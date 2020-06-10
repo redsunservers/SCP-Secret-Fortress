@@ -2846,6 +2846,7 @@ public void OnPreThink(int client)
 			{
 				if(Client[client].Power < engineTime)
 				{
+					TF2_AddCondition(client, TFCond_CritCola, 20.0);
 					Client[client].DisableSpeed = true;
 					SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_096Rage));
 					Client[client].Power = engineTime+15.0;
@@ -2859,6 +2860,7 @@ public void OnPreThink(int client)
 				SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", 475.0);
 				if(Client[client].Power < engineTime)
 				{
+					TF2_RemoveCondition(client, TFCond_CritCola);
 					Client[client].DisableSpeed = false;
 					SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_096));
 					Client[client].Radio = 0;
