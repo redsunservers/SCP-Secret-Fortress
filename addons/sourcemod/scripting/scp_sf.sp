@@ -74,8 +74,6 @@ void DisplayCredits(int client)
 #define MAXTIME	900
 
 #define PREFIX		"{red}[SCP]{default} "
-#define STEAM_BAT	"STEAM_0:1:111076786"
-#define STEAM_OREO	"STEAM_0:0:37601537"
 
 static const float OFF_THE_MAP[3] = { 16383.0, 16383.0, -16383.0 };
 static const float TRIPLE_D[3] = { 0.0, 0.0, 0.0 };
@@ -1092,6 +1090,8 @@ public void OnPluginStart()
 	AddNormalSoundHook(HookSound);
 
 	HookEntityOutput("logic_relay", "OnTrigger", OnRelayTrigger);
+	
+	LoadTranslations("common.phrases");
 
 	GameData gamedata = LoadGameConfigFile("scp_sl");
 	if(gamedata != null)
@@ -1629,6 +1629,14 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 		GetEntPropVector(target, Prop_Send, "m_vecOrigin", pos);
 		TeleportEntity(client, pos, NULL_VECTOR, TRIPLE_D);
 	}
+	else if(!StrContains(name, "scp_femur", false))
+	{
+		for(int target=1; target<=MaxClients; target++)
+		{
+			if(IsValidClient(target) && Client[target].Class==Class_106)
+				SDKHooks_TakeDamage(target, target, target, 9001.0, DMG_NERVEGAS);
+		}
+	}
 
 	return Plugin_Continue;
 }
@@ -1736,7 +1744,12 @@ public Action OnBlockCommand(int client, const char[] command, int args)
 
 public Action OnJoinClass(int client, const char[] command, int args)
 {
-	return (client && view_as<TFClassType>(GetEntProp(client, Prop_Send, "m_iDesiredPlayerClass"))!=TFClass_Unknown) ? Plugin_Handled : Plugin_Continue;
+	if(client && view_as<TFClassType>(GetEntProp(client, Prop_Send, "m_iDesiredPlayerClass"))==TFClass_Unknown)
+	{
+		SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", view_as<int>(TFClass_Spy));
+		TF2_RespawnPlayer(client);
+	}
+	return Plugin_Handled;
 }
 
 public Action OnJoinAuto(int client, const char[] command, int args)
@@ -1811,7 +1824,7 @@ public Action OnVoiceMenu(int client, const char[] command, int args)
 		return Plugin_Handled;
 	}
 
-	if(!IsSCP(client) && !IsSpec(client) && !Client[client].Disarmer && AttemptGrabItem(client))
+	if(AttemptGrabItem(client))
 		return Plugin_Handled;
 
 	return Plugin_Continue;
@@ -1839,76 +1852,15 @@ public Action OnSayCommand(int client, const char[] command, int args)
 	Client[client].ChatIn = time+1.5;
 
 	static char msg[256];
-	GetClientAuthId(client, AuthId_Steam2, msg, sizeof(msg));
-	int playerType;
-	if(StrEqual(msg, STEAM_BAT))
-	{
-		playerType = 9;
-	}
-	else if(StrEqual(msg, STEAM_OREO))
-	{
-		playerType = 8;
-	}
-	else if(CheckCommandAccess(client, "sm_ban", ADMFLAG_BAN, true))
-	{
-		playerType = 4;
-	}
-	else if(CheckCommandAccess(client, "sm_kick", ADMFLAG_KICK, true))
-	{
-		playerType = 3;
-	}
-	else if(CheckCommandAccess(client, "ff2_admin_bosses", ADMFLAG_GENERIC, true))
-	{
-		playerType = 2;
-	}
-	else if(CheckCommandAccess(client, "ff2_donator_bosses", ADMFLAG_RESERVATION, true))
-	{
-		playerType = 1;
-	}
-	else
-	{
-		playerType = 0;
-	}
-
 	GetCmdArgString(msg, sizeof(msg));
-	if(msg[0] == '/')
+	if(msg[1] == '/')
 		return Plugin_Handled;
 
 	ReplaceString(msg, sizeof(msg), "\"", "");
-	char name[96];
-	switch(playerType)
-	{
-		case 9:
-		{
-			FormatEx(name, sizeof(name), "{darkblue}[Nerd] {red}%N", client);
-		}
-		case 8:
-		{
-			FormatEx(name, sizeof(name), "{orange}[Goat] {red}%N", client);
-		}
-		case 4:
-		{
-			FormatEx(name, sizeof(name), "{darkred}[Admin] {red}%N", client);
-		}
-		case 3:
-		{
-			FormatEx(name, sizeof(name), "{orange}[Mod] {red}%N", client);
-		}
-		case 2:
-		{
-			CRemoveTags(msg, sizeof(msg));
-			FormatEx(name, sizeof(name), "{yellow}[Mini-Mod] {red}%N", client);
-		}
-		case 1:
-		{
-			FormatEx(name, sizeof(name), "{cyan}[Donator] {red}%N", client);
-		}
-		default:
-		{
-			CRemoveTags(msg, sizeof(msg));
-			FormatEx(name, sizeof(name), "{red}%N", client);
-		}
-	}
+	ReplaceString(msg, sizeof(msg), "\n", "");
+
+	char name[128];
+	FormatEx(name, sizeof(name), "{red}%N", client);
 
 	Handle iter = GetPluginIterator();
 	while(MorePlugins(iter))
@@ -2126,6 +2078,9 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 	if(TF2_GetClientTeam(client) == TFTeam_Unassigned)
 		ChangeClientTeamEx(client, TFTeam_Red);
 
+	if(TF2_GetPlayerClass(client) == TFClass_Sniper)
+		TF2_SetPlayerClass(client, TFClass_Medic);
+
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
 	if(IsSCP(client))
 	{
@@ -2152,9 +2107,14 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 				return Plugin_Changed;
 			}
 
-			if(event.GetInt("damagebits") & DMG_SHOCK)
+			int damage = event.GetInt("damagebits");
+			if(damage & DMG_SHOCK)
 			{
 				CPrintToChatAll("%s{%s}%s {default}has been contained by {gray}Tesla Gate", PREFIX, ClassColor[Client[client].Class], ClassNames[Client[client].Class]);
+			}
+			else if(damage & DMG_NERVEGAS)
+			{
+				CPrintToChatAll("%s{%s}%s {default}has been contained by {gray}Femur Breaker", PREFIX, ClassColor[Client[client].Class], ClassNames[Client[client].Class]);
 			}
 			else
 			{
@@ -2250,7 +2210,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 					i = 1;
 			} while(attempts < MAXTF2PLAYERS);
 		}
-		else if(!IsSCP(client) && !Client[client].Disarmer && AttemptGrabItem(client))
+		else if(AttemptGrabItem(client))
 		{
 			buttons &= ~IN_ATTACK;
 			changed = true;
@@ -2282,7 +2242,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 					i = 1;
 			} while(attempts < MAXTF2PLAYERS);
 		}
-		else if(!IsSCP(client) && !Client[client].Disarmer)
+		else if(!IsSCP(client))
 		{
 			if(AttemptGrabItem(client))
 			{
@@ -2330,7 +2290,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 	}
 	else if(buttons & IN_ATTACK3)	// Special Attack (Radio/Self Tele)
 	{
-		if(!IsSCP(client) && !Client[client].Disarmer)
+		if(!IsSCP(client))
 		{
 			if(AttemptGrabItem(client))
 			{
@@ -3939,11 +3899,29 @@ stock int TF2_CreateDroppedWeapon(int client, int fromWeapon, bool swap, const f
 
 bool AttemptGrabItem(int client)
 {
+	if(IsSpec(client) || Client[client].Disarmer)
+		return false;
+
+	bool oldMan;
+	if(IsSCP(client))
+	{
+		if(Client[client].Class != Class_106)
+			return false;
+
+		oldMan = true;
+	}
+
 	//SDKCall(SDKTryPickup, client);
 
 	int entity = GetClientPointVisible(client);
 	if(IsClassname(entity, "tf_dropped_weapon"))
 	{
+		if(oldMan)
+		{
+			RemoveEntity(entity);
+			return true;
+		}
+
 		int index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
 
 		WeaponEnum wep = Weapon_Disarm;
@@ -3990,24 +3968,31 @@ bool AttemptGrabItem(int client)
 	GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
 	if(!StrContains(name, "scp_keycard_", false))
 	{
-		char buffers[16][4];
-		ExplodeString(name, "_", buffers, sizeof(buffers), sizeof(buffers[]));
-		int card = StringToInt(buffers[2]);
-		if(card>0 && card<view_as<int>(KeycardEnum) && Client[client].Keycard<view_as<KeycardEnum>(card))
+		if(!oldMan)
 		{
-			Client[client].Keycard = view_as<KeycardEnum>(card);
-			RemoveEntity(entity);
-			return true;
+			char buffers[16][4];
+			ExplodeString(name, "_", buffers, sizeof(buffers), sizeof(buffers[]));
+			int card = StringToInt(buffers[2]);
+			if(card>0 && card<view_as<int>(KeycardEnum) && Client[client].Keycard<view_as<KeycardEnum>(card))
+			{
+				Client[client].Keycard = view_as<KeycardEnum>(card);
+				RemoveEntity(entity);
+				return true;
+			}
 		}
 
 		return false;
 	}
 	else if(!StrContains(name, "scp_healthkit", false))
 	{
-		if(Client[client].HealthPack == 2)
-			return false;
+		if(!oldMan)
+		{
+			if(Client[client].HealthPack == 2)
+				return true;
 
-		Client[client].HealthPack = 2;
+			Client[client].HealthPack = 2;
+		}
+
 		RemoveEntity(entity);
 		return true;
 	}
@@ -4016,6 +4001,9 @@ bool AttemptGrabItem(int client)
 		return false;
 
 	RemoveEntity(entity);
+
+	if(oldMan)
+		return true;
 
 	if(GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary) > MaxClients)
 	{
