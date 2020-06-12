@@ -1121,7 +1121,7 @@ public void OnPluginStart()
 	HookEvent("teamplay_win_panel", OnWinPanel, EventHookMode_Pre);
 	HookEvent("revive_player_complete", OnRevive);
 
-	RegAdminCmd("scp_forceclass", OnForceClassCommand, ADMFLAG_RCON, "Usage: scpsl_forceclass <target> <class>.  Forces that class to be played.");
+	RegAdminCmd("scp_forceclass", OnForceClassCommand, ADMFLAG_RCON, "Usage: scp_forceclass <target> <class>.  Forces that class to be played.");
 
 	AddCommandListener(OnSayCommand, "say");
 	AddCommandListener(OnSayCommand, "say_team");
@@ -1156,7 +1156,7 @@ public void OnPluginStart()
 	
 	LoadTranslations("common.phrases");
 
-	GameData gamedata = LoadGameConfigFile("scp_sl");
+	GameData gamedata = LoadGameConfigFile("scp_sf");
 	if(gamedata != null)
 	{
 		StartPrepSDKCall(SDKCall_Entity);
