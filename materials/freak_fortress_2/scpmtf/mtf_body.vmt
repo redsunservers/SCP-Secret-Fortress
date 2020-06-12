@@ -1,0 +1,5 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "freak_fortress_2\scpmtf\mtf_body"
+	"$bumpmap" "freak_fortress_2\scpmtf\body_bump"
+}

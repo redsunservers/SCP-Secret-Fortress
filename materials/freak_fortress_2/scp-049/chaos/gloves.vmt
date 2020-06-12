@@ -1,0 +1,10 @@
+"VertexLitGeneric"
+{
+	$baseTexture "freak_fortress_2\scp-049\chaos\gloves"
+	$bumpmap "freak_fortress_2\scp-049\chaos\gloves_n"
+
+	$phong "1"
+	$phongboost "2"
+	$phongfresnelranges	"[0.05 0.5 1]"
+	$phongalbedotint 1
+}

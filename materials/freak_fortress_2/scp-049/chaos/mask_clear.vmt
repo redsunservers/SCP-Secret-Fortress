@@ -1,0 +1,13 @@
+"VertexLitGeneric"
+{
+	$baseTexture "freak_fortress_2\scp-049\chaos\mask_clear"
+	$bumpmap "freak_fortress_2\scp-049\chaos\mask_n"
+
+	$nodecal "1"
+	$translucent 1
+	$phong "1"
+	$phongboost "5"
+	$phongfresnelranges	"[0.05 0.5 1]"
+	$phongalbedotint 1
+//	$translucent 1
+}

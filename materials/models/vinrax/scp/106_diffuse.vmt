@@ -1,0 +1,6 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/vinrax/scp/106_diffuse"
+	"$bumpmap" "models/vinrax/scp/106_normal"
+	"$surfaceprop" "Flesh"
+}

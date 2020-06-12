@@ -1,0 +1,11 @@
+"VertexLitGeneric"
+{
+	$baseTexture "freak_fortress_2\scp-049\chaos\body"
+	$bumpmap "freak_fortress_2\scp-049\chaos\body_n"
+
+	$phong "1"
+	$phongboost "5"
+	$phongexponenttexture "freak_fortress_2\scp-049\chaos\body_s"
+	$phongfresnelranges	"[0.05 0.5 1]"
+	$phongalbedotint 1
+}

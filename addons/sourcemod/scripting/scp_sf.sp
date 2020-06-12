@@ -40,8 +40,8 @@ void DisplayCredits(int client)
 }
 
 #define MAJOR_REVISION	"0"
-#define MINOR_REVISION	"7"
-#define STABLE_REVISION	"1"
+#define MINOR_REVISION	"8"
+#define STABLE_REVISION	"0"
 #define PLUGIN_VERSION MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE		100000000.0
@@ -657,7 +657,9 @@ enum WeaponEnum
 	Weapon_106,
 	Weapon_173,
 	Weapon_939,
-	Weapon_3008
+
+	Weapon_3008,
+	Weapon_3008Rage,
 }
 
 static const int WeaponIndex[] =
@@ -687,6 +689,8 @@ static const int WeaponIndex[] =
 	939,
 	195,
 	326,
+
+	195,
 	195
 };
 
@@ -701,6 +705,7 @@ enum GamemodeEnum
 
 bool Ready = false;
 bool Enabled = false;
+bool NoMusic = false;
 bool Vaex = false;		// VoiceAnnounceEx
 bool SourceComms = false;	// SourceComms++
 bool BaseComm = false;		// BaseComm
@@ -777,7 +782,7 @@ enum struct ClientEnum
 	{
 		if(team == TFTeam_Blue)
 		{
-			if(Gamemode = Gamemode_Ikea)
+			if(Gamemode == Gamemode_Ikea)
 			{
 				if(!bot && GetClassCount(Class_Survivor)*3>GetClassCount(Class_3008))
 				{
@@ -801,7 +806,7 @@ enum struct ClientEnum
 
 		if(team == TFTeam_Red)
 		{
-			if(Gamemode = Gamemode_Ikea)
+			if(Gamemode == Gamemode_Ikea)
 			{
 				this.Class = Class_Survivor;
 				return Class_Survivor;
@@ -914,7 +919,8 @@ enum struct ClientEnum
 				this.Radio = 1;
 				GiveWeapon(client, Weapon_Frag);
 				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_SMG3));
-				GiveWeapon(client, Weapon_Disarm);
+				if(Gamemode != Gamemode_Ikea)
+					GiveWeapon(client, Weapon_Disarm);
 			}
 			case Class_MTF3:
 			{
@@ -923,7 +929,8 @@ enum struct ClientEnum
 				this.Radio = 1;
 				GiveWeapon(client, Weapon_Frag);
 				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_SMG5));
-				GiveWeapon(client, Weapon_Disarm);
+				if(Gamemode != Gamemode_Ikea)
+					GiveWeapon(client, Weapon_Disarm);
 			}
 			case Class_049:
 			{
@@ -975,7 +982,7 @@ enum struct ClientEnum
 			{
 				this.Keycard = Keycard_None;
 				this.HealthPack = 0;
-				this.Radio = 0;
+				this.Radio = DClassEscaped;
 				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, DClassEscaped ? Weapon_3008Rage : Weapon_3008));
 			}
 		}
@@ -1386,6 +1393,17 @@ public void OnMapStart()
 	else
 	{
 		Gamemode = Gamemode_Koth;
+	}
+
+	int entity = -1;
+	while((entity=FindEntityByClassname2(entity, "info_target")) != -1)
+	{
+		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
+		if(!StrEqual(buffer, "scp_nomusic", false))
+			continue;
+
+		NoMusic = true;
+		break;
 	}
 
 	if(DHSetWinningTeam != null)
@@ -1821,7 +1839,7 @@ public Action OnJoinClass(int client, const char[] command, int args)
 {
 	if(client && view_as<TFClassType>(GetEntProp(client, Prop_Send, "m_iDesiredPlayerClass"))==TFClass_Unknown)
 	{
-		SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", view_as<int>(TFClass_Spy));
+		SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", view_as<int>(TFClass_Scout));
 		TF2_RespawnPlayer(client);
 	}
 	return Plugin_Handled;
@@ -2427,7 +2445,7 @@ public void OnGameFrame()
 			{
 				if(Gamemode == Gamemode_Ikea)
 				{
-					if(!(ticks % 300))
+					if(DClassEscaped)
 					{
 						DClassEscaped = 0;
 
@@ -2452,6 +2470,7 @@ public void OnGameFrame()
 
 								if(Client[client].Class == Class_3008)
 								{
+									Client[client].Radio = 0;
 									SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_3008));
 									continue;
 								}
@@ -2461,6 +2480,18 @@ public void OnGameFrame()
 
 								Client[client].Class = GetRandomInt(0, 3) ? Class_MTF : Class_MTF2;
 								Client[client].Spawn(client, true);
+							}
+						}
+
+						count = -1;
+						while((count=FindEntityByClassname(count, "logic_relay")) != -1)
+						{
+							char name[32];
+							GetEntPropString(count, Prop_Data, "m_iName", name, sizeof(name));
+							if(StrEqual(name, "scp_time_day", false))
+							{
+								AcceptEntityInput(count, "FireUser1");
+								break;
 							}
 						}
 					}
@@ -2475,6 +2506,7 @@ public void OnGameFrame()
 
 							if(Client[client].Class == Class_3008)
 							{
+								Client[client].Radio = 1;
 								SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_3008Rage));
 								continue;
 							}
@@ -2484,6 +2516,18 @@ public void OnGameFrame()
 
 							Client[client].Class = Class_3008;
 							Client[client].Spawn(client, true);
+						}
+
+						int entity = -1;
+						while((entity=FindEntityByClassname(entity, "logic_relay")) != -1)
+						{
+							char name[32];
+							GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
+							if(StrEqual(name, "scp_time_night", false))
+							{
+								AcceptEntityInput(entity, "FireUser1");
+								break;
+							}
 						}
 					}
 				}
@@ -2532,7 +2576,7 @@ public void OnGameFrame()
 							}
 							else if(count)
 							{
-								CPrintToChatAll("%sAwaiting re-containment of: {%s}%i SCP subject(s){default}.", PREFIX, ClassColor[Class_0492], count);
+								CPrintToChatAll("%sAwaiting re-containment of: {%s}%d SCP subject(s){default}.", PREFIX, ClassColor[Class_0492], count);
 							}
 						}
 					}
@@ -2559,7 +2603,7 @@ public void OnGameFrame()
 			}
 			default:
 			{
-				if(ticks == RoundFloat(MAXTIME-MusicTimes[1]))	// 13 mins + 10 secs
+				if(!NoMusic && ticks==RoundFloat(MAXTIME-MusicTimes[1]))	// 13 mins + 10 secs
 				{
 					ChangeGlobalSong(1, engineTime+15.0+MusicTimes[1], MusicList[1]);
 					CPrintToChatAll("%sNow Playing: %s", PREFIX, MusicNames[1]);
@@ -2599,11 +2643,11 @@ public void OnGameFrame()
 						char message[64];
 						if((MAXTIME-ticks)%60 > 9)
 						{
-							FormatEx(message, sizeof(message), "Time Remaining: %i:%i", RoundToFloor((MAXTIME-ticks)/60.0), (MAXTIME-ticks)%60);
+							FormatEx(message, sizeof(message), "Time Remaining: %d:%d", RoundToFloor((MAXTIME-ticks)/60.0), (MAXTIME-ticks)%60);
 						}
 						else
 						{
-							FormatEx(message, sizeof(message), "Time Remaining: %i:0%i", RoundToFloor((MAXTIME-ticks)/60.0), (MAXTIME-ticks)%60);
+							FormatEx(message, sizeof(message), "Time Remaining: %d:0%d", RoundToFloor((MAXTIME-ticks)/60.0), (MAXTIME-ticks)%60);
 						}
 						BfWriteString(bf, message);
 						BfWriteString(bf, ticks>(MAXTIME-20) ? "ico_notify_ten_seconds" : ticks>(MAXTIME-60) ? "ico_notify_thirty_seconds" : "ico_notify_sixty_seconds");
@@ -2659,6 +2703,12 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 
 		if(Client[victim].Class>=Class_049 && Client[attacker].Class>=Class_049)	// Both are SCPs
 			return Plugin_Handled;
+
+		if(Client[victim].Class==Class_3008 && !Client[victim].Radio)
+		{
+			Client[victim].Radio = 1;
+			SetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon", GiveWeapon(victim, Weapon_3008Rage));
+		}
 	}
 
 	if(IsValidEntity(weapon) && weapon>MaxClients && HasEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex"))
@@ -2785,7 +2835,7 @@ public Action OnTransmit(int client, int target)
 	if(TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode) || Client[client].InvisFor>engineTime)
 		return Plugin_Handled;
 
-	return (IsValidClient(target) && Client[target].Class>=Class_939 && !IsSCP(client) && Client[client].IdleAt<engineTime) ? Plugin_Handled : Plugin_Continue;
+	return (IsValidClient(target) && (Client[target].Class==Class_939 || Client[target].Class==Class_9392) && !IsSCP(client) && Client[client].IdleAt<engineTime) ? Plugin_Handled : Plugin_Continue;
 }
 
 public Action OnCPTouch(int entity, int client)
@@ -2843,9 +2893,9 @@ public Action OnGetMaxHealth(int client, int &health)
 		{
 			health = 2750;
 		}
-		case Class_3003:
+		case Class_3008:
 		{
-			health = 1000;
+			health = 500;
 		}
 		default:
 		{
@@ -2898,7 +2948,7 @@ public void OnPreThink(int client)
 			{
 				speed = 220.0;
 			}
-			case Class_0492, Class_3003:
+			case Class_0492, Class_3008:
 			{
 				speed = 250.0;
 			}
@@ -3153,24 +3203,24 @@ public void OnPreThink(int client)
 				{
 					FormatEx(buffer, sizeof(buffer), "Health Kit Ready [ATTACK2]");
 					if(Client[client].Power>1 && Client[client].Radio && Client[client].Radio<5)
-						Format(buffer, sizeof(buffer), "%s\nRadio: %s (%i%%) [ATTACK3]", buffer, RadioNames[Client[client].Radio], RoundToFloor(Client[client].Power));
+						Format(buffer, sizeof(buffer), "%s\nRadio: %s (%d%%) [ATTACK3]", buffer, RadioNames[Client[client].Radio], RoundToFloor(Client[client].Power));
 				}
 				else if(Client[client].HealthPack)
 				{
 					FormatEx(buffer, sizeof(buffer), "Pain Killers Ready [ATTACK2]");
 					if(Client[client].Power>1 && Client[client].Radio && Client[client].Radio<5)
-						Format(buffer, sizeof(buffer), "%s\nRadio: %s (%i%%) [ATTACK3]", buffer, RadioNames[Client[client].Radio], RoundToFloor(Client[client].Power));
+						Format(buffer, sizeof(buffer), "%s\nRadio: %s (%d%%) [ATTACK3]", buffer, RadioNames[Client[client].Radio], RoundToFloor(Client[client].Power));
 				}
 				else if(Client[client].Power>1 && Client[client].Radio && Client[client].Radio<5)
 				{
-					FormatEx(buffer, sizeof(buffer), "Radio: %s (%i%%) [ATTACK3]", RadioNames[Client[client].Radio], RoundToFloor(Client[client].Power));
+					FormatEx(buffer, sizeof(buffer), "Radio: %s (%d%%) [ATTACK3]", RadioNames[Client[client].Radio], RoundToFloor(Client[client].Power));
 				}
 				SetHudTextParamsEx(-1.0, Gamemode==Gamemode_Ctf ? 0.77 : 0.88, 0.35, ClassColors[Client[client].Team], ClassColors[Client[client].Team], 0, 0.1, 0.05, 0.05);
 				ShowSyncHudText(client, HudPlayer, "Keycard: %s\n%s", KeycardNames[Client[client].Keycard], buffer);
 			}
 		}
 
-		if(Client[client].NextSongAt < engineTime)
+		if(!NoMusic && Client[client].NextSongAt<engineTime)
 		{
 			int song = GetRandomInt(2, sizeof(MusicList)-1);
 			ChangeSong(client, song, MusicTimes[song]+engineTime, MusicList[song]);
@@ -3337,6 +3387,25 @@ public Action CheckAlivePlayers(Handle timer)
 {
 	if(!Enabled)
 		return Plugin_Continue;
+
+	if(Gamemode == Gamemode_Ikea)
+	{
+		for(int i=1; i<=MaxClients; i++)
+		{
+			if(IsValidClient(i) && !IsSpec(i) && Client[i].Class==Class_Survivor)
+				return Plugin_Continue;
+		}
+
+		if(SciEscaped)
+		{
+			EndRound(Team_MTF);
+		}
+		else
+		{
+			EndRound(Team_SCP);
+		}
+		return Plugin_Continue;
+	}
 
 	bool ralive, balive, ealive;
 	for(int i=1; i<=MaxClients; i++)
@@ -3582,8 +3651,7 @@ public void GoToSpawn(int client)
 	entity = spawns[GetRandomInt(0, count-1)];
 
 	static float pos[3];
-	//GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
-	GetClientEyePosition(entity, pos);
+	GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
 	TeleportEntity(client, pos, NULL_VECTOR, NULL_VECTOR);
 }
 
@@ -3608,7 +3676,9 @@ public Action Timer_StartMenuTheme(Handle timer, int userid)
 	if(!IsValidClient(client))
 		return Plugin_Continue;
 
-	ChangeSong(client, 0, MusicTimes[0]+GetEngineTime(), MusicList[0]);
+	if(!NoMusic)
+		ChangeSong(client, 0, MusicTimes[0]+GetEngineTime(), MusicList[0]);
+
 	DisplayCredits(client);
 	return Plugin_Continue;
 }
@@ -3883,6 +3953,22 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		{
 			wep = SpawnWeapon(client, "tf_weapon_fireaxe", WeaponIndex[weapon], 70, 13, "1 ; 0.01 ; 28 ; 0.333 ; 137 ; 101 ; 138 ; 101 ; 252 ; 0.3 ; 535 ; 0.333", false);
 		}
+		case Weapon_3008:
+		{
+			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
+			wep = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 1, 13, "1 ; 0 ; 252 ; 0.99 ; 535 ; 0.333", false);
+			if(wep > MaxClients)
+			{
+				SetEntPropFloat(wep, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
+				SetEntityRenderMode(wep, RENDER_TRANSCOLOR);
+				SetEntityRenderColor(wep, 255, 255, 255, 0);
+			}
+		}
+		case Weapon_3008Rage:
+		{
+			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
+			wep = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 100, 13, "2 ; 1.35 ; 28 ; 0.25 ; 252 ; 0.5", false);
+		}
 
 		default:
 		{
@@ -3921,14 +4007,26 @@ void EndRound(TeamEnum team)
 			team2 = TFTeam_Blue;
 
 		case Team_SCP:
-			team2 = TFTeam_Unassigned;
+			team2 = Gamemode==Gamemode_Ikea ? TFTeam_Red : TFTeam_Unassigned;
 	}
 
-	SetHudTextParamsEx(-1.0, 0.3, 15.0, TeamColors[team], {255, 255, 255, 255}, 1, 10.0, 1.0, 1.0);
-	for(int client=1; client<=MaxClients; client++)
+	if(Gamemode == Gamemode_Ikea)
 	{
-		if(IsValidClient(client))
-			ShowSyncHudText(client, HudIntro, "%s\n \nClass-D Escaped: %i / %i\nScientists Escaped: %i / %i\nSCPs Contained: %i / %i", TeamNames[team], DClassEscaped, DClassMax, SciEscaped, SciMax, SCPKilled, SCPMax);
+		SetHudTextParamsEx(-1.0, 0.4, 15.0, TeamColors[team], {255, 255, 255, 255}, 1, 10.0, 1.0, 1.0);
+		for(int client=1; client<=MaxClients; client++)
+		{
+			if(IsValidClient(client))
+				ShowSyncHudText(client, HudIntro, "%s\n \nSurvivors Escaped: %d / %d", TeamNames[team], SciEscaped, SciMax);
+		}
+	}
+	else
+	{
+		SetHudTextParamsEx(-1.0, 0.3, 15.0, TeamColors[team], {255, 255, 255, 255}, 1, 10.0, 1.0, 1.0);
+		for(int client=1; client<=MaxClients; client++)
+		{
+			if(IsValidClient(client))
+				ShowSyncHudText(client, HudIntro, "%s\n \nClass-D Escaped: %d / %d\nScientists Escaped: %d / %d\nSCPs Contained: %d / %d", TeamNames[team], DClassEscaped, DClassMax, SciEscaped, SciMax, SCPKilled, SCPMax);
+		}
 	}
 
 	Enabled = false;
@@ -4122,7 +4220,6 @@ bool AttemptGrabItem(int client)
 	}
 	else if(!StrContains(name, "prop_dynamic"))
 	{
-		char name[64];
 		GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
 		if(!StrContains(name, "scp_keycard_", false))
 		{
@@ -4138,7 +4235,6 @@ bool AttemptGrabItem(int client)
 					return true;
 				}
 			}
-
 			return false;
 		}
 		else if(!StrContains(name, "scp_healthkit", false))
@@ -4161,13 +4257,26 @@ bool AttemptGrabItem(int client)
 			if(oldMan)
 				return true;
 
-			if(GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary) > MaxClients)
+			char buffers[16][4];
+			ExplodeString(name, "_", buffers, sizeof(buffers), sizeof(buffers[]));
+			int index = StringToInt(buffers[2]);
+			if(index)
 			{
-				SpawnPickup(client, "item_ammopack_medium");
-				return true;
+				WeaponEnum wep = Weapon_Disarm;
+				for(; wep<Weapon_049; wep++)
+				{
+					if(index == WeaponIndex[wep])
+						break;
+				}
+
+				if(wep != Weapon_049)
+				{
+					ReplaceWeapon(client, wep);
+					return true;
+				}
 			}
 
-			GiveWeapon(client, Weapon_Pistol, true);
+			ReplaceWeapon(client, Weapon_Pistol);
 			return true;
 		}
 		else if(!StrContains(name, "scp_trigger", false))
@@ -4184,18 +4293,22 @@ bool AttemptGrabItem(int client)
 				case TFTeam_Blue:
 					AcceptEntityInput(entity, "FireUser3", client, client);
 			}
+			return true;
 		}
 	}
 	else if(StrEqual(name, "func_button"))
 	{
-		char name[64];
 		GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
 		if(!StrContains(name, "scp_trigger", false))
+		{
 			AcceptEntityInput(entity, "Press", client, client);
+			return true;
+		}
 	}
+	return false;
 }
 
-void ReplaceWeapon(int client, WeaponEnum wep, int entity, int index=0)
+void ReplaceWeapon(int client, WeaponEnum wep, int entity=0, int index=0)
 {
 	static float origin[3], angles[3];
 	GetClientEyePosition(client, origin);
@@ -4239,6 +4352,12 @@ void ReplaceWeapon(int client, WeaponEnum wep, int entity, int index=0)
 		TF2_RemoveWeaponSlot(client, slot);
 	}
 
+	if(entity <= MaxClients)
+	{
+		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, wep));
+		return;
+	}
+
 	weapon = GiveWeapon(client, wep, (SDKInitPickup==null && weapon<=MaxClients), GetEntProp(entity, Prop_Send, "m_iAccountID"));
 	if(SDKInitPickup!=null && weapon>MaxClients)
 	{
@@ -4280,6 +4399,8 @@ void PrintRandomHintText(int client)
 		if(!GetRandomInt(0, 9))
 			break;
 	}
+
+	PrintHintText(client, buffer);
 }
 
 bool DisarmCheck(int client)
@@ -4783,7 +4904,7 @@ stock int AttachParticle(int entity, char[] particleType, float offset=0.0, bool
 	position[2] += offset;
 	TeleportEntity(particle, position, NULL_VECTOR, NULL_VECTOR);
 
-	Format(targetName, sizeof(targetName), "target%i", entity);
+	Format(targetName, sizeof(targetName), "target%d", entity);
 	DispatchKeyValue(entity, "targetname", targetName);
 
 	DispatchKeyValue(particle, "targetname", "tf2particle");
