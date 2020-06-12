@@ -314,11 +314,11 @@ static const char ClassDesc[][] =
 	"Escape from SCP-3008-1.\nCooperate with MTF.\nAvoid other teams.",
 
 	"Escape from the facility.\nCooperate with the MTF.\nAvoid other teams.",
-	"Help scientists escape.\nCooperate with MTF.\nNeutralize other subjects.",
-	"Help scientists escape.\nNeutralize other subjects.\nFollow the orders of your superiors.",
-	"Help scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your superiors.",
-	"Help scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your commanders.",
-	"Help scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.",
+	"Help Scientists escape.\nCooperate with MTF.\nNeutralize other subjects.",
+	"Help Scientists escape.\nNeutralize other subjects.\nFollow the orders of your superiors.",
+	"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your superiors.",
+	"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your commanders.",
+	"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.",
 
 	"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nInteract with a recently-dead human to revive them as an ally.",
 	"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nFollow orders from SCP-049",
@@ -656,7 +656,8 @@ enum WeaponEnum
 
 	Weapon_106,
 	Weapon_173,
-	Weapon_939
+	Weapon_939,
+	Weapon_3008
 }
 
 static const int WeaponIndex[] =
@@ -685,17 +686,52 @@ static const int WeaponIndex[] =
 
 	939,
 	195,
-	326
+	326,
+	195
 };
 
 enum GamemodeEnum
 {
 	Gamemode_None,	// SCP dedicated map
 	Gamemode_Ikea,	// SCP-3008-2 map
-	Gamemode_Arena,	// KOTH but enable arena logic
+	Gamemode_Arena,	// KotH but enable arena logic
 	Gamemode_Koth,	// Control Points are the objectives
 	Gamemode_Ctf	// Flags are the objectives
 }
+
+bool Ready = false;
+bool Enabled = false;
+bool Vaex = false;		// VoiceAnnounceEx
+bool SourceComms = false;	// SourceComms++
+bool BaseComm = false;		// BaseComm
+
+Handle SDKTeamAddPlayer;
+Handle SDKTeamRemovePlayer;
+Handle SDKEquipWearable;
+Handle SDKCreateWeapon;
+Handle SDKEquippedWearable;
+Handle SDKInitPickup;
+Handle SDKInitWeapon;
+Handle SDKTryPickup;
+Handle DHAllowedToHealTarget;
+Handle DHSetWinningTeam;
+Handle DHRoundRespawn;
+Handle DHLagCompensation;
+Handle DHForceRespawn;
+//Handle DoorTimer = INVALID_HANDLE;
+
+GlobalForward GFOnEscape;
+
+GamemodeEnum Gamemode = Gamemode_None;
+
+float CanTouchAt[MAXENTITIES+1];
+
+int DClassEscaped;
+int DClassMax;
+int SciEscaped;
+int SciMax;
+int SCPKilled;
+int SCPMax;
 
 enum struct ClientEnum
 {
@@ -940,7 +976,7 @@ enum struct ClientEnum
 				this.Keycard = Keycard_None;
 				this.HealthPack = 0;
 				this.Radio = 0;
-				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_3008));
+				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, DClassEscaped ? Weapon_3008Rage : Weapon_3008));
 			}
 		}
 
@@ -1046,40 +1082,6 @@ static const char ProjectileList[][] =
 	//"tf_projectile_pipe_remote",
 	//"tf_projectile_cleaver",
 };
-
-bool Ready = false;
-bool Enabled = false;
-bool Vaex = false;		// VoiceAnnounceEx
-bool SourceComms = false;	// SourceComms++
-bool BaseComm = false;		// BaseComm
-
-Handle SDKTeamAddPlayer;
-Handle SDKTeamRemovePlayer;
-Handle SDKEquipWearable;
-Handle SDKCreateWeapon;
-Handle SDKEquippedWearable;
-Handle SDKInitPickup;
-Handle SDKInitWeapon;
-Handle SDKTryPickup;
-Handle DHAllowedToHealTarget;
-Handle DHSetWinningTeam;
-Handle DHRoundRespawn;
-Handle DHLagCompensation;
-Handle DHForceRespawn;
-//Handle DoorTimer = INVALID_HANDLE;
-
-GlobalForward GFOnEscape;
-
-GamemodeEnum Gamemode = Gamemode_None;
-
-float CanTouchAt[MAXENTITIES+1];
-
-int DClassEscaped;
-int DClassMax;
-int SciEscaped;
-int SciMax;
-int SCPKilled;
-int SCPMax;
 
 ClassEnum TestForceClass[MAXTF2PLAYERS];
 ClientEnum Client[MAXTF2PLAYERS];
@@ -2427,6 +2429,8 @@ public void OnGameFrame()
 				{
 					if(!(ticks % 300))
 					{
+						DClassEscaped = 0;
+
 						int count;
 						static int choosen[MAXTF2PLAYERS];
 						for(int client=1; client<=MaxClients; client++)
@@ -2441,15 +2445,14 @@ public void OnGameFrame()
 							Client[count].Class = Class_MTF3;
 							Client[count].Spawn(count, true);
 
-							count = 0;
 							for(int client=1; client<=MaxClients; client++)
 							{
 								if(!IsValidClient(client))
 									continue;
 
-								if(IsSCP(client))
+								if(Client[client].Class == Class_3008)
 								{
-									count++;
+									SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_3008));
 									continue;
 								}
 
@@ -2463,10 +2466,18 @@ public void OnGameFrame()
 					}
 					else
 					{
+						DClassEscaped = 1;
+
 						for(int client=1; client<=MaxClients; client++)
 						{
 							if(!IsValidClient(client))
 								continue;
+
+							if(Client[client].Class == Class_3008)
+							{
+								SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_3008Rage));
+								continue;
+							}
 
 							if(!IsSpec(client) || TF2_GetClientTeam(client)<=TFTeam_Spectator)
 								continue;
@@ -2643,7 +2654,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		if(Client[victim].Class<Class_Scientist && Client[attacker].Class<Class_Scientist)	// Both are DBoi/Chaos
 			return Plugin_Handled;
 
-		if(Client[victim].Class>=Class_Scientist && Client[attacker].Class>=Class_Scientist && Client[victim].Class<Class_049 && Client[attacker].Class<Class_049)	// Both are Scientist/MTF
+		if(Client[victim].Class>=Class_Survivor && Client[attacker].Class>=Class_Survivor && Client[victim].Class<Class_049 && Client[attacker].Class<Class_049)	// Both are Survivor/Scientist/MTF
 			return Plugin_Handled;
 
 		if(Client[victim].Class>=Class_049 && Client[attacker].Class>=Class_049)	// Both are SCPs
@@ -2810,15 +2821,15 @@ public Action OnGetMaxHealth(int client, int &health)
 		}
 		case Class_049:
 		{
-			health = 1500; //2125
+			health = 2125;
 		}
 		case Class_0492:
 		{
-			health = 500;
+			health = 375;
 		}
 		case Class_096:
 		{
-			health = 2500;
+			health = 2500;	//???
 		}
 		case Class_106:
 		{
@@ -2831,6 +2842,10 @@ public Action OnGetMaxHealth(int client, int &health)
 		case Class_939, Class_9392:
 		{
 			health = 2750;
+		}
+		case Class_3003:
+		{
+			health = 1000;
 		}
 		default:
 		{
@@ -2883,9 +2898,9 @@ public void OnPreThink(int client)
 			{
 				speed = 220.0;
 			}
-			case Class_0492:
+			case Class_0492, Class_3003:
 			{
-				speed = 240.0;
+				speed = 250.0;
 			}
 			case Class_096:
 			{
