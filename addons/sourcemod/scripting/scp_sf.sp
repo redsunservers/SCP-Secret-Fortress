@@ -71,10 +71,9 @@ void DisplayCredits(int client)
 
 #define MAXANGLEPITCH	45.0
 #define MAXANGLEYAW	90.0
-#define MAXTIME	900
+#define MAXTIME		898
 
 #define PREFIX		"{red}[SCP]{default} "
-#define KEYCARD_MODEL	""
 
 static const float OFF_THE_MAP[3] = { 16383.0, 16383.0, -16383.0 };
 static const float TRIPLE_D[3] = { 0.0, 0.0, 0.0 };
@@ -481,26 +480,26 @@ static const KeycardEnum KeycardPaths[][] =
 	{ Keycard_Engineer, Keycard_None, Keycard_None }
 };
 
-static const int KeycardSkin[] =
+static const char KeycardModel[][] =
 {
-	0,
+	"models/props/sl/keycard.mdl",
 
-	0,
-	0,
+	"models/props/sl/keycard.mdl",
+	"models/props/sl/keycard.mdl",
 
-	1,
-	1,
+	"models/props/sl/keycard.mdl",
+	"models/props/sl/keycard.mdl",
 
-	1,
-	2,
-	2,
-	3,
+	"models/props/sl/keycard.mdl",
+	"models/props/sl/keycard.mdl",
+	"models/props/sl/keycard.mdl",
+	"models/props/sl/keycard.mdl",
 
-	3,
-	3,
+	"models/props/sl/keycard.mdl",
+	"models/props/sl/keycard.mdl",
 
-	3,
-	4
+	"models/props/sl/keycard.mdl",
+	"models/props/sl/keycard.mdl",
 };
 
 static const char KeycardNames[][] =
@@ -1269,6 +1268,12 @@ public void OnMapStart()
 			PrecacheModel(ClassModel[i], true);
 	}
 
+	for(int i; i<sizeof(KeycardModel); i++)
+	{
+		if(FileExists(KeycardModel[i], true))
+			PrecacheModel(KeycardModel[i], true);
+	}
+
 	GetCurrentMap(buffer, sizeof(buffer));
 	if(!StrContains(buffer, "scp_3008", false))
 	{
@@ -1634,6 +1639,7 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 		if(Client[client].Cooldown > GetEngineTime())
 		{
 			Menu menu = new Menu(Handler_None);
+			menu.SetTitle("%T", "scp_914", client);
 
 			FormatEx(buffer, sizeof(buffer), "%T", "in_cooldown");
 			menu.AddItem("0", buffer);
@@ -1643,6 +1649,7 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 		else
 		{
 			Menu menu = new Menu(Handler_Upgrade);
+			menu.SetTitle("%T", "scp_914", client);
 
 			char buffer[32];
 
@@ -2607,12 +2614,12 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 			int flags = GetEntityFlags(client);
 			if((flags & FL_DUCKING) || !(flags & FL_ONGROUND) || TF2_IsPlayerInCondition(client, TFCond_Dazed) || GetEntProp(client, Prop_Send, "m_bDucked"))
 			{
-				PrintHintText(client, "%t", "106_create_deny");
+				PrintHintText(client, "%T", "106_create_deny", client);
 			}
 			else
 			{
 				Client[client].Radio = 1;
-				PrintHintText(client, "%t", "Portal created, use ATTACK3 to teleport");
+				PrintHintText(client, "%T", "106_create", client);
 				GetEntPropVector(client, Prop_Send, "m_vecOrigin", Client[client].Pos);
 				ShowAnnotation(client);
 			}
@@ -2638,11 +2645,11 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 		{
 			if(!(Client[client].Pos[0] || Client[client].Pos[1] || Client[client].Pos[2]))
 			{
-				PrintHintText(client, "%t", "106_create_none");
+				PrintHintText(client, "%T", "106_create_none", client);
 			}
 			else if(TF2_IsPlayerInCondition(client, TFCond_Dazed))
 			{
-				PrintHintText(client, "%t", "106_tele_deny");
+				PrintHintText(client, "%T", "106_tele_deny", client);
 			}
 			else
 			{
@@ -2673,14 +2680,9 @@ public void OnGameFrame()
 	static int ticks;
 	if(Enabled)
 	{
-		switch(ticks++)
+		ticks++;
+		if(!(ticks % 180))
 		{
-			case 75, 225, 375, 525, 675:
-			{
-				DisplayHint(false);
-			}
-			case 150, 300, 450, 600, 750:	// 2.5, 5, 7.5, 10, 12.5 mins
-			{
 				if(Gamemode == Gamemode_Ikea)
 				{
 					if(SciEscaped)
@@ -2806,15 +2808,15 @@ public void OnGameFrame()
 								Client[client].Class = GetRandomInt(0, 3) ? Class_MTF : Class_MTF2;
 								Client[client].Spawn(client, true);
 							}
-							CPrintToChatAll("%s{%s}Mobile Task Force Unit, Epsilon-11{default}, has entered the facility.", PREFIX, ClassColor[Class_MTF]);
+							CPrintToChatAll("%s%t", PREFIX, "mtf_spawn");
 
 							if(count > 5)
 							{
-								CPrintToChatAll("%sAwaiting re-containment of: {%s}An uncountable number of SCP subjects{default}.", PREFIX, ClassColor[Class_0492]);
+								CPrintToChatAll("%s%t", PREFIX, "mtf_spawn_scp_over");
 							}
 							else if(count)
 							{
-								CPrintToChatAll("%sAwaiting re-containment of: {%s}%d SCP subject(s){default}.", PREFIX, ClassColor[Class_0492], count);
+								CPrintToChatAll("%s%t", PREFIX, "mtf_spawn_scp", count);
 							}
 						}
 					}
@@ -2838,10 +2840,14 @@ public void OnGameFrame()
 							ChangeGlobalSong(-1, engineTime+20.0, SoundList[Sound_ChaosSpawn]);
 					}
 				}
-			}
-			default:
-			{
-				if(!NoMusic && ticks==RoundFloat(MAXTIME-MusicTimes[1]))	// 13 mins + 10 secs
+		}
+		else if(!(ticks % 90))
+		{
+			DisplayHint(false);
+		}
+		else if(Gamemode >= Gamemode_Arena)
+		{
+				if(!NoMusic && ticks==RoundFloat(MAXTIME-MusicTimes[1]))
 				{
 					ChangeGlobalSong(1, engineTime+15.0+MusicTimes[1], MusicList[1]);
 					CPrintToChatAll("%sNow Playing: %s", PREFIX, MusicNames[1]);
@@ -2904,7 +2910,6 @@ public void OnGameFrame()
 						EndMessage();
 					}
 				}
-			}
 		}
 	}
 	else
@@ -4115,7 +4120,7 @@ void DropKeycard(int client, bool swap, const float origin[3], const float angle
 		FlagDroppedWeapons(true);
 
 		//Pass client as NULL, only used for deleting existing dropped weapon which we do not want to happen
-		int entity = SDKCall(SDKCreateWeapon, -1, origin, angles, KEYCARD_MODEL, GetEntityAddress(weapon)+view_as<Address>(offset));
+		int entity = SDKCall(SDKCreateWeapon, -1, origin, angles, KeycardModel[Client[client].Keycard], GetEntityAddress(weapon)+view_as<Address>(offset));
 
 		FlagDroppedWeapons(false);
 
@@ -4125,8 +4130,8 @@ void DropKeycard(int client, bool swap, const float origin[3], const float angle
 		DispatchSpawn(entity);
 		SDKCall(SDKInitWeapon, entity, client, weapon, swap, false);
 		SetEntPropString(entity, Prop_Data, "m_iName", KeycardNames[Client[client].Keycard]);
-		SetVariantInt(KeycardSkin[Client[client].Keycard]);
-		AcceptEntityInput(entity, "Skin");
+		//SetVariantInt(KeycardSkin[Client[client].Keycard]);
+		//AcceptEntityInput(entity, "Skin");
 		break;
 	}
 }
@@ -4159,7 +4164,7 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		case Weapon_Disarm:
 		{
 			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
-			wep = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 5, 6, "15 ; 0 ; 138 ; 0 ; 252 ; 0.95 ; 366 ; 3");
+			wep = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 5, 6, "15 ; 0 ; 138 ; 0 ; 252 ; 0.95");
 		}
 
 		/*
@@ -4167,7 +4172,6 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		*/
 		case Weapon_Pistol:
 		{
-			TF2Attrib_SetByDefIndex(client, 129, 0.0);
 			switch(Client[client].Class)
 			{
 				case Class_Scientist, Class_MTFS:
@@ -4183,7 +4187,6 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_SMG:
 		{
-			TF2Attrib_SetByDefIndex(client, 129, 0.0);
 			TF2_SetPlayerClass(client, TFClass_Sniper, false);
 			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
 			wep = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 5, 6, "2 ; 1.4 ; 4 ; 2 ; 5 ; 1.3 ; 51 ; 1 ; 78 ; 2 ; 96 ; 1.25 ; 252 ; 0.95");
@@ -4192,7 +4195,6 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_SMG2:
 		{
-			TF2Attrib_SetByDefIndex(client, 129, 0.0);
 			TF2_SetPlayerClass(client, TFClass_DemoMan, false);
 			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
 			wep = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 10, 6, "2 ; 1.6 ; 4 ; 2 ; 5 ; 1.2 ; 51 ; 1 ; 78 ; 4.6875 ; 96 ; 1.5 ; 252 ; 0.9");
@@ -4201,7 +4203,6 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_SMG3:
 		{
-			TF2Attrib_SetByDefIndex(client, 129, 0.0);
 			switch(Client[client].Class)
 			{
 				case Class_Chaos:
@@ -4223,7 +4224,6 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_SMG4:
 		{
-			TF2Attrib_SetByDefIndex(client, 129, 0.0);
 			switch(Client[client].Class)
 			{
 				case Class_Chaos:
@@ -4245,7 +4245,6 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_SMG5:
 		{
-			TF2Attrib_SetByDefIndex(client, 129, 0.0);
 			switch(Client[client].Class)
 			{
 				case Class_Chaos:
@@ -4781,13 +4780,13 @@ void PrintRandomHintText(int client)
 		int rand = GetRandomInt(0, 19);
 		if(!rand)
 		{
-			PrintHintText(client, "%t", "redacted");
+			PrintHintText(client, "%T", "redacted", client);
 			return;
 		}
 
 		if(rand == 1)
 		{
-			PrintHintText(client, "%t", "data_expunged");
+			PrintHintText(client, "%T", "data_expunged", client);
 			return;
 		}
 	}
