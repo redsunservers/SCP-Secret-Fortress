@@ -256,11 +256,11 @@
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can talk to other humans."
 	}
-	"class_17_ikea"
+	"class_17"
 	{
 		"en"		"SCP-3008-2"
 	}
-	"desc_17_ikea"
+	"desc_17"
 	{
 		"en"		"Kill everyone during the night.\nCooperate with other SCP-3008-2.\nYou can talk to other humans."
 	}
@@ -379,6 +379,19 @@
 		"#format"	"{1:s},{2:t},{3:s},{4:t},{5:s},{6:t}"
 		"en"		"{{1}}{2} {default}has been contained by {{3}}{4} {default}and {{5}}{6}"
 	}
+	"mtf_spawn"	// Chat
+	{
+		"en"		"{mediumblue}Mobile Task Force Unit, Epsilon-11{default}, has entered the facility."
+	}
+	"mtf_spawn_scp"	// Chat
+	{
+		"#format"	"{1:d}"
+		"en"		"Awaiting re-containment of: {red}{1} SCP subject(s){default}."
+	}
+	"mtf_spawn_scp_over"	// Chat
+	{
+		"en"		"Awaiting re-containment of: {red}An uncountable number of SCP subjects{default}."
+	}
 	"time_remaining"	// Game
 	{
 		"#format"	"{1:d},{2:s}"
@@ -442,32 +455,28 @@
 	{
 		"en"		"[DATA EXPUNGED]"
 	}
-	"106_portal"
+	"106_portal"	// Annotation
 	{
 		"en"		"Teleport Portal"
 	}
-	"106_create"
+	"106_create"	// Hint
 	{
 		"en"		"Portal created, use ATTACK3 to teleport"
 	}
-	"106_create_deny"
+	"106_create_deny"	// Hint
 	{
 		"en"		"Can't not create a portal now"
 	}
-	"106_create_deny"
-	{
-		"en"		"Can't not create a portal now"
-	}
-	"106_create_none"
+	"106_create_none"	// Hint
 	{
 		"en"		"No portal created, use ATTACK2 to create one"
 	}
-	"106_create_none"
-	{
-		"en"		"No portal created, use ATTACK2 to create one"
-	}
-	"106_tele_deny"
+	"106_tele_deny"	// Hint
 	{
 		"en"		"You can not teleport now"
+	}
+	"scp_914"	// Menu
+	{
+		"en"		"SCP-914"
 	}
 }
