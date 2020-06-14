@@ -74,6 +74,7 @@ void DisplayCredits(int client)
 #define MAXTIME		898
 
 #define PREFIX		"{red}[SCP]{default} "
+#define KEYCARD_MODEL	"models/scp_sl/keycard.mdl"
 
 static const float OFF_THE_MAP[3] = { 16383.0, 16383.0, -16383.0 };
 static const float TRIPLE_D[3] = { 0.0, 0.0, 0.0 };
@@ -327,7 +328,7 @@ static const char ClassSpawn[][] =
 
 static const char ClassModel[][] =
 {
-	"models/props_halloween/ghost_no_hat.mdl",	// Spec
+	"models/empty.mdl",	// Spec
 
 	"models/jailbreak/scout/jail_scout_v2.mdl",	// DBoi
 	"models/freak_fortress_2/scp-049/chaos.mdl",	// Chaos
@@ -438,6 +439,9 @@ static const int TeamColors[][] =
 
 enum KeycardEnum
 {
+	Keycard_106 = -2,
+	Keycard_SCP = -1,
+
 	Keycard_None = 0,
 
 	Keycard_Janitor,	// 1
@@ -457,6 +461,28 @@ enum KeycardEnum
 	Keycard_Chaos,		// 11
 	Keycard_O5
 }
+
+static const int KeycardSkin[] =
+{
+	3,
+
+	3,
+	8,
+
+	10,
+	5,
+
+	2,
+	9,
+	4,
+	6,
+
+	0,
+	1,
+
+	6,
+	7
+};
 
 static const KeycardEnum KeycardPaths[][] =
 {
@@ -480,27 +506,27 @@ static const KeycardEnum KeycardPaths[][] =
 	{ Keycard_Engineer, Keycard_None, Keycard_None }
 };
 
-static const char KeycardModel[][] =
+/*static const char KeycardModel[][] =
 {
-	"models/props/sl/keycard.mdl",
+	"models/empty.mdl",
 
-	"models/props/sl/keycard.mdl",
-	"models/props/sl/keycard.mdl",
+	"models/props/sl/keycardj.mdl",
+	"models/props/sl/keycardbs.mdl",
 
-	"models/props/sl/keycard.mdl",
-	"models/props/sl/keycard.mdl",
+	"models/props/sl/keycardzm.mdl",
+	"models/props/sl/keycardms.mdl",
 
-	"models/props/sl/keycard.mdl",
-	"models/props/sl/keycard.mdl",
-	"models/props/sl/keycard.mdl",
-	"models/props/sl/keycard.mdl",
+	"models/props/sl/keycardbg.mdl",
+	"models/props/sl/keycardsg.mdl",
+	"models/props/sl/keycardlt.mdl",
+	"models/props/sl/keycardcg.mdl",
 
-	"models/props/sl/keycard.mdl",
-	"models/props/sl/keycard.mdl",
+	"models/props/sl/keycarden.mdl",
+	"models/props/sl/keycardfm.mdl",
 
-	"models/props/sl/keycard.mdl",
-	"models/props/sl/keycard.mdl",
-};
+	"models/empty.mdl",
+	"models/props/sl/keycard5.mdl",
+};*/
 
 static const char KeycardNames[][] =
 {
@@ -832,7 +858,7 @@ enum struct ClientEnum
 			}
 			case Class_049:
 			{
-				this.Keycard = Keycard_None;
+				this.Keycard = Keycard_SCP;
 				this.HealthPack = 0;
 				this.Radio = 0;
 				GiveWeapon(client, Weapon_049Gun);
@@ -840,14 +866,14 @@ enum struct ClientEnum
 			}
 			case Class_0492:
 			{
-				this.Keycard = Keycard_None;
+				this.Keycard = Keycard_SCP;
 				this.HealthPack = 0;
 				this.Radio = 0;
 				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_0492));
 			}
 			case Class_096:
 			{
-				this.Keycard = Keycard_None;
+				this.Keycard = Keycard_SCP;
 				this.HealthPack = 0;
 				this.Radio = 0;
 				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_096));
@@ -857,28 +883,28 @@ enum struct ClientEnum
 				this.Pos[0] = 0.0;
 				this.Pos[1] = 0.0;
 				this.Pos[2] = 0.0;
-				this.Keycard = Keycard_None;
+				this.Keycard = Keycard_106;
 				this.HealthPack = 0;
 				this.Radio = 0;
 				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_106));
 			}
 			case Class_173:
 			{
-				this.Keycard = Keycard_None;
+				this.Keycard = Keycard_SCP;
 				this.HealthPack = 0;
 				this.Radio = 0;
 				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_173));
 			}
 			case Class_939, Class_9392:
 			{
-				this.Keycard = Keycard_None;
+				this.Keycard = Keycard_SCP;
 				this.HealthPack = 0;
 				this.Radio = 0;
 				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_939));
 			}
 			case Class_3008:
 			{
-				this.Keycard = Keycard_None;
+				this.Keycard = Keycard_SCP;
 				this.HealthPack = 0;
 				this.Radio = SciEscaped;
 				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, SciEscaped ? Weapon_3008Rage : Weapon_3008));
@@ -907,13 +933,13 @@ enum struct ClientEnum
 			{
 				switch(this.Keycard)
 				{
-					case Keycard_None:
+					case Keycard_None, Keycard_SCP:
 						return 0;
 
 					case Keycard_Janitor, Keycard_Guard, Keycard_Zone:
 						return 1;
 
-					case Keycard_Engineer, Keycard_Facility, Keycard_O5:
+					case Keycard_Engineer, Keycard_Facility, Keycard_O5, Keycard_106:
 						return 3;
 
 					default:
@@ -930,7 +956,7 @@ enum struct ClientEnum
 					case Keycard_MTF2:
 						return 2;
 
-					case Keycard_MTF3, Keycard_Chaos, Keycard_O5:
+					case Keycard_MTF3, Keycard_Chaos, Keycard_O5, Keycard_106:
 						return 3;
 				}
 			}
@@ -953,7 +979,7 @@ enum struct ClientEnum
 			}
 			case Access_Intercom:
 			{
-				if(this.Keycard==Keycard_Engineer || this.Keycard==Keycard_MTF3 || this.Keycard==Keycard_Facility || this.Keycard==Keycard_Chaos || this.Keycard==Keycard_O5)
+				if(this.Keycard==Keycard_Engineer || this.Keycard==Keycard_MTF3 || this.Keycard==Keycard_Facility || this.Keycard==Keycard_Chaos || this.Keycard==Keycard_O5 || this.Keycard==Keycard_106)
 					return 1;
 			}
 		}
@@ -1268,11 +1294,14 @@ public void OnMapStart()
 			PrecacheModel(ClassModel[i], true);
 	}
 
-	for(int i; i<sizeof(KeycardModel); i++)
+	/*for(int i; i<sizeof(KeycardModel); i++)
 	{
 		if(FileExists(KeycardModel[i], true))
 			PrecacheModel(KeycardModel[i], true);
-	}
+	}*/
+
+	if(FileExists(KEYCARD_MODEL, true))
+		PrecacheModel(KEYCARD_MODEL, true);
 
 	GetCurrentMap(buffer, sizeof(buffer));
 	if(!StrContains(buffer, "scp_3008", false))
@@ -1641,7 +1670,7 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 			Menu menu = new Menu(Handler_None);
 			menu.SetTitle("%T", "scp_914", client);
 
-			FormatEx(buffer, sizeof(buffer), "%T", "in_cooldown");
+			FormatEx(buffer, sizeof(buffer), "%T", "in_cooldown", client);
 			menu.AddItem("0", buffer);
 			menu.ExitButton = false;
 			menu.Display(client, 5);
@@ -1651,26 +1680,7 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 			Menu menu = new Menu(Handler_Upgrade);
 			menu.SetTitle("%T", "scp_914", client);
 
-			char buffer[32];
-
-			if(Client[client].Keycard == Keycard_None)
-			{
-				FormatEx(buffer, sizeof(buffer), "%T", "keycard_rough", client);
-				menu.AddItem("0", buffer, ITEMDRAW_DISABLED);
-
-				FormatEx(buffer, sizeof(buffer), "%T", "keycard_coarse", client);
-				menu.AddItem("0", buffer, ITEMDRAW_DISABLED);
-
-				FormatEx(buffer, sizeof(buffer), "%T", "keycard_even", client);
-				menu.AddItem("0", buffer, ITEMDRAW_DISABLED);
-
-				FormatEx(buffer, sizeof(buffer), "%T", "keycard_fine", client);
-				menu.AddItem("0", buffer, ITEMDRAW_DISABLED);
-
-				FormatEx(buffer, sizeof(buffer), "%T", "keycard_very", client);
-				menu.AddItem("0", buffer, ITEMDRAW_DISABLED);
-			}
-			else
+			if(Client[client].Keycard > Keycard_None)
 			{
 				FormatEx(buffer, sizeof(buffer), "%T", "keycard_rough", client);
 				menu.AddItem("0", buffer);
@@ -1686,6 +1696,23 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 
 				FormatEx(buffer, sizeof(buffer), "%T", "keycard_very", client);
 				menu.AddItem("4", buffer);
+			}
+			else
+			{
+				FormatEx(buffer, sizeof(buffer), "%T", "keycard_rough", client);
+				menu.AddItem("0", buffer, ITEMDRAW_DISABLED);
+
+				FormatEx(buffer, sizeof(buffer), "%T", "keycard_coarse", client);
+				menu.AddItem("0", buffer, ITEMDRAW_DISABLED);
+
+				FormatEx(buffer, sizeof(buffer), "%T", "keycard_even", client);
+				menu.AddItem("0", buffer, ITEMDRAW_DISABLED);
+
+				FormatEx(buffer, sizeof(buffer), "%T", "keycard_fine", client);
+				menu.AddItem("0", buffer, ITEMDRAW_DISABLED);
+
+				FormatEx(buffer, sizeof(buffer), "%T", "keycard_very", client);
+				menu.AddItem("0", buffer, ITEMDRAW_DISABLED);
 			}
 
 			if(GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary) > MaxClients)
@@ -1751,7 +1778,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 			{
 				case 0:
 				{
-					if(!IsPlayerAlive(client) || Client[client].Keycard==Keycard_None)
+					if(!IsPlayerAlive(client) || Client[client].Keycard<=Keycard_None)
 						return;
 
 					if(GetRandomInt(0, 1))
@@ -1766,7 +1793,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 				}
 				case 1:
 				{
-					if(!IsPlayerAlive(client) || Client[client].Keycard==Keycard_None)
+					if(!IsPlayerAlive(client) || Client[client].Keycard<=Keycard_None)
 						return;
 
 					Client[client].Keycard = KeycardPaths[Client[client].Keycard][0];
@@ -1774,7 +1801,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 				}
 				case 2:
 				{
-					if(!IsPlayerAlive(client) || Client[client].Keycard==Keycard_None)
+					if(!IsPlayerAlive(client) || Client[client].Keycard<=Keycard_None)
 						return;
 
 					Client[client].Keycard = KeycardPaths[Client[client].Keycard][1];
@@ -1782,7 +1809,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 				}
 				case 3:
 				{
-					if(!IsPlayerAlive(client) || Client[client].Keycard==Keycard_None)
+					if(!IsPlayerAlive(client) || Client[client].Keycard<=Keycard_None)
 						return;
 
 					Client[client].Keycard = KeycardPaths[Client[client].Keycard][2];
@@ -1790,7 +1817,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 				}
 				case 4:
 				{
-					if(!IsPlayerAlive(client) || Client[client].Keycard==Keycard_None)
+					if(!IsPlayerAlive(client) || Client[client].Keycard<=Keycard_None)
 						return;
 
 					if(GetRandomInt(0, 1))
@@ -1876,7 +1903,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 
 					Client[client].Cooldown = GetEngineTime()+10.0;
 					Client[client].Power = 99.0;
-					SpawnPickup(client, "item_ammopack_large");
+					SpawnPickup(client, "item_ammopack_full");
 				}
 				case 8:
 				{
@@ -2013,6 +2040,16 @@ public Action OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	{
 		TF2_AddCondition(client, TFCond_StealthedUserBuffFade, TFCondDuration_Infinite);
 		TF2_AddCondition(client, TFCond_HalloweenGhostMode, TFCondDuration_Infinite);
+
+		SetVariantString(ClassModel[Class_Spec]);
+		AcceptEntityInput(client, "SetCustomModel");
+		SetEntProp(client, Prop_Send, "m_bUseClassAnimations", 1);
+
+		int flags = GetCommandFlags("firstperson");
+		SetCommandFlags("firstperson", flags & ~FCVAR_CHEAT);
+		ClientCommand(client, "firstperson");
+		SetCommandFlags("firstperson", flags);
+
 		if(IsFakeClient(client))
 			TeleportEntity(client, TRIPLE_D, NULL_VECTOR, NULL_VECTOR);
 	}
@@ -2580,34 +2617,10 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 					i = 1;
 			} while(attempts < MAXTF2PLAYERS);
 		}
-		else if(!IsSCP(client))
+		else if(AttemptGrabItem(client))
 		{
-			if(AttemptGrabItem(client))
-			{
-				buttons &= ~IN_ATTACK2;
-				changed = true;
-			}
-			else if(Client[client].HealthPack)
-			{
-				int entity = CreateEntityByName(Client[client].HealthPack==1 ? "item_healthkit_small" : "item_healthkit_medium");
-				if(entity > MaxClients)
-				{
-					GetClientAbsOrigin(client, pos);
-					pos[2] += 20.0;
-					DispatchKeyValue(entity, "OnPlayerTouch", "!self,Kill,,0,-1");
-					DispatchSpawn(entity);
-					SetEntProp(entity, Prop_Send, "m_iTeamNum", GetClientTeam(client), 4);
-					SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
-					SetEntityMoveType(entity, MOVETYPE_VPHYSICS);
-
-					CanTouchAt[entity] = GetEngineTime()+2.0;
-					SDKHook(entity, SDKHook_StartTouch, OnPipeTouch);
-					SDKHook(entity, SDKHook_Touch, OnKitPickup);
-
-					TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
-					Client[client].HealthPack = 0;
-				}
-			}
+			buttons &= ~IN_ATTACK2;
+			changed = true;
 		}
 		else if(Client[client].Class == Class_106)
 		{
@@ -2624,22 +2637,35 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 				ShowAnnotation(client);
 			}
 		}
+		else if(!IsSCP(client) && Client[client].HealthPack)
+		{
+			int entity = CreateEntityByName(Client[client].HealthPack==1 ? "item_healthkit_small" : "item_healthkit_medium");
+			if(entity > MaxClients)
+			{
+				GetClientAbsOrigin(client, pos);
+				pos[2] += 20.0;
+				DispatchKeyValue(entity, "OnPlayerTouch", "!self,Kill,,0,-1");
+				DispatchSpawn(entity);
+				SetEntProp(entity, Prop_Send, "m_iTeamNum", GetClientTeam(client), 4);
+				SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
+				SetEntityMoveType(entity, MOVETYPE_VPHYSICS);
+
+				CanTouchAt[entity] = GetEngineTime()+2.0;
+				SDKHook(entity, SDKHook_StartTouch, OnPipeTouch);
+				SDKHook(entity, SDKHook_Touch, OnKitPickup);
+
+				TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
+				Client[client].HealthPack = 0;
+			}
+		}
 		holding[client] = IN_ATTACK2;
 	}
 	else if(buttons & IN_ATTACK3)	// Special Attack (Radio/Self Tele)
 	{
-		if(!IsSCP(client))
+		if(AttemptGrabItem(client))
 		{
-			if(AttemptGrabItem(client))
-			{
-				buttons &= ~IN_ATTACK3;
-				changed = true;
-			}
-			else if(Client[client].Power>1 && Client[client].Radio>0)
-			{
-				if(++Client[client].Radio > 4)
-					Client[client].Radio = 1;
-			}
+			buttons &= ~IN_ATTACK3;
+			changed = true;
 		}
 		else if(Client[client].Class == Class_106)
 		{
@@ -2658,6 +2684,11 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 				Client[client].TeleIn = GetEngineTime()+5.0;
 				PrintRandomHintText(client);
 			}
+		}
+		else if(!IsSCP(client) && Client[client].Power>1 && Client[client].Radio>0)
+		{
+			if(++Client[client].Radio > 4)
+				Client[client].Radio = 1;
 		}
 		holding[client] = IN_ATTACK3;
 	}
@@ -4053,7 +4084,7 @@ void DropAllWeapons(int client)
 	GetClientEyePosition(client, origin);
 	GetClientEyeAngles(client, angles);
 
-	if(Client[client].Keycard != Keycard_None)
+	if(Client[client].Keycard > Keycard_None)
 	{
 		DropKeycard(client, false, origin, angles);
 		Client[client].Keycard = Keycard_None;
@@ -4091,7 +4122,7 @@ void DropAllWeapons(int client)
 
 void DropCurrentKeycard(int client)
 {
-	if(Client[client].Keycard == Keycard_None)
+	if(Client[client].Keycard <= Keycard_None)
 		return;
 
 	static float origin[3], angles[3];
@@ -4120,7 +4151,7 @@ void DropKeycard(int client, bool swap, const float origin[3], const float angle
 		FlagDroppedWeapons(true);
 
 		//Pass client as NULL, only used for deleting existing dropped weapon which we do not want to happen
-		int entity = SDKCall(SDKCreateWeapon, -1, origin, angles, KeycardModel[Client[client].Keycard], GetEntityAddress(weapon)+view_as<Address>(offset));
+		int entity = SDKCall(SDKCreateWeapon, -1, origin, angles, KEYCARD_MODEL, GetEntityAddress(weapon)+view_as<Address>(offset));
 
 		FlagDroppedWeapons(false);
 
@@ -4130,8 +4161,8 @@ void DropKeycard(int client, bool swap, const float origin[3], const float angle
 		DispatchSpawn(entity);
 		SDKCall(SDKInitWeapon, entity, client, weapon, swap, false);
 		SetEntPropString(entity, Prop_Data, "m_iName", KeycardNames[Client[client].Keycard]);
-		//SetVariantInt(KeycardSkin[Client[client].Keycard]);
-		//AcceptEntityInput(entity, "Skin");
+		SetVariantInt(KeycardSkin[Client[client].Keycard]);
+		AcceptEntityInput(entity, "Skin");
 		break;
 	}
 }
@@ -4576,21 +4607,20 @@ bool AttemptGrabItem(int client)
 	if(entity <= MaxClients)
 		return false;
 
-	bool oldMan;
-	if(IsSCP(client))
-	{
-		if(Client[client].Class != Class_106)
-			return false;
-
-		oldMan = true;
-	}
-
 	//SDKCall(SDKTryPickup, client);
 
 	char name[64];
 	GetEntityClassname(entity, name, sizeof(name));
 	if(StrEqual(name, "tf_dropped_weapon"))
 	{
+		if(IsSCP(client))
+		{
+			if(Client[client].Class == Class_106)
+				RemoveEntity(entity);
+
+			return true;
+		}
+
 		PickupWeapon(client, entity);
 		return true;
 	}
@@ -4599,41 +4629,49 @@ bool AttemptGrabItem(int client)
 		GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
 		if(!StrContains(name, "scp_keycard_", false))
 		{
-			if(!oldMan)
+			if(IsSCP(client))
+				return true;
+
+			char buffers[16][4];
+			ExplodeString(name, "_", buffers, sizeof(buffers), sizeof(buffers[]));
+			int card = StringToInt(buffers[2]);
+			if(card>0 && card<view_as<int>(KeycardEnum))
 			{
-				char buffers[16][4];
-				ExplodeString(name, "_", buffers, sizeof(buffers), sizeof(buffers[]));
-				int card = StringToInt(buffers[2]);
-				if(card>0 && card<view_as<int>(KeycardEnum) && Client[client].Keycard<view_as<KeycardEnum>(card))
-				{
-					DropCurrentKeycard(client);
-					Client[client].Keycard = view_as<KeycardEnum>(card);
-					RemoveEntity(entity);
-					return true;
-				}
+				DropCurrentKeycard(client);
+				Client[client].Keycard = view_as<KeycardEnum>(card);
+				RemoveEntity(entity);
+				return true;
 			}
-			return false;
+			return true;
 		}
 		else if(!StrContains(name, "scp_healthkit", false))
 		{
-			if(!oldMan)
+			if(IsSCP(client))
 			{
-				if(Client[client].HealthPack == 2)
-					return true;
+				if(Client[client].Class == Class_106)
+					RemoveEntity(entity);
 
-				Client[client].HealthPack = 2;
+				return true;
 			}
 
+			if(Client[client].HealthPack == 2)
+				return true;
+
+			Client[client].HealthPack = 2;
 			RemoveEntity(entity);
 			return true;
 		}
 		else if(!StrContains(name, "scp_weapon", false))
 		{
-			RemoveEntity(entity);
+			if(IsSCP(client))
+			{
+				if(Client[client].Class == Class_106)
+					RemoveEntity(entity);
 
-			if(oldMan)
 				return true;
+			}
 
+			RemoveEntity(entity);
 			char buffers[16][4];
 			ExplodeString(name, "_", buffers, sizeof(buffers), sizeof(buffers[]));
 			int index = StringToInt(buffers[2]);

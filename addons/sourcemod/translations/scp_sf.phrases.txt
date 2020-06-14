@@ -362,6 +362,57 @@
 		"en"		"SCPs Won"
 	}
 
+	// SCP-914 Phrases
+
+	"scp_914"
+	{
+		"en"		"SCP-914\n "
+	}
+	"in_cooldown"
+	{
+		"en"		"In Cooldown..."
+	}
+	"keycard_rough"
+	{
+		"en"		"Keycard | Rough"
+	}
+	"keycard_coarse"
+	{
+		"en"		"Keycard | Coarse"
+	}
+	"keycard_even"
+	{
+		"en"		"Keycard | 1:1"
+	}
+	"keycard_fine"
+	{
+		"en"		"Keycard | Fine"
+	}
+	"keycard_very"
+	{
+		"en"		"Keycard | Very Fine"
+	}
+	"weapon_rough"
+	{
+		"en"		"Weapon | Rough"
+	}
+	"weapon_coarse"
+	{
+		"en"		"Weapon | Coarse"
+	}
+	"weapon_even"
+	{
+		"en"		"Weapon | 1:1"
+	}
+	"weapon_fine"
+	{
+		"en"		"Weapon | Fine"
+	}
+	"weapon_very"
+	{
+		"en"		"Weapon | Very Fine"
+	}
+
 	// Other Phrases
 
 	"you_are"	// HUD
@@ -474,9 +525,5 @@
 	"106_tele_deny"	// Hint
 	{
 		"en"		"You can not teleport now"
-	}
-	"scp_914"	// Menu
-	{
-		"en"		"SCP-914"
 	}
 }
