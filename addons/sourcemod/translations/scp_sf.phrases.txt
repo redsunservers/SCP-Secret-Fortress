@@ -371,12 +371,12 @@
 	}
 	"scp_killed"	// Chat
 	{
-		"#format"	"{1:s},{2:s},{3:s},{4:t}"
+		"#format"	"{1:s},{2:t},{3:s},{4:t}"
 		"en"		"{{1}}{2} {default}has been contained by {{3}}{4}"
 	}
 	"scp_killed_duo"	// Chat
 	{
-		"#format"	"{1:s},{2:s},{3:s},{4:s},{5:s},{6:s}"
+		"#format"	"{1:s},{2:t},{3:s},{4:t},{5:s},{6:t}"
 		"en"		"{{1}}{2} {default}has been contained by {{3}}{4} {default}and {{5}}{6}"
 	}
 	"time_remaining"	// Game
@@ -418,7 +418,7 @@
 	}
 	"end_screen"	// HUD
 	{
-		"#format"	"{1:s},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d}"
+		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d}"
 		"en"		"{1}\n \nClass-D Escaped: {2} / {3}\nScientists Escaped: {4} / {5}\nSCPs Contained: {6} / {7}"
 	}
 	"end_screen_ikea"	// HUD

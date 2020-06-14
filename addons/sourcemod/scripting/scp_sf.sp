@@ -39,8 +39,8 @@ void DisplayCredits(int client)
 	PrintToConsole(client, "Is Cute | Artvin | steamcommunity.com/id/laz_boyx");
 }
 
-#define MAJOR_REVISION	"0"
-#define MINOR_REVISION	"8"
+#define MAJOR_REVISION	"1"
+#define MINOR_REVISION	"0"
 #define STABLE_REVISION	"0"
 #define PLUGIN_VERSION MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
@@ -226,31 +226,6 @@ enum
 
 static const char Characters[] = "abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOQRTUVWXYZ~`1234567890@#$%^&*(){}:[]|¶�;<>.,?/\\";
 
-static const char Hint[][] =
-{
-	"As a ghost you can call for medic\nto teleport to alive players",
-	"SCP-939-89 and SCP-939-53 can only see\nplayers if they moved or attacked recently.\n \nTry standing still if you haven't been spotted.",
-	"SCP-079 can help D-Class escape by opening\neither Gate A or Gate B, speak with it.",
-	"Facility Manager and O5 keycards allows\nyou to escape without help from MTF or Chaos.",
-	"Guards and MTF can use there melees to\ndisarm D-Class or Chaos instead of harming.",
-	"SCP-173 can only move while nobody is\nlooking. It can move if someone blinks.",
-	"Most SCPs can kill someone in\none blow. No matter there current health.",
-	"Crouching helps you stay silent towards others.",
-	"Every 3 minutes either MTF or Chaos will spawn.",
-	"MTF can save Scientists by bringing them\ntowards one of the gates and letting them through.\n \nOnly Lieutenants and Commanders have access though.",
-	"Chaos can save D-Class by bringing them\ntowards one of the gates and letting them through.",
-	"Died? Don't worry, you'll respawn soon.",
-	"Iron Bomber can blind players but also yourself.",
-	"This is a work-in-progress gamemode.\nThere may be bugs and glitches.\nBut playing here helps the development!\n \nThanks for playing here and enjoy!",
-	"There may be useless hints.",
-	"All weapons can headshot except against SCPs.",
-	"You can use ATTACK1, ATTACK2, ATTACK3, or\nCall for Medic to pick up weapons & keycards.",
-	"To use a health kit, use ATTACK2 to drop the\nkit and stand over it until it's used.",
-	"SCP-939-89, SCP-939-53, and SCP-3008-2 are able to talk to others.",
-	"SCPs can talk to each other from any distance.",
-	"SCP-3008-2 will attack if attacked or during closing hours."
-};
-
 enum ClassEnum
 {
 	Class_Spec = 0,
@@ -307,8 +282,6 @@ static const int ClassColors[][] =
 
 	{ 255, 165, 0, 255 },
 	{ 0, 100, 0, 255 },
-
-	{ 255, 165, 0, 255 },
 
 	{ 255, 255, 0, 255 },
 	{ 0, 0, 255, 255 },
@@ -456,14 +429,6 @@ enum TeamEnum
 	Team_SCP
 }
 
-static const char TeamNames[][] =
-{
-	"Stalemate",
-	"Class-D Won",
-	"MTF Won",
-	"SCPs Won"
-};
-
 static const int TeamColors[][] =
 {
 	{ 255, 200, 200, 255 },
@@ -494,6 +459,28 @@ enum KeycardEnum
 	Keycard_O5
 }
 
+static const KeycardEnum KeycardPaths[][] =
+{
+	{ Keycard_None, Keycard_None, Keycard_None },
+
+	{ Keycard_None, Keycard_Zone, Keycard_Scientist },
+	{ Keycard_None, Keycard_Zone, Keycard_Research },
+
+	{ Keycard_Scientist, Keycard_Guard, Keycard_Facility },
+	{ Keycard_Scientist, Keycard_Guard, Keycard_Engineer },
+
+	{ Keycard_Scientist, Keycard_Research, Keycard_MTF },
+	{ Keycard_Research, Keycard_Engineer, Keycard_MTF2 },
+	{ Keycard_MTF, Keycard_Engineer, Keycard_MTF3 },
+	{ Keycard_MTF2, Keycard_Chaos, Keycard_O5 },
+
+	{ Keycard_Research, Keycard_MTF, Keycard_O5 },
+	{ Keycard_MTF3, Keycard_Chaos, Keycard_O5 },
+
+	{ Keycard_None, Keycard_MTF3, Keycard_O5 },
+	{ Keycard_Engineer, Keycard_None, Keycard_None }
+};
+
 static const int KeycardSkin[] =
 {
 	0,
@@ -514,7 +501,7 @@ static const int KeycardSkin[] =
 
 	3,
 	4
-}
+};
 
 static const char KeycardNames[][] =
 {
@@ -675,6 +662,7 @@ enum struct ClientEnum
 	float ChatIn;
 	float HudIn;
 	float TeleIn;
+	float Cooldown;
 	bool CanTalkTo[MAXTF2PLAYERS];
 
 	// Revive Markers
@@ -1060,8 +1048,9 @@ public void OnPluginStart()
 	AddNormalSoundHook(HookSound);
 
 	HookEntityOutput("logic_relay", "OnTrigger", OnRelayTrigger);
-	
+
 	LoadTranslations("common.phrases");
+	LoadTranslations("scp_sf.phrases");
 
 	GameData gamedata = LoadGameConfigFile("scp_sf");
 	if(gamedata != null)
@@ -1460,6 +1449,7 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 	int[] choosen = new int[MaxClients];
 	for(int client=1; client<=MaxClients; client++)
 	{
+		Client[client].NextSongAt = 0.0;
 		if(!IsValidClient(client) || TF2_GetClientTeam(client)<=TFTeam_Spectator)
 			continue;
 
@@ -1595,6 +1585,15 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 		if(IsValidClient(client))
 			Client[client].Keycard = Keycard_None;
 	}
+	else if(!StrContains(name, "scp_endmusic", false))
+	{
+		for(int target=1; target<=MaxClients; target++)
+		{
+			Client[target].NextSongAt = FAR_FUTURE;
+			if(IsValidClient(target) && Client[target].CurrentSong>=0)
+				StopSound(target, SNDCHAN_AUTO, MusicList[Client[target].CurrentSong]);
+		}
+	}
 	else if(!StrContains(name, "scp_respawn", false))
 	{
 		if(!IsValidClient(client))
@@ -1626,8 +1625,321 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 				SDKHooks_TakeDamage(target, target, target, 9001.0, DMG_NERVEGAS);
 		}
 	}
+	else if(!StrContains(name, "scp_upgrade", false))
+	{
+		if(!IsValidClient(client))
+			return Plugin_Continue;
+
+		char buffer[32];
+		if(Client[client].Cooldown > GetEngineTime())
+		{
+			Menu menu = new Menu(Handler_None);
+
+			FormatEx(buffer, sizeof(buffer), "%T", "in_cooldown");
+			menu.AddItem("0", buffer);
+			menu.ExitButton = false;
+			menu.Display(client, 5);
+		}
+		else
+		{
+			Menu menu = new Menu(Handler_Upgrade);
+
+			char buffer[32];
+
+			if(Client[client].Keycard == Keycard_None)
+			{
+				FormatEx(buffer, sizeof(buffer), "%T", "keycard_rough", client);
+				menu.AddItem("0", buffer, ITEMDRAW_DISABLED);
+
+				FormatEx(buffer, sizeof(buffer), "%T", "keycard_coarse", client);
+				menu.AddItem("0", buffer, ITEMDRAW_DISABLED);
+
+				FormatEx(buffer, sizeof(buffer), "%T", "keycard_even", client);
+				menu.AddItem("0", buffer, ITEMDRAW_DISABLED);
+
+				FormatEx(buffer, sizeof(buffer), "%T", "keycard_fine", client);
+				menu.AddItem("0", buffer, ITEMDRAW_DISABLED);
+
+				FormatEx(buffer, sizeof(buffer), "%T", "keycard_very", client);
+				menu.AddItem("0", buffer, ITEMDRAW_DISABLED);
+			}
+			else
+			{
+				FormatEx(buffer, sizeof(buffer), "%T", "keycard_rough", client);
+				menu.AddItem("0", buffer);
+
+				FormatEx(buffer, sizeof(buffer), "%T", "keycard_coarse", client);
+				menu.AddItem("1", buffer);
+
+				FormatEx(buffer, sizeof(buffer), "%T", "keycard_even", client);
+				menu.AddItem("2", buffer);
+
+				FormatEx(buffer, sizeof(buffer), "%T", "keycard_fine", client);
+				menu.AddItem("3", buffer);
+
+				FormatEx(buffer, sizeof(buffer), "%T", "keycard_very", client);
+				menu.AddItem("4", buffer);
+			}
+
+			if(GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary) > MaxClients)
+			{
+				FormatEx(buffer, sizeof(buffer), "%T", "weapon_rough", client);
+				menu.AddItem("5", buffer);
+
+				FormatEx(buffer, sizeof(buffer), "%T", "weapon_coarse", client);
+				menu.AddItem("6", buffer);
+
+				FormatEx(buffer, sizeof(buffer), "%T", "weapon_even", client);
+				menu.AddItem("7", buffer);
+
+				FormatEx(buffer, sizeof(buffer), "%T", "weapon_fine", client);
+				menu.AddItem("8", buffer);
+
+				FormatEx(buffer, sizeof(buffer), "%T", "weapon_very", client);
+				menu.AddItem("9", buffer);
+			}
+			else
+			{
+				FormatEx(buffer, sizeof(buffer), "%T", "weapon_rough", client);
+				menu.AddItem("0", buffer, ITEMDRAW_DISABLED);
+
+				FormatEx(buffer, sizeof(buffer), "%T", "weapon_coarse", client);
+				menu.AddItem("0", buffer, ITEMDRAW_DISABLED);
+
+				FormatEx(buffer, sizeof(buffer), "%T", "weapon_even", client);
+				menu.AddItem("0", buffer, ITEMDRAW_DISABLED);
+
+				FormatEx(buffer, sizeof(buffer), "%T", "weapon_fine", client);
+				menu.AddItem("0", buffer, ITEMDRAW_DISABLED);
+
+				FormatEx(buffer, sizeof(buffer), "%T", "weapon_very", client);
+				menu.AddItem("0", buffer, ITEMDRAW_DISABLED);
+			}
+
+			menu.Pagination = false;
+			menu.Display(client, 15);
+		}
+	}
 
 	return Plugin_Continue;
+}
+
+public int Handler_None(Menu menu, MenuAction action, int param1, int param2)
+{
+	if(action == MenuAction_End)
+		delete menu;
+}
+
+public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
+{
+	switch(action)
+	{
+		case MenuAction_End:
+		{
+			delete menu;
+		}
+		case MenuAction_Select:
+		{
+			switch(choice)
+			{
+				case 0:
+				{
+					if(!IsPlayerAlive(client) || Client[client].Keycard==Keycard_None)
+						return;
+
+					if(GetRandomInt(0, 1))
+					{
+						Client[client].Keycard = Keycard_None;
+						return;
+					}
+
+					Client[client].Keycard = KeycardPaths[Client[client].Keycard][0];
+					Client[client].Keycard = KeycardPaths[Client[client].Keycard][0];
+					Client[client].Cooldown = GetEngineTime()+5.0;
+				}
+				case 1:
+				{
+					if(!IsPlayerAlive(client) || Client[client].Keycard==Keycard_None)
+						return;
+
+					Client[client].Keycard = KeycardPaths[Client[client].Keycard][0];
+					Client[client].Cooldown = GetEngineTime()+7.5;
+				}
+				case 2:
+				{
+					if(!IsPlayerAlive(client) || Client[client].Keycard==Keycard_None)
+						return;
+
+					Client[client].Keycard = KeycardPaths[Client[client].Keycard][1];
+					Client[client].Cooldown = GetEngineTime()+10.0;
+				}
+				case 3:
+				{
+					if(!IsPlayerAlive(client) || Client[client].Keycard==Keycard_None)
+						return;
+
+					Client[client].Keycard = KeycardPaths[Client[client].Keycard][2];
+					Client[client].Cooldown = GetEngineTime()+12.5;
+				}
+				case 4:
+				{
+					if(!IsPlayerAlive(client) || Client[client].Keycard==Keycard_None)
+						return;
+
+					if(GetRandomInt(0, 1))
+					{
+						Client[client].Keycard = Keycard_None;
+						return;
+					}
+
+					Client[client].Keycard = KeycardPaths[Client[client].Keycard][2];
+					Client[client].Keycard = KeycardPaths[Client[client].Keycard][2];
+					Client[client].Cooldown = GetEngineTime()+15.0;
+				}
+				case 5:
+				{
+					if(!IsPlayerAlive(client))
+						return;
+
+					int entity = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
+					if(entity <= MaxClients)
+						return;
+
+					int index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
+					WeaponEnum wep = Weapon_Pistol;
+					for(; wep<=Weapon_SMG5; wep++)
+					{
+						if(index == WeaponIndex[wep])
+							break;
+					}
+
+					if(wep > Weapon_SMG5)
+						return;
+
+					Client[client].Cooldown = GetEngineTime()+5.0;
+					wep -= view_as<WeaponEnum>(2);
+					if(wep<Weapon_Pistol || GetRandomInt(0, 1))
+					{
+						TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
+						if(GetPlayerWeaponSlot(client, TFWeaponSlot_Melee)<=MaxClients && GetPlayerWeaponSlot(client, TFWeaponSlot_Primary)<=MaxClients)
+							SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_None));
+
+						return;
+					}
+
+					SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, wep));
+				}
+				case 6:
+				{
+					if(!IsPlayerAlive(client))
+						return;
+
+					int entity = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
+					if(entity <= MaxClients)
+						return;
+
+					int index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
+					WeaponEnum wep = Weapon_Pistol;
+					for(; wep<=Weapon_SMG5; wep++)
+					{
+						if(index == WeaponIndex[wep])
+							break;
+					}
+
+					if(wep > Weapon_SMG5)
+						return;
+
+					Client[client].Cooldown = GetEngineTime()+7.5;
+					wep--;
+					if(wep < Weapon_Pistol)
+					{
+						TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
+						if(GetPlayerWeaponSlot(client, TFWeaponSlot_Melee)<=MaxClients && GetPlayerWeaponSlot(client, TFWeaponSlot_Primary)<=MaxClients)
+							SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_None));
+
+						return;
+					}
+
+					SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, wep));
+				}
+				case 7:
+				{
+					if(!IsPlayerAlive(client) || GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary)<=MaxClients)
+						return;
+
+					Client[client].Cooldown = GetEngineTime()+10.0;
+					Client[client].Power = 99.0;
+					SpawnPickup(client, "item_ammopack_large");
+				}
+				case 8:
+				{
+					if(!IsPlayerAlive(client))
+						return;
+
+					int entity = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
+					if(entity <= MaxClients)
+						return;
+
+					int index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
+					WeaponEnum wep = Weapon_Pistol;
+					for(; wep<=Weapon_SMG5; wep++)
+					{
+						if(index == WeaponIndex[wep])
+							break;
+					}
+
+					if(wep > Weapon_SMG5)
+						return;
+
+					Client[client].Cooldown = GetEngineTime()+12.5;
+					wep++;
+					if(wep > Weapon_SMG5)
+					{
+						TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
+						if(GetPlayerWeaponSlot(client, TFWeaponSlot_Melee)<=MaxClients && GetPlayerWeaponSlot(client, TFWeaponSlot_Primary)<=MaxClients)
+							SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_None));
+
+						return;
+					}
+
+					SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, wep));
+				}
+				case 9:
+				{
+					if(!IsPlayerAlive(client))
+						return;
+
+					int entity = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
+					if(entity <= MaxClients)
+						return;
+
+					int index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
+					WeaponEnum wep = Weapon_Pistol;
+					for(; wep<=Weapon_SMG5; wep++)
+					{
+						if(index == WeaponIndex[wep])
+							break;
+					}
+
+					if(wep > Weapon_SMG5)
+						return;
+
+					Client[client].Cooldown = GetEngineTime()+15.0;
+					wep += view_as<WeaponEnum>(2);
+					if(wep>Weapon_SMG5 || GetRandomInt(0, 1))
+					{
+						TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
+						if(GetPlayerWeaponSlot(client, TFWeaponSlot_Melee)<=MaxClients && GetPlayerWeaponSlot(client, TFWeaponSlot_Primary)<=MaxClients)
+							SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_None));
+
+						return;
+					}
+
+					SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, wep));
+				}
+			}
+		}
+	}
 }
 
 public void TF2_OnConditionAdded(int client, TFCond cond)
@@ -1960,9 +2272,10 @@ public Action Command_ForceClass(int client, int args)
 	char pattern[PLATFORM_MAX_PATH];
 
 	ClassEnum class = Class_Spec;
-	for(int i=1; i<sizeof(ClassNames); i++)
+	for(int i=1; i<view_as<int>(ClassEnum); i++)
 	{
-		FormatEx(pattern, sizeof(pattern), "%T", ClassNames[i], client);
+		GetClassName(i, pattern, sizeof(pattern));
+		Format(pattern, sizeof(pattern), "%T", pattern, client);
 		if(StrContains(pattern, classString, false) < 0)
 			continue;
 
@@ -2098,19 +2411,28 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 			if(Client[client].Class==Class_106 && Client[client].Radio)
 				HideAnnotation(client);
 
+			static char class1[16];
+			GetClassName(Client[client].Class, class1, sizeof(class1));
+
 			SCPKilled++;
 			if(attacker!=client && IsValidClient(attacker))
 			{
+				static char class2[16];
+				GetClassName(Client[attacker].Class, class2, sizeof(class2));
+
 				int assister = GetClientOfUserId(event.GetInt("assister"));
 				if(assister!=client && IsValidClient(assister))
 				{
+					static char class3[16];
+					GetClassName(Client[assister].Class, class3, sizeof(class3));
+
 					flags |= TF_DEATHFLAG_KILLERREVENGE|TF_DEATHFLAG_ASSISTERREVENGE;
-					CPrintToChatAll("%s%t", PREFIX, "scp_killed_duo", ClassColor[Client[client].Class], ClassNames[Client[client].Class], ClassColor[Client[attacker].Class], ClassNames[Client[attacker].Class], ClassColor[Client[assister].Class], ClassNames[Client[assister].Class]);
+					CPrintToChatAll("%s%t", PREFIX, "scp_killed_duo", ClassColor[Client[client].Class], class1, ClassColor[Client[attacker].Class], class2, ClassColor[Client[assister].Class], class3);
 				}
 				else
 				{
 					flags |= TF_DEATHFLAG_KILLERREVENGE;
-					CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], ClassNames[Client[client].Class], ClassColor[Client[attacker].Class], "_s", ClassNames[Client[attacker].Class]);
+					CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], class1, ClassColor[Client[attacker].Class], class2);
 				}
 				Client[client].Class = Class_Spec;
 				return Plugin_Changed;
@@ -2119,15 +2441,15 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 			int damage = event.GetInt("damagebits");
 			if(damage & DMG_SHOCK)
 			{
-				CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], ClassNames[Client[client].Class], "gray", "telsa_gate");
+				CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], class1, "gray", "telsa_gate");
 			}
 			else if(damage & DMG_NERVEGAS)
 			{
-				CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], ClassNames[Client[client].Class], "gray", "femur_breaker");
+				CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], class1, "gray", "femur_breaker");
 			}
 			else
 			{
-				CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], ClassNames[Client[client].Class], "black", "redacted");
+				CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], class1, "black", "redacted");
 			}
 		}
 		Client[client].Class = Class_Spec;
@@ -2779,7 +3101,7 @@ public Action OnTransmit(int client, int target)
 	if(Client[client].InvisFor > engineTime)
 		return Plugin_Handled;
 
-	return (IsValidClient(target) && (Client[target].Class==Class_939 || Client[target].Class==Class_9392 || (Client[target].Class==Class_3008 && Client[target].Radio) && !IsSCP(client) && Client[client].IdleAt<engineTime) ? Plugin_Handled : Plugin_Continue;
+	return (IsValidClient(target) && (Client[target].Class==Class_939 || Client[target].Class==Class_9392 || (Client[target].Class==Class_3008 && !Client[target].Radio)) && !IsSCP(client) && Client[client].IdleAt<engineTime) ? Plugin_Handled : Plugin_Continue;
 }
 
 public Action OnCPTouch(int entity, int client)
@@ -2874,35 +3196,35 @@ public void OnPreThink(int client)
 		{
 			case Class_DBoi, Class_Scientist:
 			{
-				speed = Client[client].Disarmer ? 230.0 : 260.0;
+				speed = Client[client].Disarmer ? 240.0 : 270.0;
 			}
 			case Class_Chaos:
 			{
-				speed = 230.0;
+				speed = 240.0;
 			}
 			case Class_MTF3:
 			{
-				speed = Client[client].Disarmer ? 230.0 : 240.0;
+				speed = 240.0;
 			}
 			case Class_Guard, Class_MTF, Class_MTF2, Class_MTFS:
 			{
-				speed = Client[client].Disarmer ? 230.0 : 250.0;
+				speed = Client[client].Disarmer ? 240.0 : 250.0;
 			}
 			case Class_049:
 			{
-				speed = 220.0;
+				speed = 230.0;
 			}
 			case Class_0492, Class_3008:
 			{
-				speed = 250.0;
+				speed = 260.0;
 			}
 			case Class_096:
 			{
-				speed = 200.0;
+				speed = 210.0;
 			}
 			case Class_106:
 			{
-				speed = 180.0;
+				speed = 190.0;
 			}
 			case Class_173:
 			{
@@ -2910,11 +3232,11 @@ public void OnPreThink(int client)
 			}
 			case Class_939, Class_9392:
 			{
-				speed = 275.0 - (GetClientHealth(client)/55.0);
+				speed = 280.0 - (GetClientHealth(client)/55.0);
 			}
 			default:
 			{
-				speed = 260.0;
+				speed = 270.0;
 			}
 		}
 		SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", speed);
@@ -2993,7 +3315,7 @@ public void OnPreThink(int client)
 	static float clientPos[3];
 
 	int status;
-	bool showHud = Client[client].HudIn<engineTime;
+	bool showHud = (Client[client].HudIn<engineTime && IsPlayerAlive(client));
 	specialTick[client] = engineTime+0.2;
 	if(Client[client].Class == Class_106)
 	{
@@ -3079,7 +3401,6 @@ public void OnPreThink(int client)
 					continue;
 
 				// ensure no wall is obstructing
-				static float result[3];
 				TR_TraceRayFilter(clientPos, enemyPos, (CONTENTS_SOLID | CONTENTS_AREAPORTAL | CONTENTS_GRATE), RayType_EndPoint, TraceWallsOnly);
 				TR_GetEndPosition(result);
 				if(result[0]!=enemyPos[0] || result[1]!=enemyPos[1] || result[2]!=enemyPos[2])
@@ -4133,14 +4454,7 @@ void ShowClassInfo(int client)
 
 	bool found;
 	char buffer[32];
-	if(Gamemode == Gamemode_Ikea)
-	{
-		FormatEx(buffer, sizeof(buffer), "class_%d_ikea", Client[client].Class);
-		found = TranslationPhraseExists(buffer);
-	}
-
-	if(!found)
-		FormatEx(buffer, sizeof(buffer), "class_%d", Client[client].Class);
+	GetClassName(Client[client].Class, buffer, sizeof(buffer));
 
 	SetHudTextParamsEx(-1.0, 0.3, 10.0, ClassColors[Client[client].Class], ClassColors[Client[client].Class], 0, 5.0, 1.0, 1.0);
 	ShowSyncHudText(client, HudExtra, "%t", "you_are", buffer);
@@ -4158,7 +4472,20 @@ void ShowClassInfo(int client)
 	ShowSyncHudText(client, HudIntro, "%t", buffer);
 }
 
-int GetClassCount(ClassEnum c)
+void GetClassName(any class, char[] buffer, int length)
+{
+	bool found;
+	if(Gamemode == Gamemode_Ikea)
+	{
+		Format(buffer, length, "class_%d_ikea", class);
+		found = TranslationPhraseExists(buffer);
+	}
+
+	if(!found)
+		Format(buffer, length, "class_%d", class);
+}
+
+stock int GetClassCount(ClassEnum c)
 {
 	int a;
 	for(int i=1; i<=MaxClients; i++)
@@ -4282,6 +4609,7 @@ bool AttemptGrabItem(int client)
 				{
 					DropCurrentKeycard(client);
 					Client[client].Keycard = view_as<KeycardEnum>(card);
+					RemoveEntity(entity);
 					return true;
 				}
 			}
@@ -4360,7 +4688,7 @@ bool AttemptGrabItem(int client)
 
 void PickupWeapon(int client, int entity)
 {
-	if(oldMan)
+	if(Client[client].Class == Class_106)
 	{
 		RemoveEntity(entity);
 		return;
@@ -4371,13 +4699,13 @@ void PickupWeapon(int client, int entity)
 		GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
 		if(name[0])
 		{
-			KeycardEnum card = Keycard_Janitor;
+			int card = view_as<int>(Keycard_Janitor);
 			for(; card<sizeof(KeycardNames); card++)
 			{
 				if(StrEqual(name, KeycardNames[card], false))
 				{
 					DropCurrentKeycard(client);
-					Client[client].Keycard = card;
+					Client[client].Keycard = view_as<KeycardEnum>(card);
 					RemoveEntity(entity);
 					return;
 				}
@@ -4676,7 +5004,7 @@ public MRESReturn DHook_RegenThinkPost(int client, Handle params)
 public MRESReturn DHook_CanPickupDroppedWeaponPre(int client, Handle returnVal, Handle params)
 {
 	if(!IsSpec(client) && !IsSCP(client) && !Client[client].Disarmer)
-		PickupWeapon(DHookGetParam(params, 1));
+		PickupWeapon(client, DHookGetParam(params, 1));
 
 	DHookSetReturn(returnVal, false);
 	return MRES_Supercede;
