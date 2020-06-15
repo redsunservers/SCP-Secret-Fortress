@@ -1,0 +1,5 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/scp_sl/zm"
+	"$bumpmap" "models/scp_sl/zm_bump"
+}

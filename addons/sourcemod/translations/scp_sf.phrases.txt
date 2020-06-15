@@ -1,0 +1,529 @@
+"Phrases"
+{
+	// Hint Phrases [OPTIONAL]
+
+	"hint_1"
+	{
+		"en"		"As a ghost you can call for medic\nto teleport to alive players"
+	}
+	"hint_2"
+	{
+		"en"		"SCP-939-89 and SCP-939-53 can only see\nplayers if they moved or attacked recently.\n \nTry standing still if you haven't been spotted."
+	}
+	"hint_3"
+	{
+		"en"		"SCP-079 can help D-Class escape by opening\neither Gate A or Gate B, speak with it."
+	}
+	"hint_4"
+	{
+		"en"		"Facility Manager and O5 keycards allows\nyou to escape without help from MTF or Chaos."
+	}
+	"hint_5"
+	{
+		"en"		"Guards and MTF can use there melees to\ndisarm D-Class or Chaos instead of harming."
+	}
+	"hint_6"
+	{
+		"en"		"SCP-173 can only move while nobody is\nlooking. It can move if someone blinks."
+	}
+	"hint_7"
+	{
+		"en"		"Most SCPs can kill someone in\none blow. No matter there current health."
+	}
+	"hint_8"
+	{
+		"en"		"Crouching helps you stay silent towards others."
+	}
+	"hint_9"
+	{
+		"en"		"Every 3 minutes either MTF or Chaos will spawn."
+	}
+	"hint_10"
+	{
+		"en"		"MTF can save Scientists by bringing them\ntowards one of the gates and letting them through.\n \nOnly Lieutenants and Commanders have access though."
+	}
+	"hint_11"
+	{
+		"en"		"Chaos can save D-Class by bringing them\ntowards one of the gates and letting them through."
+	}
+	"hint_12"
+	{
+		"en"		"Died? Don't worry, you'll respawn soon."
+	}
+	"hint_13"
+	{
+		"en"		"Iron Bomber can blind players but also yourself."
+	}
+	"hint_14"
+	{
+		"en"		"This is a work-in-progress gamemode.\nThere may be bugs and glitches.\nBut playing here helps the development!\n \nThanks for playing here and enjoy!"
+	}
+	"hint_15"
+	{
+		"en"		"There may be useless hints."
+	}
+	"hint_16"
+	{
+		"en"		"All weapons can headshot except against SCPs."
+	}
+	"hint_17"
+	{
+		"en"		"You can use ATTACK1, ATTACK2, ATTACK3, or\nCall for Medic to pick up weapons & keycards."
+	}
+	"hint_18"
+	{
+		"en"		"To use a health kit, use ATTACK2 to drop the\nkit and stand over it until it's used."
+	}
+	"hint_19"
+	{
+		"en"		"SCP-939-89, SCP-939-53, and SCP-3008-2 are able to talk to others."
+	}
+	"hint_20"
+	{
+		"en"		"SCPs can talk to each other from any distance."
+	}
+	"hint_21"
+	{
+		"en"		"SCP-3008-2 will only attack if attacked or during closing hours."
+	}
+
+	// SCP-3008-1 Phrases [OPTIONAL]
+
+	"class_1_ikea"
+	{
+		"en"		"SCP-3008-1 Victim"
+	}
+	"desc_1_ikea"
+	{
+		"en"		"Escape from SCP-3008-1.\nCooperate with the MTF.\nAvoid other teams."
+	}
+	"desc_5_ikea"
+	{
+		"en"		"Help Survivors escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
+	}
+	"desc_6_ikea"
+	{
+		"en"		"Help Survivors escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your superiors."
+	}
+	"class_7_ikea"
+	{
+		"en"		"Nine-Tailed Fox Survivor"
+	}
+	"desc_7_ikea"
+	{
+		"en"		"Help Survivors escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your commanders."
+	}
+	"desc_8_ikea"
+	{
+		"en"		"Help Survivors escape.\nNeutralize other subjects.\nInstruct your soldiers."
+	}
+
+	// Class Phrases
+
+	"class_0"
+	{
+		"en"		"Spectator"
+	}
+	"desc_0"
+	{
+		"en"		"You will respawn soon."
+	}
+	"class_1"
+	{
+		"en"		"Class-D Personnel"
+	}
+	"desc_1"
+	{
+		"en"		"Escape from the facility.\nCooperate with the Chaos Insurgency.\nAvoid other teams."
+	}
+	"class_2"
+	{
+		"en"		"Chaos Insurgency Agent"
+	}
+	"desc_2"
+	{
+		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects."
+	}
+	"class_3"
+	{
+		"en"		"Scientist"
+	}
+	"desc_3"
+	{
+		"en"		"Escape from the facility.\nCooperate with the MTF.\nAvoid other teams."
+	}
+	"class_4"
+	{
+		"en"		"Facility Guard"
+	}
+	"desc_4"
+	{
+		"en"		"Help Scientists escape.\nCooperate with MTF.\nNeutralize other subjects."
+	}
+	"class_5"
+	{
+		"en"		"Nine-Tailed Fox Cadet"
+	}
+	"desc_5"
+	{
+		"en"		"Help Scientists escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
+	}
+	"class_6"
+	{
+		"en"		"Nine-Tailed Fox Lieutenant"
+	}
+	"desc_6"
+	{
+		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your superiors."
+	}
+	"class_7"
+	{
+		"en"		"Nine-Tailed Fox Scientist"
+	}
+	"desc_7"
+	{
+		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your commanders."
+	}
+	"class_8"
+	{
+		"en"		"Nine-Tailed Fox Commander"
+	}
+	"desc_8"
+	{
+		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers."
+	}
+	"class_9"
+	{
+		"en"		"SCP-049"
+	}
+	"desc_9"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nInteract with a recently-dead human to revive them as an ally."
+	}
+	"class_10"
+	{
+		"en"		"SCP-049-2"
+	}
+	"desc_10"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nFollow orders from SCP-049"
+	}
+	"class_11"
+	{
+		"en"		"SCP-079"
+	}
+	"desc_11"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs."
+	}
+	"class_12"
+	{
+		"en"		"SCP-096"
+	}
+	"desc_12"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou become enraged when looked at."
+	}
+	"class_13"
+	{
+		"en"		"SCP-106"
+	}
+	"desc_13"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nATTACK2 to create a portal.\nATTACK3 to teleport to that portal."
+	}
+	"class_14"
+	{
+		"en"		"SCP-173"
+	}
+	"desc_14"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can only move while no one is looking."
+	}
+	"class_15"
+	{
+		"en"		"SCP-939-89"
+	}
+	"desc_15"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can talk to other humans."
+	}
+	"class_16"
+	{
+		"en"		"SCP-939-53"
+	}
+	"desc_16"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can talk to other humans."
+	}
+	"class_17"
+	{
+		"en"		"SCP-3008-2"
+	}
+	"desc_17"
+	{
+		"en"		"Kill everyone during the night.\nCooperate with other SCP-3008-2.\nYou can talk to other humans."
+	}
+
+	// Keycard Phrases
+
+	"keycard_0"
+	{
+		"en"		"None"
+	}
+	"keycard_1"
+	{
+		"en"		"Janitor"
+	}
+	"keycard_2"
+	{
+		"en"		"Scientist"
+	}
+	"keycard_3"
+	{
+		"en"		"Zone Manager"
+	}
+	"keycard_4"
+	{
+		"en"		"Research Supervisor"
+	}
+	"keycard_5"
+	{
+		"en"		"Facility Guard"
+	}
+	"keycard_6"
+	{
+		"en"		"MTF Cadet"
+	}
+	"keycard_7"
+	{
+		"en"		"MTF Lieutenant"
+	}
+	"keycard_8"
+	{
+		"en"		"MTF Commander"
+	}
+	"keycard_9"
+	{
+		"en"		"Containment Engineer"
+	}
+	"keycard_10"
+	{
+		"en"		"Facility Manager"
+	}
+	"keycard_11"
+	{
+		"en"		"Chaos Insurgency Access Device"
+	}
+	"keycard_12"
+	{
+		"en"		"O5"
+	}
+
+	// Radio Phrases
+
+	"radio_0"
+	{
+		"en"		"--"
+	}
+	"radio_1"
+	{
+		"en"		"SR"
+	}
+	"radio_2"
+	{
+		"en"		"MR"
+	}
+	"radio_2"
+	{
+		"en"		"LR"
+	}
+	"radio_4"
+	{
+		"en"		"UR"
+	}
+
+	// Team Phrases
+
+	"team_0"
+	{
+		"en"		"Stalemate"
+	}
+	"team_1"
+	{
+		"en"		"Class-D Won"
+	}
+	"team_2"
+	{
+		"en"		"MTF Won"
+	}
+	"team_3"
+	{
+		"en"		"SCPs Won"
+	}
+
+	// SCP-914 Phrases
+
+	"scp_914"
+	{
+		"en"		"SCP-914\n "
+	}
+	"in_cooldown"
+	{
+		"en"		"In Cooldown..."
+	}
+	"keycard_rough"
+	{
+		"en"		"Keycard | Rough"
+	}
+	"keycard_coarse"
+	{
+		"en"		"Keycard | Coarse"
+	}
+	"keycard_even"
+	{
+		"en"		"Keycard | 1:1"
+	}
+	"keycard_fine"
+	{
+		"en"		"Keycard | Fine"
+	}
+	"keycard_very"
+	{
+		"en"		"Keycard | Very Fine"
+	}
+	"weapon_rough"
+	{
+		"en"		"Weapon | Rough"
+	}
+	"weapon_coarse"
+	{
+		"en"		"Weapon | Coarse"
+	}
+	"weapon_even"
+	{
+		"en"		"Weapon | 1:1"
+	}
+	"weapon_fine"
+	{
+		"en"		"Weapon | Fine"
+	}
+	"weapon_very"
+	{
+		"en"		"Weapon | Very Fine"
+	}
+
+	// Other Phrases
+
+	"you_are"	// HUD
+	{
+		"#format"	"{1:t}"
+		"en"		"You are {1}"
+	}
+	"scp_killed"	// Chat
+	{
+		"#format"	"{1:s},{2:t},{3:s},{4:t}"
+		"en"		"{{1}}{2} {default}has been contained by {{3}}{4}"
+	}
+	"scp_killed_duo"	// Chat
+	{
+		"#format"	"{1:s},{2:t},{3:s},{4:t},{5:s},{6:t}"
+		"en"		"{{1}}{2} {default}has been contained by {{3}}{4} {default}and {{5}}{6}"
+	}
+	"mtf_spawn"	// Chat
+	{
+		"en"		"{mediumblue}Mobile Task Force Unit, Epsilon-11{default}, has entered the facility."
+	}
+	"mtf_spawn_scp"	// Chat
+	{
+		"#format"	"{1:d}"
+		"en"		"Awaiting re-containment of: {red}{1} SCP subject(s){default}."
+	}
+	"mtf_spawn_scp_over"	// Chat
+	{
+		"en"		"Awaiting re-containment of: {red}An uncountable number of SCP subjects{default}."
+	}
+	"time_remaining"	// Game
+	{
+		"#format"	"{1:d},{2:s}"
+		"en"		"Time Remaining: {1}:{2}"
+	}
+	"health_kit"	// HUD
+	{
+		"en"		"Health Kit Ready [ATTACK2]"
+	}
+	"pain_killers"	// HUD
+	{
+		"en"		"Pain Killers Ready [ATTACK2]"
+	}
+	"keycard"	// HUD
+	{
+		"#format"	"{1:t}"
+		"en"		"Keycard: {1}"
+	}
+	"radio"	// HUD
+	{
+		"#format"	"{1:t},{2:d}"
+		"en"		"Radio: {1} ({2}%) [ATTACK3]"
+	}
+	"disarmed_by"	// HUD
+	{
+		"#format"	"{1:N}"
+		"en"		"You are disarmed by {1}"
+	}
+	"disarmed"	// Game
+	{
+		"en"		"You have been disarmed!"
+	}
+	"now_playing"	// Chat
+	{
+		"#format"	"{1:s}"
+		"en"		"Now Playing: {1}"
+	}
+	"end_screen"	// HUD
+	{
+		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d}"
+		"en"		"{1}\n \nClass-D Escaped: {2} / {3}\nScientists Escaped: {4} / {5}\nSCPs Contained: {6} / {7}"
+	}
+	"end_screen_ikea"	// HUD
+	{
+		"#format"	"{1:s},{2:d},{3:d}"
+		"en"		"{1}\n \nSurvivors Escaped: {2} / {3}"
+	}
+	"telsa_gate"	// Chat
+	{
+		"en"		"Telsa Gate"
+	}
+	"femur_breaker"	// Chat
+	{
+		"en"		"Femur Breaker"
+	}
+	"redacted"	// Chat, Hint
+	{
+		"en"		"[REDACTED]"
+	}
+	"data_expunged"	// Hint
+	{
+		"en"		"[DATA EXPUNGED]"
+	}
+	"106_portal"	// Annotation
+	{
+		"en"		"Teleport Portal"
+	}
+	"106_create"	// Hint
+	{
+		"en"		"Portal created, use ATTACK3 to teleport"
+	}
+	"106_create_deny"	// Hint
+	{
+		"en"		"Can't not create a portal now"
+	}
+	"106_create_none"	// Hint
+	{
+		"en"		"No portal created, use ATTACK2 to create one"
+	}
+	"106_tele_deny"	// Hint
+	{
+		"en"		"You can not teleport now"
+	}
+}
