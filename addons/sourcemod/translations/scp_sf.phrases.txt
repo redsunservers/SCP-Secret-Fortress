@@ -334,7 +334,7 @@
 	{
 		"en"		"MR"
 	}
-	"radio_2"
+	"radio_3"
 	{
 		"en"		"LR"
 	}

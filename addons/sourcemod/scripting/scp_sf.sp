@@ -41,7 +41,7 @@ void DisplayCredits(int client)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"0"
-#define STABLE_REVISION	"0"
+#define STABLE_REVISION	"2"
 #define PLUGIN_VERSION MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE		100000000.0
@@ -914,7 +914,15 @@ enum struct ClientEnum
 		if(respawn)
 			GoToSpawn(client);
 
-		SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_PLAYER);
+		if(team == TFTeam_Unassigned)
+		{
+			SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_DEBRIS_TRIGGER);
+		}
+		else
+		{
+			SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_PLAYER);
+		}
+
 		ShowClassInfo(client);
 		SetCaptureRate(client);
 		SetVariantString(ClassModel[this.Class]);
@@ -3965,7 +3973,7 @@ public void UpdateListenOverrides(float engineTime)
 
 public void GoToSpawn(int client)
 {
-	if(!ClassSpawn[Client[client].Class][0])
+	if(Client[client].Class==Class_0492 || !ClassSpawn[Client[client].Class][0])
 		return;
 
 	int entity = -1;
@@ -5105,9 +5113,9 @@ public void OnRevive(Event event, const char[] name, bool dontBroadcast)
 	SetEntProp(entity, Prop_Send, "m_bDucked", 1);
 	SetEntityFlags(entity, GetEntityFlags(entity)|FL_DUCKING);
 
-	/*static float pos[3];
+	static float pos[3];
 	GetEntPropVector(client, Prop_Send, "m_vecOrigin", pos);
-	TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);*/
+	TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
 }
 
 public bool SpawnReviveMarker(int client, int team)
