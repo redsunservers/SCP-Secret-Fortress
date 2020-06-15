@@ -914,6 +914,7 @@ enum struct ClientEnum
 		if(respawn)
 			GoToSpawn(client);
 
+		SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_PLAYER);
 		ShowClassInfo(client);
 		SetCaptureRate(client);
 		SetVariantString(ClassModel[this.Class]);
@@ -3964,7 +3965,7 @@ public void UpdateListenOverrides(float engineTime)
 
 public void GoToSpawn(int client)
 {
-	if(Client[client].Class==Class_0492 || !ClassSpawn[Client[client].Class][0])
+	if(!ClassSpawn[Client[client].Class][0])
 		return;
 
 	int entity = -1;
