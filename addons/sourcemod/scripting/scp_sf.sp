@@ -574,8 +574,7 @@ enum WeaponEnum
 
 	Weapon_Flash,
 	Weapon_Frag,
-
-	Weapon_Keycard,
+	Weapon_Micro,
 
 	Weapon_049,
 	Weapon_049Gun,
@@ -606,8 +605,7 @@ static const int WeaponIndex[] =
 
 	1151,
 	308,
-
-	133,
+	594,
 
 	173,
 	35,
@@ -1987,7 +1985,15 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 
 public void TF2_OnConditionAdded(int client, TFCond cond)
 {
-	if(cond!=TFCond_TeleportedGlow || !IsValidClient(client))
+	if(cond == TFCond_Taunting)
+	{
+		if(TF2_IsPlayerInCondition(client, TFCond_Dazed))
+			TF2_RemoveCondition(client, TFCond_Taunting);
+
+		return;
+	}
+
+	if(cond != TFCond_TeleportedGlow)
 		return;
 
 	if(Client[client].Class == Class_DBoi)
@@ -4321,6 +4327,16 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 			wep = SpawnWeapon(client, "tf_weapon_grenadelauncher", WeaponIndex[weapon], 10, 6, "2 ; 30 ; 3 ; 0.25 ; 28 ; 1.5 ; 76 ; 0.125 ; 138 ; 0.1 ; 252 ; 0.9 ; 671 ; 1 ; 787 ; 1.25", false);
 			if(ammo && wep>MaxClients)
 				SetAmmo(client, wep, 1, 0);
+		}
+		case Weapon_Micro:
+		{
+			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Primary);
+			wep = SpawnWeapon(client, "tf_weapon_flamethrower", WeaponIndex[weapon], 110, 6, "2 ; 4 ; 15 ; 0 ; 76 ; 5 ; 173 ; 5 ; 252 ; 0.5", true);
+			if(ammo && wep>MaxClients)
+			{
+				SetEntPropFloat(wep, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
+				SetAmmo(client, wep, 1000);
+			}
 		}
 
 		/*
