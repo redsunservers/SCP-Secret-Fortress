@@ -502,8 +502,8 @@ static const KeycardEnum KeycardPaths[][] =
 	{ Keycard_Research, Keycard_MTF, Keycard_O5 },
 	{ Keycard_MTF3, Keycard_Chaos, Keycard_O5 },
 
-	{ Keycard_None, Keycard_MTF3, Keycard_O5 },
-	{ Keycard_Engineer, Keycard_None, Keycard_None }
+	{ Keycard_Chaos, Keycard_MTF3, Keycard_O5 },
+	{ Keycard_Engineer, Keycard_O5, Keycard_O5 }
 };
 
 /*static const char KeycardModel[][] =
@@ -969,12 +969,12 @@ enum struct ClientEnum
 			}
 			case Access_Exit:
 			{
-				if(this.Keycard==Keycard_MTF2 || this.Keycard==Keycard_MTF3 || this.Keycard==Keycard_Facility || this.Keycard==Keycard_Chaos || this.Keycard==Keycard_O5)
+				if(this.Keycard==Keycard_MTF2 || this.Keycard==Keycard_MTF3 || this.Keycard==Keycard_Facility || this.Keycard==Keycard_Chaos || this.Keycard==Keycard_O5 || this.Keycard==Keycard_106)
 					return 1;
 			}
 			case Access_Warhead:
 			{
-				if(this.Keycard==Keycard_Engineer || this.Keycard==Keycard_Facility || this.Keycard==Keycard_O5)
+				if(this.Keycard==Keycard_Engineer || this.Keycard==Keycard_Facility || this.Keycard==Keycard_O5 || this.Keycard==Keycard_106)
 					return 1;
 			}
 			case Access_Checkpoint:
