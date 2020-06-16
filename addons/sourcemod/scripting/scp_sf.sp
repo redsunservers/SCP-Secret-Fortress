@@ -1791,7 +1791,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 					if(!IsPlayerAlive(client) || Client[client].Keycard<=Keycard_None)
 						return;
 
-					Client[client].Cooldown = GetEngineTime()+5.0;
+					Client[client].Cooldown = GetEngineTime()+10.0;
 					if(GetRandomInt(0, 1))
 					{
 						Client[client].Keycard = Keycard_None;
@@ -1807,7 +1807,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 						return;
 
 					Client[client].Keycard = KeycardPaths[Client[client].Keycard][0];
-					Client[client].Cooldown = GetEngineTime()+7.5;
+					Client[client].Cooldown = GetEngineTime()+12.5;
 				}
 				case 2:
 				{
@@ -1815,7 +1815,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 						return;
 
 					Client[client].Keycard = KeycardPaths[Client[client].Keycard][1];
-					Client[client].Cooldown = GetEngineTime()+10.0;
+					Client[client].Cooldown = GetEngineTime()+15.0;
 				}
 				case 3:
 				{
@@ -1823,14 +1823,14 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 						return;
 
 					Client[client].Keycard = KeycardPaths[Client[client].Keycard][2];
-					Client[client].Cooldown = GetEngineTime()+12.5;
+					Client[client].Cooldown = GetEngineTime()+17.5;
 				}
 				case 4:
 				{
 					if(!IsPlayerAlive(client) || Client[client].Keycard<=Keycard_None)
 						return;
 
-					Client[client].Cooldown = GetEngineTime()+15.0;
+					Client[client].Cooldown = GetEngineTime()+20.0;
 					if(GetRandomInt(0, 1))
 					{
 						Client[client].Keycard = Keycard_None;
@@ -1861,7 +1861,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 						return;
 
 					TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
-					Client[client].Cooldown = GetEngineTime()+5.0;
+					Client[client].Cooldown = GetEngineTime()+10.0;
 
 					wep -= view_as<WeaponEnum>(2);
 					if(wep<Weapon_Pistol || GetRandomInt(0, 1))
@@ -1895,7 +1895,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 						return;
 
 					TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
-					Client[client].Cooldown = GetEngineTime()+7.5;
+					Client[client].Cooldown = GetEngineTime()+12.5;
 
 					wep--;
 					if(wep < Weapon_Pistol)
@@ -1913,7 +1913,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 					if(!IsPlayerAlive(client) || GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary)<=MaxClients)
 						return;
 
-					Client[client].Cooldown = GetEngineTime()+10.0;
+					Client[client].Cooldown = GetEngineTime()+15.0;
 					Client[client].Power = 99.0;
 					SpawnPickup(client, "item_ammopack_full");
 				}
@@ -1938,7 +1938,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 						return;
 
 					TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
-					Client[client].Cooldown = GetEngineTime()+12.5;
+					Client[client].Cooldown = GetEngineTime()+17.5;
 
 					wep++;
 					if(wep > Weapon_SMG5)
@@ -1967,7 +1967,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 						return;
 
 					TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
-					Client[client].Cooldown = GetEngineTime()+15.0;
+					Client[client].Cooldown = GetEngineTime()+20.0;
 					if(GetRandomInt(0, 1))
 					{
 						if(GetPlayerWeaponSlot(client, TFWeaponSlot_Melee)<=MaxClients && GetPlayerWeaponSlot(client, TFWeaponSlot_Primary)<=MaxClients)
@@ -2662,7 +2662,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 			{
 				Client[client].ChargeIn = 0.0;
 				SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
-				SetEntPropFloat(weapon, Prop_Send, "m_flRageMeter", 99.0);
+				SetEntPropFloat(client, Prop_Send, "m_flRageMeter", 99.0);
 			}
 			else if(!Client[client].ChargeIn)
 			{
@@ -2671,15 +2671,21 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 			else if(Client[client].ChargeIn < engineTime)
 			{
 				SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", 0.0);
-				SetEntPropFloat(weapon, Prop_Send, "m_flRageMeter", 0.0);
+				SetEntPropFloat(client, Prop_Send, "m_flRageMeter", 0.0);
 			}
 			else
 			{
 				SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
-				SetEntPropFloat(weapon, Prop_Send, "m_flRageMeter", (engineTime-Client[client].ChargeIn)*9.9);
-				int type = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
-				if(type != -1)
-					SetEntProp(client, Prop_Data, "m_iAmmo", GetEntProp(client, Prop_Data, "m_iAmmo", _, type)-1, _, type);
+				SetEntPropFloat(client, Prop_Send, "m_flRageMeter", (engineTime-Client[client].ChargeIn)*9.9);
+
+				static float time[MAXTF2PLAYERS];
+				if(time[client] < engineTime)
+				{
+					time[client] = engineTime+0.1;
+					int type = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
+					if(type != -1)
+						SetEntProp(client, Prop_Data, "m_iAmmo", GetEntProp(client, Prop_Data, "m_iAmmo", _, type)-1, _, type);
+				}
 			}
 		}
 	}
@@ -3131,7 +3137,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		if(Client[victim].Class==Class_3008 && !Client[victim].Radio)
 		{
 			Client[victim].Radio = 1;
-			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
+			TF2_RemoveWeaponSlot(victim, TFWeaponSlot_Melee);
 			SetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon", GiveWeapon(victim, Weapon_3008Rage));
 		}
 	}
@@ -3162,6 +3168,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 				Client[victim].HealthPack = 0;
 				TF2_RemoveAllWeapons(victim);
 				SetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon", GiveWeapon(victim, Weapon_None));
+				return Plugin_Handled;
 			}
 		}
 		else if(index == WeaponIndex[Weapon_Flash])
@@ -4439,7 +4446,7 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_Micro:
 		{
-			wep = SpawnWeapon(client, "tf_weapon_flamethrower", WeaponIndex[weapon], 110, 6, "2 ; 4 ; 15 ; 0 ; 76 ; 5 ; 173 ; 5 ; 252 ; 0.5", true);
+			wep = SpawnWeapon(client, "tf_weapon_flamethrower", WeaponIndex[weapon], 110, 6, "2 ; 4 ; 15 ; 0 ; 76 ; 5 ; 173 ; 5 ; 252 ; 0.5", false, true);
 			if(wep > MaxClients)
 			{
 				SetEntPropFloat(wep, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
@@ -4855,12 +4862,6 @@ bool AttemptGrabItem(int client)
 
 void PickupWeapon(int client, int entity)
 {
-	if(Client[client].Class == Class_106)
-	{
-		RemoveEntity(entity);
-		return;
-	}
-
 	{
 		static char name[48];
 		GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
@@ -4888,6 +4889,10 @@ void PickupWeapon(int client, int entity)
 		{
 			ReplaceWeapon(client, wep, entity);
 			RemoveEntity(entity);
+
+			Event event = CreateEvent("localplayer_pickup_weapon", true);
+			event.FireToClient(client);
+			event.Cancel();
 			return;
 		}
 	}
