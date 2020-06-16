@@ -684,7 +684,7 @@ enum struct ClientEnum
 	float Pos[3];
 	float ChatIn;
 	float HudIn;
-	float TeleIn;
+	float ChargeIn;
 	float Cooldown;
 	bool CanTalkTo[MAXTF2PLAYERS];
 
@@ -790,10 +790,11 @@ enum struct ClientEnum
 		if(team != TFTeam_Spectator)
 			ChangeClientTeamEx(client, team);
 
+		this.ChargeIn = 0.0;
 		this.Disarmer = 0;
 		this.DisableSpeed = false;
 		this.Power = 100.0;
-		TF2_RemoveAllWeapons(client);
+		//TF2_RemoveAllWeapons(client);
 		switch(this.Class)
 		{
 			case Class_DBoi:
@@ -1049,6 +1050,8 @@ public void OnPluginStart()
 	RegConsoleCmd("scp_info", Command_HelpClass, "View info about your current class");
 
 	RegAdminCmd("scp_forceclass", Command_ForceClass, ADMFLAG_RCON, "Usage: scp_forceclass <target> <class>.  Forces that class to be played.");
+	RegAdminCmd("scp_giveweapon", Command_ForceWeapon, ADMFLAG_RCON, "Usage: scp_giveweapon <target> <id>.  Gives a specific weapon.");
+	RegAdminCmd("scp_givekeycard", Command_ForceCard, ADMFLAG_RCON, "Usage: scp_givekeycard <target> <id>.  Gives a specific keycard.");
 
 	AddCommandListener(OnSayCommand, "say");
 	AddCommandListener(OnSayCommand, "say_team");
@@ -1788,6 +1791,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 					if(!IsPlayerAlive(client) || Client[client].Keycard<=Keycard_None)
 						return;
 
+					Client[client].Cooldown = GetEngineTime()+5.0;
 					if(GetRandomInt(0, 1))
 					{
 						Client[client].Keycard = Keycard_None;
@@ -1796,7 +1800,6 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 
 					Client[client].Keycard = KeycardPaths[Client[client].Keycard][0];
 					Client[client].Keycard = KeycardPaths[Client[client].Keycard][0];
-					Client[client].Cooldown = GetEngineTime()+5.0;
 				}
 				case 1:
 				{
@@ -1827,6 +1830,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 					if(!IsPlayerAlive(client) || Client[client].Keycard<=Keycard_None)
 						return;
 
+					Client[client].Cooldown = GetEngineTime()+15.0;
 					if(GetRandomInt(0, 1))
 					{
 						Client[client].Keycard = Keycard_None;
@@ -1835,7 +1839,6 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 
 					Client[client].Keycard = KeycardPaths[Client[client].Keycard][2];
 					Client[client].Keycard = KeycardPaths[Client[client].Keycard][2];
-					Client[client].Cooldown = GetEngineTime()+15.0;
 				}
 				case 5:
 				{
@@ -1857,11 +1860,12 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 					if(wep > Weapon_SMG5)
 						return;
 
+					TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
 					Client[client].Cooldown = GetEngineTime()+5.0;
+
 					wep -= view_as<WeaponEnum>(2);
 					if(wep<Weapon_Pistol || GetRandomInt(0, 1))
 					{
-						TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
 						if(GetPlayerWeaponSlot(client, TFWeaponSlot_Melee)<=MaxClients && GetPlayerWeaponSlot(client, TFWeaponSlot_Primary)<=MaxClients)
 							SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_None));
 
@@ -1890,11 +1894,12 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 					if(wep > Weapon_SMG5)
 						return;
 
+					TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
 					Client[client].Cooldown = GetEngineTime()+7.5;
+
 					wep--;
 					if(wep < Weapon_Pistol)
 					{
-						TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
 						if(GetPlayerWeaponSlot(client, TFWeaponSlot_Melee)<=MaxClients && GetPlayerWeaponSlot(client, TFWeaponSlot_Primary)<=MaxClients)
 							SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_None));
 
@@ -1932,16 +1937,12 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 					if(wep > Weapon_SMG5)
 						return;
 
+					TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
 					Client[client].Cooldown = GetEngineTime()+12.5;
+
 					wep++;
 					if(wep > Weapon_SMG5)
-					{
-						TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
-						if(GetPlayerWeaponSlot(client, TFWeaponSlot_Melee)<=MaxClients && GetPlayerWeaponSlot(client, TFWeaponSlot_Primary)<=MaxClients)
-							SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_None));
-
-						return;
-					}
+						wep = Weapon_SMG5;
 
 					SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, wep));
 				}
@@ -1965,16 +1966,19 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 					if(wep > Weapon_SMG5)
 						return;
 
+					TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
 					Client[client].Cooldown = GetEngineTime()+15.0;
-					wep += view_as<WeaponEnum>(2);
-					if(wep>Weapon_SMG5 || GetRandomInt(0, 1))
+					if(GetRandomInt(0, 1))
 					{
-						TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
 						if(GetPlayerWeaponSlot(client, TFWeaponSlot_Melee)<=MaxClients && GetPlayerWeaponSlot(client, TFWeaponSlot_Primary)<=MaxClients)
 							SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_None));
 
 						return;
 					}
+
+					wep += view_as<WeaponEnum>(2);
+					if(wep > Weapon_SMG5)
+						wep = Weapon_SMG5;
 
 					SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, wep));
 				}
@@ -2412,6 +2416,81 @@ public Action Command_ForceClass(int client, int args)
 	return Plugin_Handled;
 }
 
+public Action Command_ForceWeapon(int client, int args)
+{
+	if(args != 2)
+	{
+		ReplyToCommand(client, "[SM] Usage: scp_giveweapon <target> <id>");
+		return Plugin_Handled;
+	}
+
+	static char targetName[MAX_TARGET_LENGTH];
+	GetCmdArg(2, targetName, sizeof(targetName));
+	int weapon = StringToInt(targetName);
+	if(weapon<0 || weapon>=view_as<int>(WeaponEnum))
+	{
+		ReplyToCommand(client, "[SM] Invalid Weapon ID");
+		return Plugin_Handled;
+	}
+
+	static char pattern[PLATFORM_MAX_PATH];
+	GetCmdArg(1, pattern, sizeof(pattern));
+
+	int targets[MAXPLAYERS], matches;
+	bool targetNounIsMultiLanguage;
+	if((matches=ProcessTargetString(pattern, client, targets, sizeof(targets), 0, targetName, sizeof(targetName), targetNounIsMultiLanguage)) < 1)
+	{
+		ReplyToTargetError(client, matches);
+		return Plugin_Handled;
+	}
+
+	for(int target; target<matches; target++)
+	{
+		if(!IsClientSourceTV(targets[target]) && !IsClientReplay(targets[target]))
+			ReplaceWeapon(targets[target], view_as<WeaponEnum>(weapon));
+	}
+	return Plugin_Handled;
+}
+
+public Action Command_ForceCard(int client, int args)
+{
+	if(args != 2)
+	{
+		ReplyToCommand(client, "[SM] Usage: scp_givekeycard <target> <id>");
+		return Plugin_Handled;
+	}
+
+	static char targetName[MAX_TARGET_LENGTH];
+	GetCmdArg(2, targetName, sizeof(targetName));
+	int card = StringToInt(targetName);
+	if(card<0 || card>=view_as<int>(KeycardEnum))
+	{
+		ReplyToCommand(client, "[SM] Invalid Keycard ID");
+		return Plugin_Handled;
+	}
+
+	static char pattern[PLATFORM_MAX_PATH];
+	GetCmdArg(1, pattern, sizeof(pattern));
+
+	int targets[MAXPLAYERS], matches;
+	bool targetNounIsMultiLanguage;
+	if((matches=ProcessTargetString(pattern, client, targets, sizeof(targets), 0, targetName, sizeof(targetName), targetNounIsMultiLanguage)) < 1)
+	{
+		ReplyToTargetError(client, matches);
+		return Plugin_Handled;
+	}
+
+	for(int target; target<matches; target++)
+	{
+		if(!IsClientSourceTV(targets[target]) && !IsClientReplay(targets[target]))
+		{
+			DropCurrentKeycard(targets[target]);
+			Client[targets[target]].Keycard = view_as<KeycardEnum>(card);
+		}
+	}
+	return Plugin_Handled;
+}
+
 public void OnClientDisconnect(int client)
 {
 	CreateTimer(1.0, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
@@ -2506,6 +2585,10 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 			{
 				CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], class1, "gray", "femur_breaker");
 			}
+			else if(damage & DMG_BLAST)
+			{
+				CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], class1, "gray", "alpha_warhead");
+			}
 			else
 			{
 				CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], class1, "black", "redacted");
@@ -2551,9 +2634,6 @@ public void OnPlayerDeathPost(Event event, const char[] name, bool dontBroadcast
 
 public Action OnBroadcast(Event event, const char[] name, bool dontBroadcast)
 {
-	if(!Enabled)
-		return Plugin_Continue;
-
 	static char sound[PLATFORM_MAX_PATH];
 	event.GetString("sound", sound, sizeof(sound));
 	if(!StrContains(sound, "Game.Your", false) || StrEqual(sound, "Game.Stalemate", false) || !StrContains(sound, "Announcer.", false))
@@ -2562,7 +2642,7 @@ public Action OnBroadcast(Event event, const char[] name, bool dontBroadcast)
 	return Plugin_Continue;
 }
 
-public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon)
+public Action OnPlayerRunCmd(int client, int &buttons)
 {
 	if(!Enabled || IsSpec(client))
 		return Plugin_Continue;
@@ -2570,6 +2650,40 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 	bool changed;
 	static int holding[MAXTF2PLAYERS];
 	static float pos[3], ang[3];
+
+	float engineTime = GetEngineTime();
+	int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	if(weapon > MaxClients)
+	{
+		int index = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
+		if(index == WeaponIndex[Weapon_Micro])
+		{
+			if(!(buttons & IN_ATTACK))
+			{
+				Client[client].ChargeIn = 0.0;
+				SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
+				SetEntPropFloat(weapon, Prop_Send, "m_flRageMeter", 99.0);
+			}
+			else if(!Client[client].ChargeIn)
+			{
+				Client[client].ChargeIn = engineTime+10.0;
+			}
+			else if(Client[client].ChargeIn < engineTime)
+			{
+				SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", 0.0);
+				SetEntPropFloat(weapon, Prop_Send, "m_flRageMeter", 0.0);
+			}
+			else
+			{
+				SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
+				SetEntPropFloat(weapon, Prop_Send, "m_flRageMeter", (engineTime-Client[client].ChargeIn)*9.9);
+				int type = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
+				if(type != -1)
+					SetEntProp(client, Prop_Data, "m_iAmmo", GetEntProp(client, Prop_Data, "m_iAmmo", _, type)-1, _, type);
+			}
+		}
+	}
+
 	if(holding[client])
 	{
 		if(!(buttons & holding[client]))
@@ -2665,7 +2779,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 				SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
 				SetEntityMoveType(entity, MOVETYPE_VPHYSICS);
 
-				CanTouchAt[entity] = GetEngineTime()+2.0;
+				CanTouchAt[entity] = engineTime+2.0;
 				SDKHook(entity, SDKHook_StartTouch, OnPipeTouch);
 				SDKHook(entity, SDKHook_Touch, OnKitPickup);
 
@@ -2696,7 +2810,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 			{
 				TF2_StunPlayer(client, 10.0, 1.0, TF_STUNFLAG_BONKSTUCK|TF_STUNFLAG_NOSOUNDOREFFECT);
 				TF2_AddCondition(client, TFCond_MegaHeal, 10.0);
-				Client[client].TeleIn = GetEngineTime()+5.0;
+				Client[client].ChargeIn = engineTime+5.0;
 				PrintRandomHintText(client);
 			}
 		}
@@ -2757,6 +2871,7 @@ public void OnGameFrame()
 								if(Client[client].Class == Class_3008)
 								{
 									Client[client].Radio = 0;
+									TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 									SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_3008));
 									continue;
 								}
@@ -2793,6 +2908,7 @@ public void OnGameFrame()
 							if(Client[client].Class == Class_3008)
 							{
 								Client[client].Radio = 1;
+								TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 								SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_3008Rage));
 								continue;
 							}
@@ -3015,6 +3131,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		if(Client[victim].Class==Class_3008 && !Client[victim].Radio)
 		{
 			Client[victim].Radio = 1;
+			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 			SetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon", GiveWeapon(victim, Weapon_3008Rage));
 		}
 	}
@@ -3330,6 +3447,7 @@ public void OnPreThink(int client)
 				{
 					TF2_AddCondition(client, TFCond_CritCola, 20.0);
 					Client[client].DisableSpeed = true;
+					TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 					SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_096Rage));
 					Client[client].Power = engineTime+15.0;
 					Client[client].Radio = 2;
@@ -3344,6 +3462,7 @@ public void OnPreThink(int client)
 				{
 					TF2_RemoveCondition(client, TFCond_CritCola);
 					Client[client].DisableSpeed = false;
+					TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 					SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_096));
 					Client[client].Radio = 0;
 					Client[client].Power = engineTime+15.0;
@@ -3370,9 +3489,9 @@ public void OnPreThink(int client)
 	specialTick[client] = engineTime+0.2;
 	if(Client[client].Class == Class_106)
 	{
-		if(Client[client].TeleIn && Client[client].TeleIn<engineTime)
+		if(Client[client].ChargeIn && Client[client].ChargeIn<engineTime)
 		{
-			Client[client].TeleIn = 0.0;
+			Client[client].ChargeIn = 0.0;
 			TeleportEntity(client, Client[client].Pos, NULL_VECTOR, TRIPLE_D);
 		}
 		else if(Client[client].Pos[0] || Client[client].Pos[1] || Client[client].Pos[2])
@@ -4198,7 +4317,6 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		*/
 		case Weapon_None:
 		{
-			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 			wep = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 1, 0, "1 ; 0 ; 252 ; 0.99", _, true);
 			if(wep > MaxClients)
 			{
@@ -4209,7 +4327,6 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_Disarm:
 		{
-			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 			wep = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 5, 6, "15 ; 0 ; 138 ; 0 ; 252 ; 0.95");
 		}
 
@@ -4226,7 +4343,6 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 				default:
 					TF2_SetPlayerClass(client, TFClass_Scout, false);
 			}
-			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
 			wep = SpawnWeapon(client, "tf_weapon_pistol", WeaponIndex[weapon], 5, 6, "2 ; 1.5 ; 3 ; 0.75 ; 5 ; 1.25 ; 51 ; 1 ; 96 ; 1.25 ; 106 ; 0.33 ; 252 ; 0.95");
 			if(ammo && wep>MaxClients)
 				SetAmmo(client, wep, 27, 0);
@@ -4234,7 +4350,6 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		case Weapon_SMG:
 		{
 			TF2_SetPlayerClass(client, TFClass_Sniper, false);
-			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
 			wep = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 5, 6, "2 ; 1.4 ; 4 ; 2 ; 5 ; 1.3 ; 51 ; 1 ; 78 ; 2 ; 96 ; 1.25 ; 252 ; 0.95");
 			if(ammo && wep>MaxClients)
 				SetAmmo(client, wep, 50, 50);
@@ -4242,7 +4357,6 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		case Weapon_SMG2:
 		{
 			TF2_SetPlayerClass(client, TFClass_DemoMan, false);
-			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
 			wep = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 10, 6, "2 ; 1.6 ; 4 ; 2 ; 5 ; 1.2 ; 51 ; 1 ; 78 ; 4.6875 ; 96 ; 1.5 ; 252 ; 0.9");
 			if(ammo && wep>MaxClients)
 				SetAmmo(client, wep, 75, 50);
@@ -4263,7 +4377,6 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 				default:
 					TF2_SetPlayerClass(client, TFClass_Soldier, false);
 			}
-			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
 			wep = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 20, 6, "2 ; 1.8 ; 4 ; 2 ; 5 ; 1.1 ; 51 ; 1 ; 78 ; 4.6875 ; 96 ; 1.75 ; 252 ; 0.8");
 			if(ammo && wep>MaxClients)
 				SetAmmo(client, wep, 100, 50);
@@ -4284,7 +4397,6 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 				default:
 					TF2_SetPlayerClass(client, TFClass_Soldier, false);
 			}
-			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
 			wep = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 30, 6, "2 ; 2 ; 4 ; 2 ; 51 ; 1 ; 78 ; 4.6875 ; 96 ; 2 ; 252 ; 0.7");
 			if(ammo && wep>MaxClients)
 				SetAmmo(client, wep, 125, 50);
@@ -4305,7 +4417,6 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 				default:
 					TF2_SetPlayerClass(client, TFClass_Soldier, false);
 			}
-			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
 			wep = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 40, 6, "2 ; 2.2 ; 4 ; 2 ; 6 ; 0.9 ; 51 ; 1 ; 78 ; 4.6875 ; 96 ; 2.25 ; 252 ; 0.6");
 			if(ammo && wep>MaxClients)
 				SetAmmo(client, wep, 150, 50);
@@ -4316,26 +4427,24 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		*/
 		case Weapon_Flash:
 		{
-			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Primary);
 			wep = SpawnWeapon(client, "tf_weapon_grenadelauncher", WeaponIndex[weapon], 5, 6, "1 ; 0.5 ; 3 ; 0.25 ; 15 ; 0 ; 76 ; 0.125 ; 252 ; 0.95 ; 787 ; 1.25", false, true);
 			if(ammo && wep>MaxClients)
 				SetAmmo(client, wep, 1, 0);
 		}
 		case Weapon_Frag:
 		{
-			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Primary);
 			wep = SpawnWeapon(client, "tf_weapon_grenadelauncher", WeaponIndex[weapon], 10, 6, "2 ; 30 ; 3 ; 0.25 ; 28 ; 1.5 ; 76 ; 0.125 ; 138 ; 0.1 ; 252 ; 0.9 ; 671 ; 1 ; 787 ; 1.25", false);
 			if(ammo && wep>MaxClients)
 				SetAmmo(client, wep, 1, 0);
 		}
 		case Weapon_Micro:
 		{
-			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Primary);
 			wep = SpawnWeapon(client, "tf_weapon_flamethrower", WeaponIndex[weapon], 110, 6, "2 ; 4 ; 15 ; 0 ; 76 ; 5 ; 173 ; 5 ; 252 ; 0.5", true);
-			if(ammo && wep>MaxClients)
+			if(wep > MaxClients)
 			{
 				SetEntPropFloat(wep, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
-				SetAmmo(client, wep, 1000);
+				if(ammo)
+					SetAmmo(client, wep, 1000);
 			}
 		}
 
@@ -4356,7 +4465,6 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_096:
 		{
-			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 			wep = SpawnWeapon(client, "tf_weapon_bottle", WeaponIndex[weapon], 1, 13, "1 ; 0 ; 252 ; 0.99 ; 535 ; 0.333", false);
 			if(wep > MaxClients)
 			{
@@ -4367,7 +4475,6 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_096Rage:
 		{
-			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 			wep = SpawnWeapon(client, "tf_weapon_sword", WeaponIndex[weapon], 100, 13, "2 ; 101 ; 6 ; 0.5 ; 28 ; 3 ; 252 ; 0", false);
 		}
 		case Weapon_106:
@@ -4384,7 +4491,6 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_3008:
 		{
-			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 			wep = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 1, 13, "1 ; 0 ; 252 ; 0.99 ; 535 ; 0.333", false);
 			if(wep > MaxClients)
 			{
@@ -4395,7 +4501,6 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_3008Rage:
 		{
-			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 			wep = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 100, 13, "2 ; 1.35 ; 28 ; 0.25 ; 252 ; 0.5", false);
 		}
 
