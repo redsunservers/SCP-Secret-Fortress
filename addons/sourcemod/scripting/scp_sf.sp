@@ -564,6 +564,13 @@ enum WeaponEnum
 {
 	Weapon_None = 0,
 	Weapon_Disarm,
+	Weapon_Axe,
+	Weapon_Hammer,
+	Weapon_Knife,
+	Weapon_Bash,
+	Weapon_Meat,
+	Weapon_Wrench,
+	Weapon_Pan,
 
 	Weapon_Pistol,
 	Weapon_SMG,		// Guard
@@ -595,6 +602,13 @@ static const int WeaponIndex[] =
 {
 	5,
 	954,
+	192,
+	153,
+	30758,
+	325,
+	1013,
+	197,
+	264,
 
 	209,
 	751,
@@ -4336,6 +4350,34 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		{
 			wep = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 5, 6, "15 ; 0 ; 138 ; 0 ; 252 ; 0.95");
 		}
+		case Weapon_Axe:
+		{
+			wep = SpawnWeapon(client, "tf_weapon_fireaxe", WeaponIndex[weapon], 5, 6, "2 ; 1.65 ; 28 ; 0.5 ; 252 ; 0.95");
+		}
+		case Weapon_Hammer:
+		{
+			wep = SpawnWeapon(client, "tf_weapon_fireaxe", WeaponIndex[weapon], 5, 6, "2 ; 11 ; 6 ; 0.9 ; 28 ; 0.5 ; 138 ; 0.13 ; 252 ; 0.95");
+		}
+		case Weapon_Knife:
+		{
+			wep = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 5, 6, "2 ; 1.2 ; 6 ; 0.8 ; 15 ; 0 ; 252 ; 0.95 ; 362 ; 1");
+		}
+		case Weapon_Bash:
+		{
+			wep = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 5, 6, "2 ; 1.05 ; 6 ; 0.7 ; 28 ; 0.5 ; 252 ; 0.95");
+		}
+		case Weapon_Meat:
+		{
+			wep = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 5, 6, "1 ; 0.9 ; 6 ; 0.7 ; 252 ; 0.95");
+		}
+		case Weapon_Wrench:
+		{
+			wep = SpawnWeapon(client, "tf_weapon_wrench", WeaponIndex[weapon], 5, 6, "2 ; 1.5 ; 6 ; 0.9 ; 28 ; 0.5 ; 252 ; 0.95");
+		}
+		case Weapon_Pan:
+		{
+			wep = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 5, 6, "2 ; 1.35 ; 6 ; 0.8 ; 28 ; 0.5 ; 252 ; 0.95");
+		}
 
 		/*
 			Secondary Weapons
@@ -4446,7 +4488,7 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_Micro:
 		{
-			wep = SpawnWeapon(client, "tf_weapon_flamethrower", WeaponIndex[weapon], 110, 6, "2 ; 4 ; 15 ; 0 ; 76 ; 5 ; 173 ; 5 ; 252 ; 0.5", false, true);
+			wep = SpawnWeapon(client, "tf_weapon_flamethrower", WeaponIndex[weapon], 110, 6, "2 ; 4 ; 15 ; 0 ; 72 ; 0 ; 76 ; 5 ; 173 ; 5 ; 252 ; 0.5", false, true);
 			if(wep > MaxClients)
 			{
 				SetEntPropFloat(wep, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
@@ -4519,7 +4561,7 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 
 	if(wep > MaxClients)
 	{
-		TF2Attrib_SetByDefIndex(wep, 214, view_as<float>(weapon));
+		//TF2Attrib_SetByDefIndex(wep, 214, view_as<float>(weapon));
 		if(account == -3)
 		{
 			SetEntProp(wep, Prop_Send, "m_iAccountID", GetSteamAccountID(client));
@@ -5163,14 +5205,26 @@ public MRESReturn DHook_Supercede(int client, Handle params)
 
 public MRESReturn DHook_RegenThinkPre(int client, Handle params)
 {
-	if(TF2_GetPlayerClass(client) == TFClass_Medic)
+	if(IsSCP(client))
+	{
+		TF2_SetPlayerClass(client, TFClass_Medic);
+	}
+	else if(TF2_GetPlayerClass(client) == TFClass_Medic)
+	{
 		TF2_SetPlayerClass(client, TFClass_Unknown);
+	}
 }
 
 public MRESReturn DHook_RegenThinkPost(int client, Handle params)
 {
-	if(TF2_GetPlayerClass(client) == TFClass_Unknown)
+	if(IsSCP(client))
+	{
+		TF2_SetPlayerClass(client, ClassClass[Client[client].Class]);
+	}
+	else if(TF2_GetPlayerClass(client) == TFClass_Unknown)
+	{
 		TF2_SetPlayerClass(client, TFClass_Medic);
+	}
 }
 
 public MRESReturn DHook_CanPickupDroppedWeaponPre(int client, Handle returnVal, Handle params)
@@ -5749,7 +5803,7 @@ stock void ModelIndexToString(int index, char[] model, int size)
 
 stock int SpawnWeapon(int client, char[] name, int index, int level, int qual, const char[] att, bool visible=true, bool preserve=false)
 {
-	if(StrEqual(name, "saxxy", false))	// if "saxxy" is specified as the name, replace with appropiate name
+	/*if(StrEqual(name, "saxxy", false))	// if "saxxy" is specified as the name, replace with appropiate name
 	{ 
 		switch(TF2_GetPlayerClass(client))
 		{
@@ -5773,7 +5827,7 @@ stock int SpawnWeapon(int client, char[] name, int index, int level, int qual, c
 			case TFClass_Engineer:	ReplaceString(name, 64, "tf_weapon_shotgun", "tf_weapon_shotgun_primary", false);
 			default:		ReplaceString(name, 64, "tf_weapon_shotgun", "tf_weapon_shotgun_soldier", false);
 		}
-	}
+	}*/
 
 	Handle hWeapon;
 	if(preserve)
