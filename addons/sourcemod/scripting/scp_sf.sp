@@ -2841,6 +2841,16 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 		}
 		holding[client] = IN_ATTACK3;
 	}
+	else if(buttons & IN_USE)
+	{
+		if(AttemptGrabItem(client))
+		{
+			buttons &= ~IN_USE;
+			changed = true;
+		}
+
+		holding[client] = IN_USE;
+	}
 
 	if(!(buttons & IN_SCORE))
 		return changed ? Plugin_Changed : Plugin_Continue;
