@@ -528,12 +528,12 @@
 	{
 		"#format"	"{1:d}"
 		"en"		"Awaiting re-containment of: {red}{1} SCP subject(s){default}."
-		"en"		"{red}{1} объект(ов) SCP{default} ожидают восстановления условий содержания.{default}"
+		"ru"		"{red}{1} объект(ов) SCP{default} ожидают восстановления условий содержания.{default}"
 	}
 	"mtf_spawn_scp_over"	// Chat
 	{
 		"en"		"Awaiting re-containment of: {red}An uncountable number of SCP subjects{default}."
-		"en"		"Ожидают восстановления условий: {red}НЕВОЗМОЖНО ВЫЧИСЛИТЬ{default}."
+		"ru"		"Ожидают восстановления условий: {red}НЕВОЗМОЖНО ВЫЧИСЛИТЬ{default}."
 	}
 	"time_remaining"	// Game
 	{
