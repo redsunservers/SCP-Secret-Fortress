@@ -2078,10 +2078,7 @@ public Action OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 		AcceptEntityInput(client, "SetCustomModel");
 		SetEntProp(client, Prop_Send, "m_bUseClassAnimations", 1);
 
-		int flags = GetCommandFlags("firstperson");
-		SetCommandFlags("firstperson", flags & ~FCVAR_CHEAT);
-		ClientCommand(client, "firstperson");
-		SetCommandFlags("firstperson", flags);
+		RequestFrame(FirstPerson, GetClientUserId(client));
 
 		if(IsFakeClient(client))
 			TeleportEntity(client, TRIPLE_D, NULL_VECTOR, NULL_VECTOR);
@@ -5098,6 +5095,18 @@ void HideAnnotation(int client)
 
 		Client[client].Radio = 0;
 	}
+}
+
+public void FirstPerson(int userid)
+{
+	int client = GetClientOfUserId(client);
+	if(!client)
+		return;
+
+	int flags = GetCommandFlags("firstperson");
+	SetCommandFlags("firstperson", flags & ~FCVAR_CHEAT);
+	ClientCommand(client, "firstperson");
+	SetCommandFlags("firstperson", flags);
 }
 
 public bool TraceRayPlayerOnly(int client, int mask, any data)
