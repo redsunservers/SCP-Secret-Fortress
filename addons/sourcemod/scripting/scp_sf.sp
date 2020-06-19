@@ -1688,7 +1688,7 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 		if(!IsValidClient(client))
 			return Plugin_Continue;
 
-		char buffer[32];
+		char buffer[64];
 		if(Client[client].Cooldown > GetEngineTime())
 		{
 			Menu menu = new Menu(Handler_None);
