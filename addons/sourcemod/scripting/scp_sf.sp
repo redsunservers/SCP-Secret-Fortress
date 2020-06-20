@@ -41,7 +41,7 @@ void DisplayCredits(int client)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"0"
-#define STABLE_REVISION	"2"
+#define STABLE_REVISION	"6"
 #define PLUGIN_VERSION MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE		100000000.0
@@ -924,8 +924,8 @@ enum struct ClientEnum
 			}
 		}
 
-		if(respawn)
-			GoToSpawn(client);
+		if(respawn && this.Class!=Class_0492 && !ClassSpawn[this.Class][0])
+			GoToSpawn(client, this.Class);
 
 		if(team == TFTeam_Unassigned)
 		{
@@ -1654,26 +1654,8 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 	}
 	else if(!StrContains(name, "scp_respawn", false))
 	{
-		if(!IsValidClient(client))
-			return Plugin_Continue;
-
-		int target = -1;
-		static int spawns[36];
-		int count;
-		while((target=FindEntityByClassname2(target, "info_player_teamspawn")) != -1)
-		{
-			if(GetEntProp(target, Prop_Send, "m_iTeamNum") == 2)
-				spawns[count++] = target;
-
-			if(count >= sizeof(spawns))
-				break;
-		}
-
-		target = spawns[GetRandomInt(0, count-1)];
-
-		static float pos[3];
-		GetEntPropVector(target, Prop_Send, "m_vecOrigin", pos);
-		TeleportEntity(client, pos, NULL_VECTOR, TRIPLE_D);
+		if(IsValidClient(client))
+			GoToSpawn(client, GetRandomInt(0, 2) ? Class_0492 : Class_106);
 	}
 	else if(!StrContains(name, "scp_femur", false))
 	{
@@ -4124,11 +4106,8 @@ public void UpdateListenOverrides(float engineTime)
 	}
 }
 
-public void GoToSpawn(int client)
+void GoToSpawn(int client, ClassEnum class)
 {
-	if(Client[client].Class==Class_0492 || !ClassSpawn[Client[client].Class][0])
-		return;
-
 	int entity = -1;
 	static char name[64];
 	static int spawns[32];
@@ -4136,7 +4115,7 @@ public void GoToSpawn(int client)
 	while((entity=FindEntityByClassname2(entity, "info_target")) != -1)
 	{
 		GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
-		if(!StrContains(name, ClassSpawn[Client[client].Class], false))
+		if(!StrContains(name, ClassSpawn[class], false))
 			spawns[count++] = entity;
 
 		if(count >= sizeof(spawns))
@@ -4145,7 +4124,7 @@ public void GoToSpawn(int client)
 
 	if(!count)
 	{
-		if(IsSCP(client))
+		if(class >= Class_049)
 		{
 			entity = -1;
 			while((entity=FindEntityByClassname2(entity, "info_target")) != -1)
