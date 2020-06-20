@@ -351,6 +351,31 @@ static const char ClassModel[][] =
 	"models/freak_fortress_2/scp-049/zombie049.mdl",	// 3008-2
 };
 
+static const char ClassModelSub[][] =
+{
+	"models/empty.mdl",	// Spec
+
+	"models/player/scout.mdl",	// DBoi
+	"models/player/sniper.mdl",	// Chaos
+
+	"models/player/medic.mdl",	// Sci
+	"models/player/sniper.mdl",	// Guard
+	"models/player/soldier.mdl",	// MTF 1
+	"models/player/soldier.mdl",	// MTF 2
+	"models/player/soldier.mdl",	// MTF S
+	"models/player/soldier.mdl",	// MTF 3
+
+	"models/player/medic.mdl",	// 049
+	"models/player/spy.mdl",	// 049-2
+	"models/player/engineer.mdl", 	// 079
+	"models/player/demo.mdl",	// 096
+	"models/player/soldier.mdl",	// 106
+	"models/player/heavy.mdl",	// 173
+	"models/player/pyro.mdl",	// 939-89
+	"models/player/pyro.mdl",	// 939-53
+	"models/player/sniper.mdl",	// 3008-2
+};
+
 static const TFClassType ClassClass[] =
 {
 	TFClass_Spy,		// Spec
@@ -673,6 +698,9 @@ GamemodeEnum Gamemode = Gamemode_None;
 
 float CanTouchAt[MAXENTITIES+1];
 
+int ClassModelIndex[sizeof(ClassModel)];
+int ClassModelSubIndex[sizeof(ClassModelSub)];
+
 int DClassEscaped;
 int DClassMax;
 int SciEscaped;
@@ -688,6 +716,7 @@ enum struct ClientEnum
 	int HealthPack;
 	int Radio;
 	int Disarmer;
+	int DownloadMode;
 	float Power;
 	bool DisableSpeed;
 	float IdleAt;
@@ -924,7 +953,7 @@ enum struct ClientEnum
 			}
 		}
 
-		if(respawn && this.Class!=Class_0492 && !ClassSpawn[this.Class][0])
+		if(respawn && this.Class!=Class_0492 && ClassSpawn[this.Class][0])
 			GoToSpawn(client, this.Class);
 
 		if(team == TFTeam_Unassigned)
@@ -945,6 +974,9 @@ enum struct ClientEnum
 		TF2Attrib_SetByDefIndex(client, 69, 0.0);
 		//TF2Attrib_SetByDefIndex(client, 112, 0.03);
 		TF2_AddCondition(client, TFCond_SpeedBuffAlly, 0.01);
+
+		SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelIndex[this.Class], _, 0);
+		SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelSubIndex[this.Class], _, 3);
 	}
 
 	int Access(AccessEnum type)
@@ -1315,7 +1347,12 @@ public void OnMapStart()
 	for(int i; i<sizeof(ClassModel); i++)
 	{
 		if(FileExists(ClassModel[i], true))
-			PrecacheModel(ClassModel[i], true);
+			ClassModelIndex[i] = PrecacheModel(ClassModel[i], true);
+	}
+
+	for(int i; i<sizeof(ClassModelSub); i++)
+	{
+		ClassModelSubIndex[i] = PrecacheModel(ClassModelSub[i], true);
 	}
 
 	/*for(int i; i<sizeof(KeycardModel); i++)
@@ -1374,6 +1411,7 @@ public void OnMapEnd()
 
 public void OnClientPostAdminCheck(int client)
 {
+	Client[client].DownloadMode = 0;
 	Client[client].NextSongAt = FAR_FUTURE;
 	Client[client].Class = Class_Spec;
 	//SDKHook(client, SDKHook_WeaponSwitchPost, OnWeaponSwitch);
@@ -1393,7 +1431,12 @@ public void OnClientPostAdminCheck(int client)
 	PrintToConsole(client, "If you like to support the gamemode, you can donate to Gamers Freak Fortress community at https://discordapp.com/invite/JWE72cs\n ");
 	PrintToConsole(client, "The SCP community also needs help, you can support them at https://www.gofundme.com/f/scp-legal-funds\n \n ");
 
-	CreateTimer(0.1, Timer_StartMenuTheme, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
+	int userid = GetClientUserId(client);
+	CreateTimer(0.1, Timer_StartMenuTheme, userid, TIMER_FLAG_NO_MAPCHANGE);
+
+	QueryClientConVar(client, "sv_allowupload", OnQueryFinished, userid);
+	QueryClientConVar(client, "cl_allowdownload", OnQueryFinished, userid);
+	QueryClientConVar(client, "cl_downloadfilter", OnQueryFinished, userid);
 }
 
 public void OnRoundReady(Event event, const char[] name, bool dontBroadcast)
@@ -2066,33 +2109,14 @@ public Action OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			TeleportEntity(client, TRIPLE_D, NULL_VECTOR, NULL_VECTOR);
 	}
 
-	/*int entity = MaxClients+1;
-	while((entity=FindEntityByClassname2(entity, "tf_wear*")) != -1)
+	if(Client[client].DownloadMode == 2)
 	{
-		client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
-		if(IsValidClient(client))
-		{
-			switch(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"))
-			{
-				case 493, 233, 234, 241, 280, 281, 282, 283, 284, 286, 288, 362, 364, 365, 536, 542, 577, 599, 673, 729, 791, 839, 5607:  //Action slot items
-				{
-					//NOOP
-				}
-				default:
-				{
-					TF2_RemoveWearable(client, entity);
-				}
-			}
-		}
+		TF2Attrib_SetByDefIndex(client, 406, 4.0);
 	}
-
-	entity = MaxClients+1;
-	while((entity=FindEntityByClassname2(entity, "tf_powerup_bottle")) != -1)
+	else
 	{
-		client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
-		if(IsValidClient(client))
-			TF2_RemoveWearable(client, entity);
-	}*/
+		TF2Attrib_RemoveByDefIndex(client, 406);
+	}
 	return Plugin_Continue;
 }
 
@@ -4188,7 +4212,7 @@ public Action ResetPoint(Handle timer)
 public Action Timer_StartMenuTheme(Handle timer, int userid)
 {
 	int client = GetClientOfUserId(userid);
-	if(!IsValidClient(client))
+	if(!IsValidClient(client) || Client[client].DownloadMode)
 		return Plugin_Continue;
 
 	if(!NoMusic)
@@ -4202,6 +4226,13 @@ void ChangeSong(int client, int song, float next, const char[] filepath)
 {
 	if(Client[client].CurrentSong >= 0)
 		StopSound(client, SNDCHAN_AUTO, MusicList[Client[client].CurrentSong]);
+
+	if(Client[client].DownloadMode)
+	{
+		Client[client].CurrentSong = -1;
+		Client[client].NextSongAt = FAR_FUTURE;
+		return;
+	}
 
 	Client[client].CurrentSong = song;
 	Client[client].NextSongAt = next;
@@ -5086,6 +5117,43 @@ public void FirstPerson(int userid)
 	SetCommandFlags("firstperson", flags & ~FCVAR_CHEAT);
 	ClientCommand(client, "firstperson");
 	SetCommandFlags("firstperson", flags);
+}
+
+public int OnQueryFinished(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue, int userid)
+{
+	if(Client[client].DownloadMode==2 || GetClientOfUserId(userid)!=client || !IsClientInGame(client))
+		return;
+
+	if(result != ConVarQuery_Okay)
+	{
+		CPrintToChat(client, "%s%t", PREFIX, "download_error", cvarName);
+	}
+	else if(StrEqual(cvarName, "cl_allowdownload") || StrEqual(cvarName, "sv_allowupload"))
+	{
+		if(!StringToInt(cvarValue))
+		{
+			CPrintToChat(client, "%s%t", PREFIX, "download_cvar", cvarName, cvarName);
+			Client[client].DownloadMode = 2;
+			TF2Attrib_SetByDefIndex(client, 406, 4.0);
+		}
+	}
+	else if(StrEqual(cvarName, "cl_downloadfilter"))
+	{
+		if(StrContains("all", cvarValue) == -1)
+		{
+			if(StrContains("nosounds", cvarValue) != -1)
+			{
+				CPrintToChat(client, "%s%t", PREFIX, "download_filter_sound");
+				Client[client].DownloadMode = 1;
+			}
+			else
+			{
+				CPrintToChat(client, "%s%t", PREFIX, "download_filter", cvarValue);
+				Client[client].DownloadMode = 2;
+				TF2Attrib_SetByDefIndex(client, 406, 4.0);
+			}
+		}
+	}
 }
 
 public bool TraceRayPlayerOnly(int client, int mask, any data)

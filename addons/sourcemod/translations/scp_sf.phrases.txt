@@ -639,4 +639,23 @@
 		"en"		"You can not teleport now"
 		"ru"		"Невозможно телепортироваться"
 	}
+	"download_error"	// Chat
+	{
+		"#format"	"{1:s}"
+		"en"		"{gray}We can't check if you have {1} enabled. If you see errors, make sure you allow all custom content in your settings and rejoin."
+	}
+	"download_cvar"	// Chat
+	{
+		"#format"	"{1:s},{2:s}"
+		"en"		"{gray}{1} is disabled. You won't see any custom content. If you want to enable, set {2} to 1"
+	}
+	"download_filter"	// Chat
+	{
+		"#format"	"{1:s}"
+		"en"		"{gray}cl_downloadfilter is set to {1}. You won't see any custom content. If you want to enable, set cl_downloadfilter to all"
+	}
+	"download_filter_sound"	// Chat
+	{
+		"en"		"{gray}cl_downloadfilter is set to nosounds. You won't hear any music. If you want to enable, set cl_downloadfilter to all"
+	}
 }
