@@ -643,19 +643,23 @@
 	{
 		"#format"	"{1:s}"
 		"en"		"{gray}We can't check if you have {1} enabled. If you see errors, make sure you allow all custom content in your settings and rejoin."
+		"ru"		"{gray}Мы не можем проверить, включен ли у вас {1}. Если вы видите ошибки или что-то не показывается, убедитесь, что разрешена загрузка контента с сервера."
 	}
 	"download_cvar"	// Chat
 	{
 		"#format"	"{1:s},{2:s}"
 		"en"		"{gray}{1} is disabled. You won't see any custom content. If you want to enable, set {2} to 1"
+		"ru"		"{gray}{1} выключен. Вы не увидите кастомного контента. Чтобы включить, смените значение {2} на 1."
 	}
 	"download_filter"	// Chat
 	{
 		"#format"	"{1:s}"
 		"en"		"{gray}cl_downloadfilter is set to {1}. You won't see any custom content. If you want to enable, set cl_downloadfilter to all"
+		"ru"            "{gray}cl_downloadfilter установлен на {1}. Вы не увидите кастомного контента. Чтобы включить, смените значение cl_downloadfilter на all."
 	}
 	"download_filter_sound"	// Chat
 	{
 		"en"		"{gray}cl_downloadfilter is set to nosounds. You won't hear any music. If you want to enable, set cl_downloadfilter to all"
+		"ru"		"{gray}cl_downloadfilter установлен на nosounds. Вы не услышите звуков. Чтобы включить, смените значение cl_downloadfilter на all."
 	}
 }
