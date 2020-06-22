@@ -41,7 +41,7 @@ void DisplayCredits(int client)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"0"
-#define STABLE_REVISION	"6"
+#define STABLE_REVISION	"7"
 #define PLUGIN_VERSION MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE		100000000.0
@@ -1129,6 +1129,7 @@ public void OnPluginStart()
 	AddNormalSoundHook(HookSound);
 
 	HookEntityOutput("logic_relay", "OnTrigger", OnRelayTrigger);
+	AddTempEntHook("Player Decal", OnPlayerSpray);
 
 	LoadTranslations("common.phrases");
 	LoadTranslations("scp_sf.phrases");
@@ -2103,6 +2104,9 @@ public Action OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 		AcceptEntityInput(client, "SetCustomModel");
 		SetEntProp(client, Prop_Send, "m_bUseClassAnimations", 1);
 
+		SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelIndex[Class_Spec], _, 0);
+		SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelSubIndex[Class_Spec], _, 3);
+
 		RequestFrame(FirstPerson, GetClientUserId(client));
 
 		if(IsFakeClient(client))
@@ -2140,6 +2144,12 @@ public Action OnJoinClass(int client, const char[] command, int args)
 		TF2_RespawnPlayer(client);
 	}
 	return Plugin_Handled;
+}
+
+public Action OnPlayerSpray(const char[] name, const int[] clients, int count, float delay)
+{
+	int client = TE_ReadNum("m_nPlayer");
+	return (IsClientInGame(client) && IsSpec(client)) ? Plugin_Handled : Plugin_Continue;
 }
 
 public Action OnJoinAuto(int client, const char[] command, int args)
@@ -2188,6 +2198,7 @@ public Action OnVoiceMenu(int client, const char[] command, int args)
 	if(!client || !IsClientInGame(client))
 		return Plugin_Continue;
 
+	Client[client].IdleAt = GetEngineTime()+3.0;
 	if(TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode))
 	{
 		int attempts;
@@ -2248,6 +2259,9 @@ public Action OnSayCommand(int client, const char[] command, int args)
 
 	ReplaceString(msg, sizeof(msg), "\"", "");
 	ReplaceString(msg, sizeof(msg), "\n", "");
+
+	if(!strlen(msg))
+		return Plugin_Handled;
 
 	char name[128];
 	FormatEx(name, sizeof(name), "{red}%N", client);
@@ -2596,7 +2610,7 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 			int damage = event.GetInt("damagebits");
 			if(damage & DMG_SHOCK)
 			{
-				CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], class1, "gray", "telsa_gate");
+				CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], class1, "gray", "tesla_gate");
 			}
 			else if(damage & DMG_NERVEGAS)
 			{
@@ -2791,23 +2805,32 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 		}
 		else if(!IsSCP(client) && Client[client].HealthPack)
 		{
-			int entity = CreateEntityByName(Client[client].HealthPack==1 ? "item_healthkit_small" : "item_healthkit_medium");
-			if(entity > MaxClients)
+			if(Client[client].HealthPack == 4)
 			{
-				GetClientAbsOrigin(client, pos);
-				pos[2] += 20.0;
-				DispatchKeyValue(entity, "OnPlayerTouch", "!self,Kill,,0,-1");
-				DispatchSpawn(entity);
-				SetEntProp(entity, Prop_Send, "m_iTeamNum", GetClientTeam(client), 4);
-				SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
-				SetEntityMoveType(entity, MOVETYPE_VPHYSICS);
-
-				CanTouchAt[entity] = engineTime+2.0;
-				SDKHook(entity, SDKHook_StartTouch, OnPipeTouch);
-				SDKHook(entity, SDKHook_Touch, OnKitPickup);
-
-				TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
+				TF2_AddCondition(client, TFCond_NoHealingDamageBuff, 1.2);
+				TF2_AddCondition(client, TFCond_HalloweenQuickHeal, 21.2);
 				Client[client].HealthPack = 0;
+			}
+			else
+			{
+				int entity = CreateEntityByName(Client[client].HealthPack==1 ? "item_healthkit_small" : Client[client].HealthPack==3 ? "item_healthkit_full" : "item_healthkit_medium");
+				if(entity > MaxClients)
+				{
+					GetClientAbsOrigin(client, pos);
+					pos[2] += 20.0;
+					DispatchKeyValue(entity, "OnPlayerTouch", "!self,Kill,,0,-1");
+					DispatchSpawn(entity);
+					SetEntProp(entity, Prop_Send, "m_iTeamNum", GetClientTeam(client), 4);
+					SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
+					SetEntityMoveType(entity, MOVETYPE_VPHYSICS);
+
+					CanTouchAt[entity] = engineTime+2.0;
+					SDKHook(entity, SDKHook_StartTouch, OnPipeTouch);
+					SDKHook(entity, SDKHook_Touch, OnKitPickup);
+
+					TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
+					Client[client].HealthPack = 0;
+				}
 			}
 		}
 		holding[client] = IN_ATTACK2;
@@ -2854,6 +2877,9 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 
 		holding[client] = IN_USE;
 	}
+
+	if(holding[client])
+		Client[client].IdleAt = engineTime+3.0;
 
 	if(!(buttons & IN_SCORE))
 		return changed ? Plugin_Changed : Plugin_Continue;
@@ -3707,34 +3733,26 @@ public void OnPreThink(int client)
 					SetGlobalTransTarget(client);
 
 					char buffer[256], tran[16];
-					if(Client[client].HealthPack == 2)
-					{
-						if(Client[client].Power>1 && Client[client].Radio && Client[client].Radio<5)
-						{
-							FormatEx(tran, sizeof(tran), "radio_%d", Client[client].Radio);
-							FormatEx(buffer, sizeof(buffer), "%t\n%t", "health_kit", "radio", tran, RoundToCeil(Client[client].Power));
-						}
-						else
-						{
-							FormatEx(buffer, sizeof(buffer), "%t", "health_kit");
-						}
-					}
-					else if(Client[client].HealthPack)
-					{
-						if(Client[client].Power>1 && Client[client].Radio && Client[client].Radio<5)
-						{
-							FormatEx(tran, sizeof(tran), "radio_%d", Client[client].Radio);
-							FormatEx(buffer, sizeof(buffer), "%t\n%t", "pain_killers", "radio", tran, RoundToCeil(Client[client].Power));
-						}
-						else
-						{
-							FormatEx(buffer, sizeof(buffer), "%t", "pain_killers");
-						}
-					}
-					else if(Client[client].Power>1 && Client[client].Radio && Client[client].Radio<5)
+					if(Client[client].Power>1 && Client[client].Radio && Client[client].Radio<5)
 					{
 						FormatEx(tran, sizeof(tran), "radio_%d", Client[client].Radio);
 						FormatEx(buffer, sizeof(buffer), "%t", "radio", tran, RoundToCeil(Client[client].Power));
+					}
+
+					switch(Client[client].HealthPack)
+					{
+						case 1:
+						{
+							Format(buffer, sizeof(buffer), "%t\n%s", "pain_killers", buffer);
+						}
+						case 2, 3:
+						{
+							Format(buffer, sizeof(buffer), "%t\n%s", "health_kit", buffer);
+						}
+						case 4:
+						{
+							Format(buffer, sizeof(buffer), "%t\n%s", "scp_500", buffer);
+						}
 					}
 
 					FormatEx(tran, sizeof(tran), "keycard_%d", Client[client].Keycard);
@@ -4272,7 +4290,7 @@ void DropAllWeapons(int client)
 
 	if(Client[client].HealthPack)
 	{
-		int entity = CreateEntityByName(Client[client].HealthPack==1 ? "item_healthkit_small" : "item_healthkit_medium");
+		int entity = CreateEntityByName(Client[client].HealthPack==3 ? "item_healthkit_full" : Client[client].HealthPack==2 ? "item_healthkit_medium" : "item_healthkit_small");
 		if(entity > MaxClients)
 		{
 			GetClientAbsOrigin(client, origin);
@@ -4607,7 +4625,7 @@ void EndRound(TeamEnum team)
 			team2 = TFTeam_Blue;
 
 		case Team_SCP:
-			team2 = Gamemode==Gamemode_Ikea ? TFTeam_Red : TFTeam_Unassigned;
+			team2 = TFTeam_Red;
 	}
 
 	char buffer[16];
@@ -4850,10 +4868,14 @@ bool AttemptGrabItem(int client)
 				return true;
 			}
 
-			if(Client[client].HealthPack == 2)
+			if(Client[client].HealthPack)
 				return true;
 
-			Client[client].HealthPack = 2;
+			int type = StringToInt(name[14]);
+			if(type < 1)
+				type = 2;
+
+			Client[client].HealthPack = type;
 			RemoveEntity(entity);
 			return true;
 		}

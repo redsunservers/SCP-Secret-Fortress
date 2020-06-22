@@ -551,6 +551,10 @@
 		"en"		"Pain Killers Ready [ATTACK2]"
 		"ru"		"Обезболивающее готово [ДОП. АТАКА]"
 	}
+	"scp_500"	// HUD
+	{
+		"en"		"SCP-500"
+	}
 	"keycard"	// HUD
 	{
 		"#format"	"{1:t}"
@@ -592,9 +596,9 @@
 		"en"		"{1}\n \nSurvivors Escaped: {2} / {3}"
 		"ru"		"{1}\n \nВыживших Сбежало: {2} / {3}"
 	}
-	"telsa_gate"	// Chat
+	"tesla_gate"	// Chat
 	{
-		"en"		"Telsa Gate"
+		"en"		"Tesla Gate"
 		"ru"		"Тесла-Установка"
 	}
 	"femur_breaker"	// Chat
