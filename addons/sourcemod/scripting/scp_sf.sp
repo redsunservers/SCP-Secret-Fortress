@@ -10,12 +10,15 @@
 #include <dhooks>
 #include <SteamWorks>
 #undef REQUIRE_PLUGIN
-//#tryinclude <goomba>
+#tryinclude <goomba>
 #tryinclude <voiceannounce_ex>
 #tryinclude <devzones>
 #tryinclude <sourcecomms>
 #tryinclude <basecomm>
 #define REQUIRE_PLUGIN
+#undef REQUIRE_EXTENSIONS
+#tryinclude <collisionhook>
+#define REQUIRE_EXTENSIONS
 
 #pragma newdecls required
 
@@ -3166,24 +3169,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 
 	if(victim!=attacker && !IsFakeClient(victim))
 	{
-		if(Client[victim].Class<Class_DBoi || Client[attacker].Class<Class_DBoi)	// Either Spectator
-			return Plugin_Handled;
-
-		if(Gamemode == Gamemode_Ikea)
-		{
-			if(Client[victim].Class>=Class_DBoi && Client[attacker].Class>=Class_DBoi && Client[victim].Class<Class_049 && Client[attacker].Class<Class_049)
-				return Plugin_Handled;
-		}
-		else
-		{
-			if(Client[victim].Class<Class_Scientist && Client[attacker].Class<Class_Scientist)	// Both are DBoi/Chaos
-				return Plugin_Handled;
-
-			if(Client[victim].Class>=Class_Scientist && Client[attacker].Class>=Class_Scientist && Client[victim].Class<Class_049 && Client[attacker].Class<Class_049)	// Both are Scientist/MTF
-				return Plugin_Handled;
-		}
-
-		if(Client[victim].Class>=Class_049 && Client[attacker].Class>=Class_049)	// Both are SCPs
+		if(IsFriendly(Client[victim].Class, Client[attacker].Class))
 			return Plugin_Handled;
 
 		if(Client[victim].Class==Class_3008 && !Client[victim].Radio)
@@ -5140,6 +5126,28 @@ public void FirstPerson(int userid)
 	SetCommandFlags("firstperson", flags);
 }
 
+bool IsFriendly(ClassEnum class1, ClassEnum class2)
+{
+	if(class1<Class_DBoi || class2<Class_DBoi)	// Either Spectator
+		return true;
+
+	if(Gamemode == Gamemode_Ikea)
+	{
+		if(class1>=Class_DBoi && class2>=Class_DBoi && class1<Class_049 && class2<Class_049)
+			return true;
+	}
+	else
+	{
+		if(class1<Class_Scientist && class2<Class_Scientist)	// Both are DBoi/Chaos
+			return true;
+
+		if(class1>=Class_Scientist && class2>=Class_Scientist && class1<Class_049 && class2<Class_049)	// Both are Scientist/MTF
+			return true;
+	}
+
+	return (class1>=Class_049 && class2>=Class_049);	// Both are SCPs
+}
+
 public int OnQueryFinished(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue, int userid)
 {
 	if(Client[client].DownloadMode==2 || GetClientOfUserId(userid)!=client || !IsClientInGame(client))
@@ -5333,12 +5341,35 @@ public MRESReturn DHook_DropAmmoPackPre(int client, Handle params)
 	return MRES_Supercede;
 }
 
-// Dev Zone Events
+// Thirdparty
+
+public Action OnStomp(int attacker, int victim)
+{
+	if(!Enabled)
+		return Plugin_Continue;
+
+	int health;
+	OnGetMaxHealth(attacker, health);
+	if(health < 300)
+		return Plugin_Handled;
+
+	OnGetMaxHealth(victim, health);
+	return health<300 ? Plugin_Handled : Plugin_Continue;
+}
 
 public void Zone_OnClientEntry(int client, char[] zone)
 {
 	if(!StrContains(zone, "scp_escort", false))
 		TF2_AddCondition(client, TFCond_TeleportedGlow, 0.5);
+}
+
+public Action CH_PassFilter(int ent1, int ent2, bool &result)
+{
+	if(!Enabled || !IsValidClient(ent1) || !IsValidClient(ent2))
+		return Plugin_Continue;
+
+	result = !IsFriendly(Client[ent1].Class, Client[ent2].Class);
+	return Plugin_Changed;
 }
 
 // Revive Marker Events
