@@ -41,7 +41,7 @@ void DisplayCredits(int client)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"0"
-#define STABLE_REVISION	"7"
+#define STABLE_REVISION	"8"
 #define PLUGIN_VERSION MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE		100000000.0
@@ -956,14 +956,7 @@ enum struct ClientEnum
 		if(respawn && this.Class!=Class_0492 && ClassSpawn[this.Class][0])
 			GoToSpawn(client, this.Class);
 
-		if(team == TFTeam_Unassigned)
-		{
-			SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_DEBRIS_TRIGGER);
-		}
-		else
-		{
-			SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_PLAYER);
-		}
+		SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_PLAYER_MOVEMENT);
 
 		ShowClassInfo(client);
 		SetCaptureRate(client);
@@ -2675,7 +2668,7 @@ public Action OnBroadcast(Event event, const char[] name, bool dontBroadcast)
 
 public Action OnPlayerRunCmd(int client, int &buttons)
 {
-	if(!Enabled || IsSpec(client))
+	if(!Enabled)
 		return Plugin_Continue;
 
 	bool changed;
@@ -2881,11 +2874,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 	if(holding[client])
 		Client[client].IdleAt = engineTime+3.0;
 
-	if(!(buttons & IN_SCORE))
-		return changed ? Plugin_Changed : Plugin_Continue;
-
-	buttons &= ~IN_SCORE;
-	return Plugin_Changed;
+	return changed ? Plugin_Changed : Plugin_Continue;
 }
 
 public void OnGameFrame()
@@ -3545,7 +3534,7 @@ public void OnPreThink(int client)
 	static float clientPos[3];
 
 	int status;
-	bool showHud = (Client[client].HudIn<engineTime && IsPlayerAlive(client));
+	bool showHud = (Client[client].HudIn<engineTime && IsPlayerAlive(client) && !(GetClientButtons(client) & IN_SCORE));
 	specialTick[client] = engineTime+0.2;
 	if(Client[client].Class == Class_106)
 	{
@@ -4596,7 +4585,7 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 
 	if(wep > MaxClients)
 	{
-		//TF2Attrib_SetByDefIndex(wep, 214, view_as<float>(weapon));
+		TF2Attrib_SetByDefIndex(wep, 214, view_as<float>(weapon));
 		if(account == -3)
 		{
 			SetEntProp(wep, Prop_Send, "m_iAccountID", GetSteamAccountID(client));
