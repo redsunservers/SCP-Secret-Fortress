@@ -956,7 +956,14 @@ enum struct ClientEnum
 		if(respawn && this.Class!=Class_0492 && ClassSpawn[this.Class][0])
 			GoToSpawn(client, this.Class);
 
-		SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_PLAYER_MOVEMENT);
+		if(team == TFTeam_Unassigned)
+		{
+			SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_DEBRIS_TRIGGER);
+		}
+		else
+		{
+			SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_PLAYER);
+		}
 
 		ShowClassInfo(client);
 		SetCaptureRate(client);
@@ -1546,7 +1553,10 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 	{
 		Client[client].NextSongAt = 0.0;
 		if(!IsValidClient(client) || TF2_GetClientTeam(client)<=TFTeam_Spectator)
+		{
+			Client[client].Class = Class_Spec;
 			continue;
+		}
 
 		if(TestForceClass[client] <= Class_Spec)
 		{
