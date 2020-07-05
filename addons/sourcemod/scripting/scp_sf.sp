@@ -227,7 +227,7 @@ enum
 	EFL_NO_DAMAGE_FORCES =		(1<<31),	// Doesn't accept forces from physics damage
 };
 
-static const char Characters[] = "abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOQRTUVWXYZ~`1234567890@#$%^&*(){}:[]|¶�;<>.,?/'";
+static const char Characters[] = "abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOQRTUVWXYZ~`1234567890@#$^&*(){}:[]|¶�;<>.,?/'|";
 
 enum ClassEnum
 {
@@ -675,6 +675,7 @@ enum GamemodeEnum
 
 bool Ready = false;
 bool Enabled = false;
+bool InSetup = false;
 bool NoMusic = false;
 bool Vaex = false;		// VoiceAnnounceEx
 bool SourceComms = false;	// SourceComms++
@@ -976,8 +977,8 @@ enum struct ClientEnum
 			SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_PLAYER);
 		}
 
-		if(!TF2_HasGlow(client))
-			TF2_CreateGlow(client);
+		//if(!TF2_HasGlow(client))
+			//TF2_CreateGlow(client);
 
 		ShowClassInfo(client);
 		SetCaptureRate(client);
@@ -1109,9 +1110,9 @@ public void OnPluginStart()
 	RegConsoleCmd("scpinfo", Command_HelpClass, "View info about your current class");
 	RegConsoleCmd("scp_info", Command_HelpClass, "View info about your current class");
 
-	RegAdminCmd("scp_forceclass", Command_ForceClass, ADMFLAG_RCON, "Usage: scp_forceclass <target> <class>.  Forces that class to be played.");
-	RegAdminCmd("scp_giveweapon", Command_ForceWeapon, ADMFLAG_RCON, "Usage: scp_giveweapon <target> <id>.  Gives a specific weapon.");
-	RegAdminCmd("scp_givekeycard", Command_ForceCard, ADMFLAG_RCON, "Usage: scp_givekeycard <target> <id>.  Gives a specific keycard.");
+	RegAdminCmd("scp_forceclass", Command_ForceClass, ADMFLAG_SLAY, "Usage: scp_forceclass <target> <class>.  Forces that class to be played.");
+	RegAdminCmd("scp_giveweapon", Command_ForceWeapon, ADMFLAG_SLAY, "Usage: scp_giveweapon <target> <id>.  Gives a specific weapon.");
+	RegAdminCmd("scp_givekeycard", Command_ForceCard, ADMFLAG_SLAY, "Usage: scp_givekeycard <target> <id>.  Gives a specific keycard.");
 
 	AddCommandListener(OnSayCommand, "say");
 	AddCommandListener(OnSayCommand, "say_team");
@@ -1429,29 +1430,14 @@ public void OnClientPostAdminCheck(int client)
 	Client[client].DownloadMode = 0;
 	Client[client].NextSongAt = FAR_FUTURE;
 	Client[client].Class = Class_Spec;
-	//SDKHook(client, SDKHook_WeaponSwitchPost, OnWeaponSwitch);
+
 	SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 	SDKHook(client, SDKHook_SetTransmit, OnTransmit);
-	//SDKHook(client, SDKHook_PreThinkPost, OnPostThink);
 	SDKHook(client, SDKHook_PreThink, OnPreThink);
 
-	//if(DHLagCompensation != null)
-		//DHookEntity(DHLagCompensation, true, client);
-
-	if(DHForceRespawn != null)
-		DHookEntity(DHForceRespawn, false, client, _, DHook_ForceRespawn);
-
-	PrintToConsole(client, " \n \nWelcome to SCP: Secret Fortress\n \nThis is a gamemode based on the SCP series and community\nPlugin is created by Batfoxkid\n ");
-	PrintToConsole(client, "If you like to support the gamemode, you can donate to Gamers Freak Fortress community at https://discordapp.com/invite/JWE72cs\n ");
-	PrintToConsole(client, "The SCP community also needs help, you can support them at https://www.gofundme.com/f/scp-legal-funds\n \n ");
-
 	int userid = GetClientUserId(client);
-	CreateTimer(0.1, Timer_StartMenuTheme, userid, TIMER_FLAG_NO_MAPCHANGE);
-
-	QueryClientConVar(client, "sv_allowupload", OnQueryFinished, userid);
-	QueryClientConVar(client, "cl_allowdownload", OnQueryFinished, userid);
-	QueryClientConVar(client, "cl_downloadfilter", OnQueryFinished, userid);
+	CreateTimer(0.25, Timer_ConnectPost, userid, TIMER_FLAG_NO_MAPCHANGE);
 }
 
 public void OnRoundReady(Event event, const char[] name, bool dontBroadcast)
@@ -1514,6 +1500,7 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 	SCPKilled = 0;
 	SCPMax = 0;
 	Enabled = true;
+	InSetup = true;
 
 	if(Gamemode == Gamemode_Arena)
 	{
@@ -1634,6 +1621,8 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 	UpdateListenOverrides(FAR_FUTURE);
 
 	RequestFrame(DisplayHint, true);
+
+	InSetup = false;
 }
 
 public Action OnCapturePoint(Event event, const char[] name, bool dontBroadcast)
@@ -2114,7 +2103,7 @@ public Action OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	if(!IsValidClient(client))
 		return Plugin_Continue;
 
-	if((Enabled && Client[client].Class==Class_Spec) || (!Enabled && Gamemode!=Gamemode_Arena))
+	if(!InSetup && ((Enabled && Client[client].Class==Class_Spec) || (!Enabled && Gamemode!=Gamemode_Arena)))
 	{
 		TF2_AddCondition(client, TFCond_StealthedUserBuffFade, TFCondDuration_Infinite);
 		TF2_AddCondition(client, TFCond_HalloweenGhostMode, TFCondDuration_Infinite);
@@ -4363,14 +4352,25 @@ void TriggerShyGuy(int client, int target, float engineTime)
 	}
 }
 
-public Action Timer_StartMenuTheme(Handle timer, int userid)
+public Action Timer_ConnectPost(Handle timer, int userid)
 {
 	int client = GetClientOfUserId(userid);
-	if(!IsValidClient(client) || Client[client].DownloadMode)
+	if(!IsValidClient(client))
 		return Plugin_Continue;
+
+	if(DHForceRespawn != null)
+		DHookEntity(DHForceRespawn, false, client, _, DHook_ForceRespawn);
+
+	QueryClientConVar(client, "sv_allowupload", OnQueryFinished, userid);
+	QueryClientConVar(client, "cl_allowdownload", OnQueryFinished, userid);
+	QueryClientConVar(client, "cl_downloadfilter", OnQueryFinished, userid);
 
 	if(!NoMusic)
 		ChangeSong(client, 0, MusicTimes[0]+GetEngineTime(), MusicList[0]);
+
+	PrintToConsole(client, " \n \nWelcome to SCP: Secret Fortress\n \nThis is a gamemode based on the SCP series and community\nPlugin is created by Batfoxkid\n ");
+	PrintToConsole(client, "If you like to support the gamemode, you can donate to Gamers Freak Fortress community at https://discordapp.com/invite/JWE72cs\n ");
+	PrintToConsole(client, "The SCP community also needs help, you can support them at https://www.gofundme.com/f/scp-legal-funds\n \n ");
 
 	DisplayCredits(client);
 	return Plugin_Continue;
@@ -5776,8 +5776,8 @@ stock int TF2_CreateGlow(int iEnt)
 	SDKHook(ent, SDKHook_SetTransmit, GlowTransmit);
 	AcceptEntityInput(ent, "Enable");
 
-	SetVariantColor(view_as<int>({255, 255, 255, 255}));
-	AcceptEntityInput(ent, "SetGlowColor");
+	//SetVariantColor(view_as<int>({255, 255, 255, 255}));
+	//AcceptEntityInput(ent, "SetGlowColor");
 
 	//Change name back to old name because we don't need it anymore.
 	SetEntPropString(iEnt, Prop_Data, "m_iName", oldEntName);
@@ -5799,37 +5799,56 @@ stock bool TF2_HasGlow(int iEnt)
 	return false;
 }
 
-public Action GlowTransmit(int entity, int target)
+/*public Action GlowTransmit(int entity, int target)
 {
-	if(!IsValidClient(target) || IsSpec(target))
-		return Plugin_Continue;
-
-	if(Client[target].Class!=Class_096 && Client[target].Class<Class_939)
+	if(!IsValidClient(target))
 		return Plugin_Handled;
 
-	int client = GetEntPropEnt(entity, Prop_Send, "m_hTarget");
-	if(!IsValidClient(client) || IsSpec(client))
+	if(Client[target].Class==Class_096 || Client[target].Class>=Class_939)
 	{
-		SDKUnhook(entity, SDKHook_SetTransmit, GlowTransmit);
-		AcceptEntityInput(entity, "Kill");
-		return Plugin_Continue;
+		int client = GetEntPropEnt(entity, Prop_Send, "m_hTarget");
+		if(!IsValidClient(client) || IsSpec(client))
+		{
+			SDKUnhook(entity, SDKHook_SetTransmit, GlowTransmit);
+			AcceptEntityInput(entity, "Kill");
+			return Plugin_Handled;
+		}
+
+		if(Client[target].Class == Class_096)
+		{
+			if(Client[target].Radio==2 && Client[client].Triggered)
+			{
+				SetVariantColor(view_as<int>({255, 255, 255, 255}));
+				AcceptEntityInput(entity, "SetGlowColor");
+				return Plugin_Continue;
+			}
+		}
+		else if(Client[target].Class==Class_3008 && Client[target].Radio)
+		{
+			SetVariantColor(view_as<int>({255, 255, 255, 255}));
+			AcceptEntityInput(entity, "SetGlowColor");
+			return Plugin_Continue;
+		}
+
+		float time = Client[client].IdleAt-GetEngineTime();
+		if(time > 0)
+		{
+			static float clientPos[3], targetPos[3];
+			GetEntPropVector(client, Prop_Send, "m_vecOrigin", clientPos);
+			GetEntPropVector(client, Prop_Send, "m_vecOrigin", targetPos);
+			if(GetVectorDistance(clientPos, targetPos) < (700*time/2.5))
+			{
+				SetVariantColor(view_as<int>({255, 255, 255, 255}));
+				AcceptEntityInput(entity, "SetGlowColor");
+				return Plugin_Continue;
+			}
+		}
 	}
 
-	if(Client[target].Class == Class_096)
-		return (Client[target].Radio==2 && Client[client].Triggered) ? Plugin_Continue : Plugin_Handled;
-
-	if(Client[target].Class==Class_3008 && Client[target].Radio)
-		return Plugin_Continue;
-
-	float time = Client[client].IdleAt-GetEngineTime();
-	if(time <= 0)
-		return Plugin_Handled;
-
-	static float clientPos[3], targetPos[3];
-	GetEntPropVector(client, Prop_Send, "m_vecOrigin", clientPos);
-	GetEntPropVector(client, Prop_Send, "m_vecOrigin", targetPos);
-	return GetVectorDistance(clientPos, targetPos)>(700*time/2.5) ? Plugin_Continue : Plugin_Handled;
-}
+	SetVariantColor(view_as<int>({255, 255, 255, 0}));
+	AcceptEntityInput(entity, "SetGlowColor");
+	return Plugin_Handled;
+}*/
 
 // Stocks
 
