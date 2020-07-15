@@ -942,7 +942,7 @@ public void OnPluginStart()
 	HookEvent("teamplay_broadcast_audio", OnBroadcast, EventHookMode_Pre);
 	HookEvent("player_death", OnPlayerDeath, EventHookMode_Pre);
 	HookEvent("player_death", OnPlayerDeathPost, EventHookMode_PostNoCopy);
-	HookEvent("post_inventory_application", OnPlayerSpawn);
+	HookEvent("player_spawn", OnPlayerSpawn);
 	HookEvent("player_hurt", OnPlayerHurt, EventHookMode_Pre);
 	HookEvent("teamplay_point_captured", OnCapturePoint, EventHookMode_Pre);
 	HookEvent("teamplay_flag_event", OnCaptureFlag, EventHookMode_Pre);
@@ -968,6 +968,8 @@ public void OnPluginStart()
 	AddCommandListener(OnJoinAuto, "autoteam");
 	AddCommandListener(OnVoiceMenu, "voicemenu");
 	AddCommandListener(OnDropItem, "dropitem");
+
+	SetCommandFlags("firstperson", GetCommandFlags("firstperson") & ~FCVAR_CHEAT);
 
 	#if defined _voiceannounceex_included_
 	Vaex = LibraryExists("voiceannounce_ex");
@@ -2178,8 +2180,6 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 
 			SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_NONE);
 
-			RequestFrame(FirstPerson, GetClientUserId(client));
-
 			if(IsFakeClient(client))
 				TeleportEntity(client, TRIPLE_D, NULL_VECTOR, NULL_VECTOR);
 
@@ -2295,7 +2295,15 @@ public Action OnJoinTeam(int client, const char[] command, int args)
 	}
 
 	if(GetClientTeam(client) <= view_as<int>(TFTeam_Spectator))
+	{
 		ChangeClientTeam(client, 2);
+		if(view_as<TFClassType>(GetEntProp(client, Prop_Send, "m_iDesiredPlayerClass")) == TFClass_Unknown)
+		{
+			Client[client].Class = Class_Spec;
+			SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", view_as<int>(TFClass_Spy));
+			RespawnPlayer(client);
+		}
+	}
 
 	return Plugin_Handled;
 }
@@ -2722,8 +2730,7 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 	if(GetClientTeam(client) == view_as<int>(TFTeam_Unassigned))
 		ChangeClientTeamEx(client, TFTeam_Red);
 
-	if(TF2_GetPlayerClass(client) == TFClass_Sniper)
-		TF2_SetPlayerClass(client, TFClass_Medic);
+	TF2_SetPlayerClass(client, TFClass_Spy);
 
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
 	if(IsSCP(client))
@@ -2827,7 +2834,7 @@ public Action OnBroadcast(Event event, const char[] name, bool dontBroadcast)
 
 public Action OnPlayerRunCmd(int client, int &buttons)
 {
-	if(!Enabled)
+	if(!Enabled || !IsPlayerAlive(client))
 		return Plugin_Continue;
 
 	bool changed;
@@ -3605,7 +3612,7 @@ public Action OnGetMaxHealth(int client, int &health)
 
 public void OnPreThink(int client)
 {
-	if(!Enabled)
+	if(!Enabled || !IsPlayerAlive(client))
 		return;
 
 	float engineTime = GetEngineTime();
@@ -3813,7 +3820,11 @@ public void OnPreThink(int client)
 
 	bool showHud = (Client[client].HudIn<engineTime && IsPlayerAlive(client) && !(GetClientButtons(client) & IN_SCORE));
 	specialTick[client] = engineTime+0.2;
-	if(Client[client].Class == Class_106)
+	if(Client[client].Class == Class_Spec)
+	{
+		ClientCommand(client, "firstperson");
+	}
+	else if(Client[client].Class == Class_106)
 	{
 		if(Client[client].ChargeIn && Client[client].ChargeIn<engineTime)
 		{
@@ -4656,7 +4667,7 @@ public Action Timer_ConnectPost(Handle timer, int userid)
 		ChangeSong(client, 0, MusicTimes[0]+GetEngineTime(), MusicList[0]);
 
 	PrintToConsole(client, " \n \nWelcome to SCP: Secret Fortress\n \nThis is a gamemode based on the SCP series and community\nPlugin is created by Batfoxkid\n ");
-	PrintToConsole(client, "If you like to support the gamemode, you can join Gamers Freak Fortress community at https://discordapp.com/invite/JWE72cs\n ");
+	PrintToConsole(client, "If you like to support the gamemode, you can join Gamers Freak Fortress community at https://discord.gg/JWE72cs\n ");
 	PrintToConsole(client, "The SCP community also needs help, you can support them at https://www.gofundme.com/f/scp-legal-funds\n \n ");
 
 	DisplayCredits(client);
@@ -5532,18 +5543,6 @@ void HideAnnotation(int client)
 	}
 }
 
-public void FirstPerson(int userid)
-{
-	int client = GetClientOfUserId(client);
-	if(!client)
-		return;
-
-	int flags = GetCommandFlags("firstperson");
-	SetCommandFlags("firstperson", flags & ~FCVAR_CHEAT);
-	ClientCommand(client, "firstperson");
-	SetCommandFlags("firstperson", flags);
-}
-
 bool IsFriendly(ClassEnum class1, ClassEnum class2)
 {
 	if(class1<Class_DBoi || class2<Class_DBoi)	// Either Spectator
@@ -5796,8 +5795,18 @@ public Action CH_PassFilter(int ent1, int ent2, bool &result)
 	if(!Enabled || !IsValidClient(ent1) || !IsValidClient(ent2))
 		return Plugin_Continue;
 
-	result = !IsFriendly(Client[ent1].Class, Client[ent2].Class);
-	return Plugin_Changed;
+	if(!IsSCP(ent1) && !IsSCP(ent2) && !TF2_IsPlayerInCondition(ent1, TFCond_HalloweenGhostMode) && !TF2_IsPlayerInCondition(ent2, TFCond_HalloweenGhostMode) && !IsFriendly(Client[ent1].Class, Client[ent2].Class))
+	{
+		int weapon = GetEntPropEnt(ent1, Prop_Send, "m_hActiveWeapon");
+		if(weapon>MaxClients && IsValidEntity(weapon) && HasEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")!=WeaponIndex[Weapon_None])
+		{
+			result = true;
+			return Plugin_Changed;
+		}
+	}
+
+	result = false;
+	return Plugin_Handled;
 }
 
 // Revive Marker Events
