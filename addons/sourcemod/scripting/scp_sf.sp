@@ -249,6 +249,7 @@ enum ClassEnum
 	Class_096,
 	Class_106,
 	Class_173,
+	Class_1732,
 	Class_939,
 	Class_9392,
 	Class_3008
@@ -270,6 +271,7 @@ static const char ClassColor[][] =
 
 	"darkred",
 	"red",
+	"darkred",
 	"darkred",
 	"darkred",
 	"darkred",
@@ -301,6 +303,7 @@ static const int ClassColors[][] =
 	{ 189, 0, 0, 255 },
 	{ 189, 0, 0, 255 },
 	{ 189, 0, 0, 255 },
+	{ 189, 0, 0, 255 },
 	{ 189, 0, 0, 255 }
 };
 
@@ -323,6 +326,7 @@ static const char ClassSpawn[][] =
 	"",
 	"scp_spawn_096",
 	"scp_spawn_106",
+	"scp_spawn_173",
 	"scp_spawn_173",
 	"scp_spawn_939",
 	"scp_spawn_939",
@@ -349,6 +353,7 @@ static const char ClassModel[][] =
 	"models/freak_fortress_2/096/scp096.mdl",		// 096
 	"models/freak_fortress_2/106_spyper/106.mdl",		// 106
 	"models/freak_fortress_2/scp_173/scp_173new.mdl",	// 173
+	"models/freak_fortress_2/scp_173/scp_173new.mdl",	// 173-2
 	"models/player/pyro.mdl",				// 939-89
 	"models/player/pyro.mdl",				// 939-53
 	"models/freak_fortress_2/scp-049/zombie049.mdl",	// 3008-2
@@ -373,6 +378,7 @@ static const char ClassModelSub[][] =
 	"models/player/engineer.mdl", 	// 079
 	"models/player/demo.mdl",	// 096
 	"models/player/soldier.mdl",	// 106
+	"models/player/heavy.mdl",	// 173
 	"models/player/heavy.mdl",	// 173
 	"models/player/pyro.mdl",	// 939-89
 	"models/player/pyro.mdl",	// 939-53
@@ -399,6 +405,7 @@ static const TFClassType ClassClass[] =
 	TFClass_DemoMan,	// 096
 	TFClass_Soldier,	// 106
 	TFClass_Heavy,		// 173
+	TFClass_Heavy,		// 173-2
 	TFClass_Pyro,		// 939-89
 	TFClass_Pyro,		// 939-53
 	TFClass_Sniper		// 3008-2
@@ -406,7 +413,7 @@ static const TFClassType ClassClass[] =
 
 static const TFClassType ClassClassModel[] =
 {
-	TFClass_Pyro,		// Spec
+	TFClass_Unknown,		// Spec
 
 	TFClass_Scout,		// DBoi
 	TFClass_Sniper,		// Chaos
@@ -423,7 +430,8 @@ static const TFClassType ClassClassModel[] =
 	TFClass_Pyro, 		// 079
 	TFClass_Spy,		// 096
 	TFClass_Scout,		// 106
-	TFClass_Pyro,		// 173
+	TFClass_Unknown,	// 173
+	TFClass_Unknown,	// 173-2
 	TFClass_Pyro,		// 939-89
 	TFClass_Pyro,		// 939-53
 	TFClass_Sniper,		// 3008-2
@@ -676,7 +684,6 @@ enum GamemodeEnum
 
 bool Ready = false;
 bool Enabled = false;
-bool InSetup = false;
 bool NoMusic = false;
 bool Vaex = false;		// VoiceAnnounceEx
 bool SourceComms = false;	// SourceComms++
@@ -695,14 +702,12 @@ Handle DHAllowedToHealTarget;
 Handle DHSetWinningTeam;
 Handle DHRoundRespawn;
 //Handle DHLagCompensation;
-Handle DHForceRespawn;
+//Handle DHForceRespawn;
 //Handle DoorTimer = INVALID_HANDLE;
 
 GlobalForward GFOnEscape;
 
 GamemodeEnum Gamemode = Gamemode_None;
-
-float CanTouchAt[MAXENTITIES+1];
 
 int ClassModelIndex[sizeof(ClassModel)];
 int ClassModelSubIndex[sizeof(ClassModelSub)];
@@ -832,191 +837,6 @@ enum struct ClientEnum
 		return Class_Spec;
 	}
 
-	void Spawn(int client, bool respawn)
-	{
-		TFTeam team = this.TeamTF();
-		if(respawn)
-		{
-			if(team == TFTeam_Blue)
-			{
-				ChangeClientTeamEx(client, TFTeam_Blue);
-			}
-			else
-			{
-				ChangeClientTeamEx(client, TFTeam_Red);
-			}
-		}
-
-		TF2_SetPlayerClass(client, ClassClass[this.Class]);
-
-		if(respawn)
-		{
-			this.Respawning = GetGameTime()+0.5;
-			TF2_RespawnPlayer(client);
-		}
-
-		if(team != TFTeam_Spectator)
-			ChangeClientTeamEx(client, team);
-
-		this.Triggered = false;
-		this.ChargeIn = 0.0;
-		this.Disarmer = 0;
-		this.DisableSpeed = false;
-		this.Power = 100.0;
-		//TF2_RemoveAllWeapons(client);
-		switch(this.Class)
-		{
-			case Class_DBoi:
-			{
-				this.Keycard = Keycard_None;
-				this.HealthPack = 0;
-				this.Radio = 0;
-				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_None));
-			}
-			case Class_Chaos:
-			{
-				this.Keycard = Keycard_Chaos;
-				this.HealthPack = 2;
-				this.Radio = 0;
-				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_SMG4));
-			}
-			case Class_Scientist:
-			{
-				this.Keycard = Keycard_Scientist;
-				this.HealthPack = 2;
-				this.Radio = 0;
-				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_None));
-			}
-			case Class_Guard:
-			{
-				this.Keycard = Keycard_Guard;
-				this.HealthPack = 0;
-				this.Radio = 1;
-				GiveWeapon(client, Weapon_Flash);
-				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_SMG));
-				GiveWeapon(client, Weapon_Disarm);
-			}
-			case Class_MTF:
-			{
-				this.Keycard = Keycard_MTF;
-				this.HealthPack = 0;
-				this.Radio = 1;
-				GiveWeapon(client, Weapon_Flash);
-				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_SMG2));
-			}
-			case Class_MTF2, Class_MTFS:
-			{
-				this.Keycard = Keycard_MTF2;
-				this.HealthPack = this.Class==Class_MTFS ? 2 : 1;
-				this.Radio = 1;
-				GiveWeapon(client, Weapon_Frag);
-				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_SMG3));
-				if(Gamemode != Gamemode_Ikea)
-					GiveWeapon(client, Weapon_Disarm);
-			}
-			case Class_MTF3:
-			{
-				this.Keycard = Keycard_MTF3;
-				this.HealthPack = 1;
-				this.Radio = 1;
-				GiveWeapon(client, Weapon_Frag);
-				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_SMG5));
-				if(Gamemode != Gamemode_Ikea)
-					GiveWeapon(client, Weapon_Disarm);
-			}
-			case Class_049:
-			{
-				this.Keycard = Keycard_SCP;
-				this.HealthPack = 0;
-				this.Radio = 0;
-				GiveWeapon(client, Weapon_049Gun);
-				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_049));
-			}
-			case Class_0492:
-			{
-				this.Keycard = Keycard_SCP;
-				this.HealthPack = 0;
-				this.Radio = 0;
-				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_0492));
-			}
-			case Class_096:
-			{
-				this.Pos[0] = 0.0;
-				this.Keycard = Keycard_SCP;
-				this.HealthPack = 750;
-				this.Radio = 0;
-				SetEntityHealth(client, 750);
-				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_096));
-			}
-			case Class_106:
-			{
-				this.Pos[0] = 0.0;
-				this.Pos[1] = 0.0;
-				this.Pos[2] = 0.0;
-				this.Keycard = Keycard_106;
-				this.HealthPack = 0;
-				this.Radio = 0;
-				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_106));
-			}
-			case Class_173:
-			{
-				this.Keycard = Keycard_SCP;
-				this.HealthPack = 0;
-				this.Radio = 0;
-				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_173));
-			}
-			case Class_1732:
-			{
-				this.Keycard = Keycard_SCP;
-				this.HealthPack = 0;
-				this.Radio = 0;
-				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_173));
-			}
-			case Class_939, Class_9392:
-			{
-				this.Keycard = Keycard_SCP;
-				this.HealthPack = 0;
-				this.Radio = 0;
-				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_939));
-			}
-			case Class_3008:
-			{
-				this.Keycard = Keycard_SCP;
-				this.HealthPack = 0;
-				this.Radio = SciEscaped;
-				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, SciEscaped ? Weapon_3008Rage : Weapon_3008));
-			}
-		}
-
-		if(respawn && this.Class!=Class_0492 && ClassSpawn[this.Class][0])
-			GoToSpawn(client, this.Class);
-
-		if(!CollisionHook && team==TFTeam_Unassigned)
-		{
-			SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_DEBRIS_TRIGGER);
-		}
-		else
-		{
-			SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_PLAYER);
-		}
-
-		//if(!TF2_HasGlow(client))
-			//TF2_CreateGlow(client);
-
-		ShowClassInfo(client);
-		SetCaptureRate(client);
-		SetVariantString(ClassModel[this.Class]);
-		AcceptEntityInput(client, "SetCustomModel");
-		SetEntProp(client, Prop_Send, "m_bUseClassAnimations", 1);
-		TF2Attrib_SetByDefIndex(client, 49, 1.0);
-		TF2Attrib_SetByDefIndex(client, 69, 0.0);
-		//TF2Attrib_SetByDefIndex(client, 112, 0.03);
-		TF2_AddCondition(client, TFCond_SpeedBuffAlly, 0.01);
-
-		SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelIndex[this.Class], _, 0);
-		SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelSubIndex[this.Class], _, 3);
-	}
-
 	int Access(AccessEnum type)
 	{
 		switch(type)
@@ -1122,7 +942,7 @@ public void OnPluginStart()
 	HookEvent("teamplay_broadcast_audio", OnBroadcast, EventHookMode_Pre);
 	HookEvent("player_death", OnPlayerDeath, EventHookMode_Pre);
 	HookEvent("player_death", OnPlayerDeathPost, EventHookMode_PostNoCopy);
-	HookEvent("player_spawn", OnPlayerSpawn, EventHookMode_Pre);
+	HookEvent("post_inventory_application", OnPlayerSpawn);
 	HookEvent("player_hurt", OnPlayerHurt, EventHookMode_Pre);
 	HookEvent("teamplay_point_captured", OnCapturePoint, EventHookMode_Pre);
 	HookEvent("teamplay_flag_event", OnCaptureFlag, EventHookMode_Pre);
@@ -1313,9 +1133,9 @@ public void OnPluginStart()
 			LogError("[Gamedata] Could not find CTFGameRules::SetWinningTeam");
 		}
 
-		DHForceRespawn = DHookCreateFromConf(gamedata, "CTFPlayer::ForceRespawn");
-		if(DHForceRespawn == null)
-			LogError("[Gamedata] Could not find CTFPlayer::ForceRespawn");
+		//DHForceRespawn = DHookCreateFromConf(gamedata, "CTFPlayer::ForceRespawn");
+		//if(DHForceRespawn == null)
+			//LogError("[Gamedata] Could not find CTFPlayer::ForceRespawn");
 
 		DHRoundRespawn = DHookCreateFromConf(gamedata, "CTeamplayRoundBasedRules::RoundRespawn");
 		if(DHRoundRespawn == null)
@@ -1456,7 +1276,7 @@ public void OnMapStart()
 		ClassEnabled[i] = false;
 	}
 
-	int entity = -1;
+	entity = -1;
 	while((entity=FindEntityByClassname2(entity, "info_target")) != -1)
 	{
 		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
@@ -1548,7 +1368,10 @@ public void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 		if(!IsValidClient(client))
 			continue;
 
-		if(IsPlayerAlive(client) && TF2_GetClientTeam(client)<=TFTeam_Spectator)
+		if(TF2_GetPlayerClass(client) == TFClass_Sniper)
+			TF2_SetPlayerClass(client, TFClass_Soldier);
+
+		if(IsPlayerAlive(client) && GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
 			ChangeClientTeamEx(client, TFTeam_Red);
 
 		if(Client[client].Class==Class_106 && Client[client].Radio)
@@ -1584,7 +1407,6 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 	SCPKilled = 0;
 	SCPMax = 0;
 	Enabled = true;
-	InSetup = true;
 
 	if(Gamemode == Gamemode_Arena)
 	{
@@ -1637,7 +1459,7 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 	for(int client=1; client<=MaxClients; client++)
 	{
 		Client[client].NextSongAt = 0.0;
-		if(!IsValidClient(client) || TF2_GetClientTeam(client)<=TFTeam_Spectator)
+		if(!IsValidClient(client) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
 		{
 			Client[client].Class = Class_Spec;
 			continue;
@@ -1667,7 +1489,8 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 					SCPMax++;
 			}
 		}
-		Client[client].Spawn(client, true);
+		AssignTeam(client);
+		RespawnPlayer(client);
 	}
 
 	if(!entity)
@@ -1675,14 +1498,15 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 
 	entity = choosen[GetRandomInt(0, entity-1)];
 	Client[entity].Class = Class_DBoi;
-	Client[entity].Spawn(entity, true);
+	AssignTeam(entity);
+	RespawnPlayer(entity);
 
 	for(int client=1; client<=MaxClients; client++)
 	{
-		if(client==entity || !IsValidClient(client) || TestForceClass[client]>Class_Spec || TF2_GetClientTeam(client)<=TFTeam_Spectator)
+		if(client==entity || !IsValidClient(client) || TestForceClass[client]>Class_Spec || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
 			continue;
 
-		TFTeam team = TF2_GetClientTeam(client);
+		TFTeam team = view_as<TFTeam>(GetClientTeam(client));
 		switch(Client[client].Setup(team, IsFakeClient(client)))
 		{
 			case Class_DBoi:
@@ -1699,14 +1523,13 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 					SCPMax++;
 			}
 		}
-		Client[client].Spawn(client, true);
+		AssignTeam(client);
+		RespawnPlayer(client);
 	}
 
 	UpdateListenOverrides(FAR_FUTURE);
 
 	RequestFrame(DisplayHint, true);
-
-	InSetup = false;
 }
 
 public Action OnCapturePoint(Event event, const char[] name, bool dontBroadcast)
@@ -2156,7 +1979,8 @@ public void TF2_OnConditionAdded(int client, TFCond cond)
 			DClassEscaped++;
 			Client[client].Class = Class_Chaos;
 		}
-		Client[client].Spawn(client, false);
+		AssignTeam(client);
+		RespawnPlayer(client);
 		CreateTimer(1.0, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
 	}
 	else if(Client[client].Class == Class_Scientist)
@@ -2176,36 +2000,219 @@ public void TF2_OnConditionAdded(int client, TFCond cond)
 			SciEscaped++;
 			Client[client].Class = Class_MTFS;
 		}
-		Client[client].Spawn(client, false);
+		AssignTeam(client);
+		RespawnPlayer(client);
 		CreateTimer(1.0, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
 
-public Action OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
+public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
-	if(!IsValidClient(client))
-		return Plugin_Continue;
+	if(!IsValidClient(client) || (!Ready && !Enabled && Gamemode==Gamemode_Arena))
+		return;
 
-	if(!InSetup && ((Enabled && Client[client].Class==Class_Spec) || (!Enabled && Gamemode!=Gamemode_Arena)))
+	TFTeam team = Client[client].TeamTF();
+	if(Client[client].Class != Class_Spec)
 	{
-		TF2_AddCondition(client, TFCond_StealthedUserBuffFade, TFCondDuration_Infinite);
-		TF2_AddCondition(client, TFCond_HalloweenGhostMode, TFCondDuration_Infinite);
+		if(team == TFTeam_Blue)
+		{
+			if(GetClientTeam(client) != view_as<int>(TFTeam_Blue))
+			{
+				ChangeClientTeamEx(client, TFTeam_Blue);
+				RespawnPlayer(client);
+				return;
+			}
+		}
+		else if(GetClientTeam(client) != view_as<int>(TFTeam_Red))
+		{
+			ChangeClientTeamEx(client, TFTeam_Red);
+			RespawnPlayer(client);
+			return;
+		}
 
-		SetVariantString(ClassModel[Class_Spec]);
-		AcceptEntityInput(client, "SetCustomModel");
-		SetEntProp(client, Prop_Send, "m_bUseClassAnimations", 1);
+		TF2_SetPlayerClass(client, ClassClass[Client[client].Class]);
 
-		SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelIndex[Class_Spec], _, 0);
-		SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelSubIndex[Class_Spec], _, 3);
-
-		SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_NONE);
-
-		RequestFrame(FirstPerson, GetClientUserId(client));
-
-		if(IsFakeClient(client))
-			TeleportEntity(client, TRIPLE_D, NULL_VECTOR, NULL_VECTOR);
+		if(team != TFTeam_Spectator)
+			ChangeClientTeamEx(client, team);
 	}
+
+	Client[client].Triggered = false;
+	Client[client].ChargeIn = 0.0;
+	Client[client].Disarmer = 0;
+	Client[client].DisableSpeed = false;
+	Client[client].Power = 100.0;
+	switch(Client[client].Class)
+	{
+		case Class_DBoi:
+		{
+			Client[client].Keycard = Keycard_None;
+			Client[client].HealthPack = 0;
+			Client[client].Radio = 0;
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_None));
+		}
+		case Class_Chaos:
+		{
+			Client[client].Keycard = Keycard_Chaos;
+			Client[client].HealthPack = 2;
+			Client[client].Radio = 0;
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_SMG4));
+		}
+		case Class_Scientist:
+		{
+			Client[client].Keycard = Keycard_Scientist;
+			Client[client].HealthPack = 2;
+			Client[client].Radio = 0;
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_None));
+		}
+		case Class_Guard:
+		{
+			Client[client].Keycard = Keycard_Guard;
+			Client[client].HealthPack = 0;
+			Client[client].Radio = 1;
+			GiveWeapon(client, Weapon_Flash);
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_SMG));
+			GiveWeapon(client, Weapon_Disarm);
+		}
+		case Class_MTF:
+		{
+			Client[client].Keycard = Keycard_MTF;
+			Client[client].HealthPack = 0;
+			Client[client].Radio = 1;
+			GiveWeapon(client, Weapon_Flash);
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_SMG2));
+		}
+		case Class_MTF2, Class_MTFS:
+		{
+			Client[client].Keycard = Keycard_MTF2;
+			Client[client].HealthPack = Client[client].Class==Class_MTFS ? 2 : 1;
+			Client[client].Radio = 1;
+			GiveWeapon(client, Weapon_Frag);
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_SMG3));
+			if(Gamemode != Gamemode_Ikea)
+				GiveWeapon(client, Weapon_Disarm);
+		}
+		case Class_MTF3:
+		{
+			Client[client].Keycard = Keycard_MTF3;
+			Client[client].HealthPack = 1;
+			Client[client].Radio = 1;
+			GiveWeapon(client, Weapon_Frag);
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_SMG5));
+			if(Gamemode != Gamemode_Ikea)
+				GiveWeapon(client, Weapon_Disarm);
+		}
+		case Class_049:
+		{
+			Client[client].Keycard = Keycard_SCP;
+			Client[client].HealthPack = 0;
+			Client[client].Radio = 0;
+			GiveWeapon(client, Weapon_049Gun);
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_049));
+		}
+		case Class_0492:
+		{
+			Client[client].Keycard = Keycard_SCP;
+			Client[client].HealthPack = 0;
+			Client[client].Radio = 0;
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_0492));
+		}
+		case Class_096:
+		{
+			Client[client].Pos[0] = 0.0;
+			Client[client].Keycard = Keycard_SCP;
+			Client[client].HealthPack = 750;
+			Client[client].Radio = 0;
+			SetEntityHealth(client, 750);
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_096));
+		}
+		case Class_106:
+		{
+			Client[client].Pos[0] = 0.0;
+			Client[client].Pos[1] = 0.0;
+			Client[client].Pos[2] = 0.0;
+			Client[client].Keycard = Keycard_106;
+			Client[client].HealthPack = 0;
+			Client[client].Radio = 0;
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_106));
+		}
+		case Class_173:
+		{
+			Client[client].Keycard = Keycard_SCP;
+			Client[client].HealthPack = 0;
+			Client[client].Radio = 0;
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_173));
+		}
+		case Class_1732:
+		{
+			Client[client].Keycard = Keycard_SCP;
+			Client[client].HealthPack = 0;
+			Client[client].Radio = 0;
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_173));
+		}
+		case Class_939, Class_9392:
+		{
+			Client[client].Keycard = Keycard_SCP;
+			Client[client].HealthPack = 0;
+			Client[client].Radio = 0;
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_939));
+		}
+		case Class_3008:
+		{
+			Client[client].Keycard = Keycard_SCP;
+			Client[client].HealthPack = 0;
+			Client[client].Radio = SciEscaped;
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, SciEscaped ? Weapon_3008Rage : Weapon_3008));
+		}
+		default:
+		{
+			TF2_AddCondition(client, TFCond_StealthedUserBuffFade, TFCondDuration_Infinite);
+			TF2_AddCondition(client, TFCond_HalloweenGhostMode, TFCondDuration_Infinite);
+
+			SetVariantString(ClassModel[Class_Spec]);
+			AcceptEntityInput(client, "SetCustomModel");
+			SetEntProp(client, Prop_Send, "m_bUseClassAnimations", 1);
+
+			SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelIndex[Class_Spec], _, 0);
+			SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelSubIndex[Class_Spec], _, 3);
+
+			SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_NONE);
+
+			RequestFrame(FirstPerson, GetClientUserId(client));
+
+			if(IsFakeClient(client))
+				TeleportEntity(client, TRIPLE_D, NULL_VECTOR, NULL_VECTOR);
+
+			return;
+		}
+	}
+
+	if(Client[client].Class!=Class_0492 && ClassSpawn[Client[client].Class][0])
+		GoToSpawn(client, Client[client].Class);
+
+	if(!CollisionHook && team==TFTeam_Unassigned)
+	{
+		SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_DEBRIS_TRIGGER);
+	}
+	else
+	{
+		SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_PLAYER);
+	}
+
+	//if(!TF2_HasGlow(client))
+		//TF2_CreateGlow(client);
+
+	ShowClassInfo(client);
+	SetCaptureRate(client);
+	SetVariantString(ClassModel[Client[client].Class]);
+	AcceptEntityInput(client, "SetCustomModel");
+	SetEntProp(client, Prop_Send, "m_bUseClassAnimations", 1);
+	TF2Attrib_SetByDefIndex(client, 49, 1.0);
+	TF2Attrib_SetByDefIndex(client, 69, 0.0);
+	TF2_AddCondition(client, TFCond_SpeedBuffAlly, 0.01);
+
+	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelIndex[Client[client].Class], _, 0);
+	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelSubIndex[Client[client].Class], _, 3);
 
 	if(Client[client].DownloadMode == 2)
 	{
@@ -2215,7 +2222,6 @@ public Action OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	{
 		TF2Attrib_RemoveByDefIndex(client, 406);
 	}
-	return Plugin_Continue;
 }
 
 public Action OnPlayerHurt(Event event, const char[] name, bool dontBroadcast)
@@ -2234,8 +2240,9 @@ public Action OnJoinClass(int client, const char[] command, int args)
 {
 	if(client && view_as<TFClassType>(GetEntProp(client, Prop_Send, "m_iDesiredPlayerClass"))==TFClass_Unknown)
 	{
-		SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", view_as<int>(TFClass_Scout));
-		TF2_RespawnPlayer(client);
+		Client[client].Class = Class_Spec;
+		SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", view_as<int>(TFClass_Spy));
+		RespawnPlayer(client);
 	}
 	return Plugin_Handled;
 }
@@ -2248,7 +2255,13 @@ public Action OnPlayerSpray(const char[] name, const int[] clients, int count, f
 
 public Action OnJoinAuto(int client, const char[] command, int args)
 {
-	return (client && TF2_GetClientTeam(client)>TFTeam_Spectator) ? Plugin_Handled : Plugin_Continue;
+	if(!client)
+		return Plugin_Continue;
+
+	if(GetClientTeam(client) <= view_as<int>(TFTeam_Spectator))
+		ChangeClientTeam(client, 3);
+
+	return Plugin_Handled;
 }
 
 public Action OnJoinSpec(int client, const char[] command, int args)
@@ -2281,8 +2294,8 @@ public Action OnJoinTeam(int client, const char[] command, int args)
 		return Plugin_Continue;
 	}
 
-	if(TF2_GetClientTeam(client) <= TFTeam_Spectator)
-		ClientCommand(client, "autoteam");
+	if(GetClientTeam(client) <= view_as<int>(TFTeam_Spectator))
+		ChangeClientTeam(client, 2);
 
 	return Plugin_Handled;
 }
@@ -2581,7 +2594,8 @@ public Action Command_ForceClass(int client, int args)
 					SCPMax++;
 			}
 		}
-		Client[targets[target]].Spawn(targets[target], true);
+		AssignTeam(client);
+		RespawnPlayer(client);
 	}
 	return Plugin_Handled;
 }
@@ -2705,7 +2719,7 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 		return Plugin_Handled;
 
 	CreateTimer(1.0, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
-	if(TF2_GetClientTeam(client) == TFTeam_Unassigned)
+	if(GetClientTeam(client) == view_as<int>(TFTeam_Unassigned))
 		ChangeClientTeamEx(client, TFTeam_Red);
 
 	if(TF2_GetPlayerClass(client) == TFClass_Sniper)
@@ -2786,7 +2800,7 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 			RequestFrame(RemoveRagdoll, client);
 			CreateSpecialDeath(client);
 		}
-		ChangeClientTeamEx(client, TF2_GetClientTeam(attacker));
+		ChangeClientTeamEx(client, view_as<TFTeam>(GetClientTeam(attacker)));
 		SpawnReviveMarker(client, GetClientTeam(attacker));
 	}
 	else if(Client[attacker].Class == Class_173)
@@ -3042,7 +3056,7 @@ public void OnGameFrame()
 					static int choosen[MAXTF2PLAYERS];
 					for(int client=1; client<=MaxClients; client++)
 					{
-						if(IsValidClient(client) && IsSpec(client) && TF2_GetClientTeam(client)>TFTeam_Spectator)
+						if(IsValidClient(client) && IsSpec(client) && GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
 							choosen[count++] = client;
 					}
 
@@ -3050,7 +3064,8 @@ public void OnGameFrame()
 					{
 						count = choosen[GetRandomInt(0, count-1)];
 						Client[count].Class = Class_MTF3;
-						Client[count].Spawn(count, true);
+						AssignTeam(count);
+						RespawnPlayer(count);
 
 						for(int client=1; client<=MaxClients; client++)
 						{
@@ -3065,11 +3080,12 @@ public void OnGameFrame()
 								continue;
 							}
 
-							if(!IsSpec(client) || TF2_GetClientTeam(client)<=TFTeam_Spectator)
+							if(!IsSpec(client) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
 								continue;
 
 							Client[client].Class = GetRandomInt(0, 3) ? Class_MTF : Class_MTF2;
-							Client[client].Spawn(client, true);
+							AssignTeam(client);
+							RespawnPlayer(client);
 						}
 					}
 
@@ -3102,11 +3118,12 @@ public void OnGameFrame()
 							continue;
 						}
 
-						if(!IsSpec(client) || TF2_GetClientTeam(client)<=TFTeam_Spectator)
+						if(!IsSpec(client) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
 							continue;
 
 						Client[client].Class = Class_3008;
-						Client[client].Spawn(client, true);
+						AssignTeam(client);
+						RespawnPlayer(client);
 					}
 
 					int entity = -1;
@@ -3130,7 +3147,7 @@ public void OnGameFrame()
 					static int choosen[MAXTF2PLAYERS];
 					for(int client=1; client<=MaxClients; client++)
 					{
-						if(IsValidClient(client) && IsSpec(client) && TF2_GetClientTeam(client)>TFTeam_Spectator)
+						if(IsValidClient(client) && IsSpec(client) && GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
 							choosen[count++] = client;
 					}
 
@@ -3138,18 +3155,20 @@ public void OnGameFrame()
 					{
 						count = choosen[GetRandomInt(0, count-1)];
 						Client[count].Class = Class_MTF3;
-						Client[count].Spawn(count, true);
+						AssignTeam(count);
+						RespawnPlayer(count);
 
 						for(int client=1; client<=MaxClients; client++)
 						{
 							if(!IsValidClient(client))
 								continue;
 
-							if(!IsSpec(client) || TF2_GetClientTeam(client)<=TFTeam_Spectator)
+							if(!IsSpec(client) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
 								continue;
 
 							Client[client].Class = GetRandomInt(0, 2) ? Class_MTF : Class_MTF2;
-							Client[client].Spawn(client, true);
+							AssignTeam(client);
+							RespawnPlayer(client);
 						}
 						CPrintToChatAll("%s%t", PREFIX, "mtf_spawn");
 						CPrintToChatAll("%s%t", PREFIX, "mtf_spawn_nut_over");
@@ -3164,7 +3183,7 @@ public void OnGameFrame()
 					static int choosen[MAXTF2PLAYERS];
 					for(int client=1; client<=MaxClients; client++)
 					{
-						if(IsValidClient(client) && IsSpec(client) && TF2_GetClientTeam(client)>TFTeam_Spectator)
+						if(IsValidClient(client) && IsSpec(client) && GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
 							choosen[count++] = client;
 					}
 
@@ -3172,7 +3191,8 @@ public void OnGameFrame()
 					{
 						count = choosen[GetRandomInt(0, count-1)];
 						Client[count].Class = Class_MTF3;
-						Client[count].Spawn(count, true);
+						AssignTeam(count);
+						RespawnPlayer(count);
 
 						count = 0;
 						for(int client=1; client<=MaxClients; client++)
@@ -3187,11 +3207,12 @@ public void OnGameFrame()
 								continue;
 							}
 
-							if(!IsSpec(client) || TF2_GetClientTeam(client)<=TFTeam_Spectator)
+							if(!IsSpec(client) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
 								continue;
 
 							Client[client].Class = GetRandomInt(0, 3) ? Class_MTF : Class_MTF2;
-							Client[client].Spawn(client, true);
+							AssignTeam(client);
+							RespawnPlayer(client);
 						}
 						CPrintToChatAll("%s%t", PREFIX, "mtf_spawn");
 
@@ -3213,11 +3234,12 @@ public void OnGameFrame()
 						if(!IsValidClient(client))
 							continue;
 
-						if(!IsSpec(client) || TF2_GetClientTeam(client)<=TFTeam_Spectator)
+						if(!IsSpec(client) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
 							continue;
 
 						Client[client].Class = Class_Chaos;
-						Client[client].Spawn(client, true);
+						AssignTeam(client);
+						RespawnPlayer(client);
 						hasSpawned = true;
 					}
 
@@ -4220,6 +4242,23 @@ public Action OnPipeTouch(int entity, int client)
 
 // Public Events
 
+void AssignTeam(int client)
+{
+	TFTeam team = Client[client].TeamTF();
+	if(team != TFTeam_Blue)
+		team = TFTeam_Red;
+
+	ChangeClientTeamEx(client, team);
+}
+
+void RespawnPlayer(int client)
+{
+	if(TF2_GetPlayerClass(client) == TFClass_Sniper)
+		TF2_SetPlayerClass(client, TFClass_Spy);
+
+	TF2_RespawnPlayer(client);
+}
+
 public Action CheckAlivePlayers(Handle timer)
 {
 	if(!Enabled)
@@ -4606,8 +4645,8 @@ public Action Timer_ConnectPost(Handle timer, int userid)
 	if(!IsValidClient(client))
 		return Plugin_Continue;
 
-	if(DHForceRespawn != null)
-		DHookEntity(DHForceRespawn, false, client, _, DHook_ForceRespawn);
+	//if(DHForceRespawn != null)
+		//DHookEntity(DHForceRespawn, false, client, _, DHook_ForceRespawn);
 
 	QueryClientConVar(client, "sv_allowupload", OnQueryFinished, userid);
 	QueryClientConVar(client, "cl_allowdownload", OnQueryFinished, userid);
@@ -4617,7 +4656,7 @@ public Action Timer_ConnectPost(Handle timer, int userid)
 		ChangeSong(client, 0, MusicTimes[0]+GetEngineTime(), MusicList[0]);
 
 	PrintToConsole(client, " \n \nWelcome to SCP: Secret Fortress\n \nThis is a gamemode based on the SCP series and community\nPlugin is created by Batfoxkid\n ");
-	PrintToConsole(client, "If you like to support the gamemode, you can donate to Gamers Freak Fortress community at https://discordapp.com/invite/JWE72cs\n ");
+	PrintToConsole(client, "If you like to support the gamemode, you can join Gamers Freak Fortress community at https://discordapp.com/invite/JWE72cs\n ");
 	PrintToConsole(client, "The SCP community also needs help, you can support them at https://www.gofundme.com/f/scp-legal-funds\n \n ");
 
 	DisplayCredits(client);
@@ -5649,7 +5688,7 @@ public MRESReturn DHook_ClientWantsLagCompensationOnEntity(int client, Handle re
 {
 	DHookSetReturn(returnVal, true);
 	return MRES_Supercede;
-}*/
+}
 
 public MRESReturn DHook_ForceRespawn(int client)
 {
@@ -5657,7 +5696,7 @@ public MRESReturn DHook_ForceRespawn(int client)
 		return MRES_Ignored;
 	
 	return MRES_Supercede;
-}
+}*/
 
 public MRESReturn DHook_SetWinningTeam(Handle params)
 {
@@ -5795,7 +5834,8 @@ public void OnRevive(Event event, const char[] name, bool dontBroadcast)
 		return;
 
 	Client[entity].Class = Class_0492;
-	Client[entity].Spawn(entity, true);
+	AssignTeam(entity);
+	RespawnPlayer(entity);
 
 	SetEntProp(entity, Prop_Send, "m_bDucked", 1);
 	SetEntityFlags(entity, GetEntityFlags(entity)|FL_DUCKING);
@@ -5843,7 +5883,7 @@ public void MarkerThink(int client)
 		if(!IsValidMarker(entity)) // Oh fiddlesticks, what now..
 		{
 			SDKUnhook(client, SDKHook_PreThink, MarkerThink);
-			if(TF2_GetClientTeam(client) == TFTeam_Unassigned)
+			if(GetClientTeam(client) == view_as<int>(TFTeam_Unassigned))
 				ChangeClientTeamEx(client, TFTeam_Red);
 
 			return;
@@ -5859,7 +5899,7 @@ public void MarkerThink(int client)
 	else if(Client[client].ReviveGoneAt < GetEngineTime())
 	{
 		SDKUnhook(client, SDKHook_PreThink, MarkerThink);
-		if(!IsPlayerAlive(client) && TF2_GetClientTeam(client)==TFTeam_Unassigned)
+		if(!IsPlayerAlive(client) && GetClientTeam(client)==view_as<int>(TFTeam_Unassigned))
 			ChangeClientTeamEx(client, TFTeam_Red);
 
 		int entity = EntRefToEntIndex(Client[client].ReviveIndex);
@@ -6121,7 +6161,7 @@ stock void ChangeClientTeamEx(int client, TFTeam newTeam)
 {
 	if(SDKTeamAddPlayer==null || SDKTeamRemovePlayer==null)
 	{
-		TF2_ChangeClientTeam(client, (newTeam==TFTeam_Unassigned) ? TFTeam_Red : newTeam);
+		ChangeClientTeam(client, (newTeam==TFTeam_Unassigned) ? view_as<int>(TFTeam_Red) : view_as<int>(newTeam));
 		return;
 	}
 
