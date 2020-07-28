@@ -110,211 +110,220 @@
 
 	// SCP-3008-1 Phrases [OPTIONAL]
 
-	"class_1_ikea"
+	"class_dboi_ikea"
 	{
 		"en"		"SCP-3008-1 Victim"
 		"ru"		"Жертва SCP-3008-1"
 	}
-	"desc_1_ikea"
+	"desc_dboi_ikea"
 	{
 		"en"		"Escape from SCP-3008-1.\nCooperate with the MTF.\nAvoid other teams."
 		"ru"		"Сбегите из SCP-3008-1.\nСкооперируйтесь с МОГ.\nИзбегайте других команд."
 	}
-	"desc_5_ikea"
+	"desc_mtf1_ikea"
 	{
 		"en"		"Help Survivors escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
 		"ru"		"Помогите Выжившим спастись.\nНейтрализуйте другие объекты.\nПодчиняйтесь старшим по званию."
 	}
-	"desc_6_ikea"
+	"desc_mtf2_ikea"
 	{
 		"en"		"Help Survivors escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your superiors."
 		"ru"		"Помогите Выжившим спастись.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным.\nПодчиняйтесь старшим по званию."
 	}
-	"class_7_ikea"
+	"class_mtfs_ikea"
 	{
 		"en"		"Nine-Tailed Fox Survivor"
 		"ru"		"Выживший Отряда МОГ"
 	}
-	"desc_7_ikea"
+	"desc_mtfs_ikea"
 	{
-		"en"		"Help Survivors escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your commanders."
-		"ru"		"Помогите Выжившим спастись.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным.\nПодчиняйтесь командиру."
+		"en"		"Help Survivors escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
+		"ru"		"Помогите Выжившим спастись.\nНейтрализуйте другие объекты.\nПодчиняйтесь старшим по званию."
 	}
-	"desc_8_ikea"
+	"desc_mtf3_ikea"
 	{
 		"en"		"Help Survivors escape.\nNeutralize other subjects.\nInstruct your soldiers."
-		"ru"		"Помогите Выжившим спастись.\nНейтрализуйте другие объекты."
+		"ru"		"Помогите Выжившим спастись.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным."
 	}
 
 	// Class Phrases
 
-	"class_0"
+	"class_spec"
 	{
 		"en"		"Spectator"
 		"ru"		"Наблюдатель"
 	}
-	"desc_0"
+	"desc_spec"
 	{
 		"en"		"You will respawn soon."
 		"ru"		"Вы скоро возродитесь."
 	}
-	"class_1"
+	"class_dboi"
 	{
 		"en"		"Class-D Personnel"
 		"ru"		"Персонал D-класса"
 	}
-	"desc_1"
+	"desc_dboi"
 	{
 		"en"		"Escape from the facility.\nCooperate with the Chaos Insurgency.\nAvoid other teams."
 		"ru"		"Сбегите из Комплекса.\nСкооперируйтесь с Повстанцами Хаоса.\nИзбегайте других команд."
 	}
-	"class_2"
+	"class_chaos"
 	{
 		"en"		"Chaos Insurgency Agent"
 		"ru"		"Повстанец Хаоса"
 	}
-	"desc_2"
+	"desc_chaos"
 	{
 		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects."
 		"ru"		"Помогите D-классу сбежать.\nНейтрализуйте другие объекты."
 	}
-	"class_3"
+	"class_sci"
 	{
 		"en"		"Scientist"
 		"ru"		"Учёный"
 	}
-	"desc_3"
+	"desc_sci"
 	{
 		"en"		"Escape from the facility.\nCooperate with the MTF.\nAvoid other teams."
 		"ru"		"Сбегите из Комплекса.\nСкооперируйтесь с МОГ.\nИзбегайте других команд."
 	}
-	"class_4"
+	"class_guard"
 	{
 		"en"		"Facility Guard"
 		"ru"		"Охранник Комплекса"
 	}
-	"desc_4"
+	"desc_guard"
 	{
 		"en"		"Help Scientists escape.\nCooperate with MTF.\nNeutralize other subjects."
 		"ru"		"Помогите Учёным сбежать.\nСкооперируйтесь с МОГ.\nНейтрализуйте другие объекты."
 	}
-	"class_5"
+	"class_mtf1"
 	{
 		"en"		"Nine-Tailed Fox Cadet"
 		"ru"		"Кадет Отряда МОГ"
 	}
-	"desc_5"
+	"desc_mtf1"
 	{
 		"en"		"Help Scientists escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
 		"ru"		"Помогите Учёным сбежать.\nНейтрализуйте другие объекты.\nПодчиняйтесь старшим по званию."
 	}
-	"class_6"
+	"class_mtf2"
 	{
 		"en"		"Nine-Tailed Fox Lieutenant"
 		"ru"		"Лейтенант Отряда МОГ"
 	}
-	"desc_6"
+	"desc_mtf2"
 	{
 		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your superiors."
 		"ru"		"Помогите Учёным сбежать.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным.\nПодчиняйтесь старшим по званию."
 	}
-	"class_7"
+	"class_mtfs"
 	{
 		"en"		"Nine-Tailed Fox Scientist"
 		"ru"		"Учёный Отряда МОГ"
 	}
-	"desc_7"
+	"desc_mtfs"
 	{
 		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your commanders."
 		"ru"		"Помогите Учёным сбежать.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным.\nПодчиняйтесь командиру."
 	}
-	"class_8"
+	"class_mtf3"
 	{
 		"en"		"Nine-Tailed Fox Commander"
 		"ru"		"Командир Отряда МОГ"
 	}
-	"desc_8"
+	"desc_mtf3"
 	{
 		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers."
 		"ru"		"Помогите Учёным сбежать.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным."
 	}
-	"class_9"
+	"class_049"
 	{
 		"en"		"SCP-049"
 	}
-	"desc_9"
+	"desc_049"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nInteract with a recently-dead human to revive them as an ally."
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nИспользуйте Меди-Пушку на недавно убитых вами."
 	}
-	"class_10"
+	"class_0492"
 	{
 		"en"		"SCP-049-2"
 	}
-	"desc_10"
+	"desc_0492"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nFollow orders from SCP-049"
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nПодчиняйтесь SCP-049."
 	}
-	"class_11"
+	"class_079"
 	{
 		"en"		"SCP-079"
 	}
-	"desc_11"
+	"desc_079"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs."
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP."
 	}
-	"class_12"
+	"class_096"
 	{
 		"en"		"SCP-096"
 	}
-	"desc_12"
+	"desc_096"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou become enraged when looked at."
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы наполняетесь яростью, когда на вас смотрят."
 	}
-	"class_13"
+	"class_106"
 	{
 		"en"		"SCP-106"
 	}
-	"desc_13"
+	"desc_106"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nATTACK2 to create a portal.\nATTACK3 to teleport to that portal."
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nДОП.АТАКА-создать портал.\nСПЕЦ.АТАКА-телепорт."
 	}
-	"class_14"
+	"class_173"
 	{
 		"en"		"SCP-173"
 	}
-	"desc_14"
+	"desc_173"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can only move while no one is looking."
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы можете двигаться, пока никто не смотрит."
 	}
-	"class_15"
+	"class_1732"
+	{
+		"en"		"SCP-173"
+	}
+	"desc_1732"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can only move while no one is looking."
+		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы можете двигаться, пока никто не смотрит."
+	}
+	"class_939"
 	{
 		"en"		"SCP-939-89"
 	}
-	"desc_15"
+	"desc_939"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can talk to other humans."
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы можете говорить с людьми."
 	}
-	"class_16"
+	"class_9392"
 	{
 		"en"		"SCP-939-53"
 	}
-	"desc_16"
+	"desc_9392"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can talk to other humans."
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы можете говорить с людьми."
 	}
-	"class_17"
+	"class_3008"
 	{
 		"en"		"SCP-3008-2"
 	}
-	"desc_17"
+	"desc_3008"
 	{
 		"en"		"Kill everyone during the night.\nCooperate with other SCP-3008-2.\nYou can talk to other humans."
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP-3008-2.\nВы можете говорить с людьми."

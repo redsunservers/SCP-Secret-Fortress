@@ -43,7 +43,7 @@ void DisplayCredits(int client)
 }
 
 #define MAJOR_REVISION	"1"
-#define MINOR_REVISION	"2"
+#define MINOR_REVISION	"3"
 #define STABLE_REVISION	"0"
 #define PLUGIN_VERSION MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
@@ -252,8 +252,36 @@ enum ClassEnum
 	Class_1732,
 	Class_939,
 	Class_9392,
-	Class_3008
+	Class_3008,
+	Class_Stealer
 }
+
+static const char ClassShort[][] =
+{
+	"spec",
+
+	"dboi",
+	"chaos",
+
+	"sci",
+	"guard",
+	"mtf1",
+	"mtf2",
+	"mtfs",
+	"mtf3",
+
+	"049",
+	"0492",
+	"079",
+	"096",
+	"106",
+	"173",
+	"1732",
+	"939",
+	"9392",
+	"3008",
+	"itsteals"
+};
 
 static const char ClassColor[][] =
 {
@@ -269,16 +297,17 @@ static const char ClassColor[][] =
 	"darkblue",
 	"darkblue",
 
-	"darkred",
-	"red",
-	"darkred",
-	"darkred",
-	"darkred",
-	"darkred",
-	"darkred",
-	"darkred",
-	"darkred",
-	"darkred"
+	"darkred",	// 049
+	"red",		// 049-2
+	"darkred",	// 079
+	"darkred",	// 096
+	"darkred",	// 106
+	"darkred",	// 173
+	"darkred",	// 173
+	"darkred",	// 939
+	"darkred",	// 939
+	"darkred",	// 3008
+	"black"		// It Steals
 };
 
 static const int ClassColors[][] =
@@ -304,7 +333,8 @@ static const int ClassColors[][] =
 	{ 189, 0, 0, 255 },
 	{ 189, 0, 0, 255 },
 	{ 189, 0, 0, 255 },
-	{ 189, 0, 0, 255 }
+	{ 189, 0, 0, 255 },
+	{ 0, 0, 0, 255}
 };
 
 static const char ClassSpawn[][] =
@@ -330,6 +360,7 @@ static const char ClassSpawn[][] =
 	"scp_spawn_173",
 	"scp_spawn_939",
 	"scp_spawn_939",
+	"scp_spawn_p",
 	"scp_spawn_p"
 };
 
@@ -357,6 +388,7 @@ static const char ClassModel[][] =
 	"models/player/pyro.mdl",				// 939-89
 	"models/player/pyro.mdl",				// 939-53
 	"models/freak_fortress_2/scp-049/zombie049.mdl",	// 3008-2
+	"models/player/pyro.mdl"				// Stealer
 };
 
 static const char ClassModelSub[][] =
@@ -383,6 +415,7 @@ static const char ClassModelSub[][] =
 	"models/player/pyro.mdl",	// 939-89
 	"models/player/pyro.mdl",	// 939-53
 	"models/player/sniper.mdl",	// 3008-2
+	"models/player/pyro.mdl"	// Stealer
 };
 
 static const TFClassType ClassClass[] =
@@ -408,7 +441,8 @@ static const TFClassType ClassClass[] =
 	TFClass_Heavy,		// 173-2
 	TFClass_Pyro,		// 939-89
 	TFClass_Pyro,		// 939-53
-	TFClass_Sniper		// 3008-2
+	TFClass_Sniper,		// 3008-2
+	TFClass_Pyro		// Stealer
 };
 
 static const TFClassType ClassClassModel[] =
@@ -435,6 +469,7 @@ static const TFClassType ClassClassModel[] =
 	TFClass_Pyro,		// 939-89
 	TFClass_Pyro,		// 939-53
 	TFClass_Sniper,		// 3008-2
+	TFClass_Pyro		// Stealer
 };
 
 static const char FireDeath[][] =
@@ -677,6 +712,7 @@ enum GamemodeEnum
 	Gamemode_None,	// SCP dedicated map
 	Gamemode_Ikea,	// SCP-3008-2 map
 	Gamemode_Nut,	// SCP-173 infection map
+	Gamemode_Steals,// It Steals spin-off map
 	Gamemode_Arena,	// KotH but enable arena logic
 	Gamemode_Koth,	// Control Points are the objectives
 	Gamemode_Ctf	// Flags are the objectives
@@ -785,6 +821,11 @@ enum struct ClientEnum
 			this.Class = Class_173;
 			return Class_173;
 		}
+		else if(Gamemode==Gamemode_Steals && !bot && !IsClassTaken(Class_Stealer))
+		{
+			this.Class = Class_Stealer;
+			return Class_Stealer;
+		}
 
 		if(team == TFTeam_Blue)
 		{
@@ -800,7 +841,7 @@ enum struct ClientEnum
 				return Class_DBoi;
 			}
 
-			if(IsClassTaken(Class_Scientist) && !GetRandomInt(0, 2))
+			if(Gamemode!=Gamemode_Steals && IsClassTaken(Class_Scientist) && !GetRandomInt(0, 2))
 			{
 				this.Class = Class_Guard;
 				return Class_Guard;
@@ -812,7 +853,7 @@ enum struct ClientEnum
 
 		if(team == TFTeam_Red)
 		{
-			if(Gamemode != Gamemode_Ikea)
+			if(Gamemode!=Gamemode_Steals && Gamemode!=Gamemode_Ikea)
 			{
 				if(!bot && IsClassTaken(Class_DBoi) && GetRandomInt(0, 1))
 				{
@@ -1294,6 +1335,7 @@ public void OnMapStart()
 		ClassEnabled[Class_939] = StrContains(buffer, " 939", false)!=-1;
 		ClassEnabled[Class_9392] = ClassEnabled[Class_939];
 		ClassEnabled[Class_3008] = StrContains(buffer, " 3008", false)!=-1;
+		ClassEnabled[Class_Stealer] = StrContains(buffer, " itsteals", false)!=-1;
 		break;
 	}
 
@@ -1402,14 +1444,6 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 	if(!Ready)
 		return;
 
-	DClassEscaped = 0;
-	DClassMax = 1;
-	SciEscaped = 0;
-	SciMax = 0;
-	SCPKilled = 0;
-	SCPMax = 0;
-	Enabled = true;
-
 	if(Gamemode == Gamemode_Arena)
 	{
 		int entity = MaxClients+1;
@@ -1454,79 +1488,6 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 
 		//if(DoorTimer == INVALID_HANDLE)
 			//DoorTimer = CreateTimer(3.0, Timer_CheckDoors, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
-	}
-
-	int entity = 0;
-	int[] choosen = new int[MaxClients];
-	for(int client=1; client<=MaxClients; client++)
-	{
-		Client[client].NextSongAt = 0.0;
-		if(!IsValidClient(client) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
-		{
-			Client[client].Class = Class_Spec;
-			continue;
-		}
-
-		if(TestForceClass[client] <= Class_Spec)
-		{
-			choosen[entity++] = client;
-			continue;
-		}
-
-		Client[client].Class = TestForceClass[client];
-		TestForceClass[client] = Class_Spec;
-		switch(Client[client].Class)
-		{
-			case Class_DBoi:
-			{
-				DClassMax++;
-			}
-			case Class_Scientist:
-			{
-				SciMax++;
-			}
-			default:
-			{
-				if(IsSCP(client))
-					SCPMax++;
-			}
-		}
-		AssignTeam(client);
-		RespawnPlayer(client);
-	}
-
-	if(!entity)
-		return;
-
-	entity = choosen[GetRandomInt(0, entity-1)];
-	Client[entity].Class = Class_DBoi;
-	AssignTeam(entity);
-	RespawnPlayer(entity);
-
-	for(int client=1; client<=MaxClients; client++)
-	{
-		if(client==entity || !IsValidClient(client) || TestForceClass[client]>Class_Spec || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
-			continue;
-
-		TFTeam team = view_as<TFTeam>(GetClientTeam(client));
-		switch(Client[client].Setup(team, IsFakeClient(client)))
-		{
-			case Class_DBoi:
-			{
-				DClassMax++;
-			}
-			case Class_Scientist:
-			{
-				SciMax++;
-			}
-			default:
-			{
-				if(IsSCP(client))
-					SCPMax++;
-			}
-		}
-		AssignTeam(client);
-		RespawnPlayer(client);
 	}
 
 	UpdateListenOverrides(FAR_FUTURE);
@@ -2178,7 +2139,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelIndex[Class_Spec], _, 0);
 			SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelSubIndex[Class_Spec], _, 3);
 
-			SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_NONE);
+			//SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_NONE);
 
 			if(IsFakeClient(client))
 				TeleportEntity(client, TRIPLE_D, NULL_VECTOR, NULL_VECTOR);
@@ -2602,8 +2563,8 @@ public Action Command_ForceClass(int client, int args)
 					SCPMax++;
 			}
 		}
-		AssignTeam(client);
-		RespawnPlayer(client);
+		AssignTeam(targets[target]);
+		RespawnPlayer(targets[target]);
 	}
 	return Plugin_Handled;
 }
@@ -4644,7 +4605,7 @@ void TriggerShyGuy(int client, int target, float engineTime)
 			Client[client].Power = engineTime+6.0;
 			Client[client].Radio = 1;
 			Client[client].Disarmer = 1;
-			TF2_StunPlayer(client, 9.9, 1.0, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAGS_NORMALBONK);
+			TF2_StunPlayer(client, 9.9, 0.9, TF_STUNFLAGS_SMALLBONK|TF_STUNFLAG_NOSOUNDOREFFECT);
 			EmitSoundToAll(SoundList[Sound_Screams], client, _, SNDLEVEL_SCREAMING);
 		}
 	}
@@ -5119,12 +5080,12 @@ void ShowClassInfo(int client)
 
 	if(Gamemode == Gamemode_Ikea)
 	{
-		FormatEx(buffer, sizeof(buffer), "desc_%d_ikea", Client[client].Class);
+		FormatEx(buffer, sizeof(buffer), "desc_%s_ikea", ClassShort[Client[client].Class]);
 		found = TranslationPhraseExists(buffer);
 	}
 
 	if(!found)
-		FormatEx(buffer, sizeof(buffer), "desc_%d", Client[client].Class);
+		FormatEx(buffer, sizeof(buffer), "desc_%s", ClassShort[Client[client].Class]);
 
 	SetHudTextParamsEx(-1.0, 0.5, 10.0, ClassColors[Client[client].Class], ClassColors[Client[client].Class], 1, 5.0, 1.0, 1.0);
 	ShowSyncHudText(client, HudIntro, "%t", buffer);
@@ -5135,12 +5096,12 @@ void GetClassName(any class, char[] buffer, int length)
 	bool found;
 	if(Gamemode == Gamemode_Ikea)
 	{
-		Format(buffer, length, "class_%d_ikea", class);
+		Format(buffer, length, "class_%s_ikea", ClassShort[class]);
 		found = TranslationPhraseExists(buffer);
 	}
 
 	if(!found)
-		Format(buffer, length, "class_%d", class);
+		Format(buffer, length, "class_%s", ClassShort[class]);
 }
 
 stock int GetClassCount(ClassEnum c)
@@ -5642,6 +5603,82 @@ public MRESReturn DHook_RoundRespawn()
 			ChangeClientTeamEx(client, GetRandomInt(0, 1) ? TFTeam_Blue : TFTeam_Red);
 	}
 
+	DClassEscaped = 0;
+	DClassMax = 1;
+	SciEscaped = 0;
+	SciMax = 0;
+	SCPKilled = 0;
+	SCPMax = 0;
+
+	int entity = 0;
+	int[] choosen = new int[MaxClients];
+	for(int client=1; client<=MaxClients; client++)
+	{
+		Client[client].NextSongAt = 0.0;
+		if(!IsValidClient(client) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
+		{
+			Client[client].Class = Class_Spec;
+			continue;
+		}
+
+		if(TestForceClass[client] <= Class_Spec)
+		{
+			choosen[entity++] = client;
+			continue;
+		}
+
+		Client[client].Class = TestForceClass[client];
+		TestForceClass[client] = Class_Spec;
+		switch(Client[client].Class)
+		{
+			case Class_DBoi:
+			{
+				DClassMax++;
+			}
+			case Class_Scientist:
+			{
+				SciMax++;
+			}
+			default:
+			{
+				if(IsSCP(client))
+					SCPMax++;
+			}
+		}
+		AssignTeam(client);
+	}
+
+	if(!entity)
+		return;
+
+	entity = choosen[GetRandomInt(0, entity-1)];
+	Client[entity].Class = Class_DBoi;
+	AssignTeam(entity);
+
+	for(int client=1; client<=MaxClients; client++)
+	{
+		if(client==entity || !IsValidClient(client) || TestForceClass[client]>Class_Spec || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
+			continue;
+
+		switch(Client[client].Setup(view_as<TFTeam>(GetRandomInt(2, 3)), IsFakeClient(client)))
+		{
+			case Class_DBoi:
+			{
+				DClassMax++;
+			}
+			case Class_Scientist:
+			{
+				SciMax++;
+			}
+			default:
+			{
+				if(IsSCP(client))
+					SCPMax++;
+			}
+		}
+		AssignTeam(client);
+	}
+
 	Enabled = true;
 }
 
@@ -5795,7 +5832,10 @@ public Action CH_PassFilter(int ent1, int ent2, bool &result)
 	if(!Enabled || !IsValidClient(ent1) || !IsValidClient(ent2))
 		return Plugin_Continue;
 
-	if(!IsSCP(ent1) && !IsSCP(ent2) && !TF2_IsPlayerInCondition(ent1, TFCond_HalloweenGhostMode) && !TF2_IsPlayerInCondition(ent2, TFCond_HalloweenGhostMode) && !IsFriendly(Client[ent1].Class, Client[ent2].Class))
+	result = !IsFriendly(Client[ent1].Class, Client[ent2].Class);
+	return Plugin_Changed;
+
+	/*if(!IsSCP(ent1) && !IsSCP(ent2) && !TF2_IsPlayerInCondition(ent1, TFCond_HalloweenGhostMode) && !TF2_IsPlayerInCondition(ent2, TFCond_HalloweenGhostMode) && !IsFriendly(Client[ent1].Class, Client[ent2].Class))
 	{
 		int weapon = GetEntPropEnt(ent1, Prop_Send, "m_hActiveWeapon");
 		if(weapon>MaxClients && IsValidEntity(weapon) && HasEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")!=WeaponIndex[Weapon_None])
@@ -5806,7 +5846,7 @@ public Action CH_PassFilter(int ent1, int ent2, bool &result)
 	}
 
 	result = false;
-	return Plugin_Handled;
+	return Plugin_Changed;*/
 }
 
 // Revive Marker Events
