@@ -32,6 +32,7 @@ void DisplayCredits(int client)
 	PrintToConsole(client, "Client Eye Angles | sarysa | forums.alliedmods.net/showthread.php?t=309245");
 	PrintToConsole(client, "Fire Death Animation | 404UNF, Rowedahelicon | forums.alliedmods.net/showthread.php?t=255753");
 	PrintToConsole(client, "Revive Markers | SHADoW NiNE TR3S, sarysa | forums.alliedmods.net/showthread.php?t=248320");
+	PrintToConsole(client, "Revive Markers | SHADoW NiNE TR3S, sarysa | forums.alliedmods.net/showthread.php?t=248320");
 
 	PrintToConsole(client, "Chaos, SCP-049-2 | DoctorKrazy | forums.alliedmods.net/member.php?u=288676");
 	PrintToConsole(client, "MTF, SCP-049, SCP-096 | JuegosPablo | forums.alliedmods.net/showthread.php?t=308656");
@@ -1030,6 +1031,7 @@ public void OnPluginStart()
 	AddNormalSoundHook(HookSound);
 
 	HookEntityOutput("logic_relay", "OnTrigger", OnRelayTrigger);
+	HookEntityOutput("math_counter", "OutValue", OnCounterValue);
 	AddTempEntHook("Player Decal", OnPlayerSpray);
 
 	LoadTranslations("core.phrases");
@@ -1416,6 +1418,7 @@ public void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 			continue;
 
 		TurnOffFlashlight(client);
+		TurnOffGlow(client);
 		if(TF2_GetPlayerClass(client) == TFClass_Sniper)
 			TF2_SetPlayerClass(client, TFClass_Soldier);
 
@@ -1530,6 +1533,17 @@ public Action OnCaptureFlag(Event event, const char[] name, bool dontBroadcast)
 public Action OnWinPanel(Event event, const char[] name, bool dontBroadcast)
 {
 	return Plugin_Handled;
+}
+
+public Action OnCounterValue(const char[] output, int entity, int client, float delay)
+{
+	char name[32];
+	GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
+
+	if(!StrContains(name, "scp_collectcount", false))
+		SCPMax = RoundFloat(GetEntDataFloat(entity, FindDataMapInfo(entity, "m_OutValue")));
+
+	return Plugin_Continue;
 }
 
 public Action OnRelayTrigger(const char[] output, int entity, int client, float delay)
@@ -2698,6 +2712,7 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 		return Plugin_Continue;
 
 	TurnOffFlashlight(client);
+	TurnOffGlow(client);
 	int flags = event.GetInt("death_flags");
 	if(flags & TF_DEATHFLAG_DEADRINGER)
 		return Plugin_Handled;
@@ -3670,86 +3685,67 @@ public void OnPreThink(int client)
 		return;
 	}
 
-	if(!IsSpec(client) && !Client[client].DisableSpeed)
+	static float clientPos[3], enemyPos[3];
+	if(Gamemode==Gamemode_Steals && Client[client].HealthPack)
 	{
-		float speed;
-		switch(Client[client].Class)
+		int entity = EntRefToEntIndex(Client[client].HealthPack);
+		if(entity>MaxClients && IsValidEntity(entity))
 		{
-			case Class_DBoi, Class_Scientist:
-			{
-				speed = Client[client].Disarmer ? 240.0 : 270.0;
-			}
-			case Class_Chaos:
-			{
-				speed = 240.0;
-			}
-			case Class_MTF3:
-			{
-				speed = 240.0;
-			}
-			case Class_Guard, Class_MTF, Class_MTF2, Class_MTFS:
-			{
-				speed = Client[client].Disarmer ? 240.0 : 250.0;
-			}
-			case Class_049:
-			{
-				speed = 230.0;
-			}
-			case Class_0492, Class_3008:
-			{
-				speed = 260.0;
-			}
-			case Class_096:
-			{
-				speed = 210.0;
-			}
-			case Class_106:
-			{
-				speed = 190.0;
-			}
-			case Class_173:
-			{
-				speed = 400.0;
-			}
-			case Class_1732:
-			{
-				speed = 425.0;
-			}
-			case Class_939, Class_9392:
-			{
-				speed = 280.0 - (GetClientHealth(client)/55.0);
-			}
-			case Class_Stealer:
-			{
-				switch(Client[client].Radio)
-				{
-					case 1:
-						speed = 250.0;
-
-					case 2:
-						speed = 400.0;
-
-					default:
-						speed = 300.0;
-				}
-			}
-			default:
-			{
-				speed = 270.0;
-			}
+			GetClientEyeAngles(client, clientPos);
+			GetClientAbsAngles(client, enemyPos);
+			SubtractVectors(clientPos, enemyPos, clientPos);
+			TeleportEntity(entity, NULL_VECTOR, clientPos, NULL_VECTOR);
 		}
-		SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", speed);
+		else
+		{
+			Client[client].HealthPack = 0;
+		}
 	}
 
-	static float clientPos[3], enemyPos[3];
 	switch(Client[client].Class)
 	{
+		case Class_Spec:
+		{
+			SetSpeed(client, 360.0);
+		}
+		case Class_DBoi, Class_Scientist:
+		{
+			if(Client[client].Disarmer)
+			{
+				SetSpeed(client, Gamemode==Gamemode_Steals ? 360.0 : 270.0);
+			}
+			else
+			{
+				SetSpeed(client,  ? 240.0 : 270.0);
+			}
+		}
+		case Class_Chaos:
+		{
+			SetSpeed(client, 240.0);
+		}
+		case Class_MTF3:
+		{
+			SetSpeed(client, 240.0);
+		}
+		case Class_Guard, Class_MTF, Class_MTF2, Class_MTFS:
+		{
+			SetSpeed(client, Client[client].Disarmer ? 240.0 : 250.0);
+		}
+		case Class_049:
+		{
+			SetSpeed(client, 230.0);
+		}
+		case Class_0492, Class_3008:
+		{
+			SetSpeed(client, 260.0);
+		}
 		case Class_096:
 		{
 			switch(Client[client].Radio)
 			{
 				case 1:
 				{
+					SetSpeed(client, 210.0);
 					if(Client[client].Power < engineTime)
 					{
 						TF2_AddCondition(client, TFCond_CritCola, 99.9);
@@ -3764,7 +3760,7 @@ public void OnPreThink(int client)
 				case 2:
 				{
 					TF2_RemoveCondition(client, TFCond_Dazed);
-					SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", 475.0);
+					SetSpeed(client, 475.0);
 					if(Client[client].Power < engineTime)
 					{
 						TF2_RemoveCondition(client, TFCond_CritCola);
@@ -3800,6 +3796,7 @@ public void OnPreThink(int client)
 				}
 				default:
 				{
+					SetSpeed(client, 210.0);
 					if(Client[client].Power > engineTime)
 						return;
 
@@ -3820,6 +3817,10 @@ public void OnPreThink(int client)
 				}
 			}
 		}
+		case Class_106:
+		{
+			SetSpeed(client, 190.0;
+		}
 		case Class_173:
 		{
 			switch(Client[client].Radio)
@@ -3834,7 +3835,7 @@ public void OnPreThink(int client)
 						}
 						else
 						{
-							SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", 1.0);
+							SetSpeed(client, 1.0);
 							static float vel[3];
 							vel[2] = -500.0;
 							TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, vel);
@@ -3843,7 +3844,11 @@ public void OnPreThink(int client)
 				}
 				case 2:
 				{
-					SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", 3000.0);
+					SetSpeed(client, 3000.0);
+				}
+				default:
+				{
+					SetSpeed(client, 400.0);
 				}
 			}
 		}
@@ -3855,21 +3860,34 @@ public void OnPreThink(int client)
 				{
 					if(GetEntityMoveType(client) != MOVETYPE_NONE)
 					{
+						static float vel[3];
 						if(GetEntityFlags(client) & FL_ONGROUND)
 						{
+							vel[2] = 0.0;
+							TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, vel);
 							SetEntityMoveType(client, MOVETYPE_NONE);
 						}
 						else
 						{
-							SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", 1.0);
+							vel[2] = -500.0;
+							TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, vel);
+							SetSpeed(client, 1.0);
 						}
 					}
 				}
 				case 2:
 				{
-					SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", 2600.0);
+					SetSpeed(client, 2600.0);
+				}
+				default:
+				{
+					SetSpeed(client, 425.0);
 				}
 			}
+		}
+		case Class_939, Class_9392:
+		{
+			SetSpeed(client, 280.0-(GetClientHealth(client)/55.0));
 		}
 		case Class_Stealer:
 		{
@@ -3877,6 +3895,7 @@ public void OnPreThink(int client)
 			{
 				case -1:
 				{
+					SetSpeed(client, 335.0);
 					GetClientAbsOrigin(client, clientPos);
 					for(int target=1; target<=MaxClients; target++)
 					{
@@ -3891,27 +3910,35 @@ public void OnPreThink(int client)
 					Client[client].Radio = 0;
 					SetEntPropFloat(client, Prop_Send, "m_flNextAttack", 0.0);
 				}
-				case 0:
+				case 1:
 				{
+					SetSpeed(client, 325.0);
+					if(Client[client].Power > engineTime)
+						return;
+
+					TurnOffGlow(client);
+					Client[client].Radio = 0;
+					TF2_RemoveCondition(client, TFCond_CritCola);
+				}
+				case 2:
+				{
+					SetSpeed(client, 400.0);
+					return;
+				}
+				default:
+				{
+					SetSpeed(client, 300.0);
 					if(Client[client].IdleAt-5.0 < engineTime)
 					{
 						SciEscaped--;
 						Client[client].IdleAt = engineTime+2.5;
 					}
 				}
-				case 1:
-				{
-					if(Client[client].Power > engineTime)
-						return;
-
-					Client[client].Radio = 0;
-					TF2_RemoveCondition(client, TFCond_CritCola);
-				}
-				case 2:
-				{
-					return;
-				}
 			}
+		}
+		default:
+		{
+			SetSpeed(client, 270.0);
 		}
 	}
 
@@ -4152,6 +4179,7 @@ public void OnPreThink(int client)
 				{
 					SCPKilled = 2;
 					Client[client].Radio = 2;
+					TurnOnGlow(client, "255 0 0", 10, 700.0);
 					TF2_AddCondition(client, TFCond_CritCola);
 					TF2_StunPlayer(client, 6.0, 1.0, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
 				}
@@ -4160,6 +4188,7 @@ public void OnPreThink(int client)
 					SCPKilled = 1;
 					Client[client].Radio = 1;
 					Client[client].Power = engineTime+15.0;
+					TurnOnGlow(client, "255 0 0", 10, 600.0);
 					TF2_AddCondition(client, TFCond_CritCola, 15.0);
 					TF2_StunPlayer(client, 3.5, 1.0, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
 				}
@@ -4193,7 +4222,7 @@ public void OnPreThink(int client)
 						}
 						else
 						{
-							ShowSyncHudText(client, HudPlayer, "%s\n%t", buffer);
+							ShowSyncHudText(client, HudPlayer, buffer);
 						}
 					}
 				}
@@ -5243,7 +5272,7 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 	return wep;
 }
 
-void EndRound(any team, TFTeam team2)
+void EndRound(TeamEnum team, TFTeam team2)
 {
 	char buffer[16];
 	switch(Gamemode)
@@ -5254,7 +5283,7 @@ void EndRound(any team, TFTeam team2)
 			if(!TranslationPhraseExists(buffer))
 				FormatEx(buffer, sizeof(buffer), "team_%d", team);
 
-			SetHudTextParamsEx(-1.0, 0.4, 15.0, TeamColors[team], {255, 255, 255, 255}, 1, 10.0, 1.0, 1.0);
+			SetHudTextParamsEx(-1.0, 0.4, 13.0, TeamColors[team], {255, 255, 255, 255}, 1, 2.0, 1.0, 1.0);
 			for(int client=1; client<=MaxClients; client++)
 			{
 				if(!IsValidClient(client))
@@ -5277,7 +5306,7 @@ void EndRound(any team, TFTeam team2)
 					count++;
 			}
 
-			SetHudTextParamsEx(-1.0, 0.4, 15.0, TeamColors[team], {255, 255, 255, 255}, 1, 10.0, 1.0, 1.0);
+			SetHudTextParamsEx(-1.0, 0.4, 8.0, TeamColors[team], {255, 255, 255, 255}, 1, 2.0, 1.0, 1.0);
 			for(int client=1; client<=MaxClients; client++)
 			{
 				if(!IsValidClient(client))
@@ -5290,7 +5319,7 @@ void EndRound(any team, TFTeam team2)
 		default:
 		{
 			FormatEx(buffer, sizeof(buffer), "team_%d", team);
-			SetHudTextParamsEx(-1.0, 0.3, 15.0, TeamColors[team], {255, 255, 255, 255}, 1, 10.0, 1.0, 1.0);
+			SetHudTextParamsEx(-1.0, 0.3, 13.0, TeamColors[team], {255, 255, 255, 255}, 1, 2.0, 1.0, 1.0);
 			for(int client=1; client<=MaxClients; client++)
 			{
 				if(!IsValidClient(client))
@@ -5302,8 +5331,33 @@ void EndRound(any team, TFTeam team2)
 		}
 	}
 
+	int entity = -1;
+	while((entity=FindEntityByClassname(count, "logic_relay")) != -1)
+	{
+		char name[32];
+		GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
+		if(StrEqual(name, "scp_roundend", false))
+		{
+			switch(team)
+			{
+				case Team_DBoi:
+					AcceptEntityInput(entity, "FireUser1");
+
+				case Team_MTF:
+					AcceptEntityInput(entity, "FireUser2");
+
+				case Team_SCP:
+					AcceptEntityInput(entity, "FireUser3");
+
+				case Team_Spec:
+					AcceptEntityInput(entity, "FireUser4");
+			}
+			break;
+		}
+	}
+
 	Enabled = false;
-	int entity = FindEntityByClassname(-1, "team_control_point_master");
+	entity = FindEntityByClassname(-1, "team_control_point_master");
 	if(!IsValidEntity(entity))
 	{
 		entity = CreateEntityByName("team_control_point_master");
@@ -5500,7 +5554,7 @@ bool AttemptGrabItem(int client)
 			{
 				DropCurrentKeycard(client);
 				Client[client].Keycard = view_as<KeycardEnum>(card);
-				RemoveEntity(entity);
+				AcceptEntityInput(entity, "KillHierarchy");
 				return true;
 			}
 			return true;
@@ -5510,7 +5564,7 @@ bool AttemptGrabItem(int client)
 			if(IsSCP(client))
 			{
 				if(Client[client].Class == Class_106)
-					RemoveEntity(entity);
+					AcceptEntityInput(entity, "KillHierarchy");
 
 				return true;
 			}
@@ -5523,7 +5577,7 @@ bool AttemptGrabItem(int client)
 				type = 2;
 
 			Client[client].HealthPack = type;
-			RemoveEntity(entity);
+			AcceptEntityInput(entity, "KillHierarchy");
 			return true;
 		}
 		else if(!StrContains(name, "scp_weapon", false))
@@ -5531,12 +5585,12 @@ bool AttemptGrabItem(int client)
 			if(IsSCP(client))
 			{
 				if(Client[client].Class == Class_106)
-					RemoveEntity(entity);
+					AcceptEntityInput(entity, "KillHierarchy");
 
 				return true;
 			}
 
-			RemoveEntity(entity);
+			AcceptEntityInput(entity, "KillHierarchy");
 			char buffers[16][4];
 			ExplodeString(name, "_", buffers, sizeof(buffers), sizeof(buffers[]));
 			int index = StringToInt(buffers[2]);
@@ -5581,7 +5635,7 @@ bool AttemptGrabItem(int client)
 				return true;
 
 			AcceptEntityInput(entity, "FireUser1", client, client);
-			RemoveEntity(entity);
+			AcceptEntityInput(entity, "KillHierarchy");
 			if(Gamemode == Gamemode_Steals)
 			{
 				int left = ++DClassEscaped - SCPMax;
@@ -5847,6 +5901,40 @@ bool IsFriendly(ClassEnum class1, ClassEnum class2)
 	}
 
 	return (class1>=Class_049 && class2>=Class_049);	// Both are SCPs
+}
+
+void TurnOnGlow(int client, const char[] color, int brightness, float distance)
+{
+	int entity = CreateEntityByName("light_dynamic");
+	if(!IsValidEntity(entity))
+		return; // It shouldn't.
+
+	DispatchKeyValue(entity, "_light", color);
+	SetEntProp(entity, Prop_Send, "m_Exponent", brightness);
+	SetEntPropFloat(entity, Prop_Send, "m_Radius", distance);
+	DispatchSpawn(entity);
+
+	static float pos[3];
+	GetClientEyePosition(client, pos);
+	TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
+
+	SetVariantString("!activator");
+	AcceptEntityInput(entity, "SetParent", client);
+	Client[client].ReviveIndex = EntIndexToEntRef(entity);
+}
+
+void TurnOffGlow(int client)
+{
+	if(Gamemode!=Gamemode_Steals || !Client[client].ReviveIndex)
+		return;
+
+	int entity = Client[client].ReviveIndex;
+	if(entity>MaxClients && IsValidEntity(entity))
+	{
+		AcceptEntityInput(entity, "TurnOff");
+		CreateTimer(0.1, Timer_RemoveEntity, Client[client].ReviveIndex, TIMER_FLAG_NO_MAPCHANGE);
+	}
+	Client[client].ReviveIndex = 0;
 }
 
 void TurnOffFlashlight(int client)
@@ -6786,6 +6874,11 @@ stock int TF2_GetWeaponAmmo(int client, int weapon)
 		return GetEntProp(client, Prop_Send, "m_iAmmo", _, ammotype);
 	
 	return -1;
+}
+
+stock void SetSpeed(int client, float speed)
+{
+	SetSpeed(client, speed);
 }
 
 stock void FadeMessage(int client, int arg1, int arg2, int arg3, int arg4=255, int arg5=255, int arg6=255, int arg7=255)
