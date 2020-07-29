@@ -634,6 +634,7 @@ enum AccessEnum
 enum WeaponEnum
 {
 	Weapon_None = 0,
+
 	Weapon_Axe,
 	Weapon_Hammer,
 	Weapon_Knife,
@@ -641,6 +642,7 @@ enum WeaponEnum
 	Weapon_Meat,
 	Weapon_Wrench,
 	Weapon_Pan,
+
 	Weapon_Disarm,
 
 	Weapon_Pistol,
@@ -667,11 +669,15 @@ enum WeaponEnum
 
 	Weapon_3008,
 	Weapon_3008Rage,
+
+	Weapon_Stealer,
+	Weapon_StealerRage
 }
 
 static const int WeaponIndex[] =
 {
 	5,
+
 	192,
 	153,
 	30758,
@@ -679,6 +685,7 @@ static const int WeaponIndex[] =
 	1013,
 	197,
 	264,
+
 	954,
 
 	209,
@@ -704,7 +711,10 @@ static const int WeaponIndex[] =
 	326,
 
 	195,
-	195
+	195,
+
+	574,
+	727
 };
 
 enum GamemodeEnum
@@ -816,17 +826,6 @@ enum struct ClientEnum
 
 	ClassEnum Setup(TFTeam team, bool bot)
 	{
-		if(Gamemode==Gamemode_Nut && !bot && !IsClassTaken(Class_173))
-		{
-			this.Class = Class_173;
-			return Class_173;
-		}
-		else if(Gamemode==Gamemode_Steals && !bot && !IsClassTaken(Class_Stealer))
-		{
-			this.Class = Class_Stealer;
-			return Class_Stealer;
-		}
-
 		if(team == TFTeam_Blue)
 		{
 			if(Gamemode == Gamemode_Ikea)
@@ -1348,7 +1347,7 @@ public void OnMapStart()
 		ClassEnabled[Class_939] = true;
 		ClassEnabled[Class_9392] = true;
 	}
-	else if(Gamemode == Gamemode_None)
+	else
 	{
 		if(ClassEnabled[Class_3008])
 		{
@@ -1357,6 +1356,10 @@ public void OnMapStart()
 		else if(ClassEnabled[Class_1732])
 		{
 			Gamemode = Gamemode_Nut;
+		}
+		else if(ClassEnabled[Class_Stealer])
+		{
+			Gamemode = Gamemode_Steals;
 		}
 	}
 
@@ -2127,6 +2130,13 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			Client[client].Radio = SciEscaped;
 			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, SciEscaped ? Weapon_3008Rage : Weapon_3008));
 		}
+		case Class_Stealer:
+		{
+			Client[client].Keycard = Keycard_SCP;
+			Client[client].HealthPack = 0;
+			Client[client].Radio = 0;
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_Stealer));
+		}
 		default:
 		{
 			TF2_AddCondition(client, TFCond_StealthedUserBuffFade, TFCondDuration_Infinite);
@@ -2210,6 +2220,9 @@ public Action OnJoinClass(int client, const char[] command, int args)
 
 public Action OnPlayerSpray(const char[] name, const int[] clients, int count, float delay)
 {
+	if(Gamemode == Gamemode_Steals)
+		return Plugin_Handled;
+
 	int client = TE_ReadNum("m_nPlayer");
 	return (IsClientInGame(client) && IsSpec(client)) ? Plugin_Handled : Plugin_Continue;
 }
@@ -3220,7 +3233,7 @@ public void OnGameFrame()
 		{
 			DisplayHint(false);
 		}
-		else if(Gamemode >= Gamemode_Arena)
+		else if(Gamemode>=Gamemode_Arena || Gamemode==Gamemode_Ikea)
 		{
 			if(!NoMusic && ticks==RoundFloat(MAXTIME-MusicTimes[1]))
 			{
@@ -3563,6 +3576,32 @@ public Action OnGetMaxHealth(int client, int &health)
 		{
 			health = 500;
 		}
+		case Class_Stealer:
+		{
+			switch(Client[client].Radio)
+			{
+				case -1:
+				{
+					health = 1;
+					SetEntityHealth(client, 1);
+				}
+				case 1:
+				{
+					health = 666;
+					SetEntityHealth(client, 666);
+				}
+				case 2:
+				{
+					health = 6666;
+					SetEntityHealth(client, 6666);
+				}
+				default:
+				{
+					health = ((DClassMax+SciMax)*2)+5;
+					SetEntityHealth(client, SciEscaped+1);
+				}
+			}
+		}
 		default:
 		{
 			health = 125;
@@ -3637,6 +3676,20 @@ public void OnPreThink(int client)
 			case Class_939, Class_9392:
 			{
 				speed = 280.0 - (GetClientHealth(client)/55.0);
+			}
+			case Class_Stealer:
+			{
+				switch(Client[client].Radio)
+				{
+					case 1:
+						speed = 250.0;
+
+					case 2:
+						speed = 520.0;
+
+					default:
+						speed = 320.0;
+				}
 			}
 			default:
 			{
@@ -3781,252 +3834,364 @@ public void OnPreThink(int client)
 
 	bool showHud = (Client[client].HudIn<engineTime && IsPlayerAlive(client) && !(GetClientButtons(client) & IN_SCORE));
 	specialTick[client] = engineTime+0.2;
-	if(Client[client].Class == Class_Spec)
+	switch(Client[client].Class)
 	{
-		ClientCommand(client, "firstperson");
-	}
-	else if(Client[client].Class == Class_106)
-	{
-		if(Client[client].ChargeIn && Client[client].ChargeIn<engineTime)
+		case Class_Spec:
+			ClientCommand(client, "firstperson");
+
+		case Class_106:
 		{
-			Client[client].ChargeIn = 0.0;
-			TeleportEntity(client, Client[client].Pos, NULL_VECTOR, TRIPLE_D);
+			if(Client[client].ChargeIn && Client[client].ChargeIn<engineTime)
+			{
+				Client[client].ChargeIn = 0.0;
+				TeleportEntity(client, Client[client].Pos, NULL_VECTOR, TRIPLE_D);
+			}
+			else if(Client[client].Pos[0] || Client[client].Pos[1] || Client[client].Pos[2])
+			{
+				GetClientEyePosition(client, clientPos);
+				if(Client[client].Radio)
+				{
+					if(GetVectorDistance(clientPos, Client[client].Pos) > 400)
+						HideAnnotation(client);
+				}
+				else if(GetVectorDistance(clientPos, Client[client].Pos) < 300)
+				{
+					ShowAnnotation(client);
+				}
+			}
 		}
-		else if(Client[client].Pos[0] || Client[client].Pos[1] || Client[client].Pos[2])
+		case Class_096:
 		{
 			GetClientEyePosition(client, clientPos);
-			if(Client[client].Radio)
+			GetClientEyeAngles(client, clientAngles);
+			clientAngles[0] = fixAngle(clientAngles[0]);
+			clientAngles[1] = fixAngle(clientAngles[1]);
+
+			int status;
+			for(int target=1; target<=MaxClients; target++)
 			{
-				if(GetVectorDistance(clientPos, Client[client].Pos) > 400)
-					HideAnnotation(client);
+				if(!IsValidClient(target) || IsSpec(target) || IsSCP(target) || Client[target].Triggered)
+					continue;
+
+				GetClientEyePosition(target, enemyPos);
+				GetClientEyeAngles(target, enemyAngles);
+				GetVectorAnglesTwoPoints(enemyPos, clientPos, anglesToBoss);
+
+				// fix all angles
+				enemyAngles[0] = fixAngle(enemyAngles[0]);
+				enemyAngles[1] = fixAngle(enemyAngles[1]);
+				anglesToBoss[0] = fixAngle(anglesToBoss[0]);
+				anglesToBoss[1] = fixAngle(anglesToBoss[1]);
+
+				// verify angle validity
+				if(!(fabs(enemyAngles[0] - anglesToBoss[0]) <= MAXANGLEPITCH ||
+				(fabs(enemyAngles[0] - anglesToBoss[0]) >= (360.0-MAXANGLEPITCH))))
+					continue;
+
+				if(!(fabs(enemyAngles[1] - anglesToBoss[1]) <= MAXANGLEYAW ||
+				(fabs(enemyAngles[1] - anglesToBoss[1]) >= (360.0-MAXANGLEYAW))))
+					continue;
+
+				// ensure no wall is obstructing
+				TR_TraceRayFilter(enemyPos, clientPos, (CONTENTS_SOLID | CONTENTS_AREAPORTAL | CONTENTS_GRATE), RayType_EndPoint, TraceWallsOnly);
+				TR_GetEndPosition(result);
+				if(result[0]!=clientPos[0] || result[1]!=clientPos[1] || result[2]!=clientPos[2])
+					continue;
+
+				GetVectorAnglesTwoPoints(clientPos, enemyPos, anglesToBoss);
+
+				// fix all angles
+				anglesToBoss[0] = fixAngle(anglesToBoss[0]);
+				anglesToBoss[1] = fixAngle(anglesToBoss[1]);
+
+				// verify angle validity
+				if(!(fabs(clientAngles[0] - anglesToBoss[0]) <= MAXANGLEPITCH ||
+				(fabs(clientAngles[0] - anglesToBoss[0]) >= (360.0-MAXANGLEPITCH))))
+					continue;
+
+				if(!(fabs(clientAngles[1] - anglesToBoss[1]) <= MAXANGLEYAW ||
+				(fabs(clientAngles[1] - anglesToBoss[1]) >= (360.0-MAXANGLEYAW))))
+					continue;
+
+				// ensure no wall is obstructing
+				TR_TraceRayFilter(clientPos, enemyPos, (CONTENTS_SOLID | CONTENTS_AREAPORTAL | CONTENTS_GRATE), RayType_EndPoint, TraceWallsOnly);
+				TR_GetEndPosition(result);
+				if(result[0]!=enemyPos[0] || result[1]!=enemyPos[1] || result[2]!=enemyPos[2])
+					continue;
+
+				// success
+				status = target;
+				break;
 			}
-			else if(GetVectorDistance(clientPos, Client[client].Pos) < 300)
+
+			if(status)
+				TriggerShyGuy(client, status, engineTime);
+		}
+		case Class_173, Class_1732:
+		{
+			static int blink;
+			GetClientEyePosition(client, clientPos);
+
+			GetClientEyeAngles(client, clientAngles);
+			clientAngles[0] = fixAngle(clientAngles[0]);
+			clientAngles[1] = fixAngle(clientAngles[1]);
+
+			int status;
+			for(int target=1; target<=MaxClients; target++)
 			{
-				ShowAnnotation(client);
+				if(!IsValidClient(target) || IsSpec(target) || IsSCP(target))
+					continue;
+
+				GetClientEyePosition(target, enemyPos);
+				GetClientEyeAngles(target, enemyAngles);
+				GetVectorAnglesTwoPoints(enemyPos, clientPos, anglesToBoss);
+
+				// fix all angles
+				enemyAngles[0] = fixAngle(enemyAngles[0]);
+				enemyAngles[1] = fixAngle(enemyAngles[1]);
+				anglesToBoss[0] = fixAngle(anglesToBoss[0]);
+				anglesToBoss[1] = fixAngle(anglesToBoss[1]);
+
+				// verify angle validity
+				if(!(fabs(enemyAngles[0] - anglesToBoss[0]) <= MAXANGLEPITCH ||
+				(fabs(enemyAngles[0] - anglesToBoss[0]) >= (360.0-MAXANGLEPITCH))))
+					continue;
+
+				if(!(fabs(enemyAngles[1] - anglesToBoss[1]) <= MAXANGLEYAW ||
+				(fabs(enemyAngles[1] - anglesToBoss[1]) >= (360.0-MAXANGLEYAW))))
+					continue;
+
+				// ensure no wall is obstructing
+				TR_TraceRayFilter(enemyPos, clientPos, (CONTENTS_SOLID | CONTENTS_AREAPORTAL | CONTENTS_GRATE), RayType_EndPoint, TraceWallsOnly);
+				TR_GetEndPosition(result);
+				if(result[0]!=clientPos[0] || result[1]!=clientPos[1] || result[2]!=clientPos[2])
+					continue;
+
+				// success
+				if(!blink)
+				{
+					status = 2;
+					FadeMessage(target, 52, 52, 0x0002, 0, 0, 0);
+				}
+				else
+				{
+					status = 1;
+				}
 			}
-		}
 
-	}
-	else if(Client[client].Class == Class_096)
-	{
-		GetClientEyePosition(client, clientPos);
-		GetClientEyeAngles(client, clientAngles);
-		clientAngles[0] = fixAngle(clientAngles[0]);
-		clientAngles[1] = fixAngle(clientAngles[1]);
-
-		int status;
-		for(int target=1; target<=MaxClients; target++)
-		{
-			if(!IsValidClient(target) || IsSpec(target) || IsSCP(target) || Client[target].Triggered)
-				continue;
-
-			GetClientEyePosition(target, enemyPos);
-			GetClientEyeAngles(target, enemyAngles);
-			GetVectorAnglesTwoPoints(enemyPos, clientPos, anglesToBoss);
-
-			// fix all angles
-			enemyAngles[0] = fixAngle(enemyAngles[0]);
-			enemyAngles[1] = fixAngle(enemyAngles[1]);
-			anglesToBoss[0] = fixAngle(anglesToBoss[0]);
-			anglesToBoss[1] = fixAngle(anglesToBoss[1]);
-
-			// verify angle validity
-			if(!(fabs(enemyAngles[0] - anglesToBoss[0]) <= MAXANGLEPITCH ||
-			(fabs(enemyAngles[0] - anglesToBoss[0]) >= (360.0-MAXANGLEPITCH))))
-				continue;
-
-			if(!(fabs(enemyAngles[1] - anglesToBoss[1]) <= MAXANGLEYAW ||
-			(fabs(enemyAngles[1] - anglesToBoss[1]) >= (360.0-MAXANGLEYAW))))
-				continue;
-
-			// ensure no wall is obstructing
-			TR_TraceRayFilter(enemyPos, clientPos, (CONTENTS_SOLID | CONTENTS_AREAPORTAL | CONTENTS_GRATE), RayType_EndPoint, TraceWallsOnly);
-			TR_GetEndPosition(result);
-			if(result[0]!=clientPos[0] || result[1]!=clientPos[1] || result[2]!=clientPos[2])
-				continue;
-
-			GetVectorAnglesTwoPoints(clientPos, enemyPos, anglesToBoss);
-
-			// fix all angles
-			anglesToBoss[0] = fixAngle(anglesToBoss[0]);
-			anglesToBoss[1] = fixAngle(anglesToBoss[1]);
-
-			// verify angle validity
-			if(!(fabs(clientAngles[0] - anglesToBoss[0]) <= MAXANGLEPITCH ||
-			(fabs(clientAngles[0] - anglesToBoss[0]) >= (360.0-MAXANGLEPITCH))))
-				continue;
-
-			if(!(fabs(clientAngles[1] - anglesToBoss[1]) <= MAXANGLEYAW ||
-			(fabs(clientAngles[1] - anglesToBoss[1]) >= (360.0-MAXANGLEYAW))))
-				continue;
-
-			// ensure no wall is obstructing
-			TR_TraceRayFilter(clientPos, enemyPos, (CONTENTS_SOLID | CONTENTS_AREAPORTAL | CONTENTS_GRATE), RayType_EndPoint, TraceWallsOnly);
-			TR_GetEndPosition(result);
-			if(result[0]!=enemyPos[0] || result[1]!=enemyPos[1] || result[2]!=enemyPos[2])
-				continue;
-
-			// success
-			status = target;
-			break;
-		}
-
-		if(status)
-			TriggerShyGuy(client, status, engineTime);
-	}
-	else if(Client[client].Class==Class_173 || Client[client].Class==Class_1732)
-	{
-		static int blink;
-		GetClientEyePosition(client, clientPos);
-
-		GetClientEyeAngles(client, clientAngles);
-		clientAngles[0] = fixAngle(clientAngles[0]);
-		clientAngles[1] = fixAngle(clientAngles[1]);
-
-		int status;
-		for(int target=1; target<=MaxClients; target++)
-		{
-			if(!IsValidClient(target) || IsSpec(target) || IsSCP(target))
-				continue;
-
-			GetClientEyePosition(target, enemyPos);
-			GetClientEyeAngles(target, enemyAngles);
-			GetVectorAnglesTwoPoints(enemyPos, clientPos, anglesToBoss);
-
-			// fix all angles
-			enemyAngles[0] = fixAngle(enemyAngles[0]);
-			enemyAngles[1] = fixAngle(enemyAngles[1]);
-			anglesToBoss[0] = fixAngle(anglesToBoss[0]);
-			anglesToBoss[1] = fixAngle(anglesToBoss[1]);
-
-			// verify angle validity
-			if(!(fabs(enemyAngles[0] - anglesToBoss[0]) <= MAXANGLEPITCH ||
-			(fabs(enemyAngles[0] - anglesToBoss[0]) >= (360.0-MAXANGLEPITCH))))
-				continue;
-
-			if(!(fabs(enemyAngles[1] - anglesToBoss[1]) <= MAXANGLEYAW ||
-			(fabs(enemyAngles[1] - anglesToBoss[1]) >= (360.0-MAXANGLEYAW))))
-				continue;
-
-			// ensure no wall is obstructing
-			TR_TraceRayFilter(enemyPos, clientPos, (CONTENTS_SOLID | CONTENTS_AREAPORTAL | CONTENTS_GRATE), RayType_EndPoint, TraceWallsOnly);
-			TR_GetEndPosition(result);
-			if(result[0]!=clientPos[0] || result[1]!=clientPos[1] || result[2]!=clientPos[2])
-				continue;
-
-			// success
-			if(!blink)
+			if(blink > 0)
 			{
-				status = 2;
-				FadeMessage(target, 52, 52, 0x0002, 0, 0, 0);
+				blink--;
 			}
 			else
 			{
-				status = 1;
+				blink = GetRandomInt(10, 20);
 			}
-		}
 
-		if(blink > 0)
-		{
-			blink--;
-		}
-		else
-		{
-			blink = GetRandomInt(10, 20);
-		}
-
-		switch(status)
-		{
-			case 1:
+			switch(status)
 			{
-				Client[client].DisableSpeed = true;
-				Client[client].Radio = 1;
-				SetEntPropFloat(client, Prop_Send, "m_flNextAttack", FAR_FUTURE);
-				SetEntProp(client, Prop_Send, "m_bCustomModelRotates", 0);
-			}
-			case 2:
-			{
-				Client[client].DisableSpeed = true;
-				Client[client].Radio = 2;
-				SetEntPropFloat(client, Prop_Send, "m_flNextAttack", 0.0);
-				SetEntProp(client, Prop_Send, "m_bCustomModelRotates", 1);
-				if(GetEntityMoveType(client) != MOVETYPE_WALK)
-					SetEntityMoveType(client, MOVETYPE_WALK);
-			}
-			default:
-			{
-				Client[client].DisableSpeed = false;
-				Client[client].Radio = 0;
-				SetEntPropFloat(client, Prop_Send, "m_flNextAttack", 0.0);
-				SetEntProp(client, Prop_Send, "m_bCustomModelRotates", 1);
-				if(GetEntityMoveType(client) != MOVETYPE_WALK)
-					SetEntityMoveType(client, MOVETYPE_WALK);
-			}
-		}
-	}
-	else if(!IsSCP(client))
-	{
-		if(!IsSpec(client))
-		{
-			if(DisarmCheck(client))
-			{
-				if(showHud)
+				case 1:
 				{
-					SetHudTextParamsEx(-1.0, Gamemode==Gamemode_Ctf ? 0.77 : 0.88, 0.35, ClassColors[Client[Client[client].Disarmer].Class], ClassColors[Client[Client[client].Disarmer].Class], 0, 0.1, 0.05, 0.05);
-					ShowSyncHudText(client, HudPlayer, "%T", "disarmed_by", client, Client[client].Disarmer);
+					Client[client].DisableSpeed = true;
+					Client[client].Radio = 1;
+					SetEntPropFloat(client, Prop_Send, "m_flNextAttack", FAR_FUTURE);
+					SetEntProp(client, Prop_Send, "m_bCustomModelRotates", 0);
+				}
+				case 2:
+				{
+					Client[client].DisableSpeed = true;
+					Client[client].Radio = 2;
+					SetEntPropFloat(client, Prop_Send, "m_flNextAttack", 0.0);
+					SetEntProp(client, Prop_Send, "m_bCustomModelRotates", 1);
+					if(GetEntityMoveType(client) != MOVETYPE_WALK)
+						SetEntityMoveType(client, MOVETYPE_WALK);
+				}
+				default:
+				{
+					Client[client].DisableSpeed = false;
+					Client[client].Radio = 0;
+					SetEntPropFloat(client, Prop_Send, "m_flNextAttack", 0.0);
+					SetEntProp(client, Prop_Send, "m_bCustomModelRotates", 1);
+					if(GetEntityMoveType(client) != MOVETYPE_WALK)
+						SetEntityMoveType(client, MOVETYPE_WALK);
 				}
 			}
-			else
+		}
+		case Class_Stealer:
+		{
+			static int blink;
+			GetClientEyePosition(client, clientPos);
+
+			GetClientEyeAngles(client, clientAngles);
+			clientAngles[0] = fixAngle(clientAngles[0]);
+			clientAngles[1] = fixAngle(clientAngles[1]);
+
+			int status;
+			for(int target=1; target<=MaxClients; target++)
 			{
-				if(Client[client].Power > 0)
+				if(!IsValidClient(target) || IsSpec(target) || IsSCP(target))
+					continue;
+
+				GetClientEyePosition(target, enemyPos);
+				if(GetVectorDistance(clientPos, enemyPos, true) > 125000)
+					continue;
+
+				GetClientEyeAngles(target, enemyAngles);
+				GetVectorAnglesTwoPoints(enemyPos, clientPos, anglesToBoss);
+
+				// fix all angles
+				enemyAngles[0] = fixAngle(enemyAngles[0]);
+				enemyAngles[1] = fixAngle(enemyAngles[1]);
+				anglesToBoss[0] = fixAngle(anglesToBoss[0]);
+				anglesToBoss[1] = fixAngle(anglesToBoss[1]);
+
+				// verify angle validity
+				if(!(fabs(enemyAngles[0] - anglesToBoss[0]) <= MAXANGLEPITCH ||
+				(fabs(enemyAngles[0] - anglesToBoss[0]) >= (360.0-MAXANGLEPITCH))))
+					continue;
+
+				if(!(fabs(enemyAngles[1] - anglesToBoss[1]) <= MAXANGLEYAW ||
+				(fabs(enemyAngles[1] - anglesToBoss[1]) >= (360.0-MAXANGLEYAW))))
+					continue;
+
+				// ensure no wall is obstructing
+				TR_TraceRayFilter(enemyPos, clientPos, (CONTENTS_SOLID | CONTENTS_AREAPORTAL | CONTENTS_GRATE), RayType_EndPoint, TraceWallsOnly);
+				TR_GetEndPosition(result);
+				if(result[0]!=clientPos[0] || result[1]!=clientPos[1] || result[2]!=clientPos[2])
+					continue;
+
+				// success
+				SciEscaped++;
+				if(SciEscaped >= ((DClassMax+SciMax)*2)+4)
 				{
-					switch(Client[client].Radio)
-					{
-						case 1:
-							Client[client].Power -= 0.005;
-
-						case 2:
-							Client[client].Power -= 0.015;
-
-						case 3:
-							Client[client].Power -= 0.045;
-
-						case 4:
-							Client[client].Power -= 0.135;
-					}
+					Client[client].Radio = 1;
+					Client[client].Power = engineTime+15.0;
+					TF2_StunPlayer(client, 8.0, 1.0, TF_STUNFLAGS_NORMALBONK|TF_STUNFLAG_NOSOUNDOREFFECT);
 				}
-
-				if(showHud)
+				else if(SciEscaped == ((DClassMax+SciMax)*2)+4)
 				{
-					SetGlobalTransTarget(client);
+					Client[client].Radio = 2;
+					TF2_StunPlayer(client, 8.0, 1.0, TF_STUNFLAGS_NORMALBONK|TF_STUNFLAG_NOSOUNDOREFFECT);
+				}
+				else
+				{
+					Client[client].Radio = -1;
+					SetEntPropFloat(client, Prop_Send, "m_flNextAttack", FAR_FUTURE);
+				}
+				break;
+			}
 
-					char buffer[256], tran[16];
-					if(Client[client].Power>1 && Client[client].Radio && Client[client].Radio<5)
+			switch(status)
+			{
+				case 1:
+				{
+					Client[client].DisableSpeed = true;
+					Client[client].Radio = 1;
+					SetEntPropFloat(client, Prop_Send, "m_flNextAttack", FAR_FUTURE);
+					SetEntProp(client, Prop_Send, "m_bCustomModelRotates", 0);
+				}
+				case 2:
+				{
+					Client[client].DisableSpeed = true;
+					Client[client].Radio = 2;
+					SetEntPropFloat(client, Prop_Send, "m_flNextAttack", 0.0);
+					SetEntProp(client, Prop_Send, "m_bCustomModelRotates", 1);
+					if(GetEntityMoveType(client) != MOVETYPE_WALK)
+						SetEntityMoveType(client, MOVETYPE_WALK);
+				}
+				default:
+				{
+					Client[client].DisableSpeed = false;
+					Client[client].Radio = 0;
+					SetEntPropFloat(client, Prop_Send, "m_flNextAttack", 0.0);
+					SetEntProp(client, Prop_Send, "m_bCustomModelRotates", 1);
+					if(GetEntityMoveType(client) != MOVETYPE_WALK)
+						SetEntityMoveType(client, MOVETYPE_WALK);
+				}
+			}
+		}
+		default:
+		{
+			if(!IsSCP(client))
+			{
+				if(!IsSpec(client))
+				{
+					if(Gamemode == Gamemode_Steals)
 					{
-						FormatEx(tran, sizeof(tran), "radio_%d", Client[client].Radio);
-						FormatEx(buffer, sizeof(buffer), "%t", "radio", tran, RoundToCeil(Client[client].Power));
+						if(showHud)
+						{
+							int weapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+							if(weapon>MaxClients && IsValidEntity(weapon) && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")==WeaponIndex[Weapon_Disarm])
+							{
+								SetHudTextParams(-1.0, 0.88, 0.35, 255, 255, 255, 255, 0, 0.1, 0.05, 0.05);
+								ShowSyncHudText(client, HudPlayer, "%T", "camera", client, RoundToCeil(Client[client].Power));
+							}
+						}
 					}
-
-					switch(Client[client].HealthPack)
+					else
 					{
-						case 1:
+						if(DisarmCheck(client))
 						{
-							Format(buffer, sizeof(buffer), "%t\n%s", "pain_killers", buffer);
+							if(showHud)
+							{
+								SetHudTextParamsEx(-1.0, Gamemode==Gamemode_Ctf ? 0.77 : 0.88, 0.35, ClassColors[Client[Client[client].Disarmer].Class], ClassColors[Client[Client[client].Disarmer].Class], 0, 0.1, 0.05, 0.05);
+								ShowSyncHudText(client, HudPlayer, "%T", "disarmed_by", client, Client[client].Disarmer);
+							}
 						}
-						case 2, 3:
+						else
 						{
-							Format(buffer, sizeof(buffer), "%t\n%s", "health_kit", buffer);
-						}
-						case 4:
-						{
-							Format(buffer, sizeof(buffer), "%t\n%s", "scp_500", buffer);
+							if(Client[client].Power > 0)
+							{
+								switch(Client[client].Radio)
+								{
+									case 1:
+										Client[client].Power -= 0.005;
+
+									case 2:
+										Client[client].Power -= 0.015;
+
+									case 3:
+										Client[client].Power -= 0.045;
+
+									case 4:
+										Client[client].Power -= 0.135;
+								}
+							}
+
+							if(showHud)
+							{
+								SetGlobalTransTarget(client);
+
+								char buffer[256], tran[16];
+								if(Client[client].Power>1 && Client[client].Radio && Client[client].Radio<5)
+								{
+									FormatEx(tran, sizeof(tran), "radio_%d", Client[client].Radio);
+									FormatEx(buffer, sizeof(buffer), "%t", "radio", tran, RoundToCeil(Client[client].Power));
+								}
+
+								switch(Client[client].HealthPack)
+								{
+									case 1:
+									{
+										Format(buffer, sizeof(buffer), "%t\n%s", "pain_killers", buffer);
+									}
+									case 2, 3:
+									{
+										Format(buffer, sizeof(buffer), "%t\n%s", "health_kit", buffer);
+									}
+									case 4:
+									{
+										Format(buffer, sizeof(buffer), "%t\n%s", "scp_500", buffer);
+									}
+								}
+
+								FormatEx(tran, sizeof(tran), "keycard_%d", Client[client].Keycard);
+
+								SetHudTextParamsEx(-1.0, Gamemode==Gamemode_Ctf ? 0.77 : 0.88, 0.35, ClassColors[Client[client].Class], ClassColors[Client[client].Class], 0, 0.1, 0.05, 0.05);
+								ShowSyncHudText(client, HudPlayer, "%t\n%s", "keycard", tran, buffer);
+							}
 						}
 					}
-
-					FormatEx(tran, sizeof(tran), "keycard_%d", Client[client].Keycard);
-
-					SetHudTextParamsEx(-1.0, Gamemode==Gamemode_Ctf ? 0.77 : 0.88, 0.35, ClassColors[Client[client].Class], ClassColors[Client[client].Class], 0, 0.1, 0.05, 0.05);
-					ShowSyncHudText(client, HudPlayer, "%t\n%s", "keycard", tran, buffer);
 				}
 			}
 		}
@@ -4236,96 +4401,109 @@ public Action CheckAlivePlayers(Handle timer)
 	if(!Enabled)
 		return Plugin_Continue;
 
-	if(Gamemode == Gamemode_Ikea)
+	switch(Gamemode)
 	{
-		for(int i=1; i<=MaxClients; i++)
-		{
-			if(IsValidClient(i) && !IsSpec(i) && Client[i].Class==Class_DBoi)
-				return Plugin_Continue;
-		}
-
-		if(DClassEscaped)
-		{
-			EndRound(Team_MTF, TFTeam_Blue);
-		}
-		else
-		{
-			EndRound(Team_SCP, TFTeam_Red);
-		}
-	}
-	else if(Gamemode == Gamemode_Nut)
-	{
-		int alive;
-		for(int i=1; i<=MaxClients; i++)
-		{
-			if(!IsValidClient(i) || IsSpec(i))
-				continue;
-
-			if(Client[i].Class==Class_173 || Client[i].Class==Class_1732)
-			{
-				if(alive == 2)
-					return Plugin_Continue;
-
-				alive = 1;
-			}
-			else if(!IsSCP(i))
-			{
-				if(alive == 1)
-					return Plugin_Continue;
-
-				alive = 2;
-			}
-		}
-
-		if(alive == 1)
-		{
-			EndRound(Team_SCP, TFTeam_Red);
-		}
-		else
+		case Gamemode_Ikea:
 		{
 			for(int i=1; i<=MaxClients; i++)
 			{
-				if(IsValidClient(i) && GetClientTeam(i)>view_as<int>(TFTeam_Spectator))
-					ChangeClientTeamEx(i, TFTeam_Blue);
+				if(IsValidClient(i) && !IsSpec(i) && Client[i].Class==Class_DBoi)
+					return Plugin_Continue;
 			}
 
-			EndRound(Team_MTF, TFTeam_Blue);
-		}
-	}
-	else
-	{
-		bool ralive, balive, ealive;
-		for(int i=1; i<=MaxClients; i++)
-		{
-			if(!IsValidClient(i) || IsSpec(i))
-				continue;
-
-			ralive = (ralive || Client[i].TeamTF()==TFTeam_Red || Client[i].TeamTF()==TFTeam_Unassigned);	// Chaos and SCPs
-			ealive = (ealive || Client[i].Class==Class_DBoi || Client[i].Class==Class_Scientist);	// DBois and Scientists
-			balive = (balive || Client[i].TeamTF()==TFTeam_Blue);				// Guards and MTF Squads
-		}
-
-		if(ealive || (ralive && balive))
-			return Plugin_Continue;
-
-		if(SciEscaped)
-		{
 			if(DClassEscaped)
-			{
-				EndRound(Team_Spec, TFTeam_Unassigned);
-			}
-			else
 			{
 				EndRound(Team_MTF, TFTeam_Blue);
 			}
+			else
+			{
+				EndRound(Team_SCP, TFTeam_Red);
+			}
 		}
-		else if(DClassEscaped)
+		case Gamemode_Nut:
 		{
-			EndRound(Team_DBoi, TFTeam_Red);
+			int alive;
+			for(int i=1; i<=MaxClients; i++)
+			{
+				if(!IsValidClient(i) || IsSpec(i))
+					continue;
+
+				if(Client[i].Class==Class_173 || Client[i].Class==Class_1732)
+				{
+					if(alive == 2)
+						return Plugin_Continue;
+
+					alive = 1;
+				}
+				else if(!IsSCP(i))
+				{
+					if(alive == 1)
+						return Plugin_Continue;
+
+					alive = 2;
+				}
+			}
+
+			if(alive == 1)
+			{
+				EndRound(Team_SCP, TFTeam_Red);
+			}
+			else
+			{
+				for(int i=1; i<=MaxClients; i++)
+				{
+					if(IsValidClient(i) && GetClientTeam(i)>view_as<int>(TFTeam_Spectator))
+						ChangeClientTeamEx(i, TFTeam_Blue);
+				}
+
+				EndRound(Team_MTF, TFTeam_Blue);
+			}
 		}
-		else
+		case Gamemode_Steals:
 		{
+			for(int i=1; i<=MaxClients; i++)
+			{
+				if(IsValidClient(i) && !IsSpec(i) && !IsSCP(i))
+					return Plugin_Continue;
+			}
+
 			EndRound(Team_SCP, TFTeam_Red);
+		}
+		default:
+		{
+			bool ralive, balive, ealive;
+			for(int i=1; i<=MaxClients; i++)
+			{
+				if(!IsValidClient(i) || IsSpec(i))
+					continue;
+
+				ralive = (ralive || Client[i].TeamTF()==TFTeam_Red || Client[i].TeamTF()==TFTeam_Unassigned);	// Chaos and SCPs
+				ealive = (ealive || Client[i].Class==Class_DBoi || Client[i].Class==Class_Scientist);	// DBois and Scientists
+				balive = (balive || Client[i].TeamTF()==TFTeam_Blue);				// Guards and MTF Squads
+			}
+
+			if(ealive || (ralive && balive))
+				return Plugin_Continue;
+
+			if(SciEscaped)
+			{
+				if(DClassEscaped)
+				{
+					EndRound(Team_Spec, TFTeam_Unassigned);
+				}
+				else
+				{
+					EndRound(Team_MTF, TFTeam_Blue);
+				}
+			}
+			else if(DClassEscaped)
+			{
+				EndRound(Team_DBoi, TFTeam_Red);
+			}
+			else
+			{
+				EndRound(Team_SCP, TFTeam_Red);
+			}
 		}
 	}
 	return Plugin_Continue;
@@ -5303,6 +5481,22 @@ bool AttemptGrabItem(int client)
 			}
 			return true;
 		}
+		else if(!StrContains(name, "scp_collectable", false))
+		{
+			DClassEscaped++
+			RemoveEntity(entity);
+			if(DClassEscaped >= SCPMax)
+			{
+				for(int i=1; i<=MaxClients; i++)
+				{
+					if(IsClientInGame(i) && IsPlayerAlive(i) && GetClientTeam(i)==view_as<int>(TFTeam_Red))
+						ChangeClientTeamEx(i, TFTeam_Blue);
+				}
+
+				EndRound(Team_DBoi, TFTeam_Blue);
+			}
+			return true;
+		}
 	}
 	else if(StrEqual(name, "func_button"))
 	{
@@ -5509,27 +5703,30 @@ bool IsFriendly(ClassEnum class1, ClassEnum class2)
 	if(class1<Class_DBoi || class2<Class_DBoi)	// Either Spectator
 		return true;
 
-	if(Gamemode == Gamemode_Ikea)
+	switch(Gamemode)
 	{
-		if(class1>=Class_DBoi && class2>=Class_DBoi && class1<Class_049 && class2<Class_049)
-			return true;
-	}
-	else if(Gamemode == Gamemode_Nut)
-	{
-		bool isNut1 = (class1==Class_173 || class1==Class_1732);
-		bool isNut2 = (class2==Class_173 || class2==Class_1732);
-		if(isNut1 && isNut2)
-			return true;
+		case Gamemode_Ikea, Gamemode_Steals:
+		{
+			if(class1>=Class_DBoi && class2>=Class_DBoi && class1<Class_049 && class2<Class_049)
+				return true;
+		}
+		case Gamemode_Nut:
+		{
+			bool isNut1 = (class1==Class_173 || class1==Class_1732);
+			bool isNut2 = (class2==Class_173 || class2==Class_1732);
+			if(isNut1 && isNut2)
+				return true;
 
-		return (!isNut1 && !isNut2);
-	}
-	else
-	{
-		if(class1<Class_Scientist && class2<Class_Scientist)	// Both are DBoi/Chaos
-			return true;
+			return (!isNut1 && !isNut2);
+		}
+		default:
+		{
+			if(class1<Class_Scientist && class2<Class_Scientist)	// Both are DBoi/Chaos
+				return true;
 
-		if(class1>=Class_Scientist && class2>=Class_Scientist && class1<Class_049 && class2<Class_049)	// Both are Scientist/MTF
-			return true;
+			if(class1>=Class_Scientist && class2>=Class_Scientist && class1<Class_049 && class2<Class_049)	// Both are Scientist/MTF
+				return true;
+		}
 	}
 
 	return (class1>=Class_049 && class2>=Class_049);	// Both are SCPs
@@ -5597,11 +5794,11 @@ public MRESReturn DHook_RoundRespawn()
 	if(Enabled || !Ready)
 		return;
 
-	for(int client=1; client<=MaxClients; client++)
+	/*for(int client=1; client<=MaxClients; client++)
 	{
 		if(IsValidClient(client) && (GetClientTeam(client)>view_as<int>(TFTeam_Spectator) || IsPlayerAlive(client)))
 			ChangeClientTeamEx(client, GetRandomInt(0, 1) ? TFTeam_Blue : TFTeam_Red);
-	}
+	}*/
 
 	DClassEscaped = 0;
 	DClassMax = 1;
@@ -5610,7 +5807,7 @@ public MRESReturn DHook_RoundRespawn()
 	SCPKilled = 0;
 	SCPMax = 0;
 
-	int entity = 0;
+	int entity;
 	int[] choosen = new int[MaxClients];
 	for(int client=1; client<=MaxClients; client++)
 	{
@@ -5652,7 +5849,17 @@ public MRESReturn DHook_RoundRespawn()
 		return;
 
 	entity = choosen[GetRandomInt(0, entity-1)];
-	Client[entity].Class = Class_DBoi;
+	switch(Gamemode)
+	{
+		case Gamemode_Nut:
+			Client[entity].Class = Class_173;
+
+		case Gamemode_Steals:
+			Client[entity].Class = Class_Stealer;
+
+		default:
+			Client[entity].Class = Class_DBoi;
+	}
 	AssignTeam(entity);
 
 	for(int client=1; client<=MaxClients; client++)
