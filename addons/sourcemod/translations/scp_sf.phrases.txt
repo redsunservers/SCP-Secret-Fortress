@@ -1,6 +1,6 @@
 "Phrases"
 {
-	// Hint Phrases [OPTIONAL]
+	// Hint Phrases
 
 	"hint_1"
 	{
@@ -108,7 +108,7 @@
 		"ru"		"SCP-3008-2 будет атаковать либо ночью, либо если оно атаковано."
 	}
 
-	// SCP-3008-1 Phrases [OPTIONAL]
+	// SCP-3008-1 Phrases
 
 	"class_dboi_ikea"
 	{
@@ -144,6 +144,52 @@
 	{
 		"en"		"Help Survivors escape.\nNeutralize other subjects.\nInstruct your soldiers."
 		"ru"		"Помогите Выжившим спастись.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным."
+	}
+	"end_screen_ikea"
+	{
+		"#format"	"{1:t},{2:d},{3:d}"
+		"en"		"{1}\n \nSurvivors Escaped: {2} / {3}"
+		"ru"		"{1}\n \nВыживших Сбежало: {2} / {3}"
+	}
+
+	// It Steals Phrases
+
+	"desc_spec_steals"
+	{
+		"en"		"Wait until the next round."
+	}
+	"class_dboi_steals"
+	{
+		"en"		"Survivor"
+	}
+	"desc_dboi_steals"
+	{
+		"en"		"Collect all orbs to win.\nToggle your flashlight using MOUSE2.\nSprint by holding MOUSE3.\nAvoid other entities."
+	}
+	"class_sci_steals"
+	{
+		"en"		"Survivor"
+	}
+	"desc_sci_steals"
+	{
+		"en"		"Collect all orbs to win.\nToggle your flashlight using MOUSE2.\nSprint by holding MOUSE3.\nAvoid other entities."
+	}
+	"team_1_steals"
+	{
+		"en"		"Survivors Won"
+	}
+	"team_2_steals"
+	{
+		"en"		"Survivors Were Spared"
+	}
+	"team_3_steals"
+	{
+		"en"		"Survivors Lost"
+	}
+	"end_screen_steals"
+	{
+		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d}"
+		"en"		"{1}\n \nSurvivors Alive: {2} / {3}\nOrbs Collected: {4} / {5}\n \nCreature was triggered {6} time(s)."
 	}
 
 	// Class Phrases
@@ -326,7 +372,14 @@
 	"desc_3008"
 	{
 		"en"		"Kill everyone during the night.\nCooperate with other SCP-3008-2.\nYou can talk to other humans."
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP-3008-2.\nВы можете говорить с людьми."
+	}
+	"class_itsteals"
+	{
+		"en"		"???"
+	}
+	"desc_itsteals"
+	{
+		"en"		"Kill everyone.\nAttack from behind avoid being seen."
 	}
 
 	// Keycard Phrases
@@ -587,6 +640,17 @@
 		"en"		"You have been disarmed!"
 		"ru"		"Вас обезоружили!"
 	}
+	"camera"	// HUD
+	{
+		"#format"	"{1:d}"
+		"en"		"Camera: {1}%% [ATTACK2]"
+		"ru"		"Camera: {1}%% [ДОП. АТАКА]"
+	}
+	"radar"	// HUD
+	{
+		"en"		"Radar Ready [RELOAD]"
+		"en"		"Radar готово [RELOAD]"
+	}
 	"now_playing"	// Chat
 	{
 		"#format"	"{1:s}"
@@ -598,12 +662,6 @@
 		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d}"
 		"en"		"{1}\n \nClass-D Escaped: {2} / {3}\nScientist(s) Survived: {4} / {5}\nTerminated SCPs: {6} / {7}"
 		"ru"		"{1}\n \nD-класса Сбежало: {2} / {3}\nУчёных Сбежало: {4} / {5}\nSCP Нейтрализовано: {6} / {7}"
-	}
-	"end_screen_ikea"	// HUD
-	{
-		"#format"	"{1:s},{2:d},{3:d}"
-		"en"		"{1}\n \nSurvivors Escaped: {2} / {3}"
-		"ru"		"{1}\n \nВыживших Сбежало: {2} / {3}"
 	}
 	"tesla_gate"	// Chat
 	{
