@@ -774,7 +774,6 @@ enum struct ClientEnum
 	KeycardEnum Keycard;
 
 	bool Triggered;
-	bool DisableSpeed;
 	bool CanTalkTo[MAXTF2PLAYERS];
 
 	int HealthPack;
@@ -793,6 +792,10 @@ enum struct ClientEnum
 	float ChargeIn;
 	float Cooldown;
 	float Pos[3];
+
+	// Sprinting
+	bool Sprinting;
+	float SprintPower;
 
 	// Revive Markers
 	int ReviveIndex;
@@ -2019,9 +2022,10 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	}
 
 	Client[client].Triggered = false;
+	Client[client].Sprinting = false;
 	Client[client].ChargeIn = 0.0;
 	Client[client].Disarmer = 0;
-	Client[client].DisableSpeed = false;
+	Client[client].SprintPower = 100.0;
 	Client[client].Power = 100.0;
 	switch(Client[client].Class)
 	{
@@ -2899,6 +2903,20 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 		}
 	}
 
+	if(buttons & IN_JUMP)
+	{
+		Client[client].Sprinting = (Client[client].SprintPower>0 && (GetEntityFlags(client) & FL_ONGROUND));
+		if(Gamemode == Gamemode_Steals)
+		{
+			buttons &= ~IN_JUMP;
+			changed = true;
+		}
+	}
+	else
+	{
+		Client[client].Sprinting = false;
+	}
+
 	if(holding[client])
 	{
 		if(!(buttons & holding[client]))
@@ -3524,7 +3542,20 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 
 public Action HookSound(int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH], int &entity, int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
 {
-	return (Enabled && IsValidClient(entity) && (IsSCP(entity) || IsSpec(entity)) && !StrContains(sample, "vo", false)) ? Plugin_Handled : Plugin_Continue;
+	if(!Enabled || !IsValidClient(entity))
+		return Plugin_Continue;
+
+	if(!StrContains(sample, "vo", false))
+		return (IsSCP(entity) || IsSpec(entity)) ? Plugin_Handled : Plugin_Continue;
+
+	if(StrContains(sample, "step", false)!=-1 && Client[entity].Sprinting)
+	{
+		volume = 1.0;
+		level += 30;
+		return Plugin_Changed;
+	}
+
+	return Plugin_Continue;
 }
 
 public Action OnTransmit(int client, int target)
@@ -3710,34 +3741,34 @@ public void OnPreThink(int client)
 		}
 		case Class_DBoi, Class_Scientist:
 		{
-			if(Client[client].Disarmer)
+			if(Gamemode == Gamemode_Steals)
 			{
-				SetSpeed(client, Gamemode==Gamemode_Steals ? 360.0 : 270.0);
+				SetSpeed(client, Client[client].Sprinting ? 360.0 : 270.0);
 			}
 			else
 			{
-				SetSpeed(client,  ? 240.0 : 270.0);
+				SetSpeed(client, Client[client].Disarmer ? 230.0 : Client[client].Sprinting ? 310.0 : 260.0);
 			}
 		}
 		case Class_Chaos:
 		{
-			SetSpeed(client, 240.0);
+			SetSpeed(client, (Client[client].Sprinting && !Client[client].Disarmer) ? 270.0 : 230.0);
 		}
 		case Class_MTF3:
 		{
-			SetSpeed(client, 240.0);
+			SetSpeed(client, Client[client].Disarmer ? 230.0 : Client[client].Sprinting ? 280.0 : 240.0);
 		}
 		case Class_Guard, Class_MTF, Class_MTF2, Class_MTFS:
 		{
-			SetSpeed(client, Client[client].Disarmer ? 240.0 : 250.0);
+			SetSpeed(client, Client[client].Disarmer ? 230.0 : Client[client].Sprinting ? 290.0 : 250.0);
 		}
 		case Class_049:
 		{
-			SetSpeed(client, 230.0);
+			SetSpeed(client, 260.0);
 		}
 		case Class_0492, Class_3008:
 		{
-			SetSpeed(client, 260.0);
+			SetSpeed(client, 290.0);
 		}
 		case Class_096:
 		{
@@ -3745,11 +3776,10 @@ public void OnPreThink(int client)
 			{
 				case 1:
 				{
-					SetSpeed(client, 210.0);
+					SetSpeed(client, 240.0);
 					if(Client[client].Power < engineTime)
 					{
 						TF2_AddCondition(client, TFCond_CritCola, 99.9);
-						Client[client].DisableSpeed = true;
 						TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 						SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_096Rage));
 						Client[client].Power = engineTime+(Client[client].Disarmer*2.0)+13.0;
@@ -3760,11 +3790,10 @@ public void OnPreThink(int client)
 				case 2:
 				{
 					TF2_RemoveCondition(client, TFCond_Dazed);
-					SetSpeed(client, 475.0);
+					SetSpeed(client, 520.0);
 					if(Client[client].Power < engineTime)
 					{
 						TF2_RemoveCondition(client, TFCond_CritCola);
-						Client[client].DisableSpeed = false;
 						TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 						SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_096));
 						Client[client].Disarmer = 0;
@@ -3796,7 +3825,7 @@ public void OnPreThink(int client)
 				}
 				default:
 				{
-					SetSpeed(client, 210.0);
+					SetSpeed(client, 240.0);
 					if(Client[client].Power > engineTime)
 						return;
 
@@ -3819,7 +3848,7 @@ public void OnPreThink(int client)
 		}
 		case Class_106:
 		{
-			SetSpeed(client, 190.0;
+			SetSpeed(client, 250.0);
 		}
 		case Class_173:
 		{
@@ -3848,7 +3877,7 @@ public void OnPreThink(int client)
 				}
 				default:
 				{
-					SetSpeed(client, 400.0);
+					SetSpeed(client, 430.0);
 				}
 			}
 		}
@@ -3881,13 +3910,13 @@ public void OnPreThink(int client)
 				}
 				default:
 				{
-					SetSpeed(client, 425.0);
+					SetSpeed(client, 450.0);
 				}
 			}
 		}
 		case Class_939, Class_9392:
 		{
-			SetSpeed(client, 280.0-(GetClientHealth(client)/55.0));
+			SetSpeed(client, 310.0-(GetClientHealth(client)/55.0));
 		}
 		case Class_Stealer:
 		{
@@ -3936,10 +3965,6 @@ public void OnPreThink(int client)
 				}
 			}
 		}
-		default:
-		{
-			SetSpeed(client, 270.0);
-		}
 	}
 
 	static float specialTick[MAXTF2PLAYERS];
@@ -3948,7 +3973,7 @@ public void OnPreThink(int client)
 
 	static float clientAngles[3], enemyAngles[3], anglesToBoss[3], result[3];
 
-	bool showHud = (Client[client].HudIn<engineTime && IsPlayerAlive(client) && !(GetClientButtons(client) & IN_SCORE));
+	bool showHud = (Client[client].HudIn<engineTime && !(GetClientButtons(client) & IN_SCORE));
 	specialTick[client] = engineTime+0.2;
 	switch(Client[client].Class)
 	{
@@ -4109,14 +4134,12 @@ public void OnPreThink(int client)
 			{
 				case 1:
 				{
-					Client[client].DisableSpeed = true;
 					Client[client].Radio = 1;
 					SetEntPropFloat(client, Prop_Send, "m_flNextAttack", FAR_FUTURE);
 					SetEntProp(client, Prop_Send, "m_bCustomModelRotates", 0);
 				}
 				case 2:
 				{
-					Client[client].DisableSpeed = true;
 					Client[client].Radio = 2;
 					SetEntPropFloat(client, Prop_Send, "m_flNextAttack", 0.0);
 					SetEntProp(client, Prop_Send, "m_bCustomModelRotates", 1);
@@ -4125,7 +4148,6 @@ public void OnPreThink(int client)
 				}
 				default:
 				{
-					Client[client].DisableSpeed = false;
 					Client[client].Radio = 0;
 					SetEntPropFloat(client, Prop_Send, "m_flNextAttack", 0.0);
 					SetEntProp(client, Prop_Send, "m_bCustomModelRotates", 1);
@@ -4207,22 +4229,60 @@ public void OnPreThink(int client)
 			{
 				if(Gamemode == Gamemode_Steals)
 				{
-					if(showHud)
+					if(Client[client].Sprinting)
 					{
-						SetGlobalTransTarget(client);
-						char buffer[32];
-						int weapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
-						if(weapon>MaxClients && IsValidEntity(weapon) && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")==WeaponIndex[Weapon_Disarm])
-							FormatEx(buffer, sizeof(buffer), "%t", "camera", RoundToCeil(Client[client].Power));
+						Client[client].SprintPower -= 1.25;
+					}
+					else
+					{
+						Client[client].SprintPower += 2.0;
+					}
 
-						SetHudTextParams(-1.0, 0.92, 0.35, 255, 255, 255, 255, 0, 0.1, 0.05, 0.05);
-						if(Client[client].Radio)
+					if(Client[client].HudIn < engineTime)
+					{
+						if(Client[client].SprintPower > 80)
 						{
-							ShowSyncHudText(client, HudPlayer, "%s\n%t", buffer, "radar");
+							ClientCommand(client, "r_screenoverlay \"\"");
+						}
+						else if(Client[client].SprintPower > 60)
+						{
+							ClientCommand(client, "r_screenoverlay \"\"");
+						}
+						else if(Client[client].SprintPower > 40)
+						{
+							ClientCommand(client, "r_screenoverlay \"\"");
+						}
+						else if(Client[client].SprintPower > 20)
+						{
+							ClientCommand(client, "r_screenoverlay \"\"");
+						}
+						else if(Client[client].SprintPower > 0)
+						{
+							ClientCommand(client, "r_screenoverlay \"\"");
 						}
 						else
 						{
-							ShowSyncHudText(client, HudPlayer, buffer);
+							ClientCommand(client, "r_screenoverlay \"\"");
+							SetEntityHealth(client, GetClientHealth(client)-1);
+						}
+
+						if(showHud)
+						{
+							SetGlobalTransTarget(client);
+							char buffer[32];
+							int weapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+							if(weapon>MaxClients && IsValidEntity(weapon) && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")==WeaponIndex[Weapon_Disarm])
+								FormatEx(buffer, sizeof(buffer), "%t", "camera", RoundToCeil(Client[client].Power));
+
+							SetHudTextParams(-1.0, 0.92, 0.35, 255, 255, 255, 255, 0, 0.1, 0.05, 0.05);
+							if(Client[client].Radio)
+							{
+								ShowSyncHudText(client, HudPlayer, "%s\n%t", buffer, "radar");
+							}
+							else
+							{
+								ShowSyncHudText(client, HudPlayer, buffer);
+							}
 						}
 					}
 				}
@@ -4254,6 +4314,19 @@ public void OnPreThink(int client)
 								case 4:
 									Client[client].Power -= 0.135;
 							}
+						}
+
+						if(Client[client].Sprinting)
+						{
+							Client[client].SprintPower -= 2.0;
+							if(Client[client].SprintPower <= 0)
+								Client[client].Sprinting = false;
+						}
+						else
+						{
+							Client[client].SprintPower += 0.75;
+							if(Client[client].SprintPower > 100)
+								Client[client].SprintPower = 100.0;
 						}
 
 						if(showHud)
@@ -5249,6 +5322,10 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		{
 			wep = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 100, 13, "2 ; 1.35 ; 28 ; 0.25 ; 252 ; 0.5", false);
 		}
+		case Weapon_Stealer:
+		{
+			wep = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 10, 14, "2 ; 1.5 ; 15 ; 0", false);
+		}
 
 		default:
 		{
@@ -5332,7 +5409,7 @@ void EndRound(TeamEnum team, TFTeam team2)
 	}
 
 	int entity = -1;
-	while((entity=FindEntityByClassname(count, "logic_relay")) != -1)
+	while((entity=FindEntityByClassname(entity, "logic_relay")) != -1)
 	{
 		char name[32];
 		GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
