@@ -187,6 +187,26 @@ enum // Collision_Group_t in const.h - m_CollisionGroup
 	LAST_SHARED_COLLISION_GROUP
 };
 
+// entity effects
+enum
+{
+	EF_BONEMERGE			= 0x001,	// Performs bone merge on client side
+	EF_BRIGHTLIGHT 			= 0x002,	// DLIGHT centered at entity origin
+	EF_DIMLIGHT 			= 0x004,	// player flashlight
+	EF_NOINTERP				= 0x008,	// don't interpolate the next frame
+	EF_NOSHADOW				= 0x010,	// Don't cast no shadow
+	EF_NODRAW				= 0x020,	// don't draw entity
+	EF_NORECEIVESHADOW		= 0x040,	// Don't receive no shadow
+	EF_BONEMERGE_FASTCULL	= 0x080,	// For use with EF_BONEMERGE. If this is set, then it places this ent's origin at its
+										// parent and uses the parent's bbox + the max extents of the aiment.
+										// Otherwise, it sets up the parent's bones every frame to figure out where to place
+										// the aiment, which is inefficient because it'll setup the parent's bones even if
+										// the parent is not in the PVS.
+	EF_ITEM_BLINK			= 0x100,	// blink an item so that the user notices it.
+	EF_PARENT_ANIMATES		= 0x200,	// always assume that the parent entity is animating
+	EF_MAX_BITS = 10
+};
+
 // entity flags, CBaseEntity::m_iEFlags
 enum
 {
@@ -2227,7 +2247,10 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelSubIndex[Client[client].Class], _, 3);
 
 	if(Gamemode == Gamemode_Steals)
+	{
 		TF2Attrib_SetByDefIndex(client, 819, 1.0);
+		TurnOnFlashlight(client);
+	}
 
 	if(Client[client].DownloadMode == 2)
 	{
@@ -2916,24 +2939,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 			}
 			else
 			{
-				// Spawn the light that only everyone else will see.
-				int ent = CreateEntityByName("point_spotlight");
-				if(ent != -1)
-				{
-					GetClientEyePosition(client, pos);
-					TeleportEntity(ent, pos, NULL_VECTOR, NULL_VECTOR);
-
-					DispatchKeyValue(ent, "spotlightlength", "1024");
-					DispatchKeyValue(ent, "spotlightwidth", "512");
-					DispatchKeyValue(ent, "rendercolor", "255 255 255");
-					DispatchSpawn(ent);
-					ActivateEntity(ent);
-					SetVariantString("!activator");
-					AcceptEntityInput(ent, "SetParent", client);
-					AcceptEntityInput(ent, "LightOn");
-
-					Client[client].HealthPack = EntIndexToEntRef(ent);
-				}
+				TurnOnFlashlight(client);
 			}
 		}
 	}
@@ -3061,6 +3067,31 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 			}
 		}
 		holding[client] = IN_ATTACK2;
+	}
+	else if(buttons & IN_RELOAD)
+	{
+		if(Gamemode==Gamemode_Steals && Client[client].Radio>0)
+		{
+			buttons &= ~IN_RELOAD;
+			changed = true;
+			Client[client].Radio--;
+
+			GetClientEyePosition(client, pos);
+			int entity = -1;
+			while((entity=FindEntityByClassname(entity, "prop_dynamic")) != -1)
+			{
+				char name[32];
+				GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
+				if(!StrContains(name, "scp_collectable", false))
+				{
+					GetEntPropVector(entity, Prop_Send, "m_vecOrigin", ang);
+					if(GetVectorDistance(pos, ang, true) < 650000)
+						CreateWeaponGlow(entity, 4.0);
+				}
+			}
+		}
+
+		holding[client] = IN_RELOAD;
 	}
 	else if(buttons & IN_ATTACK3)	// Special Attack (Radio/Self Tele)
 	{
@@ -6119,6 +6150,31 @@ void TurnOffGlow(int client)
 	Client[client].ReviveIndex = 0;
 }
 
+void TurnOnFlashlight(int client)
+{
+	if(Client[client].HealthPack)
+		TurnOffFlashlight(client);
+
+	// Spawn the light that only everyone else will see.
+	int ent = CreateEntityByName("point_spotlight");
+	if(ent == -1)
+		return;
+
+	GetClientEyePosition(client, pos);
+	TeleportEntity(ent, pos, NULL_VECTOR, NULL_VECTOR);
+
+	DispatchKeyValue(ent, "spotlightlength", "1024");
+	DispatchKeyValue(ent, "spotlightwidth", "512");
+	DispatchKeyValue(ent, "rendercolor", "255 255 255");
+	DispatchSpawn(ent);
+	ActivateEntity(ent);
+	SetVariantString("!activator");
+	AcceptEntityInput(ent, "SetParent", client);
+	AcceptEntityInput(ent, "LightOn");
+
+	Client[client].HealthPack = EntIndexToEntRef(ent);
+}
+
 void TurnOffFlashlight(int client)
 {
 	if(Gamemode!=Gamemode_Steals || !Client[client].HealthPack)
@@ -6131,6 +6187,45 @@ void TurnOffFlashlight(int client)
 		CreateTimer(0.1, Timer_RemoveEntity, Client[client].HealthPack, TIMER_FLAG_NO_MAPCHANGE);
 	}
 	Client[client].HealthPack = 0;
+}
+
+int CreateWeaponGlow(int iEntity, float flDuration)
+{
+	int iGlow = CreateEntityByName("tf_taunt_prop");
+	if (IsValidEntity(iGlow) && DispatchSpawn(iGlow))
+	{
+		int index = -1;
+		if(HasEntProp(iEntity, Prop_Send, "m_iWorldModelIndex"))
+		{
+			index = GetEntProp(iEntity, Prop_Send, "m_iWorldModelIndex");
+		}
+		else
+		{
+			index = GetEntProp(iEntity, Prop_Send, "m_nModelIndex");
+		}
+
+		if(index < 0)
+			return -1;
+
+		static char model[PLATFORM_MAX_PATH];
+		ModelIndexToString(index, model, sizeof(model));
+		SetEntPropString(iGlow, Prop_Data, "m_iName", "SZF_WEAPON_GLOW");
+		SetEntityModel(iGlow, model);
+		SetEntProp(iGlow, Prop_Send, "m_nSkin", 0);
+		
+		SetEntPropEnt(iGlow, Prop_Data, "m_hEffectEntity", iEntity);
+		SetEntProp(iGlow, Prop_Send, "m_bGlowEnabled", true);
+		
+		int iEffects = GetEntProp(iGlow, Prop_Send, "m_fEffects");
+		SetEntProp(iGlow, Prop_Send, "m_fEffects", iEffects | EF_BONEMERGE | EF_NOSHADOW | EF_NORECEIVESHADOW);
+		
+		SetVariantString("!activator");
+		AcceptEntityInput(iGlow, "SetParent", iEntity);
+		
+		CreateTimer(flDuration, Timer_RemoveEntity, EntIndexToEntRef(iGlow), TIMER_FLAG_NO_MAPCHANGE);
+	}
+	
+	return iGlow;
 }
 
 public int OnQueryFinished(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue, int userid)
