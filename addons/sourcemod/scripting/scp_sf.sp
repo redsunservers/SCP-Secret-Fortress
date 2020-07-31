@@ -134,7 +134,13 @@ enum
 	Sound_Screams,
 	Sound_Snap,
 	Sound_MTFSpawn,
-	Sound_ChaosSpawn
+	Sound_ChaosSpawn,
+
+	Sound_ItSteps,
+	Sound_ItRages,
+	Sound_ItHadEnough,
+	Sound_ItStuns,
+	Sound_ItKills
 }
 
 static const char SoundList[][] =
@@ -144,7 +150,13 @@ static const char SoundList[][] =
 	"freak_fortress_2/scp096/fullrage.mp3",		// SCP-096 Rage
 	"freak_fortress_2/scp173/scp173_kill2.mp3",	// SCP-173 Kill
 	"freak_fortress_2/scp173/scp173_mtf_spawn.mp3",	// MTF Spawn
-	"freak_fortress_2/scp-049/red_backup1.mp3"	// Chaos Spawn
+	"freak_fortress_2/scp-049/red_backup1.mp3",	// Chaos Spawn
+
+	"",	// Stealer Step Noise
+	"",	// Stealer First Rage
+	"",	// Stealer Second Rage
+	"",	// Stealer Stunned
+	""	// Player Killed
 };
 
 enum // Collision_Group_t in const.h - m_CollisionGroup
@@ -389,7 +401,7 @@ static const char ClassModel[][] =
 	"models/player/pyro.mdl",				// 939-89
 	"models/player/pyro.mdl",				// 939-53
 	"models/freak_fortress_2/scp-049/zombie049.mdl",	// 3008-2
-	"models/player/pyro.mdl"				// Stealer
+	"models/freak_fortress_2/it_steals/it_steals.mdl"				// Stealer
 };
 
 static const char ClassModelSub[][] =
@@ -416,7 +428,7 @@ static const char ClassModelSub[][] =
 	"models/player/pyro.mdl",	// 939-89
 	"models/player/pyro.mdl",	// 939-53
 	"models/player/sniper.mdl",	// 3008-2
-	"models/player/pyro.mdl"	// Stealer
+	"models/freak_fortress_2/it_steals/it_steals.mdl"	// Stealer
 };
 
 static const TFClassType ClassClass[] =
@@ -470,7 +482,7 @@ static const TFClassType ClassClassModel[] =
 	TFClass_Pyro,		// 939-89
 	TFClass_Pyro,		// 939-53
 	TFClass_Sniper,		// 3008-2
-	TFClass_Pyro		// Stealer
+	TFClass_Unknown		// Stealer
 };
 
 static const char FireDeath[][] =
@@ -671,8 +683,7 @@ enum WeaponEnum
 	Weapon_3008,
 	Weapon_3008Rage,
 
-	Weapon_Stealer,
-	Weapon_StealerRage
+	Weapon_Stealer
 }
 
 static const int WeaponIndex[] =
@@ -714,8 +725,7 @@ static const int WeaponIndex[] =
 	195,
 	195,
 
-	574,
-	727
+	574
 };
 
 enum GamemodeEnum
@@ -804,7 +814,7 @@ enum struct ClientEnum
 
 	// Music
 	float NextSongAt;
-	int CurrentSong;
+	char CurrentSong[PLATFORM_MAX_PATH];
 
 	TFTeam TeamTF()
 	{
@@ -1430,6 +1440,13 @@ public void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 
 		if(Client[client].Class==Class_106 && Client[client].Radio)
 			HideAnnotation(client);
+
+		Client[client].NextSongAt = FAR_FUTURE;
+		if(!Client[client].CurrentSong[0])
+			continue;
+
+		StopSound(client, SNDCHAN_STATIC, Client[client].CurrentSong);
+		Client[client].CurrentSong[0] = 0;
 	}
 
 	UpdateListenOverrides(FAR_FUTURE);
@@ -1589,8 +1606,11 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 		for(int target=1; target<=MaxClients; target++)
 		{
 			Client[target].NextSongAt = FAR_FUTURE;
-			if(IsValidClient(target) && Client[target].CurrentSong>=0)
-				StopSound(target, SNDCHAN_AUTO, MusicList[Client[target].CurrentSong]);
+			if(!IsValidClient(target) || !Client[target].CurrentSong[0])
+				continue;
+
+			StopSound(target, SNDCHAN_STATIC, Client[target].CurrentSong);
+			Client[target].CurrentSong[0] = 0;
 		}
 	}
 	else if(!StrContains(name, "scp_respawn", false))
@@ -3244,7 +3264,7 @@ public void OnGameFrame()
 							if(!IsValidClient(client))
 								continue;
 
-							ChangeSong(client, -1, engineTime+20.0, SoundList[Sound_MTFSpawn]);
+							ChangeSong(client, engineTime+20.0, SoundList[Sound_MTFSpawn]);
 							if(IsSCP(client))
 							{
 								count++;
@@ -3288,7 +3308,7 @@ public void OnGameFrame()
 					}
 
 					if(hasSpawned)
-						ChangeGlobalSong(-1, engineTime+20.0, SoundList[Sound_ChaosSpawn]);
+						ChangeGlobalSong(engineTime+20.0, SoundList[Sound_ChaosSpawn]);
 				}
 			}
 		}
@@ -3300,7 +3320,7 @@ public void OnGameFrame()
 		{
 			if(!NoMusic && ticks==RoundFloat(MAXTIME-MusicTimes[1]))
 			{
-				ChangeGlobalSong(1, engineTime+15.0+MusicTimes[1], MusicList[1]);
+				ChangeGlobalSong(engineTime+15.0+MusicTimes[1], MusicList[1]);
 				CPrintToChatAll("%sNow Playing: %s", PREFIX, MusicNames[1]);
 			}
 
@@ -4203,7 +4223,8 @@ public void OnPreThink(int client)
 					Client[client].Radio = 2;
 					TurnOnGlow(client, "255 0 0", 10, 700.0);
 					TF2_AddCondition(client, TFCond_CritCola);
-					TF2_StunPlayer(client, 6.0, 1.0, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
+					ChangeGlobalSong(FAR_FUTURE, SoundList[Sound_ItHadEnough]);
+					TF2_StunPlayer(client, 11.0, 1.0, TF_STUNFLAG_BONKSTUCK|TF_STUNFLAG_NOSOUNDOREFFECT);
 				}
 				else if(!SCPKilled && SciEscaped==DClassMax+SciMax+2)
 				{
@@ -4212,7 +4233,8 @@ public void OnPreThink(int client)
 					Client[client].Power = engineTime+15.0;
 					TurnOnGlow(client, "255 0 0", 10, 600.0);
 					TF2_AddCondition(client, TFCond_CritCola, 15.0);
-					TF2_StunPlayer(client, 3.5, 1.0, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
+					ChangeGlobalSong(Client[client].Power, SoundList[Sound_ItRages]);
+					TF2_StunPlayer(client, 4.0, 1.0, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
 				}
 				else
 				{
@@ -4383,7 +4405,7 @@ public void OnPreThink(int client)
 	if(!NoMusic && Client[client].NextSongAt<engineTime)
 	{
 		int song = GetRandomInt(2, sizeof(MusicList)-1);
-		ChangeSong(client, song, MusicTimes[song]+engineTime, MusicList[song]);
+		ChangeSong(client, MusicTimes[song]+engineTime, MusicList[song]);
 		CPrintToChat(client, "%s%t", PREFIX, "now_playing", MusicNames[song]);
 	}
 
@@ -4969,7 +4991,7 @@ public Action Timer_ConnectPost(Handle timer, int userid)
 	QueryClientConVar(client, "cl_downloadfilter", OnQueryFinished, userid);
 
 	if(!NoMusic)
-		ChangeSong(client, 0, MusicTimes[0]+GetEngineTime(), MusicList[0]);
+		ChangeSong(client, MusicTimes[0]+GetEngineTime(), MusicList[0]);
 
 	PrintToConsole(client, " \n \nWelcome to SCP: Secret Fortress\n \nThis is a gamemode based on the SCP series and community\nPlugin is created by Batfoxkid\n ");
 	PrintToConsole(client, "If you like to support the gamemode, you can join Gamers Freak Fortress community at https://discord.gg/JWE72cs\n ");
@@ -4979,31 +5001,29 @@ public Action Timer_ConnectPost(Handle timer, int userid)
 	return Plugin_Continue;
 }
 
-void ChangeSong(int client, int song, float next, const char[] filepath)
+void ChangeSong(int client, float next, const char[] filepath)
 {
-	if(Client[client].CurrentSong >= 0)
-		StopSound(client, SNDCHAN_AUTO, MusicList[Client[client].CurrentSong]);
+	if(Client[client].CurrentSong[0])
+		StopSound(client, SNDCHAN_STATIC, Client[client].CurrentSong);
 
 	if(Client[client].DownloadMode)
 	{
-		Client[client].CurrentSong = -1;
+		Client[client].CurrentSong[0] = 0;
 		Client[client].NextSongAt = FAR_FUTURE;
 		return;
 	}
 
-	Client[client].CurrentSong = song;
+	strcopy(Client[client].CurrentSong, sizeof(Client[].CurrentSong), filepath);
 	Client[client].NextSongAt = next;
-	ClientCommand(client, "playgamesound %s", filepath);
-	//if(song < 2)
-		//ClientCommand(client, "playgamesound %s", filepath);
+	EmitSoundToClient(client, filepath, _, SNDCHAN_STATIC, SNDLEVEL_NONE);
 }
 
-void ChangeGlobalSong(int song, float next, const char[] filepath)
+void ChangeGlobalSong(float next, const char[] filepath)
 {
 	for(int client=1; client<=MaxClients; client++)
 	{
 		if(IsValidClient(client))
-			ChangeSong(client, song, next, filepath);
+			ChangeSong(client, next, filepath);
 	}
 }
 
@@ -5726,21 +5746,17 @@ bool AttemptGrabItem(int client)
 
 					EndRound(Team_DBoi, TFTeam_Blue);
 				}
-				else if(left == 1)
-				{
-					PrintCenterTextAll("DIE");
-				}
-				else if(!GetRandomInt(0, 9))
-				{
-					PrintCenterTextAll("BEHIND YOU");
-				}
-				else if(left == 2)
-				{
-					PrintCenterTextAll("200");
-				}
 				else
 				{
-					PrintCenterTextAll("%d", left);
+					float engineTime = GetEngineTime()+0.7;
+					for(int i=1; i<=MaxClients; i++)
+					{
+						if(!IsClientInGame(i) || !IsPlayerAlive(i) || IsSCP(i))
+							continue;
+
+						Client[i].HudIn = engineTime;
+						ClientCommand(i, "r_screenoverlay it_steals/numbers/%d.vmt", left);
+					}
 				}
 			}
 			return true;
