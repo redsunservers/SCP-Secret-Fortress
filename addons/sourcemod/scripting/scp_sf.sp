@@ -4337,6 +4337,12 @@ public void OnPreThink(int client)
 				}
 				else if(!SCPKilled && SciEscaped==DClassMax+SciMax+2)
 				{
+					for(target=1; target<=MaxClients; target++)
+					{
+						if(IsValidClient(target))
+							ClientCommand(target, "playgamesound %s", SoundList[Sound_ItRages]);
+					}
+
 					SCPKilled = 1;
 					Client[client].Radio = 1;
 					Client[client].Power = engineTime+15.0;
@@ -4459,13 +4465,22 @@ public void OnPreThink(int client)
 						{
 							Client[client].SprintPower -= 2.0;
 							if(Client[client].SprintPower <= 0)
+							{
+								PrintKeyHintText(client, "%t", "sprint", 0);
 								Client[client].Sprinting = false;
+							}
+							else
+							{
+								PrintKeyHintText(client, "%t", "sprint", RoundToCeil(Client[client].SprintPower));
+							}
 						}
 						else
 						{
-							Client[client].SprintPower += 0.75;
-							if(Client[client].SprintPower > 100)
-								Client[client].SprintPower = 100.0;
+							if(Client[client].SprintPower < 100)
+							{
+								Client[client].SprintPower += 0.75;
+								PrintKeyHintText(client, "%t", "sprint", RoundToFloor(Client[client].SprintPower));
+							}
 						}
 
 						if(showHud)
@@ -4758,13 +4773,36 @@ public Action CheckAlivePlayers(Handle timer)
 		}
 		case Gamemode_Steals:
 		{
+			bool salive, alive;
 			for(int i=1; i<=MaxClients; i++)
 			{
-				if(IsValidClient(i) && !IsSpec(i) && !IsSCP(i))
-					return Plugin_Continue;
+				if(!IsValidClient(i) || IsSpec(i))
+					continue;
+
+				if(IsSCP(i))
+				{
+					salive = true;
+				}
+				else
+				{
+					alive = true;
+				}
 			}
 
-			EndRound(Team_SCP, TFTeam_Red);
+			if(!salive)
+			{
+				for(int i=1; i<=MaxClients; i++)
+				{
+					if(IsValidClient(i) && GetClientTeam(i)>view_as<int>(TFTeam_Spectator))
+						ChangeClientTeamEx(i, TFTeam_Blue);
+				}
+
+				EndRound(Team_MTF, TFTeam_Blue);
+			}
+			else if(!alive)
+			{
+				EndRound(Team_SCP, TFTeam_Red);
+			}
 		}
 		default:
 		{
@@ -6327,8 +6365,8 @@ public MRESReturn DHook_RoundRespawn()
 	SCPKilled = 0;
 	SCPMax = 0;
 
-	int entity;
-	int[] choosen = new int[MaxClients];
+	int total;
+	int[] clients = new int[MaxClients];
 	for(int client=1; client<=MaxClients; client++)
 	{
 		Client[client].NextSongAt = 0.0;
@@ -6340,7 +6378,7 @@ public MRESReturn DHook_RoundRespawn()
 
 		if(TestForceClass[client] <= Class_Spec)
 		{
-			choosen[entity++] = client;
+			clients[total++] = client;
 			continue;
 		}
 
@@ -6365,29 +6403,29 @@ public MRESReturn DHook_RoundRespawn()
 		AssignTeam(client);
 	}
 
-	if(!entity)
+	if(!clients)
 		return;
 
-	entity = choosen[GetRandomInt(0, entity-1)];
+	int client = clients[GetRandomInt(0, total-1)];
 	switch(Gamemode)
 	{
 		case Gamemode_Nut:
-			Client[entity].Class = Class_173;
+			Client[client].Class = Class_173;
 
 		case Gamemode_Steals:
-			Client[entity].Class = Class_Stealer;
+			Client[client].Class = total>1 ? Class_Stealer : Class_DBoi;
 
 		default:
-			Client[entity].Class = Class_DBoi;
+			Client[client].Class = Class_DBoi;
 	}
-	AssignTeam(entity);
+	AssignTeam(client);
 
-	for(int client=1; client<=MaxClients; client++)
+	for(int i; i<total; i++)
 	{
-		if(client==entity || !IsValidClient(client) || TestForceClass[client]>Class_Spec || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
+		if(clients[i] == client)
 			continue;
 
-		switch(Client[client].Setup(view_as<TFTeam>(GetRandomInt(2, 3)), IsFakeClient(client)))
+		switch(Client[clients[i]].Setup(view_as<TFTeam>(GetRandomInt(2, 3)), IsFakeClient(clients[i])))
 		{
 			case Class_DBoi:
 			{
@@ -6399,11 +6437,11 @@ public MRESReturn DHook_RoundRespawn()
 			}
 			default:
 			{
-				if(IsSCP(client))
+				if(IsSCP(clients[i]))
 					SCPMax++;
 			}
 		}
-		AssignTeam(client);
+		AssignTeam(clients[i]);
 	}
 
 	Enabled = true;

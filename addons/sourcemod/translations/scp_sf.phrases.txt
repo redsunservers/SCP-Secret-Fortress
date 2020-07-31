@@ -651,6 +651,12 @@
 		"en"		"Radar Ready [RELOAD]"
 		"ru"		"Radar готово [RELOAD]"
 	}
+	"sprint"	// Hint
+	{
+		"#format"	"{1:d}"
+		"en"		"Sprinting: {1}%%"
+		"ru"		"Sprinting: {1}%%"
+	}
 	"now_playing"	// Chat
 	{
 		"#format"	"{1:s}"
