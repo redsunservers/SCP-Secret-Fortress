@@ -1,4 +1,4 @@
-sound/scpsl/music|exts=.mp3
+sound/scpsl|exts=.mp3,.wav
 sound/freak_fortress_2/scp096|exts=.mp3
 sound/freak_fortress_2/scp173|exts=.mp3
 sound/freak_fortress_2/scp-049|exts=.mp3

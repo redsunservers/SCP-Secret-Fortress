@@ -152,11 +152,11 @@ static const char SoundList[][] =
 	"freak_fortress_2/scp173/scp173_mtf_spawn.mp3",	// MTF Spawn
 	"freak_fortress_2/scp-049/red_backup1.mp3",	// Chaos Spawn
 
-	"scp_mode/it_steals/monster_step.wav",		// Stealer Step Noise
-	"scp_mode/it_steals/enraged.mp3",		// Stealer First Rage
-	"scp_mode/it_steals/youhadyourchance.mp3",	// Stealer Second Rage
-	"scp_mode/it_steals/stunned.mp3",		// Stealer Stunned
-	"scp_mode/it_steals/deathcam.mp3"		// Player Killed
+	"scpsl/it_steals/monster_step.wav",		// Stealer Step Noise
+	"scpsl/it_steals/enraged.mp3",		// Stealer First Rage
+	"scpsl/it_steals/youhadyourchance.mp3",	// Stealer Second Rage
+	"scpsl/it_steals/stunned.mp3",		// Stealer Stunned
+	"scpsl/it_steals/deathcam.mp3"		// Player Killed
 };
 
 enum // Collision_Group_t in const.h - m_CollisionGroup
@@ -1452,8 +1452,13 @@ public void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 		if(!IsValidClient(client))
 			continue;
 
-		TurnOffFlashlight(client);
-		TurnOffGlow(client);
+		if(Gamemode == Gamemode_Steals)
+		{
+			ClientCommand(client, "r_screenoverlay \"\"");
+			TurnOffFlashlight(client);
+			TurnOffGlow(client);
+		}
+
 		if(TF2_GetPlayerClass(client) == TFClass_Sniper)
 			TF2_SetPlayerClass(client, TFClass_Soldier);
 
@@ -2075,7 +2080,10 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 		{
 			Client[client].Keycard = Keycard_None;
 			Client[client].HealthPack = 0;
-			Client[client].Radio = Gamemode==Gamemode_Steals ? 3 : 0;
+			if(Gamemode == Gamemode_Steals)
+				TurnOnFlashlight(client);
+
+			Client[client].Radio = Gamemode==Gamemode_Steals ? 2 : 0;
 			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_None));
 		}
 		case Class_Chaos:
@@ -2089,7 +2097,10 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 		{
 			Client[client].Keycard = Keycard_Scientist;
 			Client[client].HealthPack = Gamemode==Gamemode_Steals ? 0 : 2;
-			Client[client].Radio = Gamemode==Gamemode_Steals ? 3 : 0;
+			if(Gamemode == Gamemode_Steals)
+				TurnOnFlashlight(client);
+
+			Client[client].Radio = Gamemode==Gamemode_Steals ? 2 : 0;
 			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_None));
 		}
 		case Class_Guard:
@@ -2249,7 +2260,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	if(Gamemode == Gamemode_Steals)
 	{
 		TF2Attrib_SetByDefIndex(client, 819, 1.0);
-		TurnOnFlashlight(client);
+		SetEntProp(client, Prop_Send, "m_bGlowEnabled", 0);
 	}
 
 	if(Client[client].DownloadMode == 2)
@@ -2949,6 +2960,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 		Client[client].Sprinting = (Client[client].SprintPower>0 && (GetEntityFlags(client) & FL_ONGROUND));
 		if(Gamemode == Gamemode_Steals)
 		{
+			Client[client].Pos[0] = engineTime+3.5;
 			buttons &= ~IN_JUMP;
 			changed = true;
 		}
@@ -3075,6 +3087,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 			buttons &= ~IN_RELOAD;
 			changed = true;
 			Client[client].Radio--;
+			Client[client].Pos[0] = engineTime+5.0;
 
 			GetClientEyePosition(client, pos);
 			int entity = -1;
@@ -3289,6 +3302,7 @@ public void OnGameFrame()
 				}
 				case Gamemode_Steals:
 				{
+					SciEscaped++;
 					for(int client=1; client<=MaxClients; client++)
 					{
 						if(IsValidClient(client) && (Client[client].Class==Class_DBoi || Client[client].Class==Class_Scientist))
@@ -3837,6 +3851,7 @@ public void OnPreThink(int client)
 		{
 			if(Gamemode == Gamemode_Steals)
 			{
+				SetEntProp(client, Prop_Send, "m_bGlowEnabled", Client[client].Pos[0]>engineTime);
 				SetSpeed(client, Client[client].Sprinting ? 360.0 : 270.0);
 			}
 			else
@@ -4035,7 +4050,7 @@ public void OnPreThink(int client)
 				}*/
 				case 1:
 				{
-					SetSpeed(client, 330.0);
+					SetSpeed(client, 400.0);
 					if(Client[client].Power > engineTime)
 						return;
 
@@ -4045,12 +4060,12 @@ public void OnPreThink(int client)
 				}
 				case 2:
 				{
-					SetSpeed(client, 400.0);
+					SetSpeed(client, 500.0);
 					return;
 				}
 				default:
 				{
-					SetSpeed(client, 400.0);
+					SetSpeed(client, 350.0+((SciEscaped/(SciMax+DClassMax)*50.0)));
 					GetClientAbsOrigin(client, clientPos);
 					for(int target=1; target<=MaxClients; target++)
 					{
@@ -5860,8 +5875,16 @@ bool AttemptGrabItem(int client)
 				{
 					for(int i=1; i<=MaxClients; i++)
 					{
-						if(IsClientInGame(i) && IsPlayerAlive(i) && GetClientTeam(i)==view_as<int>(TFTeam_Red))
-							ChangeClientTeamEx(i, TFTeam_Blue);
+						if(!IsClientInGame(i) || !IsPlayerAlive(i))
+							continue;
+
+						if(IsSCP(i))
+						{
+							ForcePlayerSuicide(i);
+							continue;
+						}
+
+						ChangeClientTeamEx(i, TFTeam_Blue);
 					}
 
 					EndRound(Team_DBoi, TFTeam_Blue);
@@ -6160,6 +6183,7 @@ void TurnOnFlashlight(int client)
 	if(ent == -1)
 		return;
 
+	static float pos[3];
 	GetClientEyePosition(client, pos);
 	TeleportEntity(ent, pos, NULL_VECTOR, NULL_VECTOR);
 
