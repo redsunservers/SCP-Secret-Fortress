@@ -168,21 +168,21 @@ bool AttemptGrabItem(int client, bool mode=false)
 		if(!StrContains(name, "scp_keycard_", false))
 		{
 			if(mode)
-				RemoveEntity(entity);
+				AcceptEntityInput(entity, "KillHierarchy");
 
 			return true;
 		}
 		else if(!StrContains(name, "scp_healthkit", false))
 		{
 			if(mode)
-				RemoveEntity(entity);
+				AcceptEntityInput(entity, "KillHierarchy");
 
 			return true;
 		}
 		else if(!StrContains(name, "scp_weapon", false))
 		{
 			if(mode)
-				RemoveEntity(entity);
+				AcceptEntityInput(entity, "KillHierarchy");
 
 			return true;
 		}
@@ -200,6 +200,14 @@ bool AttemptGrabItem(int client, bool mode=false)
 					AcceptEntityInput(entity, "FireUser3", client, client);
 			}
 			return true;
+		}
+		else if(!StrContains(name, "scp_collectable", false))
+		{
+			if(TF2_GetClientTeam(client) <= TFTeam_Spectator)
+				return true;
+
+			AcceptEntityInput(entity, "FireUser1", client, client);
+			AcceptEntityInput(entity, "KillHierarchy");
 		}
 	}
 	else if(StrEqual(name, "func_button"))

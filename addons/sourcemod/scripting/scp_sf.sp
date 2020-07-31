@@ -40,7 +40,7 @@ void DisplayCredits(int client)
 	PrintToConsole(client, "SCP-106 | Spyer | forums.alliedmods.net/member.php?u=272596");
 
 	PrintToConsole(client, "Cosmic Inspiration | Marxvee | forums.alliedmods.net/member.php?u=289257");
-	PrintToConsole(client, "Is Cute | Artvin | steamcommunity.com/id/laz_boyx");
+	PrintToConsole(client, "Map Development and Gamemode Co-Owner | Artvin | steamcommunity.com/id/laz_boyx");
 }
 
 #define MAJOR_REVISION	"1"
@@ -152,11 +152,11 @@ static const char SoundList[][] =
 	"freak_fortress_2/scp173/scp173_mtf_spawn.mp3",	// MTF Spawn
 	"freak_fortress_2/scp-049/red_backup1.mp3",	// Chaos Spawn
 
-	"",	// Stealer Step Noise
-	"",	// Stealer First Rage
-	"",	// Stealer Second Rage
-	"",	// Stealer Stunned
-	""	// Player Killed
+	"scp_mode/it_steals/monster_step.wav",		// Stealer Step Noise
+	"scp_mode/it_steals/enraged.mp3",		// Stealer First Rage
+	"scp_mode/it_steals/youhadyourchance.mp3",	// Stealer Second Rage
+	"scp_mode/it_steals/stunned.mp3",		// Stealer Stunned
+	"scp_mode/it_steals/deathcam.mp3"		// Player Killed
 };
 
 enum // Collision_Group_t in const.h - m_CollisionGroup
@@ -401,7 +401,7 @@ static const char ClassModel[][] =
 	"models/player/pyro.mdl",				// 939-89
 	"models/player/pyro.mdl",				// 939-53
 	"models/freak_fortress_2/scp-049/zombie049.mdl",	// 3008-2
-	"models/freak_fortress_2/it_steals/it_steals.mdl"				// Stealer
+	"models/freak_fortress_2/it_steals/it_steals_v39.mdl"	// Stealer
 };
 
 static const char ClassModelSub[][] =
@@ -428,7 +428,7 @@ static const char ClassModelSub[][] =
 	"models/player/pyro.mdl",	// 939-89
 	"models/player/pyro.mdl",	// 939-53
 	"models/player/sniper.mdl",	// 3008-2
-	"models/freak_fortress_2/it_steals/it_steals.mdl"	// Stealer
+	"models/freak_fortress_2/it_steals/it_steals_v39.mdl"	// Stealer
 };
 
 static const TFClassType ClassClass[] =
@@ -455,7 +455,7 @@ static const TFClassType ClassClass[] =
 	TFClass_Pyro,		// 939-89
 	TFClass_Pyro,		// 939-53
 	TFClass_Sniper,		// 3008-2
-	TFClass_Pyro		// Stealer
+	TFClass_Spy		// Stealer
 };
 
 static const TFClassType ClassClassModel[] =
@@ -1287,7 +1287,8 @@ public void OnMapStart()
 
 	for(int i; i<sizeof(ClassModelSub); i++)
 	{
-		ClassModelSubIndex[i] = PrecacheModel(ClassModelSub[i], true);
+		if(FileExists(ClassModelSub[i], true))
+			ClassModelSubIndex[i] = PrecacheModel(ClassModelSub[i], true);
 	}
 
 	/*for(int i; i<sizeof(KeycardModel); i++)
@@ -1375,6 +1376,7 @@ public void OnMapStart()
 		else if(ClassEnabled[Class_Stealer])
 		{
 			Gamemode = Gamemode_Steals;
+			SetCommandFlags("r_screenoverlay", GetCommandFlags("r_screenoverlay") & ~FCVAR_CHEAT);
 		}
 	}
 
@@ -2224,6 +2226,9 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelIndex[Client[client].Class], _, 0);
 	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelSubIndex[Client[client].Class], _, 3);
 
+	if(Gamemode == Gamemode_Steals)
+		TF2Attrib_SetByDefIndex(client, 819, 1.0);
+
 	if(Client[client].DownloadMode == 2)
 	{
 		TF2Attrib_SetByDefIndex(client, 406, 4.0);
@@ -2741,6 +2746,9 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 	if(flags & TF_DEATHFLAG_DEADRINGER)
 		return Plugin_Handled;
 
+	if(Gamemode == Gamemode_Steals)
+		ClientCommand(client, "r_screenoverlay \"\"");
+
 	CreateTimer(1.0, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
 	if(GetClientTeam(client) == view_as<int>(TFTeam_Unassigned))
 		ChangeClientTeamEx(client, TFTeam_Red);
@@ -2815,19 +2823,26 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 		return Plugin_Handled;
 	}
 
-	if(Client[attacker].Class == Class_049)
+	switch(Client[attacker].Class)
 	{
-		if(GetEntityFlags(client) & FL_ONGROUND)
+		case Class_049:
 		{
-			RequestFrame(RemoveRagdoll, client);
-			CreateSpecialDeath(client);
+			if(GetEntityFlags(client) & FL_ONGROUND)
+			{
+				RequestFrame(RemoveRagdoll, client);
+				CreateSpecialDeath(client);
+			}
+			ChangeClientTeamEx(client, view_as<TFTeam>(GetClientTeam(attacker)));
+			SpawnReviveMarker(client, GetClientTeam(attacker));
 		}
-		ChangeClientTeamEx(client, view_as<TFTeam>(GetClientTeam(attacker)));
-		SpawnReviveMarker(client, GetClientTeam(attacker));
-	}
-	else if(Client[attacker].Class == Class_173)
-	{
-		EmitSoundToAll(SoundList[Sound_Snap], client, SNDCHAN_BODY, SNDLEVEL_TRAIN, _, _, _, client);
+		case Class_173:
+		{
+			EmitSoundToAll(SoundList[Sound_Snap], client, SNDCHAN_BODY, SNDLEVEL_TRAIN, _, _, _, client);
+		}
+		case Class_Stealer:
+		{
+			ClientCommand(client, "playgamesound %s", SoundList[Sound_ItKills]);
+		}
 	}
 	return Plugin_Handled;
 }
@@ -3110,26 +3125,66 @@ public void OnGameFrame()
 		ticks++;
 		if(!(ticks % 180))
 		{
-			if(Gamemode == Gamemode_Ikea)
+			switch(Gamemode)
 			{
-				if(SciEscaped)
+				case Gamemode_Ikea:
 				{
-					SciEscaped = 0;
-
-					int count;
-					static int choosen[MAXTF2PLAYERS];
-					for(int client=1; client<=MaxClients; client++)
+					if(SciEscaped)
 					{
-						if(IsValidClient(client) && IsSpec(client) && GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
-							choosen[count++] = client;
+						SciEscaped = 0;
+
+						int count;
+						static int choosen[MAXTF2PLAYERS];
+						for(int client=1; client<=MaxClients; client++)
+						{
+							if(IsValidClient(client) && IsSpec(client) && GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
+								choosen[count++] = client;
+						}
+
+						if(count)
+						{
+							count = choosen[GetRandomInt(0, count-1)];
+							Client[count].Class = Class_MTF3;
+							AssignTeam(count);
+							RespawnPlayer(count);
+
+							for(int client=1; client<=MaxClients; client++)
+							{
+								if(!IsValidClient(client))
+									continue;
+
+								if(Client[client].Class == Class_3008)
+								{
+									Client[client].Radio = 0;
+									TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
+									SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_3008));
+									continue;
+								}
+
+								if(!IsSpec(client) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
+									continue;
+
+								Client[client].Class = GetRandomInt(0, 3) ? Class_MTF : Class_MTF2;
+								AssignTeam(client);
+								RespawnPlayer(client);
+							}
+						}
+
+						count = -1;
+						while((count=FindEntityByClassname(count, "logic_relay")) != -1)
+						{
+							char name[32];
+							GetEntPropString(count, Prop_Data, "m_iName", name, sizeof(name));
+							if(StrEqual(name, "scp_time_day", false))
+							{
+								AcceptEntityInput(count, "FireUser1");
+								break;
+							}
+						}
 					}
-
-					if(count)
+					else
 					{
-						count = choosen[GetRandomInt(0, count-1)];
-						Client[count].Class = Class_MTF3;
-						AssignTeam(count);
-						RespawnPlayer(count);
+						SciEscaped = 1;
 
 						for(int client=1; client<=MaxClients; client++)
 						{
@@ -3138,177 +3193,148 @@ public void OnGameFrame()
 
 							if(Client[client].Class == Class_3008)
 							{
-								Client[client].Radio = 0;
+								Client[client].Radio = 1;
 								TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
-								SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_3008));
+								SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_3008Rage));
 								continue;
 							}
 
 							if(!IsSpec(client) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
 								continue;
 
-							Client[client].Class = GetRandomInt(0, 3) ? Class_MTF : Class_MTF2;
+							Client[client].Class = Class_3008;
 							AssignTeam(client);
 							RespawnPlayer(client);
 						}
-					}
 
-					count = -1;
-					while((count=FindEntityByClassname(count, "logic_relay")) != -1)
-					{
-						char name[32];
-						GetEntPropString(count, Prop_Data, "m_iName", name, sizeof(name));
-						if(StrEqual(name, "scp_time_day", false))
+						int entity = -1;
+						while((entity=FindEntityByClassname(entity, "logic_relay")) != -1)
 						{
-							AcceptEntityInput(count, "FireUser1");
-							break;
-						}
-					}
-				}
-				else
-				{
-					SciEscaped = 1;
-
-					for(int client=1; client<=MaxClients; client++)
-					{
-						if(!IsValidClient(client))
-							continue;
-
-						if(Client[client].Class == Class_3008)
-						{
-							Client[client].Radio = 1;
-							TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
-							SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_3008Rage));
-							continue;
-						}
-
-						if(!IsSpec(client) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
-							continue;
-
-						Client[client].Class = Class_3008;
-						AssignTeam(client);
-						RespawnPlayer(client);
-					}
-
-					int entity = -1;
-					while((entity=FindEntityByClassname(entity, "logic_relay")) != -1)
-					{
-						char name[32];
-						GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
-						if(StrEqual(name, "scp_time_night", false))
-						{
-							AcceptEntityInput(entity, "FireUser1");
-							break;
-						}
-					}
-				}
-			}
-			else if(Gamemode == Gamemode_Nut)
-			{
-				if(GetRandomInt(0, 2))
-				{
-					int count;
-					static int choosen[MAXTF2PLAYERS];
-					for(int client=1; client<=MaxClients; client++)
-					{
-						if(IsValidClient(client) && IsSpec(client) && GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
-							choosen[count++] = client;
-					}
-
-					if(count)
-					{
-						count = choosen[GetRandomInt(0, count-1)];
-						Client[count].Class = Class_MTF3;
-						AssignTeam(count);
-						RespawnPlayer(count);
-
-						for(int client=1; client<=MaxClients; client++)
-						{
-							if(!IsValidClient(client))
-								continue;
-
-							if(!IsSpec(client) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
-								continue;
-
-							Client[client].Class = GetRandomInt(0, 2) ? Class_MTF : Class_MTF2;
-							AssignTeam(client);
-							RespawnPlayer(client);
-						}
-						CPrintToChatAll("%s%t", PREFIX, "mtf_spawn");
-						CPrintToChatAll("%s%t", PREFIX, "mtf_spawn_nut_over");
-					}
-				}
-			}
-			else
-			{
-				if(GetRandomInt(0, 1))
-				{
-					int count;
-					static int choosen[MAXTF2PLAYERS];
-					for(int client=1; client<=MaxClients; client++)
-					{
-						if(IsValidClient(client) && IsSpec(client) && GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
-							choosen[count++] = client;
-					}
-
-					if(count)
-					{
-						count = choosen[GetRandomInt(0, count-1)];
-						Client[count].Class = Class_MTF3;
-						AssignTeam(count);
-						RespawnPlayer(count);
-
-						count = 0;
-						for(int client=1; client<=MaxClients; client++)
-						{
-							if(!IsValidClient(client))
-								continue;
-
-							ChangeSong(client, engineTime+20.0, SoundList[Sound_MTFSpawn]);
-							if(IsSCP(client))
+							char name[32];
+							GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
+							if(StrEqual(name, "scp_time_night", false))
 							{
-								count++;
-								continue;
+								AcceptEntityInput(entity, "FireUser1");
+								break;
 							}
+						}
+					}
+				}
+				case Gamemode_Nut:
+				{
+					if(GetRandomInt(0, 2))
+					{
+						int count;
+						static int choosen[MAXTF2PLAYERS];
+						for(int client=1; client<=MaxClients; client++)
+						{
+							if(IsValidClient(client) && IsSpec(client) && GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
+								choosen[count++] = client;
+						}
+
+						if(count)
+						{
+							count = choosen[GetRandomInt(0, count-1)];
+							Client[count].Class = Class_MTF3;
+							AssignTeam(count);
+							RespawnPlayer(count);
+
+							for(int client=1; client<=MaxClients; client++)
+							{
+								if(!IsValidClient(client))
+									continue;
+
+								if(!IsSpec(client) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
+									continue;
+
+								Client[client].Class = GetRandomInt(0, 2) ? Class_MTF : Class_MTF2;
+								AssignTeam(client);
+								RespawnPlayer(client);
+							}
+							CPrintToChatAll("%s%t", PREFIX, "mtf_spawn");
+							CPrintToChatAll("%s%t", PREFIX, "mtf_spawn_nut_over");
+						}
+					}
+				}
+				case Gamemode_Steals:
+				{
+					for(int client=1; client<=MaxClients; client++)
+					{
+						if(IsValidClient(client) && (Client[client].Class==Class_DBoi || Client[client].Class==Class_Scientist))
+							Client[client].Radio++;
+					}
+				}
+				default:
+				{
+					if(GetRandomInt(0, 1))
+					{
+						int count;
+						static int choosen[MAXTF2PLAYERS];
+						for(int client=1; client<=MaxClients; client++)
+						{
+							if(IsValidClient(client) && IsSpec(client) && GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
+								choosen[count++] = client;
+						}
+
+						if(count)
+						{
+							count = choosen[GetRandomInt(0, count-1)];
+							Client[count].Class = Class_MTF3;
+							AssignTeam(count);
+							RespawnPlayer(count);
+
+							count = 0;
+							for(int client=1; client<=MaxClients; client++)
+							{
+								if(!IsValidClient(client))
+									continue;
+
+								ChangeSong(client, engineTime+20.0, SoundList[Sound_MTFSpawn]);
+								if(IsSCP(client))
+								{
+									count++;
+									continue;
+								}
+
+								if(!IsSpec(client) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
+									continue;
+
+								Client[client].Class = GetRandomInt(0, 3) ? Class_MTF : Class_MTF2;
+								AssignTeam(client);
+								RespawnPlayer(client);
+							}
+							CPrintToChatAll("%s%t", PREFIX, "mtf_spawn");
+
+							if(count > 5)
+							{
+								CPrintToChatAll("%s%t", PREFIX, "mtf_spawn_scp_over");
+							}
+							else if(count)
+							{
+								CPrintToChatAll("%s%t", PREFIX, "mtf_spawn_scp", count);
+							}
+						}
+					}
+					else
+					{
+						bool hasSpawned;
+						for(int client=1; client<=MaxClients; client++)
+						{
+							if(!IsValidClient(client))
+								continue;
 
 							if(!IsSpec(client) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
 								continue;
 
-							Client[client].Class = GetRandomInt(0, 3) ? Class_MTF : Class_MTF2;
+							Client[client].Class = Class_Chaos;
 							AssignTeam(client);
 							RespawnPlayer(client);
+							hasSpawned = true;
 						}
-						CPrintToChatAll("%s%t", PREFIX, "mtf_spawn");
 
-						if(count > 5)
-						{
-							CPrintToChatAll("%s%t", PREFIX, "mtf_spawn_scp_over");
-						}
-						else if(count)
-						{
-							CPrintToChatAll("%s%t", PREFIX, "mtf_spawn_scp", count);
-						}
+						if(hasSpawned)
+							ChangeGlobalSong(engineTime+20.0, SoundList[Sound_ChaosSpawn]);
 					}
-				}
-				else
-				{
-					bool hasSpawned;
-					for(int client=1; client<=MaxClients; client++)
-					{
-						if(!IsValidClient(client))
-							continue;
-
-						if(!IsSpec(client) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
-							continue;
-
-						Client[client].Class = Class_Chaos;
-						AssignTeam(client);
-						RespawnPlayer(client);
-						hasSpawned = true;
-					}
-
-					if(hasSpawned)
-						ChangeGlobalSong(engineTime+20.0, SoundList[Sound_ChaosSpawn]);
 				}
 			}
 		}
@@ -3568,19 +3594,31 @@ public Action HookSound(int clients[MAXPLAYERS], int &numClients, char sample[PL
 	if(!StrContains(sample, "vo", false))
 		return (IsSCP(entity) || IsSpec(entity)) ? Plugin_Handled : Plugin_Continue;
 
-	if(StrContains(sample, "step", false)!=-1 && Client[entity].Sprinting)
+	if(StrContains(sample, "step", false) != -1)
 	{
-		volume = 1.0;
-		level += 30;
-		return Plugin_Changed;
-	}
+		if(IsSCP(entity) || Client[entity].Sprinting)
+		{
+			if(Client[entity].Class == Class_Stealer)
+				strcopy(sample, PLATFORM_MAX_PATH, SoundList[Sound_ItSteps]);
 
+			volume = 1.0;
+			level += 30;
+			return Plugin_Changed;
+		}
+
+		if(Gamemode == Gamemode_Steals)
+			return Plugin_Stop;
+
+		int flag = GetEntityFlags(entity);
+		if((flag & FL_DUCKING) && (flag & FL_ONGROUND))
+			return Plugin_Stop;
+	}
 	return Plugin_Continue;
 }
 
 public Action OnTransmit(int client, int target)
 {
-	if(!Enabled || client==target || !IsValidClient(target) || !IsPlayerAlive(target) || TF2_IsPlayerInCondition(target, TFCond_HalloweenGhostMode))
+	if(!Enabled || client==target || !IsValidClient(target) || IsClientObserver(target) || TF2_IsPlayerInCondition(target, TFCond_HalloweenGhostMode))
 		return Plugin_Continue;
 
 	if(TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode))
@@ -3595,6 +3633,9 @@ public Action OnTransmit(int client, int target)
 
 	if(Client[target].Class == Class_096)
 		return (!Client[target].Radio || Client[client].Triggered) ? Plugin_Continue : Plugin_Handled;
+
+	if(Client[target].Class == Class_Stealer)
+		return Client[client].Triggered ? Plugin_Handled : Plugin_Continue;
 
 	return ((Client[target].Class==Class_939 || Client[target].Class==Class_9392 || (Client[target].Class==Class_3008 && !Client[target].Radio)) && Client[client].IdleAt<engineTime) ? Plugin_Handled : Plugin_Continue;
 }
@@ -3678,23 +3719,25 @@ public Action OnGetMaxHealth(int client, int &health)
 			{
 				case -1:
 				{
-					health = 1;
+					health = ((DClassMax+SciMax)*2)+6;
 					SetEntityHealth(client, 1);
 				}
 				case 1:
 				{
-					health = 666;
-					SetEntityHealth(client, 666);
+					health = 66;
+					SetEntityHealth(client, 66);
 				}
 				case 2:
 				{
-					health = 6666;
-					SetEntityHealth(client, 6666);
+					health = 666;
+					SetEntityHealth(client, 666);
 				}
 				default:
 				{
 					if(SciEscaped < -1)
 					{
+						ForcePlayerSuicide(client);
+
 						for(int i=1; i<=MaxClients; i++)
 						{
 							if(IsClientInGame(i) && IsPlayerAlive(i) && GetClientTeam(i)==view_as<int>(TFTeam_Red))
@@ -3942,7 +3985,7 @@ public void OnPreThink(int client)
 		{
 			switch(Client[client].Radio)
 			{
-				case -1:
+				/*case -1:
 				{
 					SetSpeed(client, 335.0);
 					GetClientAbsOrigin(client, clientPos);
@@ -3958,10 +4001,10 @@ public void OnPreThink(int client)
 
 					Client[client].Radio = 0;
 					SetEntPropFloat(client, Prop_Send, "m_flNextAttack", 0.0);
-				}
+				}*/
 				case 1:
 				{
-					SetSpeed(client, 325.0);
+					SetSpeed(client, 330.0);
 					if(Client[client].Power > engineTime)
 						return;
 
@@ -3976,8 +4019,23 @@ public void OnPreThink(int client)
 				}
 				default:
 				{
-					SetSpeed(client, 300.0);
-					if(Client[client].IdleAt-5.0 < engineTime)
+					SetSpeed(client, 400.0);
+					GetClientAbsOrigin(client, clientPos);
+					for(int target=1; target<=MaxClients; target++)
+					{
+						if(!Client[target].Triggered)
+							continue;
+
+						if(IsValidClient(target) && !IsSpec(target) && !IsSCP(target))
+						{
+							GetClientAbsOrigin(target, enemyPos);
+							if(GetVectorDistance(clientPos, enemyPos, true) < 1000000)
+								continue;
+						}
+						Client[target].Triggered = false;
+					}
+
+					if(Client[client].IdleAt+5.0 < engineTime)
 					{
 						SciEscaped--;
 						Client[client].IdleAt = engineTime+2.5;
@@ -4185,7 +4243,7 @@ public void OnPreThink(int client)
 
 			for(int target=1; target<=MaxClients; target++)
 			{
-				if(!IsValidClient(target) || IsSpec(target) || IsSCP(target) || !Client[target].HealthPack)
+				if(!IsValidClient(target) || IsSpec(target) || IsSCP(target) || !Client[target].HealthPack || Client[target].Triggered)
 					continue;
 
 				GetClientEyePosition(target, enemyPos);
@@ -4219,12 +4277,17 @@ public void OnPreThink(int client)
 				// success
 				if(SciEscaped >= ((DClassMax+SciMax)*2)+4)
 				{
+					for(target=1; target<=MaxClients; target++)
+					{
+						Client[target].Triggered = false;
+					}
+
 					SCPKilled = 2;
 					Client[client].Radio = 2;
 					TurnOnGlow(client, "255 0 0", 10, 700.0);
 					TF2_AddCondition(client, TFCond_CritCola);
 					ChangeGlobalSong(FAR_FUTURE, SoundList[Sound_ItHadEnough]);
-					TF2_StunPlayer(client, 11.0, 1.0, TF_STUNFLAG_BONKSTUCK|TF_STUNFLAG_NOSOUNDOREFFECT);
+					TF2_StunPlayer(client, 11.0, 1.0, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
 				}
 				else if(!SCPKilled && SciEscaped==DClassMax+SciMax+2)
 				{
@@ -4239,8 +4302,7 @@ public void OnPreThink(int client)
 				else
 				{
 					SciEscaped++;
-					Client[client].Radio = -1;
-					SetEntPropFloat(client, Prop_Send, "m_flNextAttack", FAR_FUTURE);
+					Client[target].Triggered = true;
 				}
 				break;
 			}
@@ -4257,34 +4319,43 @@ public void OnPreThink(int client)
 					}
 					else
 					{
-						Client[client].SprintPower += 2.0;
+						if(Client[client].SprintPower < 99)
+							Client[client].SprintPower += 2.0;
 					}
 
 					if(Client[client].HudIn < engineTime)
 					{
-						if(Client[client].SprintPower > 80)
+						if(Client[client].SprintPower > 85)
 						{
 							ClientCommand(client, "r_screenoverlay \"\"");
 						}
-						else if(Client[client].SprintPower > 60)
+						else if(Client[client].SprintPower > 70)
 						{
-							ClientCommand(client, "r_screenoverlay \"\"");
+							ClientCommand(client, "r_screenoverlay it_steals/distortion/almostnone.vmt");
+						}
+						else if(Client[client].SprintPower > 55)
+						{
+							ClientCommand(client, "r_screenoverlay it_steals/distortion/verylow.vmt");
 						}
 						else if(Client[client].SprintPower > 40)
 						{
-							ClientCommand(client, "r_screenoverlay \"\"");
+							ClientCommand(client, "r_screenoverlay it_steals/distortion/low.vmt");
 						}
-						else if(Client[client].SprintPower > 20)
+						else if(Client[client].SprintPower > 25)
 						{
-							ClientCommand(client, "r_screenoverlay \"\"");
+							ClientCommand(client, "r_screenoverlay it_steals/distortion/medium.vmt");
+						}
+						else if(Client[client].SprintPower > 10)
+						{
+							ClientCommand(client, "r_screenoverlay it_steals/distortion/high.vmt");
 						}
 						else if(Client[client].SprintPower > 0)
 						{
-							ClientCommand(client, "r_screenoverlay \"\"");
+							ClientCommand(client, "r_screenoverlay it_steals/distortion/ultrahigh.vmt");
 						}
 						else
 						{
-							ClientCommand(client, "r_screenoverlay \"\"");
+							ClientCommand(client, "r_screenoverlay it_steals/distortion/ultrahigh.vmt");
 							SetEntityHealth(client, GetClientHealth(client)-1);
 						}
 
@@ -4385,18 +4456,10 @@ public void OnPreThink(int client)
 		}
 	}
 
-	if(showHud)
+	if(showHud && Gamemode!=Gamemode_Steals)
 	{
-		bool found;
 		char buffer[32];
-		if(Gamemode == Gamemode_Ikea)
-		{
-			FormatEx(buffer, sizeof(buffer), "class_%d_ikea", Client[client].Class);
-			found = TranslationPhraseExists(buffer);
-		}
-
-		if(!found)
-			FormatEx(buffer, sizeof(buffer), "class_%d", Client[client].Class);
+		GetClassName(Client[client].Class, buffer, sizeof(buffer));
 
 		SetHudTextParamsEx(-1.0, 0.06, 0.35, ClassColors[Client[client].Class], ClassColors[Client[client].Class], 0, 0.1, 0.05, 0.05);
 		ShowSyncHudText(client, HudExtra, "%T", buffer, client);
@@ -5501,10 +5564,23 @@ void ShowClassInfo(int client)
 	SetHudTextParamsEx(-1.0, 0.3, 10.0, ClassColors[Client[client].Class], ClassColors[Client[client].Class], 0, 5.0, 1.0, 1.0);
 	ShowSyncHudText(client, HudExtra, "%t", "you_are", buffer);
 
-	if(Gamemode == Gamemode_Ikea)
+	switch(Gamemode)
 	{
-		FormatEx(buffer, sizeof(buffer), "desc_%s_ikea", ClassShort[Client[client].Class]);
-		found = TranslationPhraseExists(buffer);
+		case Gamemode_Ikea:
+		{
+			FormatEx(buffer, sizeof(buffer), "desc_%s_ikea", ClassShort[Client[client].Class]);
+			found = TranslationPhraseExists(buffer);
+		}
+		case Gamemode_Nut:
+		{
+			FormatEx(buffer, sizeof(buffer), "desc_%s_nut", ClassShort[Client[client].Class]);
+			found = TranslationPhraseExists(buffer);
+		}
+		case Gamemode_Steals:
+		{
+			FormatEx(buffer, sizeof(buffer), "desc_%s_steals", ClassShort[Client[client].Class]);
+			found = TranslationPhraseExists(buffer);
+		}
 	}
 
 	if(!found)
@@ -5517,10 +5593,23 @@ void ShowClassInfo(int client)
 void GetClassName(any class, char[] buffer, int length)
 {
 	bool found;
-	if(Gamemode == Gamemode_Ikea)
+	switch(Gamemode)
 	{
-		Format(buffer, length, "class_%s_ikea", ClassShort[class]);
-		found = TranslationPhraseExists(buffer);
+		case Gamemode_Ikea:
+		{
+			Format(buffer, length, "class_%s_ikea", ClassShort[class]);
+			found = TranslationPhraseExists(buffer);
+		}
+		case Gamemode_Nut:
+		{
+			Format(buffer, length, "class_%s_nut", ClassShort[class]);
+			found = TranslationPhraseExists(buffer);
+		}
+		case Gamemode_Steals:
+		{
+			Format(buffer, length, "class_%s_steals", ClassShort[class]);
+			found = TranslationPhraseExists(buffer);
+		}
 	}
 
 	if(!found)
@@ -5735,7 +5824,7 @@ bool AttemptGrabItem(int client)
 			AcceptEntityInput(entity, "KillHierarchy");
 			if(Gamemode == Gamemode_Steals)
 			{
-				int left = ++DClassEscaped - SCPMax;
+				int left = SCPMax - ++DClassEscaped;
 				if(left < 1)
 				{
 					for(int i=1; i<=MaxClients; i++)
@@ -6021,7 +6110,7 @@ void TurnOffGlow(int client)
 	if(Gamemode!=Gamemode_Steals || !Client[client].ReviveIndex)
 		return;
 
-	int entity = Client[client].ReviveIndex;
+	int entity = EntRefToEntIndex(Client[client].ReviveIndex);
 	if(entity>MaxClients && IsValidEntity(entity))
 	{
 		AcceptEntityInput(entity, "TurnOff");
@@ -6971,7 +7060,7 @@ stock int TF2_GetWeaponAmmo(int client, int weapon)
 
 stock void SetSpeed(int client, float speed)
 {
-	SetSpeed(client, speed);
+	SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", speed);
 }
 
 stock void FadeMessage(int client, int arg1, int arg2, int arg3, int arg4=255, int arg5=255, int arg6=255, int arg7=255)

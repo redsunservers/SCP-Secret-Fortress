@@ -164,7 +164,7 @@
 	}
 	"desc_dboi_steals"
 	{
-		"en"		"Collect all orbs to win.\nToggle your flashlight using MOUSE2.\nSprint by holding MOUSE3.\nAvoid other entities."
+		"en"		"Collect all orbs to win.\nToggle your flashlight using MOUSE2.\nSprint by holding JUMP.\nAvoid other entities."
 	}
 	"class_sci_steals"
 	{
@@ -172,7 +172,7 @@
 	}
 	"desc_sci_steals"
 	{
-		"en"		"Collect all orbs to win.\nToggle your flashlight using MOUSE2.\nSprint by holding MOUSE3.\nAvoid other entities."
+		"en"		"Collect all orbs to win.\nToggle your flashlight using MOUSE2.\nSprint by holding JUMP.\nAvoid other entities."
 	}
 	"team_1_steals"
 	{
@@ -649,7 +649,7 @@
 	"radar"	// HUD
 	{
 		"en"		"Radar Ready [RELOAD]"
-		"en"		"Radar готово [RELOAD]"
+		"ru"		"Radar готово [RELOAD]"
 	}
 	"now_playing"	// Chat
 	{
