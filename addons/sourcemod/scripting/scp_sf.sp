@@ -1,3 +1,28 @@
+/*
+	Delete This After Posting:
+
+New Gamemode:
+- A new map and mode with the help of Artvin#2047 and Baget#9648
+- Based on the game It Steals where survivors have to collect orbs to win
+- You can use a flashlight to scare creatures or see in the darkness
+- Orbs are scattered about as you need to pick them all up to win
+- You can sprint though over time your vision will blur
+- You also can use a radar to locate any nearby orbs
+- To play this gamemode use in-game vote to vote for a map change
+
+Main Gamemode:
+- Added sprinting (hold the jump button down to use)
+- Lowered base speed of all human classes by 10 HU/s
+- Increased base speed of all SCP classes by 30 HU/s (60 HU/s for SCP-106)
+- Fixed SCP-173 carrying previous movement over to his next jump
+- Reverted SCP-096's startup stun back to slow
+- Music can now be adjusted by TF2's music slider
+
+For Developers:
+- Added scp_roundend logic_relay
+- Added scp_collectable as a one-time pickup for humans
+- Entities destoryed will now be done via KillHierarchy
+*/
 #pragma semicolon 1
 
 #include <sourcemod>
@@ -22,25 +47,24 @@
 
 #pragma newdecls required
 
-void DisplayCredits(int client)
+void DisplayCredits(int i)
 {
-	PrintToConsole(client, "Useful Stocks | sarysa | forums.alliedmods.net/showthread.php?t=309245");
-	PrintToConsole(client, "Friendly Fire Fixes | Chdata, Kit O' Rifty | github.com/Chdata/TF2-Fixed-Friendly-Fire");
-	PrintToConsole(client, "SDK/DHooks Functions | Mikusch | github.com/Mikusch/fortress-royale");
-	PrintToConsole(client, "Medi-Gun Hooks | naydef | forums.alliedmods.net/showthread.php?t=311520");
-	PrintToConsole(client, "ChangeTeamEx | Benoist3012 | forums.alliedmods.net/showthread.php?t=314271");
-	PrintToConsole(client, "Client Eye Angles | sarysa | forums.alliedmods.net/showthread.php?t=309245");
-	PrintToConsole(client, "Fire Death Animation | 404UNF, Rowedahelicon | forums.alliedmods.net/showthread.php?t=255753");
-	PrintToConsole(client, "Revive Markers | SHADoW NiNE TR3S, sarysa | forums.alliedmods.net/showthread.php?t=248320");
-	PrintToConsole(client, "Revive Markers | SHADoW NiNE TR3S, sarysa | forums.alliedmods.net/showthread.php?t=248320");
+	PrintToConsole(i, "Useful Stocks | sarysa | forums.alliedmods.net/showthread.php?t=309245");
+	PrintToConsole(i, "Friendly Fire Fixes | Chdata, Kit O' Rifty | github.com/Chdata/TF2-Fixed-Friendly-Fire");
+	PrintToConsole(i, "SDK/DHooks Functions | Mikusch | github.com/Mikusch/fortress-royale");
+	PrintToConsole(i, "Medi-Gun Hooks | naydef | forums.alliedmods.net/showthread.php?t=311520");
+	PrintToConsole(i, "ChangeTeamEx | Benoist3012 | forums.alliedmods.net/showthread.php?t=314271");
+	PrintToConsole(i, "Client Eye Angles | sarysa | forums.alliedmods.net/showthread.php?t=309245");
+	PrintToConsole(i, "Fire Death Animation | 404UNF, Rowedahelicon | forums.alliedmods.net/showthread.php?t=255753");
+	PrintToConsole(i, "Revive Markers | SHADoW NiNE TR3S, sarysa | forums.alliedmods.net/showthread.php?t=248320");
 
-	PrintToConsole(client, "Chaos, SCP-049-2 | DoctorKrazy | forums.alliedmods.net/member.php?u=288676");
-	PrintToConsole(client, "MTF, SCP-049, SCP-096 | JuegosPablo | forums.alliedmods.net/showthread.php?t=308656");
-	PrintToConsole(client, "SCP-173 | RavensBro | forums.alliedmods.net/showthread.php?t=203464");
-	PrintToConsole(client, "SCP-106 | Spyer | forums.alliedmods.net/member.php?u=272596");
+	PrintToConsole(i, "Chaos, SCP-049-2 | DoctorKrazy | forums.alliedmods.net/member.php?u=288676");
+	PrintToConsole(i, "MTF, SCP-049, SCP-096 | JuegosPablo | forums.alliedmods.net/showthread.php?t=308656");
+	PrintToConsole(i, "SCP-173 | RavensBro | forums.alliedmods.net/showthread.php?t=203464");
+	PrintToConsole(i, "SCP-106 | Spyer | forums.alliedmods.net/member.php?u=272596");
 
-	PrintToConsole(client, "Cosmic Inspiration | Marxvee | forums.alliedmods.net/member.php?u=289257");
-	PrintToConsole(client, "Map Development and Gamemode Co-Owner | Artvin | steamcommunity.com/id/laz_boyx");
+	PrintToConsole(i, "Cosmic Inspiration | Marxvee | forums.alliedmods.net/member.php?u=289257");
+	PrintToConsole(i, "Map Development and Gamemode Co-Owner | Artvin | steamcommunity.com/id/laz_boyx");
 }
 
 #define MAJOR_REVISION	"1"
@@ -2310,7 +2334,7 @@ public Action OnJoinAuto(int client, const char[] command, int args)
 	if(!client)
 		return Plugin_Continue;
 
-	if(GetClientTeam(client) <= view_as<int>(TFTeam_Spectator))
+	if(!IsPlayerAlive(client) && GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
 		ChangeClientTeam(client, 3);
 
 	return Plugin_Handled;
@@ -3550,38 +3574,46 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		}
 	}
 
-	if(Client[attacker].Class == Class_106)
+	switch(Client[attacker].Class)
 	{
-		SetEntPropFloat(attacker, Prop_Send, "m_flNextAttack", GetGameTime()+2.0);
-
-		int entity = -1;
-		static char name[16];
-		static int spawns[4];
-		int count;
-		while((entity=FindEntityByClassname2(entity, "info_target")) != -1)
+		case Class_106:
 		{
-			GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
-			if(!StrContains(name, "scp_pocket", false))
-				spawns[count++] = entity;
+			SetEntPropFloat(attacker, Prop_Send, "m_flNextAttack", GetGameTime()+2.0);
 
-			if(count > 3)
-				break;
+			int entity = -1;
+			static char name[16];
+			static int spawns[4];
+			int count;
+			while((entity=FindEntityByClassname2(entity, "info_target")) != -1)
+			{
+				GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
+				if(!StrContains(name, "scp_pocket", false))
+					spawns[count++] = entity;
+
+				if(count > 3)
+					break;
+			}
+
+			if(!count)
+			{
+				if(!GetRandomInt(0, 2))
+					return Plugin_Continue;
+
+				damagetype |= DMG_CRIT;
+				return Plugin_Changed;
+			}
+
+			entity = spawns[GetRandomInt(0, count-1)];
+
+			static float pos[3];
+			GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
+			TeleportEntity(victim, pos, NULL_VECTOR, TRIPLE_D);
 		}
-
-		if(!count)
+		case Class_Stealer:
 		{
-			if(!GetRandomInt(0, 2))
-				return Plugin_Continue;
-
-			damagetype |= DMG_CRIT;
-			return Plugin_Changed;
+			if(Client[client].Triggered)
+				return Plugin_Handled;
 		}
-
-		entity = spawns[GetRandomInt(0, count-1)];
-
-		static float pos[3];
-		GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
-		TeleportEntity(victim, pos, NULL_VECTOR, TRIPLE_D);
 	}
 	return Plugin_Continue;
 }
@@ -4355,6 +4387,7 @@ public void OnPreThink(int client)
 				{
 					SciEscaped++;
 					Client[target].Triggered = true;
+					ClientCommand(target, "playgamesound %s", SoundList[Sound_ItStuns]);
 				}
 				break;
 			}

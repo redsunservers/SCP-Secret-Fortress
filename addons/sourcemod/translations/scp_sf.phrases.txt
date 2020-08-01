@@ -107,6 +107,10 @@
 		"en"		"SCP-3008-2 will only attack if attacked or during closing hours."
 		"ru"		"SCP-3008-2 будет атаковать либо ночью, либо если оно атаковано."
 	}
+	"hint_22"
+	{
+		"en"		"Hold JUMP to sprint around.\nYour sprint does need to recharge."
+	}
 
 	// SCP-3008-1 Phrases
 
