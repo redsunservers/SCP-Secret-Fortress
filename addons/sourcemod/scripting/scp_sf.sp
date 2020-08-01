@@ -1497,6 +1497,7 @@ public void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 			continue;
 
 		StopSound(client, SNDCHAN_STATIC, Client[client].CurrentSong);
+		StopSound(client, SNDCHAN_STATIC, Client[client].CurrentSong);
 		Client[client].CurrentSong[0] = 0;
 	}
 
@@ -1660,6 +1661,7 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 			if(!IsValidClient(target) || !Client[target].CurrentSong[0])
 				continue;
 
+			StopSound(target, SNDCHAN_STATIC, Client[target].CurrentSong);
 			StopSound(target, SNDCHAN_STATIC, Client[target].CurrentSong);
 			Client[target].CurrentSong[0] = 0;
 		}
@@ -2105,7 +2107,10 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			Client[client].Keycard = Keycard_None;
 			Client[client].HealthPack = 0;
 			if(Gamemode == Gamemode_Steals)
+			{
 				TurnOnFlashlight(client);
+				SetEntProp(client, Prop_Send, "m_bGlowEnabled", 1);
+			}
 
 			Client[client].Radio = Gamemode==Gamemode_Steals ? 2 : 0;
 			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_None));
@@ -2122,7 +2127,10 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			Client[client].Keycard = Keycard_Scientist;
 			Client[client].HealthPack = Gamemode==Gamemode_Steals ? 0 : 2;
 			if(Gamemode == Gamemode_Steals)
+			{
 				TurnOnFlashlight(client);
+				SetEntProp(client, Prop_Send, "m_bGlowEnabled", 1);
+			}
 
 			Client[client].Radio = Gamemode==Gamemode_Steals ? 2 : 0;
 			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_None));
@@ -2232,6 +2240,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			Client[client].HealthPack = 0;
 			Client[client].Radio = 0;
 			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_Stealer));
+			SetEntProp(client, Prop_Send, "m_bGlowEnabled", 0);
 		}
 		default:
 		{
@@ -2282,10 +2291,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelSubIndex[Client[client].Class], _, 3);
 
 	if(Gamemode == Gamemode_Steals)
-	{
 		TF2Attrib_SetByDefIndex(client, 819, 1.0);
-		SetEntProp(client, Prop_Send, "m_bGlowEnabled", 0);
-	}
 
 	if(Client[client].DownloadMode == 2)
 	{
@@ -2981,10 +2987,11 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 
 	if(buttons & IN_JUMP)
 	{
-		Client[client].Sprinting = (Client[client].SprintPower>0 && (GetEntityFlags(client) & FL_ONGROUND));
+		if(!Client[client].Sprinting)
+			Client[client].Sprinting = (Client[client].SprintPower>15 && (GetEntityFlags(client) & FL_ONGROUND));
+
 		if(Gamemode == Gamemode_Steals)
 		{
-			Client[client].Pos[0] = engineTime+3.5;
 			buttons &= ~IN_JUMP;
 			changed = true;
 		}
@@ -3080,8 +3087,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 		{
 			if(Client[client].HealthPack == 4)
 			{
-				TF2_AddCondition(client, TFCond_NoHealingDamageBuff, 1.2);
-				TF2_AddCondition(client, TFCond_HalloweenQuickHeal, 21.2);
+				TF2_AddCondition(client, TFCond_HalloweenQuickHeal, 17.5);
 				Client[client].HealthPack = 0;
 			}
 			else
@@ -3111,20 +3117,14 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 			buttons &= ~IN_RELOAD;
 			changed = true;
 			Client[client].Radio--;
-			Client[client].Pos[0] = engineTime+5.0;
 
-			GetClientEyePosition(client, pos);
 			int entity = -1;
 			while((entity=FindEntityByClassname(entity, "prop_dynamic")) != -1)
 			{
 				char name[32];
 				GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
 				if(!StrContains(name, "scp_collectable", false))
-				{
-					GetEntPropVector(entity, Prop_Send, "m_vecOrigin", ang);
-					if(GetVectorDistance(pos, ang, true) < 650000)
-						CreateWeaponGlow(entity, 4.0);
-				}
+					CreateWeaponGlow(entity, 4.0);
 			}
 		}
 
@@ -3358,7 +3358,7 @@ public void OnGameFrame()
 								if(!IsValidClient(client))
 									continue;
 
-								ChangeSong(client, engineTime+20.0, SoundList[Sound_MTFSpawn]);
+								ChangeSong(client, engineTime+20.0, SoundList[Sound_MTFSpawn], false);
 								if(IsSCP(client))
 								{
 									count++;
@@ -3402,7 +3402,7 @@ public void OnGameFrame()
 						}
 
 						if(hasSpawned)
-							ChangeGlobalSong(engineTime+20.0, SoundList[Sound_ChaosSpawn]);
+							ChangeGlobalSong(engineTime+20.0, SoundList[Sound_ChaosSpawn], false);
 					}
 				}
 			}
@@ -3611,7 +3611,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		}
 		case Class_Stealer:
 		{
-			if(Client[client].Triggered)
+			if(Client[victim].Triggered)
 				return Plugin_Handled;
 		}
 	}
@@ -3883,7 +3883,7 @@ public void OnPreThink(int client)
 		{
 			if(Gamemode == Gamemode_Steals)
 			{
-				SetEntProp(client, Prop_Send, "m_bGlowEnabled", Client[client].Pos[0]>engineTime);
+				SetEntProp(client, Prop_Send, "m_bGlowEnabled", Client[client].IdleAt>engineTime);
 				SetSpeed(client, Client[client].Sprinting ? 360.0 : 270.0);
 			}
 			else
@@ -5181,10 +5181,13 @@ public Action Timer_ConnectPost(Handle timer, int userid)
 	return Plugin_Continue;
 }
 
-void ChangeSong(int client, float next, const char[] filepath)
+void ChangeSong(int client, float next, const char[] filepath, bool volume=true)
 {
 	if(Client[client].CurrentSong[0])
+	{
 		StopSound(client, SNDCHAN_STATIC, Client[client].CurrentSong);
+		StopSound(client, SNDCHAN_STATIC, Client[client].CurrentSong);
+	}
 
 	if(Client[client].DownloadMode)
 	{
@@ -5196,14 +5199,16 @@ void ChangeSong(int client, float next, const char[] filepath)
 	strcopy(Client[client].CurrentSong, sizeof(Client[].CurrentSong), filepath);
 	Client[client].NextSongAt = next;
 	EmitSoundToClient(client, filepath, _, SNDCHAN_STATIC, SNDLEVEL_NONE);
+	if(volume)
+		EmitSoundToClient(client, filepath, _, SNDCHAN_STATIC, SNDLEVEL_NONE);
 }
 
-void ChangeGlobalSong(float next, const char[] filepath)
+void ChangeGlobalSong(float next, const char[] filepath, bool volume=true)
 {
 	for(int client=1; client<=MaxClients; client++)
 	{
 		if(IsValidClient(client))
-			ChangeSong(client, next, filepath);
+			ChangeSong(client, next, filepath, volume);
 	}
 }
 
