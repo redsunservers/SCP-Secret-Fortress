@@ -1,5 +1,6 @@
 Required Plugins:
 https://github.com/FlaminSarge/tf2attributes
+https://forums.alliedmods.net/showthread.php?p=2659562
 
 Required Extensions:
 https://github.com/asherkin/TF2Items
