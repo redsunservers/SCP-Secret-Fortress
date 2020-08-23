@@ -1,28 +1,3 @@
-/*
-	Delete This After Posting:
-
-New Gamemode:
-- A new map and mode with the help of Artvin#2047 and Baget#9648
-- Based on the game It Steals where survivors have to collect orbs to win
-- You can use a flashlight to scare creatures or see in the darkness
-- Orbs are scattered about as you need to pick them all up to win
-- You can sprint though over time your vision will blur
-- You also can use a radar to locate any nearby orbs
-- To play this gamemode use in-game vote to vote for a map change
-
-Main Gamemode:
-- Added sprinting (hold the jump button down to use)
-- Lowered base speed of all human classes by 10 HU/s
-- Increased base speed of all SCP classes by 30 HU/s (60 HU/s for SCP-106)
-- Fixed SCP-173 carrying previous movement over to his next jump
-- Reverted SCP-096's startup stun back to slow
-- Music can now be adjusted by TF2's music slider
-
-For Developers:
-- Added scp_roundend logic_relay
-- Added scp_collectable as a one-time pickup for humans
-- Entities destoryed will now be done via KillHierarchy
-*/
 #pragma semicolon 1
 
 #include <sourcemod>
@@ -69,7 +44,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"3"
-#define STABLE_REVISION	"0"
+#define STABLE_REVISION	"1"
 #define PLUGIN_VERSION MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE		100000000.0
@@ -806,6 +781,8 @@ Handle DHRoundRespawn;
 //Handle DHForceRespawn;
 //Handle DoorTimer = INVALID_HANDLE;
 
+ConVar CvarQuickRounds;
+
 GlobalForward GFOnEscape;
 
 GamemodeEnum Gamemode = Gamemode_None;
@@ -1033,6 +1010,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnPluginStart()
 {
+	CvarQuickRounds = CreateConVar("scp_quickrounds", "1", "If to end the round if winning outcome can no longer be changed", _, true, 0.0, true, 1.0);
+
 	HookEvent("arena_round_start", OnRoundReady, EventHookMode_PostNoCopy);
 	HookEvent("teamplay_round_start", OnRoundStart, EventHookMode_PostNoCopy);
 	HookEvent("teamplay_round_win", OnRoundEnd, EventHookMode_PostNoCopy);
@@ -2882,7 +2861,7 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 		if(TF2_IsPlayerInCondition(client, TFCond_MarkedForDeath) && (GetEntityFlags(client) & FL_ONGROUND))
 		{
 			RequestFrame(RemoveRagdoll, client);
-			CreateSpecialDeath(client);
+			RequestFrame(CreateSpecialDeath, client);
 		}
 		return Plugin_Handled;
 	}
@@ -4839,19 +4818,48 @@ public Action CheckAlivePlayers(Handle timer)
 		}
 		default:
 		{
-			bool ralive, balive, ealive;
-			for(int i=1; i<=MaxClients; i++)
+			bool salive;
+			if(CvarQuickRounds.BoolValue)
 			{
-				if(!IsValidClient(i) || IsSpec(i))
-					continue;
+				for(int i=1; i<=MaxClients; i++)
+				{
+					if(!IsValidClient(i) || IsSpec(i))
+						continue;
 
-				ralive = (ralive || Client[i].TeamTF()==TFTeam_Red || Client[i].TeamTF()==TFTeam_Unassigned);	// Chaos and SCPs
-				ealive = (ealive || Client[i].Class==Class_DBoi || Client[i].Class==Class_Scientist);	// DBois and Scientists
-				balive = (balive || Client[i].TeamTF()==TFTeam_Blue);				// Guards and MTF Squads
+					if(Client[i].Class==Class_DBoi || Client[i].Class==Class_Scientist)
+						return Plugin_Continue;
+
+					if(!salive)
+						salive = Client[i].TeamTF()==TFTeam_Unassigned;
+				}
 			}
+			else
+			{
+				bool ralive, balive;
+				for(int i=1; i<=MaxClients; i++)
+				{
+					if(!IsValidClient(i) || IsSpec(i))
+						continue;
 
-			if(ealive || (ralive && balive))
-				return Plugin_Continue;
+					if(Client[i].Class==Class_DBoi || Client[i].Class==Class_Scientist)
+						return Plugin_Continue;
+
+					switch(Client[i].TeamTF())
+					{
+						case TFTeam_Unassigned:	// SCPs
+							salive = true;
+
+						case TFTeam_Red:	// Chaos
+							ralive = true;
+
+						case TFTeam_Blue:	// Guards and MTF Squads
+							balive = true;
+					}
+				}
+
+				if(balive && (salive || ralive))
+					return Plugin_Continue;
+			}
 
 			if(SciEscaped)
 			{
@@ -4868,9 +4876,13 @@ public Action CheckAlivePlayers(Handle timer)
 			{
 				EndRound(Team_DBoi, TFTeam_Red);
 			}
-			else
+			else if(salive)
 			{
 				EndRound(Team_SCP, TFTeam_Red);
+			}
+			else
+			{
+				EndRound(Team_Spec, TFTeam_Unassigned);
 			}
 		}
 	}
@@ -5163,8 +5175,8 @@ public Action Timer_ConnectPost(Handle timer, int userid)
 	if(!IsValidClient(client))
 		return Plugin_Continue;
 
-	//if(DHForceRespawn != null)
-		//DHookEntity(DHForceRespawn, false, client, _, DHook_ForceRespawn);
+	/*if(DHForceRespawn != null)
+		DHookEntity(DHForceRespawn, false, client, _, DHook_ForceRespawn);*/
 
 	QueryClientConVar(client, "sv_allowupload", OnQueryFinished, userid);
 	QueryClientConVar(client, "cl_allowdownload", OnQueryFinished, userid);
@@ -5451,13 +5463,13 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		*/
 		case Weapon_Flash:
 		{
-			wep = SpawnWeapon(client, "tf_weapon_grenadelauncher", WeaponIndex[weapon], 5, 6, "1 ; 0.5 ; 3 ; 0.25 ; 15 ; 0 ; 76 ; 0.125 ; 99 ; 1.35 ; 252 ; 0.95 ; 787 ; 1.25", false, true);
+			wep = SpawnWeapon(client, "tf_weapon_grenadelauncher", WeaponIndex[weapon], 5, 6, "1 ; 0.75 ; 3 ; 0.25 ; 15 ; 0 ; 76 ; 0.125 ; 99 ; 1.35 ; 252 ; 0.95 ; 787 ; 1.25", false, true);
 			if(ammo && wep>MaxClients)
 				SetAmmo(client, wep, 1, 0);
 		}
 		case Weapon_Frag:
 		{
-			wep = SpawnWeapon(client, "tf_weapon_grenadelauncher", WeaponIndex[weapon], 10, 6, "2 ; 30 ; 3 ; 0.25 ; 28 ; 1.5 ; 76 ; 0.125 ; 99 ; 1.35 ; 138 ; 0.1 ; 252 ; 0.9 ; 671 ; 1 ; 787 ; 1.25", false);
+			wep = SpawnWeapon(client, "tf_weapon_grenadelauncher", WeaponIndex[weapon], 10, 6, "2 ; 30 ; 3 ; 0.25 ; 28 ; 1.5 ; 76 ; 0.125 ; 99 ; 1.35 ; 138 ; 0.3 ; 252 ; 0.9 ; 671 ; 1 ; 787 ; 1.25", false);
 			if(ammo && wep>MaxClients)
 				SetAmmo(client, wep, 1, 0);
 		}
@@ -6790,11 +6802,11 @@ bool IsValidMarker(int marker)
 public void CreateSpecialDeath(int client)
 {
 	int entity = CreateEntityByName("prop_dynamic_override");
-	if(!IsValidEdict(entity))
+	if(!IsValidEntity(entity))
 		return;
 
 	TFClassType class = ClassClassModel[Client[client].Class];
-	bool special = (class==TFClass_Engineer || class==TFClass_DemoMan || class==TFClass_Heavy);
+	int special = (class==TFClass_Engineer || class==TFClass_DemoMan || class==TFClass_Heavy) ? 1 : 0;
 	float pos[3];
 	GetEntPropVector(client, Prop_Send, "m_vecOrigin", pos);
 	TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
@@ -6805,7 +6817,7 @@ public void CreateSpecialDeath(int client)
 		DispatchKeyValue(entity, "skin", skin);
 	}
 	DispatchKeyValue(entity, "model", ClassModel[Client[client].Class]);
-	DispatchKeyValue(entity, "DefaultAnim", FireDeath[special ? 1 : 0]);	
+	DispatchKeyValue(entity, "DefaultAnim", FireDeath[special]);	
 	{
 		float angles[3];
 		GetClientEyeAngles(client, angles);
@@ -6815,7 +6827,7 @@ public void CreateSpecialDeath(int client)
 	}
 	DispatchSpawn(entity);
 		
-	SetVariantString(FireDeath[special ? 1 : 0]);
+	SetVariantString(FireDeath[special]);
 	AcceptEntityInput(entity, "SetAnimation");
 
 	SetVariantString("OnAnimationDone !self:KillHierarchy::0.0:1");
