@@ -18,6 +18,7 @@
 #define REQUIRE_PLUGIN
 #undef REQUIRE_EXTENSIONS
 #tryinclude <collisionhook>
+#tryinclude <sendproxy>
 #define REQUIRE_EXTENSIONS
 
 #pragma newdecls required
@@ -1402,6 +1403,20 @@ public void OnMapStart()
 			SetCommandFlags("r_screenoverlay", GetCommandFlags("r_screenoverlay") & ~FCVAR_CHEAT);
 		}
 	}
+
+	#if defined _SENDPROXYMANAGER_INC_
+	entity = FindEntityByClassname(-1, "tf_player_manager");
+	if(entity > MaxClients)
+	{
+		for(int i=1; i<=MaxClients; i++)
+		{
+			SendProxy_HookArrayProp(entity, "m_bAlive", i, Prop_Int, SendProp_OnAlive);
+			SendProxy_HookArrayProp(entity, "m_iTeam", i, Prop_Int, SendProp_OnTeam);
+			SendProxy_HookArrayProp(entity, "m_iPlayerClass", i, Prop_Int, SendProp_OnClass);
+			SendProxy_HookArrayProp(entity, "m_iPlayerClassWhenKilled", i, Prop_Int, SendProp_OnClass);
+		}
+	}
+	#endif
 
 	if(DHSetWinningTeam != null)
 		DHookGamerules(DHSetWinningTeam, false, _, DHook_SetWinningTeam);
@@ -6453,7 +6468,7 @@ public MRESReturn DHook_RoundRespawn()
 		AssignTeam(client);
 	}
 
-	if(!clients)
+	if(!total)
 		return;
 
 	int client = clients[GetRandomInt(0, total-1)];
@@ -6663,6 +6678,32 @@ public Action CH_PassFilter(int ent1, int ent2, bool &result)
 	result = false;
 	return Plugin_Changed;*/
 }
+
+#if defined _SENDPROXYMANAGER_INC_
+public Action SendProp_OnAlive(int entity, const char[] propname, int &value, int client) 
+{
+	value = 1;
+	return Plugin_Changed;
+}
+
+public Action SendProp_OnTeam(int entity, const char[] propname, int &value, int client) 
+{
+	if(!IsValidClient(client) || (GetClientTeam(client)<2 && !IsPlayerAlive(client)))
+		return Plugin_Continue;
+
+	value = CheckCommandAccess(client, "thisguyisavipiguess", ADMFLAG_RESERVATION, true) ? view_as<int>(TFTeam_Blue) : view_as<int>(TFTeam_Red);
+	return Plugin_Changed;
+}
+
+public Action SendProp_OnClass(int entity, const char[] propname, int &value, int client) 
+{
+	if(!Enabled)
+		return Plugin_Continue;
+
+	value = view_as<int>(TFClass_Unknown);
+	return Plugin_Changed;
+}
+#endif
 
 // Revive Marker Events
 
