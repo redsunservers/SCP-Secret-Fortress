@@ -40,12 +40,12 @@ void DisplayCredits(int i)
 	PrintToConsole(i, "SCP-106 | Spyer | forums.alliedmods.net/member.php?u=272596");
 
 	PrintToConsole(i, "Cosmic Inspiration | Marxvee | forums.alliedmods.net/member.php?u=289257");
-	PrintToConsole(i, "Map Development and Gamemode Co-Owner | Artvin | steamcommunity.com/id/laz_boyx");
+	PrintToConsole(i, "Map/Model Development | Artvin | steamcommunity.com/id/laz_boyx");
 }
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"3"
-#define STABLE_REVISION	"1"
+#define STABLE_REVISION	"2"
 #define PLUGIN_VERSION MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE		100000000.0
@@ -805,6 +805,7 @@ enum struct ClientEnum
 	TeamEnum Team;
 	KeycardEnum Keycard;
 
+	bool IsVip;
 	bool Triggered;
 	bool CanTalkTo[MAXTF2PLAYERS];
 
@@ -1288,6 +1289,9 @@ public void OnLibraryRemoved(const char[] name)
 
 public void OnMapStart()
 {
+	Enabled = false;
+	Ready = false;
+
 	char buffer[PLATFORM_MAX_PATH];
 	for(int i; i<sizeof(MusicList); i++)
 	{
@@ -1425,16 +1429,12 @@ public void OnMapStart()
 		DHookGamerules(DHRoundRespawn, false, _, DHook_RoundRespawn);
 }
 
-public void OnMapEnd()
-{
-	ServerCommand("sm plugins reload scp_sl");
-}
-
 public void OnClientPostAdminCheck(int client)
 {
 	Client[client].DownloadMode = 0;
 	Client[client].NextSongAt = FAR_FUTURE;
 	Client[client].Class = Class_Spec;
+	Client[client].IsVip = CheckCommandAccess(client, "thisguyisavipiguess", ADMFLAG_RESERVATION, true);
 
 	SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
@@ -6691,7 +6691,7 @@ public Action SendProp_OnTeam(int entity, const char[] propname, int &value, int
 	if(!IsValidClient(client) || (GetClientTeam(client)<2 && !IsPlayerAlive(client)))
 		return Plugin_Continue;
 
-	value = CheckCommandAccess(client, "thisguyisavipiguess", ADMFLAG_RESERVATION, true) ? view_as<int>(TFTeam_Blue) : view_as<int>(TFTeam_Red);
+	value = Client[client].IsVip ? view_as<int>(TFTeam_Blue) : view_as<int>(TFTeam_Red);
 	return Plugin_Changed;
 }
 
