@@ -1,9 +1,0 @@
-models/jailbreak/scout|exts=.mdl
-models/freak_fortress_2/scp-049|exts=.mdl
-models/freak_fortress_2/scpmtf|exts=.mdl
-models/freak_fortress_2/096|exts=.mdl
-models/freak_fortress_2/scp_173|exts=.mdl
-models/freak_fortress_2/106_spyper|exts=.mdl
-//models/freak_fortress_2/newscp106|exts=.mdl
-//models/freak_fortress_2/zombie_soldier|exts=.mdl
-models/scp_sl|exts=.mdl

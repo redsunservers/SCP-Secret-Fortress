@@ -8,7 +8,6 @@
 #include <morecolors>
 #include <tf2attributes>
 #include <dhooks>
-#include <SteamWorks>
 #undef REQUIRE_PLUGIN
 #tryinclude <goomba>
 #tryinclude <voiceannounce_ex>
@@ -45,40 +44,22 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"3"
-#define STABLE_REVISION	"2"
+#define STABLE_REVISION	"3"
 #define PLUGIN_VERSION MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
-
-#define FAR_FUTURE		100000000.0
-#define MAX_SOUND_LENGTH	80
-#define MAX_MODEL_LENGTH	128
-#define MAX_MATERIAL_LENGTH	128
-#define MAX_ENTITY_LENGTH	48
-#define MAX_EFFECT_LENGTH	48
-#define MAX_ATTACHMENT_LENGTH	48
-#define MAX_ICON_LENGTH		48
-#define HEX_OR_DEC_LENGTH	12
-#define MAX_ATTRIBUTE_LENGTH	256
-#define MAX_CONDITION_LENGTH	256
-#define MAX_CLASSNAME_LENGTH	64
-#define MAX_BOSSNAME_LENGTH	64
-#define MAX_ABILITY_LENGTH	64
-#define MAX_PLUGIN_LENGTH	64
-#define MAX_MENUITEM_LENGTH	48
-#define MAX_TITLE_LENGTH	192
-#define MAXTF2PLAYERS		36
-#define MAXENTITIES		2048
-#define VOID_ARG		-1
 
 // I'm cheating yayy
 #define IsSCP(%1)	(Client[%1].Class>=Class_049)
 #define IsSpec(%1)	(Client[%1].Class==Class_Spec || !IsPlayerAlive(%1) || TF2_IsPlayerInCondition(%1, TFCond_HalloweenGhostMode))
 
+#define FAR_FUTURE	100000000.0
+#define MAXTF2PLAYERS	36
 #define MAXANGLEPITCH	45.0
 #define MAXANGLEYAW	90.0
 #define MAXTIME		898
 
 #define PREFIX		"{red}[SCP]{default} "
 #define KEYCARD_MODEL	"models/scp_sl/keycard.mdl"
+#define DOWNLOADS	"configs/scp_sf/downloads.txt"
 
 static const float OFF_THE_MAP[3] = { 16383.0, 16383.0, -16383.0 };
 static const float TRIPLE_D[3] = { 0.0, 0.0, 0.0 };
@@ -97,13 +78,13 @@ public Plugin myinfo =
 
 static const char MusicList[][] =
 {
-	"scpsl/music/mainmenu.mp3",		// Main Menu Theme (Reserved for join sound)
-	"scpsl/music/wegottarun.mp3",		// We Gotta Run (Reserved for Alpha Warhead)
-	"scpsl/music/melancholy.mp3",		// Melancholy
-	"scpsl/music/unexplainedbehaviors.mp3",	// Unexplained Behaviors
-	"scpsl/music/doctorlab.mp3",		// Doctor Lab
-	"scpsl/music/massivelabyrinth.mp3",	// Massive Labyrinth
-	"scpsl/music/forgetaboutyourfears.mp3"	// Forget About Your Fears
+	"#scpsl/music/mainmenu.mp3",		// Main Menu Theme (Reserved for join sound)
+	"#scpsl/music/wegottarun.mp3",		// We Gotta Run (Reserved for Alpha Warhead)
+	"#scpsl/music/melancholy.mp3",		// Melancholy
+	"#scpsl/music/unexplainedbehaviors.mp3",// Unexplained Behaviors
+	"#scpsl/music/doctorlab.mp3",		// Doctor Lab
+	"#scpsl/music/massivelabyrinth.mp3",	// Massive Labyrinth
+	"#scpsl/music/forgetaboutyourfears.mp3"	// Forget About Your Fears
 };
 
 static const char MusicNames[][] =
@@ -1292,42 +1273,29 @@ public void OnMapStart()
 	Enabled = false;
 	Ready = false;
 
-	char buffer[PLATFORM_MAX_PATH];
 	for(int i; i<sizeof(MusicList); i++)
 	{
-		FormatEx(buffer, sizeof(buffer), "sound/%s", MusicList[i]);
-		if(FileExists(buffer, true))
-			PrecacheSound(MusicList[i], true);
+		PrecacheSoundEx(MusicList[i], true);
 	}
 
 	for(int i; i<sizeof(SoundList); i++)
 	{
-		FormatEx(buffer, sizeof(buffer), "sound/%s", SoundList[i]);
-		if(FileExists(buffer, true))
-			PrecacheSound(SoundList[i], true);
+		PrecacheSoundEx(SoundList[i], true);
 	}
 
 	for(int i; i<sizeof(ClassModel); i++)
 	{
-		if(FileExists(ClassModel[i], true))
-			ClassModelIndex[i] = PrecacheModel(ClassModel[i], true);
+		ClassModelIndex[i] = PrecacheModelEx(ClassModel[i], true);
 	}
 
 	for(int i; i<sizeof(ClassModelSub); i++)
 	{
-		if(FileExists(ClassModelSub[i], true))
-			ClassModelSubIndex[i] = PrecacheModel(ClassModelSub[i], true);
+		ClassModelSubIndex[i] = PrecacheModel(ClassModelSub[i], true);
 	}
 
-	/*for(int i; i<sizeof(KeycardModel); i++)
-	{
-		if(FileExists(KeycardModel[i], true))
-			PrecacheModel(KeycardModel[i], true);
-	}*/
+	PrecacheModelEx(KEYCARD_MODEL, true);
 
-	if(FileExists(KEYCARD_MODEL, true))
-		PrecacheModel(KEYCARD_MODEL, true);
-
+	static char buffer[PLATFORM_MAX_PATH];
 	GetCurrentMap(buffer, sizeof(buffer));
 	if(!StrContains(buffer, "scp_", false))
 	{
@@ -1429,6 +1397,29 @@ public void OnMapStart()
 		DHookGamerules(DHRoundRespawn, false, _, DHook_RoundRespawn);
 }
 
+public void OnConfigsExecuted()
+{
+	char buffer[PLATFORM_MAX_PATH];
+	BuildPath(Path_SM, buffer, sizeof(buffer), DOWNLOADS);
+	if(!FileExists(buffer))
+		return;
+
+	File file = OpenFile(buffer, "r");
+	if(!file)
+		return;
+
+	int table = FindStringTable("downloadables");
+	bool save = LockStringTables(false);
+	while(!file.EndOfFile() && file.ReadLine(buffer, sizeof(buffer)))
+	{
+		ReplaceString(buffer, sizeof(buffer), "\n", "");
+		if(FileExists(buffer))
+			AddToStringTable(table, buffer);
+	}
+	delete file;
+	LockStringTables(save);
+}
+
 public void OnClientPostAdminCheck(int client)
 {
 	Client[client].DownloadMode = 0;
@@ -1504,12 +1495,6 @@ public void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 
 		
 	}*/
-}
-
-public void OnConfigsExecuted()
-{
-	SteamWorks_SetGameDescription("SCP: Secret Fortress");
-	//SetConVarInt(FindConVar("tf_dropped_weapon_lifetime"), 9999);
 }
 
 public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
@@ -6725,8 +6710,8 @@ public void OnRevive(Event event, const char[] name, bool dontBroadcast)
 	if(entity <= MaxClients)
 		return;
 
-	static char classname[MAX_CLASSNAME_LENGTH];
-	GetEdictClassname(entity, classname, MAX_CLASSNAME_LENGTH);
+	static char classname[64];
+	GetEdictClassname(entity, classname, sizeof(classname));
 	if(!StrEqual(classname, "tf_weapon_medigun"))
 		return;
 
@@ -6833,8 +6818,8 @@ bool IsValidMarker(int marker)
 	if(!IsValidEntity(marker))
 		return false;
 	
-	static char buffer[MAX_CLASSNAME_LENGTH];
-	GetEntityClassname(marker, buffer, MAX_CLASSNAME_LENGTH);
+	static char buffer[64];
+	GetEntityClassname(marker, buffer, sizeof(buffer));
 	return StrEqual(buffer, "entity_revive_marker", false);
 }
 
@@ -7467,6 +7452,38 @@ stock int SpawnWearable(int client, const char[] name, int index, int id)
 	DispatchSpawn(entity);
 	SDKCall(SDKEquipWearable, client, wearable);
 	return entity;
+}
+
+stock int PrecacheModelEx(const char[] model, bool preload=false)
+{
+	static char buffer[PLATFORM_MAX_PATH];
+	strcopy(buffer, sizeof(buffer), model);
+	ReplaceString(buffer, sizeof(buffer), ".mdl", "");
+
+	int table = FindStringTable("downloadables");
+	bool save = LockStringTables(false);
+	char buffer2[PLATFORM_MAX_PATH];
+	static const char fileTypes[][] = {"dx80.vtx", "dx90.vtx", "mdl", "phy", "sw.vtx", "vvd"};
+	for(int i; i<sizeof(fileTypes); i++)
+	{
+		FormatEx(buffer2, sizeof(buffer2), "%s.%s", buffer, fileTypes[i]);
+		if(FileExists(buffer2))
+			AddToStringTable(table, buffer2);
+	}
+	LockStringTables(save);
+
+	return PrecacheModel(model, preload);
+}
+
+stock int PrecacheSoundEx(const char[] sound, bool preload=false)
+{
+	char buffer[PLATFORM_MAX_PATH];
+	FormatEx(buffer, sizeof(buffer), "sound/%s", sound);
+	ReplaceStringEx(buffer, sizeof(buffer), "#", "");
+	if(FileExists(buffer))
+		AddFileToDownloadsTable(buffer);
+
+	return PrecacheSound(sound, preload);
 }
 
 // Target Filters

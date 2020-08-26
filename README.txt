@@ -16,6 +16,5 @@ https://github.com/Franc1sco/VoiceAnnounceEX
 https://github.com/Franc1sco/DevZones
 
 Optional Extensions:
-https://github.com/KyleSanderson/SteamWorks
 https://github.com/SlidyBat/CollisionHook
 https://github.com/SlidyBat/sendproxy
