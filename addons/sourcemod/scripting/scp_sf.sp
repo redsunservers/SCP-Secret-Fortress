@@ -44,7 +44,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"3"
-#define STABLE_REVISION	"3"
+#define STABLE_REVISION	"4"
 #define PLUGIN_VERSION MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 // I'm cheating yayy
@@ -1425,7 +1425,7 @@ public void OnClientPostAdminCheck(int client)
 	Client[client].DownloadMode = 0;
 	Client[client].NextSongAt = FAR_FUTURE;
 	Client[client].Class = Class_Spec;
-	Client[client].IsVip = CheckCommandAccess(client, "thisguyisavipiguess", ADMFLAG_RESERVATION, true);
+	Client[client].IsVip = (CheckCommandAccess(client, "thisguyisavipiguess", ADMFLAG_RESERVATION, true) || CheckCommandAccess(client, "thisguyisaadminiguess", ADMFLAG_GENERIC, true));
 
 	SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
@@ -3066,7 +3066,11 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 		{
 			if(Client[client].HealthPack == 4)
 			{
-				TF2_AddCondition(client, TFCond_HalloweenQuickHeal, 17.5);
+				TF2_AddCondition(client, TFCond_MegaHeal, 0.7);
+				DataPack pack;
+				CreateDataTimer(1.2, Timer_Healing, pack, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+				pack.WriteCell(GetClientUserId(client));
+				pack.WriteCell(17);
 				Client[client].HealthPack = 0;
 			}
 			else
@@ -3884,11 +3888,11 @@ public void OnPreThink(int client)
 		}
 		case Class_049:
 		{
-			SetSpeed(client, 260.0);
+			SetSpeed(client, 250.0);
 		}
 		case Class_0492, Class_3008:
 		{
-			SetSpeed(client, 290.0);
+			SetSpeed(client, 270.0);
 		}
 		case Class_096:
 		{
@@ -3896,7 +3900,7 @@ public void OnPreThink(int client)
 			{
 				case 1:
 				{
-					SetSpeed(client, 240.0);
+					SetSpeed(client, 230.0);
 					if(Client[client].Power < engineTime)
 					{
 						TF2_AddCondition(client, TFCond_CritCola, 99.9);
@@ -3945,7 +3949,7 @@ public void OnPreThink(int client)
 				}
 				default:
 				{
-					SetSpeed(client, 240.0);
+					SetSpeed(client, 230.0);
 					if(Client[client].Power > engineTime)
 						return;
 
@@ -3968,7 +3972,7 @@ public void OnPreThink(int client)
 		}
 		case Class_106:
 		{
-			SetSpeed(client, 250.0);
+			SetSpeed(client, 240.0);
 		}
 		case Class_173:
 		{
@@ -3997,7 +4001,7 @@ public void OnPreThink(int client)
 				}
 				default:
 				{
-					SetSpeed(client, 430.0);
+					SetSpeed(client, 420.0);
 				}
 			}
 		}
@@ -4036,7 +4040,7 @@ public void OnPreThink(int client)
 		}
 		case Class_939, Class_9392:
 		{
-			SetSpeed(client, 310.0-(GetClientHealth(client)/55.0));
+			SetSpeed(client, 300.0-(GetClientHealth(client)/55.0));
 		}
 		case Class_Stealer:
 		{
@@ -5055,6 +5059,24 @@ public void UpdateListenOverrides(float engineTime)
 			}
 		}
 	}
+}
+
+public Action Timer_Healing(Handle timer, DataPack pack)
+{
+	pack.Reset();
+	int client = GetClientOfUserId(pack.ReadCell());
+	if(!client || !IsClientInGame(client))
+		return Plugin_Stop;
+
+	SetEntityHealth(client, GetClientHealth(client)+15);
+
+	int count = pack.ReadCell();
+	if(count < 1)
+		return Plugin_Stop;
+
+	pack.Position--;
+	pack.WriteCell(count-1, false);
+	return Plugin_Continue;
 }
 
 void GoToSpawn(int client, ClassEnum class)

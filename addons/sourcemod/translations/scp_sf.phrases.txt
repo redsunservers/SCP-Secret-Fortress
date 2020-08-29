@@ -619,7 +619,8 @@
 	}
 	"scp_500"	// HUD
 	{
-		"en"		"SCP-500"
+		"en"		"SCP-500 [ATTACK2]"
+		"ru"		"SCP-500 [ДОП. АТАКА]"
 	}
 	"keycard"	// HUD
 	{
