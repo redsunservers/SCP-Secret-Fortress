@@ -232,6 +232,11 @@
 				"linux"		"136"
 				"windows"	"135"
 			}
+			"ILocomotion::ShouldCollideWith"
+			{
+				"linux"		"100"
+				"windows"	"99"
+			}
 		}
 		"Addresses"
 		{

@@ -1,0 +1,14 @@
+"VertexLitGeneric"
+{
+$basetexture "models/scpbreach/scp939redone/scp-939_licker_extremities2"
+$bumpmap "models/scpbreach/scp939redone/scp-939_licker_extremities2_normal"
+$phong 1
+$phongexponent 33
+$phongfresnelranges	"[0.05 0.5 1]"
+$phongalbedotint 1
+$selfillum 1
+
+$rimlight "1"	
+$rimlightexponent "5"
+$rimlightboost "1.5"
+}

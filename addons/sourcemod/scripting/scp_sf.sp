@@ -25,8 +25,7 @@
 void DisplayCredits(int i)
 {
 	PrintToConsole(i, "Useful Stocks | sarysa | forums.alliedmods.net/showthread.php?t=309245");
-	PrintToConsole(i, "Friendly Fire Fixes | Chdata, Kit O' Rifty | github.com/Chdata/TF2-Fixed-Friendly-Fire");
-	PrintToConsole(i, "SDK/DHooks Functions | Mikusch | github.com/Mikusch/fortress-royale");
+	PrintToConsole(i, "SDK/DHooks Functions | Mikusch, 42 | github.com/Mikusch/fortress-royale");
 	PrintToConsole(i, "Medi-Gun Hooks | naydef | forums.alliedmods.net/showthread.php?t=311520");
 	PrintToConsole(i, "ChangeTeamEx | Benoist3012 | forums.alliedmods.net/showthread.php?t=314271");
 	PrintToConsole(i, "Client Eye Angles | sarysa | forums.alliedmods.net/showthread.php?t=309245");
@@ -44,7 +43,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"3"
-#define STABLE_REVISION	"4"
+#define STABLE_REVISION	"5"
 #define PLUGIN_VERSION MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 // I'm cheating yayy
@@ -399,8 +398,8 @@ static const char ClassModel[][] =
 	"models/freak_fortress_2/106_spyper/106.mdl",		// 106
 	"models/freak_fortress_2/scp_173/scp_173new.mdl",	// 173
 	"models/freak_fortress_2/scp_173/scp_173new.mdl",	// 173-2
-	"models/player/pyro.mdl",				// 939-89
-	"models/player/pyro.mdl",				// 939-53
+	"models/scp_sl/scp_939/scp_939_redone_pm.mdl",		// 939-89
+	"models/scp_sl/scp_939/scp_939_redone_pm.mdl",		// 939-53
 	"models/freak_fortress_2/scp-049/zombie049.mdl",	// 3008-2
 	"models/freak_fortress_2/it_steals/it_steals_v39.mdl"	// Stealer
 };
@@ -759,6 +758,7 @@ Handle SDKTryPickup;
 Handle DHAllowedToHealTarget;
 Handle DHSetWinningTeam;
 Handle DHRoundRespawn;
+//Handle DHShouldCollide;
 //Handle DHLagCompensation;
 //Handle DHForceRespawn;
 //Handle DoorTimer = INVALID_HANDLE;
@@ -783,11 +783,12 @@ int SCPMax;
 enum struct ClientEnum
 {
 	ClassEnum Class;
-	TeamEnum Team;
+	//TeamEnum Team;
 	KeycardEnum Keycard;
 
 	bool IsVip;
 	bool Triggered;
+	bool CustomHitbox;
 	bool CanTalkTo[MAXTF2PLAYERS];
 
 	int HealthPack;
@@ -1180,8 +1181,7 @@ public void OnPluginStart()
 			LogError("[Gamedata] Could not find CTFPlayer::WantsLagCompensationOnEntity");
 		}*/
 
-		int offset = gamedata.GetOffset("CTFGameRules::SetWinningTeam");
-		DHSetWinningTeam = DHookCreate(offset, HookType_GameRules, ReturnType_Void, ThisPointer_Ignore);
+		DHSetWinningTeam = DHookCreate(gamedata.GetOffset("CTFGameRules::SetWinningTeam"), HookType_GameRules, ReturnType_Void, ThisPointer_Ignore);
 		if(DHSetWinningTeam != null)
 		{
 			DHookAddParam(DHSetWinningTeam, HookParamType_Int);
@@ -1203,6 +1203,16 @@ public void OnPluginStart()
 		DHRoundRespawn = DHookCreateFromConf(gamedata, "CTeamplayRoundBasedRules::RoundRespawn");
 		if(DHRoundRespawn == null)
 			LogError("[Gamedata] Could not find CTFPlayer::RoundRespawn");
+
+		/*DHShouldCollide = DHookCreate(gamedata.GetOffset("ILocomotion::ShouldCollideWith"), HookType_Raw, ReturnType_Bool, ThisPointer_Address, DHook_ShouldCollideWith);
+		if(DHShouldCollide == null)
+		{
+			LogError("[Gamedata] Could not find ILocomotion::ShouldCollideWith!");
+		}
+		else
+		{
+			DHookAddParam(DHShouldCollide, HookParamType_CBaseEntity);
+		}*/
 
 		delete gamedata;
 	}
@@ -2073,6 +2083,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			ChangeClientTeamEx(client, team);
 	}
 
+	Client[client].CustomHitbox = false;
 	Client[client].Triggered = false;
 	Client[client].Sprinting = false;
 	Client[client].ChargeIn = 0.0;
@@ -2268,6 +2279,13 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 
 	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelIndex[Client[client].Class], _, 0);
 	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelSubIndex[Client[client].Class], _, 3);
+
+	if(Client[client].Class==Class_939 || Client[client].Class==Class_9392)
+	{
+		//CreateCustomModel(client);
+		//SetVariantVector3D(view_as<float>({0.75, 0.75, 0.75}));
+		//AcceptEntityInput(client, "SetModelScale");
+	}
 
 	if(Gamemode == Gamemode_Steals)
 		TF2Attrib_SetByDefIndex(client, 819, 1.0);
@@ -3493,12 +3511,12 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		}
 		else if(damagetype & DMG_CRUSH)
 		{
-			static float delay[MAXTF2PLAYERS];
-			if(delay[victim] > engineTime)
+			//static float delay[MAXTF2PLAYERS];
+			//if(delay[victim] > engineTime)
 				return Plugin_Handled;
 
-			delay[victim] = engineTime+0.05;
-			return Plugin_Continue;
+			//delay[victim] = engineTime+0.05;
+			//return Plugin_Continue;
 		}
 		return Plugin_Continue;
 	}
@@ -3512,6 +3530,11 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		{
 			if(!Client[attacker].Triggered && !TF2_IsPlayerInCondition(victim, TFCond_Dazed))
 				TriggerShyGuy(victim, attacker, engineTime);
+		}
+		else if(Client[victim].Class==Class_939 || Client[victim].Class==Class_9392)
+		{
+			
+			return Plugin_Handled;
 		}
 		else if(Client[victim].Class==Class_3008 && !Client[victim].Radio)
 		{
@@ -6641,6 +6664,22 @@ public MRESReturn DHook_DropAmmoPackPre(int client, Handle params)
 	return MRES_Supercede;
 }
 
+public MRESReturn DHook_ShouldCollideWith(Address pointer, Handle returnVal, Handle params)
+{
+	int entity = DHookGetParam(params, 1);
+	if(IsValidEntity(entity))
+	{
+		static char classname[32];
+		GetEdictClassname(entity, classname, sizeof(classname));
+		if(StrEqual(classname, "base_boss"))
+		{
+			DHookSetReturn(returnVal, false);
+			return MRES_Supercede;
+		}
+	}
+	return MRES_Ignored;
+}
+
 // Thirdparty
 
 public Action OnStomp(int attacker, int victim)
@@ -7037,6 +7076,93 @@ stock bool TF2_HasGlow(int iEnt)
 	SetVariantColor(view_as<int>({255, 255, 255, 0}));
 	AcceptEntityInput(entity, "SetGlowColor");
 	return Plugin_Handled;
+}*/
+
+// Custom Model
+
+/*void CreateCustomModel(int client)
+{
+	int entity = CreateEntityByName("base_boss");
+	if(!IsValidEntity(entity))
+		return;
+
+	Client[client].CustomHitbox = true;
+	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelIndex[Class_Spec], _, 0);
+
+	DispatchKeyValue(entity, "model", ClassModel[Client[client].Class]);
+	DispatchKeyValue(entity, "modelscale", "0.75");
+	DispatchKeyValue(entity, "health", "30000");
+	DispatchSpawn(entity);
+
+	SetEntProp(entity, Prop_Send, "m_nModelIndexOverrides", ClassModelIndex[Client[client].Class], _, 0);
+	SetEntProp(entity, Prop_Send, "m_nModelIndexOverrides", ClassModelSubIndex[Class_Spec], _, 3);
+
+	SetEntProp(entity, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_NONE);
+	SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
+
+	SDKHook(entity, SDKHook_Think, CustomModelThink);
+	SDKHook(entity, SDKHook_OnTakeDamage, CustomModelDamage);
+	//SDKHook(entity, SDKHook_ShouldCollide, CustomModelCollide);
+
+	//if(DHShouldCollide)
+		//DHookRaw(DHShouldCollide, true, view_as<Address>(DHShouldCollide));
+}
+
+public void CustomModelThink(int entity)
+{
+	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
+	if(!Enabled || !IsValidClient(client) || IsSpec(client))
+	{
+		SDKUnhook(entity, SDKHook_Think, CustomModelThink);
+		TeleportEntity(entity, OFF_THE_MAP, NULL_VECTOR, NULL_VECTOR);
+		AcceptEntityInput(entity, "Kill");
+		return;
+	}
+
+	static float pos[3], ang[3];
+	GetEntPropVector(client, Prop_Send, "m_vecOrigin", pos);
+	GetClientEyeAngles(client, ang);
+
+	 TODO: Offset pos
+	float angle = ang[0];
+	while(angle > 180)
+		angle -= 360.0;
+
+	while(angle < -180)
+		angle += 360.0;
+
+	if(angle < 0)
+		angle *= -1.0;
+
+	if(angle < 90)
+	{
+		pos[0] += 30.0-(angle/3.0);
+		pos[1] += 30.0-(angle/3.0);
+	}
+	else
+	{
+		pos[0] -= 30.0-((angle-90.0)/3.0);
+	}
+
+	ang[1] = 0.0;
+	TeleportEntity(entity, pos, ang, TRIPLE_D);
+}
+
+public Action CustomModelDamage(int entity, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	if(!Enabled || !IsValidClient(attacker))
+		return Plugin_Handled;
+
+	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
+	if(client!=attacker && IsValidClient(client) && !IsFriendly(Client[client].Class, Client[attacker].Class))
+		SDKHooks_TakeDamage(client, inflictor, attacker, damage, damagetype, weapon, damageForce, damagePosition);
+
+	return Plugin_Handled;
+}
+
+public bool CustomModelCollide(int entity, int collisiongroup, int contentsmask, bool originalResult)
+{
+	return false;
 }*/
 
 // Stocks
