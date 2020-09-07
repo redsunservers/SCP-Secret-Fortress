@@ -1,6 +1,7 @@
 #pragma semicolon 1
 
 #include <sourcemod>
+#include <clientprefs>
 #include <tf2_stocks>
 #include <sdkhooks>
 #include <sdktools>
@@ -42,9 +43,9 @@ void DisplayCredits(int i)
 }
 
 #define MAJOR_REVISION	"1"
-#define MINOR_REVISION	"3"
-#define STABLE_REVISION	"5"
-#define PLUGIN_VERSION MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
+#define MINOR_REVISION	"4"
+#define STABLE_REVISION	"1"
+#define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 // I'm cheating yayy
 #define IsSCP(%1)	(Client[%1].Class>=Class_049)
@@ -384,7 +385,7 @@ static const char ClassModel[][] =
 	"models/jailbreak/scout/jail_scout_v2.mdl",	// DBoi
 	"models/freak_fortress_2/scp-049/chaos.mdl",	// Chaos
 
-	"models/player/medic.mdl",					// Sci
+	"models/scp_sl/scientists/apsci_cohrt_1.mdl",			// Sci
 	"models/player/sniper.mdl",					// Guard
 	"models/freak_fortress_2/scpmtf/mtf_guard_playerv4.mdl",	// MTF 1
 	"models/freak_fortress_2/scpmtf/mtf_guard_playerv4.mdl",	// MTF 2
@@ -398,8 +399,8 @@ static const char ClassModel[][] =
 	"models/freak_fortress_2/106_spyper/106.mdl",		// 106
 	"models/freak_fortress_2/scp_173/scp_173new.mdl",	// 173
 	"models/freak_fortress_2/scp_173/scp_173new.mdl",	// 173-2
-	"models/scp_sl/scp_939/scp_939_redone_pm.mdl",		// 939-89
-	"models/scp_sl/scp_939/scp_939_redone_pm.mdl",		// 939-53
+	"models/scp_sl/scp_939/scp_939_redone_pm_1.mdl",	// 939-89
+	"models/scp_sl/scp_939/scp_939_redone_pm_1.mdl",	// 939-53
 	"models/freak_fortress_2/scp-049/zombie049.mdl",	// 3008-2
 	"models/freak_fortress_2/it_steals/it_steals_v39.mdl"	// Stealer
 };
@@ -742,6 +743,7 @@ enum GamemodeEnum
 bool Ready = false;
 bool Enabled = false;
 bool NoMusic = false;
+bool TrainingOn = false;
 bool Vaex = false;		// VoiceAnnounceEx
 bool SourceComms = false;	// SourceComms++
 bool BaseComm = false;		// BaseComm
@@ -758,12 +760,18 @@ Handle SDKTryPickup;
 Handle DHAllowedToHealTarget;
 Handle DHSetWinningTeam;
 Handle DHRoundRespawn;
+Handle DHIsInTraining;
+Handle DHGameType;
 //Handle DHShouldCollide;
 //Handle DHLagCompensation;
 //Handle DHForceRespawn;
 //Handle DoorTimer = INVALID_HANDLE;
 
 ConVar CvarQuickRounds;
+
+//Cookie CookieTraining;
+
+Handle TimerTraining;
 
 GlobalForward GFOnEscape;
 
@@ -788,7 +796,8 @@ enum struct ClientEnum
 
 	bool IsVip;
 	bool Triggered;
-	bool CustomHitbox;
+	bool Training;
+	//bool CustomHitbox;
 	bool CanTalkTo[MAXTF2PLAYERS];
 
 	int HealthPack;
@@ -1075,6 +1084,8 @@ public void OnPluginStart()
 	AddMultiTargetFilter("@guard", Target_Guard, "all Facility Guards", false);
 	AddMultiTargetFilter("@!guard", Target_Guard, "all non-Facility Guards", false);
 
+	//CookieTraining = new Cookie("scp_cookie_training", "Status on learning the SCP gamemode", CookieAccess_Public);
+
 	GameData gamedata = LoadGameConfigFile("scp_sf");
 	if(gamedata != null)
 	{
@@ -1214,6 +1225,14 @@ public void OnPluginStart()
 			DHookAddParam(DHShouldCollide, HookParamType_CBaseEntity);
 		}*/
 
+		DHIsInTraining = DHookCreate(gamedata.GetOffset("CTFGameRules::IsInTraining"), HookType_GameRules, ReturnType_Bool, ThisPointer_Address);
+		if(DHIsInTraining == null)
+			LogError("[Gamedata] Could not find CTFGameRules::IsInTraining!");
+
+		DHGameType = DHookCreate(gamedata.GetOffset("CTFGameRules::GetGameType"), HookType_GameRules, ReturnType_Int, ThisPointer_Address);
+		if(DHGameType == null)
+			LogError("[Gamedata] Could not find CTFGameRules::GetGameType!");
+
 		delete gamedata;
 	}
 	else
@@ -1282,6 +1301,8 @@ public void OnMapStart()
 {
 	Enabled = false;
 	Ready = false;
+	TrainingOn = false;
+	TimerTraining = INVALID_HANDLE;
 
 	for(int i; i<sizeof(MusicList); i++)
 	{
@@ -1405,6 +1426,12 @@ public void OnMapStart()
 
 	if(DHRoundRespawn != null)
 		DHookGamerules(DHRoundRespawn, false, _, DHook_RoundRespawn);
+
+	if(DHIsInTraining != null)
+		DHookGamerules(DHIsInTraining, false, _, DHook_IsInTraining);
+
+	if(DHGameType != null)
+		DHookGamerules(DHGameType, true, _, DHook_GetGameType);
 }
 
 public void OnConfigsExecuted()
@@ -1466,8 +1493,19 @@ public void TF2_OnWaitingForPlayersEnd()
 public void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 {
 	Enabled = false;
+	TrainingOn = false;
+	GameRules_SetProp("m_bIsTrainingHUDVisible", false, 1, _, true);
+
+	if(TimerTraining != INVALID_HANDLE)
+	{
+		KillTimer(TimerTraining);
+		TimerTraining = INVALID_HANDLE;
+	}
+
 	for(int client=1; client<=MaxClients; client++)
 	{
+		Client[client].Training = false;
+
 		if(!IsValidClient(client))
 			continue;
 
@@ -1561,6 +1599,11 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 	UpdateListenOverrides(FAR_FUTURE);
 
 	RequestFrame(DisplayHint, true);
+
+	if(TimerTraining != INVALID_HANDLE)
+		KillTimer(TimerTraining);
+
+	//TimerTraining = CreateTimer(3.0, TrainingMessage, 0, TIMER_FLAG_NO_MAPCHANGE);
 }
 
 public Action OnCapturePoint(Event event, const char[] name, bool dontBroadcast)
@@ -2083,7 +2126,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			ChangeClientTeamEx(client, team);
 	}
 
-	Client[client].CustomHitbox = false;
+	//Client[client].CustomHitbox = false;
 	Client[client].Triggered = false;
 	Client[client].Sprinting = false;
 	Client[client].ChargeIn = 0.0;
@@ -2877,10 +2920,8 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 	if(client==attacker || !IsValidClient(attacker))
 	{
 		if(TF2_IsPlayerInCondition(client, TFCond_MarkedForDeath) && (GetEntityFlags(client) & FL_ONGROUND))
-		{
-			RequestFrame(RemoveRagdoll, client);
-			RequestFrame(CreateSpecialDeath, client);
-		}
+			CreateSpecialDeath(client);
+
 		return Plugin_Handled;
 	}
 
@@ -2889,10 +2930,8 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 		case Class_049:
 		{
 			if(GetEntityFlags(client) & FL_ONGROUND)
-			{
-				RequestFrame(RemoveRagdoll, client);
 				CreateSpecialDeath(client);
-			}
+
 			ChangeClientTeamEx(client, view_as<TFTeam>(GetClientTeam(attacker)));
 			SpawnReviveMarker(client, GetClientTeam(attacker));
 		}
@@ -3375,6 +3414,11 @@ public void OnGameFrame()
 							}
 							CPrintToChatAll("%s%t", PREFIX, "mtf_spawn");
 
+							if(TimerTraining != INVALID_HANDLE)
+								KillTimer(TimerTraining);
+
+							//TimerTraining = CreateTimer(3.0, TrainingMessage, 1, TIMER_FLAG_NO_MAPCHANGE);
+
 							if(count > 5)
 							{
 								CPrintToChatAll("%s%t", PREFIX, "mtf_spawn_scp_over");
@@ -3403,7 +3447,13 @@ public void OnGameFrame()
 						}
 
 						if(hasSpawned)
+						{
 							ChangeGlobalSong(engineTime+20.0, SoundList[Sound_ChaosSpawn], false);
+							if(TimerTraining != INVALID_HANDLE)
+								KillTimer(TimerTraining);
+
+							//TimerTraining = CreateTimer(3.0, TrainingMessage, 2, TIMER_FLAG_NO_MAPCHANGE);
+						}
 					}
 				}
 			}
@@ -3511,12 +3561,12 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		}
 		else if(damagetype & DMG_CRUSH)
 		{
-			//static float delay[MAXTF2PLAYERS];
-			//if(delay[victim] > engineTime)
+			static float delay[MAXTF2PLAYERS];
+			if(delay[victim] > engineTime)
 				return Plugin_Handled;
 
-			//delay[victim] = engineTime+0.05;
-			//return Plugin_Continue;
+			delay[victim] = engineTime+0.05;
+			return Plugin_Continue;
 		}
 		return Plugin_Continue;
 	}
@@ -3530,11 +3580,6 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		{
 			if(!Client[attacker].Triggered && !TF2_IsPlayerInCondition(victim, TFCond_Dazed))
 				TriggerShyGuy(victim, attacker, engineTime);
-		}
-		else if(Client[victim].Class==Class_939 || Client[victim].Class==Class_9392)
-		{
-			
-			return Plugin_Handled;
 		}
 		else if(Client[victim].Class==Class_3008 && !Client[victim].Radio)
 		{
@@ -6603,8 +6648,11 @@ public MRESReturn DHook_SetWinningTeam(Handle params)
 	return MRES_ChangedOverride;
 }
 
-/*public MRESReturn DHook_IsInTraining(Address pointer, Handle returnVal)
+public MRESReturn DHook_IsInTraining(Address pointer, Handle returnVal)
 {
+	if(!TrainingOn)
+		return MRES_Ignored;
+
 	//Trick the client into thinking the training mode is enabled.
 	DHookSetReturn(returnVal, false);
 	return MRES_Supercede;
@@ -6612,8 +6660,12 @@ public MRESReturn DHook_SetWinningTeam(Handle params)
 
 public MRESReturn DHook_GetGameType(Address pointer, Handle returnVal)
 {
+	if(!TrainingOn)
+		return MRES_Ignored;
+
+	DHookSetReturn(returnVal, 0);
 	return MRES_Supercede;
-}*/
+}
 
 public MRESReturn DHook_Supercede(int client, Handle params)
 {
@@ -6888,11 +6940,16 @@ bool IsValidMarker(int marker)
 
 public void CreateSpecialDeath(int client)
 {
+	TFClassType class = ClassClassModel[Client[client].Class];
+	if(class==TFClass_Pyro || class==TFClass_Unknown)
+		return;
+
 	int entity = CreateEntityByName("prop_dynamic_override");
 	if(!IsValidEntity(entity))
 		return;
 
-	TFClassType class = ClassClassModel[Client[client].Class];
+	RequestFrame(RemoveRagdoll, client);
+
 	int special = (class==TFClass_Engineer || class==TFClass_DemoMan || class==TFClass_Heavy) ? 1 : 0;
 	float pos[3];
 	GetEntPropVector(client, Prop_Send, "m_vecOrigin", pos);
@@ -6917,7 +6974,7 @@ public void CreateSpecialDeath(int client)
 	SetVariantString(FireDeath[special]);
 	AcceptEntityInput(entity, "SetAnimation");
 
-	SetVariantString("OnAnimationDone !self:KillHierarchy::0.0:1");
+	/*SetVariantString("OnAnimationDone !self:KillHierarchy::0.0:1");
 	AcceptEntityInput(entity, "AddOutput");
 	{
 		char output[128];
@@ -6926,7 +6983,7 @@ public void CreateSpecialDeath(int client)
 		AcceptEntityInput(entity, "AddOutput");
 	}
 	SetVariantString("");
-	AcceptEntityInput(entity, "FireUser1");
+	AcceptEntityInput(entity, "FireUser1");*/
 
 	CreateTimer(FireDeathTimes[class], Timer_RemoveEntity, EntIndexToEntRef(entity));
 
@@ -7163,6 +7220,155 @@ public Action CustomModelDamage(int entity, int &attacker, int &inflictor, float
 public bool CustomModelCollide(int entity, int collisiongroup, int contentsmask, bool originalResult)
 {
 	return false;
+}*/
+
+// Turtorial
+
+/*public Action TrainingMessage(Handle timer, int mode)
+{
+	TrainingOn = true;
+	GameRules_SetProp("m_bIsInTraining", true, 1, _, true);
+	GameRules_SetProp("m_bIsTrainingHUDVisible", true, 1, _, true);
+
+	int entity = FindEntityByClassname(-1, "tf_gamerules");
+	if(entity > MaxClients)
+	{
+		SetEntData(entity, 2122, 1, 4, true);
+		SetEntData(entity, 2126, 1, 4, true);
+	}
+
+	TimerTraining = CreateTimer(35.0, TrainingMessageOff, _, TIMER_FLAG_NO_MAPCHANGE);
+
+	for(int client=1; client<=MaxClients; client++)
+	{
+		if(IsClientInGame(client))
+			TrainingMessageClient(client, mode);
+	}
+	return Plugin_Continue;
+}
+
+void TrainingMessageClient(int client, int mode)
+{
+	static char buffer[256];
+	if(Client[client].Training)
+	{
+		if(mode==1 && Client[client].Class<Class_MTF && Client[client].Class>Class_MTF3)
+		{
+			SetGlobalTransTarget(client);
+
+			BfWrite msg = view_as<BfWrite>(StartMessageOne("TrainingObjective", client));
+			if(msg != INVALID_HANDLE)
+			{
+				Format(buffer, sizeof(buffer), "%t", "train_mtf_title");
+				msg.WriteString(buffer);
+				EndMessage();
+			}
+			
+			msg = view_as<BfWrite>(StartMessageOne("TrainingMsg", client));
+			if(msg != INVALID_HANDLE)
+			{
+				Format(buffer, sizeof(buffer), "%t", "train_mtf_msg");
+				msg.WriteString(buffer);
+				EndMessage();
+			}
+			return;
+		}
+		else if(mode==2 && Client[client].Class!=Class_Chaos)
+		{
+			SetGlobalTransTarget(client);
+
+			BfWrite msg = view_as<BfWrite>(StartMessageOne("TrainingObjective", client));
+			if(msg != INVALID_HANDLE)
+			{
+				Format(buffer, sizeof(buffer), "%t", "train_chaos_title");
+				msg.WriteString(buffer);
+				EndMessage();
+			}
+			
+			msg = view_as<BfWrite>(StartMessageOne("TrainingMsg", client));
+			if(msg != INVALID_HANDLE)
+			{
+				Format(buffer, sizeof(buffer), "%t", "train_chaos_msg");
+				msg.WriteString(buffer);
+				EndMessage();
+			}
+			return;
+		}
+	}
+
+	if(!AreClientCookiesCached(client))
+		return;
+
+	CookieTraining.Get(client, buffer, sizeof(buffer));
+
+	int flags = StringToInt(buffer);
+	int flag = RoundFloat(Pow(2.0, float(view_as<int>(Client[client].Class))));
+	if(flags & flag)
+	{
+		if(!Client[client].Training)
+			return;
+	}
+	else
+	{
+		flags |= flag;
+		Client[client].Training = true;
+	}
+
+	IntToString(flags, buffer, sizeof(buffer));
+	CookieTraining.Set(client, buffer);
+
+	SetGlobalTransTarget(client);
+
+	BfWrite msg = view_as<BfWrite>(StartMessageOne("TrainingObjective", client));
+	if(msg != INVALID_HANDLE)
+	{
+		if(Client[client].Class == Class_Spec)
+		{
+			Format(buffer, sizeof(buffer), "%t", "welcome");
+		}
+		else
+		{
+			GetClassName(Client[client].Class, buffer, sizeof(buffer));
+			Format(buffer, sizeof(buffer), "%t", "you_are", buffer);
+		}
+		msg.WriteString(buffer);
+		EndMessage();
+	}
+	
+	msg = view_as<BfWrite>(StartMessageOne("TrainingMsg", client));
+	if(msg != INVALID_HANDLE)
+	{
+		Format(buffer, sizeof(buffer), "train_%s", ClassShort[Client[client].Class]);
+		Format(buffer, sizeof(buffer), "%t", buffer);
+		msg.WriteString(buffer);
+		EndMessage();
+	}
+}
+
+public Action TrainingMessageOff(Handle timer)
+{
+	for(int client=1; client<=MaxClients; client++)
+	{
+		if(IsClientInGame(client) && Client[client].Training)
+		{
+			BfWrite msg = view_as<BfWrite>(StartMessageOne("TrainingObjective", client));
+			if(msg != INVALID_HANDLE)
+				EndMessage();
+			
+			msg = view_as<BfWrite>(StartMessageOne("TrainingMsg", client));
+			if(msg != INVALID_HANDLE)
+				EndMessage();
+		}
+
+		Client[client].Training = false;
+	}
+
+	TrainingOn = false;
+	GameRules_SetProp("m_bIsInTraining", false, 1, _, true);
+	GameRules_SetProp("m_bIsTrainingHUDVisible", false, 1, _, true);
+	TimerTraining = INVALID_HANDLE;
+	//TimerTraining = CreateTimer(10.0, TrainingMessage, true, TIMER_FLAG_NO_MAPCHANGE);
+	return Plugin_Continue;
 }*/
 
 // Stocks

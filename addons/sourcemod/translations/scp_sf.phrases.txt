@@ -386,6 +386,109 @@
 		"en"		"Kill everyone.\nAttack from behind avoid being seen."
 	}
 
+	// Training Phrases
+
+	"welcome"
+	{
+		"en"		"Welcome to SCP: Secret Fortress!"
+	}
+	"train_mtf_title"
+	{
+		"en"		"Gear Up, Boys!"
+	}
+	"train_mtf_msg"
+	{
+		"en"		"Nine-Tailed Fox has spawned. They will save Scientists and work with Guards. They will kill SCPs and try to disarm Class-D Personnel. They have radios to talk to each other and have different ranks."
+	}
+	"train_chaos_title"
+	{
+		"en"		"CHAAOOOOS!"
+	}
+	"train_chaos_msg"
+	{
+		"en"		"Chaos Insurgency has spawn. They will save Class-D Personnel. They will kill Scientists and Guards. They all have the same weapon and spawn with a health kit."
+	}
+	"train_spec"
+	{
+		"en"		"You can only watch and talk with other dead players right now. Don't worry as you'll respawn soon enough. You can call for a medic to teleport to an alive player."
+	}
+	"train_dboi"
+	{
+		"en"		"You need to escape the facility. Press ATTACK, ATTACK2, ATTACK3, USE, or use VOICEMENU to interact with buttons and items. Watch out for other teams as they'll either kill you or capture you."
+	}
+	"train_chaos"
+	{
+		"en"		"You need to free Class-D Personnel from the facility. Kill other teams to help Class-D Personnel escape. Press ATTACK3, USE, or use VOICEMENU to interact with buttons and items."
+	}
+	"train_sci"
+	{
+		"en"		"You need to escape the facility. Press ATTACK, ATTACK3, USE, or use VOICEMENU to interact with buttons and items. Watch out for other teams as they'll kill you."
+	}
+	"train_guard"
+	{
+		"en"		"You need to protect Scientists from other teams. Help them by escorting them where they need to go. You can disarm Class-D Personnel with your melee weapon. You also have a flash grenade."
+	}
+	"train_mtf1"
+	{
+		"en"		"You need to free Scientists from the facility. Stay with your lieutenants and commander. Keep in touch using the radio. Press USE or use VOICEMENU to interact with buttons and items."
+	}
+	"train_mtf2"
+	{
+		"en"		"You need to free Scientists from the facility. Support your group of cadets, follow your commander. Use your radio too. Press USE or use VOICEMENU to interact with buttons and items."
+	}
+	"train_mtfs"
+	{
+		"en"		"You escaped! Now free your other Scientists or prevent non-disarmed Class-D Personnel from escaping. Take down other SCPs too. Press USE or use VOICEMENU to interact with buttons and items."
+	}
+	"train_mtf3"
+	{
+		"en"		"You need to free Scientists from the facility. Command your troops down the facility. Use your radio to help order your troops around. Press USE or use VOICEMENU to interact with buttons and items."
+	}
+	"train_049"
+	{
+		"en"		"Your attacks one-shots humans. Use your Medi-Gun to revive dead players into SCP-049-2. Press ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons and items."
+	}
+	"train_0492"
+	{
+		"en"		"You have been revived by SCP-049. Follow his orders and attack other teams. Prevent escape. Press ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
+	"train_079"
+	{
+		"en"		"Oh boy..."
+	}
+	"train_096"
+	{
+		"en"		"Your attacks one-shots humans but you must be enraged. If players look at your face or attack you, you'll charge them down. Press ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
+	"train_106"
+	{
+		"en"		"Your attacks will send humans to a pocket dimension. You can place teleport portals and teleport to them later. ATTACK2 will place a portal and ATTACK3 will teleport you to that portal."
+	}
+	"train_173"
+	{
+		"en"		"Your attacks one-shots humans. You can only move for a short time while being looked at. Try to time your attacks. Press ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
+	"train_1732"
+	{
+		"en"		"Your attacks one-shots humans. You can only move for a short time while being looked at. Try to time your attacks. Press ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
+	"train_939"
+	{
+		"en"		"You can only see targets making noise. You can trick players by talking to them. You'll get faster with less health you have. Press ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
+	"train_9392"
+	{
+		"en"		"You can only see targets making noise. You can trick players by talking to them. You'll get faster with less health you have. Press ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
+	"train_3008"
+	{
+		"en"		"Make sure your customers are enjoying themselves. Also make sure they leave during closing hours. Use brute force if needed. Press ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
+	"train_itsteals"
+	{
+		"en"		"Look around for players. More times you get hit by a player, the more rage you gain. After a certain amount of times, you'll have enough."
+	}
+
 	// Keycard Phrases
 
 	"keycard_0"

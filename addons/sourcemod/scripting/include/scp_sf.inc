@@ -23,8 +23,11 @@ enum SCPClass
 	SCPClass_096,
 	SCPClass_106,
 	SCPClass_173,
+	SCPClass_1732,
 	SCPClass_939,
-	SCPClass_9392
+	SCPClass_9392,
+	SCPClass_3008,
+	SCPClass_Stealer
 }
 
 /**
