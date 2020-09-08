@@ -410,47 +410,47 @@
 	}
 	"train_spec"
 	{
-		"en"		"You can only watch and talk with other dead players right now. Don't worry as you'll respawn soon enough. You can call for a medic to teleport to an alive player."
+		"en"		"You can only watch and talk with other dead players right now.\nDon't worry as you'll respawn soon enough.\nYou can call for a medic to teleport to an alive player."
 	}
 	"train_dboi"
 	{
-		"en"		"You need to escape the facility. Press ATTACK, ATTACK2, ATTACK3, USE, or use VOICEMENU to interact with buttons and items. Watch out for other teams as they'll either kill you or capture you."
+		"en"		"You need to escape the facility.\nPress ATTACK, ATTACK2, ATTACK3, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll either kill you or capture you."
 	}
 	"train_chaos"
 	{
-		"en"		"You need to free Class-D Personnel from the facility. Kill other teams to help Class-D Personnel escape. Press ATTACK3, USE, or use VOICEMENU to interact with buttons and items."
+		"en"		"You need to free Class-D Personnel from the facility.\nKill other teams to help Class-D Personnel escape.\nPress ATTACK3, USE, or use VOICEMENU to interact with buttons and items."
 	}
 	"train_sci"
 	{
-		"en"		"You need to escape the facility. Press ATTACK, ATTACK3, USE, or use VOICEMENU to interact with buttons and items. Watch out for other teams as they'll kill you."
+		"en"		"You need to escape the facility.\nPress ATTACK, ATTACK3, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll kill you."
 	}
 	"train_guard"
 	{
-		"en"		"You need to protect Scientists from other teams. Help them by escorting them where they need to go. You can disarm Class-D Personnel with your melee weapon. You also have a flash grenade."
+		"en"		"You need to protect Scientists from other teams.\nHelp them by escorting them where they need to go.\nYou can disarm Class-D Personnel with your melee weapon.\nYou also have a flash grenade."
 	}
 	"train_mtf1"
 	{
-		"en"		"You need to free Scientists from the facility. Stay with your lieutenants and commander. Keep in touch using the radio. Press USE or use VOICEMENU to interact with buttons and items."
+		"en"		"You need to free Scientists from the facility.\nStay with your lieutenants and commander.\nKeep in touch using the radio.\nPress USE or use VOICEMENU to interact with buttons and items."
 	}
 	"train_mtf2"
 	{
-		"en"		"You need to free Scientists from the facility. Support your group of cadets, follow your commander. Use your radio too. Press USE or use VOICEMENU to interact with buttons and items."
+		"en"		"You need to free Scientists from the facility.\nSupport your group of cadets, follow your commander.\nUse your radio too.\nPress USE or use VOICEMENU to interact with buttons and items."
 	}
 	"train_mtfs"
 	{
-		"en"		"You escaped! Now free your other Scientists or prevent non-disarmed Class-D Personnel from escaping. Take down other SCPs too. Press USE or use VOICEMENU to interact with buttons and items."
+		"en"		"You escaped! Now free your other Scientists or prevent non-disarmed Class-D Personnel from escaping.\nTake down other SCPs too.\nPress USE or use VOICEMENU to interact with buttons and items."
 	}
 	"train_mtf3"
 	{
-		"en"		"You need to free Scientists from the facility. Command your troops down the facility. Use your radio to help order your troops around. Press USE or use VOICEMENU to interact with buttons and items."
+		"en"		"You need to free Scientists from the facility.\nCommand your troops down the facility.\nUse your radio to help order your troops around.\nPress USE or use VOICEMENU to interact with buttons and items."
 	}
 	"train_049"
 	{
-		"en"		"Your attacks one-shots humans. Use your Medi-Gun to revive dead players into SCP-049-2. Press ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons and items."
+		"en"		"Your attacks one-shots humans.\nUse your Medi-Gun to revive dead players into SCP-049-2.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"train_0492"
 	{
-		"en"		"You have been revived by SCP-049. Follow his orders and attack other teams. Prevent escape. Press ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+		"en"		"You have been revived by SCP-049.\nFollow his orders and attack other teams.\nPrevent escape.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
 	"train_079"
 	{
@@ -458,35 +458,35 @@
 	}
 	"train_096"
 	{
-		"en"		"Your attacks one-shots humans but you must be enraged. If players look at your face or attack you, you'll charge them down. Press ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+		"en"		"Your attacks one-shots humans but you must be enraged.\nIf players look at your face or attack you, you'll charge them down.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
 	"train_106"
 	{
-		"en"		"Your attacks will send humans to a pocket dimension. You can place teleport portals and teleport to them later. ATTACK2 will place a portal and ATTACK3 will teleport you to that portal."
+		"en"		"Your attacks will send humans to a pocket dimension.\nYou can place teleport portals and teleport to them later.\nATTACK2 will place a portal and ATTACK3 will teleport you to that portal."
 	}
 	"train_173"
 	{
-		"en"		"Your attacks one-shots humans. You can only move for a short time while being looked at. Try to time your attacks. Press ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+		"en"		"Your attacks one-shots humans.\nYou can only move for a short time while being looked at.\nTry to time your attacks.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
 	"train_1732"
 	{
-		"en"		"Your attacks one-shots humans. You can only move for a short time while being looked at. Try to time your attacks. Press ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+		"en"		"Your attacks one-shots humans.\nYou can only move for a short time while being looked at.\nTry to time your attacks.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
 	"train_939"
 	{
-		"en"		"You can only see targets making noise. You can trick players by talking to them. You'll get faster with less health you have. Press ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+		"en"		"You can only see targets making noise.\nYou can trick players by talking to them.\nYou'll get faster with less health you have.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
 	"train_9392"
 	{
-		"en"		"You can only see targets making noise. You can trick players by talking to them. You'll get faster with less health you have. Press ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+		"en"		"You can only see targets making noise.\nYou can trick players by talking to them.\nYou'll get faster with less health you have.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
 	"train_3008"
 	{
-		"en"		"Make sure your customers are enjoying themselves. Also make sure they leave during closing hours. Use brute force if needed. Press ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+		"en"		"Make sure your customers are enjoying themselves.\nAlso make sure they leave during closing hours.\nUse brute force if needed.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
 	"train_itsteals"
 	{
-		"en"		"Look around for players. More times you get hit by a player, the more rage you gain. After a certain amount of times, you'll have enough."
+		"en"		"Look around for players.\nMore times you get hit by a player, the more rage you gain.\nAfter a certain amount of times, you'll have enough."
 	}
 
 	// Keycard Phrases
