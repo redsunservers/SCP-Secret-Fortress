@@ -44,7 +44,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"4"
-#define STABLE_REVISION	"4"
+#define STABLE_REVISION	"6"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 // I'm cheating yayy
@@ -386,7 +386,7 @@ static const char ClassModel[][] =
 	"models/freak_fortress_2/scp-049/chaos.mdl",	// Chaos
 
 	"models/scp_sl/scientists/apsci_cohrt_1.mdl",			// Sci
-	"models/player/sniper.mdl",					// Guard
+	"models/scp_sl/guards/counter_gign.mdl",			// Guard
 	"models/freak_fortress_2/scpmtf/mtf_guard_playerv4.mdl",	// MTF 1
 	"models/freak_fortress_2/scpmtf/mtf_guard_playerv4.mdl",	// MTF 2
 	"models/freak_fortress_2/scpmtf/mtf_guard_playerv4.mdl",	// MTF S
@@ -1455,18 +1455,23 @@ public void OnConfigsExecuted()
 	LockStringTables(save);
 }
 
-public void OnClientPostAdminCheck(int client)
+public void OnClientPutInServer(int client)
 {
 	Client[client].DownloadMode = 0;
 	Client[client].NextSongAt = FAR_FUTURE;
 	Client[client].Class = Class_Spec;
-	Client[client].IsVip = (CheckCommandAccess(client, "thisguyisavipiguess", ADMFLAG_RESERVATION, true) || CheckCommandAccess(client, "thisguyisaadminiguess", ADMFLAG_GENERIC, true));
+	Client[client].IsVip = false;
 
 	SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 	//SDKHook(client, SDKHook_ShouldCollide, OnCollide);
 	SDKHook(client, SDKHook_SetTransmit, OnTransmit);
 	SDKHook(client, SDKHook_PreThink, OnPreThink);
+}
+
+public void OnClientPostAdminCheck(int client)
+{
+	Client[client].IsVip = (CheckCommandAccess(client, "thisguyisavipiguess", ADMFLAG_RESERVATION, true) || CheckCommandAccess(client, "thisguyisaadminiguess", ADMFLAG_GENERIC, true));
 
 	int userid = GetClientUserId(client);
 	CreateTimer(0.25, Timer_ConnectPost, userid, TIMER_FLAG_NO_MAPCHANGE);
@@ -2380,8 +2385,10 @@ public Action OnJoinAuto(int client, const char[] command, int args)
 		return Plugin_Continue;
 
 	if(!IsPlayerAlive(client) && GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
+	{
+		SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", view_as<int>(TFClass_Spy));
 		ChangeClientTeam(client, 3);
-
+	}
 	return Plugin_Handled;
 }
 
@@ -2618,7 +2625,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 			{
 				static float targetPos[3];
 				GetEntPropVector(target, Prop_Send, "m_vecOrigin", targetPos);
-				CPrintToChat(target, "%s%s {default}: %s", GetVectorDistance(clientPos, targetPos)<350 ? "" : "*RADIO* ", name, msg);
+				CPrintToChat(target, "%s%s {default}: %s", GetVectorDistance(clientPos, targetPos)<400 ? "" : "*RADIO* ", name, msg);
 			}
 		}
 	}
@@ -2839,7 +2846,8 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 	if(!Enabled)
 		return Plugin_Continue;
 
-	int client = GetClientOfUserId(event.GetInt("userid"));
+	int clientId = event.GetInt("userid");
+	int client = GetClientOfUserId(clientId);
 	if(!client)
 		return Plugin_Continue;
 
@@ -2858,7 +2866,10 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 
 	TF2_SetPlayerClass(client, TFClass_Spy);
 
-	int attacker = GetClientOfUserId(event.GetInt("attacker"));
+	static char buffer[64];
+	int attackerId = event.GetInt("attacker");
+	int attacker = GetClientOfUserId(attackerId);
+	int assisterId = event.GetInt("assister");
 	if(IsSCP(client))
 	{
 		if(Client[client].Class!=Class_0492 && Client[client].Class!=Class_3008)
@@ -2866,53 +2877,52 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 			if(Client[client].Class==Class_106 && Client[client].Radio)
 				HideAnnotation(client);
 
-			static char class1[16];
-			GetClassName(Client[client].Class, class1, sizeof(class1));
+			GetClassName(Client[client].Class, buffer, sizeof(buffer));
 
 			SCPKilled++;
 			if(attacker!=client && IsValidClient(attacker))
 			{
-				static char class2[16];
-				GetClassName(Client[attacker].Class, class2, sizeof(class2));
+				static char class[16];
+				GetClassName(Client[attacker].Class, class, sizeof(class));
 
-				int assister = GetClientOfUserId(event.GetInt("assister"));
+				int assister = GetClientOfUserId(assisterId);
 				if(assister!=client && IsValidClient(assister))
 				{
 					static char class3[16];
 					GetClassName(Client[assister].Class, class3, sizeof(class3));
 
 					flags |= TF_DEATHFLAG_KILLERREVENGE|TF_DEATHFLAG_ASSISTERREVENGE;
-					CPrintToChatAll("%s%t", PREFIX, "scp_killed_duo", ClassColor[Client[client].Class], class1, ClassColor[Client[attacker].Class], class2, ClassColor[Client[assister].Class], class3);
+					CPrintToChatAll("%s%t", PREFIX, "scp_killed_duo", ClassColor[Client[client].Class], buffer, ClassColor[Client[attacker].Class], class, ClassColor[Client[assister].Class], class3);
 				}
 				else
 				{
 					flags |= TF_DEATHFLAG_KILLERREVENGE;
-					CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], class1, ClassColor[Client[attacker].Class], class2);
+					CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], buffer, ClassColor[Client[attacker].Class], class);
 				}
-				Client[client].Class = Class_Spec;
-				return Plugin_Changed;
-			}
-
-			int damage = event.GetInt("damagebits");
-			if(damage & DMG_SHOCK)
-			{
-				CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], class1, "gray", "tesla_gate");
-			}
-			else if(damage & DMG_NERVEGAS)
-			{
-				CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], class1, "gray", "femur_breaker");
-			}
-			else if(damage & DMG_BLAST)
-			{
-				CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], class1, "gray", "alpha_warhead");
 			}
 			else
 			{
-				CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], class1, "black", "redacted");
+				int damage = event.GetInt("damagebits");
+				if(damage & DMG_SHOCK)
+				{
+					CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], buffer, "gray", "tesla_gate");
+				}
+				else if(damage & DMG_NERVEGAS)
+				{
+					CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], buffer, "gray", "femur_breaker");
+				}
+				else if(damage & DMG_BLAST)
+				{
+					CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], buffer, "gray", "alpha_warhead");
+				}
+				else
+				{
+					CPrintToChatAll("%s%t", PREFIX, "scp_killed", ClassColor[Client[client].Class], buffer, "black", "redacted");
+				}
 			}
+			Client[client].Class = Class_Spec;
+			return Plugin_Changed;
 		}
-		Client[client].Class = Class_Spec;
-		return Plugin_Handled;
 	}
 
 	Client[client].Class = Class_Spec;
@@ -2920,29 +2930,40 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 	{
 		if(TF2_IsPlayerInCondition(client, TFCond_MarkedForDeath) && (GetEntityFlags(client) & FL_ONGROUND))
 			CreateSpecialDeath(client);
-
-		return Plugin_Handled;
 	}
-
-	switch(Client[attacker].Class)
+	else
 	{
-		case Class_049:
+		switch(Client[attacker].Class)
 		{
-			if(GetEntityFlags(client) & FL_ONGROUND)
-				CreateSpecialDeath(client);
+			case Class_049:
+			{
+				if(GetEntityFlags(client) & FL_ONGROUND)
+					CreateSpecialDeath(client);
 
-			ChangeClientTeamEx(client, view_as<TFTeam>(GetClientTeam(attacker)));
-			SpawnReviveMarker(client, GetClientTeam(attacker));
-		}
-		case Class_173:
-		{
-			EmitSoundToAll(SoundList[Sound_Snap], client, SNDCHAN_BODY, SNDLEVEL_TRAIN, _, _, _, client);
-		}
-		case Class_Stealer:
-		{
-			ClientCommand(client, "playgamesound %s", SoundList[Sound_ItKills]);
+				ChangeClientTeamEx(client, view_as<TFTeam>(GetClientTeam(attacker)));
+				SpawnReviveMarker(client, GetClientTeam(attacker));
+			}
+			case Class_173:
+			{
+				EmitSoundToAll(SoundList[Sound_Snap], client, SNDCHAN_BODY, SNDLEVEL_TRAIN, _, _, _, client);
+			}
+			case Class_Stealer:
+			{
+				ClientCommand(client, "playgamesound %s", SoundList[Sound_ItKills]);
+			}
 		}
 	}
+
+	int count;
+	int[] clients = new int[MaxClients];
+	for(int i=1; i<=MaxClients; i++)
+	{
+		if(i==client || i==attacker || (IsClientInGame(i) && IsFriendly(Client[attacker].Class, Client[i].Class) && Client[attacker].CanTalkTo[i]))
+			clients[count++] = i;
+	}
+
+	event.GetString("weapon", buffer, sizeof(buffer));
+	ShowDeathNotice(clients, count, attackerId, clientId, assisterId, event.GetInt("weaponid"), buffer, event.GetInt("damagebits"), event.GetInt("damage_flags")|TF_DEATHFLAG_DEADRINGER);
 	return Plugin_Handled;
 }
 
@@ -5120,7 +5141,7 @@ public void UpdateListenOverrides(float engineTime)
 				{
 					GetEntPropVector(target, Prop_Send, "m_vecOrigin", targetPos);
 					int radio = (!hasRadio || IsSCP(target) || Client[target].Power<=0) ? 0 : Client[target].Radio;
-					if(GetVectorDistance(clientPos, targetPos) < Pow(350.0, 1.0+(radio*0.15)))
+					if(GetVectorDistance(clientPos, targetPos) < Pow(400.0, 1.0+(radio*0.15)))
 					{
 						Client[target].CanTalkTo[client] = !muted;
 						SetListenOverride(client, target, blocked ? Listen_No : Listen_Yes);
@@ -5900,6 +5921,26 @@ void SetCaptureRate(int client)
 	TF2Attrib_SetByDefIndex(client, 68, float(result));
 }
 
+void ShowDeathNotice(int[] clients, int count, int attacker, int victim, int assister, int weaponid, const char[] weapon, int damagebits, int damageflags)
+{
+	Event event = CreateEvent("player_death", true);
+	if(!event)
+		return;
+
+	event.SetInt("userid", victim);
+	event.SetInt("attacker", attacker);
+	event.SetInt("assister", assister);
+	event.SetInt("weaponid", weaponid);
+	event.SetString("weapon", weapon);
+	event.SetInt("damagebits", damagebits);
+	event.SetInt("damage_flags", damageflags);
+	for(int i; i<count; i++)
+	{
+		event.FireToClient(clients[i]);
+	}
+	event.Cancel();
+}
+
 stock int TF2_CreateDroppedWeapon(int client, int weapon, bool swap, const float origin[3], const float angles[3])
 {
 	static char classname[32];
@@ -6143,13 +6184,22 @@ void PickupWeapon(int client, int entity)
 		{
 			ReplaceWeapon(client, wep, entity);
 			RemoveEntity(entity);
-
-			Event event = CreateEvent("localplayer_pickup_weapon", true);
-			event.FireToClient(client);
-			event.Cancel();
+			CreateTimer(0.1, Timer_UpdateClientHud, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 			return;
 		}
 	}
+}
+
+public Action Timer_UpdateClientHud(Handle timer, int userid)
+{
+	int client = GetClientOfUserId(userid);
+	if(client && IsClientInGame(client))
+	{
+		Event event = CreateEvent("localplayer_pickup_weapon", true);
+		event.FireToClient(client);
+		event.Cancel();
+	}
+	return Plugin_Continue;
 }
 
 void ReplaceWeapon(int client, WeaponEnum wep, int entity=0, int index=0)
@@ -6765,21 +6815,23 @@ public Action CH_PassFilter(int ent1, int ent2, bool &result)
 	if(!Enabled || !IsValidClient(ent1) || !IsValidClient(ent2))
 		return Plugin_Continue;
 
-	result = !IsFriendly(Client[ent1].Class, Client[ent2].Class);
-	return Plugin_Changed;
-
-	/*if(!IsSCP(ent1) && !IsSCP(ent2) && !TF2_IsPlayerInCondition(ent1, TFCond_HalloweenGhostMode) && !TF2_IsPlayerInCondition(ent2, TFCond_HalloweenGhostMode) && !IsFriendly(Client[ent1].Class, Client[ent2].Class))
+	if(IsFriendly(Client[ent1].Class, Client[ent2].Class))
+	{
+		result = false;
+	}
+	else
 	{
 		int weapon = GetEntPropEnt(ent1, Prop_Send, "m_hActiveWeapon");
-		if(weapon>MaxClients && IsValidEntity(weapon) && HasEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")!=WeaponIndex[Weapon_None])
+		result = (weapon>MaxClients && IsValidEntity(weapon) && HasEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")!=WeaponIndex[Weapon_None]);
+
+		if(!result)
 		{
-			result = true;
-			return Plugin_Changed;
+			weapon = GetEntPropEnt(ent2, Prop_Send, "m_hActiveWeapon");
+			if(weapon>MaxClients && IsValidEntity(weapon) && HasEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")!=WeaponIndex[Weapon_None])
+				result = true;
 		}
 	}
-
-	result = false;
-	return Plugin_Changed;*/
+	return Plugin_Changed;
 }
 
 #if defined _SENDPROXYMANAGER_INC_

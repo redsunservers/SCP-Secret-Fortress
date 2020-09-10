@@ -1,0 +1,6 @@
+"vertexlitgeneric"
+{
+	"$baseTexture" "models\fart\css\ct_gign/ct_gign_glass"
+	"$envmap" 			"env_cubemap"
+}
+

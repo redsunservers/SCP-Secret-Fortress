@@ -1,0 +1,11 @@
+"vertexlitgeneric"
+{
+	"$baseTexture" 	"models\fart\css\ct_gign\ct_gign"
+    "$bumpmap" 		"models/fart/css/ct_gign/ct_gign_normal"
+	
+	"$phong" "1"
+	"$phongexponent" "25"
+	"$phongboost" "1"
+	"$phongfresnelranges" "[0.05 0.1 0.5]"
+	"$nocull" "1"
+}
