@@ -1,21 +1,15 @@
 "Games"
 {
-	"#default"
-	{
-		"Signatures"
-		{
-			"CWeaponMedigun::AllowedToHealTarget" // "weapon_blocks_healing" and 4th function or debug and set breakpoints
-			{
-				"library"	"server"
-				"windows"	"\x55\x8B\xEC\x53\x8B\xD9\x56\x57\x8B\xB3\xE8"
-				"linux"		"@_ZN14CWeaponMedigun19AllowedToHealTargetEP11CBaseEntity"
-			}
-		}
-	}
 	"tf"
 	{
 		"Signatures"
 		{
+			"CBaseEntity::InSameTeam"
+			{
+				"library"	"server"
+				"linux"		"@_ZNK11CBaseEntity10InSameTeamEPKS_"
+				"windows"	"\x55\x8B\xEC\x8B\x45\x08\x57\x8B\xF9\x85\xC0\x75\x2A"
+			}
 			"CTFDroppedWeapon::Create"
 			{
 				"library"	"server"
@@ -34,29 +28,11 @@
 				"linux"		"@_ZN16CTFDroppedWeapon18InitPickedUpWeaponEP9CTFPlayerP13CTFWeaponBase"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x08\xD9\xEE\x53\x56\x57"
 			}
-			"CTFPlayer::TryToPickupDroppedWeapon"
-			{
-				"library"	"server"
-				"linux"		"@_ZN9CTFPlayer24TryToPickupDroppedWeaponEv"
-				"windows"	"\x56\x6A\x00\x8B\xF1\xE8\x2A\x2A\x2A\x2A\x84\xC0\x75\x2A\x32\xC0"
-			}
 			"CTFPlayer::CanPickupDroppedWeapon"
 			{
 				"library"	"server"
 				"linux"		"@_ZN9CTFPlayer22CanPickupDroppedWeaponEPK16CTFDroppedWeapon"
 				"windows"	"\x55\x8B\xEC\x53\x8B\x5D\x08\x56\x8B\xF1\x80\xBB\xDC\x04\x00\x00\x00"
-			}
-			"CTFPlayer::GetLoadoutItem"
-			{
-				"library"	"server"
-				"linux"		"@_ZN9CTFPlayer14GetLoadoutItemEiib"
-				"windows"	"\x55\x8B\xEC\x51\x53\x56\x8B\xF1\x8B\x0D\x2A\x2A\x2A\x2A\x57\x89\x75\xFC"
-			}
-			"CTFPlayer::GetEquippedWearableForLoadoutSlot"
-			{
-				"library"	"server"
-				"linux"		"@_ZN9CTFPlayer33GetEquippedWearableForLoadoutSlotEi"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x2A\x8B\xC1\x53\x56\x33\xF6\x89\x45\xF8\x8B\x88\x2A\x2A\x2A\x2A\x57\x89\x4D\xFC"
 			}
 			"CTFPlayer::DropAmmoPack"
 			{
@@ -64,11 +40,11 @@
 				"linux"		"@_ZN9CTFPlayer12DropAmmoPackERK15CTakeDamageInfobb"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x28\x53\x8B\xD9\x56\x33\xF6"
 			}
-			"CTFPlayer::SaveMe"
+			"CTFPlayer::GetEquippedWearableForLoadoutSlot"
 			{
 				"library"	"server"
-				"linux"		"@_ZN9CTFPlayer6SaveMeEv"
-				"windows"	"\x55\x8B\xEC\x51\x56\x8B\xF1\x8B\x06\x8B\x80\x04\x01\x00\x00\xFF\xD0\x84\xC0\x74\x2A\x8D\x86\x0C\x21\x00\x00"
+				"linux"		"@_ZN9CTFPlayer33GetEquippedWearableForLoadoutSlotEi"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x2A\x8B\xC1\x53\x56\x33\xF6\x89\x45\xF8\x8B\x88\x2A\x2A\x2A\x2A\x57\x89\x4D\xFC"
 			}
 			"CTFPlayer::RegenThink"
 			{
@@ -76,22 +52,47 @@
 				"linux"		"@_ZN9CTFPlayer10RegenThinkEv"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x74\x57\x8B\xF9\x8B\x07"
 			}
+			"CTFPlayer::SaveMe"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CTFPlayer6SaveMeEv"
+				"windows"	"\x55\x8B\xEC\x51\x56\x8B\xF1\x8B\x06\x8B\x80\x04\x01\x00\x00\xFF\xD0\x84\xC0\x74\x2A\x8D\x86\x0C\x21\x00\x00"
+			}
+			"CTFPlayer::TryToPickupDroppedWeapon"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CTFPlayer24TryToPickupDroppedWeaponEv"
+				"windows"	"\x56\x6A\x00\x8B\xF1\xE8\x2A\x2A\x2A\x2A\x84\xC0\x75\x2A\x32\xC0"
+			}
+			"CWeaponMedigun::AllowedToHealTarget" // "weapon_blocks_healing" and 4th function or debug and set breakpoints
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x53\x8B\xD9\x56\x57\x8B\xB3\xE8"
+				"linux"		"@_ZN14CWeaponMedigun19AllowedToHealTargetEP11CBaseEntity"
+			}
 		}
 		"Functions"
 		{
-			"CTFPlayer::CanPickupDroppedWeapon"
+			"CBaseEntity::InSameTeam"
 			{
-				"signature"	"CTFPlayer::CanPickupDroppedWeapon"
+				"signature"	"CBaseEntity::InSameTeam"
 				"callconv"	"thiscall"
 				"return"	"bool"
 				"this"		"entity"
 				"arguments"
 				{
-					"pWeapon"
+					"pEntity"
 					{
 						"type"	"cbaseentity"
 					}
 				}
+			}
+			"CTeamplayRoundBasedRules::RoundRespawn"
+			{
+				"offset"	"CTeamplayRoundBasedRules::RoundRespawn"
+				"hooktype"	"gamerules"
+				"return"	"void"
+				"this"		"ignore"
 			}
 			"CTeamplayRoundBasedRules::SetWinningTeam"
 			{
@@ -127,6 +128,20 @@
 					}
 				}
 			}
+			"CTFPlayer::CanPickupDroppedWeapon"
+			{
+				"signature"	"CTFPlayer::CanPickupDroppedWeapon"
+				"callconv"	"thiscall"
+				"return"	"bool"
+				"this"		"entity"
+				"arguments"
+				{
+					"pWeapon"
+					{
+						"type"	"cbaseentity"
+					}
+				}
+			}
 			"CTFPlayer::DropAmmoPack"
 			{
 				"signature"	"CTFPlayer::DropAmmoPack"
@@ -150,10 +165,10 @@
 					}
 				}
 			}
-			"CTFPlayer::SaveMe"
+			"CTFPlayer::ForceRespawn"
 			{
-				"signature"	"CTFPlayer::SaveMe"
-				"callconv"	"thiscall"
+				"offset"	"CTFPlayer::ForceRespawn"
+				"hooktype"	"entity"
 				"return"	"void"
 				"this"		"entity"
 			}
@@ -164,23 +179,26 @@
 				"return"	"void"
 				"this"		"entity"
 			}
-			"CTFPlayer::ForceRespawn"
+			"CTFPlayer::SaveMe"
 			{
-				"offset"	"CTFPlayer::ForceRespawn"
-				"hooktype"	"entity"
+				"signature"	"CTFPlayer::SaveMe"
+				"callconv"	"thiscall"
 				"return"	"void"
 				"this"		"entity"
-			}
-			"CTeamplayRoundBasedRules::RoundRespawn"
-			{
-				"offset"	"CTeamplayRoundBasedRules::RoundRespawn"
-				"hooktype"	"gamerules"
-				"return"	"void"
-				"this"		"ignore"
 			}
 		}
 		"Offsets"
 		{
+			"CBasePlayer::EquipWearable"
+			{
+				"linux"		"431"
+				"windows"	"430"
+			}
+			"CTeamplayRoundBasedRules::RoundRespawn"
+			{
+				"linux"		"226"
+				"windows"	"224"
+			}
 			"CTeam::AddPlayer"
 			{
 				"linux"		"202"
@@ -191,46 +209,25 @@
 				"linux"		"203"
 				"windows"	"202"
 			}
-			"CBasePlayer::EquipWearable"
+			"CTFGameRules::GetGameType"
 			{
-				"linux"		"431"
-				"windows"	"430"
-			}
-			"CTFPlayer::ForceRespawn"
-			{
-				"linux"		"330"
-				"windows"	"329"
-			}
-			"CTFPlayer::WantsLagCompensationOnEntity"
-			{
-				"library"	"server"
-				"windows"	"327"
-				"linux"		"328"
-			}
-			"CTFGameRules::GetCaptureValueForPlayer"
-			{
-				"linux"		"154"
-				"windows"	"153"
-			}
-			"CTFGameRules::SetWinningTeam"
-			{
-				"linux"		"161"
-				"windows"	"160"
-			}
-			"CTeamplayRoundBasedRules::RoundRespawn"
-			{
-				"linux"		"226"
-				"windows"	"224"
+				"linux"		"136"
+				"windows"	"135"
 			}
 			"CTFGameRules::IsInTraining"
 			{
 				"linux"		"182"
 				"windows"	"181"
 			}
-			"CTFGameRules::GetGameType"
+			"CTFGameRules::SetWinningTeam"
 			{
-				"linux"		"136"
-				"windows"	"135"
+				"linux"		"161"
+				"windows"	"160"
+			}
+			"CTFPlayer::ForceRespawn"
+			{
+				"linux"		"330"
+				"windows"	"329"
 			}
 			"ILocomotion::ShouldCollideWith"
 			{

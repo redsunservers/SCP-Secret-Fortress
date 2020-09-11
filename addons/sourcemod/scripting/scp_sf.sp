@@ -44,11 +44,11 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"4"
-#define STABLE_REVISION	"6"
+#define STABLE_REVISION	"7"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 // I'm cheating yayy
-#define IsSCP(%1)	(Client[%1].Class>=Class_049)
+#define IsSCP(%1)	(Client[%1].Class>=Class_035)
 #define IsSpec(%1)	(Client[%1].Class==Class_Spec || !IsPlayerAlive(%1) || TF2_IsPlayerInCondition(%1, TFCond_HalloweenGhostMode))
 
 #define FAR_FUTURE	100000000.0
@@ -257,6 +257,7 @@ enum ClassEnum
 	Class_MTFS,
 	Class_MTF3,
 
+	Class_035,
 	Class_049,
 	Class_0492,
 	Class_079,
@@ -284,6 +285,7 @@ static const char ClassShort[][] =
 	"mtfs",
 	"mtf3",
 
+	"035",
 	"049",
 	"0492",
 	"079",
@@ -311,6 +313,7 @@ static const char ClassColor[][] =
 	"darkblue",
 	"darkblue",
 
+	"darkred",	// 035
 	"darkred",	// 049
 	"red",		// 049-2
 	"darkred",	// 079
@@ -338,17 +341,18 @@ static const int ClassColors[][] =
 	{ 0, 0, 154, 255 },
 	{ 0, 0, 139, 255 },
 
-	{ 189, 0, 0, 255 },
-	{ 189, 0, 0, 255 },
-	{ 189, 0, 0, 255 },
-	{ 189, 0, 0, 255 },
-	{ 189, 0, 0, 255 },
-	{ 189, 0, 0, 255 },
-	{ 189, 0, 0, 255 },
-	{ 189, 0, 0, 255 },
-	{ 189, 0, 0, 255 },
-	{ 189, 0, 0, 255 },
-	{ 0, 0, 0, 255}
+	{ 189, 0, 0, 255 },	// 035
+	{ 189, 0, 0, 255 },	// 049
+	{ 189, 0, 0, 255 },	// 049-2
+	{ 189, 0, 0, 255 },	// 079
+	{ 189, 0, 0, 255 },	// 096
+	{ 189, 0, 0, 255 },	// 106
+	{ 189, 0, 0, 255 },	// 173
+	{ 189, 0, 0, 255 },	// 173
+	{ 189, 0, 0, 255 },	// 939
+	{ 189, 0, 0, 255 },	// 939
+	{ 189, 0, 0, 255 },	// 3008
+	{ 0, 0, 0, 255}		// It Steals
 };
 
 static const char ClassSpawn[][] =
@@ -365,6 +369,7 @@ static const char ClassSpawn[][] =
 	"",
 	"",
 
+	"scp_spawn_035",
 	"scp_spawn_049",
 	"scp_spawn_p",
 	"",
@@ -392,6 +397,7 @@ static const char ClassModel[][] =
 	"models/freak_fortress_2/scpmtf/mtf_guard_playerv4.mdl",	// MTF S
 	"models/freak_fortress_2/scpmtf/mtf_guard_playerv4.mdl",	// MTF 3
 
+	"models/freak_fortress_2/scp-049/zombie049.mdl",	// 035
 	"models/freak_fortress_2/scp-049/scp049.mdl",		// 049
 	"models/freak_fortress_2/scp-049/zombie049.mdl",	// 049-2
 	"models/player/engineer.mdl", 				// 079
@@ -419,6 +425,7 @@ static const char ClassModelSub[][] =
 	"models/player/soldier.mdl",	// MTF S
 	"models/player/soldier.mdl",	// MTF 3
 
+	"models/player/sniper.mdl",	// 035
 	"models/player/medic.mdl",	// 049
 	"models/player/spy.mdl",	// 049-2
 	"models/player/engineer.mdl", 	// 079
@@ -446,6 +453,7 @@ static const TFClassType ClassClass[] =
 	TFClass_Engineer,	// MTF S
 	TFClass_Soldier,	// MTF 3
 
+	TFClass_Sniper,		// 035
 	TFClass_Medic,		// 049
 	TFClass_Scout,		// 049-2
 	TFClass_Engineer, 	// 079
@@ -473,6 +481,7 @@ static const TFClassType ClassClassModel[] =
 	TFClass_Sniper,		// MTF S
 	TFClass_Sniper,		// MTF 3
 
+	TFClass_Sniper,		// 035
 	TFClass_Medic,		// 049
 	TFClass_Sniper,		// 049-2
 	TFClass_Pyro, 		// 079
@@ -753,17 +762,16 @@ Handle SDKTeamAddPlayer;
 Handle SDKTeamRemovePlayer;
 Handle SDKEquipWearable;
 Handle SDKCreateWeapon;
-Handle SDKEquippedWearable;
+//Handle SDKEquippedWearable;
 Handle SDKInitPickup;
 Handle SDKInitWeapon;
-Handle SDKTryPickup;
+//Handle SDKTryPickup;
 Handle DHAllowedToHealTarget;
 Handle DHSetWinningTeam;
 Handle DHRoundRespawn;
 //Handle DHIsInTraining;
 //Handle DHGameType;
 //Handle DHShouldCollide;
-//Handle DHLagCompensation;
 //Handle DHForceRespawn;
 //Handle DoorTimer = INVALID_HANDLE;
 
@@ -840,7 +848,7 @@ enum struct ClientEnum
 			if(this.Class==Class_173 || this.Class==Class_1732)
 				return TFTeam_Unassigned;
 
-			if(this.Class<Class_Scientist || this.Class>=Class_049)
+			if(this.Class<Class_Scientist || this.Class>=Class_035)
 				return TFTeam_Red;
 
 			return TFTeam_Blue;
@@ -849,7 +857,7 @@ enum struct ClientEnum
 		if(this.Class < Class_Scientist)
 			return TFTeam_Red;
 
-		return this.Class<Class_049 ? TFTeam_Blue : TFTeam_Unassigned;
+		return this.Class<Class_035 ? TFTeam_Blue : TFTeam_Unassigned;
 	}
 
 	ClassEnum Setup(TFTeam team, bool bot, int &classD, int &classS, int &scp)
@@ -885,7 +893,7 @@ enum struct ClientEnum
 		{
 			if(Gamemode!=Gamemode_Steals && Gamemode!=Gamemode_Ikea && !bot && (GetRandomInt(0, 1) || (!scp && (classD+classS)>3)))
 			{
-				ClassEnum class = view_as<ClassEnum>(GetRandomInt(view_as<int>(Class_049), view_as<int>(ClassEnum)-1));
+				ClassEnum class = view_as<ClassEnum>(GetRandomInt(view_as<int>(Class_035), view_as<int>(ClassEnum)-1));
 				if(ClassEnabled[class] && !IsClassTaken(class))
 				{
 					scp++;
@@ -1138,7 +1146,7 @@ public void OnPluginStart()
 		if(SDKInitPickup == null)
 			LogError("[Gamedata] Could not find CTFDroppedWeapon::InitPickedUpWeapon");
 
-		StartPrepSDKCall(SDKCall_Player);
+		/*StartPrepSDKCall(SDKCall_Player);
 		PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::TryToPickupDroppedWeapon");
 		PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
 		SDKTryPickup = EndPrepSDKCall();
@@ -1151,12 +1159,14 @@ public void OnPluginStart()
 		PrepSDKCall_SetReturnInfo(SDKType_CBaseEntity, SDKPass_Pointer);
 		SDKEquippedWearable = EndPrepSDKCall();
 		if(SDKEquippedWearable == null)
-			LogError("[Gamedata] Could not find CTFPlayer::GetEquippedWearableForLoadoutSlot");
+			LogError("[Gamedata] Could not find CTFPlayer::GetEquippedWearableForLoadoutSlot");*/
 
 		DHook_CreateDetour(gamedata, "CTFPlayer::SaveMe", DHook_Supercede, _);
 		DHook_CreateDetour(gamedata, "CTFPlayer::RegenThink", DHook_RegenThinkPre, DHook_RegenThinkPost);
 		DHook_CreateDetour(gamedata, "CTFPlayer::CanPickupDroppedWeapon", DHook_CanPickupDroppedWeaponPre, _);
 		DHook_CreateDetour(gamedata, "CTFPlayer::DropAmmoPack", DHook_DropAmmoPackPre, _);
+		DHook_CreateDetour(gamedata, "CBaseEntity::InSameTeam", DHook_InSameTeamPre, _);
+		//DHook_CreateDetour(gamedata, "CLagCompensationManager::StartLagCompensation", DHook_StartLagCompensationPre, DHook_StartLagCompensationPost);
 
 		DHAllowedToHealTarget = DHookCreateDetour(Address_Null, CallConv_THISCALL, ReturnType_Bool, ThisPointer_CBaseEntity);
 		if(DHAllowedToHealTarget != null)
@@ -1176,19 +1186,6 @@ public void OnPluginStart()
 		{
 			LogError("[Gamedata] Could not find CWeaponMedigun::AllowedToHealTarget");
 		}
-
-		/*int offset = GameConfGetOffset(gamedata, "CTFPlayer::WantsLagCompensationOnEntity"); 
-		DHLagCompensation = DHookCreate(offset, HookType_Entity, ReturnType_Bool, ThisPointer_CBaseEntity, DHook_ClientWantsLagCompensationOnEntity); 
-		if(DHLagCompensation != null)
-		{
-			DHookAddParam(DHLagCompensation, HookParamType_CBaseEntity);
-			DHookAddParam(DHLagCompensation, HookParamType_ObjectPtr);
-			DHookAddParam(DHLagCompensation, HookParamType_Unknown);
-		}
-		else
-		{
-			LogError("[Gamedata] Could not find CTFPlayer::WantsLagCompensationOnEntity");
-		}*/
 
 		DHSetWinningTeam = DHookCreate(gamedata.GetOffset("CTFGameRules::SetWinningTeam"), HookType_GameRules, ReturnType_Void, ThisPointer_Ignore);
 		if(DHSetWinningTeam != null)
@@ -1235,7 +1232,7 @@ public void OnPluginStart()
 	}
 	else
 	{
-		LogError("[Gamedata] Could not find scp_sl!");
+		LogError("[Gamedata] Could not find scp_sf.txt");
 	}
 
 	for(int i=1; i<=MaxClients; i++)
@@ -1910,12 +1907,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 
 					wep -= view_as<WeaponEnum>(2);
 					if(wep<Weapon_Pistol || GetRandomInt(0, 1))
-					{
-						if(GetPlayerWeaponSlot(client, TFWeaponSlot_Melee)<=MaxClients && GetPlayerWeaponSlot(client, TFWeaponSlot_Primary)<=MaxClients)
-							SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_None));
-
 						return;
-					}
 
 					SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, wep));
 				}
@@ -1944,12 +1936,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 
 					wep--;
 					if(wep < Weapon_Pistol)
-					{
-						if(GetPlayerWeaponSlot(client, TFWeaponSlot_Melee)<=MaxClients && GetPlayerWeaponSlot(client, TFWeaponSlot_Primary)<=MaxClients)
-							SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_None));
-
 						return;
-					}
 
 					SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, wep));
 				}
@@ -2014,12 +2001,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 					TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
 					Client[client].Cooldown = GetEngineTime()+20.0;
 					if(GetRandomInt(0, 1))
-					{
-						if(GetPlayerWeaponSlot(client, TFWeaponSlot_Melee)<=MaxClients && GetPlayerWeaponSlot(client, TFWeaponSlot_Primary)<=MaxClients)
-							SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_None));
-
 						return;
-					}
 
 					wep += view_as<WeaponEnum>(2);
 					if(wep > Weapon_SMG5)
@@ -2157,6 +2139,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			Client[client].HealthPack = 2;
 			Client[client].Radio = 0;
 			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_SMG4));
+			GiveWeapon(client, Weapon_None);
 		}
 		case Class_Scientist:
 		{
@@ -2187,6 +2170,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			Client[client].Radio = 1;
 			GiveWeapon(client, Weapon_Flash);
 			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_SMG2));
+			GiveWeapon(client, Weapon_None);
 		}
 		case Class_MTF2, Class_MTFS:
 		{
@@ -2501,10 +2485,24 @@ public Action OnDropItem(int client, const char[] command, int args)
 				TF2_CreateDroppedWeapon(client, entity, true, origin, angles);
 				int slot = wep>Weapon_Disarm ? wep<Weapon_Flash ? TFWeaponSlot_Secondary : TFWeaponSlot_Primary : TFWeaponSlot_Melee;
 				TF2_RemoveWeaponSlot(client, slot);
-				if(GetPlayerWeaponSlot(client, slot)<=MaxClients && (slot==TFWeaponSlot_Melee || GetPlayerWeaponSlot(client, TFWeaponSlot_Melee)<=MaxClients))
+				if(slot == TFWeaponSlot_Melee)
+				{
 					SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_None));
+					return Plugin_Handled;
+				}
 
-				return Plugin_Handled;
+				for(int i; i<3; i++)
+				{
+					if(i == slot)
+						continue;
+
+					entity = GetPlayerWeaponSlot(client, i);
+					if(entity <= MaxClients)
+						continue;
+
+					SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", entity);
+					return Plugin_Handled;
+				}
 			}
 		}
 	}
@@ -5193,7 +5191,7 @@ void GoToSpawn(int client, ClassEnum class)
 
 	if(!count)
 	{
-		if(class >= Class_049)
+		if(class >= Class_035)
 		{
 			entity = -1;
 			while((entity=FindEntityByClassname2(entity, "info_target")) != -1)
@@ -5429,13 +5427,7 @@ void DropKeycard(int client, bool swap, const float origin[3], const float angle
 
 int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 {
-	int wep = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
-	if(wep > MaxClients)
-	{
-		if(GetEntProp(wep, Prop_Send, "m_iItemDefinitionIndex") == WeaponIndex[Weapon_None])
-			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
-	}
-
+	int wep;
 	switch(weapon)
 	{
 		/*
@@ -6362,7 +6354,7 @@ bool IsFriendly(ClassEnum class1, ClassEnum class2)
 	{
 		case Gamemode_Ikea, Gamemode_Steals:
 		{
-			if(class1>=Class_DBoi && class2>=Class_DBoi && class1<Class_049 && class2<Class_049)
+			if(class1>=Class_DBoi && class2>=Class_DBoi && class1<Class_035 && class2<Class_035)
 				return true;
 		}
 		case Gamemode_Nut:
@@ -6379,12 +6371,12 @@ bool IsFriendly(ClassEnum class1, ClassEnum class2)
 			if(class1<Class_Scientist && class2<Class_Scientist)	// Both are DBoi/Chaos
 				return true;
 
-			if(class1>=Class_Scientist && class2>=Class_Scientist && class1<Class_049 && class2<Class_049)	// Both are Scientist/MTF
+			if(class1>=Class_Scientist && class2>=Class_Scientist && class1<Class_035 && class2<Class_035)	// Both are Scientist/MTF
 				return true;
 		}
 	}
 
-	return (class1>=Class_049 && class2>=Class_049);	// Both are SCPs
+	return (class1>=Class_035 && class2>=Class_035);	// Both are SCPs
 }
 
 void TurnOnGlow(int client, const char[] color, int brightness, float distance)
@@ -6771,21 +6763,43 @@ public MRESReturn DHook_DropAmmoPackPre(int client, Handle params)
 	return MRES_Supercede;
 }
 
-public MRESReturn DHook_ShouldCollideWith(Address pointer, Handle returnVal, Handle params)
+public MRESReturn DHook_InSameTeamPre(int entity, Handle returnVal, Handle params)
 {
-	int entity = DHookGetParam(params, 1);
-	if(IsValidEntity(entity))
+	bool result;
+	if(!DHookIsNullParam(params, 1))
 	{
-		static char classname[32];
-		GetEdictClassname(entity, classname, sizeof(classname));
-		if(StrEqual(classname, "base_boss"))
+		int ent1 = GetOwnerLoop(entity);
+		int ent2 = GetOwnerLoop(DHookGetParam(params, 1));
+		if(ent1 == ent2)
 		{
-			DHookSetReturn(returnVal, false);
-			return MRES_Supercede;
+			result = true;
+		}
+		else if(IsValidClient(ent1) && IsValidClient(ent2))
+		{
+			result = IsFriendly(Client[ent1].Class, Client[ent2].Class);
 		}
 	}
-	return MRES_Ignored;
+
+	DHookSetReturn(returnVal, result);
+	return MRES_Supercede;
 }
+
+/*int StartLagCompensationClient;
+public MRESReturn DHook_StartLagCompensationPre(Address manager, Handle params)
+{
+	StartLagCompensationClient = DHookGetParam(params, 1);
+
+	//Lag compensate teammates
+	// CTFPlayer::WantsLagCompensationOnEntity virtual hook could've been done instead,
+	// but expensive as it called to each clients while this detour only calls once
+	ChangeClientTeamEx(StartLagCompensationClient, TFTeam_Spectator);
+}
+
+public MRESReturn DHook_StartLagCompensationPost(Address manager, Handle params)
+{
+	//DHook bug with post hook returning incorrect client address
+	ChangeClientTeamEx(StartLagCompensationClient, Client[client].TeamTF);
+}*/
 
 // Thirdparty
 
@@ -6815,7 +6829,7 @@ public Action CH_PassFilter(int ent1, int ent2, bool &result)
 	if(!Enabled || !IsValidClient(ent1) || !IsValidClient(ent2))
 		return Plugin_Continue;
 
-	if(IsFriendly(Client[ent1].Class, Client[ent2].Class))
+	/*if(IsFriendly(Client[ent1].Class, Client[ent2].Class))
 	{
 		result = false;
 	}
@@ -6830,7 +6844,8 @@ public Action CH_PassFilter(int ent1, int ent2, bool &result)
 			if(weapon>MaxClients && IsValidEntity(weapon) && HasEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")!=WeaponIndex[Weapon_None])
 				result = true;
 		}
-	}
+	}*/
+	result = !IsFriendly(Client[ent1].Class, Client[ent2].Class);
 	return Plugin_Changed;
 }
 
@@ -6911,6 +6926,7 @@ public bool SpawnReviveMarker(int client, int team)
 	if(reviveMarker == -1)
 		return false;
 
+	SetEntPropEnt(reviveMarker, Prop_Send, "m_hOwnerEntity", client); // client index 
 	SetEntPropEnt(reviveMarker, Prop_Send, "m_hOwner", client); // client index 
 	SetEntProp(reviveMarker, Prop_Send, "m_nSolidType", 2); 
 	SetEntProp(reviveMarker, Prop_Send, "m_usSolidFlags", 8); 
@@ -7497,17 +7513,17 @@ stock void DHook_CreateDetour(GameData gamedata, const char[] name, DHookCallbac
 	Handle detour = DHookCreateFromConf(gamedata, name);
 	if (!detour)
 	{
-		LogError("Failed to create detour: %s", name);
+		LogError("[Gamedata] Could not find %s", name);
 	}
 	else
 	{
 		if (preCallback != INVALID_FUNCTION)
 			if (!DHookEnableDetour(detour, false, preCallback))
-				LogError("Failed to enable pre detour: %s", name);
+				LogError("[Gamedata] Failed to enable pre detour: %s", name);
 		
 		if (postCallback != INVALID_FUNCTION)
 			if (!DHookEnableDetour(detour, true, postCallback))
-				LogError("Failed to enable post detour: %s", name);
+				LogError("[Gamedata] Failed to enable post detour: %s", name);
 		
 		delete detour;
 	}
@@ -7671,6 +7687,15 @@ stock int FindEntityByClassname2(int startEnt, const char[] classname)
 		startEnt--;
 	}
 	return FindEntityByClassname(startEnt, classname);
+}
+
+stock int GetOwnerLoop(int entity)
+{
+	int owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
+	if(owner>0 && owner!=entity)
+		return GetOwnerLoop(owner);
+
+	return entity;
 }
 
 stock void SetAmmo(int client, int weapon, int ammo=-1, int clip=-1)

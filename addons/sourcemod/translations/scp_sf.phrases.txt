@@ -288,6 +288,15 @@
 		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers."
 		"ru"		"Помогите Учёным сбежать.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным."
 	}
+	"class_035"
+	{
+		"en"		"SCP-035"
+	}
+	"desc_035"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs."
+		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP."
+	}
 	"class_049"
 	{
 		"en"		"SCP-049"
