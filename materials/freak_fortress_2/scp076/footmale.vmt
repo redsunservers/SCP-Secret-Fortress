@@ -1,0 +1,6 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "freak_fortress_2\scp076\Footmale"
+	"$bumpmap" "freak_fortress_2\scp076\Footmale_n"
+	"$halflambert" 1
+}

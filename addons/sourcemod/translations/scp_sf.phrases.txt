@@ -94,8 +94,8 @@
 	}
 	"hint_19"
 	{
-		"en"		"SCP-939-89, SCP-939-53, and SCP-3008-2 are able to talk to others."
-		"ru"		"SCP-939-89, SCP-939-53 и SCP-3008-2 могут говорить с другими игроками."
+		"en"		"SCP-939-89, SCP-939-53, and SCP-049 are able to talk to humans."
+		"ru"		"SCP-939-89, SCP-939-53 и SCP-049 могут говорить с другими игроками."
 	}
 	"hint_20"
 	{
@@ -315,6 +315,14 @@
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nFollow orders from SCP-049"
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nПодчиняйтесь SCP-049."
 	}
+	"class_076"
+	{
+		"en"		"SCP-076-2"
+	}
+	"desc_076"
+	{
+		"en"		"Kill guards, MTF, and chaos.\nCooperate with other SCPs."
+	}
 	"class_079"
 	{
 		"en"		"SCP-079"
@@ -359,6 +367,15 @@
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can only move while no one is looking."
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы можете двигаться, пока никто не смотрит."
+	}
+	"class_527"
+	{
+		"en"		"SCP-527"
+	}
+	"desc_527"
+	{
+		"en"		"Escape from the facility.\nCooperate with other SCPs."
+		"ru"		"Сбегите из Комплекса.\nСкооперируйтесь с другими SCP."
 	}
 	"class_939"
 	{
@@ -461,6 +478,10 @@
 	{
 		"en"		"You have been revived by SCP-049.\nFollow his orders and attack other teams.\nPrevent escape.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
+	"train_076"
+	{
+		"en"		"Your main goal is too kill any Guards, MTF, or Chaos.\nOnce you gain 4 heads you enter a rage state.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
 	"train_079"
 	{
 		"en"		"Oh boy..."
@@ -480,6 +501,10 @@
 	"train_1732"
 	{
 		"en"		"Your attacks one-shots humans.\nYou can only move for a short time while being looked at.\nTry to time your attacks.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
+	"train_527"
+	{
+		"en"		"Oh boy..."
 	}
 	"train_939"
 	{
@@ -675,6 +700,17 @@
 	{
 		"en"		"Weapon | Very Fine"
 		"ru"		"Оружие | О. Тонко"
+	}
+
+	// Menu Phrases
+
+	"menu_helpclass"
+	{
+		"en"		"Class Info"
+	}
+	"menu_perference"
+	{
+		"en"		"SCP Perference"
 	}
 
 	// Other Phrases

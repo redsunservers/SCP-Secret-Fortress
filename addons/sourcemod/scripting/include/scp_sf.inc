@@ -17,6 +17,7 @@ enum SCPClass
 	SCPClass_MTFS,
 	SCPClass_MTF3,
 
+	SCPClass_035,
 	SCPClass_049,
 	SCPClass_0492,
 	SCPClass_079,

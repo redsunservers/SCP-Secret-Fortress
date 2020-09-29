@@ -1,0 +1,8 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "freak_fortress_2\scp076\pop_mask_hair"
+	"$bumpmap" "freak_fortress_2\scp076\pop_hair_normal"
+	"$alphatest" 1
+	"$halflambert" 1
+		"$nodecal" "1"
+}

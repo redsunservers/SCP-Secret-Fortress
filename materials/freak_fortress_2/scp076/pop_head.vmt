@@ -1,0 +1,8 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "freak_fortress_2\scp076\pop_head"
+	"$bumpmap" "freak_fortress_2\scp076\pop_head_normal"
+	"$lightwarptexture"  "freak_fortress_2\scp076\pop_skin_lightwarp"
+	"$halflambert" 1
+		"$nodecal" "1"
+}
