@@ -23,12 +23,14 @@
 + Getting revived by SCP-049 will remove the player's ragdoll
 + SCP-096 is unable to deal damage to targets it can't see
 + SCP-939 is able to see outlines of nearby players
++ Fixed issues with SCP spawning RNG
 
++ Updated some tips
 + Fixes towards items sometimes not dropping correctly
 + SCP Info command now shows full description of the class
-+ VIPs are now shown on Blu team in the scoreboard
 + Added a command to select a prefered SCP
-+ Updated some tips
++ VIPs are now shown on Blu team in the scoreboard
++ Disarmed players can no longer be hurt from other players on the Disarmer's team
 ```
 
 **Map Changes:**
@@ -39,6 +41,7 @@
 + Added Intercom room
 + Added Facility Manager keycard locations
 ~ Moved location of Micro
+~ Changed keycard and item spots
 ~ Increased the rate of the Tesla Gate
 ~ Reduced and recolored indoor fog
 - Removed extra doors in Class-D spawn
@@ -3786,6 +3789,8 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	if(!IsFakeClient(victim) && IsFriendly(Client[victim].Class, Client[attacker].Class))
 		return Plugin_Handled;
 
+	if(Client[victim].Disarmer && Client[victim].Disarmer!=attacker && IsFriendly(Client[Client[victim].Disarmer].Class, Client[attacker].Class))
+		return Plugin_Handled;
 
 	if(IsValidEntity(weapon) && weapon>MaxClients && HasEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex"))
 	{
