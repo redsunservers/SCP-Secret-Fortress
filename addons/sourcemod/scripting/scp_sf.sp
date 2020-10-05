@@ -1,54 +1,3 @@
-/*
-**Event Changes:**
-```diff
-+ Added SCP-076-2 (Able)
-+ Updated SCP-106 textures
-+ Updated SCP-173 model (Thanks to Artvin#4149)
-+ Updated map skybox
-+ Special MTF announcement (Thanks to Bisho#7130)
-```
-
-**General Changes:**
-```diff
-+ Ghost models will now be visable to other ghosts
-+ VIPs players who are spectating as a ghost will gain a hat
-
-+ Updated soundtracks to be played depending on location & events
-+ Updated spawn soundtracks
-+ Added LCZ soundtrack
-+ Fixed music being played during the nuke (from music after spawning music)
-~ Replaced join soundtrack with Final Flash of Existance
-- Removed soundtrack Forget About Your Fears
-
-+ Getting revived by SCP-049 will remove the player's ragdoll
-+ SCP-096 is unable to deal damage to targets it can't see
-+ SCP-939 is able to see outlines of nearby players
-+ Fixed issues with SCP spawning RNG
-
-+ Updated some tips
-+ Fixes towards items sometimes not dropping correctly
-+ SCP Info command now shows full description of the class
-+ Added a command to select a prefered SCP
-+ VIPs are now shown on Blu team in the scoreboard
-+ Disarmed players can no longer be hurt from other players on the Disarmer's team
-```
-
-**Map Changes:**
-```diff
-+ Fixed nuke alarm sounds playing after the round ends
-+ Nuke alarm sounds are now controlled by Music setting
-+ Made button for Femur Breaker a press instead of on/off
-+ Added Intercom room
-+ Added Facility Manager keycard locations
-~ Moved location of Micro
-~ Changed keycard and item spots
-~ Increased the rate of the Tesla Gate
-~ Reduced and recolored indoor fog
-- Removed extra doors in Class-D spawn
-```
-
-***Happy Halloween!***
-*/
 #pragma semicolon 1
 
 #include <sourcemod>
@@ -96,7 +45,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"5"
-#define STABLE_REVISION	"0"
+#define STABLE_REVISION	"1"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 // I'm cheating yayy
@@ -1483,7 +1432,7 @@ public void OnClientCookiesCached(int client)
 
 public void OnClientPostAdminCheck(int client)
 {
-	Client[client].IsVip = CheckCommandAccess(client, "scp_vip", ADMFLAG_CUSTOM4, true);
+	Client[client].IsVip = CheckCommandAccess(client, "scp_vip", ADMFLAG_CUSTOM3, true);
 
 	int userid = GetClientUserId(client);
 	CreateTimer(0.25, Timer_ConnectPost, userid, TIMER_FLAG_NO_MAPCHANGE);
@@ -2717,7 +2666,7 @@ public Action Command_Preference(int client, int args)
 {
 	if(client)
 	{
-		if(CheckCommandAccess(client, "scp_basicvip", ADMFLAG_CUSTOM3))	// DISC-FF thing
+		if(!CheckCommandAccess(client, "scp_basicvip", ADMFLAG_CUSTOM4))	// DISC-FF thing
 		{
 			Menu menu = new Menu(Handler_None);
 			menu.SetTitle("You must add this server to your favorites\nand join the server through your favorites.\n ");
@@ -3084,7 +3033,6 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 		}
 	}
 
-	Client[client].Class = Class_Spec;
 	if(client==attacker || !IsValidClient(attacker))
 	{
 		if(TF2_IsPlayerInCondition(client, TFCond_MarkedForDeath) && (GetEntityFlags(client) & FL_ONGROUND))
@@ -3106,27 +3054,27 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 			{
 				if(Client[client].Class==Class_Chaos || (Client[client].Class>=Class_Guard && Client[client].Class<=Class_MTF3))
 				{
-					Client[client].Radio++;
-					if(Client[client].Radio == 4)
+					Client[attacker].Radio++;
+					if(Client[attacker].Radio == 4)
 					{
-						TF2_StunPlayer(client, 2.0, 0.5, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
-						ClientCommand(client, "playgamesound items/powerup_pickup_knockback.wav");
+						TF2_StunPlayer(attacker, 2.0, 0.5, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
+						ClientCommand(attacker, "playgamesound items/powerup_pickup_knockback.wav");
 
-						TF2_AddCondition(client, TFCond_CritCola);
-						TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
-						SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_076Rage));
-						Client[client].Keycard = Keycard_106;
-						SetEntityHealth(client, GetClientHealth(client)+250);
+						TF2_AddCondition(attacker, TFCond_CritCola);
+						TF2_RemoveWeaponSlot(attacker, TFWeaponSlot_Melee);
+						SetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon", GiveWeapon(attacker, Weapon_076Rage));
+						Client[attacker].Keycard = Keycard_106;
+						SetEntityHealth(attacker, GetClientHealth(attacker)+250);
 					}
-					else if(Client[client].Radio < 4)
+					else if(Client[attacker].Radio < 4)
 					{
-						TF2_AddCondition(client, TFCond_SpeedBuffAlly, 0.01);
-						SetEntityHealth(client, GetClientHealth(client)+50);
+						TF2_AddCondition(attacker, TFCond_SpeedBuffAlly, 0.01);
+						SetEntityHealth(attacker, GetClientHealth(attacker)+50);
 					}
 				}
-				else if(Client[client].Radio < 4)
+				else if(Client[attacker].Radio < 4)
 				{
-					TF2_StunPlayer(client, 2.0, 0.5, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
+					TF2_StunPlayer(attacker, 2.0, 0.5, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
 				}
 			}
 			case Class_173:
@@ -3139,6 +3087,8 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 			}
 		}
 	}
+
+	Client[client].Class = Class_Spec;
 
 	int count;
 	int[] clients = new int[MaxClients];
@@ -5410,7 +5360,7 @@ public Action Timer_ConnectPost(Handle timer, int userid)
 
 	if(!NoMusic)
 	{
-		if(CheckCommandAccess(client, "thediscffthing", ADMFLAG_CUSTOM3))
+		if(CheckCommandAccess(client, "thediscffthing", ADMFLAG_CUSTOM4))
 		{
 			ChangeSong(client, MusicTimes[Music_Join2]+GetEngineTime(), MusicList[Music_Join2]);
 		}
