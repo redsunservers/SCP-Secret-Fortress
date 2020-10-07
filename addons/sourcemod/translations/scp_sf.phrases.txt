@@ -208,6 +208,10 @@
 		"en"		"You will respawn soon."
 		"ru"		"Вы скоро возродитесь."
 	}
+	"train_spec"
+	{
+		"en"		"You can only watch and talk with other dead players right now.\nDon't worry as you'll respawn soon enough.\nYou can call for a medic to teleport to an alive player."
+	}
 	"class_dboi"
 	{
 		"en"		"Class-D Personnel"
@@ -217,6 +221,10 @@
 	{
 		"en"		"Escape from the facility.\nCooperate with the Chaos Insurgency.\nAvoid other teams."
 		"ru"		"Сбегите из Комплекса.\nСкооперируйтесь с Повстанцами Хаоса.\nИзбегайте других команд."
+	}
+	"train_dboi"
+	{
+		"en"		"You need to escape the facility.\nPress ATTACK, ATTACK2, ATTACK3, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll either kill you or capture you."
 	}
 	"class_chaos"
 	{
@@ -228,6 +236,10 @@
 		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects."
 		"ru"		"Помогите D-классу сбежать.\nНейтрализуйте другие объекты."
 	}
+	"train_chaos"
+	{
+		"en"		"You need to free Class-D Personnel from the facility.\nKill other teams to help Class-D Personnel escape.\nPress ATTACK3, USE, or use VOICEMENU to interact with buttons and items."
+	}
 	"class_sci"
 	{
 		"en"		"Scientist"
@@ -237,6 +249,10 @@
 	{
 		"en"		"Escape from the facility.\nCooperate with the MTF.\nAvoid other teams."
 		"ru"		"Сбегите из Комплекса.\nСкооперируйтесь с МОГ.\nИзбегайте других команд."
+	}
+	"train_sci"
+	{
+		"en"		"You need to escape the facility.\nPress ATTACK, ATTACK3, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll kill you."
 	}
 	"class_guard"
 	{
@@ -248,6 +264,10 @@
 		"en"		"Help Scientists escape.\nCooperate with MTF.\nNeutralize other subjects."
 		"ru"		"Помогите Учёным сбежать.\nСкооперируйтесь с МОГ.\nНейтрализуйте другие объекты."
 	}
+	"train_guard"
+	{
+		"en"		"You need to protect Scientists from other teams.\nHelp them by escorting them where they need to go.\nYou can disarm Class-D Personnel with your melee weapon.\nYou also have a flash grenade."
+	}
 	"class_mtf1"
 	{
 		"en"		"Nine-Tailed Fox Cadet"
@@ -257,6 +277,10 @@
 	{
 		"en"		"Help Scientists escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
 		"ru"		"Помогите Учёным сбежать.\nНейтрализуйте другие объекты.\nПодчиняйтесь старшим по званию."
+	}
+	"train_mtf1"
+	{
+		"en"		"You need to free Scientists from the facility.\nStay with your lieutenants and commander.\nKeep in touch using the radio.\nPress USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_mtf2"
 	{
@@ -268,6 +292,10 @@
 		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your superiors."
 		"ru"		"Помогите Учёным сбежать.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным.\nПодчиняйтесь старшим по званию."
 	}
+	"train_mtf2"
+	{
+		"en"		"You need to free Scientists from the facility.\nSupport your group of cadets, follow your commander.\nUse your radio too.\nPress USE or use VOICEMENU to interact with buttons and items."
+	}
 	"class_mtfs"
 	{
 		"en"		"Nine-Tailed Fox Scientist"
@@ -277,6 +305,10 @@
 	{
 		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your commanders."
 		"ru"		"Помогите Учёным сбежать.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным.\nПодчиняйтесь командиру."
+	}
+	"train_mtfs"
+	{
+		"en"		"You escaped! Now free your other Scientists or prevent non-disarmed Class-D Personnel from escaping.\nTake down other SCPs too.\nPress USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_mtf3"
 	{
@@ -288,6 +320,23 @@
 		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers."
 		"ru"		"Помогите Учёным сбежать.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным."
 	}
+	"train_mtf3"
+	{
+		"en"		"You need to free Scientists from the facility.\nCommand your troops down the facility.\nUse your radio to help order your troops around.\nPress USE or use VOICEMENU to interact with buttons and items."
+	}
+	"class_mtfe"
+	{
+		"en"		"Nine-Tailed Fox Engineer"
+	}
+	"desc_mtfe"
+	{
+		"en"		"Help Scientists escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
+		"ru"		"Помогите Учёным сбежать.\nНейтрализуйте другие объекты.\nПодчиняйтесь старшим по званию."
+	}
+	"train_mtfe"
+	{
+		"en"		"You need to free Scientists from the facility.\nYou can build sentries to fight off SCPs.\nYou can also build dispensers for allies.\nPress USE or use VOICEMENU to interact with buttons and items."
+	}
 	"class_035"
 	{
 		"en"		"SCP-035"
@@ -296,6 +345,10 @@
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs."
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP."
+	}
+	"train_035"
+	{
+		"en"		"Oh boy..."
 	}
 	"class_049"
 	{
@@ -306,6 +359,10 @@
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nInteract with a recently-dead human to revive them as an ally."
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nИспользуйте Меди-Пушку на недавно убитых вами."
 	}
+	"train_049"
+	{
+		"en"		"Your attacks one-shots humans.\nUse your Medi-Gun to revive dead players into SCP-049-2.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons and items."
+	}
 	"class_0492"
 	{
 		"en"		"SCP-049-2"
@@ -315,6 +372,10 @@
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nFollow orders from SCP-049"
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nПодчиняйтесь SCP-049."
 	}
+	"train_0492"
+	{
+		"en"		"You have been revived by SCP-049.\nFollow his orders and attack other teams.\nPrevent escape.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
 	"class_076"
 	{
 		"en"		"SCP-076-2"
@@ -322,6 +383,10 @@
 	"desc_076"
 	{
 		"en"		"Kill guards, MTF, and chaos.\nCooperate with other SCPs."
+	}
+	"train_076"
+	{
+		"en"		"Your main goal is too kill any Guards, MTF, or Chaos.\nOnce you gain 4 heads you enter a rage state.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
 	"class_079"
 	{
@@ -332,6 +397,10 @@
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs."
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP."
 	}
+	"train_079"
+	{
+		"en"		"Oh boy..."
+	}
 	"class_096"
 	{
 		"en"		"SCP-096"
@@ -340,6 +409,10 @@
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou become enraged when looked at."
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы наполняетесь яростью, когда на вас смотрят."
+	}
+	"train_096"
+	{
+		"en"		"Your attacks one-shots humans but you must be enraged.\nIf players look at your face or attack you, you'll charge them down.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
 	"class_106"
 	{
@@ -350,6 +423,10 @@
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nATTACK2 to create a portal.\nATTACK3 to teleport to that portal."
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nДОП.АТАКА-создать портал.\nСПЕЦ.АТАКА-телепорт."
 	}
+	"train_106"
+	{
+		"en"		"Your attacks will send humans to a pocket dimension.\nYou can place teleport portals and teleport to them later.\nATTACK2 will place a portal and ATTACK3 will teleport you to that portal."
+	}
 	"class_173"
 	{
 		"en"		"SCP-173"
@@ -358,6 +435,10 @@
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can only move while no one is looking."
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы можете двигаться, пока никто не смотрит."
+	}
+	"train_173"
+	{
+		"en"		"Your attacks one-shots humans.\nYou can only move for a short time while being looked at.\nTry to time your attacks.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
 	"class_1732"
 	{
@@ -368,6 +449,10 @@
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can only move while no one is looking."
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы можете двигаться, пока никто не смотрит."
 	}
+	"train_1732"
+	{
+		"en"		"Your attacks one-shots humans.\nYou can only move for a short time while being looked at.\nTry to time your attacks.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
 	"class_527"
 	{
 		"en"		"SCP-527"
@@ -376,6 +461,10 @@
 	{
 		"en"		"Escape from the facility.\nCooperate with other SCPs."
 		"ru"		"Сбегите из Комплекса.\nСкооперируйтесь с другими SCP."
+	}
+	"train_527"
+	{
+		"en"		"Oh boy..."
 	}
 	"class_939"
 	{
@@ -386,6 +475,10 @@
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can talk to other humans."
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы можете говорить с людьми."
 	}
+	"train_939"
+	{
+		"en"		"You can only see targets making noise.\nYou can trick players by talking to them.\nYou'll get faster with less health you have.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
 	"class_9392"
 	{
 		"en"		"SCP-939-53"
@@ -395,6 +488,10 @@
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can talk to other humans."
 		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы можете говорить с людьми."
 	}
+	"train_9392"
+	{
+		"en"		"You can only see targets making noise.\nYou can trick players by talking to them.\nYou'll get faster with less health you have.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
 	"class_3008"
 	{
 		"en"		"SCP-3008-2"
@@ -403,6 +500,10 @@
 	{
 		"en"		"Kill everyone during the night.\nCooperate with other SCP-3008-2.\nYou can talk to other humans."
 	}
+	"train_3008"
+	{
+		"en"		"Make sure your customers are enjoying themselves.\nAlso make sure they leave during closing hours.\nUse brute force if needed.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
 	"class_itsteals"
 	{
 		"en"		"???"
@@ -410,113 +511,6 @@
 	"desc_itsteals"
 	{
 		"en"		"Kill everyone.\nAttack from behind avoid being seen."
-	}
-
-	// Training Phrases
-
-	"welcome"
-	{
-		"en"		"Welcome to SCP: Secret Fortress!"
-	}
-	"train_mtf_title"
-	{
-		"en"		"Gear Up, Boys!"
-	}
-	"train_mtf_msg"
-	{
-		"en"		"Nine-Tailed Fox has spawned. They will save Scientists and work with Guards. They will kill SCPs and try to disarm Class-D Personnel. They have radios to talk to each other and have different ranks."
-	}
-	"train_chaos_title"
-	{
-		"en"		"CHAAOOOOS!"
-	}
-	"train_chaos_msg"
-	{
-		"en"		"Chaos Insurgency has spawn. They will save Class-D Personnel. They will kill Scientists and Guards. They all have the same weapon and spawn with a health kit."
-	}
-	"train_spec"
-	{
-		"en"		"You can only watch and talk with other dead players right now.\nDon't worry as you'll respawn soon enough.\nYou can call for a medic to teleport to an alive player."
-	}
-	"train_dboi"
-	{
-		"en"		"You need to escape the facility.\nPress ATTACK, ATTACK2, ATTACK3, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll either kill you or capture you."
-	}
-	"train_chaos"
-	{
-		"en"		"You need to free Class-D Personnel from the facility.\nKill other teams to help Class-D Personnel escape.\nPress ATTACK3, USE, or use VOICEMENU to interact with buttons and items."
-	}
-	"train_sci"
-	{
-		"en"		"You need to escape the facility.\nPress ATTACK, ATTACK3, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll kill you."
-	}
-	"train_guard"
-	{
-		"en"		"You need to protect Scientists from other teams.\nHelp them by escorting them where they need to go.\nYou can disarm Class-D Personnel with your melee weapon.\nYou also have a flash grenade."
-	}
-	"train_mtf1"
-	{
-		"en"		"You need to free Scientists from the facility.\nStay with your lieutenants and commander.\nKeep in touch using the radio.\nPress USE or use VOICEMENU to interact with buttons and items."
-	}
-	"train_mtf2"
-	{
-		"en"		"You need to free Scientists from the facility.\nSupport your group of cadets, follow your commander.\nUse your radio too.\nPress USE or use VOICEMENU to interact with buttons and items."
-	}
-	"train_mtfs"
-	{
-		"en"		"You escaped! Now free your other Scientists or prevent non-disarmed Class-D Personnel from escaping.\nTake down other SCPs too.\nPress USE or use VOICEMENU to interact with buttons and items."
-	}
-	"train_mtf3"
-	{
-		"en"		"You need to free Scientists from the facility.\nCommand your troops down the facility.\nUse your radio to help order your troops around.\nPress USE or use VOICEMENU to interact with buttons and items."
-	}
-	"train_049"
-	{
-		"en"		"Your attacks one-shots humans.\nUse your Medi-Gun to revive dead players into SCP-049-2.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons and items."
-	}
-	"train_0492"
-	{
-		"en"		"You have been revived by SCP-049.\nFollow his orders and attack other teams.\nPrevent escape.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
-	}
-	"train_076"
-	{
-		"en"		"Your main goal is too kill any Guards, MTF, or Chaos.\nOnce you gain 4 heads you enter a rage state.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
-	}
-	"train_079"
-	{
-		"en"		"Oh boy..."
-	}
-	"train_096"
-	{
-		"en"		"Your attacks one-shots humans but you must be enraged.\nIf players look at your face or attack you, you'll charge them down.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
-	}
-	"train_106"
-	{
-		"en"		"Your attacks will send humans to a pocket dimension.\nYou can place teleport portals and teleport to them later.\nATTACK2 will place a portal and ATTACK3 will teleport you to that portal."
-	}
-	"train_173"
-	{
-		"en"		"Your attacks one-shots humans.\nYou can only move for a short time while being looked at.\nTry to time your attacks.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
-	}
-	"train_1732"
-	{
-		"en"		"Your attacks one-shots humans.\nYou can only move for a short time while being looked at.\nTry to time your attacks.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
-	}
-	"train_527"
-	{
-		"en"		"Oh boy..."
-	}
-	"train_939"
-	{
-		"en"		"You can only see targets making noise.\nYou can trick players by talking to them.\nYou'll get faster with less health you have.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
-	}
-	"train_9392"
-	{
-		"en"		"You can only see targets making noise.\nYou can trick players by talking to them.\nYou'll get faster with less health you have.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
-	}
-	"train_3008"
-	{
-		"en"		"Make sure your customers are enjoying themselves.\nAlso make sure they leave during closing hours.\nUse brute force if needed.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
 	"train_itsteals"
 	{
@@ -891,5 +885,28 @@
 	{
 		"en"		"{gray}cl_downloadfilter is set to nosounds. You won't hear any music. If you want to enable, set cl_downloadfilter to all"
 		"ru"		"{gray}cl_downloadfilter установлен на nosounds. Вы не услышите звуков. Чтобы включить, смените значение cl_downloadfilter на all."
+	}
+
+	// Unused
+
+	"welcome"
+	{
+		"en"		"Welcome to SCP: Secret Fortress!"
+	}
+	"train_mtf_title"
+	{
+		"en"		"Gear Up, Boys!"
+	}
+	"train_mtf_msg"
+	{
+		"en"		"Nine-Tailed Fox has spawned. They will save Scientists and work with Guards. They will kill SCPs and try to disarm Class-D Personnel. They have radios to talk to each other and have different ranks."
+	}
+	"train_chaos_title"
+	{
+		"en"		"CHAAOOOOS!"
+	}
+	"train_chaos_msg"
+	{
+		"en"		"Chaos Insurgency has spawn. They will save Class-D Personnel. They will kill Scientists and Guards. They all have the same weapon and spawn with a health kit."
 	}
 }

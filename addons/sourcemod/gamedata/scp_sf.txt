@@ -4,11 +4,23 @@
 	{
 		"Signatures"
 		{
+			"CBaseEntity::GetNextThink"
+			{
+				"library"	"server"
+				"linux" 	"@_ZN11CBaseEntity12GetNextThinkEPKc"
+				"windows"	"\x55\x8B\xEC\x8B\x45\x08\x56\x8B\xF1\x85\xC0\x75\x2A\x8B\x86\xD0\x00\x00\x00\x89\x45\x08"
+			}
 			"CBaseEntity::InSameTeam"
 			{
 				"library"	"server"
 				"linux"		"@_ZNK11CBaseEntity10InSameTeamEPKS_"
 				"windows"	"\x55\x8B\xEC\x8B\x45\x08\x57\x8B\xF9\x85\xC0\x75\x2A"
+			}
+			"CBaseEntity::PhysicsDispatchThink"
+			{
+				"library"	"server"
+				"linux" 	"@_ZN11CBaseEntity20PhysicsDispatchThinkEMS_FvvE"
+				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x83\xEC\x08\x83\x78\x30\x00\x53"
 			}
 			"CTFDroppedWeapon::Create"
 			{
@@ -46,18 +58,6 @@
 				"linux"		"@_ZN9CTFPlayer33GetEquippedWearableForLoadoutSlotEi"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x2A\x8B\xC1\x53\x56\x33\xF6\x89\x45\xF8\x8B\x88\x2A\x2A\x2A\x2A\x57\x89\x4D\xFC"
 			}
-			"CTFPlayer::RegenThink"
-			{
-				"library"	"server"
-				"linux"		"@_ZN9CTFPlayer10RegenThinkEv"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x74\x57\x8B\xF9\x8B\x07"
-			}
-			"CTFPlayer::SaveMe"
-			{
-				"library"	"server"
-				"linux"		"@_ZN9CTFPlayer6SaveMeEv"
-				"windows"	"\x55\x8B\xEC\x51\x56\x8B\xF1\x8B\x06\x8B\x80\x04\x01\x00\x00\xFF\xD0\x84\xC0\x74\x2A\x8D\x86\x0C\x21\x00\x00"
-			}
 			"CTFPlayer::TryToPickupDroppedWeapon"
 			{
 				"library"	"server"
@@ -69,6 +69,12 @@
 				"library"	"server"
 				"windows"	"\x55\x8B\xEC\x53\x8B\xD9\x56\x57\x8B\xB3\xE8"
 				"linux"		"@_ZN14CWeaponMedigun19AllowedToHealTargetEP11CBaseEntity"
+			}
+			"GetGlobalTeam"
+			{
+				"library"	"server"
+				"linux"		"@_Z13GetGlobalTeami"
+				"windows"	"\x55\x8B\xEC\x8B\x4D\x08\x85\xC9\x78\x2A\x3B\x0D\x2A\x2A\x2A\x2A\x7D\x2A\xA1\x2A\x2A\x2A\x2A\x8B\x04\x88\x5D\xC3"
 			}
 		}
 		"Functions"
@@ -87,6 +93,20 @@
 					}
 				}
 			}
+			"CBaseEntity::PhysicsDispatchThink"
+			{
+				"signature"	"CBaseEntity::PhysicsDispatchThink"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"entity"
+				"arguments"
+				{
+					"thinkFunc"
+					{
+						"type"	"int"
+					}
+				}
+			}
 			"CTeamplayRoundBasedRules::RoundRespawn"
 			{
 				"offset"	"CTeamplayRoundBasedRules::RoundRespawn"
@@ -94,9 +114,9 @@
 				"return"	"void"
 				"this"		"ignore"
 			}
-			"CTeamplayRoundBasedRules::SetWinningTeam"
+			"CTeamplayRules::SetWinningTeam"
 			{
-				"offset"	"CTeamplayRoundBasedRules::SetWinningTeam"
+				"offset"	"CTeamplayRules::SetWinningTeam"
 				"hooktype"	"gamerules"
 				"return"	"void"
 				"this"		"ignore"
@@ -172,23 +192,14 @@
 				"return"	"void"
 				"this"		"entity"
 			}
-			"CTFPlayer::RegenThink"
-			{
-				"signature"	"CTFPlayer::RegenThink"
-				"callconv"	"thiscall"
-				"return"	"void"
-				"this"		"entity"
-			}
-			"CTFPlayer::SaveMe"
-			{
-				"signature"	"CTFPlayer::SaveMe"
-				"callconv"	"thiscall"
-				"return"	"void"
-				"this"		"entity"
-			}
 		}
 		"Offsets"
 		{
+			"CBaseEntity::ChangeTeam"
+			{
+				"linux"		"92"
+				"windows"	"91"	
+			}
 			"CBasePlayer::EquipWearable"
 			{
 				"linux"		"431"
@@ -219,7 +230,7 @@
 				"linux"		"182"
 				"windows"	"181"
 			}
-			"CTFGameRules::SetWinningTeam"
+			"CTeamplayRules::SetWinningTeam"
 			{
 				"linux"		"161"
 				"windows"	"160"
