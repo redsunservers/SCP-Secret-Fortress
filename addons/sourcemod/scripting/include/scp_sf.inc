@@ -3,45 +3,45 @@
 #endif
 #define _scpsf_included
 
-enum SCPClass
-{
-	SCPClass_Spec = 0,
-
-	SCPClass_DBoi,
-	SCPClass_Chaos,
-
-	SCPClass_Scientist,
-	SCPClass_Guard,
-	SCPClass_MTF,
-	SCPClass_MTF2,
-	SCPClass_MTFS,
-	SCPClass_MTF3,
-
-	SCPClass_035,
-	SCPClass_049,
-	SCPClass_0492,
-	SCPClass_079,
-	SCPClass_096,
-	SCPClass_106,
-	SCPClass_173,
-	SCPClass_1732,
-	SCPClass_939,
-	SCPClass_9392,
-	SCPClass_3008,
-	SCPClass_Stealer
-}
-
 /**
  * Get the client's current class
  *
  * @param client 	Client index
+ * @param class 	Class short string
+ * @param length 	Max length
  *
- * @return		Class the client is currently playing as
+ * @return		Number of bytes written
  */
-native SCPClass SCPSF_GetClientClass(int client);
+native int SCPSF_GetClientClass(int client, char[] class, int length);
 
-forward void SCPSF_OnEscape(int client);
+/**
+ * Get if the client is a SCP
+ *
+ * @param client 	Client index
+ *
+ * @return		If the client is a SCP
+ */
+native bool SCPSF_IsSCP(int client);
 
+/**
+ * Calls when a client escapes
+ *
+ * @param client 	Client index
+ * @param disarmer 	Client index of the disarmer, 0 if none
+ *
+ * @noreturn
+ */
+forward void SCPSF_OnEscape(int client, int disarmer);
+
+/**
+ * Calls when a client messages
+ *
+ * @param client 	Client index
+ * @param name 		Name shown
+ * @param message 	Message shown
+ *
+ * @noreturn
+ */
 forward void SCPSF_OnChatMessage(int client, char[] name, char[] message);
 
 public SharedPlugin __pl_SCPSF =
@@ -59,5 +59,6 @@ public SharedPlugin __pl_SCPSF =
 public void __pl_SCPSF_SetNTVOptional()
 {
 	MarkNativeAsOptional("SCPSF_GetClientClass");
+	MarkNativeAsOptional("SCPSF_IsSCP");
 }
 #endif

@@ -702,9 +702,9 @@
 	{
 		"en"		"Class Info"
 	}
-	"menu_perference"
+	"menu_preference"
 	{
-		"en"		"SCP Perference"
+		"en"		"SCP Preference"
 	}
 
 	// Other Phrases

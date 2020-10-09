@@ -5,10 +5,10 @@ enum ThinkFunctionEnum
 	ThinkFunction_RegenThink
 }
 
-static Handle DHAllowedToHealTarget;
-static Handle DHSetWinningTeam;
-static Handle DHRoundRespawn;
-static int ThinkData[2049];
+static Handle AllowedToHealTarget;
+static Handle SetWinningTeam;
+static Handle RoundRespawn;
+static int ThinkData[MAXENTITIES];
 static ThinkFunctionEnum ThinkFunction;
 
 void DHook_Setup(GameData gamedata)
@@ -18,13 +18,13 @@ void DHook_Setup(GameData gamedata)
 	DHook_CreateDetour(gamedata, "CTFPlayer::DropAmmoPack", DHook_DropAmmoPackPre, _);
 	DHook_CreateDetour(gamedata, "CBaseEntity::InSameTeam", DHook_InSameTeamPre, _);
 
-	DHAllowedToHealTarget = DHookCreateDetour(Address_Null, CallConv_THISCALL, ReturnType_Bool, ThisPointer_CBaseEntity);
-	if(DHAllowedToHealTarget)
+	AllowedToHealTarget = DHookCreateDetour(Address_Null, CallConv_THISCALL, ReturnType_Bool, ThisPointer_CBaseEntity);
+	if(AllowedToHealTarget)
 	{
-		if(DHookSetFromConf(DHAllowedToHealTarget, gamedata, SDKConf_Signature, "CWeaponMedigun::AllowedToHealTarget"))
+		if(DHookSetFromConf(AllowedToHealTarget, gamedata, SDKConf_Signature, "CWeaponMedigun::AllowedToHealTarget"))
 		{
-			DHookAddParam(DHAllowedToHealTarget, HookParamType_CBaseEntity);
-			if(!DHookEnableDetour(DHAllowedToHealTarget, false, DHook_AllowedToHealTarget))
+			DHookAddParam(AllowedToHealTarget, HookParamType_CBaseEntity);
+			if(!DHookEnableDetour(AllowedToHealTarget, false, DHook_AllowedToHealTarget))
 				LogError("[Gamedata] Failed to detour CWeaponMedigun::AllowedToHealTarget");
 		}
 		else
@@ -37,12 +37,12 @@ void DHook_Setup(GameData gamedata)
 		LogError("[Gamedata] Could not find CWeaponMedigun::AllowedToHealTarget");
 	}
 
-	DHSetWinningTeam = DHookCreateFromConf(gamedata, "CTeamplayRules::SetWinningTeam");
-	if(!DHSetWinningTeam)
+	SetWinningTeam = DHookCreateFromConf(gamedata, "CTeamplayRules::SetWinningTeam");
+	if(!SetWinningTeam)
 		LogError("[Gamedata] Could not find CTeamplayRules::SetWinningTeam");
 
-	DHRoundRespawn = DHookCreateFromConf(gamedata, "CTeamplayRoundBasedRules::RoundRespawn");
-	if(!DHRoundRespawn)
+	RoundRespawn = DHookCreateFromConf(gamedata, "CTeamplayRoundBasedRules::RoundRespawn");
+	if(!RoundRespawn)
 		LogError("[Gamedata] Could not find CTFPlayer::RoundRespawn");
 }
 
@@ -67,11 +67,11 @@ static void DHook_CreateDetour(GameData gamedata, const char[] name, DHookCallba
 
 void DHook_MapStart()
 {
-	if(DHSetWinningTeam)
-		DHookGamerules(DHSetWinningTeam, false, _, DHook_SetWinningTeam);
+	if(SetWinningTeam)
+		DHookGamerules(SetWinningTeam, false, _, DHook_SetWinningTeam);
 
-	if(DHRoundRespawn)
-		DHookGamerules(DHRoundRespawn, false, _, DHook_RoundRespawn);
+	if(RoundRespawn)
+		DHookGamerules(RoundRespawn, false, _, DHook_RoundRespawn);
 }
 
 public MRESReturn DHook_RoundRespawn()

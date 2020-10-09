@@ -1,14 +1,12 @@
 /*
-SCP: Secret Fortress:
+SCP: Secret Fortress
 
 ```
-- Fixed outline models
-- Fixed SCP-096 gaining SCP-939's outlines
-- Adjusted strange rank on weapons
-- Increased ghost movement speed
-- Readded round start movement delay
-- Decreased amount of SCPs that can spawn
-- Disarmers no longer can disarm players wielding a weapon
+- Fixed SCP preference not working correctly
+- Added option to revert preference setting
+- Added option to disable becoming a SCP
+- Escaped disarmed Scientists now spawn an extra Chaos Unit
+- Escaped disarmed Class-D now become a MTF Engineer (only for Halloween event)
 ```
 */
 #pragma semicolon 1
@@ -58,25 +56,24 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"5"
-#define STABLE_REVISION	"2"
+#define STABLE_REVISION	"4"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
-// I'm cheating yayy
 #define IsSCP(%1)	(Client[%1].Class>=Class_035)
-#define IsSpec(%1)	(Client[%1].Class==Class_Spec || !IsPlayerAlive(%1) || TF2_IsPlayerInCondition(%1, TFCond_HalloweenGhostMode))
+//#define IsSpec(%1)	(Client[%1].Class==Class_Spec || !IsPlayerAlive(%1) || TF2_IsPlayerInCondition(%1, TFCond_HalloweenGhostMode))
 
 #define FAR_FUTURE	100000000.0
 #define MAXTF2PLAYERS	36
 #define MAXANGLEPITCH	45.0
 #define MAXANGLEYAW	90.0
 #define MAXTIME		898
+#define MAXENTITIES	2048
 
 #define PREFIX		"{red}[SCP]{default} "
 #define KEYCARD_MODEL	"models/scp_sl/keycard.mdl"
 #define VIP_GHOST_MODEL	"models/props_halloween/ghost.mdl"
 #define DOWNLOADS	"configs/scp_sf/downloads.txt"
 
-static const float OFF_THE_MAP[3] = { 16383.0, 16383.0, -16383.0 };
 static const float TRIPLE_D[3] = { 0.0, 0.0, 0.0 };
 
 Handle HudIntro;
@@ -89,76 +86,6 @@ public Plugin myinfo =
 	author		=	"Batfoxkid",
 	description	=	"WHY DID YOU THROW A GRENADE INTO THE ELEVA-",
 	version		=	PLUGIN_VERSION
-};
-
-enum
-{
-	Music_Join = 0,
-	Music_Join2,
-	Music_Time,
-	Music_Outside,
-	Music_Alone,
-	Music_Light,
-	Music_Heavy,
-	Music_Spec
-}
-
-static const char MusicList[][] =
-{
-	"#scp_sf/music/finalflashofexistence.mp3",
-	"#scp_sf/music/retromenu.mp3",
-	"#scp_sf/music/wegottarun.mp3",
-	"#scp_sf/music/melancholy.mp3",
-	"#scp_sf/music/massivelabyrinth.mp3",
-	"#scp_sf/music/lczambient.mp3",
-	"#scp_sf/music/doctorlab.mp3",
-	"#scp_sf/music/unexplainedbehaviors.mp3"
-};
-
-static const float MusicTimes[] =
-{
-	215.0,	// Final Flash of Existence
-	128.0,	// Retro Menu
-	115.0,	// We Gotta Run
-	92.0,	// Melancholy
-	124.5,	// Massive Labyrnith
-	55.0,	// LCZ Ambient
-	93.0,	// Doctor Lab
-	49.0	// Unexplained Behaviors
-};
-
-enum
-{
-	Sound_096 = 0,
-	Sound_Screams,
-	Sound_Snap,
-	Sound_MTFSpawn,
-	Sound_ChaosSpawn,
-
-	Sound_ItSteps,
-	Sound_ItRages,
-	Sound_ItHadEnough,
-	Sound_ItStuns,
-	Sound_ItKills,
-
-	Sound_MTFSpawnSpooky
-}
-
-static const char SoundList[][] =
-{
-	"freak_fortress_2/scp096/bgm.mp3",		// SCP-096 Passive
-	"freak_fortress_2/scp096/fullrage.mp3",		// SCP-096 Rage
-	"freak_fortress_2/scp173/scp173_kill2.mp3",	// SCP-173 Kill
-	"scp_sf/events/spawn_mtf.mp3",			// MTF Spawn
-	"freak_fortress_2/scp-049/red_backup.mp3",	// Chaos Spawn
-
-	"scpsl/it_steals/monster_step.wav",	// Stealer Step Noise
-	"scpsl/it_steals/enraged.mp3",		// Stealer First Rage
-	"scpsl/it_steals/youhadyourchance.mp3",	// Stealer Second Rage
-	"scpsl/it_steals/stunned.mp3",		// Stealer Stunned
-	"scpsl/it_steals/deathcam.mp3",		// Player Killed
-
-	"scp_sf/events/spawn_mtf_halloween.mp3"		// Spooky MTF Spawn
 };
 
 enum // Collision_Group_t in const.h - m_CollisionGroup
@@ -262,8 +189,6 @@ enum
 	EFL_NO_DAMAGE_FORCES =		(1<<31),	// Doesn't accept forces from physics damage
 };
 
-static const char Characters[] = "abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOQRTUVWXYZ~`1234567890@#$^&*(){}:[]|¶�;<>.,?/'|";
-
 enum ClassEnum
 {
 	Class_Spec = 0,
@@ -295,7 +220,7 @@ enum ClassEnum
 	Class_Stealer
 }
 
-static const char ClassShort[][] =
+char ClassShort[][] =
 {
 	"spec",
 
@@ -419,7 +344,7 @@ static const char ClassSpawn[][] =
 	"scp_spawn_p"
 };
 
-static const char ClassModel[][] =
+char ClassModel[][] =
 {
 	"models/props_halloween/ghost_no_hat.mdl",	// Spec
 
@@ -451,7 +376,7 @@ static const char ClassModel[][] =
 	"models/freak_fortress_2/it_steals/it_steals_v39.mdl"	// Stealer
 };
 
-static const char ClassModelSub[][] =
+char ClassModelSub[][] =
 {
 	"models/props_halloween/ghost_no_hat.mdl",	// Spec
 
@@ -605,7 +530,7 @@ enum KeycardEnum
 	Keycard_O5
 }
 
-static const int KeycardSkin[] =
+int KeycardSkin[] =
 {
 	3,
 
@@ -649,7 +574,7 @@ static const KeycardEnum KeycardPaths[][] =
 	{ Keycard_Engineer, Keycard_O5, Keycard_O5 }
 };
 
-static const char KeycardNames[][] =
+char KeycardNames[][] =
 {
 	"scp_card_00",
 
@@ -879,8 +804,6 @@ ConVar CvarQuickRounds;
 Cookie CookieTraining;
 Cookie CookiePref;
 
-GlobalForward GFOnEscape;
-
 GamemodeEnum Gamemode = Gamemode_None;
 
 int VIPGhostModel;
@@ -993,9 +916,9 @@ enum struct ClientEnum
 
 		if(team == TFTeam_Red)
 		{
-			if(Gamemode!=Gamemode_Steals && Gamemode!=Gamemode_Ikea && !bot && (!GetRandomInt(0, 3) || (!scp && (classD+classS)>4)))
+			if(Gamemode!=Gamemode_Steals && Gamemode!=Gamemode_Ikea && !bot && this.PreferredSCP!=Class_DBoi && (!GetRandomInt(0, 4) || (!scp && (classD+classS)>4)))
 			{
-				this.Class = GetSCPRand(scpList);
+				this.Class = GetSCPRand(scpList, this.PreferredSCP);
 				if(this.Class != Class_Spec)
 				{
 					scp++;
@@ -1077,18 +1000,20 @@ enum struct ClientEnum
 ClassEnum TestForceClass[MAXTF2PLAYERS];
 ClientEnum Client[MAXTF2PLAYERS];
 
+#include "scp_sf/configs.sp"
 #include "scp_sf/convars.sp"
 #include "scp_sf/dhooks.sp"
+#include "scp_sf/forwards.sp"
+#include "scp_sf/natives.sp"
 #include "scp_sf/sdkcalls.sp"
+#include "scp_sf/stocks.sp"
 
 // SourceMod Events
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
-	CreateNative("SCPSF_GetClientClass", Native_GetClientClass);
-
-	GFOnEscape = new GlobalForward("SCPSF_OnEscape", ET_Ignore, Param_Cell);
-
+	Forward_Setup();
+	Native_Setup();
 	RegPluginLibrary("scp_sf");
 	return APLRes_Success;
 }
@@ -1106,6 +1031,7 @@ public void OnPluginStart()
 	HookEvent("player_death", OnPlayerDeathPost, EventHookMode_PostNoCopy);
 	HookEvent("player_spawn", OnPlayerSpawn);
 	HookEvent("player_hurt", OnPlayerHurt, EventHookMode_Pre);
+	HookEvent("object_destroyed", OnObjectDestroy, EventHookMode_Pre);
 	HookEvent("teamplay_point_captured", OnCapturePoint, EventHookMode_Pre);
 	HookEvent("teamplay_flag_event", OnCaptureFlag, EventHookMode_Pre);
 	HookEvent("teamplay_win_panel", OnWinPanel, EventHookMode_Pre);
@@ -1242,31 +1168,9 @@ public void OnMapStart()
 	Enabled = false;
 	Ready = false;
 
-	for(int i; i<sizeof(MusicList); i++)
-	{
-		PrecacheSoundEx(MusicList[i], true);
-	}
+	Config_Setup();
 
-	for(int i; i<sizeof(SoundList); i++)
-	{
-		PrecacheSoundEx(SoundList[i], true);
-	}
-
-	ClassModelIndex[0] = PrecacheModelEx(ClassModel[0], true);
-	for(int i=1; i<sizeof(ClassModel); i++)
-	{
-		ClassModelIndex[i] = PrecacheModelEx(ClassModel[i], true);
-	}
-
-	for(int i; i<sizeof(ClassModelSub); i++)
-	{
-		ClassModelSubIndex[i] = PrecacheModel(ClassModelSub[i], true);
-	}
-
-	PrecacheModelEx(KEYCARD_MODEL, true);
-	VIPGhostModel = PrecacheModelEx(VIP_GHOST_MODEL, true);
-
-	static char buffer[PLATFORM_MAX_PATH];
+	char buffer[PLATFORM_MAX_PATH];
 	GetCurrentMap(buffer, sizeof(buffer));
 	if(!StrContains(buffer, "scp_", false))
 	{
@@ -1416,11 +1320,17 @@ public void OnClientCookiesCached(int client)
 	static char buffer[16];
 	CookiePref.Get(client, buffer, sizeof(buffer));
 
-	ClassEnum i = Class_035;
+	ClassEnum i = Class_DBoi;
 	for(; i<=Class_939; i++)
 	{
 		if(ClassEnabled[i] && StrEqual(buffer, ClassShort[i]))
 			break;
+
+		if(i != Class_DBoi)
+			continue;
+
+		i = Class_035;
+		i--;
 	}
 
 	if(i <= Class_939)
@@ -1986,22 +1896,18 @@ public void TF2_OnConditionAdded(int client, TFCond cond)
 		TF2_RemoveAllWeapons(client);
 		if(Gamemode == Gamemode_Ikea)
 		{
-			Call_StartForward(GFOnEscape);
-			Call_PushCell(client);
-			Call_Finish();
+			Forward_OnEscape(client, Client[client].Disarmer);
 
 			DClassEscaped++;
 			Client[client].Class = Class_MTFS;
 		}
 		else if(Client[client].Disarmer)
 		{
-			Client[client].Class = Class_MTF;
+			Client[client].Class = Class_MTFE;
 		}
 		else
 		{
-			Call_StartForward(GFOnEscape);
-			Call_PushCell(client);
-			Call_Finish();
+			Forward_OnEscape(client, Client[client].Disarmer);
 
 			DClassEscaped++;
 			Client[client].Class = Class_Chaos;
@@ -2017,12 +1923,26 @@ public void TF2_OnConditionAdded(int client, TFCond cond)
 		if(Client[client].Disarmer)
 		{
 			Client[client].Class = Class_Chaos;
+
+			int total;
+			int[] clients = new int[MaxClients];
+			for(int i=1; i<=MaxClients; i++)
+			{
+				if(IsValidClient(i) && IsSpec(i) && GetClientTeam(i)>view_as<int>(TFTeam_Spectator))
+					clients[total++] = i;
+			}
+
+			if(total)
+			{
+				total = clients[GetRandomInt(0, total-1)];
+				Client[total].Class = Class_Chaos;
+				AssignTeam(total);
+				RespawnPlayer(total);
+			}
 		}
 		else
 		{
-			Call_StartForward(GFOnEscape);
-			Call_PushCell(client);
-			Call_Finish();
+			Forward_OnEscape(client, Client[client].Disarmer);
 
 			SciEscaped++;
 			Client[client].Class = Class_MTFS;
@@ -2313,6 +2233,28 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	}
 }
 
+public Action OnObjectDestroy(Event event, const char[] name, bool dontBroadcast)
+{
+	int clientId = event.GetInt("userid");
+	int attackerId = event.GetInt("attacker");
+	int attacker = GetClientOfUserId(attackerId);
+	if(!attacker)
+		return Plugin_Handled;
+
+	int count;
+	int[] clients = new int[MaxClients];
+	for(int i=1; i<=MaxClients; i++)
+	{
+		if(i==attacker || (IsClientInGame(i) && IsFriendly(Client[attacker].Class, Client[i].Class) && Client[attacker].CanTalkTo[i]))
+			clients[count++] = i;
+	}
+
+	static char buffer[64];
+	event.GetString("weapon", buffer, sizeof(buffer));
+	ShowDestoryNotice(clients, count, attackerId, clientId, event.GetInt("assister"), event.GetInt("weaponid"), buffer, event.GetInt("objecttype"), event.GetInt("index"), event.GetBool("was_building"));
+	return Plugin_Handled;
+}
+
 public Action OnPlayerHurt(Event event, const char[] name, bool dontBroadcast)
 {
 	event.SetBool("allseecrit", false);
@@ -2529,21 +2471,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 	CRemoveTags(name, sizeof(name));
 	Format(name, sizeof(name), "{red}%s", name);
 
-	Handle iter = GetPluginIterator();
-	while(MorePlugins(iter))
-	{
-		Handle plugin = ReadPlugin(iter);
-		Function func = GetFunctionByName(plugin, "SCPSF_OnChatMessage");
-		if(func == INVALID_FUNCTION)
-			continue;
-
-		Call_StartFunction(plugin, func);
-		Call_PushCell(client);
-		Call_PushStringEx(name, sizeof(name), SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
-		Call_PushStringEx(msg, sizeof(msg), SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
-		Call_Finish();
-	}
-	delete iter;
+	Forward_OnMessage(client, name, sizeof(name), msg, sizeof(msg));
 
 	if(!Enabled)
 	{
@@ -2629,7 +2557,7 @@ public Action Command_MainMenu(int client, int args)
 		FormatEx(buffer, sizeof(buffer), "%t (/scpinfo)", "menu_helpclass");
 		menu.AddItem("1", buffer, IsPlayerAlive(client) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 
-		FormatEx(buffer, sizeof(buffer), "%t (/scppref)", "menu_perference");
+		FormatEx(buffer, sizeof(buffer), "%t (/scppref)", "menu_preference");
 		menu.AddItem("2", buffer);
 
 		menu.Display(client, MENU_TIME_FOREVER);
@@ -2691,11 +2619,14 @@ public Action Command_Preference(int client, int args)
 		
 		Menu menu = new Menu(Handler_Preference);
 		SetGlobalTransTarget(client);
-		menu.SetTitle("SCP: Secret Fortress\n%t ", "menu_perference");
+		menu.SetTitle("SCP: Secret Fortress\n%t ", "menu_preference");
 
 		char current[16];
 		if(AreClientCookiesCached(client))
 			CookiePref.Get(client, current, sizeof(current));
+
+		menu.AddItem("1", "No SCP", StrEqual(ClassShort[1], current) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+		menu.AddItem("0", "Any SCP", StrEqual(ClassShort[0], current) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
 
 		static char buffer[64], num[4];
 		for(ClassEnum i=Class_035; i<=Class_939; i++)
@@ -2973,7 +2904,7 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 
 	TF2_SetPlayerClass(client, TFClass_Spy);
 
-	static char buffer[64];
+	static char buffer[PLATFORM_MAX_PATH];
 	int attackerId = event.GetInt("attacker");
 	int attacker = GetClientOfUserId(attackerId);
 	int assisterId = event.GetInt("assister");
@@ -3042,6 +2973,38 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 		}
 	}
 
+	for(int entity=MAXENTITIES-1; entity>MaxClients; entity--)
+	{
+		if(!IsValidEntity(entity) || !GetEntityClassname(entity, buffer, sizeof(buffer)) || StrContains(buffer, "obj_") || GetEntPropEnt(entity, Prop_Send, "m_hBuilder")!=client)
+			continue;
+
+		int target = 1;
+		for(; target<=MaxClients; target++)
+		{
+			if(!IsValidClient(target) || IsSpec(target) || !IsFriendly(Client[client].Class, Client[target].Class))
+				continue;
+
+			SetEntPropEnt(entity, Prop_Send, "m_hBuilder", target);
+			break;
+		}
+
+		if(target > MaxClients)
+		{
+			FakeClientCommand(client, "destroy 0");
+			FakeClientCommand(client, "destroy 2");
+
+			SetVariantInt(GetEntPropEnt(entity, Prop_Send, "m_iMaxHealth")+1);
+			AcceptEntityInput(entity, "RemoveHealth");
+
+			Event boom = CreateEvent("object_removed", true);
+			boom.SetInt("userid", clientId);
+			boom.SetInt("index", entity);
+			boom.Fire();
+
+			AcceptEntityInput(entity, "kill");
+		}
+	}
+
 	if(client==attacker || !IsValidClient(attacker))
 	{
 		if(TF2_IsPlayerInCondition(client, TFCond_MarkedForDeath) && (GetEntityFlags(client) & FL_ONGROUND))
@@ -3088,11 +3051,13 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 			}
 			case Class_173:
 			{
-				EmitSoundToAll(SoundList[Sound_Snap], client, SNDCHAN_BODY, SNDLEVEL_TRAIN, _, _, _, client);
+				Config_GetSound(Sound_Snap, buffer, sizeof(buffer));
+				EmitSoundToAll(buffer, client, SNDCHAN_BODY, SNDLEVEL_TRAIN, _, _, _, client);
 			}
 			case Class_Stealer:
 			{
-				ClientCommand(client, "playgamesound %s", SoundList[Sound_ItKills]);
+				Config_GetSound(Sound_ItKills, buffer, sizeof(buffer));
+				ClientCommand(client, "playgamesound %s", buffer);
 			}
 		}
 	}
@@ -3400,8 +3365,10 @@ public void OnGameFrame()
 	if(Enabled)
 	{
 		ticks++;
+		static char buffer[PLATFORM_MAX_PATH];
 		if(!(ticks % 180))
 		{
+			static int choosen[MAXTF2PLAYERS];
 			switch(Gamemode)
 			{
 				case Gamemode_Ikea:
@@ -3411,7 +3378,6 @@ public void OnGameFrame()
 						SciEscaped = 0;
 
 						int count;
-						static int choosen[MAXTF2PLAYERS];
 						for(int client=1; client<=MaxClients; client++)
 						{
 							if(IsValidClient(client) && IsSpec(client) && GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
@@ -3502,7 +3468,6 @@ public void OnGameFrame()
 					if(GetRandomInt(0, 2))
 					{
 						int count;
-						static int choosen[MAXTF2PLAYERS];
 						for(int client=1; client<=MaxClients; client++)
 						{
 							if(IsValidClient(client) && IsSpec(client) && GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
@@ -3547,7 +3512,6 @@ public void OnGameFrame()
 					if(GetRandomInt(0, 1))
 					{
 						int count;
-						static int choosen[MAXTF2PLAYERS];
 						for(int client=1; client<=MaxClients; client++)
 						{
 							if(IsValidClient(client) && IsSpec(client) && GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
@@ -3584,11 +3548,13 @@ public void OnGameFrame()
 
 							if(count == 1)
 							{
-								ChangeGlobalSong(engineTime+41.0, SoundList[Sound_MTFSpawnSpooky], true);
+								Config_GetSound(Sound_MTFSpawnSpooky, buffer, sizeof(buffer));
+								ChangeGlobalSong(engineTime+41.0, buffer, true);
 							}
 							else
 							{
-								ChangeGlobalSong(engineTime+30.0, SoundList[Sound_MTFSpawn], true);
+								Config_GetSound(Sound_MTFSpawn, buffer, sizeof(buffer));
+								ChangeGlobalSong(engineTime+30.0, buffer, true);
 							}
 
 							if(count > 5)
@@ -3605,6 +3571,7 @@ public void OnGameFrame()
 					{
 						float time = engineTime+26.0;
 						bool hasSpawned;
+						Config_GetSound(Sound_ChaosSpawn, buffer, sizeof(buffer));
 						for(int client=1; client<=MaxClients; client++)
 						{
 							if(!IsValidClient(client))
@@ -3616,7 +3583,7 @@ public void OnGameFrame()
 							Client[client].Class = Class_Chaos;
 							AssignTeam(client);
 							RespawnPlayer(client);
-							ChangeSong(client, time, SoundList[Sound_ChaosSpawn], true);
+							ChangeSong(client, time, buffer, true);
 							hasSpawned = true;
 						}
 
@@ -3625,7 +3592,7 @@ public void OnGameFrame()
 							for(int client=1; client<=MaxClients; client++)
 							{
 								if(IsValidClient(client) && Client[client].Class==Class_DBoi)
-									ChangeSong(client, time, SoundList[Sound_ChaosSpawn]);
+									ChangeSong(client, time, buffer);
 							}
 						}
 					}
@@ -3638,8 +3605,12 @@ public void OnGameFrame()
 		}
 		else if(Gamemode>=Gamemode_Arena || Gamemode==Gamemode_Ikea)
 		{
-			if(!NoMusic && !NoMusicRound && ticks==RoundFloat(MAXTIME-MusicTimes[1]))
-				ChangeGlobalSong(engineTime+15.0+MusicTimes[1], MusicList[1]);
+			if(!NoMusic && !NoMusicRound)
+			{
+				float duration = Config_GetMusic(Music_Time, buffer, sizeof(buffer));
+				if(ticks == RoundFloat(MAXTIME-duration))
+					ChangeGlobalSong(engineTime+15.0+duration, buffer);
+			}
 
 			if(ticks > MAXTIME)
 			{
@@ -3681,7 +3652,6 @@ public void OnGameFrame()
 				}
 
 				int min = RoundToFloor((MAXTIME-ticks)/60.0);
-				char buffer[64];
 				for(int client=1; client<=MaxClients; client++)
 				{
 					if(!IsValidClient(client))
@@ -3691,7 +3661,7 @@ public void OnGameFrame()
 					if(bf == null)
 						continue;
 
-					FormatEx(buffer, sizeof(buffer), "%T", "time_remaining", client, min, seconds);
+					Format(buffer, sizeof(buffer), "%T", "time_remaining", client, min, seconds);
 					bf.WriteString(buffer);
 					bf.WriteString(ticks>(MAXTIME-20) ? "ico_notify_ten_seconds" : ticks>(MAXTIME-60) ? "ico_notify_thirty_seconds" : "ico_notify_sixty_seconds");
 					bf.WriteByte(0);
@@ -3879,7 +3849,7 @@ public Action HookSound(int clients[MAXPLAYERS], int &numClients, char sample[PL
 		if(IsSCP(entity) || Client[entity].Sprinting)
 		{
 			if(Client[entity].Class == Class_Stealer)
-				strcopy(sample, PLATFORM_MAX_PATH, SoundList[Sound_ItSteps]);
+				Config_GetSound(Sound_ItSteps, sample, PLATFORM_MAX_PATH);
 
 			volume = 1.0;
 			level += 30;
@@ -4064,6 +4034,7 @@ public void OnPreThink(int client)
 	}
 
 	static float clientPos[3], enemyPos[3];
+	static char buffer[PLATFORM_MAX_PATH];
 	if(Gamemode==Gamemode_Steals && Client[client].HealthPack)
 	{
 		int entity = EntRefToEntIndex(Client[client].HealthPack);
@@ -4080,7 +4051,7 @@ public void OnPreThink(int client)
 		}
 	}
 
-	if(Client[client].Class>Class_DBoi && RoundStartAt>engineTime)
+	if(Client[client].InvisFor>engineTime || (Client[client].Class>Class_DBoi && RoundStartAt>engineTime))
 	{
 		SetSpeed(client, 1.0);
 	}
@@ -4175,8 +4146,9 @@ public void OnPreThink(int client)
 							Client[client].Keycard = Keycard_SCP;
 							Client[client].Power = engineTime+15.0;
 							TF2_StunPlayer(client, 6.0, 0.9, TF_STUNFLAG_SLOWDOWN);
-							StopSound(client, SNDCHAN_VOICE, SoundList[Sound_Screams]);
-							StopSound(client, SNDCHAN_VOICE, SoundList[Sound_Screams]);
+							Config_GetSound(Sound_Screams, buffer, sizeof(buffer));
+							StopSound(client, SNDCHAN_VOICE, buffer);
+							StopSound(client, SNDCHAN_VOICE, buffer);
 
 							bool another096;
 							for(int i=1; i<=MaxClients; i++)
@@ -4207,14 +4179,16 @@ public void OnPreThink(int client)
 						{
 							if(Client[client].Pos[0])
 							{
-								StopSound(client, SNDCHAN_VOICE, SoundList[Sound_096]);
-								StopSound(client, SNDCHAN_VOICE, SoundList[Sound_096]);
+								Config_GetSound(Sound_096, buffer, sizeof(buffer));
+								StopSound(client, SNDCHAN_VOICE, buffer);
+								StopSound(client, SNDCHAN_VOICE, buffer);
 								Client[client].Pos[0] = 0.0;
 							}
 						}
 						else if(!Client[client].Pos[0])
 						{
-							EmitSoundToAll(SoundList[Sound_096], client, SNDCHAN_VOICE, SNDLEVEL_SCREAMING, _, _, _, client);
+							Config_GetSound(Sound_096, buffer, sizeof(buffer));
+							EmitSoundToAll(buffer, client, SNDCHAN_VOICE, SNDLEVEL_SCREAMING, _, _, _, client);
 							Client[client].Pos[0] = 1.0;
 						}
 					}
@@ -4345,7 +4319,6 @@ public void OnPreThink(int client)
 		return;
 
 	static float clientAngles[3], enemyAngles[3], anglesToBoss[3], result[3];
-
 	bool showHud = (Client[client].HudIn<engineTime && !(GetClientButtons(client) & IN_SCORE));
 	specialTick[client] = engineTime+0.2;
 	switch(Client[client].Class)
@@ -4589,15 +4562,17 @@ public void OnPreThink(int client)
 					Client[client].Radio = 2;
 					TurnOnGlow(client, "255 0 0", 10, 700.0);
 					TF2_AddCondition(client, TFCond_CritCola);
-					ChangeGlobalSong(FAR_FUTURE, SoundList[Sound_ItHadEnough]);
+					Config_GetSound(Sound_ItHadEnough, buffer, sizeof(buffer));
+					ChangeGlobalSong(FAR_FUTURE, buffer);
 					TF2_StunPlayer(client, 11.0, 1.0, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
 				}
 				else if(!SCPKilled && SciEscaped==DClassMax+SciMax+2)
 				{
+					Config_GetSound(Sound_ItRages, buffer, sizeof(buffer));
 					for(target=1; target<=MaxClients; target++)
 					{
 						if(IsValidClient(target))
-							ClientCommand(target, "playgamesound %s", SoundList[Sound_ItRages]);
+							ClientCommand(target, "playgamesound %s", buffer);
 					}
 
 					SCPKilled = 1;
@@ -4605,14 +4580,15 @@ public void OnPreThink(int client)
 					Client[client].Power = engineTime+15.0;
 					TurnOnGlow(client, "255 0 0", 10, 600.0);
 					TF2_AddCondition(client, TFCond_CritCola, 15.0);
-					ChangeGlobalSong(Client[client].Power, SoundList[Sound_ItRages]);
+					ChangeGlobalSong(Client[client].Power, buffer);
 					TF2_StunPlayer(client, 4.0, 1.0, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
 				}
 				else
 				{
 					SciEscaped++;
 					Client[target].Triggered = true;
-					ClientCommand(target, "playgamesound %s", SoundList[Sound_ItStuns]);
+					Config_GetSound(Sound_ItStuns, buffer, sizeof(buffer));
+					ClientCommand(target, "playgamesound %s", buffer);
 				}
 				break;
 			}
@@ -4672,10 +4648,9 @@ public void OnPreThink(int client)
 						if(showHud)
 						{
 							SetGlobalTransTarget(client);
-							char buffer[32];
 							int weapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
 							if(weapon>MaxClients && IsValidEntity(weapon) && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")==WeaponIndex[Weapon_Disarm])
-								FormatEx(buffer, sizeof(buffer), "%t", "camera", RoundToCeil(Client[client].Power));
+								Format(buffer, sizeof(buffer), "%t", "camera", RoundToCeil(Client[client].Power));
 
 							SetHudTextParams(-1.0, 0.92, 0.35, 255, 255, 255, 255, 0, 0.1, 0.05, 0.05);
 							if(Client[client].Radio)
@@ -4763,11 +4738,11 @@ public void OnPreThink(int client)
 						{
 							SetGlobalTransTarget(client);
 
-							char buffer[256], tran[16];
+							char tran[16];
 							if(Client[client].Power>1 && Client[client].Radio && Client[client].Radio<5)
 							{
 								FormatEx(tran, sizeof(tran), "radio_%d", Client[client].Radio);
-								FormatEx(buffer, sizeof(buffer), "%t", "radio", tran, RoundToCeil(Client[client].Power));
+								Format(buffer, sizeof(buffer), "%t", "radio", tran, RoundToCeil(Client[client].Power));
 							}
 
 							switch(Client[client].HealthPack)
@@ -4795,9 +4770,7 @@ public void OnPreThink(int client)
 
 	if(showHud && Gamemode!=Gamemode_Steals)
 	{
-		char buffer[32];
 		GetClassName(Client[client].Class, buffer, sizeof(buffer));
-
 		SetHudTextParamsEx(-1.0, 0.06, 0.35, ClassColors[Client[client].Class], ClassColors[Client[client].Class], 0, 0.1, 0.05, 0.05);
 		ShowSyncHudText(client, HudExtra, "%T", buffer, client);
 	}
@@ -4827,7 +4800,10 @@ public void OnPreThink(int client)
 		}
 
 		if(song)
-			ChangeSong(client, MusicTimes[song]+engineTime, MusicList[song]);
+		{
+			float duration = Config_GetMusic(song, buffer, sizeof(buffer));
+			ChangeSong(client, duration+engineTime, buffer);
+		}
 	}
 }
 
@@ -4914,8 +4890,7 @@ public Action OnObjDamage(int entity, int &attacker, int &inflictor, float &dama
 {
 	if(Enabled && IsValidClient(attacker))
 	{
-		int owner = GetEntPropEnt(entity, Prop_Send, "m_hBuilder");
-		if(owner==attacker || (IsValidClient(owner) && IsFriendly(Client[owner].Class, Client[attacker].Class)))
+		if(TF2_GetTeam(entity) == Client[attacker].TeamTF())
 			return Plugin_Handled;
 	}
 	return Plugin_Continue;
@@ -5332,6 +5307,12 @@ void GoToSpawn(int client, ClassEnum class)
 		}
 	}
 
+	if(class >= Class_035)
+	{
+		Client[client].InvisFor = GetEngineTime()+15.0;
+		TF2_StunPlayer(client, 14.9, 1.0, TF_STUNFLAGS_NORMALBONK|TF_STUNFLAG_NOSOUNDOREFFECT);
+	}
+
 	if(!count)
 		return;
 
@@ -5374,10 +5355,12 @@ void TriggerShyGuy(int client, int target, float engineTime)
 		}
 		default:
 		{
+			static char buffer[PLATFORM_MAX_PATH];
 			if(Client[client].Pos[0])
 			{
-				StopSound(client, SNDCHAN_VOICE, SoundList[Sound_096]);
-				StopSound(client, SNDCHAN_VOICE, SoundList[Sound_096]);
+				Config_GetSound(Sound_096, buffer, sizeof(buffer));
+				StopSound(client, SNDCHAN_VOICE, buffer);
+				StopSound(client, SNDCHAN_VOICE, buffer);
 			}
 
 			Client[client].Pos[0] = 0.0;
@@ -5385,7 +5368,8 @@ void TriggerShyGuy(int client, int target, float engineTime)
 			Client[client].Radio = 1;
 			Client[client].Disarmer = 1;
 			TF2_StunPlayer(client, 9.9, 0.9, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
-			EmitSoundToAll(SoundList[Sound_Screams], client, SNDCHAN_VOICE, SNDLEVEL_SCREAMING, _, _, _, client);
+			Config_GetSound(Sound_Screams, buffer, sizeof(buffer));
+			EmitSoundToAll(buffer, client, SNDCHAN_VOICE, SNDLEVEL_SCREAMING, _, _, _, client);
 		}
 	}
 }
@@ -5402,14 +5386,11 @@ public Action Timer_ConnectPost(Handle timer, int userid)
 
 	if(!NoMusic)
 	{
-		if(CheckCommandAccess(client, "thediscffthing", ADMFLAG_CUSTOM4))
-		{
-			ChangeSong(client, MusicTimes[Music_Join2]+GetEngineTime(), MusicList[Music_Join2]);
-		}
-		else
-		{
-			ChangeSong(client, MusicTimes[Music_Join]+GetEngineTime(), MusicList[Music_Join]);
-		}
+		int song = CheckCommandAccess(client, "thediscffthing", ADMFLAG_CUSTOM4) ? Music_Join : Music_Join2;
+
+		static char buffer[PLATFORM_MAX_PATH];
+		float duration = Config_GetMusic(song, buffer, sizeof(buffer));
+		ChangeSong(client, duration+GetEngineTime(), buffer);
 	}
 
 	PrintToConsole(client, " \n \nWelcome to SCP: Secret Fortress\n \nThis is a gamemode based on the SCP series and community\nPlugin is created by Batfoxkid\n ");
@@ -5504,71 +5485,11 @@ void DropKeycard(int client, bool swap, const float origin[3], const float angle
 	for(int i=2; i>=0; i--)
 	{
 		int weapon = GetPlayerWeaponSlot(client, i);
-		if(weapon <= MaxClients)
-			continue;
-
-		static char classname[32];
-		GetEntityNetClass(weapon, classname, sizeof(classname));
-		int offset = FindSendPropInfo(classname, "m_Item");
-		if(offset < 0)
+		if(weapon > MaxClients)
 		{
-			LogError("Failed to find m_Item on: %s", classname);
-			continue;
+			if(TF2_CreateDroppedWeapon(client, weapon, swap, origin, angles, Client[client].Keycard) != INVALID_ENT_REFERENCE)
+				break;
 		}
-
-		//Dropped weapon doesn't like being spawn high in air, create on ground then teleport back after DispatchSpawn
-		TR_TraceRayFilter(origin, view_as<float>({90.0, 0.0, 0.0}), MASK_SOLID, RayType_Infinite, Trace_OnlyHitWorld);
-		if(!TR_DidHit())	//Outside of map
-			continue;
-		
-		float originSpawn[3];
-		TR_GetEndPosition(originSpawn);
-
-		// CTFDroppedWeapon::Create deletes tf_dropped_weapon if there too many in map, pretend entity is marking for deletion so it doesnt actually get deleted
-		ArrayList droppedWeapons = new ArrayList();
-		int entity = MaxClients+1;
-		while((entity=FindEntityByClassname(entity, "tf_dropped_weapon")) > MaxClients)
-		{
-			int flags = GetEntProp(entity, Prop_Data, "m_iEFlags");
-			if(flags & EFL_KILLME)
-				continue;
-
-			SetEntProp(entity, Prop_Data, "m_iEFlags", flags|EFL_KILLME);
-			droppedWeapons.Push(entity);
-		}
-
-		//Pass client as NULL, only used for deleting existing dropped weapon which we do not want to happen
-		int droppedWeapon = SDKCall(SDKCreateWeapon, -1, originSpawn, angles, KEYCARD_MODEL, GetEntityAddress(weapon)+view_as<Address>(offset));
-
-		int length = droppedWeapons.Length;
-		for(int a; a<length; a++)
-		{
-			entity = droppedWeapons.Get(a);
-			int flags = GetEntProp(entity, Prop_Data, "m_iEFlags");
-			flags = flags &= ~EFL_KILLME;
-			SetEntProp(entity, Prop_Data, "m_iEFlags", flags);
-		}
-		delete droppedWeapons;
-
-		if(droppedWeapon != INVALID_ENT_REFERENCE)
-		{
-			DispatchSpawn(droppedWeapon);
-
-			//Check if weapon is not marked for deletion after spawn, otherwise we may get bad physics model leading to a crash
-			if(GetEntProp(droppedWeapon, Prop_Data, "m_iEFlags") & EFL_KILLME)
-			{
-				LogError("Unable to create dropped weapon with model '%s'", KEYCARD_MODEL);
-			}
-			else
-			{
-				SDKCall(SDKInitWeapon, droppedWeapon, client, weapon, swap, false);
-				SetEntPropString(droppedWeapon, Prop_Data, "m_iName", KeycardNames[Client[client].Keycard]);
-				SetVariantInt(KeycardSkin[Client[client].Keycard]);
-				AcceptEntityInput(droppedWeapon, "Skin");
-				TeleportEntity(droppedWeapon, origin, NULL_VECTOR, NULL_VECTOR);
-			}
-		}
-		break;
 	}
 }
 
@@ -5592,11 +5513,11 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_Disarm:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 5, 6, "1 ; 0.3 ; 15 ; 0 ; 252 ; 0.95");
+			entity = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 5, 6, "1 ; 0.3 ; 15 ; 0 ; 252 ; 0.95", _, true);
 		}
 		case Weapon_Axe:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_fireaxe", WeaponIndex[weapon], 5, 6, "2 ; 1.65 ; 28 ; 0.5 ; 252 ; 0.95");
+			entity = SpawnWeapon(client, "tf_weapon_fireaxe", WeaponIndex[weapon], 5, 6, "2 ; 1.65 ; 28 ; 0.5 ; 252 ; 0.95", _, true);
 		}
 		case Weapon_Hammer:
 		{
@@ -5604,7 +5525,7 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_Knife:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 5, 6, "2 ; 1.2 ; 6 ; 0.8 ; 15 ; 0 ; 252 ; 0.95 ; 362 ; 1");
+			entity = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 5, 6, "2 ; 1.2 ; 6 ; 0.8 ; 15 ; 0 ; 252 ; 0.95 ; 362 ; 1", _, true);
 		}
 		case Weapon_Bash:
 		{
@@ -5612,15 +5533,15 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_Meat:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 5, 6, "1 ; 0.9 ; 6 ; 0.7 ; 252 ; 0.95");
+			entity = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 5, 6, "1 ; 0.9 ; 6 ; 0.7 ; 252 ; 0.95", _, true);
 		}
 		case Weapon_Wrench:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_wrench", WeaponIndex[weapon], 5, 6, "2 ; 1.5 ; 6 ; 0.9 ; 28 ; 0.5 ; 252 ; 0.95 ; 2043 ; 0");
+			entity = SpawnWeapon(client, "tf_weapon_wrench", WeaponIndex[weapon], 5, 6, "2 ; 1.5 ; 6 ; 0.9 ; 28 ; 0.5 ; 252 ; 0.95 ; 2043 ; 0", _, true);
 		}
 		case Weapon_Pan:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 5, 6, "2 ; 1.35 ; 6 ; 0.8 ; 28 ; 0.5 ; 252 ; 0.95");
+			entity = SpawnWeapon(client, "tf_weapon_club", WeaponIndex[weapon], 5, 6, "2 ; 1.35 ; 6 ; 0.8 ; 28 ; 0.5 ; 252 ; 0.95", _, true);
 		}
 
 		/*
@@ -5636,7 +5557,7 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 				default:
 					TF2_SetPlayerClass(client, TFClass_Scout, false);
 			}
-			entity = SpawnWeapon(client, "tf_weapon_pistol", WeaponIndex[weapon], 5, 6, "2 ; 1.5 ; 3 ; 0.75 ; 5 ; 1.25 ; 51 ; 1 ; 96 ; 1.25 ; 106 ; 0.33 ; 252 ; 0.95");
+			entity = SpawnWeapon(client, "tf_weapon_pistol", WeaponIndex[weapon], 5, 6, "2 ; 1.5 ; 3 ; 0.75 ; 5 ; 1.25 ; 51 ; 1 ; 96 ; 1.25 ; 106 ; 0.33 ; 252 ; 0.95", _, true);
 			if(ammo && entity>MaxClients)
 				SetAmmo(client, entity, 27, 0);
 		}
@@ -5734,19 +5655,19 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		*/
 		case Weapon_Flash:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_grenadelauncher", WeaponIndex[weapon], 5, 6, "1 ; 0.75 ; 3 ; 0.25 ; 15 ; 0 ; 76 ; 0.125 ; 99 ; 1.35 ; 252 ; 0.95 ; 787 ; 1.25", false, true);
+			entity = SpawnWeapon(client, "tf_weapon_grenadelauncher", WeaponIndex[weapon], 5, 6, "1 ; 0.75 ; 3 ; 0.25 ; 15 ; 0 ; 76 ; 0.125 ; 99 ; 1.35 ; 252 ; 0.95 ; 787 ; 1.25", 1, true);
 			if(ammo && entity>MaxClients)
 				SetAmmo(client, entity, 1, 0);
 		}
 		case Weapon_Frag:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_grenadelauncher", WeaponIndex[weapon], 10, 6, "2 ; 30 ; 3 ; 0.25 ; 28 ; 1.5 ; 76 ; 0.125 ; 99 ; 1.35 ; 138 ; 0.3 ; 252 ; 0.9 ; 671 ; 1 ; 787 ; 1.25", false);
+			entity = SpawnWeapon(client, "tf_weapon_grenadelauncher", WeaponIndex[weapon], 10, 6, "2 ; 30 ; 3 ; 0.25 ; 28 ; 1.5 ; 76 ; 0.125 ; 99 ; 1.35 ; 138 ; 0.3 ; 252 ; 0.9 ; 671 ; 1 ; 787 ; 1.25", 1);
 			if(ammo && entity>MaxClients)
 				SetAmmo(client, entity, 1, 0);
 		}
 		case Weapon_Shotgun:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_shotgun_primary", WeaponIndex[weapon], 10, 6, "2 ; 2 ; 3 ; 0.66 ; 5 ; 1.34 ; 36 ; 1.5 ; 77 ; 0.5", _, true);
+			entity = SpawnWeapon(client, "tf_weapon_shotgun_primary", WeaponIndex[weapon], 10, 6, "3 ; 0.66 ; 5 ; 1.34 ; 36 ; 1.5 ; 45 ; 2 ; 77 ; 0.5", _, true);
 			if(ammo && entity>MaxClients)
 				SetAmmo(client, entity, 8, 4);
 		}
@@ -5766,7 +5687,7 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		*/
 		case Weapon_PDA1:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_pda_engineer_build", WeaponIndex[weapon], 5, 6, "80 ; 2 ; 148 ; 3 ; 177 ; 1.3 ; 205 ; 3 ; 287 ; 1.34 ; 344 ; 0.67 ; 353 ; 1 ; 464 ; 0 ; 465 ; 0 ; 790 ; 6.66", _, true);
+			entity = SpawnWeapon(client, "tf_weapon_pda_engineer_build", WeaponIndex[weapon], 5, 6, "80 ; 2 ; 148 ; 3 ; 177 ; 1.3 ; 205 ; 3 ; 353 ; 1 ; 464 ; 0 ; 465 ; 0 ; 790 ; 6.66", _, true);
 			SetEntProp(client, Prop_Data, "m_iAmmo", 400, 4, 3);
 		}
 		case Weapon_PDA2:
@@ -6145,27 +6066,6 @@ void GetClassName(any class, char[] buffer, int length)
 		Format(buffer, length, "class_%s", ClassShort[class]);
 }
 
-stock int GetClassCount(ClassEnum c)
-{
-	int a;
-	for(int i=1; i<=MaxClients; i++)
-	{
-		if(IsValidClient(i) && Client[i].Class==c)
-			a++;
-	}
-	return a;
-}
-
-stock bool IsClassTaken(ClassEnum c)
-{
-	for(int i=1; i<=MaxClients; i++)
-	{
-		if(Client[i].Class == c)
-			return true;
-	}
-	return false;
-}
-
 void SetCaptureRate(int client)
 {
 	if(Gamemode == Gamemode_None)
@@ -6181,104 +6081,6 @@ void SetCaptureRate(int client)
 		result = TF2_GetPlayerClass(client)==TFClass_Scout ? -2 : -1;
 	}
 	TF2Attrib_SetByDefIndex(client, 68, float(result));
-}
-
-void ShowDeathNotice(int[] clients, int count, int attacker, int victim, int assister, int weaponid, const char[] weapon, int damagebits, int damageflags)
-{
-	Event event = CreateEvent("player_death", true);
-	if(!event)
-		return;
-
-	event.SetInt("userid", victim);
-	event.SetInt("attacker", attacker);
-	event.SetInt("assister", assister);
-	event.SetInt("weaponid", weaponid);
-	event.SetString("weapon", weapon);
-	event.SetInt("damagebits", damagebits);
-	event.SetInt("damage_flags", damageflags);
-	for(int i; i<count; i++)
-	{
-		event.FireToClient(clients[i]);
-	}
-	event.Cancel();
-}
-
-stock int TF2_CreateDroppedWeapon(int client, int weapon, bool swap, const float origin[3], const float angles[3])
-{
-	static char classname[64];
-	GetEntityNetClass(weapon, classname, sizeof(classname));
-	int offset = FindSendPropInfo(classname, "m_Item");
-	if(offset <= -1)
-	{
-		LogError("Failed to find m_Item on: %s", classname);
-		return INVALID_ENT_REFERENCE;
-	}
-
-	int index;
-	if(HasEntProp(weapon, Prop_Send, "m_iWorldModelIndex"))
-	{
-		index = GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex");
-	}
-	else
-	{
-		index = GetEntProp(weapon, Prop_Send, "m_nModelIndex");
-	}
-
-	if(index < 1)
-		return INVALID_ENT_REFERENCE;
-
-	static char model[PLATFORM_MAX_PATH];
-	ModelIndexToString(index, model, sizeof(model));
-
-	//Dropped weapon doesn't like being spawn high in air, create on ground then teleport back after DispatchSpawn
-	TR_TraceRayFilter(origin, view_as<float>({90.0, 0.0, 0.0}), MASK_SOLID, RayType_Infinite, Trace_OnlyHitWorld);
-	if(!TR_DidHit())	//Outside of map
-		return INVALID_ENT_REFERENCE;
-
-	static float originSpawn[3];
-	TR_GetEndPosition(originSpawn);
-
-	// CTFDroppedWeapon::Create deletes tf_dropped_weapon if there too many in map, pretend entity is marking for deletion so it doesnt actually get deleted
-	ArrayList droppedWeapons = new ArrayList();
-	int entity = MaxClients+1;
-	while((entity=FindEntityByClassname(entity, "tf_dropped_weapon")) > MaxClients)
-	{
-		int flags = GetEntProp(entity, Prop_Data, "m_iEFlags");
-		if(flags & EFL_KILLME)
-			continue;
-
-		SetEntProp(entity, Prop_Data, "m_iEFlags", flags|EFL_KILLME);
-		droppedWeapons.Push(entity);
-	}
-
-	//Pass client as NULL, only used for deleting existing dropped weapon which we do not want to happen
-	int droppedWeapon = SDKCall(SDKCreateWeapon, -1, originSpawn, angles, model, GetEntityAddress(weapon)+view_as<Address>(offset));
-
-	int length = droppedWeapons.Length;
-	for(int i; i<length; i++)
-	{
-		entity = droppedWeapons.Get(i);
-		int flags = GetEntProp(entity, Prop_Data, "m_iEFlags");
-		flags = flags &= ~EFL_KILLME;
-		SetEntProp(entity, Prop_Data, "m_iEFlags", flags);
-	}
-
-	delete droppedWeapons;
-	if(droppedWeapon != INVALID_ENT_REFERENCE)
-	{
-		DispatchSpawn(droppedWeapon);
-
-		//Check if weapon is not marked for deletion after spawn, otherwise we may get bad physics model leading to a crash
-		if(GetEntProp(droppedWeapon, Prop_Data, "m_iEFlags") & EFL_KILLME)
-		{
-			LogError("Unable to create dropped weapon with model '%s'", model);
-			return INVALID_ENT_REFERENCE;
-		}
-
-		SDKCall(SDKInitWeapon, droppedWeapon, client, weapon, swap, false);
-		TeleportEntity(droppedWeapon, origin, NULL_VECTOR, NULL_VECTOR);
-	}
-	return droppedWeapon;
 }
 
 bool AttemptGrabItem(int client)
@@ -6488,18 +6290,6 @@ void PickupWeapon(int client, int entity)
 	}
 }
 
-public Action Timer_UpdateClientHud(Handle timer, int userid)
-{
-	int client = GetClientOfUserId(userid);
-	if(client && IsClientInGame(client))
-	{
-		Event event = CreateEvent("localplayer_pickup_weapon", true);
-		event.FireToClient(client);
-		event.Cancel();
-	}
-	return Plugin_Continue;
-}
-
 void ReplaceWeapon(int client, WeaponEnum wep, int entity=0, int index=0)
 {
 	static float origin[3], angles[3];
@@ -6516,7 +6306,7 @@ void ReplaceWeapon(int client, WeaponEnum wep, int entity=0, int index=0)
 			SpawnPickup(client, "item_ammopack_small");
 			return;
 		}
-		else if(SDKInitWeapon!=null && SDKCreateWeapon!=null && index!=WeaponIndex[Weapon_None])
+		else if(index != WeaponIndex[Weapon_None])
 		{
 			GetClientEyePosition(client, origin);
 			GetClientEyeAngles(client, angles);
@@ -6532,13 +6322,13 @@ void ReplaceWeapon(int client, WeaponEnum wep, int entity=0, int index=0)
 		return;
 	}
 
-	weapon = GiveWeapon(client, wep, (SDKInitPickup==null && weapon<=MaxClients), GetEntProp(entity, Prop_Send, "m_iAccountID"));
-	if(SDKInitPickup!=null && weapon>MaxClients)
+	weapon = GiveWeapon(client, wep, false, GetEntProp(entity, Prop_Send, "m_iAccountID"));
+	if(weapon > MaxClients)
 	{
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 
 		//Restore ammo, energy etc from picked up weapon
-		SDKCall(SDKInitPickup, entity, client, weapon);
+		SDKCall_InitPickup(entity, client, weapon);
 
 		//If max ammo not calculated yet (-1), do it now
 		if(TF2_GetWeaponAmmo(client, weapon) < 0)
@@ -6547,34 +6337,6 @@ void ReplaceWeapon(int client, WeaponEnum wep, int entity=0, int index=0)
 			TF2_RefillWeaponAmmo(client, weapon);
 		}
 	}
-}
-
-void PrintRandomHintText(int client)
-{
-	{
-		int rand = GetRandomInt(0, 19);
-		if(!rand)
-		{
-			PrintHintText(client, "%T", "redacted", client);
-			return;
-		}
-
-		if(rand == 1)
-		{
-			PrintHintText(client, "%T", "data_expunged", client);
-			return;
-		}
-	}
-
-	char buffer[16];
-	for(int i; i<sizeof(buffer); i++)
-	{
-		buffer[i] = Characters[GetRandomInt(0, sizeof(Characters)-1)];
-		if(!GetRandomInt(0, 9))
-			break;
-	}
-
-	PrintHintText(client, buffer);
 }
 
 bool DisarmCheck(int client)
@@ -6595,25 +6357,6 @@ bool DisarmCheck(int client)
 	TF2_RemoveCondition(client, TFCond_PasstimePenaltyDebuff);
 	Client[client].Disarmer = 0;
 	return false;
-}
-
-stock void FlagDroppedWeapons(bool on)
-{
-	// CTFDroppedWeapon::Create deletes tf_dropped_weapon if there too many in map, pretend entity is marking for deletion so it doesnt actually get deleted
-	int entity = MaxClients+1;
-	while((entity = FindEntityByClassname(entity, "tf_dropped_weapon")) > MaxClients)
-	{
-		int flags = GetEntProp(entity, Prop_Data, "m_iEFlags");
-		if(on)
-		{
-			SetEntProp(entity, Prop_Data, "m_iEFlags", flags|EFL_KILLME);
-		}
-		else
-		{
-			flags = flags &= ~EFL_KILLME;
-			SetEntProp(entity, Prop_Data, "m_iEFlags", flags);
-		}
-	}
 }
 
 void ShowAnnotation(int client)
@@ -6797,49 +6540,6 @@ int CreateWeaponGlow(int iEntity, float flDuration)
 	return iGlow;
 }
 
-ArrayList GetSCPList()
-{
-	ArrayList list = new ArrayList();
-	for(ClassEnum i=Class_035; i<ClassEnum; i++)
-	{
-		if(ClassEnabled[i])
-			list.Push(i);
-	}
-	return list;
-}
-
-ClassEnum GetSCPRand(ArrayList list, ClassEnum pref=Class_Spec)
-{
-	if(pref >= Class_035)
-	{
-		int index = list.FindValue(pref);
-		if(index != -1)
-		{
-			list.Erase(index);
-			return pref;
-		}
-
-		if(pref == Class_939)
-		{
-			index = list.FindValue(Class_9392);
-			if(index != -1)
-			{
-				list.Erase(index);
-				return Class_9392;
-			}
-		}
-	}
-
-	int index = list.Length;
-	if(!index)
-		return Class_Spec;
-	
-	index = GetRandomInt(0, index-1);
-	ClassEnum scp = list.Get(index);
-	list.Erase(index);
-	return scp;
-}
-
 public int OnQueryFinished(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue, int userid)
 {
 	if(Client[client].DownloadMode==2 || GetClientOfUserId(userid)!=client || !IsClientInGame(client))
@@ -6875,29 +6575,6 @@ public int OnQueryFinished(QueryCookie cookie, int client, ConVarQueryResult res
 			}
 		}
 	}
-}
-
-public bool TraceRayPlayerOnly(int client, int mask, any data)
-{
-	return (client!=data && IsValidClient(client) && IsValidClient(data));
-}
-
-public bool TraceWallsOnly(int entity, int contentsMask)
-{
-	return false;
-}
-
-public bool Trace_OnlyHitWorld(int entity, int mask)
-{
-	return !entity;
-}
-
-public bool Trace_DontHitEntity(int iEntity, int iMask, any iData)
-{
-	if (iEntity == iData)
-		return false;
-	
-	return true;
 }
 
 // Thirdparty
@@ -7147,43 +6824,6 @@ void CreateSpecialDeath(int client)
 	CreateTimer(FireDeathTimes[class], Timer_RemoveEntity, EntIndexToEntRef(entity));
 }
 
-public void RemoveRagdoll(int userid)
-{
-	int client = GetClientOfUserId(userid);
-	if(!client || !IsClientInGame(client))
-		return;
-
-	int entity = GetEntPropEnt(client, Prop_Send, "m_hRagdoll");
-	if(IsValidEdict(entity))
-		AcceptEntityInput(entity, "kill");
-}
-
-public Action Timer_DissolveRagdoll(Handle timer, any userid)
-{
-	int client = GetClientOfUserId(userid);
-	if(client && IsClientInGame(client))
-	{
-		int ragdoll = GetEntPropEnt(client, Prop_Send, "m_hRagdoll");
-		if(IsValidEntity(ragdoll))
-			DissolveRagdoll(ragdoll);
-	}
-	return Plugin_Continue;
-}
-
-int DissolveRagdoll(int ragdoll)
-{
-	int dissolver = CreateEntityByName("env_entity_dissolver");
-	if(dissolver == -1)
-		return;
-
-	DispatchKeyValue(dissolver, "dissolvetype", "0");
-	DispatchKeyValue(dissolver, "magnitude", "200");
-	DispatchKeyValue(dissolver, "target", "!activator");
-
-	AcceptEntityInput(dissolver, "Dissolve", ragdoll);
-	AcceptEntityInput(dissolver, "Kill");
-}
-
 // Glow Effects
 
 stock int TF2_CreateGlow(int client, TFTeam team)
@@ -7303,389 +6943,6 @@ bool TrainingMessageClient(int client, bool override=false)
 	FormatEx(buffer, sizeof(buffer), "train_%s", ClassShort[Client[client].Class]);
 	ShowSyncHudText(client, HudIntro, "%t", buffer);
 	return true;
-}
-
-// Stocks
-
-stock int AttachParticle(int entity, char[] particleType, float offset=0.0, bool attach=true)
-{
-	int particle = CreateEntityByName("info_particle_system");
-
-	char targetName[128];
-	float position[3];
-	GetEntPropVector(entity, Prop_Send, "m_vecOrigin", position);
-	position[2] += offset;
-	TeleportEntity(particle, position, NULL_VECTOR, NULL_VECTOR);
-
-	Format(targetName, sizeof(targetName), "target%d", entity);
-	DispatchKeyValue(entity, "targetname", targetName);
-
-	DispatchKeyValue(particle, "targetname", "tf2particle");
-	DispatchKeyValue(particle, "parentname", targetName);
-	DispatchKeyValue(particle, "effect_name", particleType);
-	DispatchSpawn(particle);
-	SetVariantString(targetName);
-	if(attach)
-	{
-		AcceptEntityInput(particle, "SetParent", particle, particle, 0);
-		SetEntPropEnt(particle, Prop_Send, "m_hOwnerEntity", entity);
-	}
-	ActivateEntity(particle);
-	AcceptEntityInput(particle, "start");
-	return particle;
-}
-
-public Action Timer_RemoveEntity(Handle timer, any entid)
-{
-	int entity = EntRefToEntIndex(entid);
-	if(IsValidEdict(entity) && entity>MaxClients)
-	{
-		TeleportEntity(entity, OFF_THE_MAP, NULL_VECTOR, NULL_VECTOR); // send it away first in case it feels like dying dramatically
-		AcceptEntityInput(entity, "Kill");
-	}
-}
-
-stock int CheckRoundState()
-{
-	switch(GameRules_GetRoundState())
-	{
-		case RoundState_Init, RoundState_Pregame:
-		{
-			return -1;
-		}
-		case RoundState_StartGame, RoundState_Preround:
-		{
-			return 0;
-		}
-		case RoundState_RoundRunning, RoundState_Stalemate:  //Oh Valve.
-		{
-			return 1;
-		}
-	}
-	return 2;
-}
-
-stock int GetClientPointVisible(int iClient, float flDistance = 100.0)
-{
-	float vecOrigin[3], vecAngles[3], vecEndOrigin[3];
-	GetClientEyePosition(iClient, vecOrigin);
-	GetClientEyeAngles(iClient, vecAngles);
-	
-	Handle hTrace = TR_TraceRayFilterEx(vecOrigin, vecAngles, MASK_ALL, RayType_Infinite, Trace_DontHitEntity, iClient);
-	TR_GetEndPosition(vecEndOrigin, hTrace);
-	
-	int iReturn = -1;
-	int iHit = TR_GetEntityIndex(hTrace);
-	
-	if (TR_DidHit(hTrace) && iHit != iClient && GetVectorDistance(vecOrigin, vecEndOrigin) < flDistance)
-		iReturn = iHit;
-	
-	delete hTrace;
-	return iReturn;
-}
-
-stock void SpawnPickup(int iClient, const char[] sClassname)
-{
-	float vecOrigin[3];
-	GetClientAbsOrigin(iClient, vecOrigin);
-	vecOrigin[2] += 16.0;
-	
-	int iEntity = CreateEntityByName(sClassname);
-	DispatchKeyValue(iEntity, "OnPlayerTouch", "!self,Kill,,0,-1");
-	if (DispatchSpawn(iEntity))
-	{
-		SetEntProp(iEntity, Prop_Send, "m_iTeamNum", 0, 4);
-		TeleportEntity(iEntity, vecOrigin, NULL_VECTOR, NULL_VECTOR);
-		CreateTimer(0.15, Timer_RemoveEntity, EntIndexToEntRef(iEntity));
-	}
-}
-
-stock float fabs(float x)
-{
-	return x<0 ? -x : x;
-}
-
-stock float fixAngle(float angle)
-{
-	int i;
-	for(; i<11 && angle<-180; i++)
-	{
-		angle += 360.0;
-	}
-	for(; i<11 && angle>180; i++)
-	{
-		angle -= 360.0;
-	}	
-	return angle;
-}
-
-stock float GetVectorAnglesTwoPoints(const float startPos[3], const float endPos[3], float angles[3])
-{
-	static float tmpVec[3];
-	tmpVec[0] = endPos[0] - startPos[0];
-	tmpVec[1] = endPos[1] - startPos[1];
-	tmpVec[2] = endPos[2] - startPos[2];
-	GetVectorAngles(tmpVec, angles);
-}
-
-stock bool IsValidClient(int client, bool replaycheck=true)
-{
-	if(client<=0 || client>MaxClients)
-		return false;
-
-	if(!IsClientInGame(client))
-		return false;
-
-	if(GetEntProp(client, Prop_Send, "m_bIsCoaching"))
-		return false;
-
-	if(replaycheck && (IsClientSourceTV(client) || IsClientReplay(client)))
-		return false;
-
-	return true;
-}
-
-stock bool IsInvuln(int client)
-{
-	if(!IsValidClient(client))
-		return true;
-
-	return (TF2_IsPlayerInCondition(client, TFCond_Ubercharged) ||
-		TF2_IsPlayerInCondition(client, TFCond_UberchargedCanteen) ||
-		TF2_IsPlayerInCondition(client, TFCond_UberchargedHidden) ||
-		TF2_IsPlayerInCondition(client, TFCond_UberchargedOnTakeDamage) ||
-		TF2_IsPlayerInCondition(client, TFCond_Bonked) ||
-		TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode) ||
-		!GetEntProp(client, Prop_Data, "m_takedamage"));
-}
-
-stock int FindEntityByClassname2(int startEnt, const char[] classname)
-{
-	while(startEnt>-1 && !IsValidEntity(startEnt))
-	{
-		startEnt--;
-	}
-	return FindEntityByClassname(startEnt, classname);
-}
-
-stock int GetOwnerLoop(int entity)
-{
-	int owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
-	if(owner>0 && owner!=entity)
-		return GetOwnerLoop(owner);
-
-	return entity;
-}
-
-stock void SetAmmo(int client, int weapon, int ammo=-1, int clip=-1)
-{
-	if(IsValidEntity(weapon))
-	{
-		if(clip > -1)
-			SetEntProp(weapon, Prop_Data, "m_iClip1", clip);
-
-		int ammoType = (ammo>-1 ? GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType") : -1);
-		if(ammoType != -1)
-			SetEntProp(client, Prop_Data, "m_iAmmo", ammo, _, ammoType);
-	}
-}
-
-stock void TF2_RefillWeaponAmmo(int client, int weapon)
-{
-	int ammotype = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
-	if (ammotype > -1)
-		GivePlayerAmmo(client, 9999, ammotype, true);
-}
-
-stock void TF2_SetWeaponAmmo(int client, int weapon, int ammo)
-{
-	int ammotype = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
-	if (ammotype > -1)
-		SetEntProp(client, Prop_Send, "m_iAmmo", ammo, _, ammotype);
-}
-
-stock int TF2_GetWeaponAmmo(int client, int weapon)
-{
-	int ammotype = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
-	if (ammotype > -1)
-		return GetEntProp(client, Prop_Send, "m_iAmmo", _, ammotype);
-	
-	return -1;
-}
-
-stock TFTeam TF2_GetTeam(int entity)
-{
-	return view_as<TFTeam>(GetEntProp(entity, Prop_Send, "m_iTeamNum"));
-}
-
-stock void SetSpeed(int client, float speed)
-{
-	SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", speed);
-}
-
-stock void FadeMessage(int client, int arg1, int arg2, int arg3, int arg4=255, int arg5=255, int arg6=255, int arg7=255)
-{
-	Handle msg = StartMessageOne("Fade", client);
-	BfWriteShort(msg, arg1);
-	BfWriteShort(msg, arg2);
-	BfWriteShort(msg, arg3);
-	BfWriteByte(msg, arg4);
-	BfWriteByte(msg, arg5);
-	BfWriteByte(msg, arg6);
-	BfWriteByte(msg, arg7);
-	EndMessage();
-}
-
-stock void PrintKeyHintText(int client, const char[] format, any ...)
-{
-	Handle userMessage = StartMessageOne("KeyHintText", client);
-	if(userMessage == INVALID_HANDLE)
-		return;
-
-	char buffer[256];
-	SetGlobalTransTarget(client);
-	VFormat(buffer, sizeof(buffer), format, 3);
-
-	if(GetFeatureStatus(FeatureType_Native, "GetUserMessageType")==FeatureStatus_Available && GetUserMessageType()==UM_Protobuf)
-	{
-		PbSetString(userMessage, "hints", buffer);
-	}
-	else
-	{
-		BfWriteByte(userMessage, 1); 
-		BfWriteString(userMessage, buffer); 
-	}
-	
-	EndMessage();
-}
-
-stock void ModelIndexToString(int index, char[] model, int size)
-{
-	int table = FindStringTable("modelprecache");
-	ReadStringTable(table, index, model, size);
-}
-
-stock int SpawnWeapon(int client, char[] name, int index, int level, int qual, const char[] att, bool visible=true, bool preserve=false)
-{
-	Handle weapon;
-	if(preserve)
-	{
-		weapon = TF2Items_CreateItem(OVERRIDE_ALL|FORCE_GENERATION|PRESERVE_ATTRIBUTES);
-	}
-	else
-	{
-		weapon = TF2Items_CreateItem(OVERRIDE_ALL|FORCE_GENERATION);
-	}
-
-	if(weapon == INVALID_HANDLE)
-		return -1;
-
-	TF2Items_SetClassname(weapon, name);
-	TF2Items_SetItemIndex(weapon, index);
-	TF2Items_SetLevel(weapon, level);
-	TF2Items_SetQuality(weapon, qual);
-	char atts[32][32];
-	int count = ExplodeString(att, ";", atts, 32, 32);
-
-	if(count % 2)
-		--count;
-
-	if(count > 0)
-	{
-		TF2Items_SetNumAttributes(weapon, count/2);
-		int i2;
-		for(int i; i<count; i+=2)
-		{
-			int attrib = StringToInt(atts[i]);
-			if(!attrib)
-			{
-				LogError("Bad weapon attribute passed: %s ; %s", atts[i], atts[i+1]);
-				delete weapon;
-				return -1;
-			}
-
-			TF2Items_SetAttribute(weapon, i2, attrib, StringToFloat(atts[i+1]));
-			i2++;
-		}
-	}
-	else
-	{
-		TF2Items_SetNumAttributes(weapon, 0);
-	}
-
-	int entity = TF2Items_GiveNamedItem(client, weapon);
-	delete weapon;
-	if(entity == -1)
-		return -1;
-
-	EquipPlayerWeapon(client, entity);
-
-	if(visible)
-	{
-		SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", 1);
-	}
-	else
-	{
-		SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", -1);
-		SetEntPropFloat(entity, Prop_Send, "m_flModelScale", 0.001);
-	}
-	return entity;
-}
-
-stock int SpawnWearable(int client, const char[] name, int index, int id)
-{
-	if(SDKEquipWearable == null)
-		return -1;
-
-	int entity = CreateEntityByName(classname);
-	if(!IsValidEntity(weapon))
-		return -1;
-
-	SetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex", index);
-	SetEntProp(entity, Prop_Send, "m_bInitialized", 1);
-
-	/*static char netClass[64];
-	GetEntityNetClass(wearable, netClass, sizeof(netClass));
-	SetEntData(entity, FindSendPropInfo(netClass, "m_iEntityQuality"), 6);
-	SetEntData(entity, FindSendPropInfo(netClass, "m_iEntityLevel"), id);*/
-	SetEntProp(entity, Prop_Send, "m_iEntityQuality", 6);
-	SetEntProp(entity, Prop_Send, "m_iEntityLevel", id);
-
-	DispatchSpawn(entity);
-	SDKCall(SDKEquipWearable, client, wearable);
-	return entity;
-}
-
-stock int PrecacheModelEx(const char[] model, bool preload=false)
-{
-	static char buffer[PLATFORM_MAX_PATH];
-	strcopy(buffer, sizeof(buffer), model);
-	ReplaceString(buffer, sizeof(buffer), ".mdl", "");
-
-	int table = FindStringTable("downloadables");
-	bool save = LockStringTables(false);
-	char buffer2[PLATFORM_MAX_PATH];
-	static const char fileTypes[][] = {"dx80.vtx", "dx90.vtx", "mdl", "phy", "sw.vtx", "vvd"};
-	for(int i; i<sizeof(fileTypes); i++)
-	{
-		FormatEx(buffer2, sizeof(buffer2), "%s.%s", buffer, fileTypes[i]);
-		if(FileExists(buffer2))
-			AddToStringTable(table, buffer2);
-	}
-	LockStringTables(save);
-
-	return PrecacheModel(model, preload);
-}
-
-stock int PrecacheSoundEx(const char[] sound, bool preload=false)
-{
-	char buffer[PLATFORM_MAX_PATH];
-	FormatEx(buffer, sizeof(buffer), "sound/%s", sound);
-	ReplaceStringEx(buffer, sizeof(buffer), "#", "");
-	if(FileExists(buffer))
-		AddFileToDownloadsTable(buffer);
-
-	return PrecacheSound(sound, preload);
 }
 
 // Target Filters
@@ -7862,17 +7119,6 @@ public bool Target_Guard(const char[] pattern, ArrayList clients)
 		clients.Push(client);
 	}
 	return true;
-}
-
-// Natives
-
-public any Native_GetClientClass(Handle plugin, int numParams)
-{
-	int client = GetNativeCell(1);
-	if(client>=0 && client<MAXTF2PLAYERS)
-		return Client[client].Class;
-
-	return Class_Spec;
 }
 
 #file "SCP: Secret Fortress"
