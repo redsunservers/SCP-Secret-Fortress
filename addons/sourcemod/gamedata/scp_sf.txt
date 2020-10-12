@@ -40,6 +40,12 @@
 				"linux"		"@_ZN16CTFDroppedWeapon18InitPickedUpWeaponEP9CTFPlayerP13CTFWeaponBase"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x08\xD9\xEE\x53\x56\x57"
 			}
+			"CTFGameMovement::ProcessMovement"
+			{
+				"library"	"server"
+				"linux"		"@_ZN15CTFGameMovement15ProcessMovementEP11CBasePlayerP9CMoveData"
+				"windows"	"\x55\x8B\xEC\x56\x57\x8B\x7D\x08\x8B\xF1\x85\xFF\x74\x2A\x53"
+			}
 			"CTFPlayer::CanPickupDroppedWeapon"
 			{
 				"library"	"server"
@@ -107,6 +113,13 @@
 					}
 				}
 			}
+			"CBasePlayer::ForceRespawn"
+			{
+				"offset"	"CBasePlayer::ForceRespawn"
+				"hooktype"	"entity"
+				"return"	"void"
+				"this"		"entity"
+			}
 			"CTeamplayRoundBasedRules::RoundRespawn"
 			{
 				"offset"	"CTeamplayRoundBasedRules::RoundRespawn"
@@ -145,6 +158,24 @@
 					"bFinal"
 					{
 						"type"	"bool"
+					}
+				}
+			}
+			"CTFGameMovement::ProcessMovement"
+			{
+				"signature"	"CTFGameMovement::ProcessMovement"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"ignore"
+				"arguments"
+				{
+					"player"
+					{
+						"type"	"cbaseentity" // CBasePlayer *
+					}
+					"mv"
+					{
+						"type"	"objectptr" // CMoveData *
 					}
 				}
 			}
@@ -205,6 +236,11 @@
 				"linux"		"431"
 				"windows"	"430"
 			}
+			"CBasePlayer::ForceRespawn"
+			{
+				"linux"		"330"
+				"windows"	"329"
+			}
 			"CTeamplayRoundBasedRules::RoundRespawn"
 			{
 				"linux"		"226"
@@ -248,26 +284,18 @@
 		}
 		"Addresses"
 		{
-			"Patch_PickupWeaponFromOther"
+			"ProcessMovement"
 			{
 				"linux"
 				{
-					"signature"	"CTFPlayer::PickupWeaponFromOther"
-					"offset"	"405" // 0x195
+					"signature"	"CTFGameMovement::ProcessMovement"
+					"offset"	"84"
 				}
 				"windows"
 				{
-					"signature"	"CTFPlayer::PickupWeaponFromOther"
-					"offset" 	"282" // 0x11A
+					"signature"	"CTFGameMovement::ProcessMovement"
+					"offset"	"70"
 				}
-			}
-		}
-		"Keys"
-		{
-			"Patch_PickupWeaponFromOther"
-			{
-				"linux"		"\x90\x90\x90\x90\x90\x90\x90\x90"
-				"windows"	"\xEB"
 			}
 		}
 	}

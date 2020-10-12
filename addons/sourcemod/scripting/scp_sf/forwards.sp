@@ -2,7 +2,7 @@ static GlobalForward OnEscape;
 
 void Forward_Setup()
 {
-	OnEscape = new GlobalForward("SCPSF_OnEscape", ET_Ignore, Param_Cell);
+	OnEscape = new GlobalForward("SCPSF_OnEscape", ET_Ignore, Param_Cell, Param_Cell);
 }
 
 void Forward_OnEscape(int client, int disarmer)

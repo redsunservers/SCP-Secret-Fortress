@@ -8,6 +8,8 @@ enum ThinkFunctionEnum
 static Handle AllowedToHealTarget;
 static Handle SetWinningTeam;
 static Handle RoundRespawn;
+static Handle ForceRespawn;
+static int ForceRespawnHook[MAXTF2PLAYERS];
 static int ThinkData[MAXENTITIES];
 static ThinkFunctionEnum ThinkFunction;
 
@@ -17,6 +19,7 @@ void DHook_Setup(GameData gamedata)
 	DHook_CreateDetour(gamedata, "CTFPlayer::CanPickupDroppedWeapon", DHook_CanPickupDroppedWeaponPre, _);
 	DHook_CreateDetour(gamedata, "CTFPlayer::DropAmmoPack", DHook_DropAmmoPackPre, _);
 	DHook_CreateDetour(gamedata, "CBaseEntity::InSameTeam", DHook_InSameTeamPre, _);
+	DHook_CreateDetour(gamedata, "CTFGameMovement::ProcessMovement", DHook_ProcessMovementPre, _);
 
 	AllowedToHealTarget = DHookCreateDetour(Address_Null, CallConv_THISCALL, ReturnType_Bool, ThisPointer_CBaseEntity);
 	if(AllowedToHealTarget)
@@ -44,6 +47,10 @@ void DHook_Setup(GameData gamedata)
 	RoundRespawn = DHookCreateFromConf(gamedata, "CTeamplayRoundBasedRules::RoundRespawn");
 	if(!RoundRespawn)
 		LogError("[Gamedata] Could not find CTFPlayer::RoundRespawn");
+
+	ForceRespawn = DHookCreateFromConf(gamedata, "CBasePlayer::ForceRespawn");
+	if(!ForceRespawn)
+		LogError("[Gamedata] Could not find CBasePlayer::ForceRespawn");
 }
 
 static void DHook_CreateDetour(GameData gamedata, const char[] name, DHookCallback preCallback = INVALID_FUNCTION, DHookCallback postCallback = INVALID_FUNCTION)
@@ -63,6 +70,17 @@ static void DHook_CreateDetour(GameData gamedata, const char[] name, DHookCallba
 	{
 		LogError("[Gamedata] Could not find %s", name);
 	}
+}
+
+void DHook_HookClient(int client)
+{
+	if(ForceRespawn)
+		ForceRespawnHook[client] = DHookEntity(ForceRespawn, false, client, _, DHook_ForceRespawn);
+}
+
+void DHook_UnhookClient(int client)
+{
+	DHookRemoveHookID(ForceRespawnHook[client]);
 }
 
 void DHook_MapStart()
@@ -168,6 +186,17 @@ public MRESReturn DHook_AllowedToHealTarget(int weapon, Handle returnVal, Handle
 
 	DHookSetReturn(returnVal, false);
 	return MRES_ChangedOverride;
+}
+
+public MRESReturn DHook_ForceRespawn(int client)
+{
+	if(Enabled && Client[client].Class==Class_Spec && !CvarSpecGhost.BoolValue)
+		return MRES_Supercede;
+
+	if(view_as<TFClassType>(GetEntProp(client, Prop_Send, "m_iDesiredPlayerClass")) == TFClass_Unknown)
+		SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", ClassClass[Client[client].Class]);
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHook_SetWinningTeam(Handle params)
@@ -340,4 +369,13 @@ public MRESReturn DHook_InSameTeamPre(int entity, Handle returnVal, Handle param
 
 	DHookSetReturn(returnVal, result);
 	return MRES_Supercede;
+}
+
+public MRESReturn DHook_ProcessMovementPre(Handle params)
+{
+	if(!Enabled)
+		return MRES_Ignored;
+
+	DHookSetParamObjectPtrVar(params, 2, 60, ObjectValueType_Float, MAXTF2SPEED);
+	return MRES_ChangedHandled;
 }

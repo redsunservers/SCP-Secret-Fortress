@@ -1,20 +1,16 @@
-Required Plugins:
+Required:
 https://github.com/FlaminSarge/tf2attributes
-https://forums.alliedmods.net/showthread.php?p=2659562
-
-Required Extensions:
 https://github.com/asherkin/TF2Items
 https://github.com/peace-maker/DHooks2
+https://forums.alliedmods.net/showthread.php?t=185016 (Compiling)
 
-Required Includes:
-https://forums.alliedmods.net/showthread.php?t=185016
+Recommended:
+https://github.com/SlidyBat/sendproxy
 
-Optional Plugins:
+Optional:
+https://github.com/SlidyBat/CollisionHook
+
+Supported:
 https://github.com/sbpp/sourcebans-pp
 https://github.com/Flyflo/SM-Goomba-Stomp
-https://github.com/Franc1sco/VoiceAnnounceEX
 https://github.com/Franc1sco/DevZones
-
-Optional Extensions:
-https://github.com/SlidyBat/CollisionHook
-https://github.com/SlidyBat/sendproxy

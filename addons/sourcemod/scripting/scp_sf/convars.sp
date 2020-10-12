@@ -7,9 +7,21 @@ enum struct CvarInfo
 
 static ArrayList CvarList;
 
+ConVar CvarQuickRounds;
+ConVar CvarSpecGhost;
+ConVar CvarFriendlyFire;
+ConVar CvarDiscFF;
+ConVar CvarTimelimit;
+
 void ConVar_Setup()
 {
-	CvarQuickRounds = CreateConVar("scp_quickrounds", "1", "If to end the round if winning outcome can no longer be changed", _, true, 0.0, true, 1.0);
+	CvarQuickRounds = CreateConVar("scp_quickrounds", "0", "If to end the round if winning outcome can no longer be changed", _, true, 0.0, true, 1.0);
+	CvarSpecGhost = CreateConVar("scp_specmode", "1", "If to spawn as a ghost while spectating", _, true, 0.0, true, 1.0);
+	CvarFriendlyFire = CreateConVar("scp_friendlyfire", "0", "If to enable friendly fire (not recommended)", _, true, 0.0, true, 1.0);
+	CvarDiscFF = CreateConVar("scp_discff", "0", "DISC-FF.com private features", _, true, 0.0, true, 1.0);
+	CvarTimelimit = CreateConVar("scp_timelimit", "898", "Round timelimit (0 to disable)", _, true, 120.0);
+
+	AutoExecConfig(true, "SCPSecretFortress");
 
 	if(CvarList != INVALID_HANDLE)
 		delete CvarList;
