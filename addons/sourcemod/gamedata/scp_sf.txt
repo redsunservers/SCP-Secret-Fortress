@@ -58,11 +58,17 @@
 				"linux"		"@_ZN9CTFPlayer12DropAmmoPackERK15CTakeDamageInfobb"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x28\x53\x8B\xD9\x56\x33\xF6"
 			}
-			"CTFPlayer::GetEquippedWearableForLoadoutSlot"
+			"CTFPlayer::TeamFortress_CalculateMaxSpeed"
 			{
 				"library"	"server"
-				"linux"		"@_ZN9CTFPlayer33GetEquippedWearableForLoadoutSlotEi"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x2A\x8B\xC1\x53\x56\x33\xF6\x89\x45\xF8\x8B\x88\x2A\x2A\x2A\x2A\x57\x89\x4D\xFC"
+				"linux"		"@_ZNK9CTFPlayer30TeamFortress_CalculateMaxSpeedEb"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x18\x83\x3D\x2A\x2A\x2A\x2A\x00\x56\x8B\xF1\x75\x2A\xD9\xEE\x5E\x8B\xE5\x5D\xC2\x04\x00\x8B\x86"
+			}
+			"CTFPlayer::TeamFortress_SetSpeed"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CTFPlayer21TeamFortress_SetSpeedEv"
+				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x83\xEC\x1C\x53"
 			}
 			"CTFPlayer::TryToPickupDroppedWeapon"
 			{
@@ -70,11 +76,11 @@
 				"linux"		"@_ZN9CTFPlayer24TryToPickupDroppedWeaponEv"
 				"windows"	"\x56\x6A\x00\x8B\xF1\xE8\x2A\x2A\x2A\x2A\x84\xC0\x75\x2A\x32\xC0"
 			}
-			"CWeaponMedigun::AllowedToHealTarget" // "weapon_blocks_healing" and 4th function or debug and set breakpoints
+			"CWeaponMedigun::AllowedToHealTarget"
 			{
 				"library"	"server"
-				"windows"	"\x55\x8B\xEC\x53\x8B\xD9\x56\x57\x8B\xB3\xE8"
 				"linux"		"@_ZN14CWeaponMedigun19AllowedToHealTargetEP11CBaseEntity"
+				"windows"	"\x55\x8B\xEC\x53\x8B\xD9\x56\x57\x8B\xB3\xE8"
 			}
 			"GetGlobalTeam"
 			{
@@ -223,6 +229,20 @@
 				"return"	"void"
 				"this"		"entity"
 			}
+			"CTFPlayer::TeamFortress_CalculateMaxSpeed"
+			{
+				"signature"	"CTFPlayer::TeamFortress_CalculateMaxSpeed"
+				"callconv"	"thiscall"
+				"return"	"float"
+				"this"		"address"
+				"arguments"
+				{
+					"bIgnoreSpecialAbility"
+					{
+						"type"	"bool"
+					}
+				}
+			}
 		}
 		"Offsets"
 		{
@@ -240,6 +260,11 @@
 			{
 				"linux"		"330"
 				"windows"	"329"
+			}
+			"CBaseEntity::GetBaseEntity"
+			{
+				"linux" 	"6"
+				"windows" 	"5"
 			}
 			"CTeamplayRoundBasedRules::RoundRespawn"
 			{

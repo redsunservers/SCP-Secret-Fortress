@@ -1,29 +1,64 @@
-static Handle SDKTeamAddPlayer;
-static Handle SDKTeamRemovePlayer;
-Handle SDKCreateWeapon;
 static Handle SDKInitPickup;
-Handle SDKInitWeapon;
-static Handle SDKGlobalTeam;
 static Handle SDKChangeTeam;
-static Handle SDKTeamAddPlayerRaw;
-static Handle SDKTeamRemovePlayerRaw;
+static Handle SDKGetBaseEntity;
 static Handle SDKGetNextThink;
+static Handle SDKTeamAddPlayerRaw;
+static Handle SDKTeamAddPlayer;
+static Handle SDKTeamRemovePlayerRaw;
+static Handle SDKTeamRemovePlayer;
+static Handle SDKSetSpeed;
+static Handle SDKGlobalTeam;
+
+Handle SDKCreateWeapon;
+Handle SDKInitWeapon;
 
 void SDKCall_Setup(GameData gamedata)
 {
 	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CBaseEntity::ChangeTeam");
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	SDKChangeTeam = EndPrepSDKCall();
+	if(!SDKChangeTeam)
+		LogError("[Gamedata] Could not find CBaseEntity::ChangeTeam");
+
+	StartPrepSDKCall(SDKCall_Raw);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CBaseEntity::GetBaseEntity");
+	PrepSDKCall_SetReturnInfo(SDKType_CBaseEntity, SDKPass_Pointer);
+	SDKGetBaseEntity = EndPrepSDKCall();
+	if(!SDKGetBaseEntity)
+		LogError("[Gamedata] Could not find CBaseEntity::GetBaseEntity");
+
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CBaseEntity::GetNextThink");
+	PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL);
+	PrepSDKCall_SetReturnInfo(SDKType_Float, SDKPass_Plain);
+	SDKGetNextThink = EndPrepSDKCall();
+	if(!SDKGetNextThink)
+		LogError("[Gamedata] Could not find CBaseEntity::GetNextThink");
+
+	StartPrepSDKCall(SDKCall_Raw);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTeam::AddPlayer");
+	PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer);
+	SDKTeamAddPlayerRaw = EndPrepSDKCall();
+	if(!SDKTeamAddPlayerRaw)
+		LogError("[Gamedata] Could not find CTeam::AddPlayer");
+
+	StartPrepSDKCall(SDKCall_Entity);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTeam::AddPlayer");
 	PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer);
 	SDKTeamAddPlayer = EndPrepSDKCall();
-	if(!SDKTeamAddPlayer)
-		LogError("[Gamedata] Could not find CTeam::AddPlayer");
+
+	StartPrepSDKCall(SDKCall_Raw);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTeam::RemovePlayer");
+	PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer);
+	SDKTeamRemovePlayerRaw = EndPrepSDKCall();
+	if(!SDKTeamRemovePlayerRaw)
+		LogError("[Gamedata] Could not find CTeam::RemovePlayer");
 
 	StartPrepSDKCall(SDKCall_Entity);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTeam::RemovePlayer");
 	PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer);
 	SDKTeamRemovePlayer = EndPrepSDKCall();
-	if(!SDKTeamRemovePlayer)
-		LogError("[Gamedata] Could not find CTeam::RemovePlayer");
 
 	StartPrepSDKCall(SDKCall_Static);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFDroppedWeapon::Create");
@@ -55,6 +90,12 @@ void SDKCall_Setup(GameData gamedata)
 	if(!SDKInitPickup)
 		LogError("[Gamedata] Could not find CTFDroppedWeapon::InitPickedUpWeapon");
 
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::TeamFortress_SetSpeed");
+	SDKSetSpeed = EndPrepSDKCall();
+	if(!SDKSetSpeed)
+		LogError("[Gamedata] Could not find CTFPlayer::TeamFortress_SetSpeed");
+
 	StartPrepSDKCall(SDKCall_Static);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "GetGlobalTeam");
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
@@ -62,49 +103,12 @@ void SDKCall_Setup(GameData gamedata)
 	SDKGlobalTeam = EndPrepSDKCall();
 	if(!SDKGlobalTeam)
 		LogError("[Gamedata] Could not find GetGlobalTeam");
-
-	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CBaseEntity::ChangeTeam");
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	SDKChangeTeam = EndPrepSDKCall();
-	if(!SDKChangeTeam)
-		LogError("[Gamedata] Could not find CBaseEntity::ChangeTeam");
-
-	StartPrepSDKCall(SDKCall_Raw);
-	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTeam::AddPlayer");
-	PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer);
-	SDKTeamAddPlayerRaw = EndPrepSDKCall();
-	if(!SDKTeamAddPlayerRaw)
-		LogError("[Gamedata] Could not find CTeam::AddPlayer");
-
-	StartPrepSDKCall(SDKCall_Raw);
-	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTeam::RemovePlayer");
-	PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer);
-	SDKTeamRemovePlayerRaw = EndPrepSDKCall();
-	if(!SDKTeamRemovePlayerRaw)
-		LogError("[Gamedata] Could not find CTeam::RemovePlayer");
-
-	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CBaseEntity::GetNextThink");
-	PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL);
-	PrepSDKCall_SetReturnInfo(SDKType_Float, SDKPass_Plain);
-	SDKGetNextThink = EndPrepSDKCall();
-	if(!SDKGetNextThink)
-		LogError("[Gamedata] Could not find CBaseEntity::GetNextThink");
 }
 
 void SDKCall_InitPickup(int entity, int client, int weapon)
 {
 	if(SDKInitPickup)
 		SDKCall(SDKInitPickup, entity, client, weapon);
-}
-
-Address SDKCall_GetGlobalTeam(any team)
-{
-	if(SDKGlobalTeam)
-		return SDKCall(SDKGlobalTeam, team);
-
-	return Address_Null;
 }
 
 void SDKCall_ChangeTeam(int entity, any team)
@@ -134,6 +138,28 @@ float SDKCall_GetNextThink(int entity, const char[] buffer="")
 		return SDKCall(SDKGetNextThink, entity, buffer);
 
 	return SDKCall(SDKGetNextThink, entity, NULL_STRING);
+}
+
+int SDKCall_GetBaseEntity(Address entity)
+{
+	if(SDKGetBaseEntity)
+		return SDKCall(SDKGetBaseEntity, entity);
+
+	return 1;
+}
+
+void SDKCall_SetSpeed(int client)
+{
+	if(SDKSetSpeed)
+		SDKCall(SDKSetSpeed, client);
+}
+
+Address SDKCall_GetGlobalTeam(any team)
+{
+	if(SDKGlobalTeam)
+		return SDKCall(SDKGlobalTeam, team);
+
+	return Address_Null;
 }
 
 void ChangeClientTeamEx(int client, TFTeam newTeam)

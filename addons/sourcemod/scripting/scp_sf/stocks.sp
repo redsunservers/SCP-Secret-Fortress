@@ -1,3 +1,52 @@
+enum HudNotification_t
+{
+	HUD_NOTIFY_YOUR_FLAG_TAKEN,
+	HUD_NOTIFY_YOUR_FLAG_DROPPED,
+	HUD_NOTIFY_YOUR_FLAG_RETURNED,
+	HUD_NOTIFY_YOUR_FLAG_CAPTURED,
+
+	HUD_NOTIFY_ENEMY_FLAG_TAKEN,
+	HUD_NOTIFY_ENEMY_FLAG_DROPPED,
+	HUD_NOTIFY_ENEMY_FLAG_RETURNED,
+	HUD_NOTIFY_ENEMY_FLAG_CAPTURED,
+
+	HUD_NOTIFY_TOUCHING_ENEMY_CTF_CAP,
+
+	HUD_NOTIFY_NO_INVULN_WITH_FLAG,
+	HUD_NOTIFY_NO_TELE_WITH_FLAG,
+
+	HUD_NOTIFY_SPECIAL,
+
+	HUD_NOTIFY_GOLDEN_WRENCH,
+
+	HUD_NOTIFY_RD_ROBOT_UNDER_ATTACK,
+
+	HUD_NOTIFY_HOW_TO_CONTROL_GHOST,
+	HUD_NOTIFY_HOW_TO_CONTROL_KART,
+
+	HUD_NOTIFY_PASSTIME_HOWTO,
+	HUD_NOTIFY_PASSTIME_NO_TELE,
+	HUD_NOTIFY_PASSTIME_NO_CARRY,
+	HUD_NOTIFY_PASSTIME_NO_INVULN,
+	HUD_NOTIFY_PASSTIME_NO_DISGUISE, 
+	HUD_NOTIFY_PASSTIME_NO_CLOAK, 
+	HUD_NOTIFY_PASSTIME_NO_OOB, // out of bounds
+	HUD_NOTIFY_PASSTIME_NO_HOLSTER,
+	HUD_NOTIFY_PASSTIME_NO_TAUNT,
+
+	HUD_NOTIFY_COMPETITIVE_GC_DOWN,
+
+	HUD_NOTIFY_TRUCE_START,
+	HUD_NOTIFY_TRUCE_END,
+
+	HUD_NOTIFY_HOW_TO_CONTROL_GHOST_NO_RESPAWN,
+	//
+	// ADD NEW ITEMS HERE TO AVOID BREAKING DEMOS
+	//
+
+	NUM_STOCK_NOTIFICATIONS
+};
+
 static const char Characters[] = "abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOQRTUVWXYZ~`1234567890@#$^&*(){}:[]|¶�;<>.,?/'|";
 static const float OFF_THE_MAP[3] = { 16383.0, 16383.0, -16383.0 };
 
@@ -353,7 +402,7 @@ TFTeam TF2_GetTeam(int entity)
 	return view_as<TFTeam>(GetEntProp(entity, Prop_Send, "m_iTeamNum"));
 }
 
-void SetSpeed(int client, float speed)
+stock void SetSpeed(int client, float speed)
 {
 	SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", speed);
 }
@@ -541,6 +590,27 @@ void ShowDestoryNotice(int[] clients, int count, int attacker, int victim, int a
 		event.FireToClient(clients[i]);
 	}
 	event.Cancel();
+}
+
+void TF2_SendHudNotification(HudNotification_t type, bool forceShow=false)
+{
+	BfWrite bf = UserMessageToBfWrite(StartMessageAll("HudNotify"));
+	bf.WriteByte(view_as<int>(type));
+	bf.WriteBool(forceShow);	//Display in cl_hud_minmode
+	EndMessage();
+}
+
+public Action Timer_Stun(Handle timer, DataPack pack)
+{
+	pack.Reset();
+	int client = GetClientOfUserId(pack.ReadCell());
+	if(client && IsClientInGame(client) && IsPlayerAlive(client))
+	{
+		float duration = pack.ReadFloat();
+		float slowdown = pack.ReadFloat();
+		TF2_StunPlayer(client, duration, slowdown, pack.ReadCell());
+	}
+	return Plugin_Continue;
 }
 
 public bool TraceRayPlayerOnly(int client, int mask, any data)

@@ -193,6 +193,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 				if(!cancel)
 				{
 					Client[victim].Disarmer = attacker;
+					SDKCall_SetSpeed(victim);
 					return Plugin_Handled;
 				}
 			}
@@ -456,15 +457,17 @@ public void OnPreThink(int client)
 		return;
 
 	float engineTime = GetEngineTime();
-	if(Client[client].InvisFor > engineTime+2.0)
+	if(Client[client].InvisFor)
 	{
-		if(Client[client].InvisFor < engineTime)
+		if(Client[client].InvisFor > engineTime)
+		{
+			TF2_RemoveCondition(client, TFCond_Taunting);
+		}
+		else
 		{
 			TF2_RemoveCondition(client, TFCond_Dazed);
-			return;
+			Client[client].InvisFor = 0.0;
 		}
-		
-		TF2_RemoveCondition(client, TFCond_Taunting);
 		return;
 	}
 
@@ -486,263 +489,129 @@ public void OnPreThink(int client)
 		}
 	}
 
-	if(Client[client].InvisFor>engineTime || (Client[client].Class>Class_DBoi && RoundStartAt>engineTime))
+	switch(Client[client].Class)
 	{
-		SetSpeed(client, 1.0);
-	}
-	else
-	{
-		switch(Client[client].Class)
+		case Class_DBoi, Class_Scientist:
 		{
-			case Class_Spec:
+			if(Gamemode == Gamemode_Steals)
+				SetEntProp(client, Prop_Send, "m_bGlowEnabled", Client[client].IdleAt>engineTime);
+		}
+		case Class_096:
+		{
+			switch(Client[client].Radio)
 			{
-				SetSpeed(client, 360.0);
-			}
-			case Class_DBoi, Class_Scientist:
-			{
-				if(Gamemode == Gamemode_Steals)
+				case 1:
 				{
-					SetEntProp(client, Prop_Send, "m_bGlowEnabled", Client[client].IdleAt>engineTime);
-					SetSpeed(client, Client[client].Sprinting ? 360.0 : 270.0);
-				}
-				else
-				{
-					SetSpeed(client, Client[client].Disarmer ? 230.0 : Client[client].Sprinting ? 310.0 : 260.0);
-				}
-			}
-			case Class_Chaos, Class_MTFE:
-			{
-				SetSpeed(client, (Client[client].Sprinting && !Client[client].Disarmer) ? 270.0 : 230.0);
-			}
-			case Class_MTF3:
-			{
-				SetSpeed(client, Client[client].Disarmer ? 230.0 : Client[client].Sprinting ? 280.0 : 240.0);
-			}
-			case Class_Guard, Class_MTF, Class_MTF2, Class_MTFS:
-			{
-				SetSpeed(client, Client[client].Disarmer ? 230.0 : Client[client].Sprinting ? 290.0 : 250.0);
-			}
-			case Class_049:
-			{
-				SetSpeed(client, 250.0);
-			}
-			case Class_0492, Class_3008:
-			{
-				SetSpeed(client, 270.0);
-			}
-			case Class_076:
-			{
-				switch(Client[client].Radio)
-				{
-					case 0:
-						SetSpeed(client, 240.0);
-
-					case 1:
-						SetSpeed(client, 245.0);
-
-					case 2:
-						SetSpeed(client, 250.0);
-
-					case 3:
-						SetSpeed(client, 255.0);
-
-					default:
-						SetSpeed(client, 275.0);
-				}
-			}
-			case Class_096:
-			{
-				switch(Client[client].Radio)
-				{
-					case 1:
+					if(Client[client].Power < engineTime)
 					{
-						SetSpeed(client, 230.0);
-						if(Client[client].Power < engineTime)
-						{
-							TF2_AddCondition(client, TFCond_CritCola, 99.9);
-							TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
-							SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_096Rage));
-							Client[client].Power = engineTime+(Client[client].Disarmer*2.0)+13.0;
-							Client[client].Keycard = Keycard_106;
-							Client[client].Radio = 2;
-						}
+						Client[client].Power = engineTime+(Client[client].Disarmer*2.0)+13.0;
+						Client[client].Keycard = Keycard_106;
+						Client[client].Radio = 2;
+						TF2_AddCondition(client, TFCond_CritCola, 99.9);
+						TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
+						SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_096Rage));
 					}
-					case 2:
-					{
+				}
+				case 2:
+				{
+					if(TF2_IsPlayerInCondition(client, TFCond_Dazed))
 						TF2_RemoveCondition(client, TFCond_Dazed);
-						SetSpeed(client, 520.0);
-						if(Client[client].Power < engineTime)
-						{
-							TF2_RemoveCondition(client, TFCond_CritCola);
-							TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
-							SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_096));
-							Client[client].Disarmer = 0;
-							Client[client].Radio = 0;
-							Client[client].Keycard = Keycard_SCP;
-							Client[client].Power = engineTime+15.0;
-							TF2_StunPlayer(client, 6.0, 0.9, TF_STUNFLAG_SLOWDOWN);
-							Config_GetSound(Sound_Screams, buffer, sizeof(buffer));
-							StopSound(client, SNDCHAN_VOICE, buffer);
-							StopSound(client, SNDCHAN_VOICE, buffer);
 
-							bool another096;
-							for(int i=1; i<=MaxClients; i++)
-							{
-								if(Client[i].Class!=Class_096 || !Client[client].Radio)
-									continue;
-
-								another096 = true;
-								break;
-							}
-
-							if(!another096)
-							{
-								for(int i; i<MAXTF2PLAYERS; i++)
-								{
-									Client[i].Triggered = false;
-								}
-							}
-						}
-					}
-					default:
+					if(Client[client].Power < engineTime)
 					{
-						SetSpeed(client, 230.0);
-						if(Client[client].Power > engineTime)
-							return;
-
-						if(Client[client].IdleAt < engineTime)
-						{
-							if(Client[client].Pos[0])
-							{
-								Config_GetSound(Sound_096, buffer, sizeof(buffer));
-								StopSound(client, SNDCHAN_VOICE, buffer);
-								StopSound(client, SNDCHAN_VOICE, buffer);
-								Client[client].Pos[0] = 0.0;
-							}
-						}
-						else if(!Client[client].Pos[0])
-						{
-							Config_GetSound(Sound_096, buffer, sizeof(buffer));
-							EmitSoundToAll(buffer, client, SNDCHAN_VOICE, SNDLEVEL_SCREAMING, _, _, _, client);
-							Client[client].Pos[0] = 1.0;
-						}
-					}
-				}
-			}
-			case Class_106:
-			{
-				SetSpeed(client, 240.0);
-			}
-			case Class_173:
-			{
-				switch(Client[client].Radio)
-				{
-					case 1:
-					{
-						if(GetEntityMoveType(client) != MOVETYPE_NONE)
-						{
-							if(GetEntityFlags(client) & FL_ONGROUND)
-							{
-								SetEntityMoveType(client, MOVETYPE_NONE);
-							}
-							else
-							{
-								SetSpeed(client, 1.0);
-								static float vel[3];
-								vel[2] = -500.0;
-								TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, vel);
-							}
-						}
-					}
-					case 2:
-					{
-						SetSpeed(client, 3000.0);
-					}
-					default:
-					{
-						SetSpeed(client, 420.0);
-					}
-				}
-			}
-			case Class_1732:
-			{
-				switch(Client[client].Radio)
-				{
-					case 1:
-					{
-						if(GetEntityMoveType(client) != MOVETYPE_NONE)
-						{
-							static float vel[3];
-							if(GetEntityFlags(client) & FL_ONGROUND)
-							{
-								vel[2] = 0.0;
-								TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, vel);
-								SetEntityMoveType(client, MOVETYPE_NONE);
-							}
-							else
-							{
-								vel[2] = -500.0;
-								TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, vel);
-								SetSpeed(client, 1.0);
-							}
-						}
-					}
-					case 2:
-					{
-						SetSpeed(client, 2600.0);
-					}
-					default:
-					{
-						SetSpeed(client, 450.0);
-					}
-				}
-			}
-			case Class_939, Class_9392:
-			{
-				SetSpeed(client, 300.0-(GetClientHealth(client)/55.0));
-			}
-			case Class_Stealer:
-			{
-				switch(Client[client].Radio)
-				{
-					case 1:
-					{
-						SetSpeed(client, 400.0);
-						if(Client[client].Power > engineTime)
-							return;
-
-						TurnOffGlow(client);
+						Client[client].Disarmer = 0;
 						Client[client].Radio = 0;
+						Client[client].Keycard = Keycard_SCP;
+						Client[client].Power = engineTime+15.0;
+						TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
+						SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_096));
+						TF2_StunPlayer(client, 6.0, 0.9, TF_STUNFLAG_SLOWDOWN);
 						TF2_RemoveCondition(client, TFCond_CritCola);
-					}
-					case 2:
-					{
-						SetSpeed(client, 500.0);
-						return;
-					}
-					default:
-					{
-						SetSpeed(client, 350.0+((SciEscaped/(SciMax+DClassMax)*50.0)));
-						GetClientAbsOrigin(client, clientPos);
-						for(int target=1; target<=MaxClients; target++)
+						Config_GetSound(Sound_Screams, buffer, sizeof(buffer));
+						StopSound(client, SNDCHAN_VOICE, buffer);
+						StopSound(client, SNDCHAN_VOICE, buffer);
+
+						bool another096;
+						for(int i=1; i<=MaxClients; i++)
 						{
-							if(!Client[target].Triggered)
+							if(Client[i].Class!=Class_096 || !Client[client].Radio)
 								continue;
 
-							if(IsValidClient(target) && !IsSpec(target) && !IsSCP(target))
-							{
-								GetClientAbsOrigin(target, enemyPos);
-								if(GetVectorDistance(clientPos, enemyPos, true) < 1000000)
-									continue;
-							}
-							Client[target].Triggered = false;
+							another096 = true;
+							break;
 						}
 
-						if(Client[client].IdleAt+5.0 < engineTime)
+						if(!another096)
 						{
-							SciEscaped--;
-							Client[client].IdleAt = engineTime+2.5;
+							for(int i; i<MAXTF2PLAYERS; i++)
+							{
+								Client[i].Triggered = false;
+							}
 						}
+					}
+				}
+				default:
+				{
+					if(Client[client].Power > engineTime)
+						return;
+
+					if(Client[client].IdleAt < engineTime)
+					{
+						if(Client[client].Pos[0])
+						{
+							Config_GetSound(Sound_096, buffer, sizeof(buffer));
+							StopSound(client, SNDCHAN_VOICE, buffer);
+							StopSound(client, SNDCHAN_VOICE, buffer);
+							Client[client].Pos[0] = 0.0;
+						}
+					}
+					else if(!Client[client].Pos[0])
+					{
+						Config_GetSound(Sound_096, buffer, sizeof(buffer));
+						EmitSoundToAll(buffer, client, SNDCHAN_VOICE, SNDLEVEL_SCREAMING, _, _, _, client);
+						Client[client].Pos[0] = 1.0;
+					}
+				}
+			}
+		}
+		case Class_Stealer:
+		{
+			switch(Client[client].Radio)
+			{
+				case 1:
+				{
+					if(Client[client].Power > engineTime)
+						return;
+
+					TurnOffGlow(client);
+					Client[client].Radio = 0;
+					TF2_RemoveCondition(client, TFCond_CritCola);
+				}
+				case 2:
+				{
+					return;
+				}
+				default:
+				{
+					GetClientAbsOrigin(client, clientPos);
+					for(int target=1; target<=MaxClients; target++)
+					{
+						if(!Client[target].Triggered)
+							continue;
+
+						if(IsValidClient(target) && !IsSpec(target) && !IsSCP(target))
+						{
+							GetClientAbsOrigin(target, enemyPos);
+							if(GetVectorDistance(clientPos, enemyPos, true) < 1000000)
+								continue;
+						}
+						Client[target].Triggered = false;
+					}
+
+					if(Client[client].IdleAt+5.0 < engineTime)
+					{
+						SciEscaped--;
+						Client[client].IdleAt = engineTime+2.5;
 					}
 				}
 			}
@@ -764,7 +633,9 @@ public void OnPreThink(int client)
 		}
 		case Class_076:
 		{
-			TF2_RemoveCondition(client, TFCond_DemoBuff);
+			if(TF2_IsPlayerInCondition(client, TFCond_DemoBuff))
+				TF2_RemoveCondition(client, TFCond_DemoBuff);
+
 			SetEntProp(client, Prop_Send, "m_iDecapitations", Client[client].Radio);
 		}
 		case Class_096:
@@ -919,30 +790,39 @@ public void OnPreThink(int client)
 				blink = GetRandomInt(10, 20);
 			}
 
-			switch(status)
+			if(status == 1)
 			{
-				case 1:
+				SetEntPropFloat(client, Prop_Send, "m_flNextAttack", FAR_FUTURE);
+				SetEntProp(client, Prop_Send, "m_bUseClassAnimations", 0);
+				SetEntProp(client, Prop_Send, "m_bCustomModelRotates", 0);
+				if(GetEntityMoveType(client) != MOVETYPE_NONE)
 				{
-					Client[client].Radio = 1;
-					SetEntPropFloat(client, Prop_Send, "m_flNextAttack", FAR_FUTURE);
-					SetEntProp(client, Prop_Send, "m_bCustomModelRotates", 0);
+					if(GetEntityFlags(client) & FL_ONGROUND)
+					{
+						SetEntityMoveType(client, MOVETYPE_NONE);
+					}
+					else
+					{
+						TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, view_as<float>({0.0, 0.0, -400.0}));
+					}
 				}
-				case 2:
+			}
+			else
+			{
+				SetEntPropFloat(client, Prop_Send, "m_flNextAttack", 0.0);
+				SetEntProp(client, Prop_Send, "m_bUseClassAnimations", 1);
+				SetEntProp(client, Prop_Send, "m_bCustomModelRotates", 1);
+				if(GetEntityMoveType(client) != MOVETYPE_WALK)
 				{
-					Client[client].Radio = 2;
-					SetEntPropFloat(client, Prop_Send, "m_flNextAttack", 0.0);
-					SetEntProp(client, Prop_Send, "m_bCustomModelRotates", 1);
-					if(GetEntityMoveType(client) != MOVETYPE_WALK)
-						SetEntityMoveType(client, MOVETYPE_WALK);
+					TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, TRIPLE_D);
+					SetEntityMoveType(client, MOVETYPE_WALK);
 				}
-				default:
-				{
-					Client[client].Radio = 0;
-					SetEntPropFloat(client, Prop_Send, "m_flNextAttack", 0.0);
-					SetEntProp(client, Prop_Send, "m_bCustomModelRotates", 1);
-					if(GetEntityMoveType(client) != MOVETYPE_WALK)
-						SetEntityMoveType(client, MOVETYPE_WALK);
-				}
+			}
+
+			if(Client[client].Radio != status)
+			{
+				Client[client].Radio = status;
+				SDKCall_SetSpeed(client);
 			}
 		}
 		case Class_Stealer:
@@ -1024,6 +904,7 @@ public void OnPreThink(int client)
 					Client[target].Triggered = true;
 					Config_GetSound(Sound_ItStuns, buffer, sizeof(buffer));
 					ClientCommand(target, "playgamesound %s", buffer);
+					SDKCall_SetSpeed(client);
 				}
 				break;
 			}
@@ -1154,6 +1035,7 @@ public void OnPreThink(int client)
 							{
 								PrintKeyHintText(client, "%t", "sprint", 0);
 								Client[client].Sprinting = false;
+								SDKCall_SetSpeed(client);
 							}
 							else
 							{

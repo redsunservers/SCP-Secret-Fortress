@@ -46,7 +46,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"5"
-#define STABLE_REVISION	"5"
+#define STABLE_REVISION	"6"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define IsSCP(%1)	(Client[%1].Class>=Class_035)
@@ -807,7 +807,6 @@ int SciEscaped;
 int SciMax;
 int SCPKilled;
 int SCPMax;
-float RoundStartAt;
 
 enum struct ClientEnum
 {
@@ -1010,6 +1009,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnPluginStart()
 {
+	Client[0].NextSongAt = FAR_FUTURE;
+
 	ConVar_Setup();
 	SDKHook_Setup();
 
@@ -1312,10 +1313,7 @@ public void OnPluginEnd()
 
 public void OnClientPutInServer(int client)
 {
-	Client[client].DownloadMode = 0;
-	Client[client].NextSongAt = FAR_FUTURE;
-	Client[client].Class = Class_Spec;
-	Client[client].IsVip = false;
+	Client[client] = Client[0];
 
 	SDKHook_HookClient(client);
 	DHook_HookClient(client);
@@ -1345,7 +1343,7 @@ public void OnClientCookiesCached(int client)
 
 public void OnClientPostAdminCheck(int client)
 {
-	Client[client].IsVip = CheckCommandAccess(client, "scp_vip", ADMFLAG_CUSTOM3, true);
+	Client[client].IsVip = CheckCommandAccess(client, "scp_vip", ADMFLAG_CUSTOM5, true);
 
 	int userid = GetClientUserId(client);
 	CreateTimer(0.25, Timer_ConnectPost, userid, TIMER_FLAG_NO_MAPCHANGE);
@@ -1360,6 +1358,8 @@ public void OnRoundReady(Event event, const char[] name, bool dontBroadcast)
 public void TF2_OnWaitingForPlayersStart()
 {
 	Ready = false;
+	if(CvarSpecGhost.BoolValue && Gamemode!=Gamemode_Arena)
+		TF2_SendHudNotification(HUD_NOTIFY_HOW_TO_CONTROL_GHOST_NO_RESPAWN);
 }
 
 public void TF2_OnWaitingForPlayersEnd()
@@ -1884,6 +1884,11 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 
 public void TF2_OnConditionAdded(int client, TFCond cond)
 {
+	if(!Enabled)
+		return;
+
+	SDKCall_SetSpeed(client);
+
 	if(cond == TFCond_Taunting)
 	{
 		if(TF2_IsPlayerInCondition(client, TFCond_Dazed))
@@ -1956,6 +1961,12 @@ public void TF2_OnConditionAdded(int client, TFCond cond)
 		RespawnPlayer(client);
 		CreateTimer(1.0, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
 	}
+}
+
+public void TF2_OnConditionRemoved(int client, TFCond cond)
+{
+	if(Enabled)
+		SDKCall_SetSpeed(client);
 }
 
 public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
@@ -2220,7 +2231,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 
 	TF2Attrib_SetByDefIndex(client, 49, 1.0);
 	TF2Attrib_SetByDefIndex(client, 69, 0.1);
-	TF2_AddCondition(client, TFCond_SpeedBuffAlly, 0.01);
+	TF2_AddCondition(client, TFCond_NoHealingDamageBuff, 0.75);
 
 	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelIndex[Client[client].Class], _, 0);
 	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelSubIndex[Client[client].Class], _, 3);
@@ -2478,6 +2489,8 @@ public Action OnSayCommand(int client, const char[] command, int args)
 
 	Forward_OnMessage(client, name, sizeof(name), msg, sizeof(msg));
 
+	float engineTime = GetEngineTime();
+
 	if(!Enabled)
 	{
 		for(int target=1; target<=MaxClients; target++)
@@ -2504,6 +2517,14 @@ public Action OnSayCommand(int client, const char[] command, int args)
 		{
 			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target] && IsSpec(target)))
 				CPrintToChat(target, "*DEAD* %s {default}: %s", name, msg);
+		}
+	}
+	else if(Client[client].ComFor > engineTime)
+	{
+		for(int target=1; target<=MaxClients; target++)
+		{
+			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target]))
+				CPrintToChat(target, "*COMM* %s {default}: %s", name, msg);
 		}
 	}
 	else
@@ -3159,7 +3180,11 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 	if(buttons & IN_JUMP)
 	{
 		if(!Client[client].Sprinting)
+		{
 			Client[client].Sprinting = (Client[client].SprintPower>15 && (GetEntityFlags(client) & FL_ONGROUND));
+			if(Client[client].Sprinting)
+				SDKCall_SetSpeed(client);
+		}
 
 		if(Gamemode == Gamemode_Steals)
 		{
@@ -3167,9 +3192,10 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 			changed = true;
 		}
 	}
-	else
+	else if(Client[client].Sprinting)
 	{
 		Client[client].Sprinting = false;
+		SDKCall_SetSpeed(client);
 	}
 
 	if(holding[client])
@@ -4076,7 +4102,13 @@ void GoToSpawn(int client, ClassEnum class)
 			if(!count)
 			{
 				Client[client].InvisFor = GetEngineTime()+30.0;
-				TF2_StunPlayer(client, 29.9, 1.0, TF_STUNFLAGS_NORMALBONK|TF_STUNFLAG_NOSOUNDOREFFECT);
+
+				DataPack pack;
+				CreateDataTimer(1.0, Timer_Stun, pack, TIMER_FLAG_NO_MAPCHANGE);
+				pack.WriteCell(GetClientUserId(client));
+				pack.WriteFloat(29.0);
+				pack.WriteFloat(1.0);
+				pack.WriteCell(TF_STUNFLAGS_NORMALBONK|TF_STUNFLAG_NOSOUNDOREFFECT);
 				return;
 			}
 		}
@@ -4099,7 +4131,13 @@ void GoToSpawn(int client, ClassEnum class)
 	if(class >= Class_035)
 	{
 		Client[client].InvisFor = GetEngineTime()+15.0;
-		TF2_StunPlayer(client, 14.9, 1.0, TF_STUNFLAGS_NORMALBONK|TF_STUNFLAG_NOSOUNDOREFFECT);
+
+		DataPack pack;
+		CreateDataTimer(1.0, Timer_Stun, pack, TIMER_FLAG_NO_MAPCHANGE);
+		pack.WriteCell(GetClientUserId(client));
+		pack.WriteFloat(14.0);
+		pack.WriteFloat(1.0);
+		pack.WriteCell(TF_STUNFLAGS_NORMALBONK|TF_STUNFLAG_NOSOUNDOREFFECT);
 	}
 
 	if(!count)
@@ -4175,7 +4213,7 @@ public Action Timer_ConnectPost(Handle timer, int userid)
 
 	if(!NoMusic)
 	{
-		int song = CheckCommandAccess(client, "thediscffthing", ADMFLAG_CUSTOM4) ? Music_Join : Music_Join2;
+		int song = CheckCommandAccess(client, "thediscffthing", ADMFLAG_CUSTOM4) ? Music_Join2 : Music_Join;
 
 		static char buffer[PLATFORM_MAX_PATH];
 		float duration = Config_GetMusic(song, buffer, sizeof(buffer));
@@ -5394,7 +5432,7 @@ public Action CH_PassFilter(int ent1, int ent2, bool &result)
 	if(!Enabled || !IsValidClient(ent1) || !IsValidClient(ent2))
 		return Plugin_Continue;
 
-	/*if(IsFriendly(Client[ent1].Class, Client[ent2].Class))
+	if(IsFriendly(Client[ent1].Class, Client[ent2].Class))
 	{
 		result = false;
 	}
@@ -5409,7 +5447,7 @@ public Action CH_PassFilter(int ent1, int ent2, bool &result)
 			if(weapon>MaxClients && IsValidEntity(weapon) && HasEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")!=WeaponIndex[Weapon_None])
 				result = true;
 		}
-	}*/
+	}
 	result = !IsFriendly(Client[ent1].Class, Client[ent2].Class);
 	return Plugin_Changed;
 }
