@@ -46,7 +46,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"5"
-#define STABLE_REVISION	"6"
+#define STABLE_REVISION	"7"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define IsSCP(%1)	(Client[%1].Class>=Class_035)
@@ -57,7 +57,6 @@ void DisplayCredits(int i)
 #define MAXANGLEPITCH	45.0
 #define MAXANGLEYAW	90.0
 #define MAXENTITIES	2048
-#define MAXTF2SPEED	3000.0
 
 #define PREFIX		"{red}[SCP]{default} "
 #define KEYCARD_MODEL	"models/scp_sl/keycard.mdl"
@@ -1393,6 +1392,7 @@ public void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 		if(Client[client].Class==Class_106 && Client[client].Radio)
 			HideAnnotation(client);
 
+		SDKCall_SetSpeed(client);
 		Client[client].NextSongAt = FAR_FUTURE;
 		if(!Client[client].CurrentSong[0])
 			continue;
@@ -2188,8 +2188,8 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 		}
 		default:
 		{
-			TF2_AddCondition(client, TFCond_StealthedUserBuffFade, TFCondDuration_Infinite);
-			TF2_AddCondition(client, TFCond_HalloweenGhostMode, TFCondDuration_Infinite);
+			//TF2_AddCondition(client, TFCond_StealthedUserBuffFade);
+			TF2_AddCondition(client, TFCond_HalloweenGhostMode);
 
 			SetVariantString(Client[client].IsVip ? VIP_GHOST_MODEL : ClassModel[Class_Spec]);
 			AcceptEntityInput(client, "SetCustomModel");
@@ -2231,7 +2231,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 
 	TF2Attrib_SetByDefIndex(client, 49, 1.0);
 	TF2Attrib_SetByDefIndex(client, 69, 0.1);
-	TF2_AddCondition(client, TFCond_NoHealingDamageBuff, 0.75);
+	TF2_AddCondition(client, TFCond_NoHealingDamageBuff, 1.0);
 
 	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelIndex[Client[client].Class], _, 0);
 	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelSubIndex[Client[client].Class], _, 3);
@@ -2710,18 +2710,18 @@ public Action Command_ForceClass(int client, int args)
 		return Plugin_Handled;
 	}
 
-	static char classString[64];
-	GetCmdArg(2, classString, sizeof(classString));
+	static char pattern[PLATFORM_MAX_PATH];
+	GetCmdArg(2, pattern, sizeof(pattern));
 
-	char pattern[PLATFORM_MAX_PATH];
-
+	char targetName[MAX_TARGET_LENGTH];
+	static char classTrans[64];
 	SetGlobalTransTarget(client);
 	ClassEnum class = Class_Spec;
 	for(int i=1; i<view_as<int>(ClassEnum); i++)
 	{
-		GetClassName(i, pattern, sizeof(pattern));
-		Format(pattern, sizeof(pattern), "%t", pattern);
-		if(StrContains(pattern, classString, false) < 0)
+		GetClassName(i, classTrans, sizeof(classTrans));
+		FormatEx(targetName, sizeof(targetName), "%t", classTrans);
+		if(StrContains(targetName, pattern, false) < 0)
 			continue;
 
 		class = view_as<ClassEnum>(i);
@@ -2734,7 +2734,6 @@ public Action Command_ForceClass(int client, int args)
 		return Plugin_Handled;
 	}
 
-	static char targetName[MAX_TARGET_LENGTH];
 	int targets[MAXPLAYERS], matches;
 	bool targetNounIsMultiLanguage;
 
@@ -2796,6 +2795,15 @@ public Action Command_ForceClass(int client, int args)
 		AssignTeam(targets[target]);
 		RespawnPlayer(targets[target]);
 	}
+
+	if(targetNounIsMultiLanguage)
+	{
+		ShowActivity2(client, PREFIX, "Gave forced class %t to %t", classTrans, targetName);
+	}
+	else
+	{
+		ShowActivity2(client, PREFIX, "Gave forced class %t to %s", classTrans, targetName);
+	}
 	return Plugin_Handled;
 }
 
@@ -2831,6 +2839,15 @@ public Action Command_ForceWeapon(int client, int args)
 	{
 		if(!IsClientSourceTV(targets[target]) && !IsClientReplay(targets[target]))
 			ReplaceWeapon(targets[target], view_as<WeaponEnum>(weapon));
+	}
+
+	if(targetNounIsMultiLanguage)
+	{
+		ShowActivity2(client, PREFIX, "Gave weapon #%d to %t", weapon, targetName);
+	}
+	else
+	{
+		ShowActivity2(client, PREFIX, "Gave weapon #%d to %s", weapon, targetName);
 	}
 	return Plugin_Handled;
 }
@@ -2870,6 +2887,15 @@ public Action Command_ForceCard(int client, int args)
 			DropCurrentKeycard(targets[target]);
 			Client[targets[target]].Keycard = view_as<KeycardEnum>(card);
 		}
+	}
+
+	if(targetNounIsMultiLanguage)
+	{
+		ShowActivity2(client, PREFIX, "Gave keycard #%d to %t", card, targetName);
+	}
+	else
+	{
+		ShowActivity2(client, PREFIX, "Gave keycard #%d to %s", card, targetName);
 	}
 	return Plugin_Handled;
 }
@@ -4494,7 +4520,7 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_Shotgun:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_shotgun_primary", WeaponIndex[weapon], 10, 6, "3 ; 0.66 ; 5 ; 1.34 ; 36 ; 1.5 ; 45 ; 2 ; 77 ; 0.5", _, true);
+			entity = SpawnWeapon(client, "tf_weapon_shotgun_primary", WeaponIndex[weapon], 10, 6, "3 ; 0.66 ; 5 ; 1.34 ; 36 ; 1.5 ; 45 ; 2 ; 77 ; 0.5 ; 252 ; 0.95", _, true);
 			if(ammo && entity>MaxClients)
 				SetAmmo(client, entity, 8, 4);
 		}
@@ -4550,7 +4576,7 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_076:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_sword", WeaponIndex[weapon], 1, 13, "2 ; 1.2 ; 28 ; 0.5 ; 252 ; 0.8 ; 535 ; 0.333", false);
+			entity = SpawnWeapon(client, "tf_weapon_sword", WeaponIndex[weapon], 1, 13, "1 ; 0.01 ; 137 ; 121 ; 138 ; 121 ; 28 ; 0.5 ; 252 ; 0.8 ; 535 ; 0.333", false);
 		}
 		case Weapon_076Rage:
 		{
@@ -4576,7 +4602,7 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_173:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_knife", WeaponIndex[weapon], 90, 13, "1 ; 0.01 ; 6 ; 0.01 ; 15 ; 0 ; 137 ; 11 ; 138 ; 1001 ; 252 ; 0.1 ; 362 ; 1 ; 535 ; 0.333", false);
+			entity = SpawnWeapon(client, "tf_weapon_knife", WeaponIndex[weapon], 90, 13, "1 ; 0.01 ; 6 ; 0.01 ; 15 ; 0 ; 137 ; 11 ; 138 ; 1001 ; 252 ; 0 ; 362 ; 1 ; 535 ; 0.333", false);
 		}
 		case Weapon_939:
 		{

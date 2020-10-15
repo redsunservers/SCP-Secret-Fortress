@@ -148,11 +148,13 @@ public MRESReturn DHook_RoundRespawn()
 	if(!total)
 		return;
 
+	Enabled = true;
+
 	int client = clients[GetRandomInt(0, total-1)];
 	switch(Gamemode)
 	{
 		case Gamemode_Nut:
-			Client[client].Class = Class_173;
+			Client[client].Class = total>1 ? Class_173 : Class_DBoi;
 
 		case Gamemode_Steals:
 			Client[client].Class = total>1 ? Class_Stealer : Class_DBoi;
@@ -175,8 +177,6 @@ public MRESReturn DHook_RoundRespawn()
 		AssignTeam(clients[i]);
 	}
 	delete list;
-
-	Enabled = true;
 }
 
 public MRESReturn DHook_AllowedToHealTarget(int weapon, Handle returnVal, Handle params)
@@ -381,7 +381,7 @@ public MRESReturn DHook_ProcessMovementPre(Handle params)
 	if(!Enabled)
 		return MRES_Ignored;
 
-	DHookSetParamObjectPtrVar(params, 2, 60, ObjectValueType_Float, MAXTF2SPEED);
+	DHookSetParamObjectPtrVar(params, 2, 60, ObjectValueType_Float, CvarSpeedMax.FloatValue);
 	return MRES_ChangedHandled;
 }
 
@@ -490,7 +490,7 @@ public MRESReturn DHook_CalculateMaxSpeedPost(Address address, Handle returnVal,
 					}
 					case 2:
 					{
-						speed = 3000.0;
+						speed = FAR_FUTURE;
 					}
 				}
 			}
@@ -504,7 +504,7 @@ public MRESReturn DHook_CalculateMaxSpeedPost(Address address, Handle returnVal,
 					}
 					case 2:
 					{
-						speed = 2600.0;
+						speed = FAR_FUTURE;
 					}
 				}
 			}
@@ -531,6 +531,8 @@ public MRESReturn DHook_CalculateMaxSpeedPost(Address address, Handle returnVal,
 				}
 			}
 		}
+
+		speed *= CvarSpeedMulti.FloatValue;
 	}
 
 	DHookSetReturn(returnVal, speed);

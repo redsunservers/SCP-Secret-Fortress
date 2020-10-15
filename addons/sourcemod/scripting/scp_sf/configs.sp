@@ -54,7 +54,7 @@ static const char SoundList[][] =
 	"freak_fortress_2/scp096/fullrage.mp3",		// SCP-096 Rage
 	"freak_fortress_2/scp173/scp173_kill2.mp3",	// SCP-173 Kill
 	"scp_sf/events/spawn_mtf.mp3",			// MTF Spawn
-	"freak_fortress_2/scp-049/red_backup.mp3",	// Chaos Spawn
+	"scp_sf/events/spawn_chaos.mp3",		// Chaos Spawn
 
 	"scpsl/it_steals/monster_step.wav",	// Stealer Step Noise
 	"scpsl/it_steals/enraged.mp3",		// Stealer First Rage
