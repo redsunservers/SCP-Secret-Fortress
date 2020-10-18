@@ -46,7 +46,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"5"
-#define STABLE_REVISION	"7"
+#define STABLE_REVISION	"8"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define IsSCP(%1)	(Client[%1].Class>=Class_035)
@@ -1397,8 +1397,10 @@ public void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 		if(!Client[client].CurrentSong[0])
 			continue;
 
-		StopSound(client, SNDCHAN_STATIC, Client[client].CurrentSong);
-		StopSound(client, SNDCHAN_STATIC, Client[client].CurrentSong);
+		for(int i; i<3; i++)
+		{
+			StopSound(client, SNDCHAN_STATIC, Client[client].CurrentSong);
+		}
 		Client[client].CurrentSong[0] = 0;
 	}
 
@@ -2798,11 +2800,11 @@ public Action Command_ForceClass(int client, int args)
 
 	if(targetNounIsMultiLanguage)
 	{
-		ShowActivity2(client, PREFIX, "Gave forced class %t to %t", classTrans, targetName);
+		CShowActivity2(client, PREFIX, "Gave forced class %t to %t", classTrans, targetName);
 	}
 	else
 	{
-		ShowActivity2(client, PREFIX, "Gave forced class %t to %s", classTrans, targetName);
+		CShowActivity2(client, PREFIX, "Gave forced class %t to %s", classTrans, targetName);
 	}
 	return Plugin_Handled;
 }
@@ -2843,11 +2845,11 @@ public Action Command_ForceWeapon(int client, int args)
 
 	if(targetNounIsMultiLanguage)
 	{
-		ShowActivity2(client, PREFIX, "Gave weapon #%d to %t", weapon, targetName);
+		CShowActivity2(client, PREFIX, "Gave weapon #%d to %t", weapon, targetName);
 	}
 	else
 	{
-		ShowActivity2(client, PREFIX, "Gave weapon #%d to %s", weapon, targetName);
+		CShowActivity2(client, PREFIX, "Gave weapon #%d to %s", weapon, targetName);
 	}
 	return Plugin_Handled;
 }
@@ -2891,11 +2893,11 @@ public Action Command_ForceCard(int client, int args)
 
 	if(targetNounIsMultiLanguage)
 	{
-		ShowActivity2(client, PREFIX, "Gave keycard #%d to %t", card, targetName);
+		CShowActivity2(client, PREFIX, "Gave keycard #%d to %t", card, targetName);
 	}
 	else
 	{
-		ShowActivity2(client, PREFIX, "Gave keycard #%d to %s", card, targetName);
+		CShowActivity2(client, PREFIX, "Gave keycard #%d to %s", card, targetName);
 	}
 	return Plugin_Handled;
 }
@@ -4154,7 +4156,7 @@ void GoToSpawn(int client, ClassEnum class)
 		}
 	}
 
-	if(class >= Class_035)
+	if(IsSCP(client))
 	{
 		Client[client].InvisFor = GetEngineTime()+15.0;
 

@@ -5,10 +5,10 @@ enum ThinkFunctionEnum
 	ThinkFunction_RegenThink
 }
 
-static Handle AllowedToHealTarget;
-static Handle SetWinningTeam;
-static Handle RoundRespawn;
-static Handle ForceRespawn;
+static DynamicDetour AllowedToHealTarget;
+static DynamicHook SetWinningTeam;
+static DynamicHook RoundRespawn;
+static DynamicHook ForceRespawn;
 static int ForceRespawnHook[MAXTF2PLAYERS];
 static int ThinkData[MAXENTITIES];
 static int CalculateSpeedClient;
@@ -23,13 +23,14 @@ void DHook_Setup(GameData gamedata)
 	DHook_CreateDetour(gamedata, "CTFGameMovement::ProcessMovement", DHook_ProcessMovementPre, _);
 	DHook_CreateDetour(gamedata, "CTFPlayer::TeamFortress_CalculateMaxSpeed", DHook_CalculateMaxSpeedPre, DHook_CalculateMaxSpeedPost);
 
-	AllowedToHealTarget = DHookCreateDetour(Address_Null, CallConv_THISCALL, ReturnType_Bool, ThisPointer_CBaseEntity);
+	// TODO: DHook_CreateDetour version of this
+	AllowedToHealTarget = new DynamicDetour(Address_Null, CallConv_THISCALL, ReturnType_Bool, ThisPointer_CBaseEntity);
 	if(AllowedToHealTarget)
 	{
-		if(DHookSetFromConf(AllowedToHealTarget, gamedata, SDKConf_Signature, "CWeaponMedigun::AllowedToHealTarget"))
+		if(AllowedToHealTarget.SetFromConf(gamedata, SDKConf_Signature, "CWeaponMedigun::AllowedToHealTarget"))
 		{
-			DHookAddParam(AllowedToHealTarget, HookParamType_CBaseEntity);
-			if(!DHookEnableDetour(AllowedToHealTarget, false, DHook_AllowedToHealTarget))
+			AllowedToHealTarget.AddParam(HookParamType_CBaseEntity);
+			if(!AllowedToHealTarget.Enable(Hook_Pre, DHook_AllowedToHealTarget))
 				LogError("[Gamedata] Failed to detour CWeaponMedigun::AllowedToHealTarget");
 		}
 		else
@@ -42,22 +43,22 @@ void DHook_Setup(GameData gamedata)
 		LogError("[Gamedata] Could not find CWeaponMedigun::AllowedToHealTarget");
 	}
 
-	SetWinningTeam = DHookCreateFromConf(gamedata, "CTeamplayRules::SetWinningTeam");
+	SetWinningTeam = DynamicHook.FromConf(gamedata, "CTeamplayRules::SetWinningTeam");
 	if(!SetWinningTeam)
 		LogError("[Gamedata] Could not find CTeamplayRules::SetWinningTeam");
 
-	RoundRespawn = DHookCreateFromConf(gamedata, "CTeamplayRoundBasedRules::RoundRespawn");
+	RoundRespawn = DynamicHook.FromConf(gamedata, "CTeamplayRoundBasedRules::RoundRespawn");
 	if(!RoundRespawn)
 		LogError("[Gamedata] Could not find CTFPlayer::RoundRespawn");
 
-	ForceRespawn = DHookCreateFromConf(gamedata, "CBasePlayer::ForceRespawn");
+	ForceRespawn = DynamicHook.FromConf(gamedata, "CBasePlayer::ForceRespawn");
 	if(!ForceRespawn)
 		LogError("[Gamedata] Could not find CBasePlayer::ForceRespawn");
 }
 
 static void DHook_CreateDetour(GameData gamedata, const char[] name, DHookCallback preCallback = INVALID_FUNCTION, DHookCallback postCallback = INVALID_FUNCTION)
 {
-	Handle detour = DHookCreateFromConf(gamedata, name);
+	DynamicDetour detour = DynamicDetour.FromConf(gamedata, name);
 	if(detour)
 	{
 		if(preCallback!=INVALID_FUNCTION && !DHookEnableDetour(detour, false, preCallback))
@@ -77,21 +78,21 @@ static void DHook_CreateDetour(GameData gamedata, const char[] name, DHookCallba
 void DHook_HookClient(int client)
 {
 	if(ForceRespawn)
-		ForceRespawnHook[client] = DHookEntity(ForceRespawn, false, client, _, DHook_ForceRespawn);
+		ForceRespawnHook[client] = ForceRespawn.HookEntity(Hook_Pre, client, DHook_ForceRespawn);
 }
 
 void DHook_UnhookClient(int client)
 {
-	DHookRemoveHookID(ForceRespawnHook[client]);
+	DynamicHook.RemoveHook(ForceRespawnHook[client]);
 }
 
 void DHook_MapStart()
 {
 	if(SetWinningTeam)
-		DHookGamerules(SetWinningTeam, false, _, DHook_SetWinningTeam);
+		SetWinningTeam.HookGamerules(Hook_Pre, DHook_SetWinningTeam);
 
 	if(RoundRespawn)
-		DHookGamerules(RoundRespawn, false, _, DHook_RoundRespawn);
+		RoundRespawn.HookGamerules(Hook_Pre, DHook_RoundRespawn);
 }
 
 public MRESReturn DHook_RoundRespawn()
@@ -179,17 +180,17 @@ public MRESReturn DHook_RoundRespawn()
 	delete list;
 }
 
-public MRESReturn DHook_AllowedToHealTarget(int weapon, Handle returnVal, Handle params)
+public MRESReturn DHook_AllowedToHealTarget(int weapon, DHookReturn ret, DHookParam param)
 {
-	if(weapon==-1 || DHookIsNullParam(params, 1))
+	if(weapon==-1 || param.IsNull(1))
 		return MRES_Ignored;
 
 	//int owner = GetEntPropEnt(weapon, Prop_Send, "m_hOwnerEntity");
-	int target = DHookGetParam(params, 1);
+	int target = param.Get(1);
 	if(!IsValidClient(target) || !IsPlayerAlive(target))
 		return MRES_Ignored;
 
-	DHookSetReturn(returnVal, false);
+	ret.Value = false;
 	return MRES_ChangedOverride;
 }
 
@@ -204,16 +205,16 @@ public MRESReturn DHook_ForceRespawn(int client)
 	return MRES_Ignored;
 }
 
-public MRESReturn DHook_SetWinningTeam(Handle params)
+public MRESReturn DHook_SetWinningTeam(DHookParam param)
 {
 	if(Enabled)
 		return MRES_Supercede;
 
-	DHookSetParam(params, 4, false);
+	param.Set(4, false);
 	return MRES_ChangedOverride;
 }
 
-public MRESReturn DHook_PhysicsDispatchThinkPre(int entity, Handle params)
+public MRESReturn DHook_PhysicsDispatchThinkPre(int entity, DHookParam param)
 {
 	//This detour calls everytime an entity was about to call a think function, useful as it only requires 1 gamedata
 	if(Enabled)
@@ -285,7 +286,7 @@ public MRESReturn DHook_PhysicsDispatchThinkPre(int entity, Handle params)
 	return MRES_Ignored;
 }
 
-public MRESReturn DHook_PhysicsDispatchThinkPost(int entity, Handle params)
+public MRESReturn DHook_PhysicsDispatchThinkPost(int entity, DHookParam param)
 {
 	switch(ThinkFunction)
 	{
@@ -336,32 +337,32 @@ public MRESReturn DHook_PhysicsDispatchThinkPost(int entity, Handle params)
 	return MRES_Ignored;
 }
 
-public MRESReturn DHook_CanPickupDroppedWeaponPre(int client, Handle returnVal, Handle params)
+public MRESReturn DHook_CanPickupDroppedWeaponPre(int client, DHookReturn ret, DHookParam param)
 {
 	if(!IsSpec(client) && !IsSCP(client) && !Client[client].Disarmer)
-		PickupWeapon(client, DHookGetParam(params, 1));
+		PickupWeapon(client, param.Get(1));
 
-	DHookSetReturn(returnVal, false);
+	ret.Value = false;
 	return MRES_Supercede;
 }
 
-public MRESReturn DHook_DropAmmoPackPre(int client, Handle params)
+public MRESReturn DHook_DropAmmoPackPre(int client, DHookParam param)
 {
 	//Ignore feign death
-	if(!DHookGetParam(params, 2) && !IsSpec(client) && !IsSCP(client))
+	if(!param.Get(2) && !IsSpec(client) && !IsSCP(client))
 		DropAllWeapons(client);
 
 	//Prevent TF2 dropping anything else
 	return MRES_Supercede;
 }
 
-public MRESReturn DHook_InSameTeamPre(int entity, Handle returnVal, Handle params)
+public MRESReturn DHook_InSameTeamPre(int entity, DHookReturn ret, DHookParam param)
 {
 	bool result;
-	if(!DHookIsNullParam(params, 1))
+	if(!param.IsNull(1))
 	{
 		int ent1 = GetOwnerLoop(entity);
-		int ent2 = GetOwnerLoop(DHookGetParam(params, 1));
+		int ent2 = GetOwnerLoop(param.Get(1));
 		if(ent1 == ent2)
 		{
 			result = true;
@@ -372,25 +373,25 @@ public MRESReturn DHook_InSameTeamPre(int entity, Handle returnVal, Handle param
 		}
 	}
 
-	DHookSetReturn(returnVal, result);
+	ret.Value = result;
 	return MRES_Supercede;
 }
 
-public MRESReturn DHook_ProcessMovementPre(Handle params)
+public MRESReturn DHook_ProcessMovementPre(DHookParam param)
 {
 	if(!Enabled)
 		return MRES_Ignored;
 
-	DHookSetParamObjectPtrVar(params, 2, 60, ObjectValueType_Float, CvarSpeedMax.FloatValue);
+	param.SetObjectVar(2, 60, ObjectValueType_Float, CvarSpeedMax.FloatValue);
 	return MRES_ChangedHandled;
 }
 
-public MRESReturn DHook_CalculateMaxSpeedPre(Address address, Handle returnVal, Handle params)
+public MRESReturn DHook_CalculateMaxSpeedPre(Address address, DHookReturn ret, DHookParam param)
 {
 	CalculateSpeedClient = SDKCall_GetBaseEntity(address);
 }
 
-public MRESReturn DHook_CalculateMaxSpeedPost(Address address, Handle returnVal, Handle params)
+public MRESReturn DHook_CalculateMaxSpeedPost(Address address, DHookReturn ret, DHookParam param)
 {
 	if(!Enabled || !IsClientInGame(CalculateSpeedClient) || !IsPlayerAlive(CalculateSpeedClient))
 		return MRES_Ignored;
@@ -535,6 +536,6 @@ public MRESReturn DHook_CalculateMaxSpeedPost(Address address, Handle returnVal,
 		speed *= CvarSpeedMulti.FloatValue;
 	}
 
-	DHookSetReturn(returnVal, speed);
+	ret.Value = speed;
 	return MRES_Override;
 }
