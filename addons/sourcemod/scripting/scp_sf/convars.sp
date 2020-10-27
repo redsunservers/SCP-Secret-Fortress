@@ -14,6 +14,7 @@ ConVar CvarDiscFF;
 ConVar CvarTimelimit;
 ConVar CvarSpeedMulti;
 ConVar CvarSpeedMax;
+ConVar CvarAchievement;
 
 void ConVar_Setup()
 {
@@ -24,6 +25,7 @@ void ConVar_Setup()
 	CvarTimelimit = CreateConVar("scp_timelimit", "898", "Round timelimit (0 to disable)", _, true, 120.0);
 	CvarSpeedMulti = CreateConVar("scp_speedmulti", "1.0", "Player movement speed multiplier", _, true, 0.004167);
 	CvarSpeedMax = CreateConVar("scp_speedmax", "3000.0", "Maximum player speed (SCP-173's blink speed)", _, true, 1.0);
+	CvarAchievement = CreateConVar("scp_achievements", "1", "If to call SCPSF_OnAchievement forward", _, true, 0.0, true, 1.0);
 
 	AutoExecConfig(true, "SCPSecretFortress");
 
@@ -33,15 +35,16 @@ void ConVar_Setup()
 	CvarList = new ArrayList(sizeof(CvarInfo));
 	
 	ConVar_Add("mp_autoteambalance", 0.0);
-	ConVar_Add("mp_teams_unbalance_limit", 0.0);
+	ConVar_Add("mp_disable_respawn_times", 1.0);
 	ConVar_Add("mp_forcecamera", 0.0);
 	ConVar_Add("mp_friendlyfire", 1.0);
-	ConVar_Add("mp_disable_respawn_times", 1.0);
-	ConVar_Add("tf_weapon_criticals_distance_falloff", 0.0);
+	ConVar_Add("mp_teams_unbalance_limit", 0.0);
+	ConVar_Add("mp_waitingforplayers_time", 70.0);
 	ConVar_Add("tf_dropped_weapon_lifetime", 99999.0);
-	ConVar_Add("tf_helpme_range", -1.0);
 	ConVar_Add("tf_ghost_xy_speed", 400.0);
+	ConVar_Add("tf_helpme_range", -1.0);
 	ConVar_Add("tf_spawn_glows_duration", 0.0);
+	ConVar_Add("tf_weapon_criticals_distance_falloff", 0.0);
 }
 
 static void ConVar_Add(const char[] name, float value)

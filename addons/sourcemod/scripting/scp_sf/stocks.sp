@@ -504,11 +504,11 @@ int SpawnWeapon(int client, char[] name, int index, int level, int qual, const c
 
 		if(visibleMode == 2)
 		{
-			SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", 1);
+			SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", true);
 		}
 		else if(visibleMode)
 		{
-			SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", 0);
+			SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", false);
 		}
 		else
 		{
@@ -610,6 +610,15 @@ public Action Timer_Stun(Handle timer, DataPack pack)
 		float slowdown = pack.ReadFloat();
 		TF2_StunPlayer(client, duration, slowdown, pack.ReadCell());
 	}
+	return Plugin_Continue;
+}
+
+public Action Timer_MyBlood(Handle timer, int userid)
+{
+	int client = GetClientOfUserId(userid);
+	if(client && IsClientInGame(client) && !IsSpec(client) && GetClientHealth(client)<26)
+		Config_DoReaction(client, "lowhealth");
+
 	return Plugin_Continue;
 }
 

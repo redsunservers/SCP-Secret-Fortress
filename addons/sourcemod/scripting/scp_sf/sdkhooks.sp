@@ -152,16 +152,20 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		if(!IsFakeClient(victim) && IsFriendly(Client[victim].Class, Client[attacker].Class))
 			return Plugin_Handled;
 
-		if(Client[victim].Disarmer && Client[victim].Disarmer!=attacker && IsFriendly(Client[Client[victim].Disarmer].Class, Client[attacker].Class))
+		if(!IsSCP(victim) && Client[victim].Disarmer && Client[victim].Disarmer!=attacker && IsFriendly(Client[Client[victim].Disarmer].Class, Client[attacker].Class))
 			return Plugin_Handled;
 	}
+
+	int health = GetClientHealth(victim);
+	if(health>25 && (health-damage)<26)
+		CreateTimer(3.0, Timer_MyBlood, GetClientUserId(victim), TIMER_FLAG_NO_MAPCHANGE);
 
 	if(IsValidEntity(weapon) && weapon>MaxClients && HasEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex"))
 	{
 		int index = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
 		if(index == WeaponIndex[Weapon_Disarm])
 		{
-			if(!IsSCP(victim))
+			if(!IsSCP(victim) && !IsFriendly(Client[victim].Class, Client[attacker].Class))
 			{
 				bool cancel;
 				if(!Client[victim].Disarmer)
@@ -176,7 +180,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 						if(bf != null)
 						{
 							char buffer[64];
-							FormatEx(buffer, sizeof(buffer), "%T", "disarmed", victim);
+							FormatEx(buffer, sizeof(buffer), "%T", "disarmed", attacker);
 							bf.WriteString(buffer);
 							bf.WriteString("ico_notify_flag_moving_alt");
 							bf.WriteByte(view_as<int>(TFTeam_Red));
@@ -187,6 +191,9 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 						Client[victim].HealthPack = 0;
 						TF2_RemoveAllWeapons(victim);
 						SetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon", GiveWeapon(victim, Weapon_None));
+	
+						if(Client[victim].Class>=Class_Guard && Client[victim].Class<=Class_MTFE)
+							GiveAchievement(Achievement_DisarmMTF, attacker);
 					}
 				}
 
@@ -209,8 +216,8 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	{
 		case Class_096:
 		{
-			if(!Client[attacker].Triggered && !TF2_IsPlayerInCondition(victim, TFCond_Dazed))
-				TriggerShyGuy(victim, attacker, engineTime);
+			if(Client[attacker].Triggered<4 && !TF2_IsPlayerInCondition(victim, TFCond_Dazed))
+				TriggerShyGuy(victim, attacker, engineTime, true);
 		}
 		case Class_3008:
 		{
@@ -227,7 +234,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	{
 		case Class_096:
 		{
-			if(!Client[victim].Triggered)
+			if(Client[victim].Triggered < 3)
 				return Plugin_Handled;
 		}
 		case Class_106:
@@ -318,7 +325,7 @@ public Action OnTransmit(int client, int target)
 		return Plugin_Continue;
 
 	if(Client[target].Class == Class_096)
-		return (!Client[target].Radio || Client[client].Triggered) ? Plugin_Continue : Plugin_Stop;
+		return (!Client[target].Radio || Client[client].Triggered>2) ? Plugin_Continue : Plugin_Stop;
 
 	if(Client[target].Class == Class_Stealer)
 		return Client[client].Triggered ? Plugin_Stop : Plugin_Continue;
@@ -367,7 +374,7 @@ public Action OnGetMaxHealth(int client, int &health)
 		}
 		case Class_076:
 		{
-			health = 1500;
+			health = 2000;
 		}
 		case Class_096:
 		{
@@ -545,7 +552,7 @@ public void OnPreThink(int client)
 						{
 							for(int i; i<MAXTF2PLAYERS; i++)
 							{
-								Client[i].Triggered = false;
+								Client[i].Triggered = 0;
 							}
 						}
 					}
@@ -568,7 +575,7 @@ public void OnPreThink(int client)
 					else if(!Client[client].Pos[0])
 					{
 						Config_GetSound(Sound_096, buffer, sizeof(buffer));
-						EmitSoundToAll(buffer, client, SNDCHAN_VOICE, SNDLEVEL_SCREAMING, _, _, _, client);
+						EmitSoundToAll(buffer, client, SNDCHAN_VOICE, SNDLEVEL_TRAIN, _, _, _, client);
 						Client[client].Pos[0] = 1.0;
 					}
 				}
@@ -605,7 +612,7 @@ public void OnPreThink(int client)
 							if(GetVectorDistance(clientPos, enemyPos, true) < 1000000)
 								continue;
 						}
-						Client[target].Triggered = false;
+						Client[target].Triggered = 0;
 					}
 
 					if(Client[client].IdleAt+5.0 < engineTime)
@@ -648,7 +655,7 @@ public void OnPreThink(int client)
 			int status;
 			for(int target=1; target<=MaxClients; target++)
 			{
-				if(!IsValidClient(target) || IsSpec(target) || IsSCP(target) || Client[target].Triggered)
+				if(!IsValidClient(target) || IsSpec(target) || IsSCP(target) || Client[target].Triggered>3)
 					continue;
 
 				GetClientEyePosition(target, enemyPos);
@@ -706,7 +713,7 @@ public void OnPreThink(int client)
 			}
 
 			if(status)
-				TriggerShyGuy(client, status, engineTime);
+				TriggerShyGuy(client, status, engineTime, false);
 		}
 		case Class_106:
 		{
@@ -793,8 +800,8 @@ public void OnPreThink(int client)
 			if(status == 1)
 			{
 				SetEntPropFloat(client, Prop_Send, "m_flNextAttack", FAR_FUTURE);
-				SetEntProp(client, Prop_Send, "m_bUseClassAnimations", 0);
-				SetEntProp(client, Prop_Send, "m_bCustomModelRotates", 0);
+				SetEntProp(client, Prop_Send, "m_bUseClassAnimations", false);
+				SetEntProp(client, Prop_Send, "m_bCustomModelRotates", false);
 				if(GetEntityMoveType(client) != MOVETYPE_NONE)
 				{
 					if(GetEntityFlags(client) & FL_ONGROUND)
@@ -810,8 +817,8 @@ public void OnPreThink(int client)
 			else
 			{
 				SetEntPropFloat(client, Prop_Send, "m_flNextAttack", 0.0);
-				SetEntProp(client, Prop_Send, "m_bUseClassAnimations", 1);
-				SetEntProp(client, Prop_Send, "m_bCustomModelRotates", 1);
+				SetEntProp(client, Prop_Send, "m_bUseClassAnimations", true);
+				SetEntProp(client, Prop_Send, "m_bCustomModelRotates", true);
 				if(GetEntityMoveType(client) != MOVETYPE_WALK)
 				{
 					TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, TRIPLE_D);
@@ -870,7 +877,7 @@ public void OnPreThink(int client)
 				{
 					for(target=1; target<=MaxClients; target++)
 					{
-						Client[target].Triggered = false;
+						Client[target].Triggered = 0;
 					}
 
 					SCPKilled = 2;
@@ -901,7 +908,7 @@ public void OnPreThink(int client)
 				else
 				{
 					SciEscaped++;
-					Client[target].Triggered = true;
+					Client[target].Triggered = 1;
 					Config_GetSound(Sound_ItStuns, buffer, sizeof(buffer));
 					ClientCommand(target, "playgamesound %s", buffer);
 					SDKCall_SetSpeed(client);

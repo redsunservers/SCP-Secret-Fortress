@@ -382,7 +382,7 @@
 	}
 	"desc_076"
 	{
-		"en"		"Kill guards, MTF, and chaos.\nCooperate with other SCPs."
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nGain 4 heads to enter rage."
 	}
 	"train_076"
 	{

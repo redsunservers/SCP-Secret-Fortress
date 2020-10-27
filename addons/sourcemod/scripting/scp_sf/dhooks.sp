@@ -214,7 +214,7 @@ public MRESReturn DHook_SetWinningTeam(DHookParam param)
 	return MRES_ChangedOverride;
 }
 
-public MRESReturn DHook_PhysicsDispatchThinkPre(int entity, DHookParam param)
+public MRESReturn DHook_PhysicsDispatchThinkPre(int entity)
 {
 	//This detour calls everytime an entity was about to call a think function, useful as it only requires 1 gamedata
 	if(Enabled)
@@ -286,7 +286,7 @@ public MRESReturn DHook_PhysicsDispatchThinkPre(int entity, DHookParam param)
 	return MRES_Ignored;
 }
 
-public MRESReturn DHook_PhysicsDispatchThinkPost(int entity, DHookParam param)
+public MRESReturn DHook_PhysicsDispatchThinkPost(int entity)
 {
 	switch(ThinkFunction)
 	{
@@ -539,3 +539,24 @@ public MRESReturn DHook_CalculateMaxSpeedPost(Address address, DHookReturn ret, 
 	ret.Value = speed;
 	return MRES_Override;
 }
+
+/*public MRESReturn DHook_TauntPre(int client)
+{
+	//Dont allow taunting if disguised or cloaked
+	if(TF2_IsPlayerInCondition(client, TFCond_Disguising) || TF2_IsPlayerInCondition(client, TFCond_Disguised) || TF2_IsPlayerInCondition(client, TFCond_Cloaked))
+		return MRES_Supercede;
+
+	//Player wants to taunt, set class to whoever can actually taunt with active weapon
+	int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	if(weapon > MaxClients)
+	{
+		TF2_SetPlayerClass(client, 
+	}
+	return MRES_Ignored;
+}
+
+public MRESReturn DHook_TauntPost(int client)
+{
+	//Set class back to what it was
+	RevertClientClass(iClient);
+}*/

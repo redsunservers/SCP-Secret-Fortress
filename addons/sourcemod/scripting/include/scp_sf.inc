@@ -3,6 +3,45 @@
 #endif
 #define _scpsf_included
 
+enum SCPAchievement
+{
+	Achievement_MTFSpawn = 0,	// Respawn as Nine-Tailed Fox
+	Achievement_ChaosSpawn,	// Respawn as Chaos Insurgency
+	Achievement_DeathTesla,	// Die from a Tesla Gate burst
+	Achievement_DeathEarly,	// Die within the first minute of the game
+	Achievement_Death173,	// Let SCP-173 snap your neck
+	Achievement_Death106,	// Die inside the pocket dimension
+	Achievement_DeathFall,	// Die from a fall
+	Achievement_DeathGrenade,	// Kill yourself with a grenade
+	Achievement_DeathEnrage,	// Die while entering a rage as SCP-096
+	Achievement_DeathMicro,	// Try to recharge the MicroHID
+	Achievement_Kill106,	// Successfully re-contain SCP-106
+	Achievement_KillSCPMirco,	// Kill an SCP with the Micro HID
+	Achievement_KillSCPSci,	// Kill an SCP as a Scientist
+	Achievement_KillMirco,	// As an SCP, kill someone who's charging or firing the MicroHID
+	Achievement_KillSci,	// As Class-D, kill a Scientist holding a keycard
+	Achievement_KillDClass,	// Kill 50 D-Class as a Scientist
+	Achievement_KillSpree,	// Kill 5 enemies in less than 30 seconds
+	Achievement_FindGun,	// Find any gun as a Class-D
+	Achievement_FindO5,	// Pick up an O5-Keycard
+	Achievement_FindSCP,	// Liberate two or more SCP objects from the facility while escaping as a Class-D
+	Achievement_EscapeDClass,	// Escape as D-Class personnel
+	Achievement_EscapeSci,	// Escape as a Scientist
+	Achievement_EscapeSpeed,	// Escape the facility in 3 minutes or under
+	Achievement_Escape207,	// Escape while under the effects of SCP-207
+	Achievement_SurvivePocket,	// Successfully escape from the Pocket Dimension
+	Achievement_SurviveWarhead,// Survive a successful Alpha Warhead Detonation
+	Achievement_Survive500,	// Use SCP-500 when you're about to die
+	Achievement_SurviveAdren,	// Use adrenaline to survive a hit that would otherwise kill you
+	Achievement_SurviveCancel,	// Cancel the Alpha Warhead detonation within the last 15 seconds of the countdown
+	Achievement_Intercom,	// Broadcast a 'helpful' message via the Intercom
+	Achievement_Upgrade,	// As a Scientist, successfully upgrade your keycard alongside any amount of Class-D
+	Achievement_Revive,	// Cure 10 people in a single game
+	Achievement_DisarmMTF,	// Disarm a MTF operative
+	Achievement_Halloween,	// Play the Halloween version of the game
+	Achievement_Christmas	// Play the Christmas version of the game
+}
+
 /**
  * Get the client's current class
  *
@@ -54,6 +93,17 @@ native void SCPSF_StopMusic(int client=0);
  * @noreturn
  */
 forward void SCPSF_OnEscape(int client, int disarmer);
+
+/**
+ * Calls when a specific event happens
+ *
+ * @param client 	Client index
+ * @param name 		Name shown
+ * @param message 	Message shown
+ *
+ * @noreturn
+ */
+forward void SCPSF_OnAchievement(int client, SCPAchievement achievement);
 
 /**
  * Calls when a client messages

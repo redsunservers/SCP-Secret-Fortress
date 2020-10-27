@@ -8,7 +8,7 @@ void Native_Setup()
 public any Native_GetClientClass(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	if(client>=0 && client<MAXTF2PLAYERS)
+	if(client<0 || client>=MAXTF2PLAYERS)
 		return 0;
 
 	int length = GetNativeCell(3);

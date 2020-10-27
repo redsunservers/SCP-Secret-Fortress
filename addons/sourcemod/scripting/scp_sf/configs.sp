@@ -65,6 +65,22 @@ static const char SoundList[][] =
 	"scp_sf/events/spawn_mtf_halloween.mp3"		// Spooky MTF Spawn
 };
 
+static const char TFClassNames[][] =
+{
+	"mercenary",
+	"scout",
+	"sniper",
+	"soldier",
+	"demoman",
+	"medic",
+	"heavy",
+	"pyro",
+	"spy",
+	"engineer"
+};
+
+static KeyValues Reactions;
+
 void Config_Setup()
 {
 	for(int i; i<sizeof(MusicList); i++)
@@ -90,6 +106,11 @@ void Config_Setup()
 
 	PrecacheModelEx(KEYCARD_MODEL, true);
 	VIPGhostModel = PrecacheModelEx(VIP_GHOST_MODEL, true);
+
+	char buffer[PLATFORM_MAX_PATH];
+	BuildPath(Path_SM, buffer, sizeof(buffer), CFG_REACTIONS);
+	Reactions = new KeyValues("SCPReactions");
+	Reactions.ImportFromFile(buffer);
 }
 
 float Config_GetMusic(int index, char[] buffer, int length)
@@ -107,4 +128,29 @@ int Config_GetSound(int index, char[] buffer, int length)
 		return 0;
 
 	return strcopy(buffer, length, SoundList[index]);
+}
+
+void Config_DoReaction(int client, const char[] name)
+{
+	Reactions.Rewind();
+	if(Reactions.JumpToKey(name))
+	{
+		if(Reactions.JumpToKey(TFClassNames[TF2_GetPlayerClass(client)]))
+		{
+			static char buffer[PLATFORM_MAX_PATH];
+			int amount;
+			do
+			{
+				IntToString(++amount, buffer, sizeof(buffer));
+				Reactions.GetString(buffer, buffer, sizeof(buffer));
+			} while(buffer[0]);
+
+			if(amount > 1)
+			{
+				IntToString(GetRandomInt(1, amount-1), buffer, sizeof(buffer));
+				Reactions.GetString(buffer, buffer, sizeof(buffer));
+				EmitSoundToAll(buffer, client, SNDCHAN_VOICE, 95);
+			}
+		}
+	}
 }
