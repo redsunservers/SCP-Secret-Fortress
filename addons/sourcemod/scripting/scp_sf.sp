@@ -1,14 +1,3 @@
-/*
-SCP: Secret Fortress:
-
-```
-- Added Achievements
-- Increased Waiting for Players time to 70 seconds
-- Fixed SCP kills saying Spectator if killed by a dead player
-- Reduced how many SCPs spawn with higher player counts
-- Added class reactions towards certain events
-```
-*/
 #pragma semicolon 1
 
 #include <sourcemod>
@@ -57,7 +46,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"6"
-#define STABLE_REVISION	"0"
+#define STABLE_REVISION	"2"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define IsSCP(%1)	(Client[%1].Class>=Class_035)
@@ -803,6 +792,7 @@ bool CollisionHook = false;	// CollisionHook
 Cookie CookieTraining;
 Cookie CookiePref;
 Cookie CookieDClass;
+Cookie CookieMTFBan;
 
 GamemodeEnum Gamemode = Gamemode_None;
 
@@ -827,6 +817,7 @@ enum struct ClientEnum
 	KeycardEnum Keycard;
 
 	bool IsVip;
+	bool MTFBan;
 	bool CanTalkTo[MAXTF2PLAYERS];
 
 	ClassEnum PreferredSCP;
@@ -906,7 +897,7 @@ enum struct ClientEnum
 				return Class_DBoi;
 			}
 
-			if(Gamemode!=Gamemode_Steals && classS && !GetRandomInt(0, 2))
+			if(Gamemode!=Gamemode_Steals && classS && !this.MTFBan && !GetRandomInt(0, 2))
 			{
 				this.Class = Class_Guard;
 				return Class_Guard;
@@ -1058,6 +1049,7 @@ public void OnPluginStart()
 	RegAdminCmd("scp_forceclass", Command_ForceClass, ADMFLAG_SLAY, "Usage: scp_forceclass <target> <class>.  Forces that class to be played.");
 	RegAdminCmd("scp_giveweapon", Command_ForceWeapon, ADMFLAG_SLAY, "Usage: scp_giveweapon <target> <id>.  Gives a specific weapon.");
 	RegAdminCmd("scp_givekeycard", Command_ForceCard, ADMFLAG_SLAY, "Usage: scp_givekeycard <target> <id>.  Gives a specific keycard.");
+	RegAdminCmd("scp_banmtf", Command_BanMTF, ADMFLAG_BAN, "Usage: scp_banmtf <target> <id>.  Prevents a player from getting MTF/Guard.");
 
 	AddCommandListener(OnSayCommand, "say");
 	AddCommandListener(OnSayCommand, "say_team");
@@ -1113,6 +1105,7 @@ public void OnPluginStart()
 	CookieTraining = new Cookie("scp_cookie_training", "Status on learning the SCP gamemode", CookieAccess_Public);
 	CookiePref = new Cookie("scp_cookie_preference", "Preference on which SCP to become", CookieAccess_Protected);
 	CookieDClass = new Cookie("scp_cookie_dboimurder", "Achievement Status", CookieAccess_Protected);
+	CookieMTFBan = new Cookie("scp_cookie_mtfban", "Private Cookie", CookieAccess_Private);
 
 	GameData gamedata = LoadGameConfigFile("scp_sf");
 	if(gamedata)
@@ -1339,6 +1332,9 @@ public void OnClientPutInServer(int client)
 public void OnClientCookiesCached(int client)
 {
 	static char buffer[16];
+	CookieMTFBan.Get(client, buffer, sizeof(buffer));
+	Client[client].MTFBan = buffer[0]=='1';
+
 	CookiePref.Get(client, buffer, sizeof(buffer));
 
 	ClassEnum i = Class_DBoi;
@@ -1360,7 +1356,7 @@ public void OnClientCookiesCached(int client)
 
 public void OnClientPostAdminCheck(int client)
 {
-	Client[client].IsVip = CheckCommandAccess(client, "scp_vip", ADMFLAG_CUSTOM5, true);
+	Client[client].IsVip = CheckCommandAccess(client, "sm_trailsvip", ADMFLAG_CUSTOM5);
 
 	int userid = GetClientUserId(client);
 	CreateTimer(0.25, Timer_ConnectPost, userid, TIMER_FLAG_NO_MAPCHANGE);
@@ -1952,11 +1948,11 @@ public void TF2_OnConditionAdded(int client, TFCond cond)
 		if(Gamemode == Gamemode_Ikea)
 		{
 			DClassEscaped++;
-			Client[client].Class = Class_MTFS;
+			Client[client].Class = Client[client].MTFBan ? Class_Spec : Class_MTFS;
 		}
 		else if(Client[client].Disarmer)
 		{
-			Client[client].Class = Class_MTFE;
+			Client[client].Class = Client[client].MTFBan ? Class_Spec : Class_MTFE;
 		}
 		else
 		{
@@ -1999,7 +1995,7 @@ public void TF2_OnConditionAdded(int client, TFCond cond)
 			Forward_OnEscape(client, Client[client].Disarmer);
 
 			SciEscaped++;
-			Client[client].Class = Class_MTFS;
+			Client[client].Class = Client[client].MTFBan ? Class_Spec : Class_MTFS;
 			GiveAchievement(Achievement_EscapeSci, client);
 		}
 		AssignTeam(client);
@@ -2743,7 +2739,7 @@ public int Handler_Preference(Menu menu, MenuAction action, int client, int choi
 			char buffer[4];
 			menu.GetItem(choice, buffer, sizeof(buffer));
 			ClassEnum class = view_as<ClassEnum>(StringToInt(buffer));
-			if(ClassEnabled[class])
+			if(class<=Class_DBoi || ClassEnabled[class])
 			{
 				Client[client].PreferredSCP = class;
 				if(AreClientCookiesCached(client))
@@ -2951,6 +2947,40 @@ public Action Command_ForceCard(int client, int args)
 	else
 	{
 		CShowActivity2(client, PREFIX, "Gave keycard #%d to %s", card, targetName);
+	}
+	return Plugin_Handled;
+}
+
+public Action Command_BanMTF(int client, int args)
+{
+	if(!args)
+	{
+		ReplyToCommand(client, "[SM] Usage: scp_banmtf <target>");
+		return Plugin_Handled;
+	}
+
+	static char pattern[PLATFORM_MAX_PATH];
+	GetCmdArgString(pattern, sizeof(pattern));
+
+	static char targetName[MAX_TARGET_LENGTH];
+	int targets[1], matches;
+	bool targetNounIsMultiLanguage;
+	if((matches=ProcessTargetString(pattern, client, targets, sizeof(targets), COMMAND_FILTER_NO_MULTI|COMMAND_FILTER_NO_BOTS, targetName, sizeof(targetName), targetNounIsMultiLanguage)) < 1)
+	{
+		ReplyToTargetError(client, matches);
+		return Plugin_Handled;
+	}
+
+	Client[targets[0]].MTFBan = !Client[targets[0]].MTFBan;
+	if(Client[targets[0]].MTFBan)
+	{
+		CookieMTFBan.Set(targets[0], "1");
+		CReplyToCommand(client, "%sBanned %N from playing MTF", PREFIX, targets[0]);
+	}
+	else
+	{
+		CookieMTFBan.Set(targets[0], "0");
+		CReplyToCommand(client, "%sUnbanned %N from playing MTF", PREFIX, targets[0]);
 	}
 	return Plugin_Handled;
 }
@@ -3715,7 +3745,7 @@ public void OnGameFrame()
 						int count;
 						for(int client=1; client<=MaxClients; client++)
 						{
-							if(IsValidClient(client) && IsSpec(client) && GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
+							if(IsValidClient(client) && !Client[client].MTFBan && IsSpec(client) && GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
 								choosen[count++] = client;
 						}
 
