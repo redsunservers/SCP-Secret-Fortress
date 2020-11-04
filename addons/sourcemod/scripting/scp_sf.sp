@@ -2177,10 +2177,10 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 		{
 			Client[client].Pos[0] = 0.0;
 			Client[client].Keycard = Keycard_SCP;
-			Client[client].HealthPack = 750;
+			Client[client].HealthPack = 1500;
 			Client[client].Radio = 0;
 			Client[client].Floor = Floor_Heavy;
-			SetEntityHealth(client, 750);
+			SetEntityHealth(client, 1850);
 			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_096));
 		}
 		case Class_106:
@@ -3290,19 +3290,22 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 			CreateSpecialDeath(client);
 	}
 
-	CreateTimer(3.9, OnPlayerDeathPost2, client, TIMER_FLAG_NO_MAPCHANGE);
+	CreateTimer(3.9, OnPlayerDeathPoster, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 	return Plugin_Handled;
-}
-
-public Action OnPlayerDeathPost2(Handle timer, int client)
-{
-	Client[client].Class = Class_Spec;
-	return Plugin_Continue;
 }
 
 public void OnPlayerDeathPost(Event event, const char[] name, bool dontBroadcast)
 {
 	UpdateListenOverrides(GetEngineTime());
+}
+
+public Action OnPlayerDeathPoster(Handle timer, int userid)
+{
+	int client = GetClientOfUserId(userid);
+	if(client && IsClientInGame(client) && !IsPlayerAlive(client))
+		Client[client].Class = Class_Spec;
+
+	return Plugin_Continue;
 }
 
 public Action OnBroadcast(Event event, const char[] name, bool dontBroadcast)
@@ -4379,7 +4382,7 @@ void TriggerShyGuy(int client, int target, float engineTime, bool full)
 		return;
 	}
 
-	SetEntityHealth(client, GetClientHealth(client)+250);
+	SetEntityHealth(client, GetClientHealth(client)+70);
 	switch(Client[client].Radio)
 	{
 		case 1:

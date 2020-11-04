@@ -378,16 +378,16 @@ public Action OnGetMaxHealth(int client, int &health)
 		}
 		case Class_096:
 		{
-			health = Client[client].HealthPack + (Client[client].Disarmer*250);
+			health = Client[client].HealthPack + 350 + (Client[client].Disarmer*70);
 
 			int current = GetClientHealth(client);
 			if(current > health)
 			{
 				SetEntityHealth(client, health);
 			}
-			else if(current < Client[client].HealthPack-250)
+			else if(current < Client[client].HealthPack-350)
 			{
-				Client[client].HealthPack = current+250;
+				Client[client].HealthPack = current+350;
 			}
 		}
 		case Class_106:
@@ -526,6 +526,8 @@ public void OnPreThink(int client)
 
 					if(Client[client].Power < engineTime)
 					{
+						PrintKeyHintText(client, "");
+
 						Client[client].Disarmer = 0;
 						Client[client].Radio = 0;
 						Client[client].Keycard = Keycard_SCP;
@@ -555,6 +557,10 @@ public void OnPreThink(int client)
 								Client[i].Triggered = 0;
 							}
 						}
+					}
+					else
+					{
+						PrintKeyHintText(client, "%t", "sprint", RoundToCeil((Client[client].Power-engineTime)*3.333333));
 					}
 				}
 				default:
