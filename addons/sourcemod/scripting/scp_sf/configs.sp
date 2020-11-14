@@ -40,7 +40,7 @@ static const float MusicTimes[] =
 {
 	215.0,	// Final Flash of Existence
 	128.0,	// Retro Menu
-	115.0,	// We Gotta Run
+	112.0,	// We Gotta Run
 	92.0,	// Melancholy
 	124.5,	// Massive Labyrnith
 	55.0,	// LCZ Ambient

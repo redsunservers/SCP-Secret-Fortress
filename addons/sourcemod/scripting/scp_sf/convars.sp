@@ -15,6 +15,7 @@ ConVar CvarTimelimit;
 ConVar CvarSpeedMulti;
 ConVar CvarSpeedMax;
 ConVar CvarAchievement;
+ConVar CvarWinStyle;
 
 void ConVar_Setup()
 {
@@ -26,6 +27,7 @@ void ConVar_Setup()
 	CvarSpeedMulti = CreateConVar("scp_speedmulti", "1.0", "Player movement speed multiplier", _, true, 0.004167);
 	CvarSpeedMax = CreateConVar("scp_speedmax", "3000.0", "Maximum player speed (SCP-173's blink speed)", _, true, 1.0);
 	CvarAchievement = CreateConVar("scp_achievements", "1", "If to call SCPSF_OnAchievement forward", _, true, 0.0, true, 1.0);
+	CvarWinStyle = CreateConVar("scp_winstyle", "1", "If winner will be determined with the amount of escaped players", _, true, 0.0, true, 1.0);
 
 	AutoExecConfig(true, "SCPSecretFortress");
 

@@ -207,6 +207,3 @@ materials/models/scpbreach/scp939redone/scp-939_licker_diffusetest01_phong.vtf
 materials/models/scpbreach/scp939redone/scp-939_licker_extremities2.vmt
 materials/models/scpbreach/scp939redone/scp-939_licker_extremities2.vtf
 materials/models/scpbreach/scp939redone/scp-939_licker_extremities2_normal.vtf
-materials/models/vinrax/scp/purple/106_diffuse.vmt
-materials/models/vinrax/scp/purple/106_diffuse.vtf
-materials/models/vinrax/scp/106_normal.vtf

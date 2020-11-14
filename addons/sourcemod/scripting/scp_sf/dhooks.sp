@@ -16,11 +16,12 @@ static ThinkFunctionEnum ThinkFunction;
 
 void DHook_Setup(GameData gamedata)
 {
+	DHook_CreateDetour(gamedata, "CBaseEntity::InSameTeam", DHook_InSameTeamPre, _);
 	DHook_CreateDetour(gamedata, "CBaseEntity::PhysicsDispatchThink", DHook_PhysicsDispatchThinkPre, DHook_PhysicsDispatchThinkPost);
+	DHook_CreateDetour(gamedata, "CTFGameMovement::ProcessMovement", DHook_ProcessMovementPre, _);
 	DHook_CreateDetour(gamedata, "CTFPlayer::CanPickupDroppedWeapon", DHook_CanPickupDroppedWeaponPre, _);
 	DHook_CreateDetour(gamedata, "CTFPlayer::DropAmmoPack", DHook_DropAmmoPackPre, _);
-	DHook_CreateDetour(gamedata, "CBaseEntity::InSameTeam", DHook_InSameTeamPre, _);
-	DHook_CreateDetour(gamedata, "CTFGameMovement::ProcessMovement", DHook_ProcessMovementPre, _);
+	DHook_CreateDetour(gamedata, "CTFPlayer::Taunt", DHook_TauntPre, DHook_TauntPost);
 	DHook_CreateDetour(gamedata, "CTFPlayer::TeamFortress_CalculateMaxSpeed", DHook_CalculateMaxSpeedPre, DHook_CalculateMaxSpeedPost);
 
 	// TODO: DHook_CreateDetour version of this
@@ -101,8 +102,10 @@ public MRESReturn DHook_RoundRespawn()
 		return;
 
 	DClassEscaped = 0;
+	DClassCaptured = 0;
 	DClassMax = 1;
 	SciEscaped = 0;
+	SciCaptured = 0;
 	SciMax = 0;
 	SCPKilled = 0;
 	SCPMax = 0;
@@ -321,10 +324,9 @@ public MRESReturn DHook_PhysicsDispatchThinkPost(int entity)
 		}
 		case ThinkFunction_RegenThink:
 		{
-			if(Client[entity].Class == Class_096)	// TODO: When I'm not lazy
+			if(Client[entity].Class == Class_096)
 			{
-				//TF2_SetPlayerClass(entity, view_as<TFClassType>(ClassClass[Class_096]));
-				TF2_SetPlayerClass(entity, TFClass_DemoMan);
+				TF2_SetPlayerClass(entity, view_as<TFClassType>(ClassClass[Class_096]));
 			}
 			else if(TF2_GetPlayerClass(entity) == TFClass_Unknown)
 			{
@@ -540,23 +542,27 @@ public MRESReturn DHook_CalculateMaxSpeedPost(Address address, DHookReturn ret, 
 	return MRES_Override;
 }
 
-/*public MRESReturn DHook_TauntPre(int client)
+public MRESReturn DHook_TauntPre(int client)
 {
 	//Dont allow taunting if disguised or cloaked
 	if(TF2_IsPlayerInCondition(client, TFCond_Disguising) || TF2_IsPlayerInCondition(client, TFCond_Disguised) || TF2_IsPlayerInCondition(client, TFCond_Cloaked))
 		return MRES_Supercede;
 
-	//Player wants to taunt, set class to whoever can actually taunt with active weapon
-	int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-	if(weapon > MaxClients)
+	if(Client[client].Class!=Class_Scientist && Client[client].Class!=Class_Guard)
 	{
-		TF2_SetPlayerClass(client, 
+		//Player wants to taunt, set class to whoever can actually taunt with active weapon
+		int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+		if(weapon > MaxClients)
+		{
+			TFClassType class = TF2_GetDefaultClassFromItem(weapon);
+			if(class != TFClass_Unknown)
+				TF2_SetPlayerClass(client, class, false);
+		}
 	}
 	return MRES_Ignored;
 }
 
 public MRESReturn DHook_TauntPost(int client)
 {
-	//Set class back to what it was
-	RevertClientClass(iClient);
-}*/
+	TF2_SetPlayerClass(client, ClassClass[Client[client].Class], false);
+}

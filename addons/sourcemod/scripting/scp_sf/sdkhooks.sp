@@ -160,6 +160,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	if(health>25 && (health-damage)<26)
 		CreateTimer(3.0, Timer_MyBlood, GetClientUserId(victim), TIMER_FLAG_NO_MAPCHANGE);
 
+	bool changed;
 	if(IsValidEntity(weapon) && weapon>MaxClients && HasEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex"))
 	{
 		int index = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
@@ -191,7 +192,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 						Client[victim].HealthPack = 0;
 						TF2_RemoveAllWeapons(victim);
 						SetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon", GiveWeapon(victim, Weapon_None));
-	
+
 						if(Client[victim].Class>=Class_Guard && Client[victim].Class<=Class_MTFE)
 							GiveAchievement(Achievement_DisarmMTF, attacker);
 					}
@@ -209,6 +210,28 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		{
 			FadeMessage(victim, 36, 768, 0x0012);
 			FadeClientVolume(victim, 1.0, 2.0, 2.0, 0.2);
+		}
+		else
+		{
+			bool isSCP = IsSCP(victim);
+			if(isSCP && WeaponIndex[Weapon_SMG4]==index)
+			{
+				damage /= 2.0;
+				changed = true;
+			}
+
+			if((!isSCP || Client[victim].Class==Class_0492) && GetEntProp(victim, Prop_Data, "m_LastHitGroup")==HITGROUP_HEAD)
+			{
+				for(WeaponEnum i=Weapon_Pistol; i<Weapon_Flash; i++)
+				{
+					if(index != WeaponIndex[i])
+						continue;
+
+					damagetype |= DMG_CRIT;
+					changed = true;
+					break;
+				}
+			}
 		}
 	}
 
@@ -255,20 +278,19 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 					break;
 			}
 
-			if(!count)
+			if(count)
 			{
-				if(!GetRandomInt(0, 2))
-					return Plugin_Continue;
+				entity = spawns[GetRandomInt(0, count-1)];
 
-				damagetype |= DMG_CRIT;
-				return Plugin_Changed;
+				static float pos[3];
+				GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
+				TeleportEntity(victim, pos, NULL_VECTOR, TRIPLE_D);
 			}
-
-			entity = spawns[GetRandomInt(0, count-1)];
-
-			static float pos[3];
-			GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
-			TeleportEntity(victim, pos, NULL_VECTOR, TRIPLE_D);
+			else if(GetRandomInt(0, 2))
+			{
+				damagetype |= DMG_CRIT;
+				changed = true;
+			}
 		}
 		case Class_Stealer:
 		{
@@ -276,7 +298,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 				return Plugin_Handled;
 		}
 	}
-	return Plugin_Continue;
+	return changed ? Plugin_Changed : Plugin_Continue;
 }
 
 public Action HookSound(int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH], int &entity, int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)

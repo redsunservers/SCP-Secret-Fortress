@@ -45,8 +45,8 @@ void DisplayCredits(int i)
 }
 
 #define MAJOR_REVISION	"1"
-#define MINOR_REVISION	"6"
-#define STABLE_REVISION	"2"
+#define MINOR_REVISION	"7"
+#define STABLE_REVISION	"0"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define IsSCP(%1)	(Client[%1].Class>=Class_035)
@@ -76,107 +76,6 @@ public Plugin myinfo =
 	author		=	"Batfoxkid",
 	description	=	"WHY DID YOU THROW A GRENADE INTO THE ELEVA-",
 	version		=	PLUGIN_VERSION
-};
-
-enum // Collision_Group_t in const.h - m_CollisionGroup
-{
-	COLLISION_GROUP_NONE  = 0,
-	COLLISION_GROUP_DEBRIS,			// Collides with nothing but world and static stuff
-	COLLISION_GROUP_DEBRIS_TRIGGER,		// Same as debris, but hits triggers
-	COLLISION_GROUP_INTERACTIVE_DEBRIS,	// Collides with everything except other interactive debris or debris
-	COLLISION_GROUP_INTERACTIVE,		// Collides with everything except interactive debris or debris	Can be hit by bullets, explosions, players, projectiles, melee
-	COLLISION_GROUP_PLAYER,			// Can be hit by bullets, explosions, players, projectiles, melee
-	COLLISION_GROUP_BREAKABLE_GLASS,
-	COLLISION_GROUP_VEHICLE,
-	COLLISION_GROUP_PLAYER_MOVEMENT,	// For HL2, same as Collision_Group_Player, for TF2, this filters out other players and CBaseObjects
-
-	COLLISION_GROUP_NPC,		// Generic NPC group
-	COLLISION_GROUP_IN_VEHICLE,	// for any entity inside a vehicle	Can be hit by explosions. Melee unknown.
-	COLLISION_GROUP_WEAPON,		// for any weapons that need collision detection
-	COLLISION_GROUP_VEHICLE_CLIP,	// vehicle clip brush to restrict vehicle movement
-	COLLISION_GROUP_PROJECTILE,	// Projectiles!
-	COLLISION_GROUP_DOOR_BLOCKER,	// Blocks entities not permitted to get near moving doors
-	COLLISION_GROUP_PASSABLE_DOOR,	// ** sarysa TF2 note: Must be scripted, not passable on physics prop (Doors that the player shouldn't collide with)
-	COLLISION_GROUP_DISSOLVING,	// Things that are dissolving are in this group
-	COLLISION_GROUP_PUSHAWAY,	// ** sarysa TF2 note: I could swear the collision detection is better for this than NONE. (Nonsolid on client and server, pushaway in player code) // Can be hit by bullets, explosions, projectiles, melee
-
-	COLLISION_GROUP_NPC_ACTOR,		// Used so NPCs in scripts ignore the player.
-	COLLISION_GROUP_NPC_SCRIPTED = 19,	// Used for NPCs in scripts that should not collide with each other.
-
-	LAST_SHARED_COLLISION_GROUP
-};
-
-// entity effects
-enum
-{
-	EF_BONEMERGE			= 0x001,	// Performs bone merge on client side
-	EF_BRIGHTLIGHT 			= 0x002,	// DLIGHT centered at entity origin
-	EF_DIMLIGHT 			= 0x004,	// player flashlight
-	EF_NOINTERP				= 0x008,	// don't interpolate the next frame
-	EF_NOSHADOW				= 0x010,	// Don't cast no shadow
-	EF_NODRAW				= 0x020,	// don't draw entity
-	EF_NORECEIVESHADOW		= 0x040,	// Don't receive no shadow
-	EF_BONEMERGE_FASTCULL	= 0x080,	// For use with EF_BONEMERGE. If this is set, then it places this ent's origin at its
-										// parent and uses the parent's bbox + the max extents of the aiment.
-										// Otherwise, it sets up the parent's bones every frame to figure out where to place
-										// the aiment, which is inefficient because it'll setup the parent's bones even if
-										// the parent is not in the PVS.
-	EF_ITEM_BLINK			= 0x100,	// blink an item so that the user notices it.
-	EF_PARENT_ANIMATES		= 0x200,	// always assume that the parent entity is animating
-	EF_MAX_BITS = 10
-};
-
-// entity flags, CBaseEntity::m_iEFlags
-enum
-{
-	EFL_KILLME	=				(1<<0),	// This entity is marked for death -- This allows the game to actually delete ents at a safe time
-	EFL_DORMANT	=				(1<<1),	// Entity is dormant, no updates to client
-	EFL_NOCLIP_ACTIVE =			(1<<2),	// Lets us know when the noclip command is active.
-	EFL_SETTING_UP_BONES =		(1<<3),	// Set while a model is setting up its bones.
-	EFL_KEEP_ON_RECREATE_ENTITIES = (1<<4), // This is a special entity that should not be deleted when we restart entities only
-
-	EFL_HAS_PLAYER_CHILD=		(1<<4),	// One of the child entities is a player.
-
-	EFL_DIRTY_SHADOWUPDATE =	(1<<5),	// Client only- need shadow manager to update the shadow...
-	EFL_NOTIFY =				(1<<6),	// Another entity is watching events on this entity (used by teleport)
-
-	// The default behavior in ShouldTransmit is to not send an entity if it doesn't
-	// have a model. Certain entities want to be sent anyway because all the drawing logic
-	// is in the client DLL. They can set this flag and the engine will transmit them even
-	// if they don't have a model.
-	EFL_FORCE_CHECK_TRANSMIT =	(1<<7),
-
-	EFL_BOT_FROZEN =			(1<<8),	// This is set on bots that are frozen.
-	EFL_SERVER_ONLY =			(1<<9),	// Non-networked entity.
-	EFL_NO_AUTO_EDICT_ATTACH =	(1<<10), // Don't attach the edict; we're doing it explicitly
-	
-	// Some dirty bits with respect to abs computations
-	EFL_DIRTY_ABSTRANSFORM =	(1<<11),
-	EFL_DIRTY_ABSVELOCITY =		(1<<12),
-	EFL_DIRTY_ABSANGVELOCITY =	(1<<13),
-	EFL_DIRTY_SURROUNDING_COLLISION_BOUNDS	= (1<<14),
-	EFL_DIRTY_SPATIAL_PARTITION = (1<<15),
-//	UNUSED						= (1<<16),
-
-	EFL_IN_SKYBOX =				(1<<17),	// This is set if the entity detects that it's in the skybox.
-											// This forces it to pass the "in PVS" for transmission.
-	EFL_USE_PARTITION_WHEN_NOT_SOLID = (1<<18),	// Entities with this flag set show up in the partition even when not solid
-	EFL_TOUCHING_FLUID =		(1<<19),	// Used to determine if an entity is floating
-
-	// FIXME: Not really sure where I should add this...
-	EFL_IS_BEING_LIFTED_BY_BARNACLE = (1<<20),
-	EFL_NO_ROTORWASH_PUSH =		(1<<21),		// I shouldn't be pushed by the rotorwash
-	EFL_NO_THINK_FUNCTION =		(1<<22),
-	EFL_NO_GAME_PHYSICS_SIMULATION = (1<<23),
-
-	EFL_CHECK_UNTOUCH =			(1<<24),
-	EFL_DONTBLOCKLOS =			(1<<25),		// I shouldn't block NPC line-of-sight
-	EFL_DONTWALKON =			(1<<26),		// NPC;s should not walk on this entity
-	EFL_NO_DISSOLVE =			(1<<27),		// These guys shouldn't dissolve
-	EFL_NO_MEGAPHYSCANNON_RAGDOLL = (1<<28),	// Mega physcannon can't ragdoll these guys.
-	EFL_NO_WATER_VELOCITY_CHANGE  =	(1<<29),	// Don't adjust this entity's velocity when transitioning into water
-	EFL_NO_PHYSCANNON_INTERACTION =	(1<<30),	// Physcannon can't pick these up or punt them
-	EFL_NO_DAMAGE_FORCES =		(1<<31),	// Doesn't accept forces from physics damage
 };
 
 enum ClassEnum
@@ -355,9 +254,8 @@ char ClassModel[][] =
 	"models/freak_fortress_2/newscp076/newscp076_v1.mdl", 	// 076-2
 	"models/player/engineer.mdl", 				// 079
 	"models/freak_fortress_2/096/scp096.mdl",		// 096
-	"models/freak_fortress_2/106_spyper/purple.mdl",	// 106
-	"models/scp/scp173.mdl",				// 173
-	//"models/freak_fortress_2/scp_173/scp_173new.mdl",	// 173
+	"models/freak_fortress_2/106_spyper/106.mdl",		// 106
+	"models/freak_fortress_2/scp_173/scp_173new.mdl",	// 173
 	"models/scp/scp173.mdl",				// 173-2
 	"models/player/spy.mdl",				// 527
 	"models/scp_sl/scp_939/scp_939_redone_pm_1.mdl",	// 939-89
@@ -610,12 +508,12 @@ enum WeaponEnum
 
 	Weapon_Disarm,
 
-	Weapon_Pistol,
-	Weapon_SMG,		// Guard
-	Weapon_SMG2,		// MTF
-	Weapon_SMG3,		// MTF2
-	Weapon_SMG4,		// Chaos
-	Weapon_SMG5,		// MTF3
+	Weapon_Pistol,		// COM-15 Sidearm
+	Weapon_Pistol2,		// USP
+	Weapon_SMG,		// MP7
+	Weapon_SMG2,		// Project 90
+	Weapon_SMG3,		// MTF-E11-SR
+	Weapon_SMG4,		// Logicer
 
 	Weapon_Flash,
 	Weapon_Frag,
@@ -662,12 +560,12 @@ int WeaponIndex[] =
 	954,	// Disarmer
 
 	// Secondary
-	209,
+	209,	//773
+	294,	//209
 	751,
 	1150,
 	425,
 	415,
-	1153,
 
 	// Primary
 	1151,
@@ -805,8 +703,10 @@ bool ClassEnabled[view_as<int>(ClassEnum)];
 
 bool NoMusicRound;
 int DClassEscaped;
+int DClassCaptured;
 int DClassMax;
 int SciEscaped;
+int SciCaptured;
 int SciMax;
 int SCPKilled;
 int SCPMax;
@@ -994,6 +894,7 @@ enum struct ClientEnum
 ClassEnum TestForceClass[MAXTF2PLAYERS];
 ClientEnum Client[MAXTF2PLAYERS];
 
+#include "scp_sf/stocks.sp"
 #include "scp_sf/achievements.sp"
 #include "scp_sf/configs.sp"
 #include "scp_sf/convars.sp"
@@ -1002,7 +903,6 @@ ClientEnum Client[MAXTF2PLAYERS];
 #include "scp_sf/natives.sp"
 #include "scp_sf/sdkcalls.sp"
 #include "scp_sf/sdkhooks.sp"
-#include "scp_sf/stocks.sp"
 
 // SourceMod Events
 
@@ -1245,7 +1145,6 @@ public void OnMapStart()
 	if(entity == -1)
 	{
 		ClassEnabled[Class_049] = true;
-		ClassEnabled[Class_076] = true;	// TODO: Remove this from future
 		ClassEnabled[Class_096] = true;
 		ClassEnabled[Class_106] = true;
 		ClassEnabled[Class_173] = true;
@@ -1799,13 +1698,13 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 
 					int index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
 					WeaponEnum wep = Weapon_Pistol;
-					for(; wep<=Weapon_SMG5; wep++)
+					for(; wep<=Weapon_SMG4; wep++)
 					{
 						if(index == WeaponIndex[wep])
 							break;
 					}
 
-					if(wep > Weapon_SMG5)
+					if(wep > Weapon_SMG4)
 						return;
 
 					TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
@@ -1828,13 +1727,13 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 
 					int index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
 					WeaponEnum wep = Weapon_Pistol;
-					for(; wep<=Weapon_SMG5; wep++)
+					for(; wep<=Weapon_SMG4; wep++)
 					{
 						if(index == WeaponIndex[wep])
 							break;
 					}
 
-					if(wep > Weapon_SMG5)
+					if(wep > Weapon_SMG4)
 						return;
 
 					TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
@@ -1866,21 +1765,21 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 
 					int index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
 					WeaponEnum wep = Weapon_Pistol;
-					for(; wep<=Weapon_SMG5; wep++)
+					for(; wep<=Weapon_SMG4; wep++)
 					{
 						if(index == WeaponIndex[wep])
 							break;
 					}
 
-					if(wep > Weapon_SMG5)
+					if(wep > Weapon_SMG4)
 						return;
 
 					TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
 					Client[client].Cooldown = GetEngineTime()+17.5;
 
 					wep++;
-					if(wep > Weapon_SMG5)
-						wep = Weapon_SMG5;
+					if(wep > Weapon_SMG4)
+						wep = Weapon_SMG4;
 
 					SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, wep));
 				}
@@ -1895,13 +1794,13 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 
 					int index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
 					WeaponEnum wep = Weapon_Pistol;
-					for(; wep<=Weapon_SMG5; wep++)
+					for(; wep<=Weapon_SMG4; wep++)
 					{
 						if(index == WeaponIndex[wep])
 							break;
 					}
 
-					if(wep > Weapon_SMG5)
+					if(wep > Weapon_SMG4)
 						return;
 
 					TF2_RemoveWeaponSlot(client, TFWeaponSlot_Secondary);
@@ -1910,8 +1809,8 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 						return;
 
 					wep += view_as<WeaponEnum>(2);
-					if(wep > Weapon_SMG5)
-						wep = Weapon_SMG5;
+					if(wep > Weapon_SMG4)
+						wep = Weapon_SMG4;
 
 					SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, wep));
 				}
@@ -1944,7 +1843,6 @@ public void TF2_OnConditionAdded(int client, TFCond cond)
 	if(Client[client].Class == Class_DBoi)
 	{
 		DropAllWeapons(client);
-		TF2_RemoveAllWeapons(client);
 		if(Gamemode == Gamemode_Ikea)
 		{
 			DClassEscaped++;
@@ -1952,7 +1850,24 @@ public void TF2_OnConditionAdded(int client, TFCond cond)
 		}
 		else if(Client[client].Disarmer)
 		{
-			Client[client].Class = Client[client].MTFBan ? Class_Spec : Class_MTFE;
+			DClassCaptured++;
+			Client[client].Class = Client[client].MTFBan ? Class_Spec : Class_MTF2;
+
+			int total;
+			int[] clients = new int[MaxClients];
+			for(int i=1; i<=MaxClients; i++)
+			{
+				if(IsValidClient(i) && IsSpec(i) && !Client[i].MTFBan && GetClientTeam(i)>view_as<int>(TFTeam_Spectator))
+					clients[total++] = i;
+			}
+
+			if(total)
+			{
+				total = clients[GetRandomInt(0, total-1)];
+				Client[total].Class = Class_MTF2;
+				AssignTeam(total);
+				RespawnPlayer(total);
+			}
 		}
 		else
 		{
@@ -1969,9 +1884,9 @@ public void TF2_OnConditionAdded(int client, TFCond cond)
 	else if(Client[client].Class == Class_Scientist)
 	{
 		DropAllWeapons(client);
-		TF2_RemoveAllWeapons(client);
 		if(Client[client].Disarmer)
 		{
+			SciCaptured++;
 			Client[client].Class = Class_Chaos;
 
 			int total;
@@ -1992,14 +1907,14 @@ public void TF2_OnConditionAdded(int client, TFCond cond)
 		}
 		else
 		{
-			Forward_OnEscape(client, Client[client].Disarmer);
-
 			SciEscaped++;
 			Client[client].Class = Client[client].MTFBan ? Class_Spec : Class_MTFS;
 			GiveAchievement(Achievement_EscapeSci, client);
 		}
+
 		AssignTeam(client);
 		RespawnPlayer(client);
+		Forward_OnEscape(client, Client[client].Disarmer);
 		CreateTimer(1.0, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
@@ -2035,7 +1950,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			return;
 		}
 
-		TF2_SetPlayerClass(client, ClassClass[Client[client].Class]);
+		ChangeClientClass(client, ClassClass[Client[client].Class]);
 
 		if(team != TFTeam_Spectator)
 			ChangeClientTeamEx(client, team);
@@ -2129,7 +2044,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			Client[client].Radio = 1;
 			Client[client].Floor = Floor_Surface;
 			GiveWeapon(client, Weapon_Frag);
-			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_SMG5));
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GiveWeapon(client, Weapon_SMG4));
 			if(Gamemode != Gamemode_Ikea)
 				GiveWeapon(client, Weapon_Disarm);
 
@@ -2274,7 +2189,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	SetVariantString(ClassModel[Client[client].Class]);
 	AcceptEntityInput(client, "SetCustomModel");
 	SetEntProp(client, Prop_Send, "m_bUseClassAnimations", true);
-	if(Client[client].Class==Class_1732 || Client[client].Class==Class_173)
+	if(Client[client].Class == Class_1732)
 		SetEntProp(client, Prop_Send, "m_nSkin", client%10);
 
 	TF2Attrib_SetByDefIndex(client, 49, 1.0);
@@ -3342,17 +3257,24 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 			}
 			else if(!Client[client].ChargeIn)
 			{
-				Client[client].ChargeIn = engineTime+10.0;
+				Client[client].ChargeIn = engineTime+6.0;
+				buttons &= ~IN_JUMP;
+				changed = true;
 			}
 			else if(Client[client].ChargeIn < engineTime)
 			{
 				SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", 0.0);
 				SetEntPropFloat(client, Prop_Send, "m_flRageMeter", 0.0);
+				buttons &= ~IN_JUMP;
+				changed = true;
 			}
 			else
 			{
+				PrintKeyHintText(client, "Charge: %d", RoundToCeil((Client[client].ChargeIn-engineTime-6.0)/-0.06));
 				SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
-				SetEntPropFloat(client, Prop_Send, "m_flRageMeter", (engineTime-Client[client].ChargeIn)*9.9);
+				SetEntPropFloat(client, Prop_Send, "m_flRageMeter", (engineTime-Client[client].ChargeIn)*-16.5);
+				buttons &= ~IN_JUMP;
+				changed = true;
 
 				static float time[MAXTF2PLAYERS];
 				if(time[client] < engineTime)
@@ -4074,7 +3996,34 @@ public Action CheckAlivePlayers(Handle timer)
 					return Plugin_Continue;
 			}
 
-			if(SciEscaped)
+			if(CvarWinStyle.BoolValue)
+			{
+				if(SciEscaped > DClassEscaped)
+				{
+					EndRound(Team_MTF, TFTeam_Blue);
+				}
+				else if(SciEscaped < DClassEscaped)
+				{
+					EndRound(Team_DBoi, TFTeam_Red);
+				}
+				else if(SciCaptured > DClassCaptured)
+				{
+					EndRound(Team_DBoi, TFTeam_Red);
+				}
+				else if(SciCaptured < DClassCaptured)
+				{
+					EndRound(Team_MTF, TFTeam_Blue);
+				}
+				else if(!salive || SciCaptured==DClassCaptured)
+				{
+					EndRound(Team_Spec, TFTeam_Unassigned);
+				}
+				else
+				{
+					EndRound(Team_SCP, TFTeam_Red);
+				}
+			}
+			else if(SciEscaped)
 			{
 				if(DClassEscaped)
 				{
@@ -4597,102 +4546,96 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 			switch(Client[client].Class)
 			{
 				case Class_Scientist, Class_MTFS, Class_MTFE:
-					TF2_SetPlayerClass(client, TFClass_Engineer, false);
+					ChangeClientClass(client, TFClass_Engineer);
 
 				default:
-					TF2_SetPlayerClass(client, TFClass_Scout, false);
+					ChangeClientClass(client, TFClass_Scout);
 			}
-			entity = SpawnWeapon(client, "tf_weapon_pistol", WeaponIndex[weapon], 5, 6, "2 ; 1.5 ; 3 ; 0.75 ; 5 ; 1.25 ; 51 ; 1 ; 96 ; 1.25 ; 106 ; 0.33 ; 252 ; 0.95", _, true);
+			entity = SpawnWeapon(client, "tf_weapon_pistol", WeaponIndex[weapon], 5, 6, "2 ; 1.426667 ; 5 ; 1.111111 ; 96 ; 1.149425 ; 106 ; 0.33 ; 252 ; 0.95");
 			if(ammo && entity>MaxClients)
-				SetAmmo(client, entity, 27, 0);
+				SetAmmo(client, entity, 24, 0);
+		}
+		case Weapon_Pistol2:
+		{
+			switch(Client[client].Class)
+			{
+				case Class_Scientist, Class_MTFS, Class_MTFE:
+					ChangeClientClass(client, TFClass_Engineer);
+
+				default:
+					ChangeClientClass(client, TFClass_Scout);
+			}
+			entity = SpawnWeapon(client, "tf_weapon_pistol", WeaponIndex[weapon], 5, 6, "2 ; 1.7 ; 4 ; 1.5 ; 5 ; 1.333333 ; 96 ; 1.214559 ; 106 ; 0.33 ; 252 ; 0.925", _, true);
+			if(ammo && entity>MaxClients)
+				SetAmmo(client, entity, 36, 0);
 		}
 		case Weapon_SMG:
 		{
 			switch(Client[client].Class)
 			{
 				case Class_MTFE:
-					TF2_SetPlayerClass(client, TFClass_Engineer, false);
+					ChangeClientClass(client, TFClass_Engineer);
 
 				default:
-					TF2_SetPlayerClass(client, TFClass_Sniper, false);
+					ChangeClientClass(client, TFClass_Sniper);
 			}
-			entity = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 5, 6, "2 ; 1.4 ; 4 ; 2 ; 5 ; 1.3 ; 51 ; 1 ; 78 ; 2 ; 96 ; 1.25 ; 252 ; 0.95");
+			entity = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 5, 6, "2 ; 1.65 ; 4 ; 1.4 ; 96 ; 2.863636 ; 252 ; 0.9");
 			if(ammo && entity>MaxClients)
-				SetAmmo(client, entity, 50, 50);
+				SetAmmo(client, entity, 70, 0);
 		}
 		case Weapon_SMG2:
 		{
 			switch(Client[client].Class)
 			{
 				case Class_MTFE:
-					TF2_SetPlayerClass(client, TFClass_Engineer, false);
+					ChangeClientClass(client, TFClass_Engineer);
 
 				default:
-					TF2_SetPlayerClass(client, TFClass_DemoMan, false);
+					ChangeClientClass(client, TFClass_DemoMan);
 			}
-			entity = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 10, 6, "2 ; 1.6 ; 4 ; 2 ; 5 ; 1.2 ; 51 ; 1 ; 78 ; 4.6875 ; 96 ; 1.5 ; 252 ; 0.9");
+			entity = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 10, 6, "2 ; 1.75 ; 4 ; 2 ; 6 ; 0.909091 ; 96 ; 3 ; 252 ; 0.85");
 			if(ammo && entity>MaxClients)
-				SetAmmo(client, entity, 75, 50);
+				SetAmmo(client, entity, 80, 0);
 		}
 		case Weapon_SMG3:
 		{
 			switch(Client[client].Class)
 			{
 				case Class_Chaos:
-					TF2_SetPlayerClass(client, TFClass_Pyro, false);
+					ChangeClientClass(client, TFClass_Pyro);
 
 				case Class_MTF2:
-					TF2_SetPlayerClass(client, TFClass_Heavy, false);
+					ChangeClientClass(client, TFClass_Heavy);
 
 				case Class_Scientist, Class_MTFS, Class_MTFE:
-					TF2_SetPlayerClass(client, TFClass_Engineer, false);
+					ChangeClientClass(client, TFClass_Engineer);
 
 				default:
-					TF2_SetPlayerClass(client, TFClass_Soldier, false);
+					ChangeClientClass(client, TFClass_Soldier);
 			}
-			entity = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 20, 6, "2 ; 1.8 ; 4 ; 2 ; 5 ; 1.1 ; 51 ; 1 ; 78 ; 4.6875 ; 96 ; 1.75 ; 252 ; 0.8");
+			entity = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 20, 6, "2 ; 2.275 ; 4 ; 1.6 ; 5 ; 1.25 ; 96 ; 3 ; 252 ; 0.8");
 			if(ammo && entity>MaxClients)
-				SetAmmo(client, entity, 100, 50);
+				SetAmmo(client, entity, Client[client].Class>=Class_MTFS ? 120 : 160, 0);
 		}
 		case Weapon_SMG4:
 		{
 			switch(Client[client].Class)
 			{
 				case Class_Chaos:
-					TF2_SetPlayerClass(client, TFClass_Pyro, false);
+					ChangeClientClass(client, TFClass_Pyro);
 
 				case Class_MTF2:
-					TF2_SetPlayerClass(client, TFClass_Heavy, false);
+					ChangeClientClass(client, TFClass_Heavy);
 
 				case Class_Scientist, Class_MTFS, Class_MTFE:
-					TF2_SetPlayerClass(client, TFClass_Engineer, false);
+					ChangeClientClass(client, TFClass_Engineer);
 
 				default:
-					TF2_SetPlayerClass(client, TFClass_Soldier, false);
+					ChangeClientClass(client, TFClass_Soldier);
 			}
-			entity = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 30, 6, "2 ; 2 ; 4 ; 2 ; 51 ; 1 ; 78 ; 4.6875 ; 96 ; 2 ; 252 ; 0.7");
+			entity = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 30, 6, "2 ; 2.475 ; 4 ; 2 ; 6 ; 0.90909 ; 78 ; 4.6875 ; 96 ; 2 ; 252 ; 0.7");
 			if(ammo && entity>MaxClients)
-				SetAmmo(client, entity, 125, 50);
-		}
-		case Weapon_SMG5:
-		{
-			switch(Client[client].Class)
-			{
-				case Class_Chaos:
-					TF2_SetPlayerClass(client, TFClass_Pyro, false);
-
-				case Class_MTF2:
-					TF2_SetPlayerClass(client, TFClass_Heavy, false);
-
-				case Class_Scientist, Class_MTFS, Class_MTFE:
-					TF2_SetPlayerClass(client, TFClass_Engineer, false);
-
-				default:
-					TF2_SetPlayerClass(client, TFClass_Soldier, false);
-			}
-			entity = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 40, 6, "2 ; 2.2 ; 4 ; 2 ; 6 ; 0.9 ; 51 ; 1 ; 78 ; 4.6875 ; 96 ; 2.25 ; 252 ; 0.6");
-			if(ammo && entity>MaxClients)
-				SetAmmo(client, entity, 150, 50);
+				SetAmmo(client, entity, 175, 0);
 		}
 
 		/*
@@ -4700,15 +4643,15 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		*/
 		case Weapon_Flash:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_grenadelauncher", WeaponIndex[weapon], 5, 6, "1 ; 0.75 ; 3 ; 0.25 ; 15 ; 0 ; 77 ; 0.125 ; 99 ; 1.35 ; 252 ; 0.95 ; 787 ; 1.25", 1, true);
+			entity = SpawnWeapon(client, "tf_weapon_grenadelauncher", WeaponIndex[weapon], 5, 6, "5 ; 8.5 ; 15 ; 0 ; 77 ; 0.003 ; 99 ; 1.5 ; 138 ; 0 ; 252 ; 0.95 ; 303 ; -1 ; 773 ; 2 ; 787 ; 1.304348", 1, true);
 			if(ammo && entity>MaxClients)
-				SetAmmo(client, entity, 1, 0);
+				SetAmmo(client, entity, 1);
 		}
 		case Weapon_Frag:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_grenadelauncher", WeaponIndex[weapon], 10, 6, "2 ; 30 ; 3 ; 0.25 ; 28 ; 1.5 ; 77 ; 0.125 ; 99 ; 1.35 ; 138 ; 0.3 ; 252 ; 0.9 ; 671 ; 1 ; 787 ; 1.25", 1);
+			entity = SpawnWeapon(client, "tf_weapon_grenadelauncher", WeaponIndex[weapon], 10, 6, "2 ; 45 ; 5 ; 8.5 ; 15 ; 0 ; 77 ; 0.003 ; 99 ; 1.5 ; 138 ; 0 ; 252 ; 0.95 ; 303 ; -1 ; 773 ; 2 ; 787 ; 2.173913", 1, true);
 			if(ammo && entity>MaxClients)
-				SetAmmo(client, entity, 1, 0);
+				SetAmmo(client, entity, 1);
 		}
 		case Weapon_Shotgun:
 		{
@@ -4764,11 +4707,11 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_0492:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_bat", WeaponIndex[weapon], 50, 13, "1 ; 0.01 ; 5 ; 1.3 ; 28 ; 0.5 ; 137 ; 101 ; 138 ; 151 ; 252 ; 0.5 ; 535 ; 0.333", false);
+			entity = SpawnWeapon(client, "tf_weapon_bat", WeaponIndex[weapon], 50, 13, "1 ; 0.01 ; 5 ; 1.3 ; 28 ; 0.5 ; 137 ; 101 ; 138 ; 125 ; 252 ; 0.5 ; 535 ; 0.333", false);
 		}
 		case Weapon_076:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_sword", WeaponIndex[weapon], 1, 13, "1 ; 0.01 ; 137 ; 121 ; 138 ; 121 ; 28 ; 0.5 ; 252 ; 0.8 ; 535 ; 0.333", false);
+			entity = SpawnWeapon(client, "tf_weapon_sword", WeaponIndex[weapon], 1, 13, "1 ; 0.01 ; 137 ; 151 ; 138 ; 151 ; 28 ; 0.5 ; 252 ; 0.8 ; 535 ; 0.333", false);
 		}
 		case Weapon_076Rage:
 		{
@@ -4798,7 +4741,7 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_939:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_fireaxe", WeaponIndex[weapon], 70, 13, "1 ; 0.01 ; 28 ; 0.333 ; 137 ; 101 ; 138 ; 101 ; 252 ; 0.3 ; 535 ; 0.333", false);
+			entity = SpawnWeapon(client, "tf_weapon_fireaxe", WeaponIndex[weapon], 70, 13, "1 ; 0.01 ; 28 ; 0.333 ; 137 ; 101 ; 138 ; 125 ; 252 ; 0.3 ; 535 ; 0.333", false);
 		}
 		case Weapon_3008:
 		{
@@ -5688,7 +5631,7 @@ public Action CH_PassFilter(int ent1, int ent2, bool &result)
 		}
 	}
 	result = !IsFriendly(Client[ent1].Class, Client[ent2].Class);
-	return Plugin_Changed;
+	return Plugin_Handled;
 }
 
 #if defined _SENDPROXYMANAGER_INC_
