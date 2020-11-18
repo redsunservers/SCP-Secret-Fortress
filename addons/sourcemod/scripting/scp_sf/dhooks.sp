@@ -11,16 +11,16 @@ static DynamicHook RoundRespawn;
 static DynamicHook ForceRespawn;
 static int ForceRespawnHook[MAXTF2PLAYERS];
 static int ThinkData[MAXENTITIES];
-static int CalculateSpeedClient;
 static ThinkFunctionEnum ThinkFunction;
+static int CalculateSpeedClient;
 
 void DHook_Setup(GameData gamedata)
 {
-	DHook_CreateDetour(gamedata, "CBaseEntity::InSameTeam", DHook_InSameTeamPre, _);
+	DHook_CreateDetour(gamedata, "CBaseEntity::InSameTeam", DHook_InSameTeamPre);
 	DHook_CreateDetour(gamedata, "CBaseEntity::PhysicsDispatchThink", DHook_PhysicsDispatchThinkPre, DHook_PhysicsDispatchThinkPost);
-	DHook_CreateDetour(gamedata, "CTFGameMovement::ProcessMovement", DHook_ProcessMovementPre, _);
-	DHook_CreateDetour(gamedata, "CTFPlayer::CanPickupDroppedWeapon", DHook_CanPickupDroppedWeaponPre, _);
-	DHook_CreateDetour(gamedata, "CTFPlayer::DropAmmoPack", DHook_DropAmmoPackPre, _);
+	DHook_CreateDetour(gamedata, "CTFGameMovement::ProcessMovement", DHook_ProcessMovementPre);
+	DHook_CreateDetour(gamedata, "CTFPlayer::CanPickupDroppedWeapon", DHook_CanPickupDroppedWeaponPre);
+	DHook_CreateDetour(gamedata, "CTFPlayer::DropAmmoPack", DHook_DropAmmoPackPre);
 	DHook_CreateDetour(gamedata, "CTFPlayer::Taunt", DHook_TauntPre, DHook_TauntPost);
 	DHook_CreateDetour(gamedata, "CTFPlayer::TeamFortress_CalculateMaxSpeed", DHook_CalculateMaxSpeedPre, DHook_CalculateMaxSpeedPost);
 
@@ -388,23 +388,24 @@ public MRESReturn DHook_ProcessMovementPre(DHookParam param)
 	return MRES_ChangedHandled;
 }
 
-public MRESReturn DHook_CalculateMaxSpeedPre(Address address, DHookReturn ret, DHookParam param)
+public MRESReturn DHook_CalculateMaxSpeedPre(Address address, DHookReturn ret)
 {
 	CalculateSpeedClient = SDKCall_GetBaseEntity(address);
 }
 
-public MRESReturn DHook_CalculateMaxSpeedPost(Address address, DHookReturn ret, DHookParam param)
+public MRESReturn DHook_CalculateMaxSpeedPost(int clientwhen, DHookReturn ret)
 {
-	if(!Enabled || !IsClientInGame(CalculateSpeedClient) || !IsPlayerAlive(CalculateSpeedClient))
+	int client = CalculateSpeedClient;
+	if(!IsClientInGame(client) || !IsPlayerAlive(client))
 		return MRES_Ignored;
 
-	float speed = 1.0;
-	if(Client[CalculateSpeedClient].InvisFor != FAR_FUTURE)
+	float speed = 300.0;
+	if(Client[client].InvisFor != FAR_FUTURE)
 	{
-		if(TF2_IsPlayerInCondition(CalculateSpeedClient, TFCond_Dazed))
+		if(TF2_IsPlayerInCondition(client, TFCond_Dazed))
 			return MRES_Ignored;
 
-		switch(Client[CalculateSpeedClient].Class)
+		switch(Client[client].Class)
 		{
 			case Class_Spec:
 			{
@@ -414,124 +415,28 @@ public MRESReturn DHook_CalculateMaxSpeedPost(Address address, DHookReturn ret, 
 			{
 				if(Gamemode == Gamemode_Steals)
 				{
-					speed = Client[CalculateSpeedClient].Sprinting ? 360.0 : 270.0;
+					speed = Client[client].Sprinting ? 360.0 : 270.0;
 				}
 				else
 				{
-					speed = Client[CalculateSpeedClient].Disarmer ? 230.0 : Client[CalculateSpeedClient].Sprinting ? 310.0 : 260.0;
+					speed = Client[client].Disarmer ? 230.0 : Client[client].Sprinting ? 310.0 : 260.0;
 				}
 			}
 			case Class_Chaos, Class_MTFE:
 			{
-				speed = (Client[CalculateSpeedClient].Sprinting && !Client[CalculateSpeedClient].Disarmer) ? 270.0 : 230.0;
+				speed = (Client[client].Sprinting && !Client[client].Disarmer) ? 270.0 : 230.0;
 			}
 			case Class_MTF3:
 			{
-				speed = Client[CalculateSpeedClient].Disarmer ? 230.0 : Client[CalculateSpeedClient].Sprinting ? 280.0 : 240.0;
+				speed = Client[client].Disarmer ? 230.0 : Client[client].Sprinting ? 280.0 : 240.0;
 			}
 			case Class_Guard, Class_MTF, Class_MTF2, Class_MTFS:
 			{
-				speed = Client[CalculateSpeedClient].Disarmer ? 230.0 : Client[CalculateSpeedClient].Sprinting ? 290.0 : 250.0;
+				speed = Client[client].Disarmer ? 230.0 : Client[client].Sprinting ? 290.0 : 250.0;
 			}
-			case Class_049:
+			default:
 			{
-				speed = 250.0;
-			}
-			case Class_0492, Class_3008:
-			{
-				speed = 270.0;
-			}
-			case Class_076:
-			{
-				switch(Client[CalculateSpeedClient].Radio)
-				{
-					case 0:
-						speed = 240.0;
-
-					case 1:
-						speed = 245.0;
-
-					case 2:
-						speed = 250.0;
-
-					case 3:
-						speed = 255.0;
-
-					default:
-						speed = 275.0;
-				}
-			}
-			case Class_096:
-			{
-				switch(Client[CalculateSpeedClient].Radio)
-				{
-					case 1:
-					{
-						speed = 230.0;
-					}
-					case 2:
-					{
-						speed = 520.0;
-					}
-					default:
-					{
-						speed = 230.0;
-					}
-				}
-			}
-			case Class_106:
-			{
-				speed = 240.0;
-			}
-			case Class_173:
-			{
-				switch(Client[CalculateSpeedClient].Radio)
-				{
-					case 0:
-					{
-						speed = 420.0;
-					}
-					case 2:
-					{
-						speed = FAR_FUTURE;
-					}
-				}
-			}
-			case Class_1732:
-			{
-				switch(Client[CalculateSpeedClient].Radio)
-				{
-					case 0:
-					{
-						speed = 450.0;
-					}
-					case 2:
-					{
-						speed = FAR_FUTURE;
-					}
-				}
-			}
-			case Class_939, Class_9392:
-			{
-				speed = 300.0-(GetClientHealth(CalculateSpeedClient)/55.0);
-			}
-			case Class_Stealer:
-			{
-				switch(Client[CalculateSpeedClient].Radio)
-				{
-					case 1:
-					{
-						speed = 400.0;
-					}
-					case 2:
-					{
-						speed = 500.0;
-					}
-					default:
-					{
-						speed = 350.0+((SciEscaped/(SciMax+DClassMax)*50.0));
-					}
-				}
+				Function_OnSpeed(client, speed);
 			}
 		}
 

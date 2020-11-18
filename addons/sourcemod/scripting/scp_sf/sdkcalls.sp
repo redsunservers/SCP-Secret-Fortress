@@ -200,32 +200,39 @@ int TF2_CreateDroppedWeapon(int client, int weapon, bool swap, const float origi
 	static char buffer[PLATFORM_MAX_PATH];
 	GetEntityNetClass(weapon, buffer, sizeof(buffer));
 	int offset = FindSendPropInfo(buffer, "m_Item");
-	if(offset <= -1)
+	if(offset < 0)
 	{
 		LogError("Failed to find m_Item on: %s", buffer);
 		return INVALID_ENT_REFERENCE;
 	}
 
-	if(keycard > Keycard_None)
+	switch(keycard)
 	{
-		strcopy(buffer, sizeof(buffer), KEYCARD_MODEL);
-	}
-	else
-	{
-		int index;
-		if(HasEntProp(weapon, Prop_Send, "m_iWorldModelIndex"))
+		case Keycard_None:
 		{
-			index = GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex");
+			int index;
+			if(HasEntProp(weapon, Prop_Send, "m_iWorldModelIndex"))
+			{
+				index = GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex");
+			}
+			else
+			{
+				index = GetEntProp(weapon, Prop_Send, "m_nModelIndex");
+			}
+
+			if(index < 1)
+				return INVALID_ENT_REFERENCE;
+
+			ModelIndexToString(index, buffer, sizeof(buffer));
 		}
-		else
+		case Keycard_Radio:
 		{
-			index = GetEntProp(weapon, Prop_Send, "m_nModelIndex");
+			strcopy(buffer, sizeof(buffer), RADIO_MODEL);
 		}
-
-		if(index < 1)
-			return INVALID_ENT_REFERENCE;
-
-		ModelIndexToString(index, buffer, sizeof(buffer));
+		default:
+		{
+			strcopy(buffer, sizeof(buffer), KEYCARD_MODEL);
+		}
 	}
 
 	//Dropped weapon doesn't like being spawn high in air, create on ground then teleport back after DispatchSpawn
@@ -275,11 +282,22 @@ int TF2_CreateDroppedWeapon(int client, int weapon, bool swap, const float origi
 
 		SDKCall(SDKInitWeapon, droppedWeapon, client, weapon, swap, false);
 
-		if(keycard > Keycard_None)
+		switch(keycard)
 		{
-			SetEntPropString(droppedWeapon, Prop_Data, "m_iName", KeycardNames[keycard]);
-			SetVariantInt(KeycardSkin[keycard]);
-			AcceptEntityInput(droppedWeapon, "Skin");
+			case Keycard_None:
+			{
+			}
+			case Keycard_Radio:
+			{
+				Format(buffer, sizeof(buffer), "scp_radio_%f", Client[client].Power);
+				SetEntPropString(droppedWeapon, Prop_Data, "m_iName", buffer);
+			}
+			default:
+			{
+				SetEntPropString(droppedWeapon, Prop_Data, "m_iName", KeycardNames[keycard]);
+				SetVariantInt(KeycardSkin[keycard]);
+				AcceptEntityInput(droppedWeapon, "Skin");
+			}
 		}
 
 		TeleportEntity(droppedWeapon, origin, NULL_VECTOR, NULL_VECTOR);

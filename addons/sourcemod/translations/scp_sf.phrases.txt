@@ -798,11 +798,17 @@
 		"en"		"Radar Ready [RELOAD]"
 		"ru"		"Radar готово [RELOAD]"
 	}
-	"sprint"	// Hint
+	"sprint_ready"	// HUD
 	{
 		"#format"	"{1:d}"
-		"en"		"Sprinting: {1}"
-		"ru"		"Sprinting: {1}"
+		"en"		"Sprint: {1}%% [JUMP]"
+		"ru"		"Sprint: {1}%% [JUMP]"
+	}
+	"sprint_not"	// HUD
+	{
+		"#format"	"{1:d}"
+		"en"		"Sprint: {1}%%"
+		"ru"		"Sprint: {1}%%"
 	}
 	"now_playing"	// Chat
 	{
@@ -908,5 +914,11 @@
 	"train_chaos_msg"
 	{
 		"en"		"Chaos Insurgency has spawn. They will save Class-D Personnel. They will kill Scientists and Guards. They all have the same weapon and spawn with a health kit."
+	}
+	"sprint"
+	{
+		"#format"	"{1:d}"
+		"en"		"Sprinting: {1}"
+		"ru"		"Sprinting: {1}"
 	}
 }

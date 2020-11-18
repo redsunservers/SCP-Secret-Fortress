@@ -9,19 +9,8 @@ enum
 	Music_Heavy,
 	Music_Spec,
 
-	Sound_096 = 0,
-	Sound_Screams,
-	Sound_Snap,
-	Sound_MTFSpawn,
-	Sound_ChaosSpawn,
-
-	Sound_ItSteps,
-	Sound_ItRages,
-	Sound_ItHadEnough,
-	Sound_ItStuns,
-	Sound_ItKills,
-
-	Sound_MTFSpawnSpooky
+	Sound_MTFSpawn = 0,
+	Sound_ChaosSpawn
 }
 
 static const char MusicList[][] =
@@ -50,19 +39,8 @@ static const float MusicTimes[] =
 
 static const char SoundList[][] =
 {
-	"freak_fortress_2/scp096/bgm.mp3",		// SCP-096 Passive
-	"freak_fortress_2/scp096/fullrage.mp3",		// SCP-096 Rage
-	"freak_fortress_2/scp173/scp173_kill2.mp3",	// SCP-173 Kill
 	"scp_sf/events/spawn_mtf.mp3",			// MTF Spawn
-	"scp_sf/events/spawn_chaos.mp3",		// Chaos Spawn
-
-	"scpsl/it_steals/monster_step.wav",	// Stealer Step Noise
-	"scpsl/it_steals/enraged.mp3",		// Stealer First Rage
-	"scpsl/it_steals/youhadyourchance.mp3",	// Stealer Second Rage
-	"scpsl/it_steals/stunned.mp3",		// Stealer Stunned
-	"scpsl/it_steals/deathcam.mp3",		// Player Killed
-
-	"scp_sf/events/spawn_mtf_halloween.mp3"		// Spooky MTF Spawn
+	"scp_sf/events/spawn_chaos.mp3"			// Chaos Spawn
 };
 
 static const char TFClassNames[][] =
@@ -78,6 +56,8 @@ static const char TFClassNames[][] =
 	"spy",
 	"engineer"
 };
+
+#define SOUNDPICKUP	"items/pumpkin_pickup.wav"
 
 static KeyValues Reactions;
 
@@ -104,8 +84,9 @@ void Config_Setup()
 		ClassModelSubIndex[i] = PrecacheModel(ClassModelSub[i], true);
 	}
 
+	PrecacheModel(RADIO_MODEL, true);
 	PrecacheModelEx(KEYCARD_MODEL, true);
-	VIPGhostModel = PrecacheModelEx(VIP_GHOST_MODEL, true);
+	VIPGhostModel = PrecacheModel(VIP_GHOST_MODEL, true);
 
 	char buffer[PLATFORM_MAX_PATH];
 	BuildPath(Path_SM, buffer, sizeof(buffer), CFG_REACTIONS);
