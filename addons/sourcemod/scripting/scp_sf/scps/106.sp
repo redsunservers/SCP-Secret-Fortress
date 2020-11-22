@@ -53,7 +53,7 @@ void SCP106_Create(int client)
 	Client[client].OnMaxHealth = SCP106_OnMaxHealth;
 	Client[client].OnSpeed = SCP106_OnSpeed;
 
-	int weapon = SpawnWeapon(client, "tf_weapon_shovel", 939, 60, 13, "1 ; 0.01 ; 28 ; 0 ; 66 ; 0.1 ; 137 ; 101 ; 138 ; 101 ; 252 ; 0.4", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_shovel", 939, 60, 13, "28 ; 0 ; 66 ; 0.1 ; 252 ; 0.4", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 12);

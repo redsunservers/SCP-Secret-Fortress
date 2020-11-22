@@ -16,7 +16,7 @@
 #tryinclude <basecomm>
 #define REQUIRE_PLUGIN
 #undef REQUIRE_EXTENSIONS
-#tryinclude <collisionhook>
+//#tryinclude <collisionhook>
 #tryinclude <sendproxy>
 #define REQUIRE_EXTENSIONS
 
@@ -46,7 +46,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"7"
-#define STABLE_REVISION	"0"
+#define STABLE_REVISION	"1"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define IsSCP(%1)	(Client[%1].Class>=Class_035)
@@ -670,7 +670,7 @@ bool Enabled = false;
 bool NoMusic = false;
 bool SourceComms = false;		// SourceComms++
 bool BaseComm = false;		// BaseComm
-bool CollisionHook = false;	// CollisionHook
+//bool CollisionHook = false;	// CollisionHook
 
 Cookie CookieTraining;
 Cookie CookiePref;
@@ -1089,6 +1089,7 @@ public void OnMapStart()
 {
 	Enabled = false;
 	Ready = false;
+	NoMusic = false;
 
 	Config_Setup();
 
@@ -2145,38 +2146,47 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 		}
 	}
 
+	// Teleport to spawn point
 	if(Client[client].Class!=Class_0492 && ClassSpawn[Client[client].Class][0])
 		GoToSpawn(client, Client[client].Class);
 
-	if(!CollisionHook && team==TFTeam_Unassigned)
+	/*if(team == TFTeam_Unassigned)
 	{
 		SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_DEBRIS_TRIGGER);
 	}
 	else
 	{
 		SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_PLAYER);
-	}
+	}*/
 
+	// Show class info
 	Client[client].HudIn = GetEngineTime()+9.9;
 	CreateTimer(2.0, ShowClassInfoTimer, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
-	TF2_CreateGlow(client, team);
-	SetCaptureRate(client);
+
+	// Model stuff
 	SetVariantString(ClassModel[Client[client].Class]);
 	AcceptEntityInput(client, "SetCustomModel");
 	SetEntProp(client, Prop_Send, "m_bUseClassAnimations", true);
+	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelIndex[Client[client].Class], _, 0);
+	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelSubIndex[Client[client].Class], _, 3);
+
 	if(Client[client].Class == Class_1732)
 		SetEntProp(client, Prop_Send, "m_nSkin", client%10);
 
-	TF2Attrib_SetByDefIndex(client, 49, 1.0);
-	TF2Attrib_SetByDefIndex(client, 69, 0.1);
-	TF2_AddCondition(client, TFCond_NoHealingDamageBuff, 1.0);
-
+	// Reset health
 	int health;
 	OnGetMaxHealth(client, health);
 	SetEntityHealth(client, health);
 
-	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelIndex[Client[client].Class], _, 0);
-	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", ClassModelSubIndex[Client[client].Class], _, 3);
+	// Other stuff
+	TF2_CreateGlow(client, team);
+	TF2_AddCondition(client, TFCond_NoHealingDamageBuff, 1.0);
+	SetEntProp(client, Prop_Send, "m_CollisionGroup", COLLISION_GROUP_PLAYER);
+
+	// Attribute stuff
+	SetCaptureRate(client);
+	TF2Attrib_SetByDefIndex(client, 49, 1.0);
+	TF2Attrib_SetByDefIndex(client, 69, 0.1);
 
 	if(Gamemode == Gamemode_Steals)
 		TF2Attrib_SetByDefIndex(client, 819, 1.0);
@@ -2445,19 +2455,19 @@ public Action OnSayCommand(int client, const char[] command, int args)
 		for(int target=1; target<=MaxClients; target++)
 		{
 			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target]))
-				CPrintToChat(target, "%s {default}: %s", name, msg);
+				CPrintToChat(target, "%s{default}: %s", name, msg);
 		}
 	}
 	else if(GetClientTeam(client)==view_as<int>(TFTeam_Spectator) && !IsPlayerAlive(client) && CheckCommandAccess(client, "sm_mute", ADMFLAG_CHAT))
 	{
-		CPrintToChatAll("*SPEC* %s {default}: %s", name, msg);
+		CPrintToChatAll("*SPEC* %s{default}: %s", name, msg);
 	}
 	else if(!IsPlayerAlive(client) && GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
 	{
 		for(int target=1; target<=MaxClients; target++)
 		{
 			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target] && IsSpec(target)))
-				CPrintToChat(target, "*SPEC* %s {default}: %s", name, msg);
+				CPrintToChat(target, "*SPEC* %s{default}: %s", name, msg);
 		}
 	}
 	else if(IsSpec(client))
@@ -2465,7 +2475,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 		for(int target=1; target<=MaxClients; target++)
 		{
 			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target] && IsSpec(target)))
-				CPrintToChat(target, "*DEAD* %s {default}: %s", name, msg);
+				CPrintToChat(target, "*DEAD* %s{default}: %s", name, msg);
 		}
 	}
 	else if(Client[client].ComFor > engineTime)
@@ -2473,7 +2483,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 		for(int target=1; target<=MaxClients; target++)
 		{
 			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target]))
-				CPrintToChat(target, "*COMM* %s {default}: %s", name, msg);
+				CPrintToChat(target, "*COMM* %s{default}: %s", name, msg);
 		}
 	}
 	else
@@ -2488,7 +2498,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 		{
 			if(target == client)
 			{
-				CPrintToChat(target, "%s {default}: %s", name, msg);
+				CPrintToChat(target, "%s{default}: %s", name, msg);
 				continue;
 			}
 
@@ -2497,22 +2507,22 @@ public Action OnSayCommand(int client, const char[] command, int args)
 
 			if(IsSpec(target))
 			{
-				CPrintToChat(target, "%s {default}: %s", name, msg);
+				CPrintToChat(target, "%s{default}: %s", name, msg);
 			}
 			else if(IsSCP(client))
 			{
 				if(IsFriendly(Client[client].Class, Client[target].Class))
-					CPrintToChat(target, "%s {default}: %s", name, msg);
+					CPrintToChat(target, "%s{default}: %s", name, msg);
 			}
 			else if(Client[client].Power<=0 || !Client[client].Radio)
 			{
-				CPrintToChat(target, "%s {default}: %s", name, msg);
+				CPrintToChat(target, "%s{default}: %s", name, msg);
 			}
 			else
 			{
 				static float targetPos[3];
 				GetEntPropVector(target, Prop_Send, "m_vecOrigin", targetPos);
-				CPrintToChat(target, "%s%s {default}: %s", GetVectorDistance(clientPos, targetPos)<400 ? "" : "*RADIO* ", name, msg);
+				CPrintToChat(target, "%s%s{default}: %s", GetVectorDistance(clientPos, targetPos)<400 ? "" : "*RADIO* ", name, msg);
 			}
 		}
 	}
@@ -3811,7 +3821,7 @@ public void OnGameFrame()
 				}
 				case Gamemode_Steals:
 				{
-					SciEscaped++;
+					SciEscaped += ticks/180;
 					for(int client=1; client<=MaxClients; client++)
 					{
 						if(IsValidClient(client) && (Client[client].Class==Class_DBoi || Client[client].Class==Class_Scientist))
@@ -4147,11 +4157,7 @@ public Action CheckAlivePlayers(Handle timer)
 				{
 					EndRound(Team_MTF, TFTeam_Blue);
 				}
-				else if(SciEscaped < DClassEscaped)
-				{
-					EndRound(Team_DBoi, TFTeam_Red);
-				}
-				else if(SciCaptured > DClassCaptured)
+				else if(SciEscaped<DClassEscaped || SciCaptured>DClassCaptured)
 				{
 					EndRound(Team_DBoi, TFTeam_Red);
 				}
@@ -4749,7 +4755,7 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_Frag:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_grenadelauncher", WeaponIndex[weapon], 10, 6, "2 ; 45 ; 5 ; 8.5 ; 15 ; 0 ; 77 ; 0.003 ; 99 ; 1.5 ; 138 ; 0 ; 252 ; 0.95 ; 303 ; -1 ; 773 ; 2 ; 787 ; 2.173913", 1);
+			entity = SpawnWeapon(client, "tf_weapon_grenadelauncher", WeaponIndex[weapon], 10, 6, "2 ; 45 ; 5 ; 8.5 ; 15 ; 0 ; 77 ; 0.003 ; 99 ; 1.5 ; 252 ; 0.95 ; 303 ; -1 ; 773 ; 2 ; 787 ; 2.173913", 1);
 			if(ammo && entity>MaxClients)
 				SetAmmo(client, entity, 1);
 		}
@@ -5457,118 +5463,6 @@ bool IsFriendly(ClassEnum class1, ClassEnum class2)
 	return (class1>=Class_035 && class2>=Class_035);	// Both are SCPs
 }
 
-void TurnOnGlow(int client, const char[] color, int brightness, float distance)
-{
-	int entity = CreateEntityByName("light_dynamic");
-	if(!IsValidEntity(entity))
-		return; // It shouldn't.
-
-	DispatchKeyValue(entity, "_light", color);
-	SetEntProp(entity, Prop_Send, "m_Exponent", brightness);
-	SetEntPropFloat(entity, Prop_Send, "m_Radius", distance);
-	DispatchSpawn(entity);
-
-	static float pos[3];
-	GetClientEyePosition(client, pos);
-	TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
-
-	SetVariantString("!activator");
-	AcceptEntityInput(entity, "SetParent", client);
-	Client[client].HealthPack = EntIndexToEntRef(entity);
-}
-
-void TurnOffGlow(int client)
-{
-	if(Gamemode!=Gamemode_Steals || !Client[client].HealthPack)
-		return;
-
-	int entity = EntRefToEntIndex(Client[client].HealthPack);
-	if(entity>MaxClients && IsValidEntity(entity))
-	{
-		AcceptEntityInput(entity, "TurnOff");
-		CreateTimer(0.1, Timer_RemoveEntity, Client[client].HealthPack, TIMER_FLAG_NO_MAPCHANGE);
-	}
-	Client[client].HealthPack = 0;
-}
-
-void TurnOnFlashlight(int client)
-{
-	if(Client[client].HealthPack)
-		TurnOffFlashlight(client);
-
-	// Spawn the light that only everyone else will see.
-	int ent = CreateEntityByName("point_spotlight");
-	if(ent == -1)
-		return;
-
-	static float pos[3];
-	GetClientEyePosition(client, pos);
-	TeleportEntity(ent, pos, NULL_VECTOR, NULL_VECTOR);
-
-	DispatchKeyValue(ent, "spotlightlength", "1024");
-	DispatchKeyValue(ent, "spotlightwidth", "512");
-	DispatchKeyValue(ent, "rendercolor", "255 255 255");
-	DispatchSpawn(ent);
-	ActivateEntity(ent);
-	SetVariantString("!activator");
-	AcceptEntityInput(ent, "SetParent", client);
-	AcceptEntityInput(ent, "LightOn");
-
-	Client[client].HealthPack = EntIndexToEntRef(ent);
-}
-
-void TurnOffFlashlight(int client)
-{
-	if(Gamemode!=Gamemode_Steals || !Client[client].HealthPack)
-		return;
-
-	int entity = EntRefToEntIndex(Client[client].HealthPack);
-	if(entity>MaxClients && IsValidEntity(entity))
-	{
-		AcceptEntityInput(entity, "LightOff");
-		CreateTimer(0.1, Timer_RemoveEntity, Client[client].HealthPack, TIMER_FLAG_NO_MAPCHANGE);
-	}
-	Client[client].HealthPack = 0;
-}
-
-int CreateWeaponGlow(int iEntity, float flDuration)
-{
-	int iGlow = CreateEntityByName("tf_taunt_prop");
-	if (IsValidEntity(iGlow) && DispatchSpawn(iGlow))
-	{
-		int index = -1;
-		if(HasEntProp(iEntity, Prop_Send, "m_iWorldModelIndex"))
-		{
-			index = GetEntProp(iEntity, Prop_Send, "m_iWorldModelIndex");
-		}
-		else
-		{
-			index = GetEntProp(iEntity, Prop_Send, "m_nModelIndex");
-		}
-
-		if(index < 0)
-			return -1;
-
-		static char model[PLATFORM_MAX_PATH];
-		ModelIndexToString(index, model, sizeof(model));
-		SetEntityModel(iGlow, model);
-		SetEntProp(iGlow, Prop_Send, "m_nSkin", 0);
-		
-		SetEntPropEnt(iGlow, Prop_Data, "m_hEffectEntity", iEntity);
-		SetEntProp(iGlow, Prop_Send, "m_bGlowEnabled", true);
-		
-		int iEffects = GetEntProp(iGlow, Prop_Send, "m_fEffects");
-		SetEntProp(iGlow, Prop_Send, "m_fEffects", iEffects | EF_BONEMERGE | EF_NOSHADOW | EF_NORECEIVESHADOW);
-		
-		SetVariantString("!activator");
-		AcceptEntityInput(iGlow, "SetParent", iEntity);
-		
-		CreateTimer(flDuration, Timer_RemoveEntity, EntIndexToEntRef(iGlow), TIMER_FLAG_NO_MAPCHANGE);
-	}
-	
-	return iGlow;
-}
-
 public int OnQueryFinished(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue, int userid)
 {
 	if(Client[client].DownloadMode==2 || GetClientOfUserId(userid)!=client || !IsClientInGame(client))
@@ -5628,7 +5522,7 @@ public void Zone_OnClientEntry(int client, char[] zone)
 		TF2_AddCondition(client, TFCond_TeleportedGlow, 0.5);
 }
 
-public Action CH_PassFilter(int ent1, int ent2, bool &result)
+/*public Action CH_PassFilter(int ent1, int ent2, bool &result)
 {
 	CollisionHook = true;
 	if(!Enabled || !IsValidClient(ent1) || !IsValidClient(ent2))
@@ -5652,7 +5546,7 @@ public Action CH_PassFilter(int ent1, int ent2, bool &result)
 	}
 	result = !IsFriendly(Client[ent1].Class, Client[ent2].Class);
 	return Plugin_Handled;
-}
+}*/
 
 #if defined _SENDPROXYMANAGER_INC_
 public Action SendProp_OnAlive(int entity, const char[] propname, int &value, int client) 

@@ -86,7 +86,7 @@ void SCP049_Create(int client)
 		SetEntProp(weapon, Prop_Send, "m_iAccountID", account);
 	}
 
-	weapon = SpawnWeapon(client, "tf_weapon_bonesaw", 173, 80, 13, "1 ; 0.01 ; 137 ; 101 ; 138 ; 1001 ; 252 ; 0.2", false);
+	weapon = SpawnWeapon(client, "tf_weapon_bonesaw", 173, 80, 13, "138 ; 11 ; 252 ; 0.2", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 6);

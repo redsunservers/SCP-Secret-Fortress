@@ -56,7 +56,7 @@ void SCP939_Create(int client)
 
 	int account = GetSteamAccountID(client);
 
-	int weapon = SpawnWeapon(client, "tf_weapon_knife", 461, 70, 13, "1 ; 0.01 ; 15 ; 0 ; 137 ; 165 ; 138 ; 165 ; 252 ; 0.3 ; 869 ; 1", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_fireaxe", 461, 70, 13, "15 ; 0 ; 252 ; 0.3", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 10);
@@ -85,10 +85,9 @@ public void SCP939_OnSpeed(int client, float &speed)
 
 public Action SCP939_OnDealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	if(damagecustom != TF_CUSTOM_BACKSTAB)
-		return Plugin_Continue;
+	if(TF2_IsPlayerInCondition(client, TFCond_Disguised))
+		TF2_RemoveCondition(client, TFCond_Disguised);
 
-	SDKHooks_TakeDamage(victim, client, client, 66.0);
 	return Plugin_Handled;
 }
 

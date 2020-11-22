@@ -13,11 +13,13 @@ static int ForceRespawnHook[MAXTF2PLAYERS];
 static int ThinkData[MAXENTITIES];
 static ThinkFunctionEnum ThinkFunction;
 static int CalculateSpeedClient;
+//static int ClientTeam;
 
 void DHook_Setup(GameData gamedata)
 {
 	DHook_CreateDetour(gamedata, "CBaseEntity::InSameTeam", DHook_InSameTeamPre);
 	DHook_CreateDetour(gamedata, "CBaseEntity::PhysicsDispatchThink", DHook_PhysicsDispatchThinkPre, DHook_PhysicsDispatchThinkPost);
+	//DHook_CreateDetour(gamedata, "CLagCompensationManager::StartLagCompensation", DHook_StartLagCompensationPre, DHook_StartLagCompensationPost);
 	DHook_CreateDetour(gamedata, "CTFGameMovement::ProcessMovement", DHook_ProcessMovementPre);
 	DHook_CreateDetour(gamedata, "CTFPlayer::CanPickupDroppedWeapon", DHook_CanPickupDroppedWeaponPre);
 	DHook_CreateDetour(gamedata, "CTFPlayer::DropAmmoPack", DHook_DropAmmoPackPre);
@@ -216,6 +218,19 @@ public MRESReturn DHook_SetWinningTeam(DHookParam param)
 	param.Set(4, false);
 	return MRES_ChangedOverride;
 }
+
+/*public MRESReturn DHook_StartLagCompensationPre(Address manager, DHookParam param)
+{
+	int client = param.Get(1);
+	ClientTeam = GetClientTeam(client);
+	ChangeClientTeamEx(client, TFTeam_Red);
+}
+
+public MRESReturn DHook_StartLagCompensationPost(Address manager, DHookParam param)
+{
+	int client = param.Get(1);
+	ChangeClientTeamEx(client, ClientTeam);
+}*/
 
 public MRESReturn DHook_PhysicsDispatchThinkPre(int entity)
 {

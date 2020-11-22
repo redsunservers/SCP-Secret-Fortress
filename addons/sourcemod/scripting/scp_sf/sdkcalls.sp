@@ -162,13 +162,13 @@ Address SDKCall_GetGlobalTeam(any team)
 	return Address_Null;
 }
 
-void ChangeClientTeamEx(int client, TFTeam newTeam)
+void ChangeClientTeamEx(int client, any newTeam)
 {
 	if(!SDKTeamAddPlayer || !SDKTeamRemovePlayer)
 	{
 		int state = GetEntProp(client, Prop_Send, "m_lifeState");
 		SetEntProp(client, Prop_Send, "m_lifeState", 2);
-		ChangeClientTeam(client, (newTeam<=TFTeam_Spectator) ? view_as<int>(TFTeam_Red) : view_as<int>(newTeam));
+		ChangeClientTeam(client, (newTeam<=TFTeam_Spectator) ? view_as<int>(TFTeam_Red) : newTeam);
 		SetEntProp(client, Prop_Send, "m_lifeState", state);
 		return;
 	}
@@ -184,12 +184,12 @@ void ChangeClientTeamEx(int client, TFTeam newTeam)
 		{
 			SDKCall(SDKTeamRemovePlayer, team, client);
 		}
-		else if(entityTeam == view_as<int>(newTeam))
+		else if(entityTeam == newTeam)
 		{
 			SDKCall(SDKTeamAddPlayer, team, client);
 		}
 	}
-	SetEntProp(client, Prop_Send, "m_iTeamNum", view_as<int>(newTeam));
+	SetEntProp(client, Prop_Send, "m_iTeamNum", newTeam);
 }
 
 int TF2_CreateDroppedWeapon(int client, int weapon, bool swap, const float origin[3], const float angles[3], KeycardEnum keycard=Keycard_None)

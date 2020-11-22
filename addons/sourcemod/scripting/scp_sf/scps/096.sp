@@ -115,7 +115,7 @@ public void SCP096_OnDeath(int client, int attacker)
 public Action SCP096_OnTakeDamage(int client, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
 	if(Triggered[attacker]<3 && !TF2_IsPlayerInCondition(client, TFCond_Dazed))
-		TriggerShyGuy(client, attacker, GetEngineTime(), true);
+		TriggerShyGuy(client, attacker, true);
 
 	return Plugin_Continue;
 }
@@ -150,7 +150,7 @@ public void SCP096_OnButton(int client, int button)
 				TF2_AddCondition(client, TFCond_CritCola, 99.9);
 
 				TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
-				int weapon = SpawnWeapon(client, "tf_weapon_sword", 154, 100, 13, "2 ; 101 ; 6 ; 0.8 ; 28 ; 3 ; 252 ; 0 ; 326 ; 2.33", false);
+				int weapon = SpawnWeapon(client, "tf_weapon_sword", 154, 100, 13, "2 ; 11 ; 6 ; 0.8 ; 28 ; 3 ; 252 ; 0 ; 326 ; 2.33", false);
 				if(weapon > MaxClients)
 				{
 					ApplyStrangeRank(weapon, 16);
@@ -280,7 +280,7 @@ public void SCP096_OnButton(int client, int button)
 						continue;
 
 					// success
-					TriggerShyGuy(client, target, engineTime, false);
+					TriggerShyGuy(client, target, false);
 					found = true;
 					break;
 				}
@@ -306,7 +306,7 @@ public void SCP096_OnButton(int client, int button)
 	}
 }
 
-static void TriggerShyGuy(int client, int target, float engineTime, bool full)
+static void TriggerShyGuy(int client, int target, bool full)
 {
 	if(full)
 	{
@@ -339,7 +339,7 @@ static void TriggerShyGuy(int client, int target, float engineTime, bool full)
 				StopSound(client, SNDCHAN_VOICE, SoundPassive);
 
 			Client[client].Pos[0] = 0.0;
-			Client[client].Power = engineTime+RageWarmup;
+			Client[client].Power = GetEngineTime()+RageWarmup;
 			Client[client].Radio = 1;
 			Client[client].Disarmer = 1;
 			TF2_StunPlayer(client, 9.9, 0.9, TF_STUNFLAGS_LOSERSTATE);

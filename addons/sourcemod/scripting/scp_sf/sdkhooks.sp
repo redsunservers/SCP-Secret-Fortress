@@ -8,6 +8,7 @@ void SDKHook_HookClient(int client)
 	SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 	SDKHook(client, SDKHook_SetTransmit, OnTransmit);
+	SDKHook(client, SDKHook_ShouldCollide, OnShouldCollide);
 }
 
 void SDKHook_HookCapture(int entity)
@@ -109,6 +110,14 @@ public Action OnObjDamage(int entity, int &attacker, int &inflictor, float &dama
 			return Plugin_Handled;
 	}
 	return Plugin_Continue;
+}
+
+public bool OnShouldCollide(int client, int collisiongroup, int contentsmask, bool original)
+{
+	if(collisiongroup == COLLISION_GROUP_PLAYER_MOVEMENT)
+		return false;
+
+	return original;
 }
 
 public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
@@ -259,7 +268,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 
 public Action HookSound(int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH], int &entity, int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
 {
-	if(!Enabled || !IsValidClient(entity))
+	if(!IsValidClient(entity))
 		return Plugin_Continue;
 
 	if(!StrContains(sample, "vo", false))

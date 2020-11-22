@@ -9,6 +9,16 @@ static const char Kill[] = "scpsl/it_steals/deathcam.mp3";
 
 static const char Downloads[][] =
 {
+	"models/freak_fortress_2/it_steals/it_steals_v39.dx80.vtx",
+	"models/freak_fortress_2/it_steals/it_steals_v39.dx90.vtx",
+	"models/freak_fortress_2/it_steals/it_steals_v39.mdl",
+	"models/freak_fortress_2/it_steals/it_steals_v39.phy",
+	"models/freak_fortress_2/it_steals/it_steals_v39.sw.vtx",
+	"models/freak_fortress_2/it_steals/it_steals_v39.vvd",
+
+	"materials/freak_fortress_2/it_steals/it_steals.vmt",
+	"materials/freak_fortress_2/it_steals/it_steals.vtf",
+
 	"scpsl/it_steals/monster_step.wav",
 	"scpsl/it_steals/enraged.mp3",
 	"scpsl/it_steals/youhadyourchance.mp3",
@@ -49,7 +59,8 @@ void ItSteals_Create(int client)
 	Client[client].HealthPack = 0;
 	Client[client].Radio = 0;
 
-	Client[client].OnDealDamage = SCP096_OnDealDamage;
+	Client[client].OnButton = ItSteals_OnButton;
+	Client[client].OnDealDamage = ItSteals_OnDealDamage;
 	Client[client].OnGlowPlayer = ItSteals_OnGlowPlayer;
 	Client[client].OnKill = ItSteals_OnKill;
 	Client[client].OnMaxHealth = ItSteals_OnMaxHealth;
@@ -71,7 +82,7 @@ public void ItSteals_OnMaxHealth(int client, int &health)
 	{
 		case -1:
 		{
-			health = ((DClassMax+SciMax)*2)+6;
+			health = ((DClassMax+SciMax)*3/2)+4;
 			SetEntityHealth(client, 1);
 		}
 		case 1:
@@ -100,7 +111,7 @@ public void ItSteals_OnMaxHealth(int client, int &health)
 			}
 			else
 			{
-				health = ((DClassMax+SciMax)*2)+6;
+				health = ((DClassMax+SciMax)*3/2)+6;
 				SetEntityHealth(client, SciEscaped+2);
 			}
 		}
@@ -113,15 +124,15 @@ public void ItSteals_OnSpeed(int client, float &speed)
 	{
 		case 1:
 		{
-			speed = 400.0;
+			speed = 420.0;
 		}
 		case 2:
 		{
-			speed = 500.0;
+			speed = 520.0;
 		}
 		default:
 		{
-			speed = 350.0+((SciEscaped/(SciMax+DClassMax)*50.0));
+			speed = 350.0+((SciEscaped/(SciMax+DClassMax)*60.0));
 		}
 	}
 }
@@ -143,7 +154,7 @@ public bool ItSteals_OnSeePlayer(int client, int victim)
 
 public bool ItSteals_OnGlowPlayer(int client, int victim)
 {
-	return Client[victim].IdleAt<GetEngineTime();
+	return (Client[client].Radio==2 || Client[victim].IdleAt<GetEngineTime());
 }
 
 public void ItSteals_OnButton(int client, int button)
@@ -232,7 +243,7 @@ public void ItSteals_OnButton(int client, int button)
 					continue;
 
 				// success
-				if(SciEscaped >= ((DClassMax+SciMax)*2)+4)
+				if(SciEscaped >= ((DClassMax+SciMax)*3/2)+4)
 				{
 					for(target=1; target<=MaxClients; target++)
 					{
@@ -246,8 +257,13 @@ public void ItSteals_OnButton(int client, int button)
 					ChangeGlobalSong(FAR_FUTURE, ItHadEnough, true);
 					TF2_StunPlayer(client, 11.0, 1.0, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
 				}
-				else if(!SCPKilled && SciEscaped==DClassMax+SciMax+2)
+				else if(!SCPKilled && SciEscaped>=((DClassMax+SciMax)*3/4)+2)
 				{
+					for(target=1; target<=MaxClients; target++)
+					{
+						Flashed[target] = false;
+					}
+
 					SCPKilled = 1;
 					Client[client].Radio = 1;
 					Client[client].Power = engineTime+15.0;
@@ -272,4 +288,116 @@ public void ItSteals_OnButton(int client, int button)
 void ItSteals_Step(char[] sound, int length)
 {
 	strcopy(sound, length, Step);
+}
+
+void TurnOnGlow(int client, const char[] color, int brightness, float distance)
+{
+	int entity = CreateEntityByName("light_dynamic");
+	if(!IsValidEntity(entity))
+		return; // It shouldn't.
+
+	DispatchKeyValue(entity, "_light", color);
+	SetEntProp(entity, Prop_Send, "m_Exponent", brightness);
+	SetEntPropFloat(entity, Prop_Send, "m_Radius", distance);
+	DispatchSpawn(entity);
+
+	static float pos[3];
+	GetClientEyePosition(client, pos);
+	TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
+
+	SetVariantString("!activator");
+	AcceptEntityInput(entity, "SetParent", client);
+	Client[client].HealthPack = EntIndexToEntRef(entity);
+}
+
+void TurnOffGlow(int client)
+{
+	if(Gamemode!=Gamemode_Steals || !Client[client].HealthPack)
+		return;
+
+	int entity = EntRefToEntIndex(Client[client].HealthPack);
+	if(entity>MaxClients && IsValidEntity(entity))
+	{
+		AcceptEntityInput(entity, "TurnOff");
+		CreateTimer(0.1, Timer_RemoveEntity, Client[client].HealthPack, TIMER_FLAG_NO_MAPCHANGE);
+	}
+	Client[client].HealthPack = 0;
+}
+
+void TurnOnFlashlight(int client)
+{
+	if(Client[client].HealthPack)
+		TurnOffFlashlight(client);
+
+	// Spawn the light that only everyone else will see.
+	int ent = CreateEntityByName("point_spotlight");
+	if(ent == -1)
+		return;
+
+	static float pos[3];
+	GetClientEyePosition(client, pos);
+	TeleportEntity(ent, pos, NULL_VECTOR, NULL_VECTOR);
+
+	DispatchKeyValue(ent, "spotlightlength", "1024");
+	DispatchKeyValue(ent, "spotlightwidth", "512");
+	DispatchKeyValue(ent, "rendercolor", "255 255 255");
+	DispatchSpawn(ent);
+	ActivateEntity(ent);
+	SetVariantString("!activator");
+	AcceptEntityInput(ent, "SetParent", client);
+	AcceptEntityInput(ent, "LightOn");
+
+	Client[client].HealthPack = EntIndexToEntRef(ent);
+}
+
+void TurnOffFlashlight(int client)
+{
+	if(Gamemode!=Gamemode_Steals || !Client[client].HealthPack)
+		return;
+
+	int entity = EntRefToEntIndex(Client[client].HealthPack);
+	if(entity>MaxClients && IsValidEntity(entity))
+	{
+		AcceptEntityInput(entity, "LightOff");
+		CreateTimer(0.1, Timer_RemoveEntity, Client[client].HealthPack, TIMER_FLAG_NO_MAPCHANGE);
+	}
+	Client[client].HealthPack = 0;
+}
+
+int CreateWeaponGlow(int iEntity, float flDuration)
+{
+	int iGlow = CreateEntityByName("tf_taunt_prop");
+	if (IsValidEntity(iGlow) && DispatchSpawn(iGlow))
+	{
+		int index = -1;
+		if(HasEntProp(iEntity, Prop_Send, "m_iWorldModelIndex"))
+		{
+			index = GetEntProp(iEntity, Prop_Send, "m_iWorldModelIndex");
+		}
+		else
+		{
+			index = GetEntProp(iEntity, Prop_Send, "m_nModelIndex");
+		}
+
+		if(index < 0)
+			return -1;
+
+		static char model[PLATFORM_MAX_PATH];
+		ModelIndexToString(index, model, sizeof(model));
+		SetEntityModel(iGlow, model);
+		SetEntProp(iGlow, Prop_Send, "m_nSkin", 0);
+		
+		SetEntPropEnt(iGlow, Prop_Data, "m_hEffectEntity", iEntity);
+		SetEntProp(iGlow, Prop_Send, "m_bGlowEnabled", true);
+		
+		int iEffects = GetEntProp(iGlow, Prop_Send, "m_fEffects");
+		SetEntProp(iGlow, Prop_Send, "m_fEffects", iEffects | EF_BONEMERGE | EF_NOSHADOW | EF_NORECEIVESHADOW);
+		
+		SetVariantString("!activator");
+		AcceptEntityInput(iGlow, "SetParent", iEntity);
+		
+		CreateTimer(flDuration, Timer_RemoveEntity, EntIndexToEntRef(iGlow), TIMER_FLAG_NO_MAPCHANGE);
+	}
+	
+	return iGlow;
 }
