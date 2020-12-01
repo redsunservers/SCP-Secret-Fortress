@@ -122,12 +122,12 @@ public Action SCP096_OnTakeDamage(int client, int &attacker, int &inflictor, flo
 
 public Action SCP096_OnDealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	return (Triggered[victim] > 1) ? Plugin_Continue : Plugin_Handled;
+	return (Triggered[victim] > 2) ? Plugin_Continue : Plugin_Handled;
 }
 
 public bool SCP096_OnSeePlayer(int client, int victim)
 {
-	return (!Client[client].Radio || Triggered[victim]>1);
+	return (!Client[client].Radio || Triggered[victim]>2);
 }
 
 public bool SCP096_OnGlowPlayer(int client, int victim)
@@ -310,8 +310,8 @@ static void TriggerShyGuy(int client, int target, bool full)
 {
 	if(full)
 	{
-		if(Triggered[target] != 3)
-			return;
+		//if(Triggered[target] == 3)
+			//return;
 
 		Triggered[target] = 3;
 	}

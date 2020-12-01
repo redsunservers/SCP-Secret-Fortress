@@ -104,7 +104,7 @@ void SCP0492_Create(int client)
 	Client[client].OnMaxHealth = SCP0492_OnMaxHealth;
 	Client[client].OnSpeed = SCP0492_OnSpeed;
 
-	int weapon = SpawnWeapon(client, "tf_weapon_bat", 572, 50, 13, "1 ; 0.01 ; 5 ; 1.3 ; 28 ; 0.5 ; 137 ; 101 ; 138 ; 125 ; 252 ; 0.5", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_bat", 572, 50, 13, "2 ; 1.25 ; 5 ; 1.3 ; 28 ; 0.5 ; 252 ; 0.5", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 4);

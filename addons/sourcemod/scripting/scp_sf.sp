@@ -46,7 +46,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"7"
-#define STABLE_REVISION	"1"
+#define STABLE_REVISION	"2"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define IsSCP(%1)	(Client[%1].Class>=Class_035)

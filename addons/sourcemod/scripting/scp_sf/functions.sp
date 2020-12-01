@@ -44,7 +44,7 @@ void Function_OnSpeed(int client, float &speed)
 
 Action Function_OnTakeDamage(int client, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	Action result;
+	Action result = Plugin_Continue;
 	if(Client[client].OnTakeDamage != INVALID_FUNCTION)
 	{
 		Call_StartFunction(INVALID_HANDLE, Client[client].OnTakeDamage);
@@ -57,14 +57,14 @@ Action Function_OnTakeDamage(int client, int &attacker, int &inflictor, float &d
 		Call_PushArrayEx(damageForce, 3, SM_PARAM_COPYBACK);
 		Call_PushArrayEx(damagePosition, 3, SM_PARAM_COPYBACK);
 		Call_PushCell(damagecustom);
-		Call_Finish();
+		Call_Finish(result);
 	}
 	return result;
 }
 
 Action Function_OnDealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	Action result;
+	Action result = Plugin_Continue;
 	if(Client[client].OnDealDamage != INVALID_FUNCTION)
 	{
 		Call_StartFunction(INVALID_HANDLE, Client[client].OnDealDamage);
@@ -77,7 +77,7 @@ Action Function_OnDealDamage(int client, int victim, int &inflictor, float &dama
 		Call_PushArrayEx(damageForce, 3, SM_PARAM_COPYBACK);
 		Call_PushArrayEx(damagePosition, 3, SM_PARAM_COPYBACK);
 		Call_PushCell(damagecustom);
-		Call_Finish();
+		Call_Finish(result);
 	}
 	return result;
 }
