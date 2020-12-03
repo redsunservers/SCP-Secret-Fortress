@@ -73,6 +73,8 @@ void SCP096_Create(int client)
 	Client[client].OnSpeed = SCP096_OnSpeed;
 	Client[client].OnTakeDamage = SCP096_OnTakeDamage;
 
+	int account = GetSteamAccountID(client);
+
 	SetEntityHealth(client, HealthMax+HealthExtra);
 	int weapon = SpawnWeapon(client, "tf_weapon_bottle", 195, 1, 13, "1 ; 0 ; 252 ; 0.6", false);
 	if(weapon > MaxClients)
@@ -81,8 +83,18 @@ void SCP096_Create(int client)
 		SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
 		SetEntityRenderMode(weapon, RENDER_TRANSCOLOR);
 		SetEntityRenderColor(weapon, 255, 255, 255, 0);
-		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client));
+		SetEntProp(weapon, Prop_Send, "m_iAccountID", account);
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
+	}
+
+	if(!GetRandomInt(0, 3))
+	{
+		weapon = TF2_CreateHat(client, 666, 13);
+		if(weapon > MaxClients)
+		{
+			ApplyStrangeHatRank(weapon, 7);
+			SetEntProp(weapon, Prop_Send, "m_iAccountID", account);
+		}
 	}
 }
 

@@ -53,12 +53,23 @@ void SCP106_Create(int client)
 	Client[client].OnMaxHealth = SCP106_OnMaxHealth;
 	Client[client].OnSpeed = SCP106_OnSpeed;
 
+	int account = GetSteamAccountID(client);
 	int weapon = SpawnWeapon(client, "tf_weapon_shovel", 939, 60, 13, "28 ; 0 ; 66 ; 0.1 ; 252 ; 0.4", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 12);
-		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client));
+		SetEntProp(weapon, Prop_Send, "m_iAccountID", account);
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
+	}
+
+	if(!GetRandomInt(0, 3))
+	{
+		weapon = TF2_CreateHat(client, 984, 13);
+		if(weapon > MaxClients)
+		{
+			ApplyStrangeHatRank(weapon, 11);
+			SetEntProp(weapon, Prop_Send, "m_iAccountID", account);
+		}
 	}
 }
 

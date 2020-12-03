@@ -299,6 +299,11 @@
 				"linux"		"92"
 				"windows"	"91"	
 			}
+			"CBaseEntity::GetBaseEntity"
+			{
+				"linux" 	"6"
+				"windows" 	"5"
+			}
 			"CBasePlayer::EquipWearable"
 			{
 				"linux"		"431"
@@ -309,15 +314,15 @@
 				"linux"		"330"
 				"windows"	"329"
 			}
-			"CBaseEntity::GetBaseEntity"
-			{
-				"linux" 	"6"
-				"windows" 	"5"
-			}
 			"CTeamplayRoundBasedRules::RoundRespawn"
 			{
 				"linux"		"226"
 				"windows"	"224"
+			}
+			"CTeamplayRules::SetWinningTeam"
+			{
+				"linux"		"161"
+				"windows"	"160"
 			}
 			"CTeam::AddPlayer"
 			{
@@ -328,31 +333,6 @@
 			{
 				"linux"		"203"
 				"windows"	"202"
-			}
-			"CTFGameRules::GetGameType"
-			{
-				"linux"		"136"
-				"windows"	"135"
-			}
-			"CTFGameRules::IsInTraining"
-			{
-				"linux"		"182"
-				"windows"	"181"
-			}
-			"CTeamplayRules::SetWinningTeam"
-			{
-				"linux"		"161"
-				"windows"	"160"
-			}
-			"CTFPlayer::ForceRespawn"
-			{
-				"linux"		"330"
-				"windows"	"329"
-			}
-			"ILocomotion::ShouldCollideWith"
-			{
-				"linux"		"100"
-				"windows"	"99"
 			}
 		}
 		"Addresses"

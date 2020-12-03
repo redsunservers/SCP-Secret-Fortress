@@ -1,5 +1,6 @@
 Required:
 https://github.com/FlaminSarge/tf2attributes
+https://forums.alliedmods.net/showthread.php?t=326853
 https://github.com/asherkin/TF2Items
 https://github.com/peace-maker/DHooks2
 https://forums.alliedmods.net/showthread.php?t=185016 (Compiling)

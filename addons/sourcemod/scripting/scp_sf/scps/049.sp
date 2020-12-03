@@ -78,7 +78,9 @@ void SCP049_Create(int client)
 
 	int account = GetSteamAccountID(client);
 
-	int weapon = SpawnWeapon(client, "tf_weapon_medigun", 211, 5, 13, "7 ; 0.7 ; 9 ; 0 ; 18 ; 1 ; 252 ; 0.95 ; 292 ; 2", false);
+	int weapon = GetRandomInt(0, 3) ? 211 : 663;
+
+	weapon = SpawnWeapon(client, "tf_weapon_medigun", weapon, 5, 13, "7 ; 0.7 ; 9 ; 0 ; 18 ; 1 ; 252 ; 0.95 ; 292 ; 2", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 11);
@@ -92,6 +94,16 @@ void SCP049_Create(int client)
 		ApplyStrangeRank(weapon, 6);
 		SetEntProp(weapon, Prop_Send, "m_iAccountID", account);
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
+	}
+
+	if(!GetRandomInt(0, 3))
+	{
+		weapon = TF2_CreateHat(client, 987, 13);
+		if(weapon > MaxClients)
+		{
+			ApplyStrangeHatRank(weapon, 6);
+			SetEntProp(weapon, Prop_Send, "m_iAccountID", account);
+		}
 	}
 }
 

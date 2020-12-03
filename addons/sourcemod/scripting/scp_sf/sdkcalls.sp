@@ -1,16 +1,16 @@
-static Handle SDKInitPickup;
 static Handle SDKChangeTeam;
 static Handle SDKGetBaseEntity;
 static Handle SDKGetNextThink;
+static Handle SDKEquipWearable;
 static Handle SDKTeamAddPlayerRaw;
 static Handle SDKTeamAddPlayer;
 static Handle SDKTeamRemovePlayerRaw;
 static Handle SDKTeamRemovePlayer;
-static Handle SDKSetSpeed;
-static Handle SDKGlobalTeam;
-
 Handle SDKCreateWeapon;
 Handle SDKInitWeapon;
+static Handle SDKInitPickup;
+static Handle SDKSetSpeed;
+static Handle SDKGlobalTeam;
 
 void SDKCall_Setup(GameData gamedata)
 {
@@ -35,6 +35,13 @@ void SDKCall_Setup(GameData gamedata)
 	SDKGetNextThink = EndPrepSDKCall();
 	if(!SDKGetNextThink)
 		LogError("[Gamedata] Could not find CBaseEntity::GetNextThink");
+
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CBasePlayer::EquipWearable");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	SDKEquipWearable = EndPrepSDKCall();
+	if(!SDKEquipWearable)
+		LogError("[Gamedata] Could not find CBasePlayer::EquipWearable");
 
 	StartPrepSDKCall(SDKCall_Raw);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTeam::AddPlayer");
@@ -190,6 +197,27 @@ void ChangeClientTeamEx(int client, any newTeam)
 		}
 	}
 	SetEntProp(client, Prop_Send, "m_iTeamNum", newTeam);
+}
+
+int TF2_CreateHat(int client, int index, int quality=0, int level=1)
+{
+	if(!SDKEquipWearable)
+		return -1;
+
+	int wearable = CreateEntityByName("tf_wearable");
+	if(IsValidEntity(wearable))
+	{
+		SetEntProp(wearable, Prop_Send, "m_iItemDefinitionIndex", index);
+		SetEntProp(wearable, Prop_Send, "m_bInitialized", true);
+		SetEntProp(wearable, Prop_Send, "m_iEntityQuality", quality);
+		SetEntProp(wearable, Prop_Send, "m_iEntityLevel", level);
+
+		DispatchSpawn(wearable);
+		SetEntProp(wearable, Prop_Send, "m_bValidatedAttachedEntity", true);
+
+		SDKCall(SDKEquipWearable, client, wearable);
+	}
+	return wearable;
 }
 
 int TF2_CreateDroppedWeapon(int client, int weapon, bool swap, const float origin[3], const float angles[3], KeycardEnum keycard=Keycard_None)

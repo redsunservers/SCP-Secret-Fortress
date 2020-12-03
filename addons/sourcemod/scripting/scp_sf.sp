@@ -46,7 +46,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"7"
-#define STABLE_REVISION	"2"
+#define STABLE_REVISION	"4"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define IsSCP(%1)	(Client[%1].Class>=Class_035)
@@ -545,8 +545,8 @@ int WeaponIndex[] =
 	954,	// Disarmer
 
 	// Secondary
-	209,	//773
-	294,	//209
+	773,
+	209,
 	751,
 	1150,
 	425,
@@ -555,7 +555,7 @@ int WeaponIndex[] =
 	// Primary
 	1151,
 	308,
-	199,
+	1141,//199,
 	594,
 
 	// PDAs
@@ -733,6 +733,7 @@ enum struct ClientEnum
 	float ChargeIn;
 	float AloneIn;
 	float Cooldown;
+	float IgnoreTeleFor;
 	float Pos[3];
 
 	// Sprinting
@@ -1864,7 +1865,7 @@ public void TF2_OnConditionAdded(int client, TFCond cond)
 		return;
 	}
 
-	if(cond != TFCond_TeleportedGlow)
+	if(cond!=TFCond_TeleportedGlow || Client[client].IgnoreTeleFor>GetEngineTime())
 		return;
 
 	if(Client[client].Class == Class_DBoi)
@@ -1878,22 +1879,29 @@ public void TF2_OnConditionAdded(int client, TFCond cond)
 		else if(Client[client].Disarmer)
 		{
 			DClassCaptured++;
-			Client[client].Class = Client[client].MTFBan ? Class_Spec : Class_MTF2;
-
-			int total;
-			int[] clients = new int[MaxClients];
-			for(int i=1; i<=MaxClients; i++)
+			if(Client[client].MTFBan)
 			{
-				if(IsValidClient(i) && IsSpec(i) && !Client[i].MTFBan && GetClientTeam(i)>view_as<int>(TFTeam_Spectator))
-					clients[total++] = i;
+				Client[client].Class = Class_Spec;
+
+				int total;
+				int[] clients = new int[MaxClients];
+				for(int i=1; i<=MaxClients; i++)
+				{
+					if(IsValidClient(i) && IsSpec(i) && !Client[i].MTFBan && GetClientTeam(i)>view_as<int>(TFTeam_Spectator))
+						clients[total++] = i;
+				}
+
+				if(total)
+				{
+					total = clients[GetRandomInt(0, total-1)];
+					Client[total].Class = Class_MTFE;
+					AssignTeam(total);
+					RespawnPlayer(total);
+				}
 			}
-
-			if(total)
+			else
 			{
-				total = clients[GetRandomInt(0, total-1)];
-				Client[total].Class = Class_MTF2;
-				AssignTeam(total);
-				RespawnPlayer(total);
+				Client[client].Class = Class_MTFE;
 			}
 		}
 		else
@@ -1950,6 +1958,15 @@ public void TF2_OnConditionRemoved(int client, TFCond cond)
 {
 	if(Enabled)
 		SDKCall_SetSpeed(client);
+}
+
+public Action TF2_OnPlayerTeleport(int client, int teleporter, bool &result)
+{
+	result = !(IsSpec(client) || IsSCP(client));
+	if(result)
+		Client[client].IgnoreTeleFor = GetEngineTime()+3.0;
+
+	return Plugin_Changed;
 }
 
 public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
@@ -3226,40 +3243,19 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 		int index = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
 		if(index == WeaponIndex[Weapon_Micro])
 		{
-			if(!(buttons & IN_ATTACK))
+			if(buttons & IN_ATTACK)
 			{
-				Client[client].ChargeIn = 0.0;
-				SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
-				SetEntPropFloat(client, Prop_Send, "m_flRageMeter", 99.0);
-			}
-			else if(!Client[client].ChargeIn)
-			{
-				Client[client].ChargeIn = engineTime+6.0;
-				buttons &= ~IN_JUMP;
-				changed = true;
-			}
-			else if(Client[client].ChargeIn < engineTime)
-			{
-				SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", 0.0);
-				SetEntPropFloat(client, Prop_Send, "m_flRageMeter", 0.0);
-				buttons &= ~IN_JUMP;
-				changed = true;
-			}
-			else
-			{
-				PrintKeyHintText(client, "Charge: %d", RoundToCeil((Client[client].ChargeIn-engineTime-6.0)/-0.06));
-				SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
-				SetEntPropFloat(client, Prop_Send, "m_flRageMeter", (engineTime-Client[client].ChargeIn)*-16.5);
-				buttons &= ~IN_JUMP;
-				changed = true;
-
 				static float time[MAXTF2PLAYERS];
 				if(time[client] < engineTime)
 				{
 					time[client] = engineTime+0.1;
 					int type = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
 					if(type != -1)
-						SetEntProp(client, Prop_Data, "m_iAmmo", GetEntProp(client, Prop_Data, "m_iAmmo", _, type)-1, _, type);
+					{
+						int ammo = GetEntProp(client, Prop_Data, "m_iAmmo", _, type)-1;
+						if(ammo >= 0)
+							SetEntProp(client, Prop_Data, "m_iAmmo", ammo, _, type);
+					}
 				}
 			}
 		}
@@ -4657,7 +4653,7 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 				default:
 					ChangeClientClass(client, TFClass_Scout);
 			}
-			entity = SpawnWeapon(client, "tf_weapon_pistol", WeaponIndex[weapon], 5, 6, "2 ; 1.426667 ; 5 ; 1.111111 ; 96 ; 1.149425 ; 106 ; 0.33 ; 252 ; 0.95");
+			entity = SpawnWeapon(client, "tf_weapon_pistol", WeaponIndex[weapon], 5, 6, "2 ; 1.426667 ; 5 ; 1.111111 ; 96 ; 1.149425 ; 106 ; 0.33 ; 252 ; 0.95 ; 397 ; 1 ; 4363 ; 0.5");
 			if(ammo && entity>MaxClients)
 				SetAmmo(client, entity, 24, 0);
 		}
@@ -4671,7 +4667,7 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 				default:
 					ChangeClientClass(client, TFClass_Scout);
 			}
-			entity = SpawnWeapon(client, "tf_weapon_pistol", WeaponIndex[weapon], 5, 6, "2 ; 1.7 ; 4 ; 1.5 ; 5 ; 1.333333 ; 96 ; 1.214559 ; 106 ; 0.33 ; 252 ; 0.925", _, true);
+			entity = SpawnWeapon(client, "tf_weapon_pistol", WeaponIndex[weapon], 5, 6, "2 ; 1.7 ; 4 ; 1.5 ; 5 ; 1.333333 ; 96 ; 1.214559 ; 106 ; 0.33 ; 252 ; 0.925 ; 397 ; 2 ; 4363 ; 0.5", _, true);
 			if(ammo && entity>MaxClients)
 				SetAmmo(client, entity, 18, 18);
 		}
@@ -4699,7 +4695,7 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 				default:
 					ChangeClientClass(client, TFClass_DemoMan);
 			}
-			entity = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 10, 6, "2 ; 1.75 ; 4 ; 2 ; 6 ; 0.909091 ; 96 ; 3 ; 252 ; 0.85");
+			entity = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 10, 6, "2 ; 1.75 ; 4 ; 2 ; 6 ; 0.909091 ; 96 ; 3 ; 252 ; 0.85 ; 397 ; 1 ; 4363 ; 0.5");
 			if(ammo && entity>MaxClients)
 				SetAmmo(client, entity, 30, 50);
 		}
@@ -4719,7 +4715,7 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 				default:
 					ChangeClientClass(client, TFClass_Soldier);
 			}
-			entity = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 20, 6, "2 ; 2.275 ; 4 ; 1.6 ; 5 ; 1.25 ; 96 ; 3 ; 252 ; 0.8");
+			entity = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 20, 6, "2 ; 2.275 ; 4 ; 1.6 ; 5 ; 1.25 ; 96 ; 3 ; 252 ; 0.8 ; 397 ; 2 ; 4363 ; 0.5");
 			if(ammo && entity>MaxClients)
 				SetAmmo(client, entity, Client[client].Class>=Class_MTFS ? 120 : 80, 40);
 		}
@@ -4739,7 +4735,7 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 				default:
 					ChangeClientClass(client, TFClass_Soldier);
 			}
-			entity = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 30, 6, "2 ; 2.475 ; 4 ; 2 ; 6 ; 0.90909 ; 96 ; 2 ; 252 ; 0.7");
+			entity = SpawnWeapon(client, "tf_weapon_smg", WeaponIndex[weapon], 30, 6, "2 ; 2.475 ; 4 ; 2 ; 6 ; 0.90909 ; 96 ; 2 ; 252 ; 0.7 ; 389 ; 3 ; 4363 ; 0.5");
 			if(ammo && entity>MaxClients)
 				SetAmmo(client, entity, 125, 50);
 		}
@@ -4761,19 +4757,15 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 		case Weapon_Shotgun:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_shotgun_primary", WeaponIndex[weapon], 10, 6, "3 ; 0.66 ; 5 ; 1.34 ; 36 ; 1.5 ; 45 ; 2 ; 77 ; 0.5 ; 252 ; 0.95", _, true);
+			entity = SpawnWeapon(client, "tf_weapon_shotgun_primary", WeaponIndex[weapon], 10, 6, "3 ; 0.66 ; 5 ; 1.34 ; 36 ; 1.5 ; 45 ; 2 ; 77 ; 0.016 ; 252 ; 0.95 ; 389 ; 3 ; 4363 ; 0.5", _, true);
 			if(ammo && entity>MaxClients)
 				SetAmmo(client, entity, 8, 4);
 		}
 		case Weapon_Micro:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_flamethrower", WeaponIndex[weapon], 110, 6, "2 ; 7 ; 15 ; 0 ; 76 ; 5 ; 173 ; 5 ; 252 ; 0.5", _, true);
-			if(entity > MaxClients)
-			{
-				SetEntPropFloat(entity, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
-				if(ammo)
-					SetAmmo(client, entity, 1000);
-			}
+			entity = SpawnWeapon(client, "tf_weapon_flamethrower", WeaponIndex[weapon], 110, 6, "2 ; 7 ; 15 ; 0 ; 76 ; 4.5 ; 173 ; 5 ; 252 ; 0.5 ; 356 ; 1 ; 839 ; 2.8 ; 841 ; 0 ; 843 ; 12 ; 844 ; 2300 ; 862 ; 0.6 ; 863 ; 0.1 ; 865 ; 50 ; 4375 ; 6");
+			if(ammo && entity>MaxClients)
+				SetAmmo(client, entity, 1000);
 		}
 
 		/*
@@ -4781,7 +4773,7 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		*/
 		case Weapon_PDA1:
 		{
-			entity = SpawnWeapon(client, "tf_weapon_pda_engineer_build", WeaponIndex[weapon], 5, 6, "80 ; 2 ; 148 ; 3 ; 177 ; 1.3 ; 205 ; 3 ; 353 ; 1 ; 464 ; 0 ; 465 ; 0 ; 790 ; 6.66", _, true);
+			entity = SpawnWeapon(client, "tf_weapon_pda_engineer_build", WeaponIndex[weapon], 5, 6, "80 ; 2 ; 148 ; 3 ; 177 ; 1.3 ; 205 ; 3 ; 276 ; 1 ; 353 ; 1 ; 464 ; 0 ; 465 ; 0 ; 732 ; 2 ; 790 ; 1.333333 ; 4350 ; 0.5 ; 4351 ; 0.5 ; 4354 ; 2.5", _, true);
 			SetEntProp(client, Prop_Data, "m_iAmmo", 400, 4, 3);
 		}
 		case Weapon_PDA2:
@@ -4808,6 +4800,9 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 
 	if(entity > MaxClients)
 	{
+		if(!GetRandomInt(0, 3))
+			TF2Attrib_SetByDefIndex(entity, 2053, 1.0);
+
 		ApplyStrangeRank(entity, WeaponRank[weapon]);
 		if(account == -3)
 		{
@@ -4819,81 +4814,6 @@ int GiveWeapon(int client, WeaponEnum weapon, bool ammo=true, int account=-3)
 		}
 	}
 	return entity;
-}
-
-void ApplyStrangeRank(int entity, int rank)
-{
-	int kills;
-	switch(rank)
-	{
-		case 0:
-			kills = GetRandomInt(0, 9);
-
-		case 1:
-			kills = GetRandomInt(10, 24);
-
-		case 2:
-			kills = GetRandomInt(25, 44);
-
-		case 3:
-			kills = GetRandomInt(45, 69);
-
-		case 4:
-			kills = GetRandomInt(70, 99);
-
-		case 5:
-			kills = GetRandomInt(100, 134);
-
-		case 6:
-			kills = GetRandomInt(135, 174);
-
-		case 7:
-			kills = GetRandomInt(175, 224);
-
-		case 8:
-			kills = GetRandomInt(225, 274);
-
-		case 9:
-			kills = GetRandomInt(275, 349);
-
-		case 10:
-			kills = GetRandomInt(350, 499);
-
-		case 11:
-			kills = GetRandomInt(500, 749);
-
-		case 12:
-			kills = GetRandomInt(750, 998);
-
-		case 13:
-			kills = 999;
-
-		case 14:
-			kills = GetRandomInt(1000, 1499);
-
-		case 15:
-			kills = GetRandomInt(1500, 2499);
-
-		case 16:
-			kills = GetRandomInt(2500, 4999);
-
-		case 17:
-			kills = GetRandomInt(5000, 7499);
-
-		case 18:
-			kills = GetRandomInt(7500, 7615);
-
-		case 19:
-			kills = GetRandomInt(7616, 8499);
-
-		case 20:
-			kills = GetRandomInt(8500, 9999);
-
-		default:
-			return;
-	}
-
-	TF2Attrib_SetByDefIndex(entity, 214, view_as<float>(kills));
 }
 
 void EndRound(TeamEnum team, TFTeam team2)

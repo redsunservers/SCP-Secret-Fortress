@@ -564,6 +564,157 @@ void ModelIndexToString(int index, char[] model, int size)
 	ReadStringTable(table, index, model, size);
 }
 
+void ApplyStrangeRank(int entity, int rank)
+{
+	int kills;
+	switch(rank)
+	{
+		case 0:
+			kills = GetRandomInt(0, 9);
+
+		case 1:
+			kills = GetRandomInt(10, 24);
+
+		case 2:
+			kills = GetRandomInt(25, 44);
+
+		case 3:
+			kills = GetRandomInt(45, 69);
+
+		case 4:
+			kills = GetRandomInt(70, 99);
+
+		case 5:
+			kills = GetRandomInt(100, 134);
+
+		case 6:
+			kills = GetRandomInt(135, 174);
+
+		case 7:
+			kills = GetRandomInt(175, 224);
+
+		case 8:
+			kills = GetRandomInt(225, 274);
+
+		case 9:
+			kills = GetRandomInt(275, 349);
+
+		case 10:
+			kills = GetRandomInt(350, 499);
+
+		case 11:
+			kills = GetRandomInt(500, 749);
+
+		case 12:
+			kills = GetRandomInt(750, 998);
+
+		case 13:
+			kills = 999;
+
+		case 14:
+			kills = GetRandomInt(1000, 1499);
+
+		case 15:
+			kills = GetRandomInt(1500, 2499);
+
+		case 16:
+			kills = GetRandomInt(2500, 4999);
+
+		case 17:
+			kills = GetRandomInt(5000, 7499);
+
+		case 18:
+			kills = GetRandomInt(7500, 7615);
+
+		case 19:
+			kills = GetRandomInt(7616, 8499);
+
+		case 20:
+			kills = GetRandomInt(8500, 9999);
+
+		default:
+			return;
+	}
+
+	TF2Attrib_SetByDefIndex(entity, 214, view_as<float>(kills));
+}
+
+void ApplyStrangeHatRank(int entity, int rank)
+{
+	int points;
+	switch(rank)
+	{
+		case 0:
+			points = GetRandomInt(0, 14);
+
+		case 1:
+			points = GetRandomInt(15, 29);
+
+		case 2:
+			points = GetRandomInt(30, 49);
+
+		case 3:
+			points = GetRandomInt(50, 74);
+
+		case 4:
+			points = GetRandomInt(75, 99);
+
+		case 5:
+			points = GetRandomInt(100, 134);
+
+		case 6:
+			points = GetRandomInt(135, 174);
+
+		case 7:
+			points = GetRandomInt(175, 249);
+
+		case 8:
+			points = GetRandomInt(250, 374);
+
+		case 9:
+			points = GetRandomInt(375, 499);
+
+		case 10:
+			points = GetRandomInt(500, 724);
+
+		case 11:
+			points = GetRandomInt(725, 999);
+
+		case 12:
+			points = GetRandomInt(1000, 1499);
+
+		case 13:
+			points = GetRandomInt(1500, 1999);
+
+		case 14:
+			points = GetRandomInt(2000, 2749);
+
+		case 15:
+			points = GetRandomInt(2750, 3999);
+
+		case 16:
+			points = GetRandomInt(4000, 5499);
+
+		case 17:
+			points = GetRandomInt(5500, 7499);
+
+		case 18:
+			points = GetRandomInt(7500, 9999);
+
+		case 19:
+			points = GetRandomInt(10000, 14999);
+
+		case 20:
+			points = GetRandomInt(15000, 19999);
+
+		default:
+			return;
+	}
+
+	TF2Attrib_SetByDefIndex(entity, 214, view_as<float>(points));
+	TF2Attrib_SetByDefIndex(entity, 292, view_as<float>(64));
+}
+
 int SpawnWeapon(int client, char[] name, int index, int level, int qual, const char[] att, int visibleMode=2, bool preserve=false)
 {
 	Handle weapon;
