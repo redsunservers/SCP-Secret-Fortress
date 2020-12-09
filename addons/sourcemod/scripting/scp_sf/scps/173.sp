@@ -15,11 +15,13 @@ static const char Downloads[][] =
 	"materials/freak_fortress_2/scp_173/new173_texture.vmt",
 	"materials/freak_fortress_2/scp_173/new173_texture.vtf",
 
-	"freak_fortress_2/scp173/scp173_kill2.mp3"
+	"sound/freak_fortress_2/scp173/scp173_kill2.mp3"
 };
 
 void SCP173_Enable()
 {
+	PrecacheSound(SnapSound, true);
+
 	int table = FindStringTable("downloadables");
 	bool save = LockStringTables(false);
 	for(int i; i<sizeof(Downloads); i++)

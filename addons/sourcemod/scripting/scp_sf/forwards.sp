@@ -1,10 +1,12 @@
 static GlobalForward OnEscape;
 static GlobalForward OnAchievement;
+static GlobalForward OnWeapon;
 
 void Forward_Setup()
 {
 	OnEscape = new GlobalForward("SCPSF_OnEscape", ET_Ignore, Param_Cell, Param_Cell);
 	OnAchievement = new GlobalForward("SCPSF_OnAchievement", ET_Ignore, Param_Cell, Param_Cell);
+	OnWeapon = new GlobalForward("SCPSF_OnWeapon", ET_Ignore, Param_Cell, Param_Cell);
 }
 
 void Forward_OnEscape(int client, int disarmer)
@@ -20,6 +22,14 @@ void Forward_OnAchievement(int client, Achievements achievement)
 	Call_StartForward(OnAchievement);
 	Call_PushCell(client);
 	Call_PushCell(achievement);
+	Call_Finish();
+}
+
+void Forward_OnWeapon(int client, int entity)
+{
+	Call_StartForward(OnWeapon);
+	Call_PushCell(client);
+	Call_PushCell(entity);
 	Call_Finish();
 }
 

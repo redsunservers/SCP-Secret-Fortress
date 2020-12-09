@@ -106,6 +106,16 @@ forward void SCPSF_OnEscape(int client, int disarmer);
 forward void SCPSF_OnAchievement(int client, SCPAchievement achievement);
 
 /**
+ * Calls when a client is given a new weapon
+ *
+ * @param client 	Client index
+ * @param entity 	Entity index of weapon
+ *
+ * @noreturn
+ */
+forward void SCPSF_OnWeapon(int client, int entity);
+
+/**
  * Calls when a client messages
  *
  * @param client 	Client index

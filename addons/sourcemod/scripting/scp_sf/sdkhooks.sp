@@ -199,7 +199,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 						DropAllWeapons(victim);
 						Client[victim].HealthPack = 0;
 						TF2_RemoveAllWeapons(victim);
-						SetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon", GiveWeapon(victim, Weapon_None));
+						GiveWeapon(victim, Weapon_None);
 
 						if(Client[victim].Class>=Class_Guard && Client[victim].Class<=Class_MTFE)
 							GiveAchievement(Achievement_DisarmMTF, attacker);
@@ -331,9 +331,6 @@ public Action OnFlagTouch(int entity, int client)
 
 public Action OnGetMaxHealth(int client, int &health)
 {
-	if(!Enabled)
-		return Plugin_Continue;
-
 	switch(Client[client].Class)
 	{
 		case Class_MTF2, Class_MTFS, Class_MTFE, Class_Chaos:

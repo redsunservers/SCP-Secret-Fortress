@@ -361,5 +361,5 @@ static void TriggerShyGuy(int client, int target, bool full)
 		}
 	}
 
-	SetEntityHealth(client, GetClientHealth(client)+HealthExtra);
+	SetEntityHealth(client, GetClientHealth(client)+HealthRage);
 }
