@@ -254,7 +254,7 @@ public void ItSteals_OnButton(int client, int button)
 					Client[client].Radio = 2;
 					TurnOnGlow(client, "255 0 0", 10, 700.0);
 					TF2_AddCondition(client, TFCond_CritCola);
-					ChangeGlobalSong(FAR_FUTURE, ItHadEnough, true);
+					ChangeGlobalSong(FAR_FUTURE, ItHadEnough, 3);
 					TF2_StunPlayer(client, 11.0, 1.0, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
 				}
 				else if(!SCPKilled && SciEscaped>=((DClassMax+SciMax)*3/4)+2)
@@ -269,7 +269,7 @@ public void ItSteals_OnButton(int client, int button)
 					Client[client].Power = engineTime+15.0;
 					TurnOnGlow(client, "255 0 0", 10, 600.0);
 					TF2_AddCondition(client, TFCond_CritCola, 15.0);
-					ChangeGlobalSong(Client[client].Power, Enrage, true);
+					ChangeGlobalSong(Client[client].Power, Enrage, 3);
 					TF2_StunPlayer(client, 4.0, 1.0, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
 				}
 				else

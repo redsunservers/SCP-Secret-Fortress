@@ -584,6 +584,93 @@
 		"en"		"O5"
 	}
 
+	// Weapon Phrases
+
+	"weapon_0"
+	{
+		"en"		"Unknown"
+	}
+	"weapon_5"
+	{
+		"en"		"None"
+	}
+	"weapon_192"
+	{
+		"en"		"Fireaxe"
+	}
+	"weapon_153"
+	{
+		"en"		"Sledge Hammer"
+	}
+	"weapon_30758"
+	{
+		"en"		"Machete"
+	}
+	"weapon_325"
+	{
+		"en"		"Wooden Club"
+	}
+	"weapon_1013"
+	{
+		"en"		"Meat"
+	}
+	"weapon_197"
+	{
+		"en"		"Wrench"
+	}
+	"weapon_264"
+	{
+		"en"		"Frying Pan"
+	}
+	"weapon_954"
+	{
+		"en"		"Disarmer"
+	}
+	"weapon_773"
+	{
+		"en"		"COM-15 Sidearm"
+	}
+	"weapon_209"
+	{
+		"en"		"USP"
+	}
+	"weapon_751"
+	{
+		"en"		"MP7"
+	}
+	"weapon_1150"
+	{
+		"en"		"Project 90"
+	}
+	"weapon_425"
+	{
+		"en"		"MTF-E11-SR"
+	}
+	"weapon_415"
+	{
+		"en"		"Logicer"
+	}
+	"weapon_1151"
+	{
+		"en"		"Flash Grenade"
+	}
+	"weapon_308"
+	{
+		"en"		"Fragmentation Grenade"
+	}
+	"weapon_199"
+	{
+		"en"		"M97"
+	}
+	"weapon_594"
+	{
+		"en"		"Micro H.I.D."
+	}
+	"weapon_25"
+	{
+		"en"		"Construction PDA"
+	}
+
 	// Radio Phrases
 
 	"radio_0"

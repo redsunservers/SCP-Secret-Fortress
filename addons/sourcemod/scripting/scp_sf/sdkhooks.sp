@@ -9,6 +9,8 @@ void SDKHook_HookClient(int client)
 	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 	SDKHook(client, SDKHook_SetTransmit, OnTransmit);
 	SDKHook(client, SDKHook_ShouldCollide, OnShouldCollide);
+	SDKHook(client, SDKHook_PostThink, OnPostThink);
+	SDKHook(client, SDKHook_PostThinkPost, OnPostThinkPost);
 }
 
 void SDKHook_HookCapture(int entity)
@@ -196,10 +198,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 							EndMessage();
 						}
 
-						DropAllWeapons(victim);
-						Client[victim].HealthPack = 0;
-						TF2_RemoveAllWeapons(victim);
-						GiveWeapon(victim, Weapon_None);
+						Items_DropAllItems(victim);
 
 						if(Client[victim].Class>=Class_Guard && Client[victim].Class<=Class_MTFE)
 							GiveAchievement(Achievement_DisarmMTF, attacker);
@@ -348,4 +347,13 @@ public Action OnGetMaxHealth(int client, int &health)
 		}
 	}
 	return Plugin_Changed;
+}
+
+public void OnPostThink(int client)
+{
+	
+}
+
+public void OnPostThinkPost(int client)
+{
 }

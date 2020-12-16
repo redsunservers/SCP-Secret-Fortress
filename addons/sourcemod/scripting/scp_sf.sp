@@ -64,6 +64,7 @@ void DisplayCredits(int i)
 #define VIP_GHOST_MODEL	"models/props_halloween/ghost.mdl"
 #define DOWNLOADS	"configs/scp_sf/downloads.txt"
 #define CFG_REACTIONS	"configs/scp_sf/reactions.cfg"
+#define CFG_WEAPONS	"configs/scp_sf/weapons.cfg"
 
 float TRIPLE_D[3] = { 0.0, 0.0, 0.0 };
 
@@ -1066,6 +1067,7 @@ public void OnConfigsExecuted()
 	LockStringTables(save);
 
 	ConVar_Enable();
+	Items_Setup();
 }
 
 public void OnPluginEnd()
@@ -1081,6 +1083,8 @@ public void OnPluginEnd()
 public void OnClientPutInServer(int client)
 {
 	Client[client] = Client[0];
+	if(AreClientCookiesCached(client))
+		OnClientCookiesCached(client);
 
 	SDKHook_HookClient(client);
 	DHook_HookClient(client);
@@ -1372,7 +1376,7 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 	}
 	else if(!StrContains(name, "scp_upgrade", false))
 	{
-		if(!IsValidClient(client))
+		if(!Enabled || !IsValidClient(client))
 			return Plugin_Continue;
 
 		char buffer[64];
@@ -1717,7 +1721,7 @@ public void TF2_OnConditionAdded(int client, TFCond cond)
 
 	if(Client[client].Class == Class_DBoi)
 	{
-		DropAllWeapons(client);
+		Items_DropAllItems(client);
 		if(Gamemode == Gamemode_Ikea)
 		{
 			DClassEscaped++;
@@ -1765,7 +1769,7 @@ public void TF2_OnConditionAdded(int client, TFCond cond)
 	}
 	else if(Client[client].Class == Class_Scientist)
 	{
-		DropAllWeapons(client);
+		Items_DropAllItems(client);
 		if(Client[client].Disarmer)
 		{
 			SciCaptured++;
@@ -1847,6 +1851,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			ChangeClientTeamEx(client, team);
 	}
 
+	int Ammo[Ammo_MAX];
 	Client[client].ClearFunc();
 	Client[client].Sprinting = false;
 	Client[client].ChargeIn = 0.0;
@@ -1859,13 +1864,12 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 		{
 			Client[client].Keycard = Keycard_None;
 			Client[client].HealthPack = 0;
-			Client[client].Radio = 0;
+			Client[client].Radio = Gamemode==Gamemode_Steals ? 2 : 0;
 			Client[client].Floor = Floor_Light;
 			if(Gamemode == Gamemode_Steals)
 				TurnOnFlashlight(client);
 
-			Client[client].Radio = Gamemode==Gamemode_Steals ? 2 : 0;
-			GiveWeapon(client, Weapon_None);
+			Items_CreateWeapon(client, 5, true, true);
 		}
 		case Class_Chaos:
 		{
@@ -1873,21 +1877,29 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			Client[client].HealthPack = 2;
 			Client[client].Radio = 0;
 			Client[client].Floor = Floor_Surface;
-			GiveWeapon(client, Weapon_SMG4);
-			GiveWeapon(client, Weapon_None, false);
+
+			Ammo[Ammo_7mm] = 100;
+
+			Items_CreateWeapon(client, 415, true, true);
+
+			Items_CreateWeapon(client, 5, false, true);
+			Items_CreateWeapon(client, 30011, false, true);
+			Items_CreateWeapon(client, 30013, false, true);
+			Items_CreateWeapon(client, 30014, false, true);
+
 			GiveAchievement(Achievement_ChaosSpawn, client);
 		}
 		case Class_Scientist:
 		{
 			Client[client].Keycard = Keycard_Scientist;
 			Client[client].HealthPack = Gamemode==Gamemode_Steals ? 0 : 2;
-			Client[client].Radio = 0;
+			Client[client].Radio = Gamemode==Gamemode_Steals ? 2 : 0;
 			Client[client].Floor = Floor_Heavy;
 			if(Gamemode == Gamemode_Steals)
 				TurnOnFlashlight(client);
 
-			Client[client].Radio = Gamemode==Gamemode_Steals ? 2 : 0;
-			GiveWeapon(client, Weapon_None);
+			Items_CreateWeapon(client, 5, true, true);
+			Items_CreateWeapon(client, 30002, false, true);
 		}
 		case Class_Guard:
 		{
@@ -1895,9 +1907,19 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			Client[client].HealthPack = 0;
 			Client[client].Radio = 1;
 			Client[client].Floor = Floor_Heavy;
-			GiveWeapon(client, Weapon_Flash, false);
-			GiveWeapon(client, Weapon_SMG);
-			GiveWeapon(client, Weapon_Disarm, false);
+
+			Ammo[Ammo_7mm] = 35;
+			Ammo[Ammo_Grenade] = 1;
+
+			Items_CreateWeapon(client, 30016, false, true);
+			Items_CreateWeapon(client, 1151, false, true);
+
+			Items_CreateWeapon(client, 751, true, true);
+
+			Items_CreateWeapon(client, 5, false, true);
+			Items_CreateWeapon(client, 30005, false, true);
+			Items_CreateWeapon(client, 954, false, true);
+			Items_CreateWeapon(client, 30014, false, true);
 		}
 		case Class_MTF:
 		{
@@ -1905,21 +1927,67 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			Client[client].HealthPack = 0;
 			Client[client].Radio = 1;
 			Client[client].Floor = Floor_Surface;
-			GiveWeapon(client, Weapon_Flash, false);
-			GiveWeapon(client, Weapon_SMG2);
-			GiveWeapon(client, Weapon_None, false);
+
+			Ammo[Ammo_5mm] = 40;
+			Ammo[Ammo_9mm] = 100;
+
+			Items_CreateWeapon(client, 30016, false, true);
+
+			Items_CreateWeapon(client, 1150, true, true);
+
+			Items_CreateWeapon(client, 5, false, true);
+			Items_CreateWeapon(client, 30006, false, true);
+			if(Gamemode != Gamemode_Ikea)
+				Items_CreateWeapon(client, 954, false, true);
+
 			GiveAchievement(Achievement_MTFSpawn, client);
 		}
-		case Class_MTF2, Class_MTFS:
+		case Class_MTF2:
 		{
 			Client[client].Keycard = Keycard_MTF2;
-			Client[client].HealthPack = Client[client].Class==Class_MTFS ? 2 : 1;
+			Client[client].HealthPack = 1;
 			Client[client].Radio = 1;
 			Client[client].Floor = Floor_Surface;
-			GiveWeapon(client, Weapon_Frag, false);
-			GiveWeapon(client, Weapon_SMG3);
+
+			Ammo[Ammo_5mm] = 80;
+			Ammo[Ammo_9mm] = 50;
+			Ammo[Ammo_Grenade] = 1;
+
+			Items_CreateWeapon(client, 30016, false, true);
+			Items_CreateWeapon(client, 308, false, true);
+
+			Items_CreateWeapon(client, 1150, true, true);
+
+			Items_CreateWeapon(client, 5, false, true);
+			Items_CreateWeapon(client, 30007, false, true);
 			if(Gamemode != Gamemode_Ikea)
-				GiveWeapon(client, Weapon_Disarm, false);
+				Items_CreateWeapon(client, 954, false, true);
+			Items_CreateWeapon(client, 30014, false, true);
+
+			GiveAchievement(Achievement_MTFSpawn, client);
+		}
+		case Class_MTFS:
+		{
+			Client[client].Keycard = Keycard_MTF2;
+			Client[client].HealthPack = 2;
+			Client[client].Radio = 1;
+			Client[client].Floor = Floor_Surface;
+
+			Ammo[Ammo_5mm] = 120;
+			Ammo[Ammo_7mm] = 20;
+			Ammo[Ammo_9mm] = 20;
+			Ammo[Ammo_Grenade] = 1;
+
+			Items_CreateWeapon(client, 30016, false, true);
+			Items_CreateWeapon(client, 308, false, true);
+
+			Items_CreateWeapon(client, 1150, true, true);
+
+			Items_CreateWeapon(client, 5, false, true);
+			Items_CreateWeapon(client, 30007, false, true);
+			if(Gamemode != Gamemode_Ikea)
+				Items_CreateWeapon(client, 954, false, true);
+			Items_CreateWeapon(client, 30014, false, true);
 
 			GiveAchievement(Achievement_MTFSpawn, client);
 		}
@@ -1929,10 +1997,21 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			Client[client].HealthPack = 1;
 			Client[client].Radio = 1;
 			Client[client].Floor = Floor_Surface;
-			GiveWeapon(client, Weapon_Frag, false);
-			GiveWeapon(client, Weapon_SMG3);
+
+			Ammo[Ammo_5mm] = 120;
+			Ammo[Ammo_9mm] = 100;
+			Ammo[Ammo_Grenade] = 1;
+
+			Items_CreateWeapon(client, 30016, false, true);
+			Items_CreateWeapon(client, 308, false, true);
+
+			Items_CreateWeapon(client, 1150, true, true);
+
+			Items_CreateWeapon(client, 5, false, true);
+			Items_CreateWeapon(client, 30008, false, true);
 			if(Gamemode != Gamemode_Ikea)
-				GiveWeapon(client, Weapon_Disarm, false);
+				Items_CreateWeapon(client, 954, false, true);
+			Items_CreateWeapon(client, 30014, false, true);
 
 			GiveAchievement(Achievement_MTFSpawn, client);
 		}
@@ -1942,11 +2021,21 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			Client[client].HealthPack = 1;
 			Client[client].Radio = 1;
 			Client[client].Floor = Floor_Surface;
-			GiveWeapon(client, Weapon_Shotgun);
-			GiveWeapon(client, Weapon_Wrench, false);
-			GiveWeapon(client, Weapon_PDA1, false);
-			GiveWeapon(client, Weapon_PDA2, false);
-			GiveWeapon(client, Weapon_PDA3, false);
+
+			Ammo[Ammo_5mm] = 120;
+			Ammo[Ammo_7mm] = 20;
+			Ammo[Ammo_9mm] = 20;
+
+			Items_CreateWeapon(client, 30016, false, true);
+			Items_CreateWeapon(client, 308, false, true);
+
+			Items_CreateWeapon(client, 199, true, true);
+
+			Items_CreateWeapon(client, 5, false, true);
+			Items_CreateWeapon(client, 30009, false, true);
+			Items_CreateWeapon(client, 197, false, true);
+			Items_CreateWeapon(client, 30014, false, true);
+
 			GiveAchievement(Achievement_MTFSpawn, client);
 		}
 		case Class_049:
@@ -2041,6 +2130,12 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	int health;
 	OnGetMaxHealth(client, health);
 	SetEntityHealth(client, health);
+
+	// Ammo stuff
+	for(int i; i<Ammo_MAX; i++)
+	{
+		SetEntProp(client, Prop_Data, "m_iAmmo", Ammo[i], _, i);
+	}
 
 	// Other stuff
 	TF2_CreateGlow(client, team);
@@ -2222,52 +2317,9 @@ public Action OnDropItem(int client, const char[] command, int args)
 		GetClientEyePosition(client, origin);
 		GetClientEyeAngles(client, angles);
 
-		if(Client[client].Keycard > Keycard_None)
-		{
-			DropKeycard(client, true, origin, angles, Client[client].Keycard);
-			Client[client].Keycard = Keycard_None;
-			return Plugin_Handled;
-		}
-
-		if(Client[client].Radio)
-		{
-			DropKeycard(client, true, origin, angles, Keycard_Radio);
-			Client[client].Radio = 0;
-			return Plugin_Handled;
-		}
-
 		int entity = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-		if(entity > MaxClients)
-		{
-			int index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
-			for(WeaponEnum wep=Weapon_Axe; wep<Weapon_PDA1; wep++)
-			{
-				if(index != WeaponIndex[wep])
-					continue;
-
-				TF2_CreateDroppedWeapon(client, entity, true, origin, angles);
-				int slot = wep>Weapon_Disarm ? wep<Weapon_Flash ? TFWeaponSlot_Secondary : TFWeaponSlot_Primary : TFWeaponSlot_Melee;
-				TF2_RemoveWeaponSlot(client, slot);
-				if(slot == TFWeaponSlot_Melee)
-				{
-					GiveWeapon(client, Weapon_None);
-					return Plugin_Handled;
-				}
-
-				for(int i; i<3; i++)
-				{
-					if(i == slot)
-						continue;
-
-					entity = GetPlayerWeaponSlot(client, i);
-					if(entity <= MaxClients)
-						continue;
-
-					SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", entity);
-					return Plugin_Handled;
-				}
-			}
-		}
+		if(entity>MaxClients && Items_DropItem(client, entity, pos, ang))
+			return Plugin_Handled;
 	}
 	return Plugin_Continue;
 }
@@ -3144,7 +3196,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 		}
 	}
 
-	if(buttons & IN_JUMP)
+	if((buttons & IN_JUMP) || (buttons & IN_SPEED))
 	{
 		if(!Client[client].Sprinting)
 		{
@@ -3153,7 +3205,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 				SDKCall_SetSpeed(client);
 		}
 
-		if(Gamemode == Gamemode_Steals)
+		if(Gamemode==Gamemode_Steals && (buttons & IN_JUMP))
 		{
 			buttons &= ~IN_JUMP;
 			changed = true;
@@ -3193,7 +3245,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 
 				if(i > MaxClients)
 					i = 1;
-			} while(attempts < MAXTF2PLAYERS);
+			} while(attempts < MaxClients);
 		}
 		else if(AttemptGrabItem(client))
 		{
@@ -3223,9 +3275,9 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 				i--;
 				attempts++;
 
-				if(i > MaxClients)
-					i = 1;
-			} while(attempts < MAXTF2PLAYERS);
+				if(i < 1)
+					i = MaxClients;
+			} while(attempts < MaxClients);
 		}
 		else if(AttemptGrabItem(client))
 		{
@@ -3736,7 +3788,7 @@ public void OnGameFrame()
 							CPrintToChatAll("%s%t", PREFIX, "mtf_spawn");
 
 							Config_GetSound(Sound_MTFSpawn, buffer, sizeof(buffer));
-							ChangeGlobalSong(engineTime+30.0, buffer, true);
+							ChangeGlobalSong(engineTime+30.0, buffer, 3);
 
 							if(count > 5)
 							{
@@ -3764,7 +3816,7 @@ public void OnGameFrame()
 							Client[client].Class = Class_Chaos;
 							AssignTeam(client);
 							RespawnPlayer(client);
-							ChangeSong(client, time, buffer, true);
+							ChangeSong(client, time, buffer, 1);
 							hasSpawned = true;
 						}
 
@@ -3773,7 +3825,7 @@ public void OnGameFrame()
 							for(int client=1; client<=MaxClients; client++)
 							{
 								if(IsValidClient(client) && Client[client].Class==Class_DBoi)
-									ChangeSong(client, time, buffer);
+									ChangeSong(client, time, buffer, 1);
 							}
 						}
 					}
@@ -4361,7 +4413,7 @@ public Action Timer_ConnectPost(Handle timer, int userid)
 	return Plugin_Continue;
 }
 
-void ChangeSong(int client, float next, const char[] filepath, bool volume=false)
+void ChangeSong(int client, float next, const char[] filepath, int volume=2)
 {
 	if(Client[client].CurrentSong[0])
 	{
@@ -4378,13 +4430,13 @@ void ChangeSong(int client, float next, const char[] filepath, bool volume=false
 
 	strcopy(Client[client].CurrentSong, sizeof(Client[].CurrentSong), filepath);
 	Client[client].NextSongAt = next;
-	EmitSoundToClient(client, filepath, _, SNDCHAN_STATIC, SNDLEVEL_NONE);
-	EmitSoundToClient(client, filepath, _, SNDCHAN_STATIC, SNDLEVEL_NONE);
-	if(volume)
+	for(int i; i<volume; i++)
+	{
 		EmitSoundToClient(client, filepath, _, SNDCHAN_STATIC, SNDLEVEL_NONE);
+	}
 }
 
-void ChangeGlobalSong(float next, const char[] filepath, bool volume=true)
+void ChangeGlobalSong(float next, const char[] filepath, int volume=2)
 {
 	for(int client=1; client<=MaxClients; client++)
 	{

@@ -445,27 +445,39 @@ void PickupWeapon(int client, int entity)
 	}
 
 	int index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
-	WeaponEnum wep = Weapon_Axe;
-	for(; wep<Weapon_PDA1; wep++)
+	for(WeaponEnum i=Weapon_Axe; i<Weapon_Pistol; i++)
 	{
-		if(index == WeaponIndex[wep])
+		if(index != WeaponIndex[i])
+			continue;
+
+		if(Items_CanGive(client, Item_Weapon))
 		{
-			if(Client[client].Class == Class_DBoi)
-				GiveAchievement(Achievement_FindGun, client);
-
-			if(ReplaceWeapon(client, wep, entity))
-			{
-				SetVariantString("randomnum:100");
-				AcceptEntityInput(client, "AddContext");
-				SetVariantString("TLK_MVM_LOOT_COMMON");
-				AcceptEntityInput(client, "SpeakResponseConcept");
-				AcceptEntityInput(client, "ClearContext");
-			}
-
-			RemoveEntity(entity);
-			CreateTimer(0.1, Timer_UpdateClientHud, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
-			return;
+			
 		}
+		else
+		{
+		}
+	}
+
+	for(WeaponEnum i=Weapon_Pistol; i<Weapon_PDA1; i++)
+	{
+		if(index != WeaponIndex[i])
+			continue;
+
+		if(Client[client].Class == Class_DBoi)
+			GiveAchievement(Achievement_FindGun, client);
+
+		if(ReplaceWeapon(client, i, entity))
+		{
+			SetVariantString("randomnum:100");
+			AcceptEntityInput(client, "AddContext");
+			SetVariantString("TLK_MVM_LOOT_COMMON");
+			AcceptEntityInput(client, "SpeakResponseConcept");
+			AcceptEntityInput(client, "ClearContext");
+		}
+
+		RemoveEntity(entity);
+		return;
 	}
 }
 

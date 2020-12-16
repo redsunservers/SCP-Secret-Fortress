@@ -112,12 +112,6 @@ void SDKCall_Setup(GameData gamedata)
 		LogError("[Gamedata] Could not find GetGlobalTeam");
 }
 
-void SDKCall_InitPickup(int entity, int client, int weapon)
-{
-	if(SDKInitPickup)
-		SDKCall(SDKInitPickup, entity, client, weapon);
-}
-
 void SDKCall_ChangeTeam(int entity, any team)
 {
 	if(SDKChangeTeam)
@@ -153,6 +147,26 @@ int SDKCall_GetBaseEntity(Address entity)
 		return SDKCall(SDKGetBaseEntity, entity);
 
 	return 1;
+}
+
+int SDKCall_CreateDroppedWeapon(int client, const float origin[3], const float angles[3], const char[] model, Address item)
+{
+	if(SDKCreateWeapon)
+		return SDKCall(SDKCreateWeapon, client, origin, angles, model, item);
+
+	return INVALID_ENT_REFERENCE;
+}
+
+void SDKCall_InitDroppedWeapon(int droppedWeapon, int client, int fromWeapon, bool swap, bool suicide)
+{
+	if(SDKInitWeapon)
+		SDKCall(SDKInitWeapon, droppedWeapon, client, fromWeapon, swap, suicide);
+}
+
+void SDKCall_InitPickup(int entity, int client, int weapon)
+{
+	if(SDKInitPickup)
+		SDKCall(SDKInitPickup, entity, client, weapon);
 }
 
 void SDKCall_SetSpeed(int client)

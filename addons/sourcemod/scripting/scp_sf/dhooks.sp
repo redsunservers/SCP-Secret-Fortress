@@ -366,8 +366,8 @@ public MRESReturn DHook_CanPickupDroppedWeaponPre(int client, DHookReturn ret, D
 public MRESReturn DHook_DropAmmoPackPre(int client, DHookParam param)
 {
 	//Ignore feign death
-	if(!param.Get(2) && !IsSpec(client) && !IsSCP(client))
-		DropAllWeapons(client);
+	if(!param.Get(2) && !IsSpec(client))
+		Items_DropAllItems(client);
 
 	//Prevent TF2 dropping anything else
 	return MRES_Supercede;
@@ -485,4 +485,69 @@ public MRESReturn DHook_TauntPre(int client)
 public MRESReturn DHook_TauntPost(int client)
 {
 	TF2_SetPlayerClass(client, ClassClass[Client[client].Class], false);
+}
+
+public MRESReturn DHook_GetMaxAmmoPre(int client, DHookReturn ret, DHookParam param)
+{
+	switch(param.Get(1))
+	{
+		case Ammo_Micro:
+		{
+			ret.Value = 1000;
+		}
+		case Ammo_9mm:
+		{
+			if(Client[client].Class == Class_Chaos)
+			{
+				ret.Value = 100;
+			}
+			else if(Client[client].Class < Class_Guard)
+			{
+				ret.Value = 50;
+			}
+			else
+			{
+				ret.Value = 200;
+			}
+		}
+		case Ammo_Metal:
+		{
+			ret.Value = 400;
+		}
+		case Ammo_7mm:
+		{
+			if(Client[client].Class == Class_Chaos)
+			{
+				ret.Value = 200;
+			}
+			else if(Client[client].Class < Class_Guard)
+			{
+				ret.Value = 70;
+			}
+			else
+			{
+				ret.Value = 100;
+			}
+		}
+		case Ammo_5mm:
+		{
+			if(Client[client].Class < Class_Guard)
+			{
+				ret.Value = 80;
+			}
+			else
+			{
+				ret.Value = 160;
+			}
+		}
+		case Ammo_Grenade:
+		{
+			ret.Value = 3;
+		}
+		default:
+		{
+			return MRES_Ignored;
+		}
+	}
+	return MRES_Supercede;
 }
