@@ -45,8 +45,8 @@ void DisplayCredits(int i)
 }
 
 #define MAJOR_REVISION	"1"
-#define MINOR_REVISION	"7"
-#define STABLE_REVISION	"6"
+#define MINOR_REVISION	"8"
+#define STABLE_REVISION	"0"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define IsSCP(%1)	(Client[%1].Class>=Class_035)
@@ -251,7 +251,7 @@ char ClassModel[][] =
 	"models/freak_fortress_2/scpmtf/mtf_guard_playerv4.mdl",	// MTF E
 
 	"models/scp_sf/scp_049/zombieguard.mdl",		// 035
-	"models/freak_fortress_2/scp-049/scp049.mdl",		// 049
+	"models/vinrax/player/scp049_player_7.mdl",		// 049
 	"models/scp_sf/scp_049/zombieguard.mdl",		// 049-2
 	"models/freak_fortress_2/newscp076/newscp076_v1.mdl", 	// 076-2
 	"models/player/engineer.mdl", 				// 079
@@ -344,7 +344,7 @@ TFClassType ClassClassModel[] =
 	TFClass_Sniper,		// MTF E
 
 	TFClass_Sniper,		// 035
-	TFClass_Medic,		// 049
+	TFClass_Unknown,	// 049
 	TFClass_Sniper,		// 049-2
 	TFClass_DemoMan, 	// 076
 	TFClass_Unknown, 	// 079
@@ -566,6 +566,9 @@ enum struct ClientEnum
 	Function OnSeePlayer;	// bool(int client, int victim)
 	Function OnMaxHealth;	// void(int client, int &health)
 	Function OnGlowPlayer;	// bool(int client, int victim)
+	Function OnAnimation;	// Action(int client, PlayerAnimEvent_t &anim, int &data)
+	Function OnWeaponSwitch;	// void(int client, int entity)
+	Function OnSound;		// Action(int client, char sample[PLATFORM_MAX_PATH], int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
 
 	int HealthPack;
 	int Radio;
@@ -605,6 +608,9 @@ enum struct ClientEnum
 		this.OnSeePlayer = INVALID_FUNCTION;
 		this.OnMaxHealth = INVALID_FUNCTION;
 		this.OnGlowPlayer = INVALID_FUNCTION;
+		this.OnAnimation = INVALID_FUNCTION;
+		this.OnWeaponSwitch = INVALID_FUNCTION;
+		this.OnSound = INVALID_FUNCTION;
 	}
 
 	TFTeam TeamTF()
@@ -751,10 +757,12 @@ ClientEnum Client[MAXTF2PLAYERS];
 #include "scp_sf/dhooks.sp"
 #include "scp_sf/forwards.sp"
 #include "scp_sf/functions.sp"
+#include "scp_sf/items.sp"
 #include "scp_sf/natives.sp"
 #include "scp_sf/sdkcalls.sp"
-#include "scp_sf/weapons.sp"
 #include "scp_sf/sdkhooks.sp"
+#include "scp_sf/targetfilters.sp"
+#include "scp_sf/viewmodels.sp"
 
 #include "scp_sf/scps/049.sp"
 #include "scp_sf/scps/076.sp"
@@ -778,10 +786,12 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnPluginStart()
 {
+	Client[0].ClearFunc();
 	Client[0].NextSongAt = FAR_FUTURE;
 
 	ConVar_Setup();
 	SDKHook_Setup();
+	Target_Setup();
 
 	HookEvent("arena_round_start", OnRoundReady, EventHookMode_PostNoCopy);
 	HookEvent("teamplay_round_start", OnRoundStart, EventHookMode_PostNoCopy);
@@ -1710,6 +1720,7 @@ public void TF2_OnConditionAdded(int client, TFCond cond)
 
 	if(cond == TFCond_Taunting)
 	{
+		ViewModel_Hide(client);
 		if(TF2_IsPlayerInCondition(client, TFCond_Dazed))
 			TF2_RemoveCondition(client, TFCond_Taunting);
 
@@ -1850,6 +1861,8 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 		if(team != TFTeam_Spectator)
 			ChangeClientTeamEx(client, team);
 	}
+
+	ViewModel_Destroy(client);
 
 	int Ammo[Ammo_MAX];
 	Client[client].ClearFunc();
@@ -2869,6 +2882,7 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 	if(GetClientTeam(client) == view_as<int>(TFTeam_Unassigned))
 		ChangeClientTeamEx(client, TFTeam_Red);
 
+	ViewModel_Destroy(client);
 	TF2_SetPlayerClass(client, TFClass_Spy);
 
 	float engineTime = GetEngineTime();
@@ -5021,8 +5035,8 @@ void CreateSpecialDeath(int client)
 		IntToString(team-2, skin, sizeof(skin));
 		DispatchKeyValue(entity, "skin", skin);
 	}
+	DispatchKeyValue(entity, "solid", "0");
 	DispatchKeyValue(entity, "model", ClassModel[Client[client].Class]);
-	DispatchKeyValue(entity, "DefaultAnim", FireDeath[special]);	
 	{
 		float angles[3];
 		GetClientEyeAngles(client, angles);

@@ -1,7 +1,7 @@
 //static const char Name[] = "173";
 //static const char Model[] = "models/freak_fortress_2/scp_173/scp_173new.mdl";
 static const int Health = 4000;
-static const float Speed = 420.0;
+static const float Speed = 490.0;
 static const char SnapSound[] = "freak_fortress_2/scp173/scp173_kill2.mp3";
 
 static const char Downloads[][] =

@@ -22,6 +22,7 @@ void DHook_Setup(GameData gamedata)
 	//DHook_CreateDetour(gamedata, "CLagCompensationManager::StartLagCompensation", DHook_StartLagCompensationPre, DHook_StartLagCompensationPost);
 	DHook_CreateDetour(gamedata, "CTFGameMovement::ProcessMovement", DHook_ProcessMovementPre);
 	DHook_CreateDetour(gamedata, "CTFPlayer::CanPickupDroppedWeapon", DHook_CanPickupDroppedWeaponPre);
+	DHook_CreateDetour(gamedata, "CTFPlayer::DoAnimationEvent", DHook_DoAnimationEventPre, _);
 	DHook_CreateDetour(gamedata, "CTFPlayer::DropAmmoPack", DHook_DropAmmoPackPre);
 	DHook_CreateDetour(gamedata, "CTFPlayer::Taunt", DHook_TauntPre, DHook_TauntPost);
 	DHook_CreateDetour(gamedata, "CTFPlayer::TeamFortress_CalculateMaxSpeed", DHook_CalculateMaxSpeedPre, DHook_CalculateMaxSpeedPost);
@@ -361,6 +362,34 @@ public MRESReturn DHook_CanPickupDroppedWeaponPre(int client, DHookReturn ret, D
 
 	ret.Value = false;
 	return MRES_Supercede;
+}
+
+public MRESReturn DHook_DoAnimationEventPre(int client, DHookParam param)
+{
+	if(Client[client].OnAnimation != INVALID_FUNCTION)
+	{
+		PlayerAnimEvent_t anim = param.Get(1);
+		int data = param.Get(2);
+
+		Call_StartFunction(null, Client[client].OnAnimation);
+		Call_PushCell(client);
+		Call_PushCellRef(anim);
+		Call_PushCellRef(data);
+
+		Action action;
+		Call_Finish(action);
+
+		if(action >= Plugin_Handled)
+			return MRES_Supercede;
+
+		if(action == Plugin_Changed)
+		{
+			param.Set(1, anim);
+			param.Set(2, data);
+			return MRES_ChangedOverride;
+		}
+	}
+	return MRES_Ignored;
 }
 
 public MRESReturn DHook_DropAmmoPackPre(int client, DHookParam param)

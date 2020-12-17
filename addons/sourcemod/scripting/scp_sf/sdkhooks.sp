@@ -9,6 +9,7 @@ void SDKHook_HookClient(int client)
 	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 	SDKHook(client, SDKHook_SetTransmit, OnTransmit);
 	SDKHook(client, SDKHook_ShouldCollide, OnShouldCollide);
+	SDKHook(client, SDKHook_WeaponSwitchPost, OnWeaponSwitch);
 	SDKHook(client, SDKHook_PostThink, OnPostThink);
 	SDKHook(client, SDKHook_PostThinkPost, OnPostThinkPost);
 }
@@ -270,6 +271,10 @@ public Action HookSound(int clients[MAXPLAYERS], int &numClients, char sample[PL
 	if(!IsValidClient(entity))
 		return Plugin_Continue;
 
+	Action action;
+	if(Function_OnSound(action, entity, sample, channel, volume, level, pitch, flags, soundEntry, seed))
+		return action;
+
 	if(!StrContains(sample, "vo", false))
 	{
 		if(IsSpec(entity) || (IsSCP(entity) && !TF2_IsPlayerInCondition(entity, TFCond_Disguised)))
@@ -347,6 +352,11 @@ public Action OnGetMaxHealth(int client, int &health)
 		}
 	}
 	return Plugin_Changed;
+}
+
+public void OnWeaponSwitch(int client, int entity)
+{
+	Function_OnSwitchWeapon(client, entity);
 }
 
 public void OnPostThink(int client)

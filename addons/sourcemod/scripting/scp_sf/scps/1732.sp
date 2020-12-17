@@ -1,7 +1,7 @@
 //static const char Name[] = "1732";
 //static const char Model[] = "models/scp/scp173.mdl";
 static const int Health = 800;
-static const float Speed = 450.0;
+static const float Speed = 520.0;
 
 static const char Downloads[][] =
 {
