@@ -3,16 +3,16 @@
 static const char SoundPassive[] = "freak_fortress_2/scp096/bgm.mp3";
 static const char SoundEnrage[] = "freak_fortress_2/scp096/fullrage.mp3";
 
-static const int HealthMax = 1500;	// Max standard health
-static const int HealthExtra = 350;	// Max regenerable health
-static const int HealthRage = 70;	// Extra health per target in rage
+static const int HealthMax = 1875;	// Max standard health
+static const int HealthExtra = 425;//437.5// Max regenerable health
+static const int HealthRage = 75;//87.5	// Extra health per target in rage
 
 static const float SpeedPassive = 230.0;
-static const float SpeedRage = 520.0;
+static const float SpeedRage = 480.0;
 
 static const float RageWarmup = 6.0;	// Rage warmup time
-static const float RageDuration = 13.0;	// Rage initial duration
-static const float RageExtra = 2.0;	// Rage duration per target
+static const float RageDuration = 12.0;	// Rage initial duration
+static const float RageExtra = 3.0;	// Rage duration per target
 static const float RageWinddown = 6.0;	// After rage stun
 static const float RageCooldown = 15.0;	// After rage cooldown
 
@@ -156,13 +156,17 @@ public void SCP096_OnButton(int client, int button)
 		{
 			if(Client[client].Power < engineTime)
 			{
-				Client[client].Power = engineTime+(Client[client].Disarmer*RageExtra)+RageDuration;
+				float duration = (Client[client].Disarmer*RageExtra)+RageDuration;
+				if(duration > 30)
+					duration = 30.0;
+
+				Client[client].Power = engineTime+duration;
 				Client[client].Keycard = Keycard_106;
 				Client[client].Radio = 2;
 				TF2_AddCondition(client, TFCond_CritCola, 99.9);
 
 				TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
-				int weapon = SpawnWeapon(client, "tf_weapon_sword", 154, 100, 13, "2 ; 11 ; 6 ; 0.8 ; 28 ; 3 ; 252 ; 0 ; 326 ; 2.33", false);
+				int weapon = SpawnWeapon(client, "tf_weapon_sword", 154, 100, 13, "2 ; 11 ; 6 ; 0.95 ; 28 ; 3 ; 252 ; 0 ; 326 ; 2 ; 4328 ; 1", false);
 				if(weapon > MaxClients)
 				{
 					ApplyStrangeRank(weapon, 16);
@@ -342,8 +346,8 @@ static void TriggerShyGuy(int client, int target, bool full)
 		}
 		case 2:
 		{
-			Client[client].Power += RageExtra;
-			Client[client].Disarmer++;
+			if(++Client[client].Disarmer < 7)
+				Client[client].Power += RageExtra;
 		}
 		default:
 		{

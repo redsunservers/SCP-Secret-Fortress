@@ -58,6 +58,12 @@
 				"linux"		"@_ZN9CTFPlayer22CanPickupDroppedWeaponEPK16CTFDroppedWeapon"
 				"windows"	"\x55\x8B\xEC\x53\x8B\x5D\x08\x56\x8B\xF1\x80\xBB\xDC\x04\x00\x00\x00"
 			}
+			"CTFPlayer::DoAnimationEvent"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CTFPlayer16DoAnimationEventE17PlayerAnimEvent_ti"
+				"windows"	"\x55\x8B\xEC\x51\x53\x56\x8B\x35\x2A\x2A\x2A\x2A\x8B\xD9\x8B\xCE"
+			}
 			"CTFPlayer::DropAmmoPack"
 			{
 				"library"	"server"
@@ -226,6 +232,24 @@
 					"pWeapon"
 					{
 						"type"	"cbaseentity"
+					}
+				}
+			}
+			"CTFPlayer::DoAnimationEvent"
+			{
+				"signature"	"CTFPlayer::DoAnimationEvent"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"entity"
+				"arguments"
+				{
+					"event"
+					{
+						"type"	"int"
+					}
+					"nData"
+					{
+						"type"	"int"
 					}
 				}
 			}
