@@ -1,5 +1,14 @@
 #define ITEMS_MAX	8
 
+enum
+{
+	Item_Weapon,
+	Item_Keycard,
+	Item_Medical,
+	Item_Radio,
+	Item_SCP
+}
+
 static const int ItemLimits[] =
 {
 	2,	// Weapons
@@ -169,10 +178,10 @@ int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, 
 		Config.GetString("func_spawn", buffer, sizeof(buffer));
 		if(buffer[0])
 		{
-			Function func = GetFunctionByName(INVALID_HANDLE, buffer);
+			Function func = GetFunctionByName(null, buffer);
 			if(func != INVALID_FUNCTION)
 			{
-				Call_StartFunction(INVALID_HANDLE, func);
+				Call_StartFunction(null, func);
 				Call_PushCell(client);
 				Call_PushCell(entity);
 				Call_Finish();
@@ -187,42 +196,38 @@ int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, 
 	return entity;
 }
 
-int Items_SwitchItem(int client)
+int Items_SwitchItem(int client, int holding)
 {
-	int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-	if(weapon>MaxClients && IsValidEntity(weapon))
+	static char buffer[36];
+	if(GetEntityClassname(holding, buffer, sizeof(buffer)))
 	{
-		static char buffer[36];
-		if(GetEntityClassname(weapon, buffer, sizeof(buffer)))
-		{
-			if(!MaxWeapons)
-				MaxWeapons = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
+		if(!MaxWeapons)
+			MaxWeapons = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
 
-			int slot = TF2_GetClassnameSlot(buffer);
-			for(int i; i<MaxWeapons; i++)
+		int slot = TF2_GetClassnameSlot(buffer);
+		for(int i; i<MaxWeapons; i++)
+		{
+			if(GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i) != holding)
+				continue;
+
+			for(int a=1; a<MaxWeapons; a++)
 			{
-				if(GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i) != weapon)
+				if(++i >= MaxWeapons)
+					i = 0;
+
+				int weapon = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i);
+				if(weapon<=MaxClients || !IsValidEntity(weapon) ||
+				  !GetEntityClassname(weapon, buffer, sizeof(buffer)) ||
+				   TF2_GetClassnameSlot(buffer) != slot)
 					continue;
 
-				for(int a=1; a<MaxWeapons; a++)
-				{
-					if(++i >= MaxWeapons)
-						i = 0;
-
-					weapon = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i);
-					if(weapon<=MaxClients || !IsValidEntity(weapon) ||
-					  !GetEntityClassname(weapon, buffer, sizeof(buffer)) ||
-					   TF2_GetClassnameSlot(buffer) != slot)
-						continue;
-
-					SetActiveWeapon(client, weapon);
-					break;
-				}
-				break;
+				SetActiveWeapon(client, weapon);
+				return weapon;
 			}
+			break;
 		}
 	}
-	return weapon;
+	return -1;
 }
 
 bool Items_CanGiveItem(int client, int type)
@@ -276,10 +281,10 @@ bool Items_DropItem(int client, int weapon, const float origin[3], const float a
 	Config.GetString("func_drop", buffer, sizeof(buffer));
 	if(buffer[0])
 	{
-		Function func = GetFunctionByName(INVALID_HANDLE, buffer);
+		Function func = GetFunctionByName(null, buffer);
 		if(func != INVALID_FUNCTION)
 		{
-			Call_StartFunction(INVALID_HANDLE, func);
+			Call_StartFunction(null, func);
 			Call_PushCell(client);
 
 			bool canDrop;
@@ -345,9 +350,9 @@ bool Items_DropItem(int client, int weapon, const float origin[3], const float a
 		return false;
 	}
 
-	TF2_RemoveItem(client, weapon);
-
 	SDKCall_InitDroppedWeapon(entity, client, weapon, swap, false);
+
+	TF2_RemoveItem(client, weapon);
 
 	offset = Config.GetNum("skin", -1);
 	if(offset >= 0)
@@ -376,9 +381,84 @@ void Items_DropAllItems(int client)
 	}
 }
 
+static void SpawnPlayerPickup(int client, const char[] classname)
+{
+	int entity = CreateEntityByName("item_healthkit_small");
+	if(entity > MaxClients)
+	{
+		static float pos[3];
+		GetClientAbsOrigin(client, pos);
+		pos[2] += 20.0;
+		DispatchKeyValue(entity, "OnPlayerTouch", "!self,Kill,,0,-1");
+		DispatchSpawn(entity);
+		SetEntProp(entity, Prop_Send, "m_iTeamNum", GetClientTeam(client), 4);
+		SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
+		SetEntityMoveType(entity, MOVETYPE_VPHYSICS);
+
+		TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
+
+		int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+		if(weapon>=MaxClients && IsValidEntity(weapon))
+			RemoveAndSwitch(client, weapon);
+	}
+}
+
+Action Items_OnDamage(int victim, int attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	Action action;
+	if(IsValidEntity(weapon) && weapon>MaxClients && HasEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex"))
+	{
+		static char buffer[16];
+		IntToString(GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex"), buffer, sizeof(buffer));
+
+		Config.Rewind();
+		if(Config.JumpToKey(buffer))
+		{
+			Config.GetString("func_damage", buffer, sizeof(buffer));
+			if(buffer[0])
+			{
+				Function func = GetFunctionByName(null, buffer);
+				if(func != INVALID_FUNCTION)
+				{
+					Call_StartFunction(null, func);
+					Call_PushCell(attacker);
+					Call_PushCell(victim);
+					Call_PushCellRef(inflictor);
+					Call_PushFloatRef(damage);
+					Call_PushCellRef(damagetype);
+					Call_PushCellRef(weapon);
+					Call_PushArrayEx(damageForce, 3, SM_PARAM_COPYBACK);
+					Call_PushArrayEx(damagePosition, 3, SM_PARAM_COPYBACK);
+					Call_PushCell(damagecustom);
+					Call_Finish(result);
+				}
+			}
+		}
+	}
+	return action;
+}
+
+static void RemoveAndSwitch(int client, int weapon)
+{
+	Items_SwitchItem(client, weapon);
+	TF2_RemoveItem(client, weapon);
+}
+
 public bool Items_NoDrop(int client)
 {
 	return false;
+}
+
+public bool Items_PainKillerDrop(int client)
+{
+	SpawnPlayerPickup(client, "item_healthkit_small");
+	return true;
+}
+
+public bool Items_HealthKitDrop(int client)
+{
+	SpawnPlayerPickup(client, "item_healthkit_medium");
+	return true;
 }
 
 public Action Items_DisarmerHit(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
@@ -433,19 +513,316 @@ public Action Items_DisarmerHit(int victim, int &attacker, int &inflictor, float
 	return Plugin_Continue;
 }
 
-public Action Items_LogicerHit(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+public Action Items_HeadshotHit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	if(!IsSCP(victim))
-		return Plugin_Changed;
+	if((IsSCP(victim) && !Client[victim].Class==Class_0492) ||
+	   GetEntProp(victim, Prop_Data, "m_LastHitGroup") != HITGROUP_HEAD)
+		return Plugin_Continue;
 
-	damage /= 2.0;
-	return false;
+	damagetype |= DMG_CRIT;
+	return Plugin_Changed;
 }
 
-public void Items_BuilderSpawn(int client, int entity)
+public Action Items_LogicerHit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	bool changed;
+	bool isSCP = IsSCP(victim);
+	if(isSCP)
+	{
+		damage /= 2.0;
+		changed = true;
+	}
+
+	if((!isSCP || Client[victim].Class==Class_0492) &&
+	   GetEntProp(victim, Prop_Data, "m_LastHitGroup") == HITGROUP_HEAD)
+	{
+		damagetype |= DMG_CRIT;
+		changed = true;
+	}
+
+	return changed ? Plugin_Changed : Plugin_Continue;
+}
+
+public Action Items_FlashHit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	FadeMessage(victim, 36, 768, 0x0012);
+	FadeClientVolume(victim, 1.0, 2.0, 2.0, 0.2);
+	return Plugin_Continue;
+}
+
+public void Items_MicroCreate(int client, int entity)
+{
+	SetEntPropFloat(entity, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
+}
+
+public void Items_BuilderCreate(int client, int entity)
 {
 	for(int i; i<4; i++)
 	{
 		SetEntProp(entity, Prop_Send, "m_aBuildableObjectTypes", i!=3, _, i);
 	}
+}
+
+public bool Items_MicroRunCmd(int client, int weapon, int &buttons)
+{
+	static float charge[MAXTF2PLAYERS];
+	if(!(buttons & IN_ATTACK))
+	{
+		charge[client] = 0.0;
+		SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
+		SetEntPropFloat(client, Prop_Send, "m_flRageMeter", 99.0);
+		return false;
+	}
+
+	buttons &= ~IN_JUMP|IN_SPEED;
+
+	if(charge[client])
+	{
+		float engineTime = GetEngineTime();
+		if(charge[client] < engineTime)
+		{
+			SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", 0.0);
+			SetEntPropFloat(client, Prop_Send, "m_flRageMeter", 0.0);
+		}
+		else
+		{
+			PrintKeyHintText(client, "Charge: %d", RoundToCeil((charge[client]-engineTime-6.0)/-0.06));
+			SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
+			SetEntPropFloat(client, Prop_Send, "m_flRageMeter", (charge[client]-engineTime)*16.5)
+
+			static float time[MAXTF2PLAYERS];
+			if(time[client] < engineTime)
+			{
+				time[client] = engineTime+0.1;
+				int type = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
+				if(type != -1)
+				{
+					int ammo = GetEntProp(client, Prop_Data, "m_iAmmo", _, type)-1;
+					if(ammo >= 0)
+						SetEntProp(client, Prop_Data, "m_iAmmo", ammo, _, type);
+				}
+			}
+		}
+	}
+	else
+	{
+		charge[client] = GetEngineTime()+6.0;
+	}
+	return true;
+}
+
+public bool Items_PainKillerRunCmd(int client, int weapon, int &buttons)
+{
+	if(buttons & IN_ATTACK)
+	{
+		buttons &= ~IN_ATTACK;
+
+		int userid = GetClientUserId(client);
+		ApplyHealEvent(userid, userid, 6);
+
+		SetEntityHealth(client, GetClientHealth(client)+6);
+		StartHealingTimer(client, 0.4, 1, 50);
+	}
+	else if(buttons & IN_ATTACK2)
+	{
+		buttons &= ~IN_ATTACK2;
+
+		Items_PainKillerDrop(client);
+	}
+	else
+	{
+		return false;
+	}
+
+	RemoveAndSwitch(client, weapon);
+	return true;
+}
+
+public bool Items_HealthKitRunCmd(int client, int weapon, int &buttons)
+{
+	if(!(buttons & IN_ATTACK) && !(buttons & IN_ATTACK2))
+		return false;
+
+	RemoveAndSwitch(client, weapon);
+	buttons &= ~(IN_ATTACK|IN_ATTACK2);
+	return Items_HealthKitDrop(client);
+}
+
+public bool Items_AdrenalineRunCmd(int client, int weapon, int &buttons)
+{
+	if(!(buttons & IN_ATTACK))
+		return false;
+
+	buttons &= ~IN_ATTACK;
+	RemoveAndSwitch(client, weapon);
+	StartHealingTimer(client, 0.334, 1, 60, true);
+	TF2_AddCondition(client, TFCond_DefenseBuffNoCritBlock, 20.0, client);
+	TF2_AddCondition(client, TFCond_CritHype, 20.0, client);
+	FadeClientVolume(client, 0.7, 2.5, 17.5, 2.5);
+	return true;
+}
+
+public bool Items_500RunCmd(int client, int weapon, int &buttons)
+{
+	if(!(buttons & IN_ATTACK))
+		return false;
+
+	buttons &= ~IN_ATTACK;
+	RemoveAndSwitch(client, weapon);
+	SpawnPickup(client, "item_healthkit_full");
+	StartHealingTimer(client, 0.334, 1, 36, true);
+	TF2_AddCondition(client, TFCond_DefenseBuffNoCritBlock, 20.0, client);
+	TF2_AddCondition(client, TFCond_CritHype, 20.0, client);
+	return true;
+}
+
+public int Items_KeycardJan(int client, AccessEnum access)
+{
+	if(access == Access_Main)
+		return 1;
+
+	return 0;
+}
+
+public int Items_KeycardSci(int client, AccessEnum access)
+{
+	if(access == Access_Main)
+		return 2;
+
+	return 0;
+}
+
+public int Items_KeycardZon(int client, AccessEnum access)
+{
+	if(access==Access_Main || access==Access_Checkpoint)
+		return 1;
+
+	return 0;
+}
+
+public int Items_KeycardRes(int client, AccessEnum access)
+{
+	switch(access)
+	{
+		case Access_Main:
+			return 2;
+
+		case Access_Checkpoint:
+			return 1;
+
+		default;
+			return 0;
+	}
+}
+
+public int Items_KeycardGua(int client, AccessEnum access)
+{
+	if(access==Access_Main || access==Access_Checkpoint || access==Access_Armory)
+		return 1;
+
+	return 0;
+}
+
+public int Items_KeycardCad(int client, AccessEnum access)
+{
+	switch(access)
+	{
+		case Access_Main:
+			return 2;
+
+		case Access_Checkpoint, Access_Armory:
+			return 1;
+
+		default;
+			return 0;
+	}
+}
+
+public int Items_KeycardLie(int client, AccessEnum access)
+{
+	switch(access)
+	{
+		case Access_Main, Access_Armory:
+			return 2;
+
+		case Access_Exit, Access_Checkpoint:
+			return 1;
+
+		default;
+			return 0;
+	}
+}
+
+public int Items_KeycardCom(int client, AccessEnum access)
+{
+	switch(access)
+	{
+		case Access_Armory:
+			return 3;
+
+		case Access_Main:
+			return 2;
+
+		case Access_Exit, Access_Checkpoint, Access_Intercom:
+			return 1;
+
+		default;
+			return 0;
+	}
+}
+
+public int Items_KeycardEng(int client, AccessEnum access)
+{
+	switch(access)
+	{
+		case Access_Main:
+			return 3;
+
+		case Access_Warhead, Access_Checkpoint, Access_Intercom:
+			return 1;
+
+		default;
+			return 0;
+	}
+}
+
+public int Items_KeycardFac(int client, AccessEnum access)
+{
+	switch(access)
+	{
+		case Access_Main:
+			return 3;
+
+		case Access_Exit, Access_Warhead, Access_Checkpoint, Access_Intercom:
+			return 1;
+
+		default;
+			return 0;
+	}
+}
+
+public int Items_KeycardCha(int client, AccessEnum access)
+{
+	switch(access)
+	{
+		case Access_Armory:
+			return 3;
+
+		case Access_Main:
+			return 2;
+
+		case Access_Exit, Access_Checkpoint, Access_Intercom:
+			return 1;
+
+		default;
+			return 0;
+	}
+}
+
+public int Items_KeycardAll(int client, AccessEnum access)
+{
+	if(access==Access_Main || access==Access_Armory)
+		return 3;
+
+	return 1;
 }

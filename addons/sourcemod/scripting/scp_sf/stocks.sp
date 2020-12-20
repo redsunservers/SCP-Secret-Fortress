@@ -1199,6 +1199,56 @@ public Action Timer_MyBlood(Handle timer, int userid)
 	return Plugin_Continue;
 }
 
+void StartHealingTimer(int client, float delay, int health, int amount=0, bool maxhealth=true)
+{
+	DataPack pack;
+	CreateDataTimer(delay, Timer_Healing, pack, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+	pack.WriteCell(GetClientUserId(client));
+	pack.WriteCell(health);
+	pack.WriteCell(maxhealth);
+	pack.WriteCell(amount);
+}
+
+public Action Timer_Healing(Handle timer, DataPack pack)
+{
+	pack.Reset();
+	int userid = pack.ReadCell();
+	int client = GetClientOfUserId(userid);
+	if(!client || !IsClientInGame(client) || !IsPlayerAlive(client))
+		return Plugin_Stop;
+
+	int current = GetClientHealth(client);
+	int health = pack.ReadCell();
+	if(pack.ReadCell())
+	{
+		int max = 125;
+		OnGetMaxHealth(client, max);
+		if(current<=max && current+health>max)
+			health = max-current;
+	}
+
+	SetEntityHealth(client, current+health);
+
+	current = pack.ReadCell();
+	if(current < 1)
+		return Plugin_Stop;
+
+	pack.Position--;
+	pack.WriteCell(current-1, false);
+	return Plugin_Continue;
+}
+
+void ApplyHealEvent(int patient, int healer, int amount)
+{
+	Event event = CreateEvent("player_healed", true);
+
+	event.SetInt("patient", patient);
+	event.SetInt("healer", healer);
+	event.SetInt("heals", amount);
+
+	event.Fire();
+}
+
 public bool TraceRayPlayerOnly(int client, int mask, any data)
 {
 	return (client!=data && IsValidClient(client) && IsValidClient(data));

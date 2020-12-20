@@ -30,8 +30,7 @@ public void OnEntityCreated(int entity, const char[] classname)
 {
 	if(StrContains(classname, "item_healthkit") != -1)
 	{
-		SDKHook(entity, SDKHook_Spawn, StrEqual(classname, "item_healthkit_medium") ? OnMedSpawned : OnKitSpawned);
-		return;
+		SDKHook(entity, SDKHook_Spawn, StrEqual(classname, "item_healthkit_small") ? OnKitSpawned : OnMedSpawned);
 	}
 	else if(Ready && StrEqual(classname, "tf_projectile_pipe"))
 	{
@@ -52,9 +51,23 @@ public void OnKitSpawned(int entity)
 
 public void OnMedSpawned(int entity)
 {
-	SetEntProp(entity, Prop_Data, "m_iHammerID", RoundToFloor((GetEngineTime()+2.25)*10.0));
+	SetEntProp(entity, Prop_Data, "m_iHammerID", RoundToFloor((GetEngineTime()+2.0)*10.0));
 	SDKHook(entity, SDKHook_StartTouch, OnPipeTouch);
 	SDKHook(entity, SDKHook_Touch, OnKitPickup);
+}
+
+public Action OnSmallPickup(int entity, int client)
+{
+	if(!Enabled || !IsValidClient(client))
+		return Plugin_Continue;
+
+	if(!IsSCP(client) && !Client[client].Disarmer &&
+	   GetEntProp(entity, Prop_Data, "m_iHammerID")/10.0 < GetEngineTime() &&
+	   Items_CanGiveItem(client, Item_Medical) &&
+	   Items_CreateWeapon(client, 30013, false, true, true, GetSteamAccountID(client)) != -1)
+		AcceptEntityInput(entity, "Kill");
+
+	return Plugin_Handled;
 }
 
 public Action OnKitPickup(int entity, int client)
@@ -62,35 +75,48 @@ public Action OnKitPickup(int entity, int client)
 	if(!Enabled || !IsValidClient(client))
 		return Plugin_Continue;
 
-	static char classname[32];
-	GetEntityClassname(entity, classname, sizeof(classname));
-	if(StrContains(classname, "item_healthkit") == -1)
+	if(!IsSCP(client) && !Client[client].Disarmer)
 	{
-		SDKUnhook(entity, SDKHook_Touch, OnKitPickup);
-		return Plugin_Continue;
+		float time = GetEntProp(entity, Prop_Data, "m_iHammerID")/10.0;
+		float engineTime = GetEngineTime();
+		if(time < engineTime)
+		{
+			if(time+0.3 > engineTime)
+			{
+				int health;
+				OnGetMaxHealth(client, health);
+				if(health > GetClientHealth(client))
+				{
+					SDKUnhook(entity, SDKHook_Touch, OnKitPickup);
+					return Plugin_Continue;
+				}
+			}
+			else if(Items_CanGiveItem(client, Item_Medical) &&
+				Items_CreateWeapon(client, 30013, false, true, true, GetSteamAccountID(client)) != -1)
+			{
+				AcceptEntityInput(entity, "Kill");
+			}
+		}
 	}
+	return Plugin_Handled;
+}
 
-	float time = GetEntProp(entity, Prop_Data, "m_iHammerID")/10.0;
-	if(IsSCP(client) || Client[client].Disarmer || time>GetEngineTime())
-		return Plugin_Handled;
-
-	if(StrEqual(classname, "item_healthkit_full") || (time+0.3)>GetEngineTime())
+public Action OnFullPickup(int entity, int client)
+{
+	if(Enabled && IsValidClient(client))
 	{
+		if(IsSCP(client) || Client[client].Disarmer ||
+		   GetEntProp(entity, Prop_Data, "m_iHammerID")/10.0 > GetEngineTime())
+			return Plugin_Handled;
+
 		int health;
 		OnGetMaxHealth(client, health);
 		if(health <= GetClientHealth(client))
 			return Plugin_Handled;
 
 		SDKUnhook(entity, SDKHook_Touch, OnKitPickup);
-		return Plugin_Continue;
 	}
-
-	if(Client[client].HealthPack)
-		return Plugin_Handled;
-
-	Client[client].HealthPack = StrEqual(classname, "item_healthkit_small") ? 1 : 2;
-	AcceptEntityInput(entity, "Kill");
-	return Plugin_Handled;
+	return Plugin_Continue;
 }
 
 public Action OnPipeSpawned(int entity)
@@ -102,7 +128,7 @@ public Action OnPipeSpawned(int entity)
 
 public Action OnPipeTouch(int entity, int client)
 {
-	return (IsValidClient(client)) ? Plugin_Handled : Plugin_Continue;
+	return IsValidClient(client) ? Plugin_Handled : Plugin_Continue;
 }
 
 public Action OnObjDamage(int entity, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)

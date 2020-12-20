@@ -933,7 +933,7 @@ public void OnLibraryRemoved(const char[] name)
 public void OnMapStart()
 {
 	Enabled = false;
-	Ready = false;
+	Ready = true;
 	NoMusic = false;
 
 	Config_Setup();
@@ -947,6 +947,7 @@ public void OnMapStart()
 	else if(!StrContains(buffer, "arena_", false) || !StrContains(buffer, "vsh_", false))
 	{
 		Gamemode = Gamemode_Arena;
+		Ready = false;
 	}
 	else if(!StrContains(buffer, "ctf_", false))
 	{
@@ -1154,8 +1155,6 @@ public void OnRoundReady(Event event, const char[] name, bool dontBroadcast)
 public void TF2_OnWaitingForPlayersStart()
 {
 	Ready = false;
-	if(CvarSpecGhost.BoolValue && Gamemode!=Gamemode_Arena)
-		TF2_SendHudNotification(HUD_NOTIFY_HOW_TO_CONTROL_GHOST_NO_RESPAWN);
 }
 
 public void TF2_OnWaitingForPlayersEnd()
@@ -1834,8 +1833,14 @@ public Action TF2_OnPlayerTeleport(int client, int teleporter, bool &result)
 public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
-	if(!IsValidClient(client) || (!Ready && !Enabled && Gamemode==Gamemode_Arena))
+	if(!IsValidClient(client))
 		return;
+
+	if(!Ready)
+	{
+		TF2_AddCondition(client, TFCond_UberchargedCanteen, 5.0);
+		return;
+	}
 
 	TFTeam team = Client[client].TeamTF();
 	if(Client[client].Class != Class_Spec)
@@ -1862,6 +1867,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			ChangeClientTeamEx(client, team);
 	}
 
+	TF2_RemoveAllWeapons(client);
 	ViewModel_Destroy(client);
 
 	int Ammo[Ammo_MAX];
@@ -2842,6 +2848,9 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] classname, int index, 
 			return Plugin_Continue;
 	}
 
+	if(!StrContains(classname, "tf_weap", false))
+		return Plugin_Continue;
+
 	switch(index)
 	{
 		case 493, 233, 234, 241, 280, 281, 282, 283, 284, 286, 288, 362, 364, 365, 536, 542, 577, 599, 673, 729, 791, 839, 5607:  //Action slot items
@@ -3306,10 +3315,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 					GiveAchievement(Achievement_Survive500, client);
 
 				TF2_AddCondition(client, TFCond_MegaHeal, 0.7);
-				DataPack pack;
-				CreateDataTimer(1.2, Timer_Healing, pack, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
-				pack.WriteCell(GetClientUserId(client));
-				pack.WriteCell(17);
+				StartHealingTimer(client, 15, 1.2, 17);
 				Client[client].HealthPack = 0;
 			}
 			else
@@ -3515,12 +3521,15 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 
 					if(Client[client].Sprinting)
 					{
-						Client[client].SprintPower -= 2.0;
-						if(Client[client].SprintPower < 0)
+						if(!TF2_IsPlayerInCondition(client, TFCond_CritHype))
 						{
-							Client[client].SprintPower = 0.0;
-							Client[client].Sprinting = false;
-							SDKCall_SetSpeed(client);
+							Client[client].SprintPower -= 2.0;
+							if(Client[client].SprintPower < 0)
+							{
+								Client[client].SprintPower = 0.0;
+								Client[client].Sprinting = false;
+								SDKCall_SetSpeed(client);
+							}
 						}
 					}
 					else
@@ -4253,7 +4262,7 @@ public void UpdateListenOverrides(float engineTime)
 						SetListenOverride(client, target, blocked ? Listen_No : Listen_Yes);
 						continue;
 					}
-					else if(Client[target].Class==Class_049 || (Client[target].Class>=Class_939 && Client[target].Class<=Class_3008))
+					else if(Client[target].Class>=Class_939 && Client[target].Class<=Class_3008)
 					{
 						GetEntPropVector(target, Prop_Send, "m_vecOrigin", targetPos);
 						if(GetVectorDistance(clientPos, targetPos) < 700)
@@ -4285,24 +4294,6 @@ public void UpdateListenOverrides(float engineTime)
 			}
 		}
 	}
-}
-
-public Action Timer_Healing(Handle timer, DataPack pack)
-{
-	pack.Reset();
-	int client = GetClientOfUserId(pack.ReadCell());
-	if(!client || !IsClientInGame(client))
-		return Plugin_Stop;
-
-	SetEntityHealth(client, GetClientHealth(client)+15);
-
-	int count = pack.ReadCell();
-	if(count < 1)
-		return Plugin_Stop;
-
-	pack.Position--;
-	pack.WriteCell(count-1, false);
-	return Plugin_Continue;
 }
 
 void GoToSpawn(int client, ClassEnum class)
