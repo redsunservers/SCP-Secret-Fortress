@@ -862,7 +862,7 @@ void ApplyStrangeRank(int entity, int rank)
 	TF2Attrib_SetByDefIndex(entity, 214, view_as<float>(kills));
 }
 
-void ApplyStrangeHatRank(int entity, int rank)
+stock void ApplyStrangeHatRank(int entity, int rank)
 {
 	int points;
 	switch(rank)

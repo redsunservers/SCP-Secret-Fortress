@@ -148,3 +148,14 @@ bool Function_OnSound(Action &result, int client, char sample[PLATFORM_MAX_PATH]
 	Call_Finish(result);
 	return true;
 }
+
+void Function_OnCondRemoved(int client, TFCond cond)
+{
+	if(Client[client].OnCondRemoved == INVALID_FUNCTION)
+		return;
+
+	Call_StartFunction(null, Client[client].OnCondRemoved);
+	Call_PushCell(client);
+	Call_PushCell(cond);
+	Call_Finish();
+}
