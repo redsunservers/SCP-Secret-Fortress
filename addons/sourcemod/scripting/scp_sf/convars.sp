@@ -19,7 +19,7 @@ ConVar CvarWinStyle;
 
 void ConVar_Setup()
 {
-	CvarQuickRounds = CreateConVar("scp_quickrounds", "0", "If to end the round if winning outcome can no longer be changed", _, true, 0.0, true, 1.0);
+	CvarQuickRounds = CreateConVar("scp_quickrounds", "1", "If to end the round if winning outcome can no longer be changed", _, true, 0.0, true, 1.0);
 	CvarSpecGhost = CreateConVar("scp_specmode", "1", "If to spawn as a ghost while spectating", _, true, 0.0, true, 1.0);
 	CvarFriendlyFire = CreateConVar("scp_friendlyfire", "0", "If to enable friendly fire", _, true, 0.0, true, 1.0);
 	CvarDiscFF = CreateConVar("scp_discff", "0", "DISC-FF.com private features", _, true, 0.0, true, 1.0);
