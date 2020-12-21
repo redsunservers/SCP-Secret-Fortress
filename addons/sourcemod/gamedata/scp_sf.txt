@@ -328,11 +328,6 @@
 				"linux" 	"6"
 				"windows" 	"5"
 			}
-			"CBasePlayer::EquipWearable"
-			{
-				"linux"		"431"
-				"windows"	"430"
-			}
 			"CBasePlayer::ForceRespawn"
 			{
 				"linux"		"330"

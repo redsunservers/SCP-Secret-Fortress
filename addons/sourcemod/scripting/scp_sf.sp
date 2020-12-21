@@ -34,10 +34,10 @@ void DisplayCredits(int i)
 	PrintToConsole(i, "Transmit Outlines | nosoop | forums.alliedmods.net/member.php?u=252787");
 	PrintToConsole(i, "Move Speed Unlocker | xXDeathreusXx | forums.alliedmods.net/member.php?u=224722");
 
-	PrintToConsole(i, "Chaos, SCP-049-2 | DoctorKrazy | forums.alliedmods.net/member.php?u=288676");
-	PrintToConsole(i, "MTF, SCP-049, SCP-096 | JuegosPablo | forums.alliedmods.net/showthread.php?t=308656");
-	PrintToConsole(i, "SCP-173 | RavensBro | forums.alliedmods.net/showthread.php?t=203464");
-	PrintToConsole(i, "SCP-106 | Spyer | forums.alliedmods.net/member.php?u=272596");
+	PrintToConsole(i, "Chaos, SCP-049-2 Rigs | DoctorKrazy | forums.alliedmods.net/member.php?u=288676");
+	PrintToConsole(i, "MTF Rig | JuegosPablo | forums.alliedmods.net/showthread.php?t=308656");
+	PrintToConsole(i, "SCP-173 Port | RavensBro | forums.alliedmods.net/showthread.php?t=203464");
+	PrintToConsole(i, "SCP Animations | Badget | steamcommunity.com/profiles/76561198097667312");
 	PrintToConsole(i, "Soundtracks | Jacek \"Burnert\" Rogal");
 
 	PrintToConsole(i, "Cosmic Inspiration | Marxvee | forums.alliedmods.net/member.php?u=289257");
@@ -46,7 +46,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"7"
-#define STABLE_REVISION	"8"
+#define STABLE_REVISION	"9"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define IsSCP(%1)	(Client[%1].Class>=Class_035)
@@ -250,12 +250,12 @@ char ClassModel[][] =
 	"models/freak_fortress_2/scpmtf/mtf_guard_playerv4.mdl",	// MTF E
 
 	"models/scp_sf/scp_049/zombieguard.mdl",		// 035
-	"models/vinrax/player/scp049_player_7.mdl",		// 049
+	"models/scp_sf/049/scp049_player_7.mdl",		// 049
 	"models/scp_sf/scp_049/zombieguard.mdl",		// 049-2
 	"models/freak_fortress_2/newscp076/newscp076_v1.mdl", 	// 076-2
 	"models/player/engineer.mdl", 				// 079
-	"models/freak_fortress_2/096/scp096.mdl",		// 096
-	"models/freak_fortress_2/106_spyper/106.mdl",		// 106
+	"models/scp_sf/096/scp096_2.mdl",			// 096
+	"models/scp_sf/106/scp106_player_3.mdl",		// 106
 	"models/freak_fortress_2/scp_173/scp_173new.mdl",	// 173
 	"models/scp/scp173.mdl",				// 173-2
 	"models/player/spy.mdl",				// 527
@@ -568,6 +568,7 @@ enum struct ClientEnum
 	Function OnAnimation;	// Action(int client, PlayerAnimEvent_t &anim, int &data)
 	Function OnWeaponSwitch;	// void(int client, int entity)
 	Function OnSound;		// Action(int client, char sample[PLATFORM_MAX_PATH], int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
+	Function OnCondRemoved;	// void(int client, TFCond cond)
 
 	int HealthPack;
 	int Radio;
@@ -610,6 +611,7 @@ enum struct ClientEnum
 		this.OnAnimation = INVALID_FUNCTION;
 		this.OnWeaponSwitch = INVALID_FUNCTION;
 		this.OnSound = INVALID_FUNCTION;
+		this.OnCondRemoved = INVALID_FUNCTION;
 	}
 
 	TFTeam TeamTF()
@@ -1818,6 +1820,8 @@ public void TF2_OnConditionRemoved(int client, TFCond cond)
 {
 	if(Enabled)
 		SDKCall_SetSpeed(client);
+
+	Function_OnCondRemoved(client, cond);
 }
 
 public Action TF2_OnPlayerTeleport(int client, int teleporter, bool &result)

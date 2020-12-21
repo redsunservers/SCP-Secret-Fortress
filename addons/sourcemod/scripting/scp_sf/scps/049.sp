@@ -1,7 +1,7 @@
 //static const char Name[] = "049";
-static const char Model[] = "models/vinrax/player/scp049_player_7.mdl";
-static const char ModelMedi[] = "models/vinrax/weapons/c_arms_scp049_knife_1.mdl";
-static const char ModelMelee[] = "models/vinrax/weapons/c_arms_scp049_4.mdl";
+static const char Model[] = "models/scp_sf/049/scp049_player_7.mdl";
+static const char ModelMedi[] = "models/scp_sf/049/c_arms_scp049_knife_1.mdl";
+static const char ModelMelee[] = "models/scp_sf/049/c_arms_scp049_4.mdl";
 static const int Health = 2125;
 static const float Speed = 250.0;
 
@@ -81,22 +81,22 @@ static const char SoundPrecache[][] =
 
 static const char Downloads[][] =
 {
-	"models/vinrax/player/scp049_player_7.dx80.vtx",
-	"models/vinrax/player/scp049_player_7.dx90.vtx",
-	"models/vinrax/player/scp049_player_7.mdl",
-	"models/vinrax/player/scp049_player_7.phy",
-	"models/vinrax/player/scp049_player_7.sw.vtx",
-	"models/vinrax/player/scp049_player_7.vvd",
-	"models/vinrax/weapons/c_arms_scp049_4.dx80.vtx",
-	"models/vinrax/weapons/c_arms_scp049_4.dx90.vtx",
-	"models/vinrax/weapons/c_arms_scp049_4.mdl",
-	"models/vinrax/weapons/c_arms_scp049_4.sw.vtx",
-	"models/vinrax/weapons/c_arms_scp049_4.vvd",
-	"models/vinrax/weapons/c_arms_scp049_knife_1.dx80.vtx",
-	"models/vinrax/weapons/c_arms_scp049_knife_1.dx90.vtx",
-	"models/vinrax/weapons/c_arms_scp049_knife_1.mdl",
-	"models/vinrax/weapons/c_arms_scp049_knife_1.sw.vtx",
-	"models/vinrax/weapons/c_arms_scp049_knife_1.vvd",
+	"models/scp_sf/049/scp049_player_7.dx80.vtx",
+	"models/scp_sf/049/scp049_player_7.dx90.vtx",
+	"models/scp_sf/049/scp049_player_7.mdl",
+	"models/scp_sf/049/scp049_player_7.phy",
+	"models/scp_sf/049/scp049_player_7.sw.vtx",
+	"models/scp_sf/049/scp049_player_7.vvd",
+	"models/scp_sf/049/c_arms_scp049_4.dx80.vtx",
+	"models/scp_sf/049/c_arms_scp049_4.dx90.vtx",
+	"models/scp_sf/049/c_arms_scp049_4.mdl",
+	"models/scp_sf/049/c_arms_scp049_4.sw.vtx",
+	"models/scp_sf/049/c_arms_scp049_4.vvd",
+	"models/scp_sf/049/c_arms_scp049_knife_1.dx80.vtx",
+	"models/scp_sf/049/c_arms_scp049_knife_1.dx90.vtx",
+	"models/scp_sf/049/c_arms_scp049_knife_1.mdl",
+	"models/scp_sf/049/c_arms_scp049_knife_1.sw.vtx",
+	"models/scp_sf/049/c_arms_scp049_knife_1.vvd",
 	"materials/models/vinrax/scp/scp-049_clothing_diffuse4.vmt",
 	"materials/models/vinrax/scp/scp-049_clothing_diffuse4.vtf",
 	"materials/models/vinrax/scp/scp-049_mask_diffuse5.vmt",
@@ -151,9 +151,9 @@ static const char Downloads[][] =
 
 enum struct SCP049Enum
 {
-	int Index;
-	float MoveAt;
-	float GoneAt;
+	int Index;	// Revive Marker Index / SCP-049 Revive Count
+	float MoveAt;	// Revive Marker Move Timer / SCP-049 Melee Timer
+	float GoneAt;	// Revive Marker Lifetime Timer / SCP-049 Tick Timer
 }
 
 static SCP049Enum Revive[MAXTF2PLAYERS];
@@ -161,6 +161,9 @@ static SCP049Enum Revive[MAXTF2PLAYERS];
 void SCP049_Enable()
 {
 	HookEvent("revive_player_complete", SCP049_OnRevive);
+
+	PrecacheModel(ModelMedi, true);
+	PrecacheModel(ModelMelee, true);
 
 	for(int i; i<sizeof(SoundPrecache); i++)
 	{
@@ -199,7 +202,7 @@ void SCP049_Create(int client)
 
 	int account = GetSteamAccountID(client);
 
-	int weapon = SpawnWeapon(client, "tf_weapon_medigun", 211, 5, 13, "7 ; 0.7 ; 9 ; 0 ; 18 ; 1 ; 252 ; 0.95 ; 292 ; 2", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_medigun", 211, 5, 13, "7 ; 0.65 ; 9 ; 0 ; 18 ; 1 ; 252 ; 0.95 ; 292 ; 2", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 11);
@@ -210,6 +213,7 @@ void SCP049_Create(int client)
 	GiveMelee(client, account);
 
 	Client[client].OnWeaponSwitch = SCP049_OnWeaponSwitch;
+	Revive[client].Index = 0;
 	Revive[client].GoneAt = GetEngineTime()+20.0;
 	Revive[client].MoveAt = FAR_FUTURE;
 }
@@ -267,7 +271,14 @@ public void SCP049_OnWeaponSwitch(int client, int entity)
 	ViewModel_Destroy(client);
 	if(entity == GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary))
 	{
-		Revive[client].MoveAt = FAR_FUTURE;
+		if(Revive[client].MoveAt != FAR_FUTURE)
+		{
+			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
+			GiveMelee(client, GetSteamAccountID(client), false);
+			Revive[client].MoveAt = FAR_FUTURE;
+			Revive[client].GoneAt = GetEngineTime()+3.0;
+		}
+
 		ViewModel_Create(client, ModelMedi);
 		ViewModel_Hide(client);
 		ViewModel_SetDefaultAnimation(client, "b_idle");
@@ -355,9 +366,10 @@ public Action SCP049_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &ch
 			return Plugin_Handled;
 		}
 
-		EmitSoundToAll(sample, client, _, level, flags, _, pitch);
-		EmitSoundToAll(sample, client, _, level, flags, _, pitch);
-		EmitSoundToAll(sample, client, _, level, flags, _, pitch);
+		for(int i; i<3; i++)
+		{
+			EmitSoundToAll(sample, client, _, level, flags, _, pitch);
+		}
 		return Plugin_Handled;
 	}
 
@@ -388,7 +400,7 @@ public Action SCP0492_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &c
 		}
 		else
 		{
-			Format(sample, PLATFORM_MAX_PATH, "npc/zombie/zombie_voice_idle%d.mp3", GetRandomInt(1, 14));
+			Format(sample, PLATFORM_MAX_PATH, "npc/zombie/zombie_voice_idle%d.wav", GetRandomInt(1, 14));
 		}
 		return Plugin_Changed;
 	}
@@ -464,7 +476,7 @@ public void SCP049_OnButton(int client, int button)
 				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", target);
 			}
 
-			FakeClientCommandEx(client, "voicemenu 1 7");	// Uber ready
+			FakeClientCommandEx(client, "voicemenu 1 6");	// Activate charge
 
 			ViewModel_Create(client, ModelMelee);
 			ViewModel_Hide(client);
@@ -479,9 +491,9 @@ public void SCP049_OnButton(int client, int button)
 	if(Revive[client].MoveAt < engineTime)
 	{
 		FakeClientCommandEx(client, "voicemenu 2 4");	// Positive
+		ViewModel_Destroy(client);
 		TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 		GiveMelee(client, GetSteamAccountID(client));
-		ViewModel_Destroy(client);
 		Revive[client].MoveAt = FAR_FUTURE;
 		Revive[client].GoneAt = engineTime+2.0;
 	}
@@ -566,28 +578,33 @@ public void SCP049_OnRevive(Event event, const char[] name, bool dontBroadcast)
 	if(!StrEqual(classname, "tf_weapon_medigun"))
 		return;
 
-	entity = GetEntPropEnt(entity, Prop_Send, "m_hHealingTarget");
-	if(entity <= MaxClients)
+	int target = GetEntPropEnt(entity, Prop_Send, "m_hHealingTarget");
+	if(target <= MaxClients)
 		return;
 
-	entity = GetEntPropEnt(entity, Prop_Send, "m_hOwner");
-	if(!IsValidClient(entity))
+	target = GetEntPropEnt(target, Prop_Send, "m_hOwner");
+	if(!IsValidClient(target))
 		return;
 
-	if(++Client[client].Disarmer == 10)
+	Revive[client].Index++;
+	TF2Attrib_SetByDefIndex(entity, 7, 0.7+(Revive[client].Index)*0.05);
+	if(Revive[client].Index < 41)
+		SetEntPropFloat(entity, Prop_Send, "m_flChargeLevel", 1.0-Pow(10.0, (1.0-(0.05*Revive[client].Index)))/10.0);
+
+	if(Revive[client].Index == 10)
 		GiveAchievement(Achievement_Revive, client);
 
-	Client[entity].Class = Class_0492;
-	AssignTeam(entity);
-	RespawnPlayer(entity);
-	Client[entity].Floor = Client[client].Floor;
+	Client[target].Class = Class_0492;
+	AssignTeam(target);
+	RespawnPlayer(target);
+	Client[target].Floor = Client[client].Floor;
 
-	SetEntProp(entity, Prop_Send, "m_bDucked", true);
-	SetEntityFlags(entity, GetEntityFlags(entity)|FL_DUCKING);
+	SetEntProp(target, Prop_Send, "m_bDucked", true);
+	SetEntityFlags(target, GetEntityFlags(target)|FL_DUCKING);
 
 	static float pos[3];
 	GetEntPropVector(client, Prop_Send, "m_vecOrigin", pos);
-	TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
+	TeleportEntity(target, pos, NULL_VECTOR, NULL_VECTOR);
 }
 
 public void SCP049_Think(int client)
@@ -678,7 +695,7 @@ static void SpawnMarker(int victim, int client)
 	SDKHook(victim, SDKHook_PreThink, SCP049_Think);
 }
 
-static void GiveMelee(int client, int account)
+static void GiveMelee(int client, int account, bool equip=true)
 {
 	int weapon = SpawnWeapon(client, "tf_weapon_bonesaw", 413, 1, 13, "138 ; 0 ; 252 ; 0.2", false);
 	if(weapon > MaxClients)
@@ -687,6 +704,7 @@ static void GiveMelee(int client, int account)
 		SetEntityRenderMode(weapon, RENDER_TRANSCOLOR);
 		SetEntityRenderColor(weapon, 255, 255, 255, 0);
 		SetEntProp(weapon, Prop_Send, "m_iAccountID", account);
-		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
+		if(equip)
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 	}
 }

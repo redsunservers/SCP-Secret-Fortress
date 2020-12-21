@@ -55,7 +55,7 @@ int WeaponIndex[] =
 	// Primary
 	1151,
 	308,
-	1141,//199,
+	199,
 	594,
 
 	// PDAs
@@ -382,9 +382,6 @@ int GiveWeapon(int client, WeaponEnum weapon, bool equip=true, bool ammo=true, i
 
 	if(entity > MaxClients)
 	{
-		if(!GetRandomInt(0, 3))
-			TF2Attrib_SetByDefIndex(entity, 2053, 1.0);
-
 		ApplyStrangeRank(entity, WeaponRank[weapon]);
 
 		if(account == -3)
