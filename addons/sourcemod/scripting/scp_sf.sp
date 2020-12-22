@@ -46,7 +46,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"7"
-#define STABLE_REVISION	"9"
+#define STABLE_REVISION	"10"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define IsSCP(%1)	(Client[%1].Class>=Class_035)
@@ -517,6 +517,7 @@ enum
 bool Ready = false;
 bool Enabled = false;
 bool NoMusic = false;
+bool ChatHook = false;
 bool SourceComms = false;		// SourceComms++
 bool BaseComm = false;		// BaseComm
 //bool CollisionHook = false;	// CollisionHook
@@ -823,8 +824,6 @@ public void OnPluginStart()
 	RegAdminCmd("scp_givekeycard", Command_ForceCard, ADMFLAG_SLAY, "Usage: scp_givekeycard <target> <id>.  Gives a specific keycard.");
 	RegAdminCmd("scp_banmtf", Command_BanMTF, ADMFLAG_BAN, "Usage: scp_banmtf <target> <id>.  Prevents a player from getting MTF/Guard.");
 
-	AddCommandListener(OnSayCommand, "say");
-	AddCommandListener(OnSayCommand, "say_team");
 	AddCommandListener(OnBlockCommand, "explode");
 	AddCommandListener(OnBlockCommand, "kill");
 	AddCommandListener(OnJoinClass, "joinclass");
@@ -1057,6 +1056,15 @@ public void OnMapStart()
 
 public void OnConfigsExecuted()
 {
+	ConVar_Enable();
+
+	ChatHook = CvarChatHook.BoolValue;
+	if(ChatHook)
+	{
+		AddCommandListener(OnSayCommand, "say");
+		AddCommandListener(OnSayCommand, "say_team");
+	}
+
 	char buffer[PLATFORM_MAX_PATH];
 	BuildPath(Path_SM, buffer, sizeof(buffer), DOWNLOADS);
 	if(!FileExists(buffer))
@@ -1076,8 +1084,6 @@ public void OnConfigsExecuted()
 	}
 	delete file;
 	LockStringTables(save);
-
-	ConVar_Enable();
 }
 
 public void OnPluginEnd()
@@ -4101,6 +4107,12 @@ public void UpdateListenOverrides(float engineTime)
 
 			for(int target=1; target<=MaxClients; target++)
 			{
+				if(!ChatHook)
+				{
+					Client[target].CanTalkTo[client] = true;
+					continue;
+				}
+
 				if(client == target)
 				{
 					SetListenOverride(client, target, Listen_Default);
@@ -4156,7 +4168,9 @@ public void UpdateListenOverrides(float engineTime)
 		{
 			if(client == target)
 			{
-				SetListenOverride(client, target, Listen_Default);
+				if(ChatHook)
+					SetListenOverride(client, target, Listen_Default);
+
 				continue;
 			}
 
@@ -4179,22 +4193,26 @@ public void UpdateListenOverrides(float engineTime)
 			if(GetClientTeam(target)==view_as<int>(TFTeam_Spectator) && !IsPlayerAlive(target) && CheckCommandAccess(target, "sm_mute", ADMFLAG_CHAT))
 			{
 				Client[target].CanTalkTo[client] = true;
-				SetListenOverride(client, target, blocked ? Listen_No : Listen_Default);
+				if(ChatHook)
+					SetListenOverride(client, target, blocked ? Listen_No : Listen_Default);
 			}
 			else if(team)
 			{
 				Client[target].CanTalkTo[client] = !muted;
-				SetListenOverride(client, target, blocked ? Listen_No : Listen_Default);
+				if(ChatHook)
+					SetListenOverride(client, target, blocked ? Listen_No : Listen_Default);
 			}
 			else if(IsSpec(target))
 			{
 				Client[target].CanTalkTo[client] = (!muted && spec);
-				SetListenOverride(client, target, (!blocked && spec) ? Listen_Default : Listen_No);
+				if(ChatHook)
+					SetListenOverride(client, target, (!blocked && spec) ? Listen_Default : Listen_No);
 			}
 			else if(Client[target].ComFor > engineTime)
 			{
 				Client[target].CanTalkTo[client] = !muted;
-				SetListenOverride(client, target, blocked ? Listen_No : Listen_Default);
+				if(ChatHook)
+					SetListenOverride(client, target, blocked ? Listen_No : Listen_Default);
 			}
 			else
 			{
@@ -4204,7 +4222,9 @@ public void UpdateListenOverrides(float engineTime)
 					if(IsSCP(client))
 					{
 						Client[target].CanTalkTo[client] = !muted;
-						SetListenOverride(client, target, blocked ? Listen_No : Listen_Yes);
+						if(ChatHook)
+							SetListenOverride(client, target, blocked ? Listen_No : Listen_Yes);
+
 						continue;
 					}
 					else if(Client[target].Class==Class_049 || (Client[target].Class>=Class_939 && Client[target].Class<=Class_3008))
@@ -4213,13 +4233,16 @@ public void UpdateListenOverrides(float engineTime)
 						if(GetVectorDistance(clientPos, targetPos) < 700)
 						{
 							Client[target].CanTalkTo[client] = !muted;
-							SetListenOverride(client, target, blocked ? Listen_No : Listen_Yes);
+							if(ChatHook)
+								SetListenOverride(client, target, blocked ? Listen_No : Listen_Yes);
+
 							continue;
 						}
 					}
 
 					Client[target].CanTalkTo[client] = false;
-					SetListenOverride(client, target, Listen_No);
+					if(ChatHook)
+						SetListenOverride(client, target, Listen_No);
 				}
 				else
 				{
@@ -4228,12 +4251,14 @@ public void UpdateListenOverrides(float engineTime)
 					if(GetVectorDistance(clientPos, targetPos) < Pow(400.0, 1.0+(radio*0.15)))
 					{
 						Client[target].CanTalkTo[client] = !muted;
-						SetListenOverride(client, target, blocked ? Listen_No : Listen_Yes);
+						if(ChatHook)
+							SetListenOverride(client, target, blocked ? Listen_No : Listen_Yes);
 					}
 					else
 					{
 						Client[target].CanTalkTo[client] = false;
-						SetListenOverride(client, target, Listen_No);
+						if(ChatHook)
+							SetListenOverride(client, target, Listen_No);
 					}
 				}
 			}

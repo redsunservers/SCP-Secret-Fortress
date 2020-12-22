@@ -85,6 +85,16 @@ native void SCPSF_StartMusic(int client=0);
 native void SCPSF_StopMusic(int client=0);
 
 /**
+ * Checks if the client can talk to the target
+ *
+ * @param client 	Client index of speaker
+ * @param target 	Client index of listener
+ *
+ * @noreturn
+ */
+native bool SCPSF_CanTalkTo(int client, int target);
+
+/**
  * Calls when a client escapes
  *
  * @param client 	Client index
@@ -116,7 +126,7 @@ forward void SCPSF_OnAchievement(int client, SCPAchievement achievement);
 forward void SCPSF_OnWeapon(int client, int entity);
 
 /**
- * Calls when a client messages
+ * Calls when a client messages when the chat processor is enabled
  *
  * @param client 	Client index
  * @param name 		Name shown
@@ -144,5 +154,6 @@ public void __pl_SCPSF_SetNTVOptional()
 	MarkNativeAsOptional("SCPSF_IsSCP");
 	MarkNativeAsOptional("SCPSF_StartMusic");
 	MarkNativeAsOptional("SCPSF_StopMusic");
+	MarkNativeAsOptional("SCPSF_CanTalkTo");
 }
 #endif
