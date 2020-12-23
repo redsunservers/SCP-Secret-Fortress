@@ -3,6 +3,8 @@ void Native_Setup()
 	CreateNative("SCPSF_GetClientClass", Native_GetClientClass);
 	CreateNative("SCPSF_IsSCP", Native_IsSCP);
 	CreateNative("SCPSF_StartMusic", Native_StartMusic);
+	CreateNative("SCPSF_StopMusic", Native_StopMusic);
+	CreateNative("SCPSF_CanTalkTo", Native_CanTalkTo);
 }
 
 public any Native_GetClientClass(Handle plugin, int numParams)
@@ -74,4 +76,17 @@ public any Native_StopMusic(Handle plugin, int numParams)
 		}
 		NoMusicRound = false;
 	}
+}
+
+public any Native_CanTalkTo(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	if(client<0 || client>=MAXTF2PLAYERS)
+		return false;
+
+	int target = GetNativeCell(2);
+	if(target<0 || target>=MAXTF2PLAYERS)
+		return false;
+
+	return Client[client].CanTalkTo[target];
 }

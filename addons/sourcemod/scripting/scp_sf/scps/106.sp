@@ -107,13 +107,13 @@ public void SCP106_OnDeath(int client, int attacker)
 	if(Client[client].Radio)
 		HideAnnotation(client);
 
+	RequestFrame(RemoveRagdoll, GetClientUserId(client));
 	if(GetEntityFlags(client) & FL_ONGROUND)
 	{
 		int entity = CreateEntityByName("prop_dynamic_override");
 		if(!IsValidEntity(entity))
 			return;
 
-		RequestFrame(RemoveRagdoll, GetClientUserId(client));
 		{
 			float pos[3];
 			GetEntPropVector(client, Prop_Send, "m_vecOrigin", pos);
@@ -135,10 +135,6 @@ public void SCP106_OnDeath(int client, int attacker)
 		AcceptEntityInput(entity, "SetAnimation");
 
 		CreateTimer(3.0, Timer_RemoveEntity, EntIndexToEntRef(entity));
-	}
-	else
-	{
-		CreateTimer(0.1, Timer_DissolveRagdoll, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
 
