@@ -424,7 +424,7 @@ enum
 
 bool Enabled = false;
 bool NoMusic = false;
-bool ChatHook = false;
+bool ChatHook = true;
 bool SourceComms = false;		// SourceComms++
 bool BaseComm = false;		// BaseComm
 //bool CollisionHook = false;	// CollisionHook
@@ -1407,7 +1407,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 									static float pos[3], ang[3];
 									GetClientEyePosition(client, pos);
 									GetClientEyeAngles(client, ang);
-									Items_DropItem(client, entity, pos, ang);
+									Items_DropItem(client, entity, pos, ang, true);
 								}
 
 								static char buffer[64];
@@ -2036,7 +2036,7 @@ public Action OnDropItem(int client, const char[] command, int args)
 			static float pos[3], ang[3];
 			GetClientEyePosition(client, pos);
 			GetClientEyeAngles(client, ang);
-			if(Items_DropItem(client, entity, pos, ang))
+			if(Items_DropItem(client, entity, pos, ang, true))
 			{
 				if(big)
 				{

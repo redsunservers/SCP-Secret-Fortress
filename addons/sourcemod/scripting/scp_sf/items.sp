@@ -264,6 +264,7 @@ int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, 
 			SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", -1);
 			SetEntPropFloat(entity, Prop_Send, "m_flModelScale", 0.001);
 			SetEntPropFloat(entity, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
+			SetEntPropFloat(entity, Prop_Send, "m_flNextSecondaryAttack", FAR_FUTURE);
 			SetEntityRenderMode(entity, RENDER_TRANSCOLOR);
 			SetEntityRenderColor(entity, 255, 255, 255, 0);
 		}
@@ -854,6 +855,7 @@ public Action Items_DisarmerHit(int client, int victim, int &inflictor, float &d
 				{
 					SetEntProp(victim, Prop_Data, "m_iAmmo", 0, _, i);
 				}
+				FakeClientCommand(victim, "use tf_weapon_fists");
 
 				if(Client[victim].Class>=Class_Guard && Client[victim].Class<=Class_MTFE)
 					GiveAchievement(Achievement_DisarmMTF, client);
@@ -910,6 +912,7 @@ public Action Items_FlashHit(int client, int victim, int &inflictor, float &dama
 public void Items_MicroCreate(int client, int entity)
 {
 	SetEntPropFloat(entity, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
+	SetEntPropFloat(entity, Prop_Send, "m_flNextSecondaryAttack", FAR_FUTURE);
 }
 
 public void Items_BuilderCreate(int client, int entity)
@@ -1032,7 +1035,8 @@ public bool Items_HealthKitButton(int client, int weapon, int &buttons)
 
 	buttons &= ~(IN_ATTACK|IN_ATTACK2);
 	bool yes = true;
-	return Items_HealthKitDrop(client, weapon, yes);
+	Items_HealthKitDrop(client, weapon, yes);
+	return true;
 }
 
 public bool Items_AdrenalineButton(int client, int weapon, int &buttons)

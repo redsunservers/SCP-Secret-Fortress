@@ -68,11 +68,11 @@
 	}
 	"hint_17"
 	{
-		"en"		"You can use ATTACK1, ATTACK2, ATTACK3, or\nCall for Medic to pick up weapons & keycards."
+		"en"		"You can use ATTACK1, ATTACK2, or Call for Medic\nto pick up weapons & keycards."
 	}
 	"hint_18"
 	{
-		"en"		"To use a health kit, use ATTACK2 to drop the\nkit and stand over it until it's used."
+		"en"		"To use a Health Kit, use ATTACK2 to drop the\nkit and stand over it until it's used."
 	}
 	"hint_19"
 	{
@@ -191,7 +191,7 @@
 	}
 	"train_dboi"
 	{
-		"en"		"You need to escape the facility.\nPress ATTACK, ATTACK2, ATTACK3, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll either kill you or capture you."
+		"en"		"You need to escape the facility.\nPress ATTACK, ATTACK2, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll either kill you or capture you."
 	}
 	"class_chaos"
 	{
@@ -203,7 +203,7 @@
 	}
 	"train_chaos"
 	{
-		"en"		"You need to free Class-D Personnel from the facility.\nKill other teams to help Class-D Personnel escape.\nPress ATTACK3, USE, or use VOICEMENU to interact with buttons and items."
+		"en"		"You need to free Class-D Personnel from the facility.\nKill other teams to help Class-D Personnel escape.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_sci"
 	{
@@ -215,7 +215,7 @@
 	}
 	"train_sci"
 	{
-		"en"		"You need to escape the facility.\nPress ATTACK, ATTACK3, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll kill you."
+		"en"		"You need to escape the facility.\nPress ATTACK, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll kill you."
 	}
 	"class_guard"
 	{
@@ -239,7 +239,7 @@
 	}
 	"train_mtf1"
 	{
-		"en"		"You need to free Scientists from the facility.\nStay with your lieutenants and commander.\nKeep in touch using the radio.\nPress USE or use VOICEMENU to interact with buttons and items."
+		"en"		"You need to free Scientists from the facility.\nStay with your lieutenants and commander.\nKeep in touch using the radio.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_mtf2"
 	{
@@ -251,7 +251,7 @@
 	}
 	"train_mtf2"
 	{
-		"en"		"You need to free Scientists from the facility.\nSupport your group of cadets, follow your commander.\nUse your radio too.\nPress USE or use VOICEMENU to interact with buttons and items."
+		"en"		"You need to free Scientists from the facility.\nSupport your group of cadets, follow your commander.\nUse your radio too.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_mtfs"
 	{
@@ -263,7 +263,7 @@
 	}
 	"train_mtfs"
 	{
-		"en"		"You escaped! Now free your other Scientists or prevent non-disarmed Class-D Personnel from escaping.\nTake down other SCPs too.\nPress USE or use VOICEMENU to interact with buttons and items."
+		"en"		"You escaped! Now free your other Scientists or prevent non-disarmed Class-D Personnel from escaping.\nTake down other SCPs too.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_mtf3"
 	{
@@ -275,7 +275,7 @@
 	}
 	"train_mtf3"
 	{
-		"en"		"You need to free Scientists from the facility.\nCommand your troops down the facility.\nUse your radio to help order your troops around.\nPress USE or use VOICEMENU to interact with buttons and items."
+		"en"		"You need to free Scientists from the facility.\nCommand your troops down the facility.\nUse your radio to help order your troops around.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_mtfe"
 	{
@@ -287,7 +287,7 @@
 	}
 	"train_mtfe"
 	{
-		"en"		"You need to free Scientists from the facility.\nYou can build sentries to fight off SCPs.\nYou can also build dispensers for allies.\nPress USE or use VOICEMENU to interact with buttons and items."
+		"en"		"You need to free Scientists from the facility.\nYou can build sentries to fight off SCPs.\nYou can also build dispensers for allies.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_035"
 	{
