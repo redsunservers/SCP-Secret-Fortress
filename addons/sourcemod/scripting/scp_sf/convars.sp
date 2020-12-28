@@ -110,6 +110,17 @@ public void ConVar_OnChatHook(ConVar cvar, const char[] oldValue, const char[] n
 		if(!cvar.BoolValue)
 		{
 			ChatHook = false;
+			for(int client=1; client<=MaxClients; client++)
+			{
+				if(!IsValidClient(client, false))
+					continue;
+
+				for(int target=1; target<=MaxClients; target++)
+				{
+					if(client==target || IsValidClient(target))
+						SetListenOverride(client, target, Listen_Default);
+				}
+			}
 			RemoveCommandListener(OnSayCommand, "say");
 			RemoveCommandListener(OnSayCommand, "say_team");
 		}

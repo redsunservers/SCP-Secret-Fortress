@@ -258,7 +258,6 @@ char ClassModel[][] =
 	"models/scp_sf/096/scp096_2.mdl",			// 096
 	"models/scp_sf/106/scp106_player_3.mdl",		// 106
 	"models/freak_fortress_2/scp_173/scp_173new.mdl",	// 173
-	"models/freak_fortress_2/scp_173/scp_173new.mdl",	// 173
 	"models/scp/scp173.mdl",				// 173-2
 	"models/player/spy.mdl",				// 527
 	"models/scp_sl/scp_939/scp_939_redone_pm_1.mdl",	// 939-89
@@ -1912,10 +1911,7 @@ public Action OnBlockCommand(int client, const char[] command, int args)
 
 public Action OnJoinClass(int client, const char[] command, int args)
 {
-	if(!Enabled || !client)
-		return Plugin_Continue;
-
-	if(view_as<TFClassType>(GetEntProp(client, Prop_Send, "m_iDesiredPlayerClass")) == TFClass_Unknown)
+	if(client && view_as<TFClassType>(GetEntProp(client, Prop_Send, "m_iDesiredPlayerClass"))==TFClass_Unknown)
 	{
 		Client[client].Class = Class_Spec;
 		SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", view_as<int>(TFClass_Spy));
@@ -3790,6 +3786,12 @@ public void UpdateListenOverrides(float engineTime)
 
 			for(int target=1; target<=MaxClients; target++)
 			{
+				if(!ChatHook)
+				{
+					Client[target].CanTalkTo[client] = true;
+					continue;
+				}
+
 				if(client == target)
 				{
 					SetListenOverride(client, target, Listen_Default);
@@ -3855,7 +3857,9 @@ public void UpdateListenOverrides(float engineTime)
 		{
 			if(client[i] == client[a])
 			{
-				SetListenOverride(client[i], client[a], Listen_Default);
+				if(ChatHook)
+					SetListenOverride(client[i], client[a], Listen_Default);
+
 				continue;
 			}
 
@@ -3878,17 +3882,20 @@ public void UpdateListenOverrides(float engineTime)
 			if(spec[a])
 			{
 				Client[client[a]].CanTalkTo[client[i]] = !muted;
-				SetListenOverride(client[i], client[a], blocked ? Listen_No : Listen_Default);
+				if(ChatHook)
+					SetListenOverride(client[i], client[a], blocked ? Listen_No : Listen_Default);
 			}
 			else if(IsSpec(client[a]))
 			{
 				Client[client[a]].CanTalkTo[client[i]] = (!muted && IsSpec(client[i]));
-				SetListenOverride(client[i], client[a], (!blocked && IsSpec(client[i])) ? Listen_Default : Listen_No);
+				if(ChatHook)
+					SetListenOverride(client[i], client[a], (!blocked && IsSpec(client[i])) ? Listen_Default : Listen_No);
 			}
 			else if(Client[client[a]].ComFor > engineTime)
 			{
 				Client[client[a]].CanTalkTo[client[i]] = !muted;
-				SetListenOverride(client[i], client[a], blocked ? Listen_No : Listen_Default);
+				if(ChatHook)
+					SetListenOverride(client[i], client[a], blocked ? Listen_No : Listen_Default);
 			}
 			else
 			{
@@ -3897,7 +3904,8 @@ public void UpdateListenOverrides(float engineTime)
 					if(IsSCP(client[i]))
 					{
 						Client[client[a]].CanTalkTo[client[i]] = !muted;
-						SetListenOverride(client[i], client[a], blocked ? Listen_No : Listen_Yes);
+						if(ChatHook)
+							SetListenOverride(client[i], client[a], blocked ? Listen_No : Listen_Yes);
 						continue;
 					}
 					else if(Client[client[a]].Class>=Class_939 && Client[client[a]].Class<=Class_3008)
@@ -3905,23 +3913,27 @@ public void UpdateListenOverrides(float engineTime)
 						if(GetVectorDistance(pos[i], pos[a], true) < 499999)
 						{
 							Client[client[a]].CanTalkTo[client[i]] = !muted;
-							SetListenOverride(client[i], client[a], blocked ? Listen_No : Listen_Yes);
+							if(ChatHook)
+								SetListenOverride(client[i], client[a], blocked ? Listen_No : Listen_Yes);
 							continue;
 						}
 					}
 
 					Client[client[a]].CanTalkTo[client[i]] = false;
-					SetListenOverride(client[i], client[a], Listen_No);
+					if(ChatHook)
+						SetListenOverride(client[i], client[a], Listen_No);
 				}
 				else if(GetVectorDistance(pos[i], pos[a], true) < (radio[i]>1 ? 160000.0*radio[a] : 160000.0))
 				{
 					Client[client[a]].CanTalkTo[client[i]] = !muted;
-					SetListenOverride(client[i], client[a], blocked ? Listen_No : Listen_Yes);
+					if(ChatHook)
+						SetListenOverride(client[i], client[a], blocked ? Listen_No : Listen_Yes);
 				}
 				else
 				{
 					Client[client[a]].CanTalkTo[client[i]] = false;
-					SetListenOverride(client[i], client[a], Listen_No);
+					if(ChatHook)
+						SetListenOverride(client[i], client[a], Listen_No);
 				}
 			}
 		}

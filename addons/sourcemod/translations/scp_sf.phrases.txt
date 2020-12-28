@@ -5,107 +5,86 @@
 	"hint_1"
 	{
 		"en"		"As a ghost you can call for medic\nto teleport to alive players"
-		"ru"		"Будучи призраком, вы можете позвать Медика,\n чтобы телепортироваться к живым игрокам."
 	}
 	"hint_2"
 	{
 		"en"		"SCP-939-89 and SCP-939-53 can only see\nplayers if they moved or attacked recently.\n \nTry standing still if you haven't been spotted."
-		"ru"		"SCP-939-89 и SCP-939-53 могут видеть только тех,\n кто недавно двигались.\n \nПопробуйте стоять неподвижно, если вас еще не заметили."
 	}
 	"hint_3"
 	{
 		"en"		"SCP-079 can help D-Class escape by opening\neither Gate A or Gate B, speak with it."
-		"ru"		"SCP-079 может помочь D классу сбежать,\nоткрывая Ворота A или Ворота B. Поговорите с ним."
 	}
 	"hint_4"
 	{
 		"en"		"Facility Manager and O5 keycards allows\nyou to escape without help from MTF or Chaos."
-		"ru"		"Карты 'Менеджер Комплекса' и '05' позволяют\nсбежать без помощи МОГ или Хаоса."
 	}
 	"hint_5"
 	{
 		"en"		"Guards and MTF can use there melees to\ndisarm D-Class or Chaos instead of harming."
-		"ru"		"Охранники и МОГ могут ипользовать ближний бой,\nчтобы обезоружить D-класс или Хаос."
 	}
 	"hint_6"
 	{
 		"en"		"SCP-173 can only move while nobody is\nlooking. It can move if someone blinks."
-		"ru"		"SCP-173 может двигаться, только когда\nникто не смотрит. Также двигается при моргании."
 	}
 	"hint_7"
 	{
 		"en"		"Most SCPs can kill someone in\none blow, disregarding HP."
-		"ru"		"Большинство SCP могут убить за один удар,\n вне зависимости от ОЗ."
 	}
 	"hint_8"
 	{
 		"en"		"Crouching helps you stay silent towards others."
-		"ru"		"Приседание помогает оставаться неуслышанным другими."
 	}
 	"hint_9"
 	{
 		"en"		"Every 3 minutes either MTF or Chaos will spawn."
-		"ru"		"Каждые 3 минуты появляется МОГ или Хаос."
 	}
 	"hint_10"
 	{
 		"en"		"MTF can save Scientists by bringing them\ntowards one of the gates and letting them through.\n \nOnly Lieutenants and Commanders have access though."
-		"ru"		"МОГ может спасти Учёных путем сопровождения их\nк Воротам и прохода последних через них.\n \nДоступ есть только у Лейтенантов и Командиров."
 	}
 	"hint_11"
 	{
 		"en"		"Chaos can save D-Class by bringing them\ntowards one of the gates and letting them through."
-		"ru"		"Хаос может спасти D-класс путем сопровождения\n к Воротам и прохода последних через них."
 	}
 	"hint_12"
 	{
 		"en"		"Died? Don't worry, you'll respawn soon."
-		"ru"		"Погибли? Ничего, вы скоро возродитесь."
 	}
 	"hint_13"
 	{
 		"en"		"Iron Bomber can blind players but also yourself."
-		"ru"		"Железный Бомбардир может слепить как врагов, так и вас."
 	}
 	"hint_14"
 	{
 		"en"		"This is a work-in-progress gamemode.\nThere may be bugs and glitches.\nBut playing here helps the development!\n \nThanks for playing here and enjoy!"
-		"ru"		"Этот режим все еще в разработке.\nТут могут быть баги.\nИгра здесь помогает разработке!\n \nСпасибо за то, что играете здесь!"
 	}
 	"hint_15"
 	{
 		"en"		"There may be useless hints."
-		"ru"		"Некоторые подсказки бесполезны."
 	}
 	"hint_16"
 	{
 		"en"		"All weapons can headshot except against SCPs."
-		"ru"		"Любое оружие критует в голову, но только не против SCP."
 	}
 	"hint_17"
 	{
 		"en"		"You can use ATTACK1, ATTACK2, ATTACK3, or\nCall for Medic to pick up weapons & keycards."
-		"ru"		"Используйте ОСН. АТАКУ, ДОП. АТАКУ, СПЕЦ. АТАКУ\nили позовите Медика, чтобы подобрать предмет."
 	}
 	"hint_18"
 	{
 		"en"		"To use a health kit, use ATTACK2 to drop the\nkit and stand over it until it's used."
-		"ru"		"Нажмите ДОП. АТАКУ,\nчтобы сбросить Аптечку на пол. Стойте на ней, чтобы использовать."
 	}
 	"hint_19"
 	{
 		"en"		"SCP-939-89, SCP-939-53, and SCP-049 are able to talk to humans."
-		"ru"		"SCP-939-89, SCP-939-53 и SCP-049 могут говорить с другими игроками."
 	}
 	"hint_20"
 	{
 		"en"		"SCPs can talk to each other from any distance."
-		"ru"		"SCP могут говорить на любом расстоянии."
 	}
 	"hint_21"
 	{
 		"en"		"SCP-3008-2 will only attack if attacked or during closing hours."
-		"ru"		"SCP-3008-2 будет атаковать либо ночью, либо если оно атаковано."
 	}
 	"hint_22"
 	{
@@ -117,43 +96,35 @@
 	"class_dboi_ikea"
 	{
 		"en"		"SCP-3008-1 Victim"
-		"ru"		"Жертва SCP-3008-1"
 	}
 	"desc_dboi_ikea"
 	{
 		"en"		"Escape from SCP-3008-1.\nCooperate with the MTF.\nAvoid other teams."
-		"ru"		"Сбегите из SCP-3008-1.\nСкооперируйтесь с МОГ.\nИзбегайте других команд."
 	}
 	"desc_mtf1_ikea"
 	{
 		"en"		"Help Survivors escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
-		"ru"		"Помогите Выжившим спастись.\nНейтрализуйте другие объекты.\nПодчиняйтесь старшим по званию."
 	}
 	"desc_mtf2_ikea"
 	{
 		"en"		"Help Survivors escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your superiors."
-		"ru"		"Помогите Выжившим спастись.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным.\nПодчиняйтесь старшим по званию."
 	}
 	"class_mtfs_ikea"
 	{
 		"en"		"Nine-Tailed Fox Survivor"
-		"ru"		"Выживший Отряда МОГ"
 	}
 	"desc_mtfs_ikea"
 	{
 		"en"		"Help Survivors escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
-		"ru"		"Помогите Выжившим спастись.\nНейтрализуйте другие объекты.\nПодчиняйтесь старшим по званию."
 	}
 	"desc_mtf3_ikea"
 	{
 		"en"		"Help Survivors escape.\nNeutralize other subjects.\nInstruct your soldiers."
-		"ru"		"Помогите Выжившим спастись.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным."
 	}
 	"end_screen_ikea"
 	{
 		"#format"	"{1:t},{2:d},{3:d}"
 		"en"		"{1}\n \nSurvivors Escaped: {2} / {3}"
-		"ru"		"{1}\n \nВыживших Сбежало: {2} / {3}"
 	}
 
 	// It Steals Phrases
@@ -201,12 +172,10 @@
 	"class_spec"
 	{
 		"en"		"Spectator"
-		"ru"		"Наблюдатель"
 	}
 	"desc_spec"
 	{
 		"en"		"You will respawn soon."
-		"ru"		"Вы скоро возродитесь."
 	}
 	"train_spec"
 	{
@@ -215,12 +184,10 @@
 	"class_dboi"
 	{
 		"en"		"Class-D Personnel"
-		"ru"		"Персонал D-класса"
 	}
 	"desc_dboi"
 	{
 		"en"		"Escape from the facility.\nCooperate with the Chaos Insurgency.\nAvoid other teams."
-		"ru"		"Сбегите из Комплекса.\nСкооперируйтесь с Повстанцами Хаоса.\nИзбегайте других команд."
 	}
 	"train_dboi"
 	{
@@ -229,12 +196,10 @@
 	"class_chaos"
 	{
 		"en"		"Chaos Insurgency Agent"
-		"ru"		"Повстанец Хаоса"
 	}
 	"desc_chaos"
 	{
 		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects."
-		"ru"		"Помогите D-классу сбежать.\nНейтрализуйте другие объекты."
 	}
 	"train_chaos"
 	{
@@ -243,12 +208,10 @@
 	"class_sci"
 	{
 		"en"		"Scientist"
-		"ru"		"Учёный"
 	}
 	"desc_sci"
 	{
 		"en"		"Escape from the facility.\nCooperate with the MTF.\nAvoid other teams."
-		"ru"		"Сбегите из Комплекса.\nСкооперируйтесь с МОГ.\nИзбегайте других команд."
 	}
 	"train_sci"
 	{
@@ -257,12 +220,10 @@
 	"class_guard"
 	{
 		"en"		"Facility Guard"
-		"ru"		"Охранник Комплекса"
 	}
 	"desc_guard"
 	{
 		"en"		"Help Scientists escape.\nCooperate with MTF.\nNeutralize other subjects."
-		"ru"		"Помогите Учёным сбежать.\nСкооперируйтесь с МОГ.\nНейтрализуйте другие объекты."
 	}
 	"train_guard"
 	{
@@ -271,12 +232,10 @@
 	"class_mtf1"
 	{
 		"en"		"Nine-Tailed Fox Cadet"
-		"ru"		"Кадет Отряда МОГ"
 	}
 	"desc_mtf1"
 	{
 		"en"		"Help Scientists escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
-		"ru"		"Помогите Учёным сбежать.\nНейтрализуйте другие объекты.\nПодчиняйтесь старшим по званию."
 	}
 	"train_mtf1"
 	{
@@ -285,12 +244,10 @@
 	"class_mtf2"
 	{
 		"en"		"Nine-Tailed Fox Lieutenant"
-		"ru"		"Лейтенант Отряда МОГ"
 	}
 	"desc_mtf2"
 	{
 		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your superiors."
-		"ru"		"Помогите Учёным сбежать.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным.\nПодчиняйтесь старшим по званию."
 	}
 	"train_mtf2"
 	{
@@ -299,12 +256,10 @@
 	"class_mtfs"
 	{
 		"en"		"Nine-Tailed Fox Scientist"
-		"ru"		"Учёный Отряда МОГ"
 	}
 	"desc_mtfs"
 	{
 		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your commanders."
-		"ru"		"Помогите Учёным сбежать.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным.\nПодчиняйтесь командиру."
 	}
 	"train_mtfs"
 	{
@@ -313,12 +268,10 @@
 	"class_mtf3"
 	{
 		"en"		"Nine-Tailed Fox Commander"
-		"ru"		"Командир Отряда МОГ"
 	}
 	"desc_mtf3"
 	{
 		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers."
-		"ru"		"Помогите Учёным сбежать.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным."
 	}
 	"train_mtf3"
 	{
@@ -331,7 +284,6 @@
 	"desc_mtfe"
 	{
 		"en"		"Help Scientists escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
-		"ru"		"Помогите Учёным сбежать.\nНейтрализуйте другие объекты.\nПодчиняйтесь старшим по званию."
 	}
 	"train_mtfe"
 	{
@@ -344,7 +296,6 @@
 	"desc_035"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs."
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP."
 	}
 	"train_035"
 	{
@@ -357,7 +308,6 @@
 	"desc_049"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nInteract with a recently-dead human to revive them as an ally."
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nИспользуйте Меди-Пушку на недавно убитых вами."
 	}
 	"train_049"
 	{
@@ -370,7 +320,6 @@
 	"desc_0492"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nFollow orders from SCP-049"
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nПодчиняйтесь SCP-049."
 	}
 	"train_0492"
 	{
@@ -395,7 +344,6 @@
 	"desc_079"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs."
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP."
 	}
 	"train_079"
 	{
@@ -408,7 +356,6 @@
 	"desc_096"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou become enraged when looked at."
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы наполняетесь яростью, когда на вас смотрят."
 	}
 	"train_096"
 	{
@@ -421,7 +368,6 @@
 	"desc_106"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nATTACK2 to create a portal.\nATTACK3 to teleport to that portal."
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nДОП.АТАКА-создать портал.\nСПЕЦ.АТАКА-телепорт."
 	}
 	"train_106"
 	{
@@ -434,7 +380,6 @@
 	"desc_173"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can only move while no one is looking."
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы можете двигаться, пока никто не смотрит."
 	}
 	"train_173"
 	{
@@ -447,7 +392,6 @@
 	"desc_1732"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can only move while no one is looking."
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы можете двигаться, пока никто не смотрит."
 	}
 	"train_1732"
 	{
@@ -460,7 +404,6 @@
 	"desc_527"
 	{
 		"en"		"Escape from the facility.\nCooperate with other SCPs."
-		"ru"		"Сбегите из Комплекса.\nСкооперируйтесь с другими SCP."
 	}
 	"train_527"
 	{
@@ -473,7 +416,6 @@
 	"desc_939"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can talk to other humans."
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы можете говорить с людьми."
 	}
 	"train_939"
 	{
@@ -486,7 +428,6 @@
 	"desc_9392"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can talk to other humans."
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы можете говорить с людьми."
 	}
 	"train_9392"
 	{
@@ -515,73 +456,6 @@
 	"train_itsteals"
 	{
 		"en"		"Look around for players.\nMore times you get hit by a player, the more rage you gain.\nAfter a certain amount of times, you'll have enough."
-	}
-
-	// Keycard Phrases
-
-	"keycard_0"
-	{
-		"en"		"None"
-		"ru"		"Нет"
-	}
-	"keycard_1"
-	{
-		"en"		"Janitor"
-		"ru"		"Уборщик"
-	}
-	"keycard_2"
-	{
-		"en"		"Scientist"
-		"ru"		"Учёный"
-	}
-	"keycard_3"
-	{
-		"en"		"Zone Manager"
-		"ru"		"Менеджер Зоны"
-	}
-	"keycard_4"
-	{
-		"en"		"Research Supervisor"
-		"ru"		"Руководитель Исследований"
-	}
-	"keycard_5"
-	{
-		"en"		"Facility Guard"
-		"ru"		"Охранник Комплекса"
-	}
-	"keycard_6"
-	{
-		"en"		"MTF Cadet"
-		"ru"		"Кадет МОГ"
-	}
-	"keycard_7"
-	{
-		"en"		"MTF Lieutenant"
-		"ru"		"Лейтенант МОГ"
-	}
-	"keycard_8"
-	{
-		"en"		"MTF Commander"
-		"ru"		"Командир МОГ"
-	}
-	"keycard_9"
-	{
-		"en"		"Containment Engineer"
-		"ru"		"Инженер Содержания"
-	}
-	"keycard_10"
-	{
-		"en"		"Facility Manager"
-		"ru"		"Менеджер Комплекса"
-	}
-	"keycard_11"
-	{
-		"en"		"Chaos Insurgency Access Device"
-		"ru"		"Устройство Доступа Повстанца Хаоса"
-	}
-	"keycard_12"
-	{
-		"en"		"O5"
 	}
 
 	// Weapon Phrases
@@ -747,54 +621,24 @@
 		"en"		"SCP-500"
 	}
 
-	// Radio Phrases
-
-	"radio_0"
-	{
-		"en"		"--"
-	}
-	"radio_1"
-	{
-		"en"		"SR"
-		"ru"		"КД"
-	}
-	"radio_2"
-	{
-		"en"		"MR"
-		"ru"		"СД"
-	}
-	"radio_3"
-	{
-		"en"		"LR"
-		"ru"		"ДД"
-	}
-	"radio_4"
-	{
-		"en"		"UR"
-		"ru"		"УД"
-	}
 
 	// Team Phrases
 
 	"team_0"
 	{
 		"en"		"Stalemate"
-		"ru"		"Ничья"
 	}
 	"team_1"
 	{
 		"en"		"Class-D Won"
-		"ru"		"D-класс победили"
 	}
 	"team_2"
 	{
 		"en"		"MTF Won"
-		"ru"		"МОГ победили"
 	}
 	"team_3"
 	{
 		"en"		"SCPs Won"
-		"ru"		"SCP победили"
 	}
 
 	// SCP-914 Phrases
@@ -822,7 +666,6 @@
 	"in_cooldown"
 	{
 		"en"		"In Cooldown..."
-		"ru"		"Не так быстро..."
 	}
 	"914_noeffect"
 	{
@@ -881,41 +724,34 @@
 	{
 		"#format"	"{1:t}"
 		"en"		"You are {1}"
-		"ru"		"Вы: {1}"
 	}
 	"scp_killed"	// Chat
 	{
 		"#format"	"{1:s},{2:t},{3:s},{4:t}"
 		"en"		"{{1}}{2} {default}has been contained by {{3}}{4}"
-		"ru"		"{{1}}{2} {default} был нейтрализован классом {{3}}{4}"
 	}
 	"scp_killed_duo"	// Chat
 	{
 		"#format"	"{1:s},{2:t},{3:s},{4:t},{5:s},{6:t}"
 		"en"		"{{1}}{2} {default}has been contained by {{3}}{4} {default}and {{5}}{6}"
-		"ru"		"{{1}}{2} {default} был нейтрализован классом {{3}}{4} {default}и {{5}}{6}"
 	}
 	"mtf_spawn"	// Chat
 	{
 		"en"		"{mediumblue}Mobile Task Force Unit, Epsilon-11{default} has entered the facility."
-		"ru"		"{mediumblue}МОГ Эпсилон-11{default} вошла в комплекс."
 	}
 	"mtf_spawn_scp"	// Chat
 	{
 		"#format"	"{1:d}"
 		"en"		"Awaiting re-containment of: {red}{1} SCP subject(s){default}."
-		"ru"		"{red}{1} объект(ов) SCP{default} ожидают восстановления условий содержания.{default}"
 	}
 	"mtf_spawn_scp_over"	// Chat
 	{
 		"en"		"Awaiting re-containment of: {red}An uncountable number of SCP subjects{default}."
-		"ru"		"Ожидают восстановления условий: {red}НЕВОЗМОЖНО ВЫЧИСЛИТЬ{default}."
 	}
 	"time_remaining"	// Game
 	{
 		"#format"	"{1:d},{2:s}"
 		"en"		"Time Remaining: {1}:{2}"
-		"ru"		"Оставшееся время: {1}:{2}"
 	}
 	"inv_full"	// Game
 	{
@@ -929,17 +765,14 @@
 	{
 		"#format"	"{1:N}"
 		"en"		"You are disarmed by {1}"
-		"ru"		"{1} обезоружил вас"
 	}
 	"disarmed"	// Game
 	{
 		"en"		"You have been disarmed!"
-		"ru"		"Вас обезоружили!"
 	}
 	"radar"	// HUD
 	{
 		"en"		"Radar Ready [RELOAD]"
-		"ru"		"Radar готово [RELOAD]"
 	}
 	"sprint"	// HUD
 	{
@@ -962,12 +795,10 @@
 	{
 		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d}"
 		"en"		"{1}\n \nClass-D Escaped: {2} / {3}\nScientist(s) Survived: {4} / {5}\nTerminated SCPs: {6} / {7}"
-		"ru"		"{1}\n \nD-класса Сбежало: {2} / {3}\nУчёных Сбежало: {4} / {5}\nSCP Нейтрализовано: {6} / {7}"
 	}
 	"tesla_gate"	// Chat
 	{
 		"en"		"Tesla Gate"
-		"ru"		"Тесла-Установка"
 	}
 	"femur_breaker"	// Chat
 	{
@@ -980,12 +811,10 @@
 	"redacted"	// Chat, Hint
 	{
 		"en"		"[REDACTED]"
-		"ru"		"[РЕДАКТИРОВАНО]"
 	}
 	"data_expunged"	// Hint
 	{
 		"en"		"[DATA EXPUNGED]"
-		"ru"		"[ДАННЫЕ УДАЛЕНЫ]"
 	}
 	"106_portal"	// Annotation
 	{
@@ -994,45 +823,37 @@
 	"106_create"	// Hint
 	{
 		"en"		"Portal created, use ATTACK3 to teleport"
-		"ru"		"Портал создан. СПЕЦ. АТАКА, чтобы переместиться"
 	}
 	"106_create_deny"	// Hint
 	{
 		"en"		"Can't create a portal now"
-		"ru"		"Невозможно создать портал"
 	}
 	"106_create_none"	// Hint
 	{
 		"en"		"No portal created, use ATTACK2 to create one"
-		"ru"		"Нет порталов. ДОП. АТАКА, чтобы создать"
 	}
 	"106_tele_deny"	// Hint
 	{
 		"en"		"You can not teleport now"
-		"ru"		"Невозможно телепортироваться"
 	}
 	"download_error"	// Chat
 	{
 		"#format"	"{1:s}"
 		"en"		"{gray}We can't check if you have {1} enabled. If you see errors, make sure you allow all custom content in your settings and rejoin."
-		"ru"		"{gray}Мы не можем проверить, включен ли у вас {1}. Если вы видите ошибки или что-то не показывается, убедитесь, что разрешена загрузка контента с сервера."
 	}
 	"download_cvar"	// Chat
 	{
 		"#format"	"{1:s},{2:s}"
 		"en"		"{gray}{1} is disabled. You won't see any custom content. If you want to enable, set {2} to 1"
-		"ru"		"{gray}{1} выключен. Вы не увидите кастомного контента. Чтобы включить, смените значение {2} на 1."
 	}
 	"download_filter"	// Chat
 	{
 		"#format"	"{1:s}"
 		"en"		"{gray}cl_downloadfilter is set to {1}. You won't see any custom content. If you want to enable, set cl_downloadfilter to all"
-		"ru"            "{gray}cl_downloadfilter установлен на {1}. Вы не увидите кастомного контента. Чтобы включить, смените значение cl_downloadfilter на all."
 	}
 	"download_filter_sound"	// Chat
 	{
 		"en"		"{gray}cl_downloadfilter is set to nosounds. You won't hear any music. If you want to enable, set cl_downloadfilter to all"
-		"ru"		"{gray}cl_downloadfilter установлен на nosounds. Вы не услышите звуков. Чтобы включить, смените значение cl_downloadfilter на all."
 	}
 
 	// Unused
@@ -1161,5 +982,93 @@
 	"scp_914"
 	{
 		"en"		"SCP-914\n "
+	}
+	"keycard_0"
+	{
+		"en"		"None"
+		"ru"		"Нет"
+	}
+	"keycard_1"
+	{
+		"en"		"Janitor"
+		"ru"		"Уборщик"
+	}
+	"keycard_2"
+	{
+		"en"		"Scientist"
+		"ru"		"Учёный"
+	}
+	"keycard_3"
+	{
+		"en"		"Zone Manager"
+		"ru"		"Менеджер Зоны"
+	}
+	"keycard_4"
+	{
+		"en"		"Research Supervisor"
+		"ru"		"Руководитель Исследований"
+	}
+	"keycard_5"
+	{
+		"en"		"Facility Guard"
+		"ru"		"Охранник Комплекса"
+	}
+	"keycard_6"
+	{
+		"en"		"MTF Cadet"
+		"ru"		"Кадет МОГ"
+	}
+	"keycard_7"
+	{
+		"en"		"MTF Lieutenant"
+		"ru"		"Лейтенант МОГ"
+	}
+	"keycard_8"
+	{
+		"en"		"MTF Commander"
+		"ru"		"Командир МОГ"
+	}
+	"keycard_9"
+	{
+		"en"		"Containment Engineer"
+		"ru"		"Инженер Содержания"
+	}
+	"keycard_10"
+	{
+		"en"		"Facility Manager"
+		"ru"		"Менеджер Комплекса"
+	}
+	"keycard_11"
+	{
+		"en"		"Chaos Insurgency Access Device"
+		"ru"		"Устройство Доступа Повстанца Хаоса"
+	}
+	"keycard_12"
+	{
+		"en"		"O5"
+	}
+	"radio_0"
+	{
+		"en"		"--"
+	}
+	"radio_1"
+	{
+		"en"		"SR"
+		"ru"		"КД"
+	}
+	"radio_2"
+	{
+		"en"		"MR"
+		"ru"		"СД"
+	}
+	"radio_3"
+	{
+		"en"		"LR"
+		"ru"		"ДД"
+	}
+	"radio_4"
+	{
+		"en"		"UR"
+		"ru"		"УД"
 	}
 }
