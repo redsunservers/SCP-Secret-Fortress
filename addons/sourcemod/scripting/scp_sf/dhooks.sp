@@ -22,8 +22,9 @@ void DHook_Setup(GameData gamedata)
 	//DHook_CreateDetour(gamedata, "CLagCompensationManager::StartLagCompensation", DHook_StartLagCompensationPre, DHook_StartLagCompensationPost);
 	DHook_CreateDetour(gamedata, "CTFGameMovement::ProcessMovement", DHook_ProcessMovementPre);
 	DHook_CreateDetour(gamedata, "CTFPlayer::CanPickupDroppedWeapon", DHook_CanPickupDroppedWeaponPre);
-	DHook_CreateDetour(gamedata, "CTFPlayer::DoAnimationEvent", DHook_DoAnimationEventPre, _);
+	DHook_CreateDetour(gamedata, "CTFPlayer::DoAnimationEvent", DHook_DoAnimationEventPre);
 	DHook_CreateDetour(gamedata, "CTFPlayer::DropAmmoPack", DHook_DropAmmoPackPre);
+	DHook_CreateDetour(gamedata, "CTFPlayer::GetMaxAmmo", DHook_GetMaxAmmoPre);
 	DHook_CreateDetour(gamedata, "CTFPlayer::Taunt", DHook_TauntPre, DHook_TauntPost);
 	DHook_CreateDetour(gamedata, "CTFPlayer::TeamFortress_CalculateMaxSpeed", DHook_CalculateMaxSpeedPre, DHook_CalculateMaxSpeedPost);
 
@@ -101,7 +102,7 @@ void DHook_MapStart()
 
 public MRESReturn DHook_RoundRespawn()
 {
-	if(Enabled || !Ready)
+	if(Enabled || GameRules_GetProp("m_bInWaitingForPlayers"))
 		return;
 
 	DClassEscaped = 0;
@@ -358,7 +359,11 @@ public MRESReturn DHook_PhysicsDispatchThinkPost(int entity)
 public MRESReturn DHook_CanPickupDroppedWeaponPre(int client, DHookReturn ret, DHookParam param)
 {
 	if(!IsSpec(client) && !IsSCP(client) && !Client[client].Disarmer)
-		PickupWeapon(client, param.Get(1));
+	{
+		int entity = param.Get(1);
+		if(Items_Pickup(client, GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), entity))
+			AcceptEntityInput(entity, "Kill");
+	}
 
 	ret.Value = false;
 	return MRES_Supercede;
@@ -394,11 +399,10 @@ public MRESReturn DHook_DoAnimationEventPre(int client, DHookParam param)
 
 public MRESReturn DHook_DropAmmoPackPre(int client, DHookParam param)
 {
-	//Ignore feign death
+	//TODO: Remove this hook, move to OnEntityCreated and OnPlayerDeath
 	if(!param.Get(2) && !IsSpec(client))
 		Items_DropAllItems(client);
 
-	//Prevent TF2 dropping anything else
 	return MRES_Supercede;
 }
 
@@ -425,9 +429,6 @@ public MRESReturn DHook_InSameTeamPre(int entity, DHookReturn ret, DHookParam pa
 
 public MRESReturn DHook_ProcessMovementPre(DHookParam param)
 {
-	if(!Enabled)
-		return MRES_Ignored;
-
 	param.SetObjectVar(2, 60, ObjectValueType_Float, CvarSpeedMax.FloatValue);
 	return MRES_ChangedHandled;
 }
@@ -485,6 +486,8 @@ public MRESReturn DHook_CalculateMaxSpeedPost(int clientwhen, DHookReturn ret)
 		}
 
 		speed *= CvarSpeedMulti.FloatValue;
+		if(TF2_IsPlayerInCondition(client, TFCond_SpeedBuffAlly))
+			speed *= 1.35;
 	}
 
 	ret.Value = speed;
@@ -518,65 +521,11 @@ public MRESReturn DHook_TauntPost(int client)
 
 public MRESReturn DHook_GetMaxAmmoPre(int client, DHookReturn ret, DHookParam param)
 {
-	switch(param.Get(1))
-	{
-		case Ammo_Micro:
-		{
-			ret.Value = 1000;
-		}
-		case Ammo_9mm:
-		{
-			if(Client[client].Class == Class_Chaos)
-			{
-				ret.Value = 100;
-			}
-			else if(Client[client].Class < Class_Guard)
-			{
-				ret.Value = 50;
-			}
-			else
-			{
-				ret.Value = 200;
-			}
-		}
-		case Ammo_Metal:
-		{
-			ret.Value = 400;
-		}
-		case Ammo_7mm:
-		{
-			if(Client[client].Class == Class_Chaos)
-			{
-				ret.Value = 200;
-			}
-			else if(Client[client].Class < Class_Guard)
-			{
-				ret.Value = 70;
-			}
-			else
-			{
-				ret.Value = 100;
-			}
-		}
-		case Ammo_5mm:
-		{
-			if(Client[client].Class < Class_Guard)
-			{
-				ret.Value = 80;
-			}
-			else
-			{
-				ret.Value = 160;
-			}
-		}
-		case Ammo_Grenade:
-		{
-			ret.Value = 3;
-		}
-		default:
-		{
-			return MRES_Ignored;
-		}
-	}
+	int type = param.Get(1);
+	int ammo = ClassMaxAmmo(type, Client[client].Class);
+	//if(ammo < 2)
+		//return MRES_Ignored;
+
+	ret.Value = ammo;
 	return MRES_Supercede;
 }

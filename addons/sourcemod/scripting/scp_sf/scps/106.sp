@@ -50,9 +50,7 @@ void SCP106_Create(int client)
 	Client[client].Pos[0] = 0.0;
 	Client[client].Pos[1] = 0.0;
 	Client[client].Pos[2] = 0.0;
-	Client[client].Keycard = Keycard_106;
-	Client[client].HealthPack = 0;
-	Client[client].Radio = 0;
+	Client[client].Extra2 = 0;
 	Client[client].Floor = Floor_Heavy;
 
 	Client[client].OnAnimation = SCP106_OnAnimation;
@@ -60,6 +58,7 @@ void SCP106_Create(int client)
 	Client[client].OnCondRemoved = SCP106_OnCondRemoved;
 	Client[client].OnDealDamage = SCP106_OnDealDamage;
 	Client[client].OnDeath = SCP106_OnDeath;
+	Client[client].OnKeycard = Items_KeycardAll;
 	Client[client].OnKill = SCP106_OnKill;
 	Client[client].OnMaxHealth = SCP106_OnMaxHealth;
 	Client[client].OnSpeed = SCP106_OnSpeed;
@@ -104,7 +103,7 @@ public void SCP106_OnCondRemoved(int client, TFCond cond)
 
 public void SCP106_OnDeath(int client, int attacker)
 {
-	if(Client[client].Radio)
+	if(Client[client].Extra2)
 		HideAnnotation(client);
 
 	RequestFrame(RemoveRagdoll, GetClientUserId(client));
@@ -188,7 +187,7 @@ public void SCP106_OnButton(int client, int button)
 	{
 		static float pos[3];
 		GetClientEyePosition(client, pos);
-		if(Client[client].Radio)
+		if(Client[client].Extra2)
 		{
 			if(GetVectorDistance(pos, Client[client].Pos, true) > 150000)
 				HideAnnotation(client);
@@ -208,7 +207,7 @@ public void SCP106_OnButton(int client, int button)
 		}
 		else
 		{
-			Client[client].Radio = 1;
+			Client[client].Extra2 = 1;
 			PrintHintText(client, "%T", "106_create", client);
 			GetEntPropVector(client, Prop_Send, "m_vecOrigin", Client[client].Pos);
 			ShowAnnotation(client);
@@ -253,7 +252,7 @@ static void ShowAnnotation(int client)
 		event.SetInt("visibilityBitfield", (1<<client));
 		event.Fire();
 
-		Client[client].Radio = 1;
+		Client[client].Extra2 = 1;
 	}
 }
 
@@ -265,6 +264,6 @@ void HideAnnotation(int client)
 		event.SetInt("id", 9999-client);
 		event.Fire();
 
-		Client[client].Radio = 0;
+		Client[client].Extra2 = 0;
 	}
 }

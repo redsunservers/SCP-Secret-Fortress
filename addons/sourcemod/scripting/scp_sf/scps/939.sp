@@ -43,13 +43,11 @@ void SCP939_Enable()
 
 void SCP939_Create(int client)
 {
-	Client[client].Keycard = Keycard_SCP;
-	Client[client].HealthPack = Health;
-	Client[client].Radio = 0;
 	Client[client].Floor = Floor_Light;
 
 	Client[client].OnDealDamage = SCP939_OnDealDamage;
 	Client[client].OnGlowPlayer = SCP939_OnGlowPlayer;
+	Client[client].OnKeycard = Items_KeycardScp;
 	Client[client].OnMaxHealth = SCP939_OnMaxHealth;
 	Client[client].OnSeePlayer = SCP939_OnSeePlayer;
 	Client[client].OnSpeed = SCP939_OnSpeed;

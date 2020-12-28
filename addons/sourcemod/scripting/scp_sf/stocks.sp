@@ -229,73 +229,6 @@ enum
 	HITGROUP_GEAR = 10
 };
 
-enum
-{
-	OBS_MODE_NONE = 0,	// not in spectator mode
-	OBS_MODE_DEATHCAM,	// special mode for death cam animation
-	OBS_MODE_FREEZECAM,	// zooms to a target, and freeze-frames on them
-	OBS_MODE_FIXED,		// view from a fixed camera position
-	OBS_MODE_IN_EYE,	// follow a player in first person view
-	OBS_MODE_CHASE,		// follow a player in third person view
-	OBS_MODE_POI,		// PASSTIME point of interest - game objective, big fight, anything interesting; added in the middle of the enum due to tons of hard-coded "<ROAMING" enum compares
-	OBS_MODE_ROAMING,	// free roaming
-
-	NUM_OBSERVER_MODES,
-};
-
-enum PlayerAnimEvent_t
-{
-	PLAYERANIMEVENT_ATTACK_PRIMARY,
-	PLAYERANIMEVENT_ATTACK_SECONDARY,
-	PLAYERANIMEVENT_ATTACK_GRENADE,
-	PLAYERANIMEVENT_RELOAD,
-	PLAYERANIMEVENT_RELOAD_LOOP,
-	PLAYERANIMEVENT_RELOAD_END,
-	PLAYERANIMEVENT_JUMP,
-	PLAYERANIMEVENT_SWIM,
-	PLAYERANIMEVENT_DIE,
-	PLAYERANIMEVENT_FLINCH_CHEST,
-	PLAYERANIMEVENT_FLINCH_HEAD,
-	PLAYERANIMEVENT_FLINCH_LEFTARM,
-	PLAYERANIMEVENT_FLINCH_RIGHTARM,
-	PLAYERANIMEVENT_FLINCH_LEFTLEG,
-	PLAYERANIMEVENT_FLINCH_RIGHTLEG,
-	PLAYERANIMEVENT_DOUBLEJUMP,
-
-	// Cancel.
-	PLAYERANIMEVENT_CANCEL,
-	PLAYERANIMEVENT_SPAWN,
-
-	// Snap to current yaw exactly
-	PLAYERANIMEVENT_SNAP_YAW,
-
-	PLAYERANIMEVENT_CUSTOM,				// Used to play specific activities
-	PLAYERANIMEVENT_CUSTOM_GESTURE,
-	PLAYERANIMEVENT_CUSTOM_SEQUENCE,	// Used to play specific sequences
-	PLAYERANIMEVENT_CUSTOM_GESTURE_SEQUENCE,
-
-	// TF Specific. Here until there's a derived game solution to this.
-	PLAYERANIMEVENT_ATTACK_PRE,
-	PLAYERANIMEVENT_ATTACK_POST,
-	PLAYERANIMEVENT_GRENADE1_DRAW,
-	PLAYERANIMEVENT_GRENADE2_DRAW,
-	PLAYERANIMEVENT_GRENADE1_THROW,
-	PLAYERANIMEVENT_GRENADE2_THROW,
-	PLAYERANIMEVENT_VOICE_COMMAND_GESTURE,
-	PLAYERANIMEVENT_DOUBLEJUMP_CROUCH,
-	PLAYERANIMEVENT_STUN_BEGIN,
-	PLAYERANIMEVENT_STUN_MIDDLE,
-	PLAYERANIMEVENT_STUN_END,
-	PLAYERANIMEVENT_PASSTIME_THROW_BEGIN,
-	PLAYERANIMEVENT_PASSTIME_THROW_MIDDLE,
-	PLAYERANIMEVENT_PASSTIME_THROW_END,
-	PLAYERANIMEVENT_PASSTIME_THROW_CANCEL,
-
-	PLAYERANIMEVENT_ATTACK_PRIMARY_SUPER,
-
-	PLAYERANIMEVENT_COUNT
-};
-
 static const char Characters[] = "abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOQRTUVWXYZ~`1234567890@#$^&*(){}:[]|¶�;<>.,?/'|";
 static const float OFF_THE_MAP[3] = { 16383.0, 16383.0, -16383.0 };
 
@@ -610,7 +543,7 @@ int GetOwnerLoop(int entity)
 	return entity;
 }
 
-void SetAmmo(int client, int weapon, int ammo=-1, int clip=-1)
+stock void SetAmmo(int client, int weapon, int ammo=-1, int clip=-1)
 {
 	if(IsValidEntity(weapon))
 	{
@@ -623,21 +556,21 @@ void SetAmmo(int client, int weapon, int ammo=-1, int clip=-1)
 	}
 }
 
-void TF2_RefillWeaponAmmo(int client, int weapon)
+stock void TF2_RefillWeaponAmmo(int client, int weapon)
 {
 	int ammotype = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
 	if (ammotype > -1)
 		GivePlayerAmmo(client, 9999, ammotype, true);
 }
 
-void TF2_SetWeaponAmmo(int client, int weapon, int ammo)
+stock void TF2_SetWeaponAmmo(int client, int weapon, int ammo)
 {
 	int ammotype = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
 	if (ammotype > -1)
 		SetEntProp(client, Prop_Send, "m_iAmmo", ammo, _, ammotype);
 }
 
-int TF2_GetWeaponAmmo(int client, int weapon)
+stock int TF2_GetWeaponAmmo(int client, int weapon)
 {
 	int ammotype = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
 	if (ammotype > -1)
@@ -1107,7 +1040,7 @@ int PrecacheSoundEx(const char[] sound, bool preload=false)
 	return PrecacheSound(sound, preload);
 }
 
-void ShowDeathNotice(int[] clients, int count, int attacker, int victim, int assister, int weaponid, const char[] weapon, int damagebits, int damageflags)
+stock void ShowDeathNotice(int[] clients, int count, int attacker, int victim, int assister, int weaponid, const char[] weapon, int damagebits, int damageflags)
 {
 	Event event = CreateEvent("player_death", true);
 	if(!event)
@@ -1127,7 +1060,7 @@ void ShowDeathNotice(int[] clients, int count, int attacker, int victim, int ass
 	event.Cancel();
 }
 
-void ShowDestoryNotice(int[] clients, int count, int attacker, int victim, int assister, int weaponid, const char[] weapon, int type, int index, bool building)
+stock void ShowDestoryNotice(int[] clients, int count, int attacker, int victim, int assister, int weaponid, const char[] weapon, int type, int index, bool building)
 {
 	Event event = CreateEvent("object_destroyed", true);
 	if(!event)
@@ -1148,7 +1081,7 @@ void ShowDestoryNotice(int[] clients, int count, int attacker, int victim, int a
 	event.Cancel();
 }
 
-void TF2_SendHudNotification(HudNotification_t type, bool forceShow=false)
+stock void TF2_SendHudNotification(HudNotification_t type, bool forceShow=false)
 {
 	BfWrite bf = UserMessageToBfWrite(StartMessageAll("HudNotify"));
 	bf.WriteByte(view_as<int>(type));
@@ -1156,7 +1089,7 @@ void TF2_SendHudNotification(HudNotification_t type, bool forceShow=false)
 	EndMessage();
 }
 
-void ChangeClientClass(int client, any class)
+stock void ChangeClientClass(int client, any class)
 {
 	SetEntProp(client, Prop_Send, "m_iClass", class);
 	SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", class);
@@ -1242,6 +1175,16 @@ stock TFClassType KvGetClass(KeyValues kv, const char[] string)
 		class = TF2_GetClass(buffer);
 
 	return class;
+}
+
+stock Function KvGetFunction(KeyValues kv, const char[] string)
+{
+	static char buffer[64];
+	kv.GetString(string, buffer, sizeof(buffer));
+	if(buffer[0])
+		return GetFunctionByName(null, buffer);
+
+	return INVALID_FUNCTION;
 }
 
 public Action Timer_Stun(Handle timer, DataPack pack)

@@ -55,13 +55,13 @@ void ItSteals_Enable()
 
 void ItSteals_Create(int client)
 {
-	Client[client].Keycard = Keycard_SCP;
-	Client[client].HealthPack = 0;
-	Client[client].Radio = 0;
+	Client[client].Extra1 = 0;
+	Client[client].Extra2 = 0;
 
 	Client[client].OnButton = ItSteals_OnButton;
 	Client[client].OnDealDamage = ItSteals_OnDealDamage;
 	Client[client].OnGlowPlayer = ItSteals_OnGlowPlayer;
+	Client[client].OnKeycard = Items_KeycardScp;
 	Client[client].OnKill = ItSteals_OnKill;
 	Client[client].OnMaxHealth = ItSteals_OnMaxHealth;
 	Client[client].OnSeePlayer = ItSteals_OnSeePlayer;
@@ -78,7 +78,7 @@ void ItSteals_Create(int client)
 
 public void ItSteals_OnMaxHealth(int client, int &health)
 {
-	switch(Client[client].Radio)
+	switch(Client[client].Extra2)
 	{
 		case -1:
 		{
@@ -120,7 +120,7 @@ public void ItSteals_OnMaxHealth(int client, int &health)
 
 public void ItSteals_OnSpeed(int client, float &speed)
 {
-	switch(Client[client].Radio)
+	switch(Client[client].Extra2)
 	{
 		case 1:
 		{
@@ -154,20 +154,20 @@ public bool ItSteals_OnSeePlayer(int client, int victim)
 
 public bool ItSteals_OnGlowPlayer(int client, int victim)
 {
-	return (Client[client].Radio==2 || Client[victim].IdleAt<GetEngineTime());
+	return (Client[client].Extra2==2 || Client[victim].IdleAt<GetEngineTime());
 }
 
 public void ItSteals_OnButton(int client, int button)
 {
 	float engineTime = GetEngineTime();
-	switch(Client[client].Radio)
+	switch(Client[client].Extra2)
 	{
 		case 1:
 		{
-			if(Client[client].Power < engineTime)
+			if(Client[client].Extra3 < engineTime)
 			{
 				TurnOffGlow(client);
-				Client[client].Radio = 0;
+				Client[client].Extra2 = 0;
 				TF2_RemoveCondition(client, TFCond_CritCola);
 			}
 		}
@@ -198,10 +198,10 @@ public void ItSteals_OnButton(int client, int button)
 				Client[client].IdleAt = engineTime+2.5;
 			}
 
-			if(Client[client].Power > engineTime)
+			if(Client[client].Extra3 > engineTime)
 				return;
 
-			Client[client].Power = engineTime+0.15;
+			Client[client].Extra3 = engineTime+0.15;
 
 			static float ang1[3];
 			GetClientEyeAngles(client, ang1);
@@ -210,7 +210,7 @@ public void ItSteals_OnButton(int client, int button)
 
 			for(int target=1; target<=MaxClients; target++)
 			{
-				if(!IsValidClient(target) || IsSpec(target) || IsSCP(target) || !Client[target].HealthPack || Flashed[target])
+				if(!IsValidClient(target) || IsSpec(target) || IsSCP(target) || !Client[target].Extra1 || Flashed[target])
 					continue;
 
 				GetClientEyePosition(target, pos2);
@@ -251,7 +251,7 @@ public void ItSteals_OnButton(int client, int button)
 					}
 
 					SCPKilled = 2;
-					Client[client].Radio = 2;
+					Client[client].Extra2 = 2;
 					TurnOnGlow(client, "255 0 0", 10, 700.0);
 					TF2_AddCondition(client, TFCond_CritCola);
 					ChangeGlobalSong(FAR_FUTURE, ItHadEnough, 3);
@@ -265,11 +265,11 @@ public void ItSteals_OnButton(int client, int button)
 					}
 
 					SCPKilled = 1;
-					Client[client].Radio = 1;
-					Client[client].Power = engineTime+15.0;
+					Client[client].Extra2 = 1;
+					Client[client].Extra3 = engineTime+15.0;
 					TurnOnGlow(client, "255 0 0", 10, 600.0);
 					TF2_AddCondition(client, TFCond_CritCola, 15.0);
-					ChangeGlobalSong(Client[client].Power, Enrage, 3);
+					ChangeGlobalSong(Client[client].Extra3, Enrage, 3);
 					TF2_StunPlayer(client, 4.0, 1.0, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
 				}
 				else
@@ -307,26 +307,26 @@ void TurnOnGlow(int client, const char[] color, int brightness, float distance)
 
 	SetVariantString("!activator");
 	AcceptEntityInput(entity, "SetParent", client);
-	Client[client].HealthPack = EntIndexToEntRef(entity);
+	Client[client].Extra1 = EntIndexToEntRef(entity);
 }
 
 void TurnOffGlow(int client)
 {
-	if(Gamemode!=Gamemode_Steals || !Client[client].HealthPack)
+	if(Gamemode!=Gamemode_Steals || !Client[client].Extra1)
 		return;
 
-	int entity = EntRefToEntIndex(Client[client].HealthPack);
+	int entity = EntRefToEntIndex(Client[client].Extra1);
 	if(entity>MaxClients && IsValidEntity(entity))
 	{
 		AcceptEntityInput(entity, "TurnOff");
-		CreateTimer(0.1, Timer_RemoveEntity, Client[client].HealthPack, TIMER_FLAG_NO_MAPCHANGE);
+		CreateTimer(0.1, Timer_RemoveEntity, Client[client].Extra1, TIMER_FLAG_NO_MAPCHANGE);
 	}
-	Client[client].HealthPack = 0;
+	Client[client].Extra1 = 0;
 }
 
 void TurnOnFlashlight(int client)
 {
-	if(Client[client].HealthPack)
+	if(Client[client].Extra1)
 		TurnOffFlashlight(client);
 
 	// Spawn the light that only everyone else will see.
@@ -347,21 +347,21 @@ void TurnOnFlashlight(int client)
 	AcceptEntityInput(ent, "SetParent", client);
 	AcceptEntityInput(ent, "LightOn");
 
-	Client[client].HealthPack = EntIndexToEntRef(ent);
+	Client[client].Extra1 = EntIndexToEntRef(ent);
 }
 
 void TurnOffFlashlight(int client)
 {
-	if(Gamemode!=Gamemode_Steals || !Client[client].HealthPack)
+	if(Gamemode!=Gamemode_Steals || !Client[client].Extra1)
 		return;
 
-	int entity = EntRefToEntIndex(Client[client].HealthPack);
+	int entity = EntRefToEntIndex(Client[client].Extra1);
 	if(entity>MaxClients && IsValidEntity(entity))
 	{
 		AcceptEntityInput(entity, "LightOff");
-		CreateTimer(0.1, Timer_RemoveEntity, Client[client].HealthPack, TIMER_FLAG_NO_MAPCHANGE);
+		CreateTimer(0.1, Timer_RemoveEntity, Client[client].Extra1, TIMER_FLAG_NO_MAPCHANGE);
 	}
-	Client[client].HealthPack = 0;
+	Client[client].Extra1 = 0;
 }
 
 int CreateWeaponGlow(int iEntity, float flDuration)

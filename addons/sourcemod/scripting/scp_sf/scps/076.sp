@@ -67,13 +67,12 @@ void SCP076_Enable()
 
 void SCP076_Create(int client)
 {
-	Client[client].Keycard = Keycard_SCP;
-	Client[client].HealthPack = 0;
-	Client[client].Radio = 0;
+	Client[client].Extra2 = 0;
 	Client[client].Floor = Floor_Heavy;
 
 	Client[client].OnDeath = SCP076_OnDeath;
 	Client[client].OnKill = SCP076_OnKill;
+	Client[client].OnKeycard = Items_KeycardScp;
 	Client[client].OnMaxHealth = SCP076_OnMaxHealth;
 	Client[client].OnSpeed = SCP076_OnSpeed;
 
@@ -94,7 +93,7 @@ public void SCP076_OnMaxHealth(int client, int &health)
 
 public void SCP076_OnSpeed(int client, float &speed)
 {
-	int value = Client[client].Radio;
+	int value = Client[client].Extra2;
 	if(value >= sizeof(Speeds))
 		value = sizeof(Speeds)-1;
 
@@ -103,15 +102,15 @@ public void SCP076_OnSpeed(int client, float &speed)
 
 public void SCP076_OnKill(int client, int victim)
 {
-	Client[client].Radio++;
-	if(Client[client].Radio == MaxHeads)
+	Client[client].Extra2++;
+	if(Client[client].Extra2 == MaxHeads)
 	{
 		TF2_StunPlayer(client, 2.0, 0.5, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
 		ClientCommand(client, "playgamesound items/powerup_pickup_knockback.wav");
 
 		TF2_AddCondition(client, TFCond_CritCola);
 		TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
-		Client[client].Keycard = Keycard_106;
+		Client[client].OnKeycard = Items_KeycardAll;
 		SetEntityHealth(client, GetClientHealth(client)+HealthRage);
 
 		int weapon = SpawnWeapon(client, "tf_weapon_sword", 266, 90, 13, "2 ; 11 ; 5 ; 1.15 ; 252 ; 0 ; 326 ; 1.67", true, true);
@@ -122,7 +121,7 @@ public void SCP076_OnKill(int client, int victim)
 			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 		}
 	}
-	else if(Client[client].Radio < MaxHeads)
+	else if(Client[client].Extra2 < MaxHeads)
 	{
 		SetEntityHealth(client, GetClientHealth(client)+HealthKill);
 		SDKCall_SetSpeed(client);

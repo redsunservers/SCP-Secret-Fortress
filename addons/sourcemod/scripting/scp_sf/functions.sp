@@ -159,3 +159,15 @@ void Function_OnCondRemoved(int client, TFCond cond)
 	Call_PushCell(cond);
 	Call_Finish();
 }
+
+bool Function_OnKeycard(int client, any access, int &value)
+{
+	if(Client[client].OnKeycard == INVALID_FUNCTION)
+		return false;
+
+	Call_StartFunction(null, Client[client].OnKeycard);
+	Call_PushCell(client);
+	Call_PushCell(access);
+	Call_Finish(value);
+	return true;
+}

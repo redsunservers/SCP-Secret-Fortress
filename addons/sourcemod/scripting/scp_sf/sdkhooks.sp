@@ -32,7 +32,7 @@ public void OnEntityCreated(int entity, const char[] classname)
 	{
 		SDKHook(entity, SDKHook_Spawn, StrEqual(classname, "item_healthkit_small") ? OnKitSpawned : OnMedSpawned);
 	}
-	else if(Ready && StrEqual(classname, "tf_projectile_pipe"))
+	else if(StrEqual(classname, "tf_projectile_pipe"))
 	{
 		SDKHook(entity, SDKHook_SpawnPost, OnPipeSpawned);
 	}
@@ -63,10 +63,11 @@ public Action OnSmallPickup(int entity, int client)
 
 	if(!IsSCP(client) && !Client[client].Disarmer &&
 	   GetEntProp(entity, Prop_Data, "m_iHammerID")/10.0 < GetEngineTime() &&
-	   Items_CanGiveItem(client, Item_Medical) &&
-	   Items_CreateWeapon(client, 30013, false, true, true, GetSteamAccountID(client)) != -1)
+	   Items_CanGiveItem(client, Item_Medical))
+	{
+		Items_CreateWeapon(client, 30013, false, true, true);
 		AcceptEntityInput(entity, "Kill");
-
+	}
 	return Plugin_Handled;
 }
 
@@ -91,9 +92,9 @@ public Action OnKitPickup(int entity, int client)
 					return Plugin_Continue;
 				}
 			}
-			else if(Items_CanGiveItem(client, Item_Medical) &&
-				Items_CreateWeapon(client, 30013, false, true, true, GetSteamAccountID(client)) != -1)
+			else if(Items_CanGiveItem(client, Item_Medical))
 			{
+				Items_CreateWeapon(client, 30013, false, true, true);
 				AcceptEntityInput(entity, "Kill");
 			}
 		}
@@ -198,78 +199,17 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		CreateTimer(3.0, Timer_MyBlood, GetClientUserId(victim), TIMER_FLAG_NO_MAPCHANGE);
 
 	bool changed;
-	if(IsValidEntity(weapon) && weapon>MaxClients && HasEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex"))
+	Action action = Items_OnDamage(victim, attacker, inflictor, damage, damagetype, weapon, damageForce, damagePosition, damagecustom);
+	switch(action)
 	{
-		int index = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
-		if(index == WeaponIndex[Weapon_Disarm])
-		{
-			if(!IsSCP(victim) && !IsFriendly(Client[victim].Class, Client[attacker].Class))
-			{
-				bool cancel;
-				if(!Client[victim].Disarmer)
-				{
-					int weapon2 = GetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon");
-					cancel = (weapon2>MaxClients && IsValidEntity(weapon2) && HasEntProp(weapon2, Prop_Send, "m_iItemDefinitionIndex") && GetEntProp(weapon2, Prop_Send, "m_iItemDefinitionIndex")!=WeaponIndex[Weapon_None]);
+		case Plugin_Changed:
+			changed = true;
 
-					if(!cancel)
-					{
-						TF2_AddCondition(victim, TFCond_PasstimePenaltyDebuff);
-						BfWrite bf = view_as<BfWrite>(StartMessageOne("HudNotifyCustom", victim));
-						if(bf != null)
-						{
-							char buffer[64];
-							FormatEx(buffer, sizeof(buffer), "%T", "disarmed", attacker);
-							bf.WriteString(buffer);
-							bf.WriteString("ico_notify_flag_moving_alt");
-							bf.WriteByte(view_as<int>(TFTeam_Red));
-							EndMessage();
-						}
-
-						Items_DropAllItems(victim);
-
-						if(Client[victim].Class>=Class_Guard && Client[victim].Class<=Class_MTFE)
-							GiveAchievement(Achievement_DisarmMTF, attacker);
-					}
-				}
-
-				if(!cancel)
-				{
-					Client[victim].Disarmer = attacker;
-					SDKCall_SetSpeed(victim);
-					return Plugin_Handled;
-				}
-			}
-		}
-		else if(index == WeaponIndex[Weapon_Flash])
-		{
-			FadeMessage(victim, 36, 768, 0x0012);
-			FadeClientVolume(victim, 1.0, 2.0, 2.0, 0.2);
-		}
-		else
-		{
-			bool isSCP = IsSCP(victim);
-			if(isSCP && WeaponIndex[Weapon_SMG4]==index)
-			{
-				damage /= 2.0;
-				changed = true;
-			}
-
-			if((!isSCP || Client[victim].Class==Class_0492) && GetEntProp(victim, Prop_Data, "m_LastHitGroup")==HITGROUP_HEAD)
-			{
-				for(WeaponEnum i=Weapon_Pistol; i<Weapon_Flash; i++)
-				{
-					if(index != WeaponIndex[i])
-						continue;
-
-					damagetype |= DMG_CRIT;
-					changed = true;
-					break;
-				}
-			}
-		}
+		case Plugin_Handled, Plugin_Stop:
+			return action;
 	}
 
-	Action action = Function_OnTakeDamage(victim, attacker, inflictor, damage, damagetype, weapon, damageForce, damagePosition, damagecustom);
+	action = Function_OnTakeDamage(victim, attacker, inflictor, damage, damagetype, weapon, damageForce, damagePosition, damagecustom);
 	switch(action)
 	{
 		case Plugin_Changed:
@@ -383,13 +323,43 @@ public Action OnGetMaxHealth(int client, int &health)
 public void OnWeaponSwitch(int client, int entity)
 {
 	Function_OnSwitchWeapon(client, entity);
+	RequestFrame(OnWeaponSwitchFrame, GetClientUserId(client));
+}
+
+static void OnWeaponSwitchFrame(int userid)
+{
+	int client = GetClientOfUserId(userid);
+	if(client && IsClientInGame(client))
+	{
+		int entity = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+		if(entity>MaxClients && IsValidEntity(entity))
+		{
+			WeaponEnum weapon;
+			if(Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon))
+			{
+				if(weapon.Hide)
+					ViewModel_Hide(client);
+
+				if(weapon.Class != TFClass_Unknown)
+				{
+					Client[client].WeaponClass = weapon.Class;
+					return;
+				}
+			}
+		}
+	}
+
+	Client[client].WeaponClass = ClassClass[Client[client].Class];
 }
 
 public void OnPostThink(int client)
 {
-	
+	if(IsPlayerAlive(client) && Client[client].HudIn<GetEngineTime() && TF2_GetPlayerClass(client)!=Client[client].WeaponClass)
+		TF2_SetPlayerClass(client, Client[client].WeaponClass, false);
 }
 
 public void OnPostThinkPost(int client)
 {
+	if(IsPlayerAlive(client) && Client[client].HudIn<GetEngineTime() && TF2_GetPlayerClass(client)!=ClassClass[Client[client].Class])
+		TF2_SetPlayerClass(client, ClassClass[Client[client].Class], false);
 }

@@ -46,6 +46,7 @@ void ConVar_Setup()
 	ConVar_Add("mp_friendlyfire", 1.0);
 	ConVar_Add("mp_teams_unbalance_limit", 0.0);
 	ConVar_Add("mp_waitingforplayers_time", 70.0);
+	ConVar_Add("tf_bot_join_after_player", 0.0);
 	ConVar_Add("tf_dropped_weapon_lifetime", 99999.0);
 	ConVar_Add("tf_ghost_xy_speed", 400.0);
 	ConVar_Add("tf_helpme_range", -1.0);

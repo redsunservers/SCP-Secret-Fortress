@@ -670,6 +670,82 @@
 	{
 		"en"		"Construction PDA"
 	}
+	"weapon_26"
+	{
+		"en"		"Destruction PDA"
+	}
+	"weapon_28"
+	{
+		"en"		"Building"
+	}
+	"weapon_30001"
+	{
+		"en"		"Janitor Keycard"
+	}
+	"weapon_30002"
+	{
+		"en"		"Scientist Keycard"
+	}
+	"weapon_30003"
+	{
+		"en"		"Zone Manager Keycard"
+	}
+	"weapon_30004"
+	{
+		"en"		"Research Supervisor Keycard"
+	}
+	"weapon_30005"
+	{
+		"en"		"Facility Guard Keycard"
+	}
+	"weapon_30006"
+	{
+		"en"		"MTF Cadet Keycard"
+	}
+	"weapon_30007"
+	{
+		"en"		"MTF Lieutenant Keycard"
+	}
+	"weapon_30008"
+	{
+		"en"		"MTF Commander Keycard"
+	}
+	"weapon_30009"
+	{
+		"en"		"Containment Engineer Keycard"
+	}
+	"weapon_30010"
+	{
+		"en"		"Facility Manager Keycard"
+	}
+	"weapon_30011"
+	{
+		"en"		"Chaos Insurgency Access Device"
+	}
+	"weapon_30012"
+	{
+		"en"		"O5 Keycard"
+	}
+	"weapon_30013"
+	{
+		"en"		"Pain Killer"
+	}
+	"weapon_30014"
+	{
+		"en"		"Health Kit"
+	}
+	"weapon_30015"
+	{
+		"en"		"Adrenaline"
+	}
+	"weapon_30016"
+	{
+		"en"		"Radio"
+	}
+	"weapon_30017"
+	{
+		"en"		"SCP-500"
+	}
 
 	// Radio Phrases
 
@@ -723,65 +799,45 @@
 
 	// SCP-914 Phrases
 
-	"scp_914"
+	"914_very"
 	{
-		"en"		"SCP-914\n "
+		"en"		"Very Fine"
+	}
+	"914_fine"
+	{
+		"en"		"Fine"
+	}
+	"914_onetoone"
+	{
+		"en"		"1:1"
+	}
+	"914_coarse"
+	{
+		"en"		"Coarse"
+	}
+	"914_rough"
+	{
+		"en"		"Rough"
 	}
 	"in_cooldown"
 	{
 		"en"		"In Cooldown..."
 		"ru"		"Не так быстро..."
 	}
-	"keycard_rough"
+	"914_noeffect"
 	{
-		"en"		"Keycard | Rough"
-		"ru"		"Карта | О. Грубо"
+		"en"		"Nothing happened..."
 	}
-	"keycard_coarse"
+	"914_delet"
 	{
-		"en"		"Keycard | Coarse"
-		"ru"		"Карта | Грубо"
+		"en"		"The item vanished!"
 	}
-	"keycard_even"
+	"914_gained"
 	{
-		"en"		"Keycard | 1:1"
-		"ru"		"Карта | 1:1"
+		"#format"	"{1:t}"
+		"en"		"It transformed into {red}{1}"
 	}
-	"keycard_fine"
-	{
-		"en"		"Keycard | Fine"
-		"ru"		"Карта | Тонко"
-	}
-	"keycard_very"
-	{
-		"en"		"Keycard | Very Fine"
-		"ru"		"Карта | О. Тонко"
-	}
-	"weapon_rough"
-	{
-		"en"		"Weapon | Rough"
-		"ru"		"Оружие | О. Грубо"
-	}
-	"weapon_coarse"
-	{
-		"en"		"Weapon | Coarse"
-		"ru"		"Оружие | Грубо"
-	}
-	"weapon_even"
-	{
-		"en"		"Weapon | 1:1"
-		"ru"		"Оружие | 1:1"
-	}
-	"weapon_fine"
-	{
-		"en"		"Weapon | Fine"
-		"ru"		"Оружие | Тонко"
-	}
-	"weapon_very"
-	{
-		"en"		"Weapon | Very Fine"
-		"ru"		"Оружие | О. Тонко"
-	}
+
 
 	// Menu Phrases
 
@@ -793,6 +849,31 @@
 	{
 		"en"		"SCP Preference"
 	}
+	"menu_colorblind"
+	{
+		"en"		"Color Blind Mode"
+	}
+	"Red"
+	{
+		"en"		"Red"
+	}
+	"Green"
+	{
+		"en"		"Green"
+	}
+	"Blue"
+	{
+		"en"		"Blue"
+	}
+	"Reset"
+	{
+		"en"		"Reset"
+	}
+	"Off"
+	{
+		"en"		"Off"
+	}
+
 
 	// Other Phrases
 
@@ -836,32 +917,13 @@
 		"en"		"Time Remaining: {1}:{2}"
 		"ru"		"Оставшееся время: {1}:{2}"
 	}
-	"health_kit"	// HUD
+	"inv_full"	// Game
 	{
-		"en"		"Health Kit Ready [ATTACK2]"
-		"ru"		"Аптечка готова [ДОП. АТАКА]"
+		"en"		"Inventory is Full"
 	}
-	"pain_killers"	// HUD
+	"type_full"	// Game
 	{
-		"en"		"Pain Killers Ready [ATTACK2]"
-		"ru"		"Обезболивающее готово [ДОП. АТАКА]"
-	}
-	"scp_500"	// HUD
-	{
-		"en"		"SCP-500 [ATTACK2]"
-		"ru"		"SCP-500 [ДОП. АТАКА]"
-	}
-	"keycard"	// HUD
-	{
-		"#format"	"{1:t}"
-		"en"		"Keycard: {1}"
-		"ru"		"Ключ-Карта: {1}"
-	}
-	"radio"	// HUD
-	{
-		"#format"	"{1:t},{2:d}"
-		"en"		"Radio: {1} ({2}%%) [ATTACK3]"
-		"ru"		"Радио: {1} ({2}%%) [СПЕЦ. АТАКА]"
+		"en"		"Too Many Similar Items"
 	}
 	"disarmed_by"	// HUD
 	{
@@ -874,34 +936,27 @@
 		"en"		"You have been disarmed!"
 		"ru"		"Вас обезоружили!"
 	}
-	"camera"	// HUD
-	{
-		"#format"	"{1:d}"
-		"en"		"Camera: {1}%% [ATTACK2]"
-		"ru"		"Camera: {1}%% [ДОП. АТАКА]"
-	}
 	"radar"	// HUD
 	{
 		"en"		"Radar Ready [RELOAD]"
 		"ru"		"Radar готово [RELOAD]"
 	}
-	"sprint_ready"	// HUD
-	{
-		"#format"	"{1:d}"
-		"en"		"Sprint: {1}%% [JUMP]"
-		"ru"		"Sprint: {1}%% [JUMP]"
-	}
-	"sprint_not"	// HUD
-	{
-		"#format"	"{1:d}"
-		"en"		"Sprint: {1}%%"
-		"ru"		"Sprint: {1}%%"
-	}
-	"now_playing"	// Chat
+	"sprint"	// HUD
 	{
 		"#format"	"{1:s}"
-		"en"		"Now Playing: {1}"
-		"ru"		"Сейчас играет: {1}"
+		"en"		"Sprint: {1}"
+	}
+	"switch"	// HUD
+	{
+		"en"		"ATTACK3 to switch items"
+	}
+	"help_switch"	// Hint
+	{
+		"en"		"%%+attack3%% Press to switch between items"
+	}
+	"help_sprint"	// Hint
+	{
+		"en"		"%%+jump%% Press and hold to use sprint"
 	}
 	"end_screen"	// HUD
 	{
@@ -1002,10 +1057,109 @@
 	{
 		"en"		"Chaos Insurgency has spawn. They will save Class-D Personnel. They will kill Scientists and Guards. They all have the same weapon and spawn with a health kit."
 	}
-	"sprint"
+	"camera"	// HUD
 	{
 		"#format"	"{1:d}"
-		"en"		"Sprinting: {1}"
-		"ru"		"Sprinting: {1}"
+		"en"		"Camera: {1}%% [ATTACK2]"
+		"ru"		"Camera: {1}%% [ДОП. АТАКА]"
+	}
+	"sprint_ready"	// HUD
+	{
+		"#format"	"{1:d}"
+		"en"		"Sprint: {1}%% [JUMP]"
+		"ru"		"Sprint: {1}%% [JUMP]"
+	}
+	"sprint_not"	// HUD
+	{
+		"#format"	"{1:d}"
+		"en"		"Sprint: {1}%%"
+		"ru"		"Sprint: {1}%%"
+	}
+	"now_playing"	// Chat
+	{
+		"#format"	"{1:s}"
+		"en"		"Now Playing: {1}"
+		"ru"		"Сейчас играет: {1}"
+	}
+	"health_kit"	// HUD
+	{
+		"en"		"Health Kit Ready [ATTACK2]"
+		"ru"		"Аптечка готова [ДОП. АТАКА]"
+	}
+	"pain_killers"	// HUD
+	{
+		"en"		"Pain Killers Ready [ATTACK2]"
+		"ru"		"Обезболивающее готово [ДОП. АТАКА]"
+	}
+	"scp_500"	// HUD
+	{
+		"en"		"SCP-500 [ATTACK2]"
+		"ru"		"SCP-500 [ДОП. АТАКА]"
+	}
+	"keycard"	// HUD
+	{
+		"#format"	"{1:t}"
+		"en"		"Keycard: {1}"
+		"ru"		"Ключ-Карта: {1}"
+	}
+	"radio"	// HUD
+	{
+		"#format"	"{1:t},{2:d}"
+		"en"		"Radio: {1} ({2}%%) [ATTACK3]"
+		"ru"		"Радио: {1} ({2}%%) [СПЕЦ. АТАКА]"
+	}
+	"keycard_rough"
+	{
+		"en"		"Keycard | Rough"
+		"ru"		"Карта | О. Грубо"
+	}
+	"keycard_coarse"
+	{
+		"en"		"Keycard | Coarse"
+		"ru"		"Карта | Грубо"
+	}
+	"keycard_even"
+	{
+		"en"		"Keycard | 1:1"
+		"ru"		"Карта | 1:1"
+	}
+	"keycard_fine"
+	{
+		"en"		"Keycard | Fine"
+		"ru"		"Карта | Тонко"
+	}
+	"keycard_very"
+	{
+		"en"		"Keycard | Very Fine"
+		"ru"		"Карта | О. Тонко"
+	}
+	"weapon_rough"
+	{
+		"en"		"Weapon | Rough"
+		"ru"		"Оружие | О. Грубо"
+	}
+	"weapon_coarse"
+	{
+		"en"		"Weapon | Coarse"
+		"ru"		"Оружие | Грубо"
+	}
+	"weapon_even"
+	{
+		"en"		"Weapon | 1:1"
+		"ru"		"Оружие | 1:1"
+	}
+	"weapon_fine"
+	{
+		"en"		"Weapon | Fine"
+		"ru"		"Оружие | Тонко"
+	}
+	"weapon_very"
+	{
+		"en"		"Weapon | Very Fine"
+		"ru"		"Оружие | О. Тонко"
+	}
+	"scp_914"
+	{
+		"en"		"SCP-914\n "
 	}
 }

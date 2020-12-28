@@ -111,10 +111,10 @@ void DropAllWeapons(int client)
 		Client[client].Keycard = Keycard_None;
 	}
 
-	if(Client[client].Radio)
+	if(Client[client].Extra2)
 	{
 		DropKeycard(client, true, origin, angles, Keycard_Radio);
-		Client[client].Radio = 0;
+		Client[client].Extra2 = 0;
 	}
 
 	//Drop all weapons
@@ -408,7 +408,7 @@ void PickupWeapon(int client, int entity)
 				ClientCommand(client, "playgamesound ui/item_nvg_pickup.wav");
 				ReplaceString(name, sizeof(name), "scp_radio_", "");
 				float power = StringToFloat(name);
-				if(Client[client].Radio)
+				if(Client[client].Extra2)
 				{
 					Format(name, sizeof(name), "scp_radio_%f", Client[client].Power);
 					SetEntPropString(entity, Prop_Data, "m_iName", name);
@@ -416,7 +416,7 @@ void PickupWeapon(int client, int entity)
 				}
 				else
 				{
-					Client[client].Radio = 1;
+					Client[client].Extra2 = 1;
 					Client[client].Power = power;
 					RemoveEntity(entity);
 				}

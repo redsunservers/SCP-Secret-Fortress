@@ -10,12 +10,12 @@ void SCP3008_Enable()
 
 void SCP3008_Create(int client)
 {
-	Client[client].Keycard = Keycard_SCP;
-	Client[client].HealthPack = Health;
-	Client[client].Radio = SciEscaped;
+	Client[client].Extra1 = Health;
+	Client[client].Extra2 = SciEscaped;
 	Client[client].Floor = Floor_Light;
 
 	Client[client].OnGlowPlayer = SCP3008_OnGlowPlayer;
+	Client[client].OnKeycard = Items_KeycardScp;
 	Client[client].OnMaxHealth = SCP3008_OnMaxHealth;
 	Client[client].OnSeePlayer = SCP3008_OnSeePlayer;
 	Client[client].OnSpeed = SCP3008_OnSpeed;
@@ -43,9 +43,9 @@ public void SCP3008_OnSpeed(int client, float &speed)
 
 public Action SCP3008_OnTakeDamage(int client, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	if(!Client[client].Radio)
+	if(!Client[client].Extra2)
 	{
-		Client[client].Radio = 1;
+		Client[client].Extra2 = 1;
 		TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 		SCP3008_WeaponFists(client);
 	}
@@ -53,12 +53,12 @@ public Action SCP3008_OnTakeDamage(int client, int &attacker, int &inflictor, fl
 
 public bool SCP3008_OnSeePlayer(int client, int victim)
 {
-	return (Client[client].Radio || Client[victim].IdleAt>GetEngineTime());
+	return (Client[client].Extra2 || Client[victim].IdleAt>GetEngineTime());
 }
 
 public bool SCP3008_OnGlowPlayer(int client, int victim)
 {
-	return view_as<bool>(Client[client].Radio);
+	return view_as<bool>(Client[client].Extra2);
 }
 
 void SCP3008_WeaponNone(int client)
