@@ -94,7 +94,7 @@ public Action OnKitPickup(int entity, int client)
 			}
 			else if(Items_CanGiveItem(client, Item_Medical))
 			{
-				Items_CreateWeapon(client, 30013, false, true, true);
+				Items_CreateWeapon(client, 30014, false, true, true);
 				AcceptEntityInput(entity, "Kill");
 			}
 		}

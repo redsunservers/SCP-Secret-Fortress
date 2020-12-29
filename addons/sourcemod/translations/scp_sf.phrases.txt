@@ -76,7 +76,7 @@
 	}
 	"hint_19"
 	{
-		"en"		"SCP-939-89, SCP-939-53, and SCP-049 are able to talk to humans."
+		"en"		"SCP-939-89 and SCP-939-53 are able to talk to humans."
 	}
 	"hint_20"
 	{
@@ -88,7 +88,7 @@
 	}
 	"hint_22"
 	{
-		"en"		"Hold JUMP to sprint around.\nYour sprint does need to recharge."
+		"en"		"Hold RELOAD to view description about the item your holding."
 	}
 
 	// SCP-3008-1 Phrases
@@ -468,157 +468,313 @@
 	{
 		"en"		"None"
 	}
+	"info_5"
+	{
+		"en"		"It's your fists, they don't do much."
+	}
 	"weapon_192"
 	{
 		"en"		"Fireaxe"
+	}
+	"info_192"
+	{
+		"en"		"High damage, slow fire rate."
 	}
 	"weapon_153"
 	{
 		"en"		"Sledge Hammer"
 	}
+	"info_152"
+	{
+		"en"		"Great for destorying objects and buildings."
+	}
 	"weapon_30758"
 	{
 		"en"		"Machete"
+	}
+	"info_30758"
+	{
+		"en"		"Able to backstab players."
 	}
 	"weapon_325"
 	{
 		"en"		"Wooden Club"
 	}
+	"info_325"
+	{
+		"en"		"You won't hurt yourself if you miss though."
+	}
 	"weapon_1013"
 	{
 		"en"		"Meat"
+	}
+	"info_1013"
+	{
+		"en"		"Hope you like increased random crit chance."
 	}
 	"weapon_197"
 	{
 		"en"		"Wrench"
 	}
+	"info_197"
+	{
+		"en"		"Hit a building to repair it or build it up."
+	}
 	"weapon_264"
 	{
 		"en"		"Frying Pan"
+	}
+	"info_264"
+	{
+		"en"		"They'll hear it coming."
 	}
 	"weapon_954"
 	{
 		"en"		"Disarmer"
 	}
+	"info_954"
+	{
+		"en"		"Able to disarm players not wielding a weapon, bring disarmed\nplayers to the escape zone to convert them into your team."
+	}
 	"weapon_773"
 	{
 		"en"		"COM-15 Sidearm"
+	}
+	"info_773"
+	{
+		"en"		"Your handy pocket pistol."
 	}
 	"weapon_209"
 	{
 		"en"		"USP"
 	}
+	"info_209"
+	{
+		"en"		"Slower but holds more bullets and deals more damage then your average pistol."
+	}
 	"weapon_751"
 	{
 		"en"		"MP7"
+	}
+	"info_751"
+	{
+		"en"		"Weaker then the bunch but saves you some bullets when your on a budget."
 	}
 	"weapon_1150"
 	{
 		"en"		"Project 90"
 	}
+	"info_1150"
+	{
+		"en"		"Your personal SMG when you need it in a punch."
+	}
 	"weapon_425"
 	{
 		"en"		"MTF-E11-SR"
+	}
+	"info_425"
+	{
+		"en"		"The rifle when you want to get rid of some nasty [REDACTED]."
 	}
 	"weapon_415"
 	{
 		"en"		"Logicer"
 	}
+	"info_415"
+	{
+		"en"		"Heavy gun to deal high amounts of damage but less effective against SCPs."
+	}
 	"weapon_1151"
 	{
 		"en"		"Flash Grenade"
+	}
+	"info_1151"
+	{
+		"en"		"No damage but blinds players when it explodes."
 	}
 	"weapon_308"
 	{
 		"en"		"Fragmentation Grenade"
 	}
+	"info_308"
+	{
+		"en"		"High damage when it does explode."
+	}
 	"weapon_199"
 	{
 		"en"		"M97"
+	}
+	"info_199"
+	{
+		"en"		"Costs 20 bullets to fire 20 bullets, best melee weapon in the game."
 	}
 	"weapon_594"
 	{
 		"en"		"Micro H.I.D."
 	}
+	"info_594"
+	{
+		"en"		"Hold to charge up and after 6 seconds, release to fire high-damage beam.\nThe best tool to deal with SCPs and well worth pulling it off."
+	}
 	"weapon_25"
 	{
 		"en"		"Construction PDA"
+	}
+	"info_25"
+	{
+		"en"		"Anti-SCP Sentries, Dispensers, Two-Way Teleporters."
 	}
 	"weapon_26"
 	{
 		"en"		"Destruction PDA"
 	}
+	"info_26"
+	{
+		"en"		"You can't pick up buildings but you can use this."
+	}
 	"weapon_28"
 	{
 		"en"		"Building"
+	}
+	"info_28"
+	{
+		"en"		"%%+attack%% already"
 	}
 	"weapon_30001"
 	{
 		"en"		"Janitor Keycard"
 	}
+	"info_30001"
+	{
+		"en"		"Allows you to get into SCP-914"
+	}
 	"weapon_30002"
 	{
 		"en"		"Scientist Keycard"
+	}
+	"info_30002"
+	{
+		"en"		"Allows you to get into SCP-914"
 	}
 	"weapon_30003"
 	{
 		"en"		"Zone Manager Keycard"
 	}
+	"info_30003"
+	{
+		"en"		"Allows you to get into SCP-914 and checkpoint elevators"
+	}
 	"weapon_30004"
 	{
 		"en"		"Research Supervisor Keycard"
+	}
+	"info_30004"
+	{
+		"en"		"Allows you to get into SCP-914 and checkpoint elevators"
 	}
 	"weapon_30005"
 	{
 		"en"		"Facility Guard Keycard"
 	}
+	"info_30005"
+	{
+		"en"		"Allows you to get into SCP-914, checkpoint elevators, and the armory"
+	}
 	"weapon_30006"
 	{
 		"en"		"MTF Cadet Keycard"
+	}
+	"info_30006"
+	{
+		"en"		"Allows you to get into SCP-914, checkpoint elevators, and the armory"
 	}
 	"weapon_30007"
 	{
 		"en"		"MTF Lieutenant Keycard"
 	}
+	"info_30007"
+	{
+		"en"		"Go anywhere except SCP-106, Comms, Warhead, and the Micro H.I.D."
+	}
 	"weapon_30008"
 	{
 		"en"		"MTF Commander Keycard"
+	}
+	"info_30008"
+	{
+		"en"		"Go anywhere except SCP-106, Comms, and Warhead"
 	}
 	"weapon_30009"
 	{
 		"en"		"Containment Engineer Keycard"
 	}
+	"info_30009"
+	{
+		"en"		"Go anywhere except the gates and armory."
+	}
 	"weapon_30010"
 	{
 		"en"		"Facility Manager Keycard"
+	}
+	"info_30010"
+	{
+		"en"		"Go anywhere except the armory."
 	}
 	"weapon_30011"
 	{
 		"en"		"Chaos Insurgency Access Device"
 	}
+	"info_30011"
+	{
+		"en"		"Go anywhere except the SCP-106 room."
+	}
 	"weapon_30012"
 	{
 		"en"		"O5 Keycard"
+	}
+	"info_30012"
+	{
+		"en"		"Full access to every room!"
 	}
 	"weapon_30013"
 	{
 		"en"		"Pain Killer"
 	}
+	"info_30013"
+	{
+		"en"		"%%+attack%% to use and gain health regeneration."
+	}
 	"weapon_30014"
 	{
 		"en"		"Health Kit"
+	}
+	"info_30014"
+	{
+		"en"		"%%+attack%% to drop and stand over it to gain back half your max health."
 	}
 	"weapon_30015"
 	{
 		"en"		"Adrenaline"
 	}
+	"info_30015"
+	{
+		"en"		"%%+attack%% to use and gain unlimited sprint and health regeneration."
+	}
 	"weapon_30016"
 	{
 		"en"		"Radio"
 	}
+	"info_30016"
+	{
+		"en"		"This allows you to speak to others at a longer range.\nPressing will toggle it's range and power consumption.\nYou only need to pull it out when you need to change the range."
+	}
 	"weapon_30017"
 	{
 		"en"		"SCP-500"
+	}
+	"info_30017"
+	{
+		"en"		"%%+attack%% to use restore health and gain health regneration."
 	}
 
 

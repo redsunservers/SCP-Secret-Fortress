@@ -345,10 +345,10 @@
 				"linux" 	"6"
 				"windows" 	"5"
 			}
-			"CBasePlayer::ForceRespawn"
+			"CBasePlayer::EquipWearable"
 			{
-				"linux"		"330"
-				"windows"	"329"
+				"linux"		"431"
+				"windows"	"430"
 			}
 			"CTeamplayRoundBasedRules::RoundRespawn"
 			{

@@ -726,6 +726,17 @@ bool Items_OnRunCmd(int client, int &buttons)
 	return changed;
 }
 
+bool Items_ShowItemDesc(int client, int entity)
+{
+	char buffer[16];
+	FormatEx(buffer, sizeof(buffer), "info_%d", GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"));
+	if(!TranslationPhraseExists(buffer))
+		return false;
+
+	PrintKeyHintText(client, "%t", buffer);
+	return true;
+}
+
 float Items_Radio(int client)
 {
 	float distance = 1.0;
@@ -774,10 +785,6 @@ static void SpawnPlayerPickup(int client, const char[] classname)
 		SetEntityMoveType(entity, MOVETYPE_VPHYSICS);
 
 		TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
-
-		int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-		if(weapon>MaxClients && IsValidEntity(weapon))
-			RemoveAndSwitchItem(client, weapon);
 	}
 }
 
@@ -1012,19 +1019,18 @@ public bool Items_PainKillerButton(int client, int weapon, int &buttons)
 
 		SetEntityHealth(client, GetClientHealth(client)+6);
 		StartHealingTimer(client, 0.4, 1, 50);
-
-		RemoveAndSwitchItem(client, weapon);
 	}
 	else if(buttons & IN_ATTACK2)
 	{
 		buttons &= ~IN_ATTACK2;
-		bool yes = true;
-		Items_PainKillerDrop(client, weapon, yes);
+		SpawnPlayerPickup(client, "item_healthkit_small");
 	}
 	else
 	{
 		return false;
 	}
+
+	RemoveAndSwitchItem(client, weapon);
 	return true;
 }
 
@@ -1034,8 +1040,8 @@ public bool Items_HealthKitButton(int client, int weapon, int &buttons)
 		return false;
 
 	buttons &= ~(IN_ATTACK|IN_ATTACK2);
-	bool yes = true;
-	Items_HealthKitDrop(client, weapon, yes);
+	SpawnPlayerPickup(client, "item_healthkit_medium");
+	RemoveAndSwitchItem(client, weapon);
 	return true;
 }
 

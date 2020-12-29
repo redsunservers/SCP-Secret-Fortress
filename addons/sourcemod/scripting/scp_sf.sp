@@ -1581,6 +1581,8 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			return;
 		}
 
+		TF2_SetPlayerClass(client, ClassClass[Client[client].Class]);
+
 		if(team != TFTeam_Spectator)
 			ChangeClientTeamEx(client, team);
 	}
@@ -1609,6 +1611,9 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 				TurnOnFlashlight(client);
 
 			Items_CreateWeapon(client, 5, true, true);
+			int entity = TF2_CreateHat(client, 150);
+			if(entity > MaxClients)
+				TF2Attrib_SetByDefIndex(entity, 261, view_as<float>(13595446));
 		}
 		case Class_Chaos:
 		{
@@ -1632,6 +1637,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 				TurnOnFlashlight(client);
 
 			Items_CreateWeapon(client, 30002, true, true);
+			Items_CreateWeapon(client, 30014, false, true);
 			Items_CreateWeapon(client, 5, false, true);
 		}
 		case Class_Guard:
@@ -1746,6 +1752,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			Ammo[Ammo_7mm] = 20;
 			Ammo[Ammo_9mm] = 20;
 			Ammo[Ammo_Radio] = 100;
+			Ammo[Ammo_Metal] = 400;
 
 			Items_CreateWeapon(client, 30016, false, true);
 			Items_CreateWeapon(client, 308, false, true);
@@ -1756,6 +1763,10 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 			Items_CreateWeapon(client, 197, false, true);
 			Items_CreateWeapon(client, 30014, false, true);
 			Items_CreateWeapon(client, 5, false, true);
+
+			Items_CreateWeapon(client, 25, false, true);
+			Items_CreateWeapon(client, 26, false, true);
+			Items_CreateWeapon(client, 28, false, true);
 
 			GiveAchievement(Achievement_MTFSpawn, client);
 		}
@@ -1835,6 +1846,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 
 	// Show class info
 	Client[client].HudIn = GetEngineTime()+9.9;
+	TF2_SetPlayerClass(client, ClassClass[Client[client].Class], false);
 	CreateTimer(2.0, ShowClassInfoTimer, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 
 	// Model stuff
@@ -3152,11 +3164,30 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 						int active = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 						if(active>MaxClients && IsValidEntity(active) && GetEntityClassname(active, buffer, sizeof(buffer)))
 						{
-							ArrayList list = Items_ArrayList(client,  TF2_GetClassnameSlot(buffer));
+							static float time[MAXTF2PLAYERS];
+							if(holding[client] == IN_RELOAD)
+							{
+								if(time[client] == FAR_FUTURE)
+								{
+									time[client] = engineTime+0.1;
+								}
+								else if(time[client] < engineTime)
+								{
+									showingHelp = Items_ShowItemDesc(client, active);
+									if(!showingHelp)
+										time[client] = FAR_FUTURE;
+								}
+							}
+							else
+							{
+								time[client] = FAR_FUTURE;
+							}
+
+							ArrayList list = Items_ArrayList(client, TF2_GetClassnameSlot(buffer));
 							int length = list.Length;
 							if(length)
 							{
-								if(length>1 && Client[client].HelpSwitch)
+								if(!showingHelp && length>1 && Client[client].HelpSwitch)
 								{
 									showingHelp = true;
 									PrintKeyHintText(client, "%t", "help_switch");
@@ -4230,7 +4261,6 @@ void ShowClassInfo(int client, bool help=false)
 
 	Client[client].HelpSprint = true;
 	Client[client].HelpSwitch = true;
-	TF2_SetPlayerClass(client, ClassClass[Client[client].Class], false);
 
 	bool found;
 	char buffer[32];
@@ -4365,7 +4395,17 @@ bool AttemptGrabItem(int client)
 			{
 				char buffers[3][4];
 				ExplodeString(buffer, "_", buffers, sizeof(buffers), sizeof(buffers[]));
-				if(Items_Pickup(client, StringToInt(buffers[2])+30012))
+				int value = StringToInt(buffers[2]);
+				if(value > 3)
+				{
+					value = 30017;
+				}
+				else
+				{
+					value += 30012;
+				}
+
+				if(Items_Pickup(client, value))
 					AcceptEntityInput(entity, "KillHierarchy");
 			}
 			return true;
