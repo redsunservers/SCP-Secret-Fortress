@@ -144,7 +144,7 @@ public void SCP173_OnButton(int client, int button)
 	}
 	else
 	{
-		blink = GetRandomInt(12, 16);
+		blink = GetRandomInt(8, 12);
 	}
 
 	if(status == 1)

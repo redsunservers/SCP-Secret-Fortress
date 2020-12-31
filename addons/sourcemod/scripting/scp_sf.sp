@@ -53,6 +53,7 @@ void DisplayCredits(int i)
 //#define IsSpec(%1)	(Client[%1].Class==Class_Spec || !IsPlayerAlive(%1) || TF2_IsPlayerInCondition(%1, TFCond_HalloweenGhostMode))
 
 #define FAR_FUTURE	100000000.0
+#define FAR_FUTURE_ALT	99999998.0
 #define MAXTF2PLAYERS	36
 #define MAXANGLEPITCH	45.0
 #define MAXANGLEYAW	90.0
@@ -960,6 +961,9 @@ public void OnPluginEnd()
 		if(IsClientInGame(i))
 			DHook_UnhookClient(i);
 	}
+
+	if(Enabled)
+		EndRound(Team_Spec, TFTeam_Unassigned);
 }
 
 public void OnClientPutInServer(int client)
@@ -1191,9 +1195,21 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 	{
 		if(IsValidClient(client))
 		{
-			int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-			if(weapon>MaxClients && IsValidEntity(weapon))
-				RemoveAndSwitchItem(client, weapon);
+			int ent, i;
+			WeaponEnum weapon;
+			while((ent=Items_Iterator(client, i)) != -1)
+			{
+				if(!Items_GetWeaponByIndex(GetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex"), weapon))
+					continue;
+
+				if(weapon.Type == Item_Keycard)
+				{
+					if(ent == GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon"))
+						Items_SwitchItem(client, ent);
+
+					TF2_RemoveItem(client, ent);
+				}
+			}
 		}
 	}
 	else if(!StrContains(name, "scp_endmusic", false))
@@ -1394,11 +1410,12 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 							else if(Items_GetWeaponByIndex(amount, weapon))
 							{
 								TF2_RemoveItem(client, entity);
-								entity = Items_CreateWeapon(client, amount, false, true, false);
 								if(choice<2 && Client[client].Class==Class_Scientist && weapon.Type==Item_Keycard)
 									GiveAchievement(Achievement_Upgrade, client);
 
-								if(Items_CanGiveItem(client, weapon.Type))
+								bool canGive = Items_CanGiveItem(client, weapon.Type);
+								entity = Items_CreateWeapon(client, amount, canGive, true, false);
+								if(!canGive && entity>MaxClients && IsValidEntity(entity))
 								{
 									SetActiveWeapon(client, entity);
 								}
@@ -1408,6 +1425,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 									GetClientEyePosition(client, pos);
 									GetClientEyeAngles(client, ang);
 									Items_DropItem(client, entity, pos, ang, true);
+									FakeClientCommand(client, "use tf_weapon_fists");
 								}
 
 								static char buffer[64];
@@ -2926,7 +2944,9 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 	}
 
 	// Item-Specific Buttons
-	bool changed = Items_OnRunCmd(client, buttons);
+	static int holding[MAXTF2PLAYERS];
+	bool wasHolding = view_as<bool>(holding[client]);
+	bool changed = Items_OnRunCmd(client, buttons, holding[client]);
 
 	// Sprinting Related
 	if((buttons & IN_JUMP) || (buttons & IN_SPEED))
@@ -2953,8 +2973,6 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 	}
 
 	// Everything else
-	static int holding[MAXTF2PLAYERS];
-	bool wasHolding = view_as<bool>(holding[client]);
 	if(holding[client])
 	{
 		if(!(buttons & holding[client]))
@@ -3867,6 +3885,7 @@ public void UpdateListenOverrides(float engineTime)
 	int[] client = new int[MaxClients];
 	int[] team = new int[MaxClients];
 	bool[] spec = new bool[MaxClients];
+	bool[] admin = new bool[MaxClients];
 	float[] radio = new float[MaxClients];
 	static float pos[MAXTF2PLAYERS][3];
 	for(int i=1; i<=MaxClients; i++)
@@ -3878,6 +3897,7 @@ public void UpdateListenOverrides(float engineTime)
 		team[total] = GetClientTeam(i);
 		radio[total] = Items_Radio(i);
 		spec[total] = GetClientTeam(i)==view_as<int>(TFTeam_Spectator);
+		admin[total] = (spec[total] && CheckCommandAccess(i, "sm_mute", ADMFLAG_CHAT));
 		GetEntPropVector(i, Prop_Send, "m_vecOrigin", pos[total]);
 		total++;
 	}
@@ -3910,7 +3930,7 @@ public void UpdateListenOverrides(float engineTime)
 				blocked = true;
 			#endif
 
-			if(spec[a])
+			if(spec[i] || admin[a])
 			{
 				Client[client[a]].CanTalkTo[client[i]] = !muted;
 				if(ChatHook)
@@ -3928,44 +3948,41 @@ public void UpdateListenOverrides(float engineTime)
 				if(ChatHook)
 					SetListenOverride(client[i], client[a], blocked ? Listen_No : Listen_Default);
 			}
-			else
+			else if(IsSCP(client[a]))
 			{
-				if(IsSCP(client[a]))
+				if(IsSCP(client[i]))
 				{
-					if(IsSCP(client[i]))
+					Client[client[a]].CanTalkTo[client[i]] = !muted;
+					if(ChatHook)
+						SetListenOverride(client[i], client[a], blocked ? Listen_No : Listen_Yes);
+					continue;
+				}
+				else if(Client[client[a]].Class>=Class_939 && Client[client[a]].Class<=Class_3008)
+				{
+					if(GetVectorDistance(pos[i], pos[a], true) < 499999)
 					{
 						Client[client[a]].CanTalkTo[client[i]] = !muted;
 						if(ChatHook)
 							SetListenOverride(client[i], client[a], blocked ? Listen_No : Listen_Yes);
 						continue;
 					}
-					else if(Client[client[a]].Class>=Class_939 && Client[client[a]].Class<=Class_3008)
-					{
-						if(GetVectorDistance(pos[i], pos[a], true) < 499999)
-						{
-							Client[client[a]].CanTalkTo[client[i]] = !muted;
-							if(ChatHook)
-								SetListenOverride(client[i], client[a], blocked ? Listen_No : Listen_Yes);
-							continue;
-						}
-					}
+				}
 
-					Client[client[a]].CanTalkTo[client[i]] = false;
-					if(ChatHook)
-						SetListenOverride(client[i], client[a], Listen_No);
-				}
-				else if(GetVectorDistance(pos[i], pos[a], true) < (radio[i]>1 ? 160000.0*radio[a] : 160000.0))
-				{
-					Client[client[a]].CanTalkTo[client[i]] = !muted;
-					if(ChatHook)
-						SetListenOverride(client[i], client[a], blocked ? Listen_No : Listen_Yes);
-				}
-				else
-				{
-					Client[client[a]].CanTalkTo[client[i]] = false;
-					if(ChatHook)
-						SetListenOverride(client[i], client[a], Listen_No);
-				}
+				Client[client[a]].CanTalkTo[client[i]] = false;
+				if(ChatHook)
+					SetListenOverride(client[i], client[a], Listen_No);
+			}
+			else if(GetVectorDistance(pos[i], pos[a], true) < (radio[i]>1 ? 160000.0*radio[a] : 160000.0))
+			{
+				Client[client[a]].CanTalkTo[client[i]] = !muted;
+				if(ChatHook)
+					SetListenOverride(client[i], client[a], blocked ? Listen_No : Listen_Yes);
+			}
+			else
+			{
+				Client[client[a]].CanTalkTo[client[i]] = false;
+				if(ChatHook)
+					SetListenOverride(client[i], client[a], Listen_No);
 			}
 		}
 	}
@@ -3995,7 +4012,7 @@ void GoToSpawn(int client, ClassEnum class)
 			while((entity=FindEntityByClassname2(entity, "info_target")) != -1)
 			{
 				GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
-				if(!StrContains(name, ClassSpawn[Class_0492], false))
+				if(StrEqual(name, ClassSpawn[Class_0492], false))
 					spawns[count++] = entity;
 
 				if(count >= sizeof(spawns))
@@ -4022,7 +4039,7 @@ void GoToSpawn(int client, ClassEnum class)
 			while((entity=FindEntityByClassname2(entity, "info_target")) != -1)
 			{
 				GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
-				if(!StrContains(name, ClassSpawn[0], false))
+				if(StrEqual(name, ClassSpawn[0], false))
 					spawns[count++] = entity;
 
 				if(count >= sizeof(spawns))
@@ -4439,7 +4456,7 @@ bool AttemptGrabItem(int client)
 			{
 				AcceptEntityInput(entity, "FireUser1", client, client);
 
-				char buffers[3][4];
+				char buffers[3][6];
 				ExplodeString(buffer, "_", buffers, sizeof(buffers), sizeof(buffers[]));
 				if(Items_Pickup(client, StringToInt(buffers[2])))
 					AcceptEntityInput(entity, "KillHierarchy");

@@ -543,6 +543,15 @@ int GetOwnerLoop(int entity)
 	return entity;
 }
 
+int GetAmmo(int client, int type)
+{
+	int ammo = GetEntProp(client, Prop_Data, "m_iAmmo", _, type);
+	if(ammo < 0)
+		ammo = 0;
+
+	return ammo;
+}
+
 stock void SetAmmo(int client, int weapon, int ammo=-1, int clip=-1)
 {
 	if(IsValidEntity(weapon))

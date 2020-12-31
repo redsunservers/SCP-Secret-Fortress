@@ -59,7 +59,7 @@ enum struct WeaponEnum
 	char Model[PLATFORM_MAX_PATH];
 	int Skin;
 
-	Function OnButton;	// Action(int client, int weapon, int &buttons)
+	Function OnButton;	// Action(int client, int weapon, int &buttons, int &holding)
 	Function OnCard;		// int(int client, AccessEnum access)
 	Function OnCreate;	// void(int client, int weapon)
 	Function OnDamage;	// Action(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
@@ -298,7 +298,7 @@ int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, 
 			int ammos[Ammo_MAX];
 			for(i=1; i<Ammo_MAX; i++)
 			{
-				ammos[i] = GetEntProp(client, Prop_Data, "m_iAmmo", _, i);
+				ammos[i] = GetAmmo(client, i);
 				SetEntProp(client, Prop_Data, "m_iAmmo", 0, _, i);
 			}
 
@@ -421,13 +421,6 @@ void Items_SwitchItem(int client, int holding)
 						i = 0;
 
 					int entity = list.Get(i);
-					int type = GetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType");
-					if(type > 0)
-					{
-						if(GetEntProp(entity, Prop_Data, "m_iClip1")<1 && GetEntProp(client, Prop_Data, "m_iAmmo", _, type)<1)
-							continue;
-					}
-
 					Items_SwapWeapons(client, entity, holding);
 					SetActiveWeapon(client, entity);
 					break;
@@ -445,9 +438,6 @@ void Items_SwitchItem(int client, int holding)
 
 bool Items_CanGiveItem(int client, int type, bool &full=false)
 {
-	if(!MaxWeapons)
-		MaxWeapons = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
-
 	int i, entity, all, types;
 	WeaponEnum weapon;
 	while((entity=Items_Iterator(client, i)) != -1)
@@ -529,7 +519,7 @@ bool Items_DropItem(int client, int helditem, const float origin[3], const float
 		type = GetEntProp(helditem, Prop_Send, "m_iPrimaryAmmoType");
 		if(type != -1)
 		{
-			ammo = GetEntProp(client, Prop_Data, "m_iAmmo", _, type);
+			ammo = GetAmmo(client, type);
 			int clip = GetEntProp(helditem, Prop_Data, "m_iClip1");
 			int max = ClassMaxAmmo(type, Client[client].Class);
 
@@ -704,7 +694,7 @@ Action Items_OnDamage(int victim, int attacker, int &inflictor, float &damage, i
 	return action;
 }
 
-bool Items_OnRunCmd(int client, int &buttons)
+bool Items_OnRunCmd(int client, int &buttons, int &holding)
 {
 	bool changed;
 	int entity = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
@@ -719,6 +709,7 @@ bool Items_OnRunCmd(int client, int &buttons)
 				Call_PushCell(client);
 				Call_PushCell(entity);
 				Call_PushCellRef(buttons);
+				Call_PushCellRef(holding);
 				Call_Finish(changed);
 			}
 		}
@@ -796,6 +787,15 @@ void RemoveAndSwitchItem(int client, int weapon)
 
 public bool Items_NoDrop(int client, int weapon, bool &swap)
 {
+	return false;
+}
+
+public bool Items_DeleteDrop(int client, int weapon, bool &swap)
+{
+	if(swap)
+		Items_SwitchItem(client, weapon);
+
+	TF2_RemoveItem(client, weapon);
 	return false;
 }
 
@@ -930,19 +930,12 @@ public void Items_BuilderCreate(int client, int entity)
 	}
 }
 
-public bool Items_NoneButton(int client, int weapon, int &buttons)
+public bool Items_NoneButton(int client, int weapon, int &buttons, int &holding)
 {
-	if(Gamemode == Gamemode_Steals)
+	if(!holding && Gamemode==Gamemode_Steals)
 	{
-		static bool holding[MAXTF2PLAYERS];
-		if(holding[client])
+		if(buttons & IN_ATTACK2)
 		{
-			if(!(buttons & IN_ATTACK2))
-				holding[client] = false;
-		}
-		else if(buttons & IN_ATTACK2)
-		{
-			holding[client] = true;
 			if(Client[client].Extra1)
 			{
 				TurnOffFlashlight(client);
@@ -956,10 +949,12 @@ public bool Items_NoneButton(int client, int weapon, int &buttons)
 	return false;
 }
 
-public bool Items_MicroButton(int client, int weapon, int &buttons)
+public bool Items_MicroButton(int client, int weapon, int &buttons, int &holding)
 {
+	int type = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
+	int ammo = GetAmmo(client, type);
 	static float charge[MAXTF2PLAYERS];
-	if(!(buttons & IN_ATTACK))
+	if(ammo<1 || !(buttons & IN_ATTACK))
 	{
 		charge[client] = 0.0;
 		SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
@@ -983,7 +978,6 @@ public bool Items_MicroButton(int client, int weapon, int &buttons)
 		}
 		else
 		{
-			PrintKeyHintText(client, "Charge: %d", RoundToCeil((charge[client]-engineTime-6.0)/-0.06));
 			SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
 			SetEntPropFloat(client, Prop_Send, "m_flRageMeter", (charge[client]-engineTime)*16.5);
 
@@ -991,13 +985,8 @@ public bool Items_MicroButton(int client, int weapon, int &buttons)
 			if(time[client] < engineTime)
 			{
 				time[client] = engineTime+0.1;
-				int type = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
 				if(type != -1)
-				{
-					int ammo = GetEntProp(client, Prop_Data, "m_iAmmo", _, type)-1;
-					if(ammo >= 0)
-						SetEntProp(client, Prop_Data, "m_iAmmo", ammo, _, type);
-				}
+					SetEntProp(client, Prop_Data, "m_iAmmo", ammo-1, _, type);
 			}
 		}
 	}
@@ -1008,11 +997,15 @@ public bool Items_MicroButton(int client, int weapon, int &buttons)
 	return true;
 }
 
-public bool Items_PainKillerButton(int client, int weapon, int &buttons)
+public bool Items_PainKillerButton(int client, int weapon, int &buttons, int &holding)
 {
-	if(buttons & IN_ATTACK)
+	if(holding)
 	{
-		buttons &= ~IN_ATTACK;
+		return false;
+	}
+	else if(buttons & IN_ATTACK)
+	{
+		holding = IN_ATTACK;
 
 		int userid = GetClientUserId(client);
 		ApplyHealEvent(userid, userid, 6);
@@ -1022,7 +1015,8 @@ public bool Items_PainKillerButton(int client, int weapon, int &buttons)
 	}
 	else if(buttons & IN_ATTACK2)
 	{
-		buttons &= ~IN_ATTACK2;
+		holding = IN_ATTACK2;
+
 		SpawnPlayerPickup(client, "item_healthkit_small");
 	}
 	else
@@ -1031,132 +1025,122 @@ public bool Items_PainKillerButton(int client, int weapon, int &buttons)
 	}
 
 	RemoveAndSwitchItem(client, weapon);
-	return true;
+	return false;
 }
 
-public bool Items_HealthKitButton(int client, int weapon, int &buttons)
+public bool Items_HealthKitButton(int client, int weapon, int &buttons, int &holding)
 {
-	if(!(buttons & IN_ATTACK) && !(buttons & IN_ATTACK2))
-		return false;
-
-	buttons &= ~(IN_ATTACK|IN_ATTACK2);
-	SpawnPlayerPickup(client, "item_healthkit_medium");
-	RemoveAndSwitchItem(client, weapon);
-	return true;
-}
-
-public bool Items_AdrenalineButton(int client, int weapon, int &buttons)
-{
-	if(!(buttons & IN_ATTACK))
-		return false;
-
-	buttons &= ~IN_ATTACK;
-	RemoveAndSwitchItem(client, weapon);
-	StartHealingTimer(client, 0.334, 1, 60, true);
-	TF2_AddCondition(client, TFCond_DefenseBuffNoCritBlock, 20.0, client);
-	TF2_AddCondition(client, TFCond_CritHype, 20.0, client);
-	FadeClientVolume(client, 0.7, 2.5, 17.5, 2.5);
-	return true;
-}
-
-public bool Items_RadioButton(int client, int entity, int &buttons)
-{
-	static int holding[MAXTF2PLAYERS];
-	if(holding[client])
+	if(!holding && ((buttons & IN_ATTACK) || (buttons & IN_ATTACK2)))
 	{
-		if(!((buttons & IN_ATTACK) || (buttons & IN_ATTACK2)))
-			holding[client] = false;
-	}
-	else if(buttons & IN_ATTACK)
-	{
-		holding[client] = true;
-
-		buttons &= ~IN_ATTACK;
-
-		int clip = GetEntProp(entity, Prop_Data, "m_iClip1");
-		if(clip > 3)
-		{
-			clip = 0;
-		}
-		else
-		{
-			clip++;
-		}
-
-		SetEntProp(entity, Prop_Data, "m_iClip1", clip);
-		return true;
-	}
-	else if(buttons & IN_ATTACK2)
-	{
-		holding[client] = true;
-
-		buttons &= ~IN_ATTACK2;
-
-		int clip = GetEntProp(entity, Prop_Data, "m_iClip1");
-		if(clip < 1)
-		{
-			clip = 4;
-		}
-		else
-		{
-			clip--;
-		}
-
-		SetEntProp(entity, Prop_Data, "m_iClip1", clip);
-		return true;
+		holding = (buttons & IN_ATTACK) ? IN_ATTACK : IN_ATTACK2;
+		SpawnPlayerPickup(client, "item_healthkit_medium");
+		RemoveAndSwitchItem(client, weapon);
 	}
 	return false;
 }
 
-public bool Items_500Button(int client, int weapon, int &buttons)
+public bool Items_AdrenalineButton(int client, int weapon, int &buttons, int &holding)
 {
-	if(!(buttons & IN_ATTACK))
-		return false;
-
-	buttons &= ~IN_ATTACK;
-	RemoveAndSwitchItem(client, weapon);
-	SpawnPickup(client, "item_healthkit_full");
-	StartHealingTimer(client, 0.334, 1, 36, true);
-	TF2_AddCondition(client, TFCond_DefenseBuffNoCritBlock, 20.0, client);
-	TF2_AddCondition(client, TFCond_CritHype, 20.0, client);
-	return true;
+	if(!holding && (buttons & IN_ATTACK))
+	{
+		holding = IN_ATTACK;
+		RemoveAndSwitchItem(client, weapon);
+		StartHealingTimer(client, 0.334, 1, 60, true);
+		TF2_AddCondition(client, TFCond_DefenseBuffNoCritBlock, 20.0, client);
+		TF2_AddCondition(client, TFCond_CritHype, 20.0, client);
+		FadeClientVolume(client, 0.7, 2.5, 17.5, 2.5);
+	}
+	return false;
 }
 
-public float Items_RadioRadio(int client, int entity, float &multi)
+public bool Items_RadioButton(int client, int entity, int &buttons, int &holding)
+{
+	if(!holding)
+	{
+		if(buttons & IN_ATTACK)
+		{
+			buttons = IN_ATTACK;
+
+			int clip = GetEntProp(entity, Prop_Data, "m_iClip1");
+			if(clip > 3)
+			{
+				clip = 0;
+			}
+			else
+			{
+				clip++;
+			}
+
+			SetEntProp(entity, Prop_Data, "m_iClip1", clip);
+		}
+		else if(buttons & IN_ATTACK2)
+		{
+			buttons = IN_ATTACK2;
+
+			int clip = GetEntProp(entity, Prop_Data, "m_iClip1");
+			if(clip < 1)
+			{
+				clip = 4;
+			}
+			else
+			{
+				clip--;
+			}
+
+			SetEntProp(entity, Prop_Data, "m_iClip1", clip);
+		}
+	}
+	return false;
+}
+
+public bool Items_500Button(int client, int weapon, int &buttons, int &holding)
+{
+	if(!holding && (buttons & IN_ATTACK))
+	{
+		buttons = IN_ATTACK;
+		RemoveAndSwitchItem(client, weapon);
+		SpawnPickup(client, "item_healthkit_full");
+		StartHealingTimer(client, 0.334, 1, 36, true);
+		TF2_AddCondition(client, TFCond_DefenseBuffNoCritBlock, 20.0, client);
+		TF2_AddCondition(client, TFCond_CritHype, 20.0, client);
+	}
+	return false;
+}
+
+public bool Items_RadioRadio(int client, int entity, float &multi)
 {
 	static float time[MAXTF2PLAYERS];
-	bool remove;
-	float power;
+	bool remove, off;
 	float engineTime = GetEngineTime();
 	switch(GetEntProp(entity, Prop_Data, "m_iClip1"))
 	{
 		case 1:
 		{
-			power = 2.6;
+			multi = 2.6;
 			if(time[client]+8.0 < engineTime)
 				remove = true;
 		}
 		case 2:
 		{
-			power = 3.5;
+			multi = 3.5;
 			if(time[client]+4.0 < engineTime)
 				remove = true;
 		}
 		case 3:
 		{
-			power = 5.7;
+			multi = 5.7;
 			if(time[client]+2.0 < engineTime)
 				remove = true;
 		}
 		case 4:
 		{
-			power = 10.8;
+			multi = 10.8;
 			if(time[client]+1.0 < engineTime)
 				remove = true;
 		}
 		default:
 		{
-			power = 1.0;
+			off = true;
 		}
 	}
 
@@ -1166,20 +1150,19 @@ public float Items_RadioRadio(int client, int entity, float &multi)
 		int type = GetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType");
 		if(type != -1)
 		{
-			int ammo = GetEntProp(client, Prop_Data, "m_iAmmo", _, type);
-			if(ammo > 1)
+			int ammo = GetAmmo(client, type);
+			if(ammo > 0)
 			{
 				SetEntProp(client, Prop_Data, "m_iAmmo", ammo-1, _, type);
 			}
 			else
 			{
-				SetEntProp(client, Prop_Data, "m_iAmmo", 0, _, type);
-				RemoveAndSwitchItem(client, entity);
-				power = 1.0;
+				multi = 1.0;
+				off = true;
 			}
 		}
 	}
-	return power;
+	return !off;
 }
 
 public int Items_KeycardJan(int client, AccessEnum access)

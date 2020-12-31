@@ -154,7 +154,7 @@ public void SCP096_OnDeath(int client, int attacker)
 
 public Action SCP096_OnTakeDamage(int client, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	if(Triggered[attacker]<3 && !TF2_IsPlayerInCondition(client, TFCond_Dazed))
+	if(Triggered[attacker]<2 && !TF2_IsPlayerInCondition(client, TFCond_Dazed))
 		TriggerShyGuy(client, attacker, true);
 
 	return Plugin_Continue;
@@ -162,17 +162,17 @@ public Action SCP096_OnTakeDamage(int client, int &attacker, int &inflictor, flo
 
 public Action SCP096_OnDealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	return (Triggered[victim] > 2) ? Plugin_Continue : Plugin_Handled;
+	return (Triggered[victim] > 1) ? Plugin_Continue : Plugin_Handled;
 }
 
 public bool SCP096_OnSeePlayer(int client, int victim)
 {
-	return (!Client[client].Extra2 || Triggered[victim]>2);
+	return (!Client[client].Extra2 || Triggered[victim]>1);
 }
 
 public bool SCP096_OnGlowPlayer(int client, int victim)
 {
-	return (Client[client].Extra2==2 && Triggered[victim]>2);
+	return (Client[client].Extra2==2 && Triggered[victim]>1);
 }
 
 public void SCP096_OnButton(int client, int button)
@@ -279,7 +279,7 @@ public void SCP096_OnButton(int client, int button)
 				bool found;
 				for(int target=1; target<=MaxClients; target++)
 				{
-					if(!IsValidClient(target) || IsFriendly(Class_096, Client[target].Class) || Triggered[target]>2)
+					if(!IsValidClient(target) || IsFriendly(Class_096, Client[target].Class) || Triggered[target]>1)
 						continue;
 
 					static float pos2[3];
@@ -364,12 +364,12 @@ static void TriggerShyGuy(int client, int target, bool full)
 {
 	if(full)
 	{
-		//if(Triggered[target] == 3)
+		//if(Triggered[target] == 2)
 			//return;
 
-		Triggered[target] = 3;
+		Triggered[target] = 2;
 	}
-	else if(++Triggered[target] != 3)
+	else if(++Triggered[target] != 2)
 	{
 		return;
 	}

@@ -331,6 +331,12 @@ static void OnWeaponSwitchFrame(int userid)
 	int client = GetClientOfUserId(userid);
 	if(client && IsClientInGame(client))
 	{
+		for(int i=1; i<Ammo_MAX; i++)
+		{
+			if(i!=Ammo_Metal && !GetEntProp(client, Prop_Data, "m_iAmmo", _, i))
+				SetEntProp(client, Prop_Data, "m_iAmmo", -1, _, i);
+		}
+
 		int entity = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 		if(entity>MaxClients && IsValidEntity(entity))
 		{
