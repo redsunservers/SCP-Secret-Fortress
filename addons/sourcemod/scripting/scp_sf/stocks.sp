@@ -543,7 +543,16 @@ int GetOwnerLoop(int entity)
 	return entity;
 }
 
-void SetAmmo(int client, int weapon, int ammo=-1, int clip=-1)
+int GetAmmo(int client, int type)
+{
+	int ammo = GetEntProp(client, Prop_Data, "m_iAmmo", _, type);
+	if(ammo < 0)
+		ammo = 0;
+
+	return ammo;
+}
+
+stock void SetAmmo(int client, int weapon, int ammo=-1, int clip=-1)
 {
 	if(IsValidEntity(weapon))
 	{
@@ -556,27 +565,183 @@ void SetAmmo(int client, int weapon, int ammo=-1, int clip=-1)
 	}
 }
 
-void TF2_RefillWeaponAmmo(int client, int weapon)
+stock void TF2_RefillWeaponAmmo(int client, int weapon)
 {
 	int ammotype = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
 	if (ammotype > -1)
 		GivePlayerAmmo(client, 9999, ammotype, true);
 }
 
-void TF2_SetWeaponAmmo(int client, int weapon, int ammo)
+stock void TF2_SetWeaponAmmo(int client, int weapon, int ammo)
 {
 	int ammotype = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
 	if (ammotype > -1)
 		SetEntProp(client, Prop_Send, "m_iAmmo", ammo, _, ammotype);
 }
 
-int TF2_GetWeaponAmmo(int client, int weapon)
+stock int TF2_GetWeaponAmmo(int client, int weapon)
 {
 	int ammotype = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
 	if (ammotype > -1)
 		return GetEntProp(client, Prop_Send, "m_iAmmo", _, ammotype);
 	
 	return -1;
+}
+
+stock int TF2_GetItemSlot(int index, TFClassType class)
+{
+	int slot = TF2Econ_GetItemLoadoutSlot(index, class);
+	if(slot == 9)
+	{
+		slot = TFWeaponSlot_PDA;
+	}
+	else if(class == TFClass_Engineer)
+	{
+		switch(slot)
+		{
+			case 4: slot = TFWeaponSlot_PDA;		//Toolbox
+			case 5: slot = TFWeaponSlot_Grenade;	//Construction PDA
+			case 6: slot = TFWeaponSlot_Building;	//Destruction PDA
+		}
+	}
+	else if(class == TFClass_Spy)
+	{
+		switch(slot)
+		{
+			case 1: slot = TFWeaponSlot_Primary;	//Revolver
+			case 4: slot = TFWeaponSlot_Secondary;	//Sapper
+			case 5: slot = TFWeaponSlot_Grenade;	//Disguise Kit
+			case 6: slot = TFWeaponSlot_Building;	//Invis Watch
+		}
+	}
+	return slot;
+}
+
+stock int TF2_GetClassnameSlot(const char[] classname)
+{
+	if(StrEqual(classname, "tf_weapon_scattergun") ||
+	   StrEqual(classname, "tf_weapon_handgun_scout_primary") ||
+	   StrEqual(classname, "tf_weapon_soda_popper") ||
+	   StrEqual(classname, "tf_weapon_pep_brawler_blaster") ||
+	  !StrContains(classname, "tf_weapon_rocketlauncher") ||
+	   StrEqual(classname, "tf_weapon_particle_cannon") ||
+	   StrEqual(classname, "tf_weapon_flamethrower") ||
+	   StrEqual(classname, "tf_weapon_grenadelauncher") ||
+	   StrEqual(classname, "tf_weapon_cannon") ||
+	   StrEqual(classname, "tf_weapon_minigun") ||
+	   StrEqual(classname, "tf_weapon_shotgun_primary") ||
+	   StrEqual(classname, "tf_weapon_sentry_revenge") ||
+	   StrEqual(classname, "tf_weapon_drg_pomson") ||
+	   StrEqual(classname, "tf_weapon_shotgun_building_rescue") ||
+	   StrEqual(classname, "tf_weapon_syringegun_medic") ||
+	   StrEqual(classname, "tf_weapon_crossbow") ||
+	  !StrContains(classname, "tf_weapon_sniperrifle") ||
+	   StrEqual(classname, "tf_weapon_compound_bow") ||
+	   StrEqual(classname, "tf_weapon_revolver"))
+	{
+		return TFWeaponSlot_Primary;
+	}
+	else if(!StrContains(classname, "tf_weapon_pistol") ||
+	  !StrContains(classname, "tf_weapon_lunchbox") ||
+	  !StrContains(classname, "tf_weapon_jar") ||
+	   StrEqual(classname, "tf_weapon_handgun_scout_secondary") ||
+	   StrEqual(classname, "tf_weapon_cleaver") ||
+	  !StrContains(classname, "tf_weapon_shotgun") ||
+	   StrEqual(classname, "tf_weapon_buff_item") ||
+	   StrEqual(classname, "tf_weapon_raygun") ||
+	  !StrContains(classname, "tf_weapon_flaregun") ||
+	  !StrContains(classname, "tf_weapon_rocketpack") ||
+	  !StrContains(classname, "tf_weapon_pipebomblauncher") ||
+	   StrEqual(classname, "tf_weapon_laser_pointer") ||
+	   StrEqual(classname, "tf_weapon_mechanical_arm") ||
+	   StrEqual(classname, "tf_weapon_medigun") ||
+	   StrEqual(classname, "tf_weapon_smg") ||
+	   StrEqual(classname, "tf_weapon_charged_smg") ||
+	   StrEqual(classname, "tf_weapon_sapper"))
+	{
+		return TFWeaponSlot_Secondary;
+	}
+	else if(!StrContains(classname, "tf_weapon_pda_engineer_b", false) ||
+	  !StrContains(classname, "tf_weapon_pda_s"))
+	{
+		return TFWeaponSlot_Grenade;
+	}
+	else if(!StrContains(classname, "tf_weapon_p") ||
+	   StrEqual(classname, "tf_weapon_i"))
+	{
+		return TFWeaponSlot_Building;
+	}
+	else if(!StrContains(classname, "tf_weapon_b"))
+	{
+		return TFWeaponSlot_PDA;
+	}
+	return TFWeaponSlot_Melee;
+}
+
+stock bool TF2_GetItem(int client, int &weapon, int &pos)
+{
+	//Could be looped through client slots, but would cause issues with >1 weapons in same slot
+	static int maxWeapons;
+	if(!maxWeapons)
+		maxWeapons = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
+
+	//Loop though all weapons (non-wearables)
+	while(pos < maxWeapons)
+	{
+		weapon = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", pos);
+		pos++;
+
+		if(weapon > MaxClients)
+			return true;
+	}
+	return false;
+}
+
+stock int TF2_GetItemByClassname(int client, const char[] classname)
+{
+	int weapon, pos;
+	while(TF2_GetItem(client, weapon, pos))
+	{
+		static char buffer[36];
+		if(GetEntityClassname(weapon, buffer, sizeof(buffer)) && StrEqual(classname, buffer))
+			return weapon;
+	}
+	return INVALID_ENT_REFERENCE;
+}
+
+stock void TF2_RemoveItem(int client, int weapon)
+{
+	/*if(TF2_IsWearable(weapon))
+	{
+		TF2_RemoveWearable(client, weapon);
+		return;
+	}*/
+
+	int entity = GetEntPropEnt(weapon, Prop_Send, "m_hExtraWearable");
+	if(entity != -1)
+		TF2_RemoveWearable(client, entity);
+
+	entity = GetEntPropEnt(weapon, Prop_Send, "m_hExtraWearableViewModel");
+	if(entity != -1)
+		TF2_RemoveWearable(client, entity);
+
+	RemovePlayerItem(client, weapon);
+	RemoveEntity(weapon);
+}
+
+stock bool TF2_IsWearable(int weapon)
+{
+	static char classname[36];
+	GetEntityClassname(weapon, classname, sizeof(classname));
+	return !StrContains(classname, "tf_wearable");
+}
+
+void SetActiveWeapon(int client, int entity)
+{
+	static char buffer[36];
+	GetEntityClassname(entity, buffer, sizeof(buffer));
+	FakeClientCommand(client, "use %s", buffer);
+	SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", entity);
 }
 
 TFTeam TF2_GetTeam(int entity)
@@ -779,7 +944,7 @@ stock void ApplyStrangeHatRank(int entity, int rank)
 	}
 
 	TF2Attrib_SetByDefIndex(entity, 214, view_as<float>(points));
-	TF2Attrib_SetByDefIndex(entity, 292, view_as<float>(64));
+	TF2Attrib_SetByDefIndex(entity, 454, view_as<float>(64));
 }
 
 int SpawnWeapon(int client, char[] name, int index, int level, int qual, const char[] att, int visibleMode=2, bool preserve=false)
@@ -884,7 +1049,7 @@ int PrecacheSoundEx(const char[] sound, bool preload=false)
 	return PrecacheSound(sound, preload);
 }
 
-void ShowDeathNotice(int[] clients, int count, int attacker, int victim, int assister, int weaponid, const char[] weapon, int damagebits, int damageflags)
+stock void ShowDeathNotice(int[] clients, int count, int attacker, int victim, int assister, int weaponid, const char[] weapon, int damagebits, int damageflags)
 {
 	Event event = CreateEvent("player_death", true);
 	if(!event)
@@ -904,7 +1069,7 @@ void ShowDeathNotice(int[] clients, int count, int attacker, int victim, int ass
 	event.Cancel();
 }
 
-void ShowDestoryNotice(int[] clients, int count, int attacker, int victim, int assister, int weaponid, const char[] weapon, int type, int index, bool building)
+stock void ShowDestoryNotice(int[] clients, int count, int attacker, int victim, int assister, int weaponid, const char[] weapon, int type, int index, bool building)
 {
 	Event event = CreateEvent("object_destroyed", true);
 	if(!event)
@@ -925,7 +1090,7 @@ void ShowDestoryNotice(int[] clients, int count, int attacker, int victim, int a
 	event.Cancel();
 }
 
-void TF2_SendHudNotification(HudNotification_t type, bool forceShow=false)
+stock void TF2_SendHudNotification(HudNotification_t type, bool forceShow=false)
 {
 	BfWrite bf = UserMessageToBfWrite(StartMessageAll("HudNotify"));
 	bf.WriteByte(view_as<int>(type));
@@ -933,7 +1098,7 @@ void TF2_SendHudNotification(HudNotification_t type, bool forceShow=false)
 	EndMessage();
 }
 
-void ChangeClientClass(int client, any class)
+stock void ChangeClientClass(int client, any class)
 {
 	SetEntProp(client, Prop_Send, "m_iClass", class);
 	SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", class);
@@ -1009,6 +1174,28 @@ TFClassType TF2_GetDefaultClassFromItem(int weapon)
 	return TFClass_Unknown;
 }
 
+stock TFClassType KvGetClass(KeyValues kv, const char[] string)
+{
+	TFClassType class;
+	static char buffer[24];
+	kv.GetString(string, buffer, sizeof(buffer));
+	class = view_as<TFClassType>(StringToInt(buffer));
+	if(class == TFClass_Unknown)
+		class = TF2_GetClass(buffer);
+
+	return class;
+}
+
+stock Function KvGetFunction(KeyValues kv, const char[] string)
+{
+	static char buffer[64];
+	kv.GetString(string, buffer, sizeof(buffer));
+	if(buffer[0])
+		return GetFunctionByName(null, buffer);
+
+	return INVALID_FUNCTION;
+}
+
 public Action Timer_Stun(Handle timer, DataPack pack)
 {
 	pack.Reset();
@@ -1029,6 +1216,56 @@ public Action Timer_MyBlood(Handle timer, int userid)
 		Config_DoReaction(client, "lowhealth");
 
 	return Plugin_Continue;
+}
+
+void StartHealingTimer(int client, float delay, int health, int amount=0, bool maxhealth=true)
+{
+	DataPack pack;
+	CreateDataTimer(delay, Timer_Healing, pack, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+	pack.WriteCell(GetClientUserId(client));
+	pack.WriteCell(health);
+	pack.WriteCell(maxhealth);
+	pack.WriteCell(amount);
+}
+
+public Action Timer_Healing(Handle timer, DataPack pack)
+{
+	pack.Reset();
+	int userid = pack.ReadCell();
+	int client = GetClientOfUserId(userid);
+	if(!client || !IsClientInGame(client) || !IsPlayerAlive(client))
+		return Plugin_Stop;
+
+	int current = GetClientHealth(client);
+	int health = pack.ReadCell();
+	if(pack.ReadCell())
+	{
+		int max = 125;
+		OnGetMaxHealth(client, max);
+		if(current<=max && current+health>max)
+			health = max-current;
+	}
+
+	SetEntityHealth(client, current+health);
+
+	current = pack.ReadCell();
+	if(current < 1)
+		return Plugin_Stop;
+
+	pack.Position--;
+	pack.WriteCell(current-1, false);
+	return Plugin_Continue;
+}
+
+void ApplyHealEvent(int patient, int healer, int amount)
+{
+	Event event = CreateEvent("player_healed", true);
+
+	event.SetInt("patient", patient);
+	event.SetInt("healer", healer);
+	event.SetInt("heals", amount);
+
+	event.Fire();
 }
 
 public bool TraceRayPlayerOnly(int client, int mask, any data)

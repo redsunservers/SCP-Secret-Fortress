@@ -187,14 +187,12 @@ void SCP049_Enable()
 
 void SCP049_Create(int client)
 {
-	Client[client].Keycard = Keycard_SCP;
-	Client[client].HealthPack = 0;
-	Client[client].Radio = 0;
 	Client[client].Floor = Floor_Heavy;
 
 	Client[client].OnAnimation = SCP049_OnAnimation;
 	Client[client].OnButton = SCP049_OnButton;
 	Client[client].OnDeath = SCP049_OnDeath;
+	Client[client].OnKeycard = Items_KeycardScp;
 	Client[client].OnKill = SCP049_OnKill;
 	Client[client].OnMaxHealth = SCP049_OnMaxHealth;
 	Client[client].OnSound = SCP049_OnSound;
@@ -220,10 +218,7 @@ void SCP049_Create(int client)
 
 void SCP0492_Create(int client)
 {
-	Client[client].Keycard = Keycard_SCP;
-	Client[client].HealthPack = 0;
-	Client[client].Radio = 0;
-
+	Client[client].OnKeycard = Items_KeycardScp;
 	Client[client].OnKill = SCP0492_OnKill;
 	Client[client].OnMaxHealth = SCP0492_OnMaxHealth;
 	Client[client].OnSound = SCP0492_OnSound;
@@ -273,8 +268,11 @@ public void SCP049_OnWeaponSwitch(int client, int entity)
 	{
 		if(Revive[client].MoveAt != FAR_FUTURE)
 		{
-			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
-			GiveMelee(client, GetSteamAccountID(client), false);
+			if(Enabled)
+			{
+				TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
+				GiveMelee(client, GetSteamAccountID(client), false);
+			}
 			Revive[client].MoveAt = FAR_FUTURE;
 			Revive[client].GoneAt = GetEngineTime()+3.0;
 		}
@@ -587,9 +585,10 @@ public void SCP049_OnRevive(Event event, const char[] name, bool dontBroadcast)
 		return;
 
 	Revive[client].Index++;
-	TF2Attrib_SetByDefIndex(entity, 7, 0.7+(Revive[client].Index)*0.05);
+	float amount = float(Revive[client].Index)*0.05;
+	TF2Attrib_SetByDefIndex(entity, 7, 0.7+amount);
 	if(Revive[client].Index < 41)
-		SetEntPropFloat(entity, Prop_Send, "m_flChargeLevel", 1.0-Pow(10.0, (1.0-(0.05*Revive[client].Index)))/10.0);
+		SetEntPropFloat(entity, Prop_Send, "m_flChargeLevel", 1.0-Pow(10.0, (1.0-amount))/10.0);
 
 	if(Revive[client].Index == 10)
 		GiveAchievement(Achievement_Revive, client);

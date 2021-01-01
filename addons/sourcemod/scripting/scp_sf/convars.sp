@@ -33,6 +33,7 @@ void ConVar_Setup()
 
 	AutoExecConfig(true, "SCPSecretFortress");
 
+	ChatHook = CvarChatHook.BoolValue;
 	CvarChatHook.AddChangeHook(ConVar_OnChatHook);
 
 	if(CvarList != INVALID_HANDLE)
@@ -46,6 +47,7 @@ void ConVar_Setup()
 	ConVar_Add("mp_friendlyfire", 1.0);
 	ConVar_Add("mp_teams_unbalance_limit", 0.0);
 	ConVar_Add("mp_waitingforplayers_time", 70.0);
+	ConVar_Add("tf_bot_join_after_player", 0.0);
 	ConVar_Add("tf_dropped_weapon_lifetime", 99999.0);
 	ConVar_Add("tf_ghost_xy_speed", 400.0);
 	ConVar_Add("tf_helpme_range", -1.0);
@@ -109,6 +111,17 @@ public void ConVar_OnChatHook(ConVar cvar, const char[] oldValue, const char[] n
 		if(!cvar.BoolValue)
 		{
 			ChatHook = false;
+			for(int client=1; client<=MaxClients; client++)
+			{
+				if(!IsValidClient(client, false))
+					continue;
+
+				for(int target=1; target<=MaxClients; target++)
+				{
+					if(client==target || IsValidClient(target))
+						SetListenOverride(client, target, Listen_Default);
+				}
+			}
 			RemoveCommandListener(OnSayCommand, "say");
 			RemoveCommandListener(OnSayCommand, "say_team");
 		}

@@ -71,7 +71,7 @@ public void SCP1732_OnMaxHealth(int client, int &health)
 
 public void SCP1732_OnSpeed(int client, float &speed)
 {
-	switch(Client[client].Radio)
+	switch(Client[client].Extra2)
 	{
 		case 0:
 			speed = Speed;

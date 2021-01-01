@@ -1,6 +1,7 @@
 static Handle SDKChangeTeam;
 static Handle SDKGetBaseEntity;
 static Handle SDKGetNextThink;
+static Handle SDKEquipWearable;
 static Handle SDKTeamAddPlayerRaw;
 static Handle SDKTeamAddPlayer;
 static Handle SDKTeamRemovePlayerRaw;
@@ -34,6 +35,13 @@ void SDKCall_Setup(GameData gamedata)
 	SDKGetNextThink = EndPrepSDKCall();
 	if(!SDKGetNextThink)
 		LogError("[Gamedata] Could not find CBaseEntity::GetNextThink");
+
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CBasePlayer::EquipWearable");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	SDKEquipWearable = EndPrepSDKCall();
+	if(!SDKEquipWearable)
+		LogError("[Gamedata] Could not find CBasePlayer::EquipWearable");
 
 	StartPrepSDKCall(SDKCall_Raw);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTeam::AddPlayer");
@@ -104,12 +112,6 @@ void SDKCall_Setup(GameData gamedata)
 		LogError("[Gamedata] Could not find GetGlobalTeam");
 }
 
-void SDKCall_InitPickup(int entity, int client, int weapon)
-{
-	if(SDKInitPickup)
-		SDKCall(SDKInitPickup, entity, client, weapon);
-}
-
 void SDKCall_ChangeTeam(int entity, any team)
 {
 	if(SDKChangeTeam)
@@ -145,6 +147,26 @@ int SDKCall_GetBaseEntity(Address entity)
 		return SDKCall(SDKGetBaseEntity, entity);
 
 	return 1;
+}
+
+int SDKCall_CreateDroppedWeapon(int client, const float origin[3], const float angles[3], const char[] model, Address item)
+{
+	if(SDKCreateWeapon)
+		return SDKCall(SDKCreateWeapon, client, origin, angles, model, item);
+
+	return INVALID_ENT_REFERENCE;
+}
+
+void SDKCall_InitDroppedWeapon(int droppedWeapon, int client, int fromWeapon, bool swap, bool suicide)
+{
+	if(SDKInitWeapon)
+		SDKCall(SDKInitWeapon, droppedWeapon, client, fromWeapon, swap, suicide);
+}
+
+void SDKCall_InitPickup(int entity, int client, int weapon)
+{
+	if(SDKInitPickup)
+		SDKCall(SDKInitPickup, entity, client, weapon);
 }
 
 void SDKCall_SetSpeed(int client)
@@ -191,115 +213,23 @@ void ChangeClientTeamEx(int client, any newTeam)
 	SetEntProp(client, Prop_Send, "m_iTeamNum", newTeam);
 }
 
-int TF2_CreateDroppedWeapon(int client, int weapon, bool swap, const float origin[3], const float angles[3], KeycardEnum keycard=Keycard_None)
+int TF2_CreateHat(int client, int index, int quality=0, int level=1)
 {
-	if(!SDKCreateWeapon || !SDKInitWeapon)
-		return INVALID_ENT_REFERENCE;
+	if(!SDKEquipWearable)
+		return -1;
 
-	static char buffer[PLATFORM_MAX_PATH];
-	GetEntityNetClass(weapon, buffer, sizeof(buffer));
-	int offset = FindSendPropInfo(buffer, "m_Item");
-	if(offset < 0)
+	int wearable = CreateEntityByName("tf_wearable");
+	if(IsValidEntity(wearable))
 	{
-		LogError("Failed to find m_Item on: %s", buffer);
-		return INVALID_ENT_REFERENCE;
+		SetEntProp(wearable, Prop_Send, "m_iItemDefinitionIndex", index);
+		SetEntProp(wearable, Prop_Send, "m_bInitialized", true);
+		SetEntProp(wearable, Prop_Send, "m_iEntityQuality", quality);
+		SetEntProp(wearable, Prop_Send, "m_iEntityLevel", level);
+
+		DispatchSpawn(wearable);
+		SetEntProp(wearable, Prop_Send, "m_bValidatedAttachedEntity", true);
+
+		SDKCall(SDKEquipWearable, client, wearable);
 	}
-
-	switch(keycard)
-	{
-		case Keycard_None:
-		{
-			int index;
-			if(HasEntProp(weapon, Prop_Send, "m_iWorldModelIndex"))
-			{
-				index = GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex");
-			}
-			else
-			{
-				index = GetEntProp(weapon, Prop_Send, "m_nModelIndex");
-			}
-
-			if(index < 1)
-				return INVALID_ENT_REFERENCE;
-
-			ModelIndexToString(index, buffer, sizeof(buffer));
-		}
-		case Keycard_Radio:
-		{
-			strcopy(buffer, sizeof(buffer), RADIO_MODEL);
-		}
-		default:
-		{
-			strcopy(buffer, sizeof(buffer), KEYCARD_MODEL);
-		}
-	}
-
-	//Dropped weapon doesn't like being spawn high in air, create on ground then teleport back after DispatchSpawn
-	TR_TraceRayFilter(origin, view_as<float>({90.0, 0.0, 0.0}), MASK_SOLID, RayType_Infinite, Trace_OnlyHitWorld);
-	if(!TR_DidHit())	//Outside of map
-		return INVALID_ENT_REFERENCE;
-
-	static float originSpawn[3];
-	TR_GetEndPosition(originSpawn);
-
-	// CTFDroppedWeapon::Create deletes tf_dropped_weapon if there too many in map, pretend entity is marking for deletion so it doesnt actually get deleted
-	ArrayList droppedWeapons = new ArrayList();
-	int entity = MaxClients+1;
-	while((entity=FindEntityByClassname(entity, "tf_dropped_weapon")) > MaxClients)
-	{
-		int flags = GetEntProp(entity, Prop_Data, "m_iEFlags");
-		if(flags & EFL_KILLME)
-			continue;
-
-		SetEntProp(entity, Prop_Data, "m_iEFlags", flags|EFL_KILLME);
-		droppedWeapons.Push(entity);
-	}
-
-	//Pass client as NULL, only used for deleting existing dropped weapon which we do not want to happen
-	int droppedWeapon = SDKCall(SDKCreateWeapon, -1, originSpawn, angles, buffer, GetEntityAddress(weapon)+view_as<Address>(offset));
-
-	int length = droppedWeapons.Length;
-	for(int i; i<length; i++)
-	{
-		entity = droppedWeapons.Get(i);
-		offset = GetEntProp(entity, Prop_Data, "m_iEFlags");
-		offset = offset &= ~EFL_KILLME;
-		SetEntProp(entity, Prop_Data, "m_iEFlags", offset);
-	}
-
-	delete droppedWeapons;
-	if(droppedWeapon != INVALID_ENT_REFERENCE)
-	{
-		DispatchSpawn(droppedWeapon);
-
-		//Check if weapon is not marked for deletion after spawn, otherwise we may get bad physics model leading to a crash
-		if(GetEntProp(droppedWeapon, Prop_Data, "m_iEFlags") & EFL_KILLME)
-		{
-			LogError("Unable to create dropped weapon with model '%s'", buffer);
-			return INVALID_ENT_REFERENCE;
-		}
-
-		SDKCall(SDKInitWeapon, droppedWeapon, client, weapon, swap, false);
-
-		switch(keycard)
-		{
-			case Keycard_None:
-			{
-			}
-			case Keycard_Radio:
-			{
-				Format(buffer, sizeof(buffer), "scp_radio_%f", Client[client].Power);
-				SetEntPropString(droppedWeapon, Prop_Data, "m_iName", buffer);
-			}
-			default:
-			{
-				SetEntPropString(droppedWeapon, Prop_Data, "m_iName", KeycardNames[keycard]);
-				SetVariantInt(KeycardSkin[keycard]);
-				AcceptEntityInput(droppedWeapon, "Skin");
-			}
-		}
-
-		TeleportEntity(droppedWeapon, origin, NULL_VECTOR, NULL_VECTOR);
-	}
-	return droppedWeapon;
+	return wearable;
 }

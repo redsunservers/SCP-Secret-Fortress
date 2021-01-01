@@ -39,12 +39,11 @@ void SCP173_Enable()
 
 void SCP173_Create(int client)
 {
-	Client[client].Keycard = Keycard_SCP;
-	Client[client].HealthPack = 0;
-	Client[client].Radio = 0;
+	Client[client].Extra2 = 0;
 	Client[client].Floor = Floor_Heavy;
 
 	Client[client].OnButton = SCP173_OnButton;
+	Client[client].OnKeycard = Items_KeycardScp;
 	Client[client].OnKill = SCP173_OnKill;
 	Client[client].OnMaxHealth = SCP173_OnMaxHealth;
 	Client[client].OnSpeed = SCP173_OnSpeed;
@@ -65,7 +64,7 @@ public void SCP173_OnMaxHealth(int client, int &health)
 
 public void SCP173_OnSpeed(int client, float &speed)
 {
-	switch(Client[client].Radio)
+	switch(Client[client].Extra2)
 	{
 		case 0:
 			speed = Speed;
@@ -84,10 +83,10 @@ public void SCP173_OnKill(int client, int victim)
 public void SCP173_OnButton(int client, int button)
 {
 	float engineTime = GetEngineTime();
-	if(Client[client].Power > engineTime)
+	if(Client[client].Extra3 > engineTime)
 		return;
 
-	Client[client].Power = engineTime+0.2;
+	Client[client].Extra3 = engineTime+0.2;
 
 	static int blink;
 	static float pos1[3], ang1[3];
@@ -145,7 +144,7 @@ public void SCP173_OnButton(int client, int button)
 	}
 	else
 	{
-		blink = GetRandomInt(12, 16);
+		blink = GetRandomInt(8, 12);
 	}
 
 	if(status == 1)
@@ -180,9 +179,9 @@ public void SCP173_OnButton(int client, int button)
 		}
 	}
 
-	if(Client[client].Radio != status)
+	if(Client[client].Extra2 != status)
 	{
-		Client[client].Radio = status;
+		Client[client].Extra2 = status;
 		SDKCall_SetSpeed(client);
 	}
 }

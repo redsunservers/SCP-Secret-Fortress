@@ -5,111 +5,90 @@
 	"hint_1"
 	{
 		"en"		"As a ghost you can call for medic\nto teleport to alive players"
-		"ru"		"Будучи призраком, вы можете позвать Медика,\n чтобы телепортироваться к живым игрокам."
 	}
 	"hint_2"
 	{
 		"en"		"SCP-939-89 and SCP-939-53 can only see\nplayers if they moved or attacked recently.\n \nTry standing still if you haven't been spotted."
-		"ru"		"SCP-939-89 и SCP-939-53 могут видеть только тех,\n кто недавно двигались.\n \nПопробуйте стоять неподвижно, если вас еще не заметили."
 	}
 	"hint_3"
 	{
 		"en"		"SCP-079 can help D-Class escape by opening\neither Gate A or Gate B, speak with it."
-		"ru"		"SCP-079 может помочь D классу сбежать,\nоткрывая Ворота A или Ворота B. Поговорите с ним."
 	}
 	"hint_4"
 	{
 		"en"		"Facility Manager and O5 keycards allows\nyou to escape without help from MTF or Chaos."
-		"ru"		"Карты 'Менеджер Комплекса' и '05' позволяют\nсбежать без помощи МОГ или Хаоса."
 	}
 	"hint_5"
 	{
 		"en"		"Guards and MTF can use there melees to\ndisarm D-Class or Chaos instead of harming."
-		"ru"		"Охранники и МОГ могут ипользовать ближний бой,\nчтобы обезоружить D-класс или Хаос."
 	}
 	"hint_6"
 	{
 		"en"		"SCP-173 can only move while nobody is\nlooking. It can move if someone blinks."
-		"ru"		"SCP-173 может двигаться, только когда\nникто не смотрит. Также двигается при моргании."
 	}
 	"hint_7"
 	{
 		"en"		"Most SCPs can kill someone in\none blow, disregarding HP."
-		"ru"		"Большинство SCP могут убить за один удар,\n вне зависимости от ОЗ."
 	}
 	"hint_8"
 	{
 		"en"		"Crouching helps you stay silent towards others."
-		"ru"		"Приседание помогает оставаться неуслышанным другими."
 	}
 	"hint_9"
 	{
 		"en"		"Every 3 minutes either MTF or Chaos will spawn."
-		"ru"		"Каждые 3 минуты появляется МОГ или Хаос."
 	}
 	"hint_10"
 	{
 		"en"		"MTF can save Scientists by bringing them\ntowards one of the gates and letting them through.\n \nOnly Lieutenants and Commanders have access though."
-		"ru"		"МОГ может спасти Учёных путем сопровождения их\nк Воротам и прохода последних через них.\n \nДоступ есть только у Лейтенантов и Командиров."
 	}
 	"hint_11"
 	{
 		"en"		"Chaos can save D-Class by bringing them\ntowards one of the gates and letting them through."
-		"ru"		"Хаос может спасти D-класс путем сопровождения\n к Воротам и прохода последних через них."
 	}
 	"hint_12"
 	{
 		"en"		"Died? Don't worry, you'll respawn soon."
-		"ru"		"Погибли? Ничего, вы скоро возродитесь."
 	}
 	"hint_13"
 	{
 		"en"		"Iron Bomber can blind players but also yourself."
-		"ru"		"Железный Бомбардир может слепить как врагов, так и вас."
 	}
 	"hint_14"
 	{
 		"en"		"This is a work-in-progress gamemode.\nThere may be bugs and glitches.\nBut playing here helps the development!\n \nThanks for playing here and enjoy!"
-		"ru"		"Этот режим все еще в разработке.\nТут могут быть баги.\nИгра здесь помогает разработке!\n \nСпасибо за то, что играете здесь!"
 	}
 	"hint_15"
 	{
 		"en"		"There may be useless hints."
-		"ru"		"Некоторые подсказки бесполезны."
 	}
 	"hint_16"
 	{
 		"en"		"All weapons can headshot except against SCPs."
-		"ru"		"Любое оружие критует в голову, но только не против SCP."
 	}
 	"hint_17"
 	{
-		"en"		"You can use ATTACK1, ATTACK2, ATTACK3, or\nCall for Medic to pick up weapons & keycards."
-		"ru"		"Используйте ОСН. АТАКУ, ДОП. АТАКУ, СПЕЦ. АТАКУ\nили позовите Медика, чтобы подобрать предмет."
+		"en"		"You can use ATTACK1, ATTACK2, or Call for Medic\nto pick up weapons & keycards."
 	}
 	"hint_18"
 	{
-		"en"		"To use a health kit, use ATTACK2 to drop the\nkit and stand over it until it's used."
-		"ru"		"Нажмите ДОП. АТАКУ,\nчтобы сбросить Аптечку на пол. Стойте на ней, чтобы использовать."
+		"en"		"To use a Health Kit, use ATTACK2 to drop the\nkit and stand over it until it's used."
 	}
 	"hint_19"
 	{
-		"en"		"SCP-939-89, SCP-939-53, and SCP-049 are able to talk to humans."
-		"ru"		"SCP-939-89, SCP-939-53 и SCP-049 могут говорить с другими игроками."
+		"en"		"SCP-939-89 and SCP-939-53 are able to talk to humans."
 	}
 	"hint_20"
 	{
 		"en"		"SCPs can talk to each other from any distance."
-		"ru"		"SCP могут говорить на любом расстоянии."
 	}
 	"hint_21"
 	{
 		"en"		"SCP-3008-2 will only attack if attacked or during closing hours."
-		"ru"		"SCP-3008-2 будет атаковать либо ночью, либо если оно атаковано."
 	}
 	"hint_22"
 	{
-		"en"		"Hold JUMP to sprint around.\nYour sprint does need to recharge."
+		"en"		"Hold RELOAD to view description about the item your holding."
 	}
 
 	// SCP-3008-1 Phrases
@@ -117,43 +96,35 @@
 	"class_dboi_ikea"
 	{
 		"en"		"SCP-3008-1 Victim"
-		"ru"		"Жертва SCP-3008-1"
 	}
 	"desc_dboi_ikea"
 	{
 		"en"		"Escape from SCP-3008-1.\nCooperate with the MTF.\nAvoid other teams."
-		"ru"		"Сбегите из SCP-3008-1.\nСкооперируйтесь с МОГ.\nИзбегайте других команд."
 	}
 	"desc_mtf1_ikea"
 	{
 		"en"		"Help Survivors escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
-		"ru"		"Помогите Выжившим спастись.\nНейтрализуйте другие объекты.\nПодчиняйтесь старшим по званию."
 	}
 	"desc_mtf2_ikea"
 	{
 		"en"		"Help Survivors escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your superiors."
-		"ru"		"Помогите Выжившим спастись.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным.\nПодчиняйтесь старшим по званию."
 	}
 	"class_mtfs_ikea"
 	{
 		"en"		"Nine-Tailed Fox Survivor"
-		"ru"		"Выживший Отряда МОГ"
 	}
 	"desc_mtfs_ikea"
 	{
 		"en"		"Help Survivors escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
-		"ru"		"Помогите Выжившим спастись.\nНейтрализуйте другие объекты.\nПодчиняйтесь старшим по званию."
 	}
 	"desc_mtf3_ikea"
 	{
 		"en"		"Help Survivors escape.\nNeutralize other subjects.\nInstruct your soldiers."
-		"ru"		"Помогите Выжившим спастись.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным."
 	}
 	"end_screen_ikea"
 	{
 		"#format"	"{1:t},{2:d},{3:d}"
 		"en"		"{1}\n \nSurvivors Escaped: {2} / {3}"
-		"ru"		"{1}\n \nВыживших Сбежало: {2} / {3}"
 	}
 
 	// It Steals Phrases
@@ -201,12 +172,10 @@
 	"class_spec"
 	{
 		"en"		"Spectator"
-		"ru"		"Наблюдатель"
 	}
 	"desc_spec"
 	{
 		"en"		"You will respawn soon."
-		"ru"		"Вы скоро возродитесь."
 	}
 	"train_spec"
 	{
@@ -215,54 +184,46 @@
 	"class_dboi"
 	{
 		"en"		"Class-D Personnel"
-		"ru"		"Персонал D-класса"
 	}
 	"desc_dboi"
 	{
 		"en"		"Escape from the facility.\nCooperate with the Chaos Insurgency.\nAvoid other teams."
-		"ru"		"Сбегите из Комплекса.\nСкооперируйтесь с Повстанцами Хаоса.\nИзбегайте других команд."
 	}
 	"train_dboi"
 	{
-		"en"		"You need to escape the facility.\nPress ATTACK, ATTACK2, ATTACK3, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll either kill you or capture you."
+		"en"		"You need to escape the facility.\nPress ATTACK, ATTACK2, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll either kill you or capture you."
 	}
 	"class_chaos"
 	{
 		"en"		"Chaos Insurgency Agent"
-		"ru"		"Повстанец Хаоса"
 	}
 	"desc_chaos"
 	{
 		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects."
-		"ru"		"Помогите D-классу сбежать.\nНейтрализуйте другие объекты."
 	}
 	"train_chaos"
 	{
-		"en"		"You need to free Class-D Personnel from the facility.\nKill other teams to help Class-D Personnel escape.\nPress ATTACK3, USE, or use VOICEMENU to interact with buttons and items."
+		"en"		"You need to free Class-D Personnel from the facility.\nKill other teams to help Class-D Personnel escape.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_sci"
 	{
 		"en"		"Scientist"
-		"ru"		"Учёный"
 	}
 	"desc_sci"
 	{
 		"en"		"Escape from the facility.\nCooperate with the MTF.\nAvoid other teams."
-		"ru"		"Сбегите из Комплекса.\nСкооперируйтесь с МОГ.\nИзбегайте других команд."
 	}
 	"train_sci"
 	{
-		"en"		"You need to escape the facility.\nPress ATTACK, ATTACK3, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll kill you."
+		"en"		"You need to escape the facility.\nPress ATTACK, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll kill you."
 	}
 	"class_guard"
 	{
 		"en"		"Facility Guard"
-		"ru"		"Охранник Комплекса"
 	}
 	"desc_guard"
 	{
 		"en"		"Help Scientists escape.\nCooperate with MTF.\nNeutralize other subjects."
-		"ru"		"Помогите Учёным сбежать.\nСкооперируйтесь с МОГ.\nНейтрализуйте другие объекты."
 	}
 	"train_guard"
 	{
@@ -271,58 +232,50 @@
 	"class_mtf1"
 	{
 		"en"		"Nine-Tailed Fox Cadet"
-		"ru"		"Кадет Отряда МОГ"
 	}
 	"desc_mtf1"
 	{
 		"en"		"Help Scientists escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
-		"ru"		"Помогите Учёным сбежать.\nНейтрализуйте другие объекты.\nПодчиняйтесь старшим по званию."
 	}
 	"train_mtf1"
 	{
-		"en"		"You need to free Scientists from the facility.\nStay with your lieutenants and commander.\nKeep in touch using the radio.\nPress USE or use VOICEMENU to interact with buttons and items."
+		"en"		"You need to free Scientists from the facility.\nStay with your lieutenants and commander.\nKeep in touch using the radio.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_mtf2"
 	{
 		"en"		"Nine-Tailed Fox Lieutenant"
-		"ru"		"Лейтенант Отряда МОГ"
 	}
 	"desc_mtf2"
 	{
 		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your superiors."
-		"ru"		"Помогите Учёным сбежать.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным.\nПодчиняйтесь старшим по званию."
 	}
 	"train_mtf2"
 	{
-		"en"		"You need to free Scientists from the facility.\nSupport your group of cadets, follow your commander.\nUse your radio too.\nPress USE or use VOICEMENU to interact with buttons and items."
+		"en"		"You need to free Scientists from the facility.\nSupport your group of cadets, follow your commander.\nUse your radio too.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_mtfs"
 	{
 		"en"		"Nine-Tailed Fox Scientist"
-		"ru"		"Учёный Отряда МОГ"
 	}
 	"desc_mtfs"
 	{
 		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your commanders."
-		"ru"		"Помогите Учёным сбежать.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным.\nПодчиняйтесь командиру."
 	}
 	"train_mtfs"
 	{
-		"en"		"You escaped! Now free your other Scientists or prevent non-disarmed Class-D Personnel from escaping.\nTake down other SCPs too.\nPress USE or use VOICEMENU to interact with buttons and items."
+		"en"		"You escaped! Now free your other Scientists or prevent non-disarmed Class-D Personnel from escaping.\nTake down other SCPs too.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_mtf3"
 	{
 		"en"		"Nine-Tailed Fox Commander"
-		"ru"		"Командир Отряда МОГ"
 	}
 	"desc_mtf3"
 	{
 		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers."
-		"ru"		"Помогите Учёным сбежать.\nНейтрализуйте другие объекты.\nОтдавайте приказы подчиненным."
 	}
 	"train_mtf3"
 	{
-		"en"		"You need to free Scientists from the facility.\nCommand your troops down the facility.\nUse your radio to help order your troops around.\nPress USE or use VOICEMENU to interact with buttons and items."
+		"en"		"You need to free Scientists from the facility.\nCommand your troops down the facility.\nUse your radio to help order your troops around.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_mtfe"
 	{
@@ -331,11 +284,10 @@
 	"desc_mtfe"
 	{
 		"en"		"Help Scientists escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
-		"ru"		"Помогите Учёным сбежать.\nНейтрализуйте другие объекты.\nПодчиняйтесь старшим по званию."
 	}
 	"train_mtfe"
 	{
-		"en"		"You need to free Scientists from the facility.\nYou can build sentries to fight off SCPs.\nYou can also build dispensers for allies.\nPress USE or use VOICEMENU to interact with buttons and items."
+		"en"		"You need to free Scientists from the facility.\nYou can build sentries to fight off SCPs.\nYou can also build dispensers for allies.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_035"
 	{
@@ -344,7 +296,6 @@
 	"desc_035"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs."
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP."
 	}
 	"train_035"
 	{
@@ -357,7 +308,6 @@
 	"desc_049"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nInteract with a recently-dead human to revive them as an ally."
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nИспользуйте Меди-Пушку на недавно убитых вами."
 	}
 	"train_049"
 	{
@@ -370,7 +320,6 @@
 	"desc_0492"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nFollow orders from SCP-049"
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nПодчиняйтесь SCP-049."
 	}
 	"train_0492"
 	{
@@ -395,7 +344,6 @@
 	"desc_079"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs."
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP."
 	}
 	"train_079"
 	{
@@ -408,7 +356,6 @@
 	"desc_096"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou become enraged when looked at."
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы наполняетесь яростью, когда на вас смотрят."
 	}
 	"train_096"
 	{
@@ -421,7 +368,6 @@
 	"desc_106"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nATTACK2 to create a portal.\nATTACK3 to teleport to that portal."
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nДОП.АТАКА-создать портал.\nСПЕЦ.АТАКА-телепорт."
 	}
 	"train_106"
 	{
@@ -434,7 +380,6 @@
 	"desc_173"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can only move while no one is looking."
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы можете двигаться, пока никто не смотрит."
 	}
 	"train_173"
 	{
@@ -447,7 +392,6 @@
 	"desc_1732"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can only move while no one is looking."
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы можете двигаться, пока никто не смотрит."
 	}
 	"train_1732"
 	{
@@ -460,7 +404,6 @@
 	"desc_527"
 	{
 		"en"		"Escape from the facility.\nCooperate with other SCPs."
-		"ru"		"Сбегите из Комплекса.\nСкооперируйтесь с другими SCP."
 	}
 	"train_527"
 	{
@@ -473,7 +416,6 @@
 	"desc_939"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can talk to other humans."
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы можете говорить с людьми."
 	}
 	"train_939"
 	{
@@ -486,7 +428,6 @@
 	"desc_9392"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can talk to other humans."
-		"ru"		"Убейте всех.\nПредотвратите побег.\nСкооперируйтесь с другими SCP.\nВы можете говорить с людьми."
 	}
 	"train_9392"
 	{
@@ -517,8 +458,687 @@
 		"en"		"Look around for players.\nMore times you get hit by a player, the more rage you gain.\nAfter a certain amount of times, you'll have enough."
 	}
 
-	// Keycard Phrases
+	// Weapon Phrases
 
+	"weapon_0"
+	{
+		"en"		"Unknown"
+	}
+	"weapon_5"
+	{
+		"en"		"None"
+	}
+	"info_5"
+	{
+		"en"		"It's your fists, they don't do much."
+	}
+	"weapon_192"
+	{
+		"en"		"Fireaxe"
+	}
+	"info_192"
+	{
+		"en"		"High damage, slow fire rate."
+	}
+	"weapon_153"
+	{
+		"en"		"Sledge Hammer"
+	}
+	"info_152"
+	{
+		"en"		"Great for destorying objects and buildings."
+	}
+	"weapon_30758"
+	{
+		"en"		"Machete"
+	}
+	"info_30758"
+	{
+		"en"		"Able to backstab players."
+	}
+	"weapon_325"
+	{
+		"en"		"Wooden Club"
+	}
+	"info_325"
+	{
+		"en"		"You won't hurt yourself if you miss though."
+	}
+	"weapon_1013"
+	{
+		"en"		"Meat"
+	}
+	"info_1013"
+	{
+		"en"		"Hope you like increased random crit chance."
+	}
+	"weapon_197"
+	{
+		"en"		"Wrench"
+	}
+	"info_197"
+	{
+		"en"		"Hit a building to repair it or build it up."
+	}
+	"weapon_264"
+	{
+		"en"		"Frying Pan"
+	}
+	"info_264"
+	{
+		"en"		"They'll hear it coming."
+	}
+	"weapon_954"
+	{
+		"en"		"Disarmer"
+	}
+	"info_954"
+	{
+		"en"		"Able to disarm players not wielding a weapon, bring disarmed\nplayers to the escape zone to convert them into your team."
+	}
+	"weapon_773"
+	{
+		"en"		"COM-15 Sidearm"
+	}
+	"info_773"
+	{
+		"en"		"Your handy pocket pistol."
+	}
+	"weapon_209"
+	{
+		"en"		"USP"
+	}
+	"info_209"
+	{
+		"en"		"Slower but holds more bullets and deals more damage then your average pistol."
+	}
+	"weapon_751"
+	{
+		"en"		"MP7"
+	}
+	"info_751"
+	{
+		"en"		"Weaker then the bunch but saves you some bullets when your on a budget."
+	}
+	"weapon_1150"
+	{
+		"en"		"Project 90"
+	}
+	"info_1150"
+	{
+		"en"		"Your personal SMG when you need it in a punch."
+	}
+	"weapon_425"
+	{
+		"en"		"MTF-E11-SR"
+	}
+	"info_425"
+	{
+		"en"		"The rifle when you want to get rid of some nasty [REDACTED]."
+	}
+	"weapon_415"
+	{
+		"en"		"Logicer"
+	}
+	"info_415"
+	{
+		"en"		"Heavy gun to deal high amounts of damage but less effective against SCPs."
+	}
+	"weapon_1151"
+	{
+		"en"		"Flash Grenade"
+	}
+	"info_1151"
+	{
+		"en"		"No damage but blinds players when it explodes."
+	}
+	"weapon_308"
+	{
+		"en"		"Fragmentation Grenade"
+	}
+	"info_308"
+	{
+		"en"		"High damage when it does explode."
+	}
+	"weapon_199"
+	{
+		"en"		"M97"
+	}
+	"info_199"
+	{
+		"en"		"Costs 20 bullets to fire 20 bullets, best melee weapon in the game."
+	}
+	"weapon_594"
+	{
+		"en"		"Micro H.I.D."
+	}
+	"info_594"
+	{
+		"en"		"Hold to charge up and after 6 seconds, release to fire high-damage beam.\nThe best tool to deal with SCPs and well worth pulling it off."
+	}
+	"weapon_25"
+	{
+		"en"		"Construction PDA"
+	}
+	"info_25"
+	{
+		"en"		"Anti-SCP Sentries, Dispensers, Two-Way Teleporters."
+	}
+	"weapon_26"
+	{
+		"en"		"Destruction PDA"
+	}
+	"info_26"
+	{
+		"en"		"You can't pick up buildings but you can use this."
+	}
+	"weapon_28"
+	{
+		"en"		"Building"
+	}
+	"info_28"
+	{
+		"en"		"%%+attack%% already"
+	}
+	"weapon_30001"
+	{
+		"en"		"Janitor Keycard"
+	}
+	"info_30001"
+	{
+		"en"		"Allows you to get into SCP-914"
+	}
+	"weapon_30002"
+	{
+		"en"		"Scientist Keycard"
+	}
+	"info_30002"
+	{
+		"en"		"Allows you to get into SCP-914"
+	}
+	"weapon_30003"
+	{
+		"en"		"Zone Manager Keycard"
+	}
+	"info_30003"
+	{
+		"en"		"Allows you to get into SCP-914 and checkpoint elevators"
+	}
+	"weapon_30004"
+	{
+		"en"		"Research Supervisor Keycard"
+	}
+	"info_30004"
+	{
+		"en"		"Allows you to get into SCP-914 and checkpoint elevators"
+	}
+	"weapon_30005"
+	{
+		"en"		"Facility Guard Keycard"
+	}
+	"info_30005"
+	{
+		"en"		"Allows you to get into SCP-914, checkpoint elevators, and the armory"
+	}
+	"weapon_30006"
+	{
+		"en"		"MTF Cadet Keycard"
+	}
+	"info_30006"
+	{
+		"en"		"Allows you to get into SCP-914, checkpoint elevators, and the armory"
+	}
+	"weapon_30007"
+	{
+		"en"		"MTF Lieutenant Keycard"
+	}
+	"info_30007"
+	{
+		"en"		"Go anywhere except SCP-106, Comms, Warhead, and the Micro H.I.D."
+	}
+	"weapon_30008"
+	{
+		"en"		"MTF Commander Keycard"
+	}
+	"info_30008"
+	{
+		"en"		"Go anywhere except SCP-106, Comms, and Warhead"
+	}
+	"weapon_30009"
+	{
+		"en"		"Containment Engineer Keycard"
+	}
+	"info_30009"
+	{
+		"en"		"Go anywhere except the gates and armory."
+	}
+	"weapon_30010"
+	{
+		"en"		"Facility Manager Keycard"
+	}
+	"info_30010"
+	{
+		"en"		"Go anywhere except the armory."
+	}
+	"weapon_30011"
+	{
+		"en"		"Chaos Insurgency Access Device"
+	}
+	"info_30011"
+	{
+		"en"		"Go anywhere except the SCP-106 room."
+	}
+	"weapon_30012"
+	{
+		"en"		"O5 Keycard"
+	}
+	"info_30012"
+	{
+		"en"		"Full access to every room!"
+	}
+	"weapon_30013"
+	{
+		"en"		"Pain Killer"
+	}
+	"info_30013"
+	{
+		"en"		"%%+attack%% to use and gain health regeneration."
+	}
+	"weapon_30014"
+	{
+		"en"		"Health Kit"
+	}
+	"info_30014"
+	{
+		"en"		"%%+attack%% to drop and stand over it to gain back half your max health."
+	}
+	"weapon_30015"
+	{
+		"en"		"Adrenaline"
+	}
+	"info_30015"
+	{
+		"en"		"%%+attack%% to use and gain unlimited sprint and health regeneration."
+	}
+	"weapon_30016"
+	{
+		"en"		"Radio"
+	}
+	"info_30016"
+	{
+		"en"		"This allows you to speak to others at a longer range.\nPressing will toggle it's range and power consumption.\nYou only need to pull it out when you need to change the range."
+	}
+	"weapon_30017"
+	{
+		"en"		"SCP-500"
+	}
+	"info_30017"
+	{
+		"en"		"%%+attack%% to use restore health and gain health regneration."
+	}
+
+
+	// Team Phrases
+
+	"team_0"
+	{
+		"en"		"Stalemate"
+	}
+	"team_1"
+	{
+		"en"		"Class-D Won"
+	}
+	"team_2"
+	{
+		"en"		"MTF Won"
+	}
+	"team_3"
+	{
+		"en"		"SCPs Won"
+	}
+
+	// SCP-914 Phrases
+
+	"914_very"
+	{
+		"en"		"Very Fine"
+	}
+	"914_fine"
+	{
+		"en"		"Fine"
+	}
+	"914_onetoone"
+	{
+		"en"		"1:1"
+	}
+	"914_coarse"
+	{
+		"en"		"Coarse"
+	}
+	"914_rough"
+	{
+		"en"		"Rough"
+	}
+	"in_cooldown"
+	{
+		"en"		"In Cooldown..."
+	}
+	"914_noeffect"
+	{
+		"en"		"Nothing happened..."
+	}
+	"914_delet"
+	{
+		"en"		"The item vanished!"
+	}
+	"914_gained"
+	{
+		"#format"	"{1:t}"
+		"en"		"It transformed into {red}{1}"
+	}
+
+
+	// Menu Phrases
+
+	"menu_helpclass"
+	{
+		"en"		"Class Info"
+	}
+	"menu_preference"
+	{
+		"en"		"SCP Preference"
+	}
+	"menu_colorblind"
+	{
+		"en"		"Color Blind Mode"
+	}
+	"Red"
+	{
+		"en"		"Red"
+	}
+	"Green"
+	{
+		"en"		"Green"
+	}
+	"Blue"
+	{
+		"en"		"Blue"
+	}
+	"Reset"
+	{
+		"en"		"Reset"
+	}
+	"Off"
+	{
+		"en"		"Off"
+	}
+
+
+	// Other Phrases
+
+	"you_are"	// HUD
+	{
+		"#format"	"{1:t}"
+		"en"		"You are {1}"
+	}
+	"scp_killed"	// Chat
+	{
+		"#format"	"{1:s},{2:t},{3:s},{4:t}"
+		"en"		"{{1}}{2} {default}has been contained by {{3}}{4}"
+	}
+	"scp_killed_duo"	// Chat
+	{
+		"#format"	"{1:s},{2:t},{3:s},{4:t},{5:s},{6:t}"
+		"en"		"{{1}}{2} {default}has been contained by {{3}}{4} {default}and {{5}}{6}"
+	}
+	"mtf_spawn"	// Chat
+	{
+		"en"		"{mediumblue}Mobile Task Force Unit, Epsilon-11{default} has entered the facility."
+	}
+	"mtf_spawn_scp"	// Chat
+	{
+		"#format"	"{1:d}"
+		"en"		"Awaiting re-containment of: {red}{1} SCP subject(s){default}."
+	}
+	"mtf_spawn_scp_over"	// Chat
+	{
+		"en"		"Awaiting re-containment of: {red}An uncountable number of SCP subjects{default}."
+	}
+	"time_remaining"	// Game
+	{
+		"#format"	"{1:d},{2:s}"
+		"en"		"Time Remaining: {1}:{2}"
+	}
+	"inv_full"	// Game
+	{
+		"en"		"Inventory is Full"
+	}
+	"type_full"	// Game
+	{
+		"en"		"Too Many Similar Items"
+	}
+	"disarmed_by"	// HUD
+	{
+		"#format"	"{1:N}"
+		"en"		"You are disarmed by {1}"
+	}
+	"disarmed"	// Game
+	{
+		"en"		"You have been disarmed!"
+	}
+	"radar"	// HUD
+	{
+		"en"		"Radar Ready [RELOAD]"
+	}
+	"sprint"	// HUD
+	{
+		"#format"	"{1:s}"
+		"en"		"Sprint: {1}"
+	}
+	"switch"	// HUD
+	{
+		"en"		"ATTACK3 to switch items"
+	}
+	"help_switch"	// Hint
+	{
+		"en"		"%%+attack3%% Press to switch between items"
+	}
+	"help_sprint"	// Hint
+	{
+		"en"		"%%+jump%% Press and hold to use sprint"
+	}
+	"end_screen"	// HUD
+	{
+		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d}"
+		"en"		"{1}\n \nClass-D Escaped: {2} / {3}\nScientist(s) Survived: {4} / {5}\nTerminated SCPs: {6} / {7}"
+	}
+	"tesla_gate"	// Chat
+	{
+		"en"		"Tesla Gate"
+	}
+	"femur_breaker"	// Chat
+	{
+		"en"		"Femur Breaker"
+	}
+	"alpha_warhead"	// Chat
+	{
+		"en"		"Alpha Warhead"
+	}
+	"redacted"	// Chat, Hint
+	{
+		"en"		"[REDACTED]"
+	}
+	"data_expunged"	// Hint
+	{
+		"en"		"[DATA EXPUNGED]"
+	}
+	"106_portal"	// Annotation
+	{
+		"en"		"Teleport Portal"
+	}
+	"106_create"	// Hint
+	{
+		"en"		"Portal created, use ATTACK3 to teleport"
+	}
+	"106_create_deny"	// Hint
+	{
+		"en"		"Can't create a portal now"
+	}
+	"106_create_none"	// Hint
+	{
+		"en"		"No portal created, use ATTACK2 to create one"
+	}
+	"106_tele_deny"	// Hint
+	{
+		"en"		"You can not teleport now"
+	}
+	"download_error"	// Chat
+	{
+		"#format"	"{1:s}"
+		"en"		"{gray}We can't check if you have {1} enabled. If you see errors, make sure you allow all custom content in your settings and rejoin."
+	}
+	"download_cvar"	// Chat
+	{
+		"#format"	"{1:s},{2:s}"
+		"en"		"{gray}{1} is disabled. You won't see any custom content. If you want to enable, set {2} to 1"
+	}
+	"download_filter"	// Chat
+	{
+		"#format"	"{1:s}"
+		"en"		"{gray}cl_downloadfilter is set to {1}. You won't see any custom content. If you want to enable, set cl_downloadfilter to all"
+	}
+	"download_filter_sound"	// Chat
+	{
+		"en"		"{gray}cl_downloadfilter is set to nosounds. You won't hear any music. If you want to enable, set cl_downloadfilter to all"
+	}
+
+	// Unused
+
+	"welcome"
+	{
+		"en"		"Welcome to SCP: Secret Fortress!"
+	}
+	"train_mtf_title"
+	{
+		"en"		"Gear Up, Boys!"
+	}
+	"train_mtf_msg"
+	{
+		"en"		"Nine-Tailed Fox has spawned. They will save Scientists and work with Guards. They will kill SCPs and try to disarm Class-D Personnel. They have radios to talk to each other and have different ranks."
+	}
+	"train_chaos_title"
+	{
+		"en"		"CHAAOOOOS!"
+	}
+	"train_chaos_msg"
+	{
+		"en"		"Chaos Insurgency has spawn. They will save Class-D Personnel. They will kill Scientists and Guards. They all have the same weapon and spawn with a health kit."
+	}
+	"camera"	// HUD
+	{
+		"#format"	"{1:d}"
+		"en"		"Camera: {1}%% [ATTACK2]"
+		"ru"		"Camera: {1}%% [ДОП. АТАКА]"
+	}
+	"sprint_ready"	// HUD
+	{
+		"#format"	"{1:d}"
+		"en"		"Sprint: {1}%% [JUMP]"
+		"ru"		"Sprint: {1}%% [JUMP]"
+	}
+	"sprint_not"	// HUD
+	{
+		"#format"	"{1:d}"
+		"en"		"Sprint: {1}%%"
+		"ru"		"Sprint: {1}%%"
+	}
+	"now_playing"	// Chat
+	{
+		"#format"	"{1:s}"
+		"en"		"Now Playing: {1}"
+		"ru"		"Сейчас играет: {1}"
+	}
+	"health_kit"	// HUD
+	{
+		"en"		"Health Kit Ready [ATTACK2]"
+		"ru"		"Аптечка готова [ДОП. АТАКА]"
+	}
+	"pain_killers"	// HUD
+	{
+		"en"		"Pain Killers Ready [ATTACK2]"
+		"ru"		"Обезболивающее готово [ДОП. АТАКА]"
+	}
+	"scp_500"	// HUD
+	{
+		"en"		"SCP-500 [ATTACK2]"
+		"ru"		"SCP-500 [ДОП. АТАКА]"
+	}
+	"keycard"	// HUD
+	{
+		"#format"	"{1:t}"
+		"en"		"Keycard: {1}"
+		"ru"		"Ключ-Карта: {1}"
+	}
+	"radio"	// HUD
+	{
+		"#format"	"{1:t},{2:d}"
+		"en"		"Radio: {1} ({2}%%) [ATTACK3]"
+		"ru"		"Радио: {1} ({2}%%) [СПЕЦ. АТАКА]"
+	}
+	"keycard_rough"
+	{
+		"en"		"Keycard | Rough"
+		"ru"		"Карта | О. Грубо"
+	}
+	"keycard_coarse"
+	{
+		"en"		"Keycard | Coarse"
+		"ru"		"Карта | Грубо"
+	}
+	"keycard_even"
+	{
+		"en"		"Keycard | 1:1"
+		"ru"		"Карта | 1:1"
+	}
+	"keycard_fine"
+	{
+		"en"		"Keycard | Fine"
+		"ru"		"Карта | Тонко"
+	}
+	"keycard_very"
+	{
+		"en"		"Keycard | Very Fine"
+		"ru"		"Карта | О. Тонко"
+	}
+	"weapon_rough"
+	{
+		"en"		"Weapon | Rough"
+		"ru"		"Оружие | О. Грубо"
+	}
+	"weapon_coarse"
+	{
+		"en"		"Weapon | Coarse"
+		"ru"		"Оружие | Грубо"
+	}
+	"weapon_even"
+	{
+		"en"		"Weapon | 1:1"
+		"ru"		"Оружие | 1:1"
+	}
+	"weapon_fine"
+	{
+		"en"		"Weapon | Fine"
+		"ru"		"Оружие | Тонко"
+	}
+	"weapon_very"
+	{
+		"en"		"Weapon | Very Fine"
+		"ru"		"Оружие | О. Тонко"
+	}
+	"scp_914"
+	{
+		"en"		"SCP-914\n "
+	}
 	"keycard_0"
 	{
 		"en"		"None"
@@ -583,9 +1203,6 @@
 	{
 		"en"		"O5"
 	}
-
-	// Radio Phrases
-
 	"radio_0"
 	{
 		"en"		"--"
@@ -609,316 +1226,5 @@
 	{
 		"en"		"UR"
 		"ru"		"УД"
-	}
-
-	// Team Phrases
-
-	"team_0"
-	{
-		"en"		"Stalemate"
-		"ru"		"Ничья"
-	}
-	"team_1"
-	{
-		"en"		"Class-D Won"
-		"ru"		"D-класс победили"
-	}
-	"team_2"
-	{
-		"en"		"MTF Won"
-		"ru"		"МОГ победили"
-	}
-	"team_3"
-	{
-		"en"		"SCPs Won"
-		"ru"		"SCP победили"
-	}
-
-	// SCP-914 Phrases
-
-	"scp_914"
-	{
-		"en"		"SCP-914\n "
-	}
-	"in_cooldown"
-	{
-		"en"		"In Cooldown..."
-		"ru"		"Не так быстро..."
-	}
-	"keycard_rough"
-	{
-		"en"		"Keycard | Rough"
-		"ru"		"Карта | О. Грубо"
-	}
-	"keycard_coarse"
-	{
-		"en"		"Keycard | Coarse"
-		"ru"		"Карта | Грубо"
-	}
-	"keycard_even"
-	{
-		"en"		"Keycard | 1:1"
-		"ru"		"Карта | 1:1"
-	}
-	"keycard_fine"
-	{
-		"en"		"Keycard | Fine"
-		"ru"		"Карта | Тонко"
-	}
-	"keycard_very"
-	{
-		"en"		"Keycard | Very Fine"
-		"ru"		"Карта | О. Тонко"
-	}
-	"weapon_rough"
-	{
-		"en"		"Weapon | Rough"
-		"ru"		"Оружие | О. Грубо"
-	}
-	"weapon_coarse"
-	{
-		"en"		"Weapon | Coarse"
-		"ru"		"Оружие | Грубо"
-	}
-	"weapon_even"
-	{
-		"en"		"Weapon | 1:1"
-		"ru"		"Оружие | 1:1"
-	}
-	"weapon_fine"
-	{
-		"en"		"Weapon | Fine"
-		"ru"		"Оружие | Тонко"
-	}
-	"weapon_very"
-	{
-		"en"		"Weapon | Very Fine"
-		"ru"		"Оружие | О. Тонко"
-	}
-
-	// Menu Phrases
-
-	"menu_helpclass"
-	{
-		"en"		"Class Info"
-	}
-	"menu_preference"
-	{
-		"en"		"SCP Preference"
-	}
-
-	// Other Phrases
-
-	"you_are"	// HUD
-	{
-		"#format"	"{1:t}"
-		"en"		"You are {1}"
-		"ru"		"Вы: {1}"
-	}
-	"scp_killed"	// Chat
-	{
-		"#format"	"{1:s},{2:t},{3:s},{4:t}"
-		"en"		"{{1}}{2} {default}has been contained by {{3}}{4}"
-		"ru"		"{{1}}{2} {default} был нейтрализован классом {{3}}{4}"
-	}
-	"scp_killed_duo"	// Chat
-	{
-		"#format"	"{1:s},{2:t},{3:s},{4:t},{5:s},{6:t}"
-		"en"		"{{1}}{2} {default}has been contained by {{3}}{4} {default}and {{5}}{6}"
-		"ru"		"{{1}}{2} {default} был нейтрализован классом {{3}}{4} {default}и {{5}}{6}"
-	}
-	"mtf_spawn"	// Chat
-	{
-		"en"		"{mediumblue}Mobile Task Force Unit, Epsilon-11{default} has entered the facility."
-		"ru"		"{mediumblue}МОГ Эпсилон-11{default} вошла в комплекс."
-	}
-	"mtf_spawn_scp"	// Chat
-	{
-		"#format"	"{1:d}"
-		"en"		"Awaiting re-containment of: {red}{1} SCP subject(s){default}."
-		"ru"		"{red}{1} объект(ов) SCP{default} ожидают восстановления условий содержания.{default}"
-	}
-	"mtf_spawn_scp_over"	// Chat
-	{
-		"en"		"Awaiting re-containment of: {red}An uncountable number of SCP subjects{default}."
-		"ru"		"Ожидают восстановления условий: {red}НЕВОЗМОЖНО ВЫЧИСЛИТЬ{default}."
-	}
-	"time_remaining"	// Game
-	{
-		"#format"	"{1:d},{2:s}"
-		"en"		"Time Remaining: {1}:{2}"
-		"ru"		"Оставшееся время: {1}:{2}"
-	}
-	"health_kit"	// HUD
-	{
-		"en"		"Health Kit Ready [ATTACK2]"
-		"ru"		"Аптечка готова [ДОП. АТАКА]"
-	}
-	"pain_killers"	// HUD
-	{
-		"en"		"Pain Killers Ready [ATTACK2]"
-		"ru"		"Обезболивающее готово [ДОП. АТАКА]"
-	}
-	"scp_500"	// HUD
-	{
-		"en"		"SCP-500 [ATTACK2]"
-		"ru"		"SCP-500 [ДОП. АТАКА]"
-	}
-	"keycard"	// HUD
-	{
-		"#format"	"{1:t}"
-		"en"		"Keycard: {1}"
-		"ru"		"Ключ-Карта: {1}"
-	}
-	"radio"	// HUD
-	{
-		"#format"	"{1:t},{2:d}"
-		"en"		"Radio: {1} ({2}%%) [ATTACK3]"
-		"ru"		"Радио: {1} ({2}%%) [СПЕЦ. АТАКА]"
-	}
-	"disarmed_by"	// HUD
-	{
-		"#format"	"{1:N}"
-		"en"		"You are disarmed by {1}"
-		"ru"		"{1} обезоружил вас"
-	}
-	"disarmed"	// Game
-	{
-		"en"		"You have been disarmed!"
-		"ru"		"Вас обезоружили!"
-	}
-	"camera"	// HUD
-	{
-		"#format"	"{1:d}"
-		"en"		"Camera: {1}%% [ATTACK2]"
-		"ru"		"Camera: {1}%% [ДОП. АТАКА]"
-	}
-	"radar"	// HUD
-	{
-		"en"		"Radar Ready [RELOAD]"
-		"ru"		"Radar готово [RELOAD]"
-	}
-	"sprint_ready"	// HUD
-	{
-		"#format"	"{1:d}"
-		"en"		"Sprint: {1}%% [JUMP]"
-		"ru"		"Sprint: {1}%% [JUMP]"
-	}
-	"sprint_not"	// HUD
-	{
-		"#format"	"{1:d}"
-		"en"		"Sprint: {1}%%"
-		"ru"		"Sprint: {1}%%"
-	}
-	"now_playing"	// Chat
-	{
-		"#format"	"{1:s}"
-		"en"		"Now Playing: {1}"
-		"ru"		"Сейчас играет: {1}"
-	}
-	"end_screen"	// HUD
-	{
-		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d}"
-		"en"		"{1}\n \nClass-D Escaped: {2} / {3}\nScientist(s) Survived: {4} / {5}\nTerminated SCPs: {6} / {7}"
-		"ru"		"{1}\n \nD-класса Сбежало: {2} / {3}\nУчёных Сбежало: {4} / {5}\nSCP Нейтрализовано: {6} / {7}"
-	}
-	"tesla_gate"	// Chat
-	{
-		"en"		"Tesla Gate"
-		"ru"		"Тесла-Установка"
-	}
-	"femur_breaker"	// Chat
-	{
-		"en"		"Femur Breaker"
-	}
-	"alpha_warhead"	// Chat
-	{
-		"en"		"Alpha Warhead"
-	}
-	"redacted"	// Chat, Hint
-	{
-		"en"		"[REDACTED]"
-		"ru"		"[РЕДАКТИРОВАНО]"
-	}
-	"data_expunged"	// Hint
-	{
-		"en"		"[DATA EXPUNGED]"
-		"ru"		"[ДАННЫЕ УДАЛЕНЫ]"
-	}
-	"106_portal"	// Annotation
-	{
-		"en"		"Teleport Portal"
-	}
-	"106_create"	// Hint
-	{
-		"en"		"Portal created, use ATTACK3 to teleport"
-		"ru"		"Портал создан. СПЕЦ. АТАКА, чтобы переместиться"
-	}
-	"106_create_deny"	// Hint
-	{
-		"en"		"Can't create a portal now"
-		"ru"		"Невозможно создать портал"
-	}
-	"106_create_none"	// Hint
-	{
-		"en"		"No portal created, use ATTACK2 to create one"
-		"ru"		"Нет порталов. ДОП. АТАКА, чтобы создать"
-	}
-	"106_tele_deny"	// Hint
-	{
-		"en"		"You can not teleport now"
-		"ru"		"Невозможно телепортироваться"
-	}
-	"download_error"	// Chat
-	{
-		"#format"	"{1:s}"
-		"en"		"{gray}We can't check if you have {1} enabled. If you see errors, make sure you allow all custom content in your settings and rejoin."
-		"ru"		"{gray}Мы не можем проверить, включен ли у вас {1}. Если вы видите ошибки или что-то не показывается, убедитесь, что разрешена загрузка контента с сервера."
-	}
-	"download_cvar"	// Chat
-	{
-		"#format"	"{1:s},{2:s}"
-		"en"		"{gray}{1} is disabled. You won't see any custom content. If you want to enable, set {2} to 1"
-		"ru"		"{gray}{1} выключен. Вы не увидите кастомного контента. Чтобы включить, смените значение {2} на 1."
-	}
-	"download_filter"	// Chat
-	{
-		"#format"	"{1:s}"
-		"en"		"{gray}cl_downloadfilter is set to {1}. You won't see any custom content. If you want to enable, set cl_downloadfilter to all"
-		"ru"            "{gray}cl_downloadfilter установлен на {1}. Вы не увидите кастомного контента. Чтобы включить, смените значение cl_downloadfilter на all."
-	}
-	"download_filter_sound"	// Chat
-	{
-		"en"		"{gray}cl_downloadfilter is set to nosounds. You won't hear any music. If you want to enable, set cl_downloadfilter to all"
-		"ru"		"{gray}cl_downloadfilter установлен на nosounds. Вы не услышите звуков. Чтобы включить, смените значение cl_downloadfilter на all."
-	}
-
-	// Unused
-
-	"welcome"
-	{
-		"en"		"Welcome to SCP: Secret Fortress!"
-	}
-	"train_mtf_title"
-	{
-		"en"		"Gear Up, Boys!"
-	}
-	"train_mtf_msg"
-	{
-		"en"		"Nine-Tailed Fox has spawned. They will save Scientists and work with Guards. They will kill SCPs and try to disarm Class-D Personnel. They have radios to talk to each other and have different ranks."
-	}
-	"train_chaos_title"
-	{
-		"en"		"CHAAOOOOS!"
-	}
-	"train_chaos_msg"
-	{
-		"en"		"Chaos Insurgency has spawn. They will save Class-D Personnel. They will kill Scientists and Guards. They all have the same weapon and spawn with a health kit."
-	}
-	"sprint"
-	{
-		"#format"	"{1:d}"
-		"en"		"Sprinting: {1}"
-		"ru"		"Sprinting: {1}"
 	}
 }

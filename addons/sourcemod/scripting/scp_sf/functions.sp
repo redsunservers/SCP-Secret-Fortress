@@ -130,24 +130,23 @@ void Function_OnSwitchWeapon(int client, int entity)
 	Call_Finish();
 }
 
-Action Function_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
+bool Function_OnSound(Action &result, int client, char sample[PLATFORM_MAX_PATH], int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
 {
-	Action result = Plugin_Continue;
-	if(Client[client].OnSound != INVALID_FUNCTION)
-	{
-		Call_StartFunction(null, Client[client].OnSound);
-		Call_PushCell(client);
-		Call_PushStringEx(sample, PLATFORM_MAX_PATH, SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
-		Call_PushCellRef(channel);
-		Call_PushFloatRef(volume);
-		Call_PushCellRef(level);
-		Call_PushCellRef(pitch);
-		Call_PushCellRef(flags);
-		Call_PushStringEx(soundEntry, PLATFORM_MAX_PATH, SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
-		Call_PushCellRef(seed);
-		Call_Finish(result);
-	}
-	return result;
+	if(Client[client].OnSound == INVALID_FUNCTION)
+		return false;
+
+	Call_StartFunction(null, Client[client].OnSound);
+	Call_PushCell(client);
+	Call_PushStringEx(sample, PLATFORM_MAX_PATH, SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
+	Call_PushCellRef(channel);
+	Call_PushFloatRef(volume);
+	Call_PushCellRef(level);
+	Call_PushCellRef(pitch);
+	Call_PushCellRef(flags);
+	Call_PushStringEx(soundEntry, PLATFORM_MAX_PATH, SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
+	Call_PushCellRef(seed);
+	Call_Finish(result);
+	return true;
 }
 
 void Function_OnCondRemoved(int client, TFCond cond)
@@ -159,4 +158,16 @@ void Function_OnCondRemoved(int client, TFCond cond)
 	Call_PushCell(client);
 	Call_PushCell(cond);
 	Call_Finish();
+}
+
+bool Function_OnKeycard(int client, any access, int &value)
+{
+	if(Client[client].OnKeycard == INVALID_FUNCTION)
+		return false;
+
+	Call_StartFunction(null, Client[client].OnKeycard);
+	Call_PushCell(client);
+	Call_PushCell(access);
+	Call_Finish(value);
+	return true;
 }

@@ -67,9 +67,8 @@ void SCP096_Enable()
 void SCP096_Create(int client)
 {
 	Client[client].Pos[0] = 0.0;
-	Client[client].Keycard = Keycard_SCP;
-	Client[client].HealthPack = HealthMax;
-	Client[client].Radio = 0;
+	Client[client].Extra1 = HealthMax;
+	Client[client].Extra2 = 0;
 	Client[client].Floor = Floor_Heavy;
 
 	Client[client].OnAnimation = SCP096_OnAnimation;
@@ -77,6 +76,7 @@ void SCP096_Create(int client)
 	Client[client].OnDealDamage = SCP096_OnDealDamage;
 	Client[client].OnDeath = SCP096_OnDeath;
 	Client[client].OnGlowPlayer = SCP096_OnGlowPlayer;
+	Client[client].OnKeycard = Items_KeycardScp;
 	Client[client].OnMaxHealth = SCP096_OnMaxHealth;
 	Client[client].OnSeePlayer = SCP096_OnSeePlayer;
 	Client[client].OnSpeed = SCP096_OnSpeed;
@@ -89,22 +89,22 @@ void SCP096_Create(int client)
 
 public void SCP096_OnMaxHealth(int client, int &health)
 {
-	health = Client[client].HealthPack + HealthExtra + (Client[client].Disarmer*HealthRage);
+	health = Client[client].Extra1 + HealthExtra + (Client[client].Disarmer*HealthRage);
 
 	int current = GetClientHealth(client);
 	if(current > health)
 	{
 		SetEntityHealth(client, health);
 	}
-	else if(current < Client[client].HealthPack-HealthExtra)
+	else if(current < Client[client].Extra1-HealthExtra)
 	{
-		Client[client].HealthPack = current+HealthExtra;
+		Client[client].Extra1 = current+HealthExtra;
 	}
 }
 
 public void SCP096_OnSpeed(int client, float &speed)
 {
-	speed = Client[client].Radio==2 ? SpeedRage : SpeedPassive;
+	speed = Client[client].Extra2==2 ? SpeedRage : SpeedPassive;
 }
 
 public Action SCP096_OnAnimation(int client, PlayerAnimEvent_t &anim, int &data)
@@ -117,7 +117,7 @@ public Action SCP096_OnAnimation(int client, PlayerAnimEvent_t &anim, int &data)
 
 public void SCP096_OnDeath(int client, int attacker)
 {
-	if(Client[client].Radio == 1)
+	if(Client[client].Extra2 == 1)
 	{
 		GiveAchievement(Achievement_DeathEnrage, client);
 		StopSound(client, SNDCHAN_VOICE, SoundEnrage);
@@ -154,7 +154,7 @@ public void SCP096_OnDeath(int client, int attacker)
 
 public Action SCP096_OnTakeDamage(int client, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	if(Triggered[attacker]<3 && !TF2_IsPlayerInCondition(client, TFCond_Dazed))
+	if(Triggered[attacker]<2 && !TF2_IsPlayerInCondition(client, TFCond_Dazed))
 		TriggerShyGuy(client, attacker, true);
 
 	return Plugin_Continue;
@@ -162,35 +162,35 @@ public Action SCP096_OnTakeDamage(int client, int &attacker, int &inflictor, flo
 
 public Action SCP096_OnDealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	return (Triggered[victim] > 2) ? Plugin_Continue : Plugin_Handled;
+	return (Triggered[victim] > 1) ? Plugin_Continue : Plugin_Handled;
 }
 
 public bool SCP096_OnSeePlayer(int client, int victim)
 {
-	return (!Client[client].Radio || Triggered[victim]>2);
+	return (!Client[client].Extra2 || Triggered[victim]>1);
 }
 
 public bool SCP096_OnGlowPlayer(int client, int victim)
 {
-	return (Client[client].Radio==2 && Triggered[victim]>2);
+	return (Client[client].Extra2==2 && Triggered[victim]>1);
 }
 
 public void SCP096_OnButton(int client, int button)
 {
 	float engineTime = GetEngineTime();
-	switch(Client[client].Radio)
+	switch(Client[client].Extra2)
 	{
 		case 1:
 		{
-			if(Client[client].Power < engineTime)
+			if(Client[client].Extra3 < engineTime)
 			{
 				float duration = (Client[client].Disarmer*RageExtra)+RageDuration;
 				if(duration > 30)
 					duration = 30.0;
 
-				Client[client].Power = engineTime+duration;
-				Client[client].Keycard = Keycard_106;
-				Client[client].Radio = 2;
+				Client[client].Extra3 = engineTime+duration;
+				Client[client].OnKeycard = Items_KeycardAll;
+				Client[client].Extra2 = 2;
 				TF2_AddCondition(client, TFCond_CritCola, 99.9);
 
 				TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
@@ -213,12 +213,12 @@ public void SCP096_OnButton(int client, int button)
 			if(TF2_IsPlayerInCondition(client, TFCond_Dazed))
 				TF2_RemoveCondition(client, TFCond_Dazed);
 
-			if(Client[client].Power < engineTime)
+			if(Client[client].Extra3 < engineTime)
 			{
 				Client[client].Disarmer = 0;
-				Client[client].Radio = 0;
-				Client[client].Keycard = Keycard_SCP;
-				Client[client].Power = engineTime+RageCooldown;
+				Client[client].Extra2 = 0;
+				Client[client].OnKeycard = Items_KeycardScp;
+				Client[client].Extra3 = engineTime+RageCooldown;
 
 				ViewModel_Destroy(client);
 				TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
@@ -231,7 +231,7 @@ public void SCP096_OnButton(int client, int button)
 				bool another096;
 				for(int i=1; i<=MaxClients; i++)
 				{
-					if(Client[i].Class!=Class_096 || !Client[client].Radio)
+					if(Client[i].Class!=Class_096 || !Client[client].Extra2)
 						continue;
 
 					another096 = true;
@@ -248,15 +248,28 @@ public void SCP096_OnButton(int client, int button)
 			}
 			else
 			{
-				SetHudTextParamsEx(-1.0, Gamemode==Gamemode_Ctf ? 0.88 : 0.99, 0.35, ClassColors[Class_096], ClassColors[Class_096], 0, 0.1, 0.05, 0.05);
-				ShowSyncHudText(client, HudGame, "%T", "sprint_not", client, RoundToCeil((Client[client].Power-engineTime)*3.333333));
+				static float hudIn[MAXTF2PLAYERS];
+				if(hudIn[client]<engineTime && !(GetClientButtons(client) & IN_SCORE))
+				{
+					hudIn[client] = engineTime+0.25;
+
+					char buffer[32];
+					int amount = RoundToCeil(Client[client].Extra3-engineTime);
+					for(int i; i<amount; i++)
+					{
+						Format(buffer, sizeof(buffer), "%s|", buffer);
+					}
+
+					SetHudTextParamsEx(0.14, 0.93, 0.425, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
+					ShowSyncHudText(client, HudGame, "%T", "sprint", client, buffer);
+				}
 			}
 		}
 		default:
 		{
-			if(Client[client].Power < engineTime)
+			if(Client[client].Extra3 < engineTime)
 			{
-				Client[client].Power = engineTime+0.25;
+				Client[client].Extra3 = engineTime+0.25;
 				static float pos1[3], ang1[3];
 				GetClientEyePosition(client, pos1);
 				GetClientEyeAngles(client, ang1);
@@ -266,7 +279,7 @@ public void SCP096_OnButton(int client, int button)
 				bool found;
 				for(int target=1; target<=MaxClients; target++)
 				{
-					if(!IsValidClient(target) || IsFriendly(Class_096, Client[target].Class) || Triggered[target]>2)
+					if(!IsValidClient(target) || IsFriendly(Class_096, Client[target].Class) || Triggered[target]>1)
 						continue;
 
 					static float pos2[3];
@@ -351,17 +364,17 @@ static void TriggerShyGuy(int client, int target, bool full)
 {
 	if(full)
 	{
-		//if(Triggered[target] == 3)
+		//if(Triggered[target] == 2)
 			//return;
 
-		Triggered[target] = 3;
+		Triggered[target] = 2;
 	}
-	else if(++Triggered[target] != 3)
+	else if(++Triggered[target] != 2)
 	{
 		return;
 	}
 
-	switch(Client[client].Radio)
+	switch(Client[client].Extra2)
 	{
 		case 1:
 		{
@@ -372,7 +385,7 @@ static void TriggerShyGuy(int client, int target, bool full)
 		case 2:
 		{
 			if(++Client[client].Disarmer < 7)
-				Client[client].Power += RageExtra;
+				Client[client].Extra3 += RageExtra;
 		}
 		default:
 		{
@@ -380,8 +393,8 @@ static void TriggerShyGuy(int client, int target, bool full)
 				StopSound(client, SNDCHAN_VOICE, SoundPassive);
 
 			Client[client].Pos[0] = 0.0;
-			Client[client].Power = GetEngineTime()+RageWarmup;
-			Client[client].Radio = 1;
+			Client[client].Extra3 = GetEngineTime()+RageWarmup;
+			Client[client].Extra2 = 1;
 			Client[client].Disarmer = 1;
 			TF2_StunPlayer(client, 9.9, 0.9, TF_STUNFLAG_BONKSTUCK|TF_STUNFLAG_NOSOUNDOREFFECT);
 			EmitSoundToAll(SoundEnrage, client, SNDCHAN_VOICE, SNDLEVEL_TRAIN, _, _, _, client);
