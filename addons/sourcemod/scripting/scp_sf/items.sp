@@ -625,7 +625,8 @@ bool Items_Pickup(int client, int index, int entity=-1)
 		bool full;
 		if(Items_CanGiveItem(client, weapon.Type, full))
 		{
-			Items_CreateWeapon(client, index, true, false, false, entity);
+			bool newWep = entity==-1;
+			Items_CreateWeapon(client, index, true, newWep, newWep, entity);
 			ClientCommand(client, "playgamesound AmmoPack.Touch");
 			return true;
 		}
