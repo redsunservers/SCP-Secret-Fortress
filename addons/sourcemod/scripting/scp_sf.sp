@@ -1415,17 +1415,20 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 
 								bool canGive = Items_CanGiveItem(client, weapon.Type);
 								entity = Items_CreateWeapon(client, amount, canGive, true, false);
-								if(!canGive && entity>MaxClients && IsValidEntity(entity))
+								if(entity>MaxClients && IsValidEntity(entity))
 								{
-									SetActiveWeapon(client, entity);
-								}
-								else
-								{
-									static float pos[3], ang[3];
-									GetClientEyePosition(client, pos);
-									GetClientEyeAngles(client, ang);
-									Items_DropItem(client, entity, pos, ang, true);
-									FakeClientCommand(client, "use tf_weapon_fists");
+									if(canGive)
+									{
+										SetActiveWeapon(client, entity);
+									}
+									else
+									{
+										static float pos[3], ang[3];
+										GetClientEyePosition(client, pos);
+										GetClientEyeAngles(client, ang);
+										Items_DropItem(client, entity, pos, ang, true);
+										FakeClientCommand(client, "use tf_weapon_fists");
+									}
 								}
 
 								static char buffer[64];
