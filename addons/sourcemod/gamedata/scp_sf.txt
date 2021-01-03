@@ -350,6 +350,11 @@
 				"linux"		"431"
 				"windows"	"430"
 			}
+			"CBasePlayer::ForceRespawn"
+			{
+				"linux"		"330"
+				"windows"	"329"
+			}
 			"CTeamplayRoundBasedRules::RoundRespawn"
 			{
 				"linux"		"226"

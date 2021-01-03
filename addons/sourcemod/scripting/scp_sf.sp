@@ -45,7 +45,7 @@ void DisplayCredits(int i)
 }
 
 #define MAJOR_REVISION	"1"
-#define MINOR_REVISION	"8"
+#define MINOR_REVISION	"9"
 #define STABLE_REVISION	"0"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
@@ -1415,7 +1415,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 
 								bool canGive = Items_CanGiveItem(client, weapon.Type);
 								entity = Items_CreateWeapon(client, amount, canGive, true, false);
-								if(!canGive && entity>MaxClients && IsValidEntity(entity))
+								if(canGive && entity>MaxClients && IsValidEntity(entity))
 								{
 									SetActiveWeapon(client, entity);
 								}
