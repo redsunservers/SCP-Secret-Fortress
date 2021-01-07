@@ -46,7 +46,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"1"
 #define MINOR_REVISION	"8"
-#define STABLE_REVISION	"1"
+#define STABLE_REVISION	"2"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define IsSCP(%1)	(Client[%1].Class>=Class_035)
@@ -1210,6 +1210,14 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 					TF2_RemoveItem(client, ent);
 				}
 			}
+		}
+	}
+	else if(!StrContains(name, "scp_startmusic", false))
+	{
+		NoMusicRound = false;
+		for(int target=1; target<=MaxClients; target++)
+		{
+			Client[target].NextSongAt = 0.0;
 		}
 	}
 	else if(!StrContains(name, "scp_endmusic", false))
