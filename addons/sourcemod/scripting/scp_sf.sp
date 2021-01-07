@@ -3612,7 +3612,10 @@ public void OnGameFrame()	// TODO: Change this to NOT use ticks++ because that's
 	UpdateListenOverrides(engineTime);
 }
 
-// Public Events
+public bool OnGhostSpawn(int client)
+{
+	return true;
+}
 
 void AssignTeam(int client)
 {
