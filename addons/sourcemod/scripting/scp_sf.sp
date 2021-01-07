@@ -3267,7 +3267,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 		if(showHud && Gamemode!=Gamemode_Steals)
 		{
 			GetClassName(Client[client].Class, buffer, sizeof(buffer));
-			SetHudTextParamsEx(-1.0, 0.06, 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
+			SetHudTextParamsEx(-1.0, 0.08, 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
 			ShowSyncHudText(client, HudClass, "%t", buffer);
 		}
 
