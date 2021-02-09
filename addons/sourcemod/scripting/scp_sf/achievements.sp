@@ -37,22 +37,13 @@ enum Achievements
 
 bool NoAchieve;
 
-void GiveAchievement(Achievements achievement, int client=0)
+void GiveAchievement(Achievements achievement, int client)
 {
 	if(NoAchieve)
 		return;
 
 	switch(achievement)
 	{
-		case Achievement_Kill106:
-		{
-			for(int i=1; i<=MaxClients; i++)
-			{
-				if(IsValidClient(i) && !IsSpec(i) && !IsSCP(i))
-					Forward_OnAchievement(i, achievement);
-			}
-			return;
-		}
 		case Achievement_KillDClass:
 		{
 			if(!AreClientCookiesCached(client))
@@ -74,28 +65,6 @@ void GiveAchievement(Achievements achievement, int client=0)
 					Forward_OnAchievement(i, achievement);
 			}
 			return;
-		}
-		case Achievement_Upgrade:
-		{
-			bool found;
-			static float pos[3];
-			GetClientAbsOrigin(client, pos);
-			for(int i=1; i<=MaxClients; i++)
-			{
-				if(!IsValidClient(i) || Client[i].Class!=Class_DBoi)
-					continue;
-
-				static float pos2[3];
-				GetClientAbsOrigin(i, pos2);
-				if(GetVectorDistance(pos, pos2, true) > 160000)
-					continue;
-
-				found = true;
-				break;
-			}
-
-			if(!found)
-				return;
 		}
 	}
 

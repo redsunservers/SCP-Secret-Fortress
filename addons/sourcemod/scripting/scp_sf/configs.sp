@@ -1,48 +1,3 @@
-enum
-{
-	Music_Join = 0,
-	Music_Join2,
-	Music_Time,
-	Music_Outside,
-	Music_Alone,
-	Music_Light,
-	Music_Heavy,
-	Music_Spec,
-
-	Sound_MTFSpawn = 0,
-	Sound_ChaosSpawn
-}
-
-static const char MusicList[][] =
-{
-	"#scp_sf/music/finalflashofexistence.mp3",
-	"#scp_sf/music/retromenu.mp3",
-	"#scp_sf/music/wegottarun.mp3",
-	"#scp_sf/music/melancholy.mp3",
-	"#scp_sf/music/massivelabyrinth.mp3",
-	"#scp_sf/music/lczambient.mp3",
-	"#scp_sf/music/doctorlab.mp3",
-	"#scp_sf/music/unexplainedbehaviors.mp3"
-};
-
-static const float MusicTimes[] =
-{
-	215.0,	// Final Flash of Existence
-	128.0,	// Retro Menu
-	112.0,	// We Gotta Run
-	92.0,	// Melancholy
-	124.5,	// Massive Labyrnith
-	55.0,	// LCZ Ambient
-	93.0,	// Doctor Lab
-	49.0	// Unexplained Behaviors
-};
-
-static const char SoundList[][] =
-{
-	"scp_sf/events/spawn_mtf.mp3",			// MTF Spawn
-	"scp_sf/events/spawn_chaos.mp3"			// Chaos Spawn
-};
-
 static const char TFClassNames[][] =
 {
 	"mercenary",
@@ -57,58 +12,105 @@ static const char TFClassNames[][] =
 	"engineer"
 };
 
+#define FILE_PATH	"configs/scp_sf/"
+#define FILE_MAPS	"maps"
+#define FILE_REACTIONS	"reactions.cfg"
+#define FILE_WEAPONS	"weapons.cfg"
+#define FILE_GAMEMODE	"gamemode.cfg"
+#define FILE_CLASSES	"classes.cfg"
 #define SOUNDPICKUP	"items/pumpkin_pickup.wav"
 
 static KeyValues Reactions;
 
 void Config_Setup()
 {
-	for(int i; i<sizeof(MusicList); i++)
+	char mapname[64], buffer[PLATFORM_MAX_PATH];
+	GetCurrentMap(mapname, sizeof(mapname));
+	KeyValues map;
+
+	BuildPath(Path_SM, buffer, sizeof(buffer), "%s%s", FILE_PATH, FILE_MAPS);
+	DirectoryListing dir = OpenDirectory(buffer);
+	if(dir != INVALID_HANDLE)
 	{
-		PrecacheSoundEx(MusicList[i], true);
+		FileType file;
+		char filename[68];
+		while(dir.GetNext(filename, sizeof(filename), file))
+		{
+			if(file != FileType_File)
+				continue;
+
+			if(SplitString(filename, ".cfg", filename, sizeof(filename)) == -1)
+				continue;
+				
+			if(StrContains(mapname, filename))
+				continue;
+
+			map = new KeyValues("Map");
+			Format(buffer, sizeof(buffer), "%s/%s.cfg", buffer, filename);
+			if(!map.ImportFromFile(buffer))
+				LogError("[Config] Found '%s' but was unable to read", buffer);
+
+			break;
+		}
+		delete dir;
+	}
+	else
+	{
+		LogError("[Config] Directory '%s' does not exist", buffer);
 	}
 
-	for(int i; i<sizeof(SoundList); i++)
+
+	KeyValues main = new KeyValues("Gamemode");
+	BuildPath(Path_SM, buffer, sizeof(buffer), "%s%s", FILE_PATH, FILE_GAMEMODE);
+	if(!main.ImportFromFile(buffer) && (!map || !map.JumpToKey("Gamemode")))
+		SetFailState("Failed to read '%s'", buffer);
+
+	ArrayList list = Gamemode_Setup(main, map);
+	delete main;
+
+
+	main = new KeyValues("Classes");
+	BuildPath(Path_SM, buffer, sizeof(buffer), "%s%s", FILE_PATH, FILE_CLASSES);
+	if(!main.ImportFromFile(buffer) && (!map || !map.JumpToKey("Classes")))
+		SetFailState("Failed to read '%s'", buffer);
+
+	Classes_Setup(main, map, list);
+	delete main;
+	if(list)
+		delete list;
+
+
+	main = new KeyValues("Weapons");
+	BuildPath(Path_SM, buffer, sizeof(buffer), "%s%s", FILE_PATH, FILE_WEAPONS);
+	if(!main.ImportFromFile(buffer) && (!map || !map.JumpToKey("Weapons")))
+		SetFailState("Failed to read '%s'", buffer);
+
+	Items_Setup(main, map);
+	delete main;
+
+
+	if(Reactions)
+		delete Reactions;
+
+	Reactions = new KeyValues("Reactions");
+	if(map)
 	{
-		PrecacheSoundEx(SoundList[i], true);
+		map.Rewind();
+		if(map.JumpToKey("Reactions"))
+		{
+			Reactions.Import(map);
+			delete map;
+			return;
+		}
+
+		delete map;
 	}
 
-	ClassModelIndex[0] = PrecacheModel(ClassModel[0], true);
-	for(int i=1; i<sizeof(ClassModel); i++)
-	{
-		ClassModelIndex[i] = PrecacheModelEx(ClassModel[i], true);
-	}
+	BuildPath(Path_SM, buffer, sizeof(buffer), "%s%s", FILE_PATH, FILE_REACTIONS);
+	if(!Reactions.ImportFromFile(buffer))
+		SetFailState("Failed to read '%s'", buffer);
 
-	for(int i; i<sizeof(ClassModelSub); i++)
-	{
-		ClassModelSubIndex[i] = PrecacheModel(ClassModelSub[i], true);
-	}
-
-	PrecacheModel(RADIO_MODEL, true);
-	PrecacheModelEx(KEYCARD_MODEL, true);
-	VIPGhostModel = PrecacheModel(VIP_GHOST_MODEL, true);
-
-	char buffer[PLATFORM_MAX_PATH];
-	BuildPath(Path_SM, buffer, sizeof(buffer), CFG_REACTIONS);
-	Reactions = new KeyValues("SCPReactions");
 	Reactions.ImportFromFile(buffer);
-}
-
-float Config_GetMusic(int index, char[] buffer, int length)
-{
-	if(index >= sizeof(MusicList))
-		return 0.0;
-
-	strcopy(buffer, length, MusicList[index]);
-	return MusicTimes[index];
-}
-
-int Config_GetSound(int index, char[] buffer, int length)
-{
-	if(index >= sizeof(SoundList))
-		return 0;
-
-	return strcopy(buffer, length, SoundList[index]);
 }
 
 void Config_DoReaction(int client, const char[] name)

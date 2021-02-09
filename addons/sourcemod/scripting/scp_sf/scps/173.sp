@@ -1,77 +1,23 @@
-//static const char Name[] = "173";
-//static const char Model[] = "models/freak_fortress_2/scp_173/scp_173new.mdl";
-static const int Health = 4000;
-static const float Speed = 490.0;
 static const char SnapSound[] = "freak_fortress_2/scp173/scp173_kill2.mp3";
 
-static const char Downloads[][] =
-{
-	"models/freak_fortress_2/scp_173/scp_173new.dx80.vtx",
-	"models/freak_fortress_2/scp_173/scp_173new.dx90.vtx",
-	"models/freak_fortress_2/scp_173/scp_173new.mdl",
-	"models/freak_fortress_2/scp_173/scp_173new.sw.vtx",
-	"models/freak_fortress_2/scp_173/scp_173new.vvd",
-
-	"materials/freak_fortress_2/scp_173/new173_texture.vmt",
-	"materials/freak_fortress_2/scp_173/new173_texture.vtf",
-
-	"sound/freak_fortress_2/scp173/scp173_kill2.mp3"
-};
-
-void SCP173_Enable()
-{
-	PrecacheSound(SnapSound, true);
-
-	int table = FindStringTable("downloadables");
-	bool save = LockStringTables(false);
-	for(int i; i<sizeof(Downloads); i++)
-	{
-		if(!FileExists(Downloads[i], true))
-		{
-			LogError("Missing file: '%s'", Downloads[i]);
-			continue;
-		}
-
-		AddToStringTable(table, Downloads[i]);
-	}
-	LockStringTables(save);
-}
-
-void SCP173_Create(int client)
+public bool SCP173_Create(int client)
 {
 	Client[client].Extra2 = 0;
-	Client[client].Floor = Floor_Heavy;
 
-	Client[client].OnButton = SCP173_OnButton;
-	Client[client].OnKeycard = Items_KeycardScp;
-	Client[client].OnKill = SCP173_OnKill;
-	Client[client].OnMaxHealth = SCP173_OnMaxHealth;
-	Client[client].OnSpeed = SCP173_OnSpeed;
-
-	int weapon = SpawnWeapon(client, "tf_weapon_knife", 195, 90, 13, "1 ; 0.05 ; 6 ; 0.01 ; 15 ; 0 ; 138 ; 101 ; 252 ; 0 ; 263 ; 1.15 ; 264 ; 1.15 ; 362 ; 1 ; 4328 ; 1", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_knife", 195, 90, 13, "1 ; 0.05 ; 6 ; 0.01 ; 15 ; 0 ; 138 ; 101 ; 252 ; 0 ; 263 ; 1.15 ; 264 ; 1.15 ; 275 ; 1 ; 362 ; 1 ; 4328 ; 1", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 17);
 		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client));
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 	}
-}
-
-public void SCP173_OnMaxHealth(int client, int &health)
-{
-	health = Health;
+	return false;
 }
 
 public void SCP173_OnSpeed(int client, float &speed)
 {
-	switch(Client[client].Extra2)
-	{
-		case 0:
-			speed = Speed;
-
-		case 2:
-			speed = FAR_FUTURE;
-	}
+	if(Client[client].Extra2 == 2)
+		speed = FAR_FUTURE;
 }
 
 public void SCP173_OnKill(int client, int victim)
@@ -98,7 +44,7 @@ public void SCP173_OnButton(int client, int button)
 	int status;
 	for(int target=1; target<=MaxClients; target++)
 	{
-		if(!IsValidClient(target) || IsFriendly(Class_096, Client[target].Class))
+		if(!IsValidClient(target) || IsFriendly(Client[client].Class, Client[target].Class))
 			continue;
 
 		static float pos2[3], ang2[3], ang3[3];
@@ -144,7 +90,19 @@ public void SCP173_OnButton(int client, int button)
 	}
 	else
 	{
-		blink = GetRandomInt(8, 12);
+		float min = 9.001;
+		float max = 13.13;
+
+		int health;
+		OnGetMaxHealth(client, health);
+		if(health)
+		{
+			float ratio = (0.6-(GetClientHealth(client)/health))*3.0;	// -1.2 ~ +1.8
+			min -= ratio;
+			max -= ratio*1.1;
+		}
+
+		blink = RoundFloat(GetRandomFloat(min, max));
 	}
 
 	if(status == 1)

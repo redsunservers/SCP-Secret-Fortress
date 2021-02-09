@@ -169,6 +169,10 @@
 
 	// Class Phrases
 
+	"class_0"
+	{
+		"en"		"Invalid Class"
+	}
 	"class_spec"
 	{
 		"en"		"Spectator"
@@ -289,159 +293,123 @@
 	{
 		"en"		"You need to free Scientists from the facility.\nYou can build sentries to fight off SCPs.\nYou can also build dispensers for allies.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
-	"class_035"
-	{
-		"en"		"SCP-035"
-	}
-	"desc_035"
-	{
-		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs."
-	}
-	"train_035"
-	{
-		"en"		"Oh boy..."
-	}
-	"class_049"
+	"class_scp049"
 	{
 		"en"		"SCP-049"
 	}
-	"desc_049"
+	"desc_scp049"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nInteract with a recently-dead human to revive them as an ally."
 	}
-	"train_049"
+	"train_scp049"
 	{
 		"en"		"Your attacks one-shots humans.\nUse your Medi-Gun to revive dead players into SCP-049-2.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons and items."
 	}
-	"class_0492"
+	"class_scp0492"
 	{
 		"en"		"SCP-049-2"
 	}
-	"desc_0492"
+	"desc_scp0492"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nFollow orders from SCP-049"
 	}
-	"train_0492"
+	"train_scp0492"
 	{
 		"en"		"You have been revived by SCP-049.\nFollow his orders and attack other teams.\nPrevent escape.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
-	"class_076"
+	"class_scp076"
 	{
 		"en"		"SCP-076-2"
 	}
-	"desc_076"
+	"desc_scp076"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nGain 4 heads to enter rage."
 	}
-	"train_076"
+	"train_scp076"
 	{
 		"en"		"Your main goal is too kill any Guards, MTF, or Chaos.\nOnce you gain 4 heads you enter a rage state.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
-	"class_079"
-	{
-		"en"		"SCP-079"
-	}
-	"desc_079"
-	{
-		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs."
-	}
-	"train_079"
-	{
-		"en"		"Oh boy..."
-	}
-	"class_096"
+	"class_scp096"
 	{
 		"en"		"SCP-096"
 	}
-	"desc_096"
+	"desc_scp096"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou become enraged when looked at."
 	}
-	"train_096"
+	"train_scp096"
 	{
 		"en"		"Your attacks one-shots humans but you must be enraged.\nIf players look at your face or attack you, you'll charge them down.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
-	"class_106"
+	"class_scp106"
 	{
 		"en"		"SCP-106"
 	}
-	"desc_106"
+	"desc_scp106"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nATTACK2 to create a portal.\nATTACK3 to teleport to that portal."
 	}
-	"train_106"
+	"train_scp106"
 	{
 		"en"		"Your attacks will send humans to a pocket dimension.\nYou can place teleport portals and teleport to them later.\nATTACK2 will place a portal and ATTACK3 will teleport you to that portal."
 	}
-	"class_173"
+	"class_scp173"
 	{
 		"en"		"SCP-173"
 	}
-	"desc_173"
+	"desc_scp173"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can only move while no one is looking."
 	}
-	"train_173"
+	"train_scp173"
 	{
 		"en"		"Your attacks one-shots humans.\nYou can only move for a short time while being looked at.\nTry to time your attacks.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
-	"class_1732"
+	"class_scp1732"
 	{
 		"en"		"SCP-173"
 	}
-	"desc_1732"
+	"desc_scp1732"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can only move while no one is looking."
 	}
-	"train_1732"
+	"train_scp1732"
 	{
 		"en"		"Your attacks one-shots humans.\nYou can only move for a short time while being looked at.\nTry to time your attacks.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
-	"class_527"
-	{
-		"en"		"SCP-527"
-	}
-	"desc_527"
-	{
-		"en"		"Escape from the facility.\nCooperate with other SCPs."
-	}
-	"train_527"
-	{
-		"en"		"Oh boy..."
-	}
-	"class_939"
+	"class_scp939"
 	{
 		"en"		"SCP-939-89"
 	}
-	"desc_939"
+	"desc_scp939"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can talk to other humans."
 	}
-	"train_939"
+	"train_scp939"
 	{
 		"en"		"You can only see targets making noise.\nYou can trick players by talking to them.\nYou'll get faster with less health you have.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
-	"class_9392"
+	"class_scp9392"
 	{
 		"en"		"SCP-939-53"
 	}
-	"desc_9392"
+	"desc_scp9392"
 	{
 		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can talk to other humans."
 	}
-	"train_9392"
+	"train_scp9392"
 	{
 		"en"		"You can only see targets making noise.\nYou can trick players by talking to them.\nYou'll get faster with less health you have.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
-	"class_3008"
+	"class_scp3008"
 	{
 		"en"		"SCP-3008-2"
 	}
-	"desc_3008"
+	"desc_scp3008"
 	{
 		"en"		"Kill everyone during the night.\nCooperate with other SCP-3008-2.\nYou can talk to other humans."
 	}
-	"train_3008"
+	"train_scp3008"
 	{
 		"en"		"Make sure your customers are enjoying themselves.\nAlso make sure they leave during closing hours.\nUse brute force if needed.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}

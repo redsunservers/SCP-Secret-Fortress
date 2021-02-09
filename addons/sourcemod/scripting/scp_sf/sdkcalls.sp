@@ -141,6 +141,12 @@ float SDKCall_GetNextThink(int entity, const char[] buffer="")
 	return SDKCall(SDKGetNextThink, entity, NULL_STRING);
 }
 
+void SDKCall_EquipWearable(int client, int entity)
+{
+	if(SDKEquipWearable)
+		SDKCall(SDKEquipWearable, client, entity);
+}
+
 int SDKCall_GetBaseEntity(Address entity)
 {
 	if(SDKGetBaseEntity)
@@ -211,25 +217,4 @@ void ChangeClientTeamEx(int client, any newTeam)
 		}
 	}
 	SetEntProp(client, Prop_Send, "m_iTeamNum", newTeam);
-}
-
-int TF2_CreateHat(int client, int index, int quality=0, int level=1)
-{
-	if(!SDKEquipWearable)
-		return -1;
-
-	int wearable = CreateEntityByName("tf_wearable");
-	if(IsValidEntity(wearable))
-	{
-		SetEntProp(wearable, Prop_Send, "m_iItemDefinitionIndex", index);
-		SetEntProp(wearable, Prop_Send, "m_bInitialized", true);
-		SetEntProp(wearable, Prop_Send, "m_iEntityQuality", quality);
-		SetEntProp(wearable, Prop_Send, "m_iEntityLevel", level);
-
-		DispatchSpawn(wearable);
-		SetEntProp(wearable, Prop_Send, "m_bValidatedAttachedEntity", true);
-
-		SDKCall(SDKEquipWearable, client, wearable);
-	}
-	return wearable;
 }
