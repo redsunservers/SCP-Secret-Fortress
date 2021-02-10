@@ -18,7 +18,6 @@ void ConVar_Setup()
 
 	AutoExecConfig(true, "SCPSecretFortress");
 
-	ChatHook = CvarChatHook.BoolValue;
 	CvarChatHook.AddChangeHook(ConVar_OnChatHook);
 
 	if(CvarList != INVALID_HANDLE)

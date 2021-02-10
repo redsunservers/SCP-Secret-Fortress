@@ -5,6 +5,8 @@ static const float TeleDelay = 4.0;	// Teleport delay
 
 public bool SCP106_Create(int client)
 {
+	Classes_VipSpawn(client);
+
 	Client[client].Pos[0] = 0.0;
 	Client[client].Pos[1] = 0.0;
 	Client[client].Pos[2] = 0.0;

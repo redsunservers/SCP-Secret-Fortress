@@ -25,6 +25,8 @@ public void SCP0492_Enable(int index)
 
 public bool SCP049_Create(int client)
 {
+	Classes_VipSpawn(client);
+
 	int account = GetSteamAccountID(client);
 
 	GiveMelee(client, account);

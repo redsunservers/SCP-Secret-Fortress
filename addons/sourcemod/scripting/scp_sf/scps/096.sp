@@ -18,6 +18,8 @@ static int Triggered[MAXTF2PLAYERS];
 
 public bool SCP096_Create(int client)
 {
+	Classes_VipSpawn(client);
+
 	Client[client].Pos[0] = 0.0;
 	Client[client].Extra1 = HealthMax;
 	Client[client].Extra2 = 0;

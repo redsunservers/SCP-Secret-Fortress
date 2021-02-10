@@ -1786,7 +1786,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 				Client[client].AloneIn = FAR_FUTURE;
 				if(showHud)
 				{
-					SetHudTextParamsEx(0.01, 0.75, 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
+					SetHudTextParamsEx(0.14, 0.93, 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
 					ShowSyncHudText(client, HudPlayer, "%t", "disarmed_by", Client[client].Disarmer);
 				}
 			}
@@ -1907,7 +1907,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 			// What class am I again
 			if(showHud)
 			{
-				SetHudTextParamsEx(-1.0, 0.09, 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
+				SetHudTextParamsEx(-1.0, 0.08, 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
 				ShowSyncHudText(client, HudClass, "%t", class.Display);
 			}
 		}

@@ -3,6 +3,8 @@ static const float GlowRange = 800.0;
 
 public bool SCP939_Create(int client)
 {
+	Classes_VipSpawn(client);
+
 	int account = GetSteamAccountID(client);
 
 	int weapon = SpawnWeapon(client, "tf_weapon_knife", 461, 70, 13, "2 ; 1.625 ; 15 ; 0 ; 35 ; 2.5 ; 252 ; 0.3 ; 4328 ; 1", false);

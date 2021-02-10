@@ -5,6 +5,8 @@ static const int HealthRage = 250;
 
 public bool SCP076_Create(int client)
 {
+	Classes_VipSpawn(client);
+
 	Client[client].Extra2 = 0;
 
 	int weapon = SpawnWeapon(client, "tf_weapon_sword", 195, 1, 13, "2 ; 1.5 ; 28 ; 0.5 ; 219 ; 1 ; 252 ; 0.8", false);
