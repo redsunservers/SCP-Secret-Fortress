@@ -729,7 +729,7 @@ public bool Classes_VipSpawn(int client)
 			case 0:
 				Gamemode_AddValue("ptotal");
 
-			case 2:
+			case 1:
 				Gamemode_AddValue("dtotal");
 
 			default:

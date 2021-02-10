@@ -788,7 +788,7 @@ public float Gamemode_WaveRespawnTickets(ArrayList &list, ArrayList &players)
 			}
 
 			if(wave.SoundTeam.Path[0])
-				ChangeSong(i, engineTime+wave.SoundTeam.Time, wave.SoundTeam.Path);
+				ChangeSong(i, engineTime+wave.SoundTeam.Time, wave.SoundTeam.Path, 1);
 		}
 
 		if(wave.ShowSCPs)
