@@ -232,6 +232,21 @@ ArrayList Gamemode_Setup(KeyValues main, KeyValues map)
 		kv.GoBack();
 	}
 
+	if(kv.JumpToKey("commands"))
+	{
+		char buffer[2048];
+		for(int i=1; ; i++)
+		{
+			IntToString(i, preset.Name, sizeof(preset.Name));
+			kv.GetString(preset.Name, buffer, sizeof(buffer));
+			if(!buffer[0])
+				break;
+
+			ServerCommand(buffer);
+		}
+		kv.GoBack();
+	}
+
 	ArrayList list;
 	if(kv.JumpToKey("classes"))
 	{
@@ -400,6 +415,21 @@ void Gamemode_AddValue(const char[] value)
 	}
 }
 
+void Gamemode_GiveTicket(int group, int amount)
+{
+	WaveEnum wave;
+	int length = WaveList.Length;
+	for(int i; i<length; i++)
+	{
+		WaveList.GetArray(i, wave);
+		if(wave.Group == group)
+		{
+			wave.TicketsLeft += amount;
+			WaveList.SetArray(i, wave);
+		}
+	}
+}
+
 static ArrayList GrabClassList(KeyValues kv)
 {
 	char buffer[16];
@@ -412,7 +442,6 @@ static ArrayList GrabClassList(KeyValues kv)
 			break;
 
 		list.PushString(buffer);
-		PrintToServer(buffer);
 	}
 	return list;
 }
@@ -427,7 +456,6 @@ static ArrayList MakeClassList(ArrayList classes, int max)
 		if(i < length)	// Allows using the last string until we're done
 			classes.GetString(i, buffer, sizeof(buffer));
 
-		PrintToServer("MakeClassList::%s:%d", buffer, i);
 		int class = PresetToClass(buffer, list);	// Turn string into a class index
 		if(class == -1)
 		{
@@ -464,7 +492,6 @@ static int PresetToClass(const char[] name, ArrayList current)
 			break;
 		}
 	}
-	PrintToServer("PresetToClass::%s:%d", name, index);
 	return index;
 }
 
@@ -486,7 +513,6 @@ static ArrayList DeadPlayersList()
 		list.Push(client);
 	}
 	list.Sort(Sort_Random, Sort_Integer);
-	PrintToServer("DeadPlayersList::%d", list.Length);
 	return list;
 }
 
@@ -553,8 +579,11 @@ public bool Gamemode_ConditionClassic(TFTeam &team)
 	bool salive, ralive, balive;
 	for(int i=1; i<=MaxClients; i++)
 	{
-		if(!IsValidClient(i) || !Classes_GetByIndex(Client[i].Class, class))
+		if(!IsValidClient(i) || IsSpec(i) || !Classes_GetByIndex(Client[i].Class, class))
 			continue;
+
+		if(class.Vip)
+			return false;
 
 		if(!class.Group)	// SCPs
 		{
@@ -627,16 +656,16 @@ public bool Gamemode_ConditionClassic(TFTeam &team)
 	return true;
 }
 
-public bool Gamemode_ConditionVip(bool forced, TFTeam &team)
+public bool Gamemode_ConditionVip(TFTeam &team)
 {
 	ClassEnum class;
 	bool salive;
 	for(int i=1; i<=MaxClients; i++)
 	{
-		if(!IsValidClient(i) || !Classes_GetByIndex(Client[i].Class, class))
+		if(!IsValidClient(i) || IsSpec(i) || !Classes_GetByIndex(Client[i].Class, class))
 			continue;
 
-		if(class.Vip && !forced)	// Class-D and Scientists
+		if(class.Vip)	// Class-D and Scientists
 			return false;
 
 		if(!class.Group)	// SCPs
@@ -752,14 +781,14 @@ public float Gamemode_WaveRespawnTickets(ArrayList &list, ArrayList &players)
 				if(!found || class.Group!=wave.Group)
 				{
 					if(wave.Sound.Path[0])
-						ChangeSong(players.Get(i), engineTime+wave.Sound.Time, wave.Sound.Path);
+						ChangeSong(i, engineTime+wave.Sound.Time, wave.Sound.Path);
 
 					continue;
 				}
 			}
 
 			if(wave.SoundTeam.Path[0])
-				ChangeSong(players.Get(i), engineTime+wave.SoundTeam.Time, wave.SoundTeam.Path);
+				ChangeSong(i, engineTime+wave.SoundTeam.Time, wave.SoundTeam.Path);
 		}
 
 		if(wave.ShowSCPs)

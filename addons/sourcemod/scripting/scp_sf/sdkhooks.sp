@@ -235,12 +235,21 @@ public Action OnGetMaxHealth(int client, int &health)
 public void OnWeaponSwitch(int client, int entity)
 {
 	Classes_OnWeaponSwitch(client, entity);
-	ViewChange_Switch(client, entity);
+	RequestFrame(OnWeaponSwitchFrame, GetClientUserId(client));
+}
 
-	for(int i=1; i<Ammo_MAX; i++)
+static void OnWeaponSwitchFrame(int userid)
+{
+	int client = GetClientOfUserId(userid);
+	if(client && IsClientInGame(client))
 	{
-		if(i!=Ammo_Metal && !GetEntProp(client, Prop_Data, "m_iAmmo", _, i))
-			SetEntProp(client, Prop_Data, "m_iAmmo", -1, _, i);
+		for(int i=1; i<Ammo_MAX; i++)
+		{
+			if(i!=Ammo_Metal && !GetEntProp(client, Prop_Data, "m_iAmmo", _, i))
+				SetEntProp(client, Prop_Data, "m_iAmmo", -1, _, i);
+		}
+
+		ViewChange_Switch(client);
 	}
 }
 

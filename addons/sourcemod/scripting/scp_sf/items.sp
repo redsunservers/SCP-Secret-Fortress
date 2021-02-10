@@ -661,7 +661,7 @@ bool Items_Pickup(int client, int index, int entity=-1)
 			return true;
 		}
 
-		ClientCommand(client, "playgamesound WallHealth.Deny");
+		ClientCommand(client, "playgamesound items/medshotno1.wav");
 
 		BfWrite bf = view_as<BfWrite>(StartMessageOne("HudNotifyCustom", client));
 		if(bf)
@@ -924,7 +924,7 @@ public Action Items_DisarmerHit(int client, int victim, int &inflictor, float &d
 
 public Action Items_HeadshotHit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	if((IsSCP(victim) && Client[victim].Class!=Classes_GetByName("0492")) ||
+	if((IsSCP(victim) && Client[victim].Class!=Classes_GetByName("scp0492")) ||
 	   GetEntProp(victim, Prop_Data, "m_LastHitGroup") != HITGROUP_HEAD)
 		return Plugin_Continue;
 
@@ -942,7 +942,7 @@ public Action Items_LogicerHit(int client, int victim, int &inflictor, float &da
 		changed = true;
 	}
 
-	if((!isSCP || Client[victim].Class==Classes_GetByName("0492")) &&
+	if((!isSCP || Client[victim].Class==Classes_GetByName("scp0492")) &&
 	   GetEntProp(victim, Prop_Data, "m_LastHitGroup") == HITGROUP_HEAD)
 	{
 		damagetype |= DMG_CRIT;
@@ -1071,8 +1071,8 @@ public bool Items_AdrenalineButton(int client, int weapon, int &buttons, int &ho
 		RemoveAndSwitchItem(client, weapon);
 		StartHealingTimer(client, 0.334, 1, 60, true);
 		TF2_AddCondition(client, TFCond_DefenseBuffNoCritBlock, 20.0, client);
-		TF2_AddCondition(client, TFCond_CritHype, 20.0, client);
-		FadeClientVolume(client, 0.7, 2.5, 17.5, 2.5);
+		Client[client].Extra3 = GetEngineTime()+20.0;
+		FadeClientVolume(client, 0.3, 2.5, 17.5, 2.5);
 	}
 	return false;
 }
@@ -1083,7 +1083,7 @@ public bool Items_RadioButton(int client, int entity, int &buttons, int &holding
 	{
 		if(buttons & IN_ATTACK)
 		{
-			buttons = IN_ATTACK;
+			holding = IN_ATTACK;
 
 			int clip = GetEntProp(entity, Prop_Data, "m_iClip1");
 			if(clip > 3)
@@ -1099,7 +1099,7 @@ public bool Items_RadioButton(int client, int entity, int &buttons, int &holding
 		}
 		else if(buttons & IN_ATTACK2)
 		{
-			buttons = IN_ATTACK2;
+			holding = IN_ATTACK2;
 
 			int clip = GetEntProp(entity, Prop_Data, "m_iClip1");
 			if(clip < 1)
@@ -1121,12 +1121,89 @@ public bool Items_500Button(int client, int weapon, int &buttons, int &holding)
 {
 	if(!holding && (buttons & IN_ATTACK))
 	{
-		buttons = IN_ATTACK;
+		holding = IN_ATTACK;
 		RemoveAndSwitchItem(client, weapon);
-		SpawnPickup(client, "item_healthkit_full");
+		SpawnPlayerPickup(client, "item_healthkit_full");
 		StartHealingTimer(client, 0.334, 1, 36, true);
-		TF2_AddCondition(client, TFCond_DefenseBuffNoCritBlock, 20.0, client);
-		TF2_AddCondition(client, TFCond_CritHype, 20.0, client);
+		Client[client].Extra2 = 0;
+
+		ClassEnum class;
+		if(Classes_GetByIndex(Client[client].Class, class) && class.Group==1)
+			Gamemode_GiveTicket(1, 2);
+	}
+	return false;
+}
+
+public bool Items_207Button(int client, int weapon, int &buttons, int &holding)
+{
+	if(!holding && (buttons & IN_ATTACK))
+	{
+		holding = IN_ATTACK;
+		RemoveAndSwitchItem(client, weapon);
+
+		int current = GetClientHealth(client);
+		int max = Classes_GetMaxHealth(client);
+		if(current < max)
+		{
+			int health = max/3;
+			if(current+health > max)
+				health = max-current;
+
+			SetEntityHealth(client, current+health);
+			ApplyHealEvent(client, client, health);
+		}
+
+		if(Client[client].Extra2 < 4)
+		{
+			StartHealingTimer(client, 2.5, -1, 250, _, true);
+			Client[client].Extra2++;
+		}
+
+		ClassEnum class;
+		if(Classes_GetByIndex(Client[client].Class, class) && class.Group==1)
+			Gamemode_GiveTicket(1, 2);
+	}
+	return false;
+}
+
+public bool Items_018Button(int client, int weapon, int &buttons, int &holding)
+{
+	if(!holding && (buttons & IN_ATTACK))
+	{
+		holding = IN_ATTACK;
+		RemoveAndSwitchItem(client, weapon);
+		TF2_AddCondition(client, TFCond_CritCola, 6.0);
+		TF2_AddCondition(client, TFCond_RestrictToMelee, 6.0);
+
+		ClassEnum class;
+		if(Classes_GetByIndex(Client[client].Class, class) && class.Group==1)
+			Gamemode_GiveTicket(1, 2);
+	}
+	return false;
+}
+
+public bool Items_268Button(int client, int weapon, int &buttons, int &holding)
+{
+	if(!holding && (buttons & IN_ATTACK))
+	{
+		holding = IN_ATTACK;
+
+		float engineTime = GetEngineTime();
+		static float delay[MAXTF2PLAYERS];
+		if(delay[client] > engineTime)
+		{
+			ClientCommand(client, "playgamesound items/medshotno1.wav");
+			PrintCenterText(client, "%T", "in_cooldown", client);
+			return false;
+		}
+
+		delay[client] = engineTime+90.0;
+		TF2_AddCondition(client, TFCond_Stealthed, 15.0);
+		ClientCommand(client, "playgamesound misc/halloween/spell_stealth.wav");
+
+		ClassEnum class;
+		if(Classes_GetByIndex(Client[client].Class, class) && class.Group==1)
+			Gamemode_GiveTicket(1, 1);
 	}
 	return false;
 }

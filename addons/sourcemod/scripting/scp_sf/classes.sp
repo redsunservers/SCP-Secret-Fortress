@@ -668,7 +668,6 @@ Action Classes_OnTakeDamage(int client, int &attacker, int &inflictor, float &da
 		Call_PushArrayEx(damagePosition, 3, SM_PARAM_COPYBACK);
 		Call_PushCell(damagecustom);
 		Call_Finish(result);
-		PrintToChat(client, "%d", result);
 	}
 	return result;
 }
@@ -784,6 +783,9 @@ public bool Classes_DeathScp(int client, Event event)
 		{
 			CPrintToChatAll("%s%t", PREFIX, "scp_killed", clientClass.Color, clientClass.Display, attackerClass.Color, attackerClass.Display);
 		}
+
+		if(attackerClass.Group==2 || assisterClass.Group==2)
+			Gamemode_GiveTicket(2, 4);
 	}
 	else
 	{
@@ -819,8 +821,25 @@ public void Classes_KillScp(int client, int victim)
 
 public void Classes_KillDBoi(int client, int victim)
 {
-	if(Classes_GetByName("sci")==Client[victim].Class && Items_OnKeycard(victim, Access_Main))
-		GiveAchievement(Achievement_KillSCPSci, client);
+	if(Classes_GetByName("sci") == Client[victim].Class)
+	{
+		if(Items_OnKeycard(victim, Access_Main))
+			GiveAchievement(Achievement_KillSCPSci, client);
+
+		ClassEnum class;
+		if(Classes_GetByIndex(Client[client].Class, class))
+			Gamemode_GiveTicket(class.Group, 1);
+	}
+}
+
+public void Classes_KillChaos(int client, int victim)
+{
+	if(Classes_GetByName("sci") == Client[victim].Class)
+	{
+		ClassEnum class;
+		if(Classes_GetByIndex(Client[client].Class, class))
+			Gamemode_GiveTicket(class.Group, 1);
+	}
 }
 
 public void Classes_KillMtf(int client, int victim)
@@ -870,20 +889,27 @@ public void Classes_CondDBoi(int client, TFCond cond)
 	if(cond==TFCond_TeleportedGlow && Client[client].IgnoreTeleFor<GetEngineTime())
 	{
 		int index;
+		ClassEnum class;
 		if(Client[client].Disarmer)
 		{
 			Gamemode_AddValue("dcapture");
-			index = Classes_GetByName("mtf1");
+			index = Classes_GetByName("mtf1", class);
 		}
 		else
 		{
 			Gamemode_AddValue("descape");
 			GiveAchievement(Achievement_EscapeDClass, client);
-			index = Classes_GetByName("chaos");
+			index = Classes_GetByName("chaos", class);
 		}
 
 		if(index == -1)
+		{
 			index = 0;
+		}
+		else
+		{
+			Gamemode_GiveTicket(class.Group, 1);
+		}
 
 		Items_DropAllItems(client);
 		Forward_OnEscape(client, Client[client].Disarmer);
@@ -898,20 +924,27 @@ public void Classes_CondSci(int client, TFCond cond)
 	if(cond==TFCond_TeleportedGlow && Client[client].IgnoreTeleFor<GetEngineTime())
 	{
 		int index;
+		ClassEnum class;
 		if(Client[client].Disarmer)
 		{
 			Gamemode_AddValue("scapture");
-			index = Classes_GetByName("chaos");
+			index = Classes_GetByName("chaos", class);
 		}
 		else
 		{
 			Gamemode_AddValue("sescape");
 			GiveAchievement(Achievement_EscapeDClass, client);
-			index = Classes_GetByName("mtfs");
+			index = Classes_GetByName("mtfs", class);
 		}
 
 		if(index == -1)
+		{
 			index = 0;
+		}
+		else
+		{
+			Gamemode_GiveTicket(class.Group, Client[client].Disarmer ? 2 : 1);
+		}
 
 		Items_DropAllItems(client);
 		Forward_OnEscape(client, Client[client].Disarmer);
@@ -930,6 +963,7 @@ public bool Classes_PickupStandard(int client, int entity)
 		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
 		if(!StrContains(buffer, "scp_trigger", false))
 		{
+			TF2_RemoveCondition(client, TFCond_Stealthed);
 			AcceptEntityInput(entity, "Press", client, client);
 			return true;
 		}
@@ -942,8 +976,10 @@ public bool Classes_PickupStandard(int client, int entity)
 			if(StrEqual(buffer, "tf_dropped_weapon"))
 			{
 				if(class.Human && Items_Pickup(client, GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), entity))
+				{
 					AcceptEntityInput(entity, "Kill");
-
+					TF2_RemoveCondition(client, TFCond_Stealthed);
+				}
 				return true;
 			}
 			else if(!StrContains(buffer, "prop_dynamic"))
@@ -956,8 +992,10 @@ public bool Classes_PickupStandard(int client, int entity)
 						char buffers[3][4];
 						ExplodeString(buffer, "_", buffers, sizeof(buffers), sizeof(buffers[]));
 						if(Items_Pickup(client, StringToInt(buffers[2])+30000))
+						{
+							TF2_RemoveCondition(client, TFCond_Stealthed);
 							AcceptEntityInput(entity, "KillHierarchy");
-
+						}
 						return true;
 					}
 					else if(!StrContains(buffer, "scp_healthkit", false))	// Backwards compatibility
@@ -975,8 +1013,10 @@ public bool Classes_PickupStandard(int client, int entity)
 						}
 
 						if(Items_Pickup(client, value))
+						{
+							TF2_RemoveCondition(client, TFCond_Stealthed);
 							AcceptEntityInput(entity, "KillHierarchy");
-
+						}
 						return true;
 					}
 					else if(!StrContains(buffer, "scp_weapon", false))	// Backwards compatibility
@@ -988,8 +1028,10 @@ public bool Classes_PickupStandard(int client, int entity)
 							index = 773;
 
 						if(Items_Pickup(client, index))
+						{
+							TF2_RemoveCondition(client, TFCond_Stealthed);
 							AcceptEntityInput(entity, "KillHierarchy");
-
+						}
 						return true;
 					}
 					else if(!StrContains(buffer, "scp_item_", false))
@@ -999,14 +1041,17 @@ public bool Classes_PickupStandard(int client, int entity)
 						char buffers[3][6];
 						ExplodeString(buffer, "_", buffers, sizeof(buffers), sizeof(buffers[]));
 						if(Items_Pickup(client, StringToInt(buffers[2])))
+						{
+							TF2_RemoveCondition(client, TFCond_Stealthed);
 							AcceptEntityInput(entity, "KillHierarchy");
-
+						}
 						return true;
 					}
 				}
 
 				if(!StrContains(buffer, "scp_trigger", false))
 				{
+					TF2_RemoveCondition(client, TFCond_Stealthed);
 					switch(class.Group)
 					{
 						case 0:
@@ -1027,6 +1072,12 @@ public bool Classes_PickupStandard(int client, int entity)
 		}
 	}
 	return false;
+}
+
+public float Classes_SpeedHuman(int client, float &speed)
+{
+	if(Client[client].Extra2)
+		speed += speed*(Client[client].Extra2*0.2);
 }
 
 public float Classes_GhostTheme(int client, char path[PLATFORM_MAX_PATH])

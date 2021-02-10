@@ -95,7 +95,7 @@ enum
 
 bool Enabled = false;
 bool NoMusic = false;
-bool ChatHook = true;
+bool ChatHook = false;
 bool SourceComms = false;		// SourceComms++
 bool BaseComm = false;		// BaseComm
 
@@ -401,6 +401,7 @@ public void OnConfigsExecuted()
 	{
 		AddCommandListener(OnSayCommand, "say");
 		AddCommandListener(OnSayCommand, "say_team");
+		ChatHook = true;
 	}
 }
 
@@ -901,6 +902,8 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	Client[client].ChargeIn = 0.0;
 	Client[client].Disarmer = 0;
 	Client[client].SprintPower = 100.0;
+	Client[client].Extra2 = 0;
+	Client[client].Extra3 = 0.0;
 	Client[client].WeaponClass = TFClass_Unknown;
 
 	Classes_PlayerSpawn(client);
@@ -1717,6 +1720,10 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 		}
 		holding[client] = IN_USE;
 	}
+	else if(buttons & IN_RELOAD)
+	{
+		holding[client] = IN_RELOAD;
+	}
 
 	// Check if the player moved at all or is speaking
 	#if SOURCEMOD_V_MAJOR==1 && SOURCEMOD_V_MINOR<=10
@@ -1806,7 +1813,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 
 				if(Client[client].Sprinting)
 				{
-					if(!TF2_IsPlayerInCondition(client, TFCond_CritHype))
+					if(!Client[client].Extra2 && Client[client].Extra3<engineTime)
 					{
 						Client[client].SprintPower -= 2.0;
 						if(Client[client].SprintPower < 0)
@@ -1900,7 +1907,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 			// What class am I again
 			if(showHud)
 			{
-				SetHudTextParamsEx(-1.0, 0.06, 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
+				SetHudTextParamsEx(-1.0, 0.09, 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
 				ShowSyncHudText(client, HudClass, "%t", class.Display);
 			}
 		}

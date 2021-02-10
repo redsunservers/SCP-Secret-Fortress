@@ -24,7 +24,7 @@ void ViewChange_MapStart()
 	}
 }
 
-void ViewChange_Switch(int client, int active)
+void ViewChange_Switch(int client)
 {
 	int entity = EntRefToEntIndex(WeaponRef[client]);
 	if(entity>MaxClients && IsValidEntity(entity))
@@ -33,6 +33,7 @@ void ViewChange_Switch(int client, int active)
 	entity = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
 	if(entity > MaxClients)
 	{
+		int active = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 		if(!ViewModel_Enabled(client) && active>MaxClients && IsValidEntity(active))
 		{
 			WeaponEnum weapon;
@@ -47,12 +48,12 @@ void ViewChange_Switch(int client, int active)
 
 					SetEntProp(entity, Prop_Send, "m_nModelIndex", HandIndex[class]);
 
-					int model = weapon.Viewmodel ? weapon.Viewmodel : GetEntProp(active, Prop_Send, "m_iWorldModelIndex");
+					active = weapon.Viewmodel ? weapon.Viewmodel : GetEntProp(active, Prop_Send, "m_iWorldModelIndex");
 
 					entity = CreateEntityByName("tf_wearable_vm");
 					if(entity > MaxClients)	// Weapon viewmodel
 					{
-						SetEntProp(entity, Prop_Send, "m_nModelIndex", model);
+						SetEntProp(entity, Prop_Send, "m_nModelIndex", active);
 						SetEntProp(entity, Prop_Send, "m_fEffects", 129);
 						SetEntProp(entity, Prop_Send, "m_iTeamNum", GetClientTeam(client));
 						SetEntProp(entity, Prop_Send, "m_nSkin", weapon.Skin);

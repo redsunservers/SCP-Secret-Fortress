@@ -229,6 +229,21 @@ enum
 	HITGROUP_GEAR = 10
 };
 
+enum
+{
+	TFSpell_Fireball = 1,
+	TFSpell_Bats,
+	TFSpell_OverHeal,
+	TFSpell_MIRV,
+	TFSpell_BlastJump,
+	TFSpell_Stealth,
+	TFSpell_Teleport,
+	TFSpell_LightningBall,
+	TFSpell_Athletic,
+	TFSpell_Meteor,
+	TFSpell_SkeletonHorde
+}
+
 static const char Characters[] = "abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOQRTUVWXYZ~`1234567890@#$^&*(){}:[]|¶�;<>.,?/'|";
 static const float OFF_THE_MAP[3] = { 16383.0, 16383.0, -16383.0 };
 
@@ -405,22 +420,6 @@ int GetClientPointVisible(int iClient, float flDistance = 100.0)
 	
 	delete hTrace;
 	return iReturn;
-}
-
-void SpawnPickup(int iClient, const char[] sClassname)
-{
-	float vecOrigin[3];
-	GetClientAbsOrigin(iClient, vecOrigin);
-	vecOrigin[2] += 16.0;
-	
-	int iEntity = CreateEntityByName(sClassname);
-	DispatchKeyValue(iEntity, "OnPlayerTouch", "!self,Kill,,0,-1");
-	if (DispatchSpawn(iEntity))
-	{
-		SetEntProp(iEntity, Prop_Send, "m_iTeamNum", 0, 4);
-		TeleportEntity(iEntity, vecOrigin, NULL_VECTOR, NULL_VECTOR);
-		CreateTimer(0.15, Timer_RemoveEntity, EntIndexToEntRef(iEntity));
-	}
 }
 
 float fabs(float x)
@@ -1132,11 +1131,12 @@ public Action Timer_MyBlood(Handle timer, int userid)
 	return Plugin_Continue;
 }
 
-void StartHealingTimer(int client, float delay, int health, int amount=0, bool maxhealth=true)
+void StartHealingTimer(int client, float delay, int health, int amount=0, bool maxhealth=true, bool require=false)
 {
 	DataPack pack;
 	CreateDataTimer(delay, Timer_Healing, pack, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	pack.WriteCell(GetClientUserId(client));
+	pack.WriteCell(require);
 	pack.WriteCell(health);
 	pack.WriteCell(maxhealth);
 	pack.WriteCell(amount);
@@ -1150,17 +1150,27 @@ public Action Timer_Healing(Handle timer, DataPack pack)
 	if(!client || !IsClientInGame(client) || !IsPlayerAlive(client))
 		return Plugin_Stop;
 
+	if(pack.ReadCell() && !Client[client].Extra2)
+		return Plugin_Stop;
+
 	int current = GetClientHealth(client);
 	int health = pack.ReadCell();
 	if(pack.ReadCell())
 	{
-		int max = 125;
-		OnGetMaxHealth(client, max);
+		int max = Classes_GetMaxHealth(client);
 		if(current<=max && current+health>max)
 			health = max-current;
 	}
 
-	SetEntityHealth(client, current+health);
+	health = current+health;
+	if(health < 1)
+	{
+		ForcePlayerSuicide(client);
+	}
+	else if(health)
+	{
+		SetEntityHealth(client, health);
+	}
 
 	current = pack.ReadCell();
 	if(current < 1)

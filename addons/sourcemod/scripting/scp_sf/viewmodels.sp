@@ -32,7 +32,7 @@ void ViewModel_Create(int iClient, const char[] sModel, const float vecAnglesOff
 	
 	ViewmodelRef[iClient] = EntIndexToEntRef(iViewModel);
 	
-	ViewChange_Switch(iClient, -1);
+	ViewChange_Switch(iClient);
 }
 
 bool ViewModel_Enabled(int iClient)

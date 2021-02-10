@@ -744,6 +744,30 @@
 	{
 		"en"		"%%+attack%% to use restore health and gain health regneration."
 	}
+	"weapon_46"
+	{
+		"en"		"SCP-207"
+	}
+	"info_46"
+	{
+		"en"		"%%+attack%% to use restore health and increase your movement speed.\nYou passively lose health over time until you take SCP-500."
+	}
+	"weapon_30018"
+	{
+		"en"		"SCP-018"
+	}
+	"info_30018"
+	{
+		"en"		"%%+attack%% to break down a door in front of you."
+	}
+	"weapon_107"
+	{
+		"en"		"SCP-268"
+	}
+	"info_107"
+	{
+		"en"		"%%+attack%% to become invisible for 15 seconds."
+	}
 
 
 	// Team Phrases

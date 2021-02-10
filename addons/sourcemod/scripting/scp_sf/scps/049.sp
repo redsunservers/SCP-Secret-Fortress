@@ -27,6 +27,8 @@ public bool SCP049_Create(int client)
 {
 	int account = GetSteamAccountID(client);
 
+	GiveMelee(client, account);
+
 	int weapon = SpawnWeapon(client, "tf_weapon_medigun", 211, 5, 13, "7 ; 0.65 ; 9 ; 0 ; 18 ; 1 ; 252 ; 0.95 ; 292 ; 2", false);
 	if(weapon > MaxClients)
 	{
@@ -34,8 +36,6 @@ public bool SCP049_Create(int client)
 		TF2Attrib_SetByDefIndex(weapon, 454, view_as<float>(1));
 		SetEntProp(weapon, Prop_Send, "m_iAccountID", account);
 	}
-
-	GiveMelee(client, account);
 
 	Revive[client].Index = 0;
 	Revive[client].GoneAt = GetEngineTime()+20.0;
