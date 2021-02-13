@@ -243,10 +243,23 @@ static void OnWeaponSwitchFrame(int userid)
 	int client = GetClientOfUserId(userid);
 	if(client && IsClientInGame(client))
 	{
+		int ammo[Ammo_MAX];
 		for(int i=1; i<Ammo_MAX; i++)
 		{
-			if(i!=Ammo_Metal && !GetEntProp(client, Prop_Data, "m_iAmmo", _, i))
+			ammo[i] = GetEntProp(client, Prop_Data, "m_iAmmo", _, i);
+			if(i!=Ammo_Metal && !ammo[i])
 				SetEntProp(client, Prop_Data, "m_iAmmo", -1, _, i);
+		}
+
+		int entity;
+		for(int i; (entity=Items_Iterator(client, i))!=-1; i++)
+		{
+			if(GetEntProp(entity, Prop_Data, "m_iClip1") >= 0)
+				continue;
+
+			int type = GetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType");
+			if(type>0 && type<Ammo_MAX && ammo[type]<1)
+				TF2_RemoveItem(client, entity);
 		}
 
 		ViewChange_Switch(client);

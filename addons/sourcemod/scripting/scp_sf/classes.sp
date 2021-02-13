@@ -1038,7 +1038,7 @@ public bool Classes_PickupStandard(int client, int entity)
 					{
 						AcceptEntityInput(entity, "FireUser1", client, client);
 
-						char buffers[3][6];
+						char buffers[4][6];
 						ExplodeString(buffer, "_", buffers, sizeof(buffers), sizeof(buffers[]));
 						if(Items_Pickup(client, StringToInt(buffers[2])))
 						{

@@ -585,6 +585,9 @@ public bool Gamemode_ConditionClassic(TFTeam &team)
 		if(class.Vip)
 			return false;
 
+		if(Client[i].Disarmer)
+			continue;
+
 		if(!class.Group)	// SCPs
 		{
 			salive = true;

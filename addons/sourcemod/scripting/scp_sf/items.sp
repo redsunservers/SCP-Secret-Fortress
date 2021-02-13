@@ -978,7 +978,7 @@ public bool Items_MicroButton(int client, int weapon, int &buttons, int &holding
 	int type = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
 	int ammo = GetAmmo(client, type);
 	static float charge[MAXTF2PLAYERS];
-	if(ammo<1 || !(buttons & IN_ATTACK))
+	if(ammo<2 || !(buttons & IN_ATTACK))
 	{
 		charge[client] = 0.0;
 		SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
@@ -998,7 +998,7 @@ public bool Items_MicroButton(int client, int weapon, int &buttons, int &holding
 		else if(charge[client] < engineTime)
 		{
 			charge[client] = FAR_FUTURE;
-			SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", 0.0);
+			SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", GetGameTime()+0.1);
 		}
 		else
 		{

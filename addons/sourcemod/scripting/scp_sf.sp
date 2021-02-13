@@ -405,6 +405,11 @@ public void OnConfigsExecuted()
 	}
 }
 
+public void OnMapEnd()
+{
+	Enabled = false;
+}
+
 public void OnPluginEnd()
 {
 	ConVar_Disable();
@@ -414,8 +419,7 @@ public void OnPluginEnd()
 			DHook_UnhookClient(i);
 	}
 
-	char buffer[2];
-	if(Enabled && GetCurrentMap(buffer, sizeof(buffer)))
+	if(Enabled)
 		EndRound(0);
 }
 
@@ -564,20 +568,22 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 	{
 		if(IsValidClient(client))
 		{
-			int ent, i;
 			WeaponEnum weapon;
-			while((ent=Items_Iterator(client, i)) != -1)
+			int ent = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+			if(ent > MaxClients)
 			{
-				if(!Items_GetWeaponByIndex(GetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex"), weapon))
-					continue;
-
-				if(weapon.Type == Item_Keycard)
+				if(Items_GetWeaponByIndex(GetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex"), weapon) && weapon.Type==Item_Keycard)
 				{
-					if(ent == GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon"))
-						Items_SwitchItem(client, ent);
-
+					Items_SwitchItem(client, ent);
 					TF2_RemoveItem(client, ent);
+					return Plugin_Continue;
 				}
+			}
+
+			for(int i; (ent=Items_Iterator(client, i))!=-1; i++)
+			{
+				if(Items_GetWeaponByIndex(GetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex"), weapon) && weapon.Type==Item_Keycard)
+					TF2_RemoveItem(client, ent);
 			}
 		}
 	}

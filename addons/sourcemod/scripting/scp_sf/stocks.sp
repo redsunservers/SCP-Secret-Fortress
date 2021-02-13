@@ -1264,25 +1264,19 @@ int TF2_CreateGlow(int client, const char[] model)
 
 public Action GlowTransmit(int entity, int target)
 {
-	if(!Enabled)
+	if(Enabled)
 	{
-		SDKUnhook(entity, SDKHook_SetTransmit, GlowTransmit);
-		AcceptEntityInput(entity, "Kill");
-		return Plugin_Continue;
+		if(!IsValidClient(target))
+			return Plugin_Continue;
+
+		int client = GetEntPropEnt(entity, Prop_Data, "m_hParent");
+		if(IsValidClient(client) && IsPlayerAlive(client))
+			return Classes_OnGlowPlayer(target, client) ? Plugin_Continue : Plugin_Stop;
 	}
 
-	if(!IsValidClient(target))
-		return Plugin_Continue;
-
-	int client = GetEntPropEnt(entity, Prop_Data, "m_hParent");
-	if(!IsValidClient(client) || !IsPlayerAlive(client))
-	{
-		SDKUnhook(entity, SDKHook_SetTransmit, GlowTransmit);
-		AcceptEntityInput(entity, "Kill");
-		return Plugin_Stop;
-	}
-
-	return Classes_OnGlowPlayer(target, client) ? Plugin_Continue : Plugin_Stop;
+	SDKUnhook(entity, SDKHook_SetTransmit, GlowTransmit);
+	AcceptEntityInput(entity, "Kill");
+	return Plugin_Continue;
 }
 
 public bool TraceRayPlayerOnly(int client, int mask, any data)
