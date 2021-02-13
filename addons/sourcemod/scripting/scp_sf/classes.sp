@@ -915,7 +915,7 @@ public void Classes_CondDBoi(int client, TFCond cond)
 		Forward_OnEscape(client, Client[client].Disarmer);
 		Client[client].Class = index;
 		TF2_RespawnPlayer(client);
-		Gamemode_CheckRound();
+		CreateTimer(0.3, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
 
@@ -950,7 +950,7 @@ public void Classes_CondSci(int client, TFCond cond)
 		Forward_OnEscape(client, Client[client].Disarmer);
 		Client[client].Class = index;
 		TF2_RespawnPlayer(client);
-		Gamemode_CheckRound();
+		CreateTimer(0.3, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
 
