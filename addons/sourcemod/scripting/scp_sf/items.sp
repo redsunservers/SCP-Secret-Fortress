@@ -283,6 +283,8 @@ int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, 
 				i += 2;
 			}
 
+			ApplyStrangeRank(entity, GetRandomInt(0, 20));
+
 			if(weapon.Hide)
 			{
 				SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", -1);

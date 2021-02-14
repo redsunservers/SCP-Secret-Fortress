@@ -975,7 +975,7 @@ public bool Classes_PickupStandard(int client, int entity)
 		{
 			if(StrEqual(buffer, "tf_dropped_weapon"))
 			{
-				if(class.Human && Items_Pickup(client, GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), entity))
+				if(Items_Pickup(client, GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), entity))
 				{
 					AcceptEntityInput(entity, "Kill");
 					TF2_RemoveCondition(client, TFCond_Stealthed);
@@ -985,73 +985,114 @@ public bool Classes_PickupStandard(int client, int entity)
 			else if(!StrContains(buffer, "prop_dynamic"))
 			{
 				GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
-				if(class.Human)
+				if(!StrContains(buffer, "scp_keycard_", false))	// Backwards compatibility
 				{
-					if(!StrContains(buffer, "scp_keycard_", false))	// Backwards compatibility
+					char buffers[3][4];
+					ExplodeString(buffer, "_", buffers, sizeof(buffers), sizeof(buffers[]));
+					if(Items_Pickup(client, StringToInt(buffers[2])+30000))
 					{
-						char buffers[3][4];
-						ExplodeString(buffer, "_", buffers, sizeof(buffers), sizeof(buffers[]));
-						if(Items_Pickup(client, StringToInt(buffers[2])+30000))
-						{
-							TF2_RemoveCondition(client, TFCond_Stealthed);
-							AcceptEntityInput(entity, "KillHierarchy");
-						}
-						return true;
+						TF2_RemoveCondition(client, TFCond_Stealthed);
+						AcceptEntityInput(entity, "KillHierarchy");
 					}
-					else if(!StrContains(buffer, "scp_healthkit", false))	// Backwards compatibility
-					{
-						char buffers[3][4];
-						ExplodeString(buffer, "_", buffers, sizeof(buffers), sizeof(buffers[]));
-						int value = StringToInt(buffers[2]);
-						if(value > 3)
-						{
-							value = 30017;
-						}
-						else
-						{
-							value += 30012;
-						}
-
-						if(Items_Pickup(client, value))
-						{
-							TF2_RemoveCondition(client, TFCond_Stealthed);
-							AcceptEntityInput(entity, "KillHierarchy");
-						}
-						return true;
-					}
-					else if(!StrContains(buffer, "scp_weapon", false))	// Backwards compatibility
-					{
-						char buffers[3][4];
-						ExplodeString(buffer, "_", buffers, sizeof(buffers), sizeof(buffers[]));
-						int index = StringToInt(buffers[2]);
-						if(!index)
-							index = 773;
-
-						if(Items_Pickup(client, index))
-						{
-							TF2_RemoveCondition(client, TFCond_Stealthed);
-							AcceptEntityInput(entity, "KillHierarchy");
-						}
-						return true;
-					}
-					else if(!StrContains(buffer, "scp_item_", false))
-					{
-						AcceptEntityInput(entity, "FireUser1", client, client);
-
-						char buffers[4][6];
-						ExplodeString(buffer, "_", buffers, sizeof(buffers), sizeof(buffers[]));
-						if(Items_Pickup(client, StringToInt(buffers[2])))
-						{
-							TF2_RemoveCondition(client, TFCond_Stealthed);
-							AcceptEntityInput(entity, "KillHierarchy");
-						}
-						return true;
-					}
+					return true;
 				}
+				else if(!StrContains(buffer, "scp_healthkit", false))	// Backwards compatibility
+				{
+					char buffers[3][4];
+					ExplodeString(buffer, "_", buffers, sizeof(buffers), sizeof(buffers[]));
+					int value = StringToInt(buffers[2]);
+					if(value > 3)
+					{
+						value = 30017;
+					}
+					else
+					{
+						value += 30012;
+					}
 
-				if(!StrContains(buffer, "scp_trigger", false))
+					if(Items_Pickup(client, value))
+					{
+						TF2_RemoveCondition(client, TFCond_Stealthed);
+						AcceptEntityInput(entity, "KillHierarchy");
+					}
+					return true;
+				}
+				else if(!StrContains(buffer, "scp_weapon", false))	// Backwards compatibility
+				{
+					char buffers[3][4];
+					ExplodeString(buffer, "_", buffers, sizeof(buffers), sizeof(buffers[]));
+					int index = StringToInt(buffers[2]);
+					if(!index)
+						index = 773;
+
+					if(Items_Pickup(client, index))
+					{
+						TF2_RemoveCondition(client, TFCond_Stealthed);
+						AcceptEntityInput(entity, "KillHierarchy");
+					}
+					return true;
+				}
+				else if(!StrContains(buffer, "scp_item_", false))
+				{
+					AcceptEntityInput(entity, "FireUser1", client, client);
+
+					char buffers[4][6];
+					ExplodeString(buffer, "_", buffers, sizeof(buffers), sizeof(buffers[]));
+					if(Items_Pickup(client, StringToInt(buffers[2])))
+					{
+						TF2_RemoveCondition(client, TFCond_Stealthed);
+						AcceptEntityInput(entity, "KillHierarchy");
+					}
+					return true;
+				}
+				else if(!StrContains(buffer, "scp_trigger", false))
 				{
 					TF2_RemoveCondition(client, TFCond_Stealthed);
+					switch(class.Group)
+					{
+						case 0:
+							AcceptEntityInput(entity, "FireUser1", client, client);
+
+						case 1:
+							AcceptEntityInput(entity, "FireUser2", client, client);
+
+						case 2:
+							AcceptEntityInput(entity, "FireUser3", client, client);
+
+						default:
+							AcceptEntityInput(entity, "FireUser4", client, client);
+					}
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+public bool Classes_PickupScp(int client, int entity)
+{
+	char buffer[64];
+	GetEntityClassname(entity, buffer, sizeof(buffer));
+	if(StrEqual(buffer, "func_button"))
+	{
+		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
+		if(!StrContains(buffer, "scp_trigger", false))
+		{
+			AcceptEntityInput(entity, "Press", client, client);
+			return true;
+		}
+	}
+	else
+	{
+		ClassEnum class;
+		if(Classes_GetByIndex(Client[client].Class, class))
+		{
+			if(!StrContains(buffer, "prop_dynamic"))
+			{
+				GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
+				if(!StrContains(buffer, "scp_trigger", false))
+				{
 					switch(class.Group)
 					{
 						case 0:
