@@ -438,6 +438,7 @@ void Items_SwitchItem(int client, int holding)
 		slot = TF2_GetClassnameSlot(buffer);
 		ArrayList list = Items_ArrayList(client, slot);
 
+		bool found;
 		int length = list.Length;
 		if(length > 1)
 		{
@@ -455,17 +456,19 @@ void Items_SwitchItem(int client, int holding)
 					int entity = list.Get(i);
 					Items_SwapWeapons(client, entity, holding);
 					SetActiveWeapon(client, entity);
+					found = true;
 					break;
 				}
 				break;
 			}
 		}
 		delete list;
+
+		if(found)
+			return;
 	}
-	else
-	{
-		FakeClientCommand(client, "slot%d", slot+1);
-	}
+
+	FakeClientCommand(client, "use tf_weapon_fists");
 }
 
 bool Items_CanGiveItem(int client, int type, bool &full=false)
