@@ -914,6 +914,8 @@ public Action Items_DisarmerHit(int client, int victim, int &inflictor, float &d
 				ClassEnum class;
 				if(Classes_GetByIndex(Client[victim].Class, class) && class.Group==2 && !class.Vip)
 					GiveAchievement(Achievement_DisarmMTF, client);
+
+				CreateTimer(1.0, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
 			}
 		}
 

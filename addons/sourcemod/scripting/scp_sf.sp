@@ -587,6 +587,14 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 			}
 		}
 	}
+	else if(!StrContains(name, "scp_startmusic", false))
+	{
+		NoMusicRound = false;
+		for(int target=1; target<=MaxClients; target++)
+		{
+			Client[target].NextSongAt = 0.0;
+		}
+	}
 	else if(!StrContains(name, "scp_endmusic", false))
 	{
 		NoMusicRound = true;
