@@ -277,6 +277,9 @@ bool Gamemode_RoundStart()
 
 	int length = players.Length;
 	ArrayList classes = MakeClassList(SetupList, length);
+	int length2 = classes.Length;
+	if(length > length2)
+		length = length2;
 
 	ClassEnum class;
 	for(int i; i<length; i++)
@@ -475,7 +478,7 @@ static ArrayList MakeClassList(ArrayList classes, int max)
 static int PresetToClass(const char[] name, ArrayList current)
 {
 	int index = Classes_GetByName(name);
-	if(index == -1)
+	if(index==-1 && Presets)
 	{
 		PresetEnum preset;
 		int length = Presets.Length;
@@ -549,27 +552,29 @@ static void KvGetSound(KeyValues kv, const char[] string, SoundEnum sound, const
 {
 	static char buffers[2][PLATFORM_MAX_PATH];
 	kv.GetString(string, buffers[0], sizeof(buffers[]));
-
-	switch(ExplodeString(buffers[0], ";", buffers, sizeof(buffers), sizeof(buffers[])))
+	if(buffers[0][0])
 	{
-		case 0:
+		switch(ExplodeString(buffers[0], ";", buffers, sizeof(buffers), sizeof(buffers[])))
 		{
-			sound = defaul;
+			case 1:
+			{
+				sound.Time = 0.0;
+				strcopy(sound.Path, sizeof(sound.Path), buffers[0]);
+				if(sound.Path[0])
+					PrecacheSound(sound.Path, true);
+			}
+			default:
+			{
+				sound.Time = StringToFloat(buffers[0]);
+				strcopy(sound.Path, sizeof(sound.Path), buffers[1]);
+				if(sound.Path[0])
+					PrecacheSound(sound.Path, true);
+			}
 		}
-		case 1:
-		{
-			sound.Time = 0.0;
-			strcopy(sound.Path, sizeof(sound.Path), buffers[0]);
-			if(sound.Path[0])
-				PrecacheSound(sound.Path, true);
-		}
-		default:
-		{
-			sound.Time = StringToFloat(buffers[0]);
-			strcopy(sound.Path, sizeof(sound.Path), buffers[1]);
-			if(sound.Path[0])
-				PrecacheSound(sound.Path, true);
-		}
+	}
+	else
+	{
+		sound = defaul;
 	}
 }
 
@@ -585,7 +590,7 @@ public bool Gamemode_ConditionClassic(TFTeam &team)
 		if(class.Vip)
 			return false;
 
-		if(Client[i].Disarmer)
+		if(class.Human && Client[i].Disarmer)
 			continue;
 
 		if(!class.Group)	// SCPs

@@ -918,6 +918,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	Client[client].SprintPower = 100.0;
 	Client[client].Extra2 = 0;
 	Client[client].Extra3 = 0.0;
+	Client[client].NextSongAt = 0.0;
 	Client[client].WeaponClass = TFClass_Unknown;
 
 	Classes_PlayerSpawn(client);
