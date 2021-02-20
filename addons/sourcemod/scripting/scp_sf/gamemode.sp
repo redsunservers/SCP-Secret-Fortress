@@ -619,7 +619,7 @@ public bool Gamemode_ConditionClassic(TFTeam &team)
 	GameInfo.GetValue("ptotal", ptotal);
 
 	int group;
-	if(descape || GameInfo.GetValue("scapture", group))	//  Class-D escaped or Scientist captured
+	if(descape || (GameInfo.GetValue("scapture", group) && group))	//  Class-D escaped or Scientist captured
 	{
 		if(balive)	// MTF still alive
 		{
@@ -637,7 +637,7 @@ public bool Gamemode_ConditionClassic(TFTeam &team)
 		team = TFTeam_Red;	// SCPs win
 		group = 3;
 	}
-	else if(sescape || GameInfo.GetValue("dcapture", group))	// Scientist escaped or Class-D captured
+	else if(sescape || (GameInfo.GetValue("dcapture", group) && group))	// Scientist escaped or Class-D captured
 	{
 		team = TFTeam_Blue;	// MTF win
 		group = 2;
