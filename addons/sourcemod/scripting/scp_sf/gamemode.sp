@@ -273,9 +273,15 @@ bool Gamemode_RoundStart()
 			Client[client].Class = 0;
 		}
 	}
-	players.Sort(Sort_Random, Sort_Integer);
 
 	int length = players.Length;
+	if(!length)
+	{
+		delete players;
+		return false;
+	}
+
+	players.Sort(Sort_Random, Sort_Integer);
 	ArrayList classes = MakeClassList(SetupList, length);
 	int length2 = classes.Length;
 	if(length > length2)
@@ -308,6 +314,7 @@ bool Gamemode_RoundStart()
 
 		WaveTimer = CreateTimer(GetRandomFloat(WaveTimes[0], WaveTimes[1]), Gamemode_WaveTimer, _, TIMER_FLAG_NO_MAPCHANGE);
 	}
+	return true;
 }
 
 void Gamemode_CheckRound()

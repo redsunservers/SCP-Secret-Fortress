@@ -97,8 +97,7 @@ public MRESReturn DHook_RoundRespawn()
 	if(Enabled || GameRules_GetProp("m_bInWaitingForPlayers"))
 		return;
 
-	Gamemode_RoundStart();
-	Enabled = true;
+	Enabled = Gamemode_RoundStart();
 }
 
 public MRESReturn DHook_AllowedToHealTarget(int weapon, DHookReturn ret, DHookParam param)
@@ -277,8 +276,7 @@ public MRESReturn DHook_CanPickupDroppedWeaponPre(int client, DHookReturn ret, D
 	if(Classes_GetByIndex(Client[client].Class, class) && !(Client[client].Disarmer && class.Human))
 	{
 		int entity = param.Get(1);
-		if(Items_Pickup(client, GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), entity))
-			AcceptEntityInput(entity, "Kill");
+		Classes_OnPickup(client, entity);
 	}
 
 	ret.Value = false;

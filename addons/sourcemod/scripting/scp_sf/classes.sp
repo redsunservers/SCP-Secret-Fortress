@@ -651,7 +651,7 @@ void Classes_OnSpeed(int client, float &speed)
 	Call_Finish();
 }
 
-Action Classes_OnTakeDamage(int client, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+Action Classes_OnTakeDamage(int client, int attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
 	Action result = Plugin_Continue;
 	ClassEnum class;
@@ -659,7 +659,7 @@ Action Classes_OnTakeDamage(int client, int &attacker, int &inflictor, float &da
 	{
 		Call_StartFunction(null, class.OnTakeDamage);
 		Call_PushCell(client);
-		Call_PushCellRef(attacker);
+		Call_PushCell(attacker);
 		Call_PushCellRef(inflictor);
 		Call_PushFloatRef(damage);
 		Call_PushCellRef(damagetype);
