@@ -248,97 +248,99 @@ public void SCP096_OnButton(int client, int button)
 				}
 			}
 		}
+		default:
+		{
+			if(Client[client].Extra3 > engineTime)
+				return;
+		}
 	}
 
-	if(!Client[client].Extra2 || Client[client].Extra3<engineTime)
+	static float delay;
+	if(delay < engineTime)
 	{
-		static float delay;
-		if(delay < engineTime)
+		delay = engineTime+0.25;
+		static float pos1[3], ang1[3];
+		GetClientEyePosition(client, pos1);
+		GetClientEyeAngles(client, ang1);
+		ang1[0] = fixAngle(ang1[0]);
+		ang1[1] = fixAngle(ang1[1]);
+
+		bool found;
+		for(int target=1; target<=MaxClients; target++)
 		{
-			delay = engineTime+0.25;
-			static float pos1[3], ang1[3];
-			GetClientEyePosition(client, pos1);
-			GetClientEyeAngles(client, ang1);
-			ang1[0] = fixAngle(ang1[0]);
-			ang1[1] = fixAngle(ang1[1]);
+			if(!IsValidClient(target) || IsFriendly(Client[client].Class, Client[target].Class) || Triggered[target]>1)
+				continue;
 
-			bool found;
-			for(int target=1; target<=MaxClients; target++)
+			static float pos2[3];
+			GetClientEyePosition(target, pos2);
+			if(GetVectorDistance(pos1, pos2, true) > 499999)
+				continue;
+
+			static float ang2[3], ang3[3];
+			GetClientEyeAngles(target, ang2);
+			GetVectorAnglesTwoPoints(pos2, pos1, ang3);
+
+			// fix all angles
+			ang2[0] = fixAngle(ang2[0]);
+			ang2[1] = fixAngle(ang2[1]);
+			ang3[0] = fixAngle(ang3[0]);
+			ang3[1] = fixAngle(ang3[1]);
+
+			// verify angle validity
+			if(!(fabs(ang2[0] - ang3[0]) <= MAXANGLEPITCH ||
+			(fabs(ang2[0] - ang3[0]) >= (360.0-MAXANGLEPITCH))))
+				continue;
+
+			if(!(fabs(ang2[1] - ang3[1]) <= MAXANGLEYAW ||
+			(fabs(ang2[1] - ang3[1]) >= (360.0-MAXANGLEYAW))))
+				continue;
+
+			// ensure no wall is obstructing
+			TR_TraceRayFilter(pos2, pos1, (CONTENTS_SOLID | CONTENTS_AREAPORTAL | CONTENTS_GRATE), RayType_EndPoint, TraceWallsOnly);
+			TR_GetEndPosition(ang3);
+			if(ang3[0]!=pos1[0] || ang3[1]!=pos1[1] || ang3[2]!=pos1[2])
+				continue;
+
+			GetVectorAnglesTwoPoints(pos1, pos2, ang3);
+
+			// fix all angles
+			ang3[0] = fixAngle(ang3[0]);
+			ang3[1] = fixAngle(ang3[1]);
+
+			// verify angle validity
+			if(!(fabs(ang1[0] - ang3[0]) <= MAXANGLEPITCH ||
+			(fabs(ang1[0] - ang3[0]) >= (360.0-MAXANGLEPITCH))))
+				continue;
+
+			if(!(fabs(ang1[1] - ang3[1]) <= MAXANGLEYAW ||
+			(fabs(ang1[1] - ang3[1]) >= (360.0-MAXANGLEYAW))))
+				continue;
+
+			// ensure no wall is obstructing
+			TR_TraceRayFilter(pos1, pos2, (CONTENTS_SOLID | CONTENTS_AREAPORTAL | CONTENTS_GRATE), RayType_EndPoint, TraceWallsOnly);
+			TR_GetEndPosition(ang3);
+			if(ang3[0]!=pos2[0] || ang3[1]!=pos2[1] || ang3[2]!=pos2[2])
+				continue;
+
+			// success
+			TriggerShyGuy(client, target, false);
+			found = true;
+		}
+
+		if(!found && !Client[client].Extra2)
+		{
+			if(Client[client].IdleAt < engineTime)
 			{
-				if(!IsValidClient(target) || IsFriendly(Client[client].Class, Client[target].Class) || Triggered[target]>1)
-					continue;
-
-				static float pos2[3];
-				GetClientEyePosition(target, pos2);
-				if(GetVectorDistance(pos1, pos2, true) > 499999)
-					continue;
-
-				static float ang2[3], ang3[3];
-				GetClientEyeAngles(target, ang2);
-				GetVectorAnglesTwoPoints(pos2, pos1, ang3);
-
-				// fix all angles
-				ang2[0] = fixAngle(ang2[0]);
-				ang2[1] = fixAngle(ang2[1]);
-				ang3[0] = fixAngle(ang3[0]);
-				ang3[1] = fixAngle(ang3[1]);
-
-				// verify angle validity
-				if(!(fabs(ang2[0] - ang3[0]) <= MAXANGLEPITCH ||
-				(fabs(ang2[0] - ang3[0]) >= (360.0-MAXANGLEPITCH))))
-					continue;
-
-				if(!(fabs(ang2[1] - ang3[1]) <= MAXANGLEYAW ||
-				(fabs(ang2[1] - ang3[1]) >= (360.0-MAXANGLEYAW))))
-					continue;
-
-				// ensure no wall is obstructing
-				TR_TraceRayFilter(pos2, pos1, (CONTENTS_SOLID | CONTENTS_AREAPORTAL | CONTENTS_GRATE), RayType_EndPoint, TraceWallsOnly);
-				TR_GetEndPosition(ang3);
-				if(ang3[0]!=pos1[0] || ang3[1]!=pos1[1] || ang3[2]!=pos1[2])
-					continue;
-
-				GetVectorAnglesTwoPoints(pos1, pos2, ang3);
-
-				// fix all angles
-				ang3[0] = fixAngle(ang3[0]);
-				ang3[1] = fixAngle(ang3[1]);
-
-				// verify angle validity
-				if(!(fabs(ang1[0] - ang3[0]) <= MAXANGLEPITCH ||
-				(fabs(ang1[0] - ang3[0]) >= (360.0-MAXANGLEPITCH))))
-					continue;
-
-				if(!(fabs(ang1[1] - ang3[1]) <= MAXANGLEYAW ||
-				(fabs(ang1[1] - ang3[1]) >= (360.0-MAXANGLEYAW))))
-					continue;
-
-				// ensure no wall is obstructing
-				TR_TraceRayFilter(pos1, pos2, (CONTENTS_SOLID | CONTENTS_AREAPORTAL | CONTENTS_GRATE), RayType_EndPoint, TraceWallsOnly);
-				TR_GetEndPosition(ang3);
-				if(ang3[0]!=pos2[0] || ang3[1]!=pos2[1] || ang3[2]!=pos2[2])
-					continue;
-
-				// success
-				TriggerShyGuy(client, target, false);
-				found = true;
+				if(Client[client].Pos[0])
+				{
+					StopSound(client, SNDCHAN_VOICE, SoundPassive);
+					Client[client].Pos[0] = 0.0;
+				}
 			}
-
-			if(!found && !Client[client].Extra2)
+			else if(!Client[client].Pos[0])
 			{
-				if(Client[client].IdleAt < engineTime)
-				{
-					if(Client[client].Pos[0])
-					{
-						StopSound(client, SNDCHAN_VOICE, SoundPassive);
-						Client[client].Pos[0] = 0.0;
-					}
-				}
-				else if(!Client[client].Pos[0])
-				{
-					EmitSoundToAll(SoundPassive, client, SNDCHAN_VOICE, SNDLEVEL_TRAIN, _, _, _, client);
-					Client[client].Pos[0] = 1.0;
-				}
+				EmitSoundToAll(SoundPassive, client, SNDCHAN_VOICE, SNDLEVEL_TRAIN, _, _, _, client);
+				Client[client].Pos[0] = 1.0;
 			}
 		}
 	}
