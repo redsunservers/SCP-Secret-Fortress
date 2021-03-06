@@ -1,60 +1,13 @@
-//static const char Name[] = "939";
-//static const char Name2[] = "9392";
-//static const char Model[] = "models/scp_sl/scp_939/scp_939_redone_pm_1.mdl";
-static const int Health = 2750;
-static const float SpeedFull = 300.0;
-static const float SpeedDiv = 55.0;
+static const float SpeedExtra = 50.0;
 static const float GlowRange = 800.0;
 
-static const char Downloads[][] =
+public bool SCP939_Create(int client)
 {
-	"models/scp_sl/scp_939/scp_939_redone_pm_1.dx80.vtx",
-	"models/scp_sl/scp_939/scp_939_redone_pm_1.dx90.vtx",
-	"models/scp_sl/scp_939/scp_939_redone_pm_1.mdl",
-	"models/scp_sl/scp_939/scp_939_redone_pm_1.phy",
-	"models/scp_sl/scp_939/scp_939_redone_pm_1.sw.vtx",
-	"models/scp_sl/scp_939/scp_939_redone_pm_1.vvd",
-
-	"materials/models/scpbreach/scp939redone/scp-939_licker_diffusetest01.vmt",
-	"materials/models/scpbreach/scp939redone/scp-939_licker_diffusetest01.vtf",
-	"materials/models/scpbreach/scp939redone/scp-939_licker_diffusetest01_normal.vtf",
-	"materials/models/scpbreach/scp939redone/scp-939_licker_diffusetest01_phong.vtf",
-	"materials/models/scpbreach/scp939redone/scp-939_licker_extremities2.vmt",
-	"materials/models/scpbreach/scp939redone/scp-939_licker_extremities2.vtf",
-	"materials/models/scpbreach/scp939redone/scp-939_licker_extremities2_normal.vtf"
-};
-
-void SCP939_Enable()
-{
-	int table = FindStringTable("downloadables");
-	bool save = LockStringTables(false);
-	for(int i; i<sizeof(Downloads); i++)
-	{
-		if(!FileExists(Downloads[i], true))
-		{
-			LogError("Missing file: '%s'", Downloads[i]);
-			continue;
-		}
-
-		AddToStringTable(table, Downloads[i]);
-	}
-	LockStringTables(save);
-}
-
-void SCP939_Create(int client)
-{
-	Client[client].Floor = Floor_Light;
-
-	Client[client].OnDealDamage = SCP939_OnDealDamage;
-	Client[client].OnGlowPlayer = SCP939_OnGlowPlayer;
-	Client[client].OnKeycard = Items_KeycardScp;
-	Client[client].OnMaxHealth = SCP939_OnMaxHealth;
-	Client[client].OnSeePlayer = SCP939_OnSeePlayer;
-	Client[client].OnSpeed = SCP939_OnSpeed;
+	Classes_VipSpawn(client);
 
 	int account = GetSteamAccountID(client);
 
-	int weapon = SpawnWeapon(client, "tf_weapon_knife", 461, 70, 13, "2 ; 1.625 ; 252 ; 0.3 ; 4328 ; 1", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_knife", 461, 70, 13, "2 ; 1.625 ; 15 ; 0 ; 35 ; 2.5 ; 252 ; 0.3 ; 4328 ; 1", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 10);
@@ -69,16 +22,29 @@ void SCP939_Create(int client)
 		TF2Attrib_SetByDefIndex(weapon, 292, view_as<float>(64));
 		SetEntProp(weapon, Prop_Send, "m_iAccountID", account);
 	}
+	return false;
 }
 
-public void SCP939_OnMaxHealth(int client, int &health)
+public void SCP939_OnButton(int client, int button)
 {
-	health = Health;
+	Client[client].WeaponClass = TFClass_Spy;
+
+	if(TF2_IsPlayerInCondition(client, TFCond_Disguised))
+	{
+		Client[client].CurrentClass = view_as<TFClassType>(GetEntProp(client, Prop_Send, "m_nDisguiseClass"));
+		if(Client[client].CurrentClass != TFClass_Unknown)
+			return;
+	}
+
+	Client[client].CurrentClass = TFClass_Spy;
 }
 
 public void SCP939_OnSpeed(int client, float &speed)
 {
-	speed = SpeedFull-(GetClientHealth(client)/SpeedDiv);
+	int health;
+	OnGetMaxHealth(client, health);
+	if(health)
+		speed += (1.0-(GetClientHealth(client)/health))*SpeedExtra;
 }
 
 public Action SCP939_OnDealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
@@ -92,6 +58,17 @@ public Action SCP939_OnDealDamage(int client, int victim, int &inflictor, float 
 	damage = 21.667;
 	damagetype |= DMG_CRIT;
 	Client[victim].HudIn = GetEngineTime()+13.0;
+	return Plugin_Changed;
+}
+
+public Action SCP939_OnTakeDamage(int client, int attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	SDKCall_SetSpeed(client);
+
+	if(!(damagetype & DMG_FALL))
+		return Plugin_Continue;
+
+	damage *= 0.015;
 	return Plugin_Changed;
 }
 

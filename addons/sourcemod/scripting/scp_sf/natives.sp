@@ -13,9 +13,12 @@ public any Native_GetClientClass(Handle plugin, int numParams)
 	if(client<0 || client>=MAXTF2PLAYERS)
 		return 0;
 
+	ClassEnum class;
+	Classes_GetByIndex(Client[client].Class, class);
+
 	int length = GetNativeCell(3);
 	char[] buffer = new char[length];
-	strcopy(buffer, length, ClassShort[Client[client].Class]);
+	strcopy(buffer, length, class.Name);
 
 	int bytes;
 	SetNativeString(2, buffer, length, _, bytes);

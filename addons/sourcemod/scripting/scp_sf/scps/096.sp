@@ -1,5 +1,3 @@
-//static const char Name[] = "096";
-static const char Model[] = "models/scp_sf/096/scp096_2.mdl";
 static const char ModelMelee[] = "models/scp_sf/096/scp096_hands_7.mdl";
 static const char SoundPassive[] = "freak_fortress_2/scp096/bgm.mp3";
 static const char SoundEnrage[] = "freak_fortress_2/scp096/fullrage.mp3";
@@ -8,8 +6,7 @@ static const int HealthMax = 1875;	// Max standard health
 static const int HealthExtra = 425;//437.5// Max regenerable health
 static const int HealthRage = 75;//87.5	// Extra health per target in rage
 
-static const float SpeedPassive = 230.0;
-static const float SpeedRage = 480.0;
+static const float SpeedRage = 2.1;
 
 static const float RageWarmup = 6.0;	// Rage warmup time
 static const float RageDuration = 12.0;	// Rage initial duration
@@ -17,74 +14,18 @@ static const float RageExtra = 3.0;	// Rage duration per target
 static const float RageWinddown = 6.0;	// After rage stun
 static const float RageCooldown = 15.0;	// After rage cooldown
 
-static const char Downloads[][] =
-{
-	"models/scp_sf/096/scp096_2.dx80.vtx",
-	"models/scp_sf/096/scp096_2.dx90.vtx",
-	"models/scp_sf/096/scp096_2.mdl",
-	"models/scp_sf/096/scp096_2.phy",
-	"models/scp_sf/096/scp096_2.sw.vtx",
-	"models/scp_sf/096/scp096_2.vvd",
-
-	"models/scp_sf/096/scp096_hands_7.dx80.vtx",
-	"models/scp_sf/096/scp096_hands_7.dx90.vtx",
-	"models/scp_sf/096/scp096_hands_7.mdl",
-	"models/scp_sf/096/scp096_hands_7.sw.vtx",
-	"models/scp_sf/096/scp096_hands_7.vvd",
-
-	"materials/models/vinrax/scp/scp096.vmt",
-	"materials/models/vinrax/scp/scp096.vtf",
-	"materials/models/vinrax/scp/scp096_eyes.vmt",
-	"materials/models/vinrax/scp/scp096_eyes.vtf",
-
-	"sound/freak_fortress_2/scp096/bgm.mp3",
-	"sound/freak_fortress_2/scp096/fullrage.mp3"
-};
-
 static int Triggered[MAXTF2PLAYERS];
 
-void SCP096_Enable()
+public bool SCP096_Create(int client)
 {
-	PrecacheModel(ModelMelee, true);
-	PrecacheSound(SoundPassive, true);
-	PrecacheSound(SoundEnrage, true);
+	Classes_VipSpawn(client);
 
-	int table = FindStringTable("downloadables");
-	bool save = LockStringTables(false);
-	for(int i; i<sizeof(Downloads); i++)
-	{
-		if(!FileExists(Downloads[i], true))
-		{
-			LogError("Missing file: '%s'", Downloads[i]);
-			continue;
-		}
-
-		AddToStringTable(table, Downloads[i]);
-	}
-	LockStringTables(save);
-}
-
-void SCP096_Create(int client)
-{
 	Client[client].Pos[0] = 0.0;
 	Client[client].Extra1 = HealthMax;
 	Client[client].Extra2 = 0;
-	Client[client].Floor = Floor_Heavy;
-
-	Client[client].OnAnimation = SCP096_OnAnimation;
-	Client[client].OnButton = SCP096_OnButton;
-	Client[client].OnDealDamage = SCP096_OnDealDamage;
-	Client[client].OnDeath = SCP096_OnDeath;
-	Client[client].OnGlowPlayer = SCP096_OnGlowPlayer;
-	Client[client].OnKeycard = Items_KeycardScp;
-	Client[client].OnMaxHealth = SCP096_OnMaxHealth;
-	Client[client].OnSeePlayer = SCP096_OnSeePlayer;
-	Client[client].OnSpeed = SCP096_OnSpeed;
-	Client[client].OnTakeDamage = SCP096_OnTakeDamage;
-
-	SetEntityHealth(client, HealthMax+HealthExtra);
 
 	GiveMelee(client);
+	return false;
 }
 
 public void SCP096_OnMaxHealth(int client, int &health)
@@ -104,7 +45,8 @@ public void SCP096_OnMaxHealth(int client, int &health)
 
 public void SCP096_OnSpeed(int client, float &speed)
 {
-	speed = Client[client].Extra2==2 ? SpeedRage : SpeedPassive;
+	if(Client[client].Extra2 == 2)
+		speed *= SpeedRage;
 }
 
 public Action SCP096_OnAnimation(int client, PlayerAnimEvent_t &anim, int &data)
@@ -115,8 +57,10 @@ public Action SCP096_OnAnimation(int client, PlayerAnimEvent_t &anim, int &data)
 	return Plugin_Continue;
 }
 
-public void SCP096_OnDeath(int client, int attacker)
+public void SCP096_OnDeath(int client, Event event)
 {
+	Classes_DeathScp(client, event);
+
 	if(Client[client].Extra2 == 1)
 	{
 		GiveAchievement(Achievement_DeathEnrage, client);
@@ -136,7 +80,11 @@ public void SCP096_OnDeath(int client, int attacker)
 			TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
 		}
 		DispatchKeyValue(entity, "skin", "0");
-		DispatchKeyValue(entity, "model", Model);	
+		{
+			char model[PLATFORM_MAX_PATH];
+			GetEntPropString(client, Prop_Data, "m_ModelName", model, sizeof(model));
+			DispatchKeyValue(entity, "model", model);
+		}	
 		{
 			float angles[3];
 			GetClientEyeAngles(client, angles);
@@ -152,11 +100,35 @@ public void SCP096_OnDeath(int client, int attacker)
 	}
 }
 
-public Action SCP096_OnTakeDamage(int client, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+public Action SCP096_OnTakeDamage(int client, int attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	if(Triggered[attacker]<2 && !TF2_IsPlayerInCondition(client, TFCond_Dazed))
-		TriggerShyGuy(client, attacker, true);
+	if(attacker<1 || attacker>MaxClients)
+	{
+		if(damagetype & DMG_FALL)
+		{
+			switch(Client[client].Extra2)
+			{
+				case 1:
+					damage *= 0.06;
 
+				case 2:
+					damage *= 0.015;
+
+				default:
+					damage *= 0.03;
+			}
+			return Plugin_Changed;
+		}
+	}
+	else if(Triggered[attacker]<2 && !TF2_IsPlayerInCondition(client, TFCond_Dazed))
+	{
+		TriggerShyGuy(client, attacker, true);
+	}
+	else if(Client[client].Extra2 == 1)
+	{
+		damagetype |= DMG_PREVENT_PHYSICS_FORCE;
+		return Plugin_Changed;
+	}
 	return Plugin_Continue;
 }
 
@@ -175,6 +147,20 @@ public bool SCP096_OnGlowPlayer(int client, int victim)
 	return (Client[client].Extra2==2 && Triggered[victim]>1);
 }
 
+public int SCP096_OnKeycard(int client, AccessEnum access)
+{
+	if(access == Access_Checkpoint)
+		return 1;
+
+	if(Client[client].Extra2 < 2)
+		return 0;
+
+	if(access==Access_Main || access==Access_Armory)
+		return 3;
+
+	return 1;
+}
+
 public void SCP096_OnButton(int client, int button)
 {
 	float engineTime = GetEngineTime();
@@ -189,7 +175,6 @@ public void SCP096_OnButton(int client, int button)
 					duration = 30.0;
 
 				Client[client].Extra3 = engineTime+duration;
-				Client[client].OnKeycard = Items_KeycardAll;
 				Client[client].Extra2 = 2;
 				TF2_AddCondition(client, TFCond_CritCola, 99.9);
 
@@ -203,7 +188,6 @@ public void SCP096_OnButton(int client, int button)
 				}
 
 				ViewModel_Create(client, ModelMelee);
-				ViewModel_Hide(client);
 				ViewModel_SetDefaultAnimation(client, "a_fists_idle_02");
 				ViewModel_SetAnimation(client, "a_fists_idle_02");
 			}
@@ -217,7 +201,6 @@ public void SCP096_OnButton(int client, int button)
 			{
 				Client[client].Disarmer = 0;
 				Client[client].Extra2 = 0;
-				Client[client].OnKeycard = Items_KeycardScp;
 				Client[client].Extra3 = engineTime+RageCooldown;
 
 				ViewModel_Destroy(client);
@@ -231,7 +214,7 @@ public void SCP096_OnButton(int client, int button)
 				bool another096;
 				for(int i=1; i<=MaxClients; i++)
 				{
-					if(Client[i].Class!=Class_096 || !Client[client].Extra2)
+					if(Client[i].Class!=Client[client].Class || !Client[client].Extra2)
 						continue;
 
 					another096 = true;
@@ -267,94 +250,97 @@ public void SCP096_OnButton(int client, int button)
 		}
 		default:
 		{
-			if(Client[client].Extra3 < engineTime)
+			if(Client[client].Extra3 > engineTime)
+				return;
+		}
+	}
+
+	static float delay;
+	if(delay < engineTime)
+	{
+		delay = engineTime+0.25;
+		static float pos1[3], ang1[3];
+		GetClientEyePosition(client, pos1);
+		GetClientEyeAngles(client, ang1);
+		ang1[0] = fixAngle(ang1[0]);
+		ang1[1] = fixAngle(ang1[1]);
+
+		bool found;
+		for(int target=1; target<=MaxClients; target++)
+		{
+			if(!IsValidClient(target) || IsFriendly(Client[client].Class, Client[target].Class) || Triggered[target]>1)
+				continue;
+
+			static float pos2[3];
+			GetClientEyePosition(target, pos2);
+			if(GetVectorDistance(pos1, pos2, true) > 499999)
+				continue;
+
+			static float ang2[3], ang3[3];
+			GetClientEyeAngles(target, ang2);
+			GetVectorAnglesTwoPoints(pos2, pos1, ang3);
+
+			// fix all angles
+			ang2[0] = fixAngle(ang2[0]);
+			ang2[1] = fixAngle(ang2[1]);
+			ang3[0] = fixAngle(ang3[0]);
+			ang3[1] = fixAngle(ang3[1]);
+
+			// verify angle validity
+			if(!(fabs(ang2[0] - ang3[0]) <= MAXANGLEPITCH ||
+			(fabs(ang2[0] - ang3[0]) >= (360.0-MAXANGLEPITCH))))
+				continue;
+
+			if(!(fabs(ang2[1] - ang3[1]) <= MAXANGLEYAW ||
+			(fabs(ang2[1] - ang3[1]) >= (360.0-MAXANGLEYAW))))
+				continue;
+
+			// ensure no wall is obstructing
+			TR_TraceRayFilter(pos2, pos1, (CONTENTS_SOLID | CONTENTS_AREAPORTAL | CONTENTS_GRATE), RayType_EndPoint, TraceWallsOnly);
+			TR_GetEndPosition(ang3);
+			if(ang3[0]!=pos1[0] || ang3[1]!=pos1[1] || ang3[2]!=pos1[2])
+				continue;
+
+			GetVectorAnglesTwoPoints(pos1, pos2, ang3);
+
+			// fix all angles
+			ang3[0] = fixAngle(ang3[0]);
+			ang3[1] = fixAngle(ang3[1]);
+
+			// verify angle validity
+			if(!(fabs(ang1[0] - ang3[0]) <= MAXANGLEPITCH ||
+			(fabs(ang1[0] - ang3[0]) >= (360.0-MAXANGLEPITCH))))
+				continue;
+
+			if(!(fabs(ang1[1] - ang3[1]) <= MAXANGLEYAW ||
+			(fabs(ang1[1] - ang3[1]) >= (360.0-MAXANGLEYAW))))
+				continue;
+
+			// ensure no wall is obstructing
+			TR_TraceRayFilter(pos1, pos2, (CONTENTS_SOLID | CONTENTS_AREAPORTAL | CONTENTS_GRATE), RayType_EndPoint, TraceWallsOnly);
+			TR_GetEndPosition(ang3);
+			if(ang3[0]!=pos2[0] || ang3[1]!=pos2[1] || ang3[2]!=pos2[2])
+				continue;
+
+			// success
+			TriggerShyGuy(client, target, false);
+			found = true;
+		}
+
+		if(!found && !Client[client].Extra2)
+		{
+			if(Client[client].IdleAt < engineTime)
 			{
-				Client[client].Extra3 = engineTime+0.25;
-				static float pos1[3], ang1[3];
-				GetClientEyePosition(client, pos1);
-				GetClientEyeAngles(client, ang1);
-				ang1[0] = fixAngle(ang1[0]);
-				ang1[1] = fixAngle(ang1[1]);
-
-				bool found;
-				for(int target=1; target<=MaxClients; target++)
+				if(Client[client].Pos[0])
 				{
-					if(!IsValidClient(target) || IsFriendly(Class_096, Client[target].Class) || Triggered[target]>1)
-						continue;
-
-					static float pos2[3];
-					GetClientEyePosition(target, pos2);
-					if(GetVectorDistance(pos1, pos2, true) > 499999)
-						continue;
-
-					static float ang2[3], ang3[3];
-					GetClientEyeAngles(target, ang2);
-					GetVectorAnglesTwoPoints(pos2, pos1, ang3);
-
-					// fix all angles
-					ang2[0] = fixAngle(ang2[0]);
-					ang2[1] = fixAngle(ang2[1]);
-					ang3[0] = fixAngle(ang3[0]);
-					ang3[1] = fixAngle(ang3[1]);
-
-					// verify angle validity
-					if(!(fabs(ang2[0] - ang3[0]) <= MAXANGLEPITCH ||
-					(fabs(ang2[0] - ang3[0]) >= (360.0-MAXANGLEPITCH))))
-						continue;
-
-					if(!(fabs(ang2[1] - ang3[1]) <= MAXANGLEYAW ||
-					(fabs(ang2[1] - ang3[1]) >= (360.0-MAXANGLEYAW))))
-						continue;
-
-					// ensure no wall is obstructing
-					TR_TraceRayFilter(pos2, pos1, (CONTENTS_SOLID | CONTENTS_AREAPORTAL | CONTENTS_GRATE), RayType_EndPoint, TraceWallsOnly);
-					TR_GetEndPosition(ang3);
-					if(ang3[0]!=pos1[0] || ang3[1]!=pos1[1] || ang3[2]!=pos1[2])
-						continue;
-
-					GetVectorAnglesTwoPoints(pos1, pos2, ang3);
-
-					// fix all angles
-					ang3[0] = fixAngle(ang3[0]);
-					ang3[1] = fixAngle(ang3[1]);
-
-					// verify angle validity
-					if(!(fabs(ang1[0] - ang3[0]) <= MAXANGLEPITCH ||
-					(fabs(ang1[0] - ang3[0]) >= (360.0-MAXANGLEPITCH))))
-						continue;
-
-					if(!(fabs(ang1[1] - ang3[1]) <= MAXANGLEYAW ||
-					(fabs(ang1[1] - ang3[1]) >= (360.0-MAXANGLEYAW))))
-						continue;
-
-					// ensure no wall is obstructing
-					TR_TraceRayFilter(pos1, pos2, (CONTENTS_SOLID | CONTENTS_AREAPORTAL | CONTENTS_GRATE), RayType_EndPoint, TraceWallsOnly);
-					TR_GetEndPosition(ang3);
-					if(ang3[0]!=pos2[0] || ang3[1]!=pos2[1] || ang3[2]!=pos2[2])
-						continue;
-
-					// success
-					TriggerShyGuy(client, target, false);
-					found = true;
-					break;
+					StopSound(client, SNDCHAN_VOICE, SoundPassive);
+					Client[client].Pos[0] = 0.0;
 				}
-
-				if(!found)
-				{
-					if(Client[client].IdleAt < engineTime)
-					{
-						if(Client[client].Pos[0])
-						{
-							StopSound(client, SNDCHAN_VOICE, SoundPassive);
-							Client[client].Pos[0] = 0.0;
-						}
-					}
-					else if(!Client[client].Pos[0])
-					{
-						EmitSoundToAll(SoundPassive, client, SNDCHAN_VOICE, SNDLEVEL_TRAIN, _, _, _, client);
-						Client[client].Pos[0] = 1.0;
-					}
-				}
+			}
+			else if(!Client[client].Pos[0])
+			{
+				EmitSoundToAll(SoundPassive, client, SNDCHAN_VOICE, SNDLEVEL_TRAIN, _, _, _, client);
+				Client[client].Pos[0] = 1.0;
 			}
 		}
 	}
@@ -394,9 +380,10 @@ static void TriggerShyGuy(int client, int target, bool full)
 
 			Client[client].Pos[0] = 0.0;
 			Client[client].Extra3 = GetEngineTime()+RageWarmup;
+			Client[client].FreezeFor = Client[client].Extra3;
 			Client[client].Extra2 = 1;
 			Client[client].Disarmer = 1;
-			TF2_StunPlayer(client, 9.9, 0.9, TF_STUNFLAG_BONKSTUCK|TF_STUNFLAG_NOSOUNDOREFFECT);
+			TF2_StunPlayer(client, RageWarmup-2.0, 0.9, TF_STUNFLAG_BONKSTUCK|TF_STUNFLAG_NOSOUNDOREFFECT);
 			EmitSoundToAll(SoundEnrage, client, SNDCHAN_VOICE, SNDLEVEL_TRAIN, _, _, _, client);
 			if(!full)
 				Config_DoReaction(target, "trigger096");

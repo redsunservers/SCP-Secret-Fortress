@@ -6,7 +6,6 @@ enum ThinkFunctionEnum
 }
 
 static DynamicDetour AllowedToHealTarget;
-static DynamicHook SetWinningTeam;
 static DynamicHook RoundRespawn;
 static DynamicHook ForceRespawn;
 static int ForceRespawnHook[MAXTF2PLAYERS];
@@ -47,10 +46,6 @@ void DHook_Setup(GameData gamedata)
 	{
 		LogError("[Gamedata] Could not find CWeaponMedigun::AllowedToHealTarget");
 	}
-
-	SetWinningTeam = DynamicHook.FromConf(gamedata, "CTeamplayRules::SetWinningTeam");
-	if(!SetWinningTeam)
-		LogError("[Gamedata] Could not find CTeamplayRules::SetWinningTeam");
 
 	RoundRespawn = DynamicHook.FromConf(gamedata, "CTeamplayRoundBasedRules::RoundRespawn");
 	if(!RoundRespawn)
@@ -93,9 +88,6 @@ void DHook_UnhookClient(int client)
 
 void DHook_MapStart()
 {
-	if(SetWinningTeam)
-		SetWinningTeam.HookGamerules(Hook_Pre, DHook_SetWinningTeam);
-
 	if(RoundRespawn)
 		RoundRespawn.HookGamerules(Hook_Pre, DHook_RoundRespawn);
 }
@@ -105,86 +97,7 @@ public MRESReturn DHook_RoundRespawn()
 	if(Enabled || GameRules_GetProp("m_bInWaitingForPlayers"))
 		return;
 
-	DClassEscaped = 0;
-	DClassCaptured = 0;
-	DClassMax = 1;
-	SciEscaped = 0;
-	SciCaptured = 0;
-	SciMax = 0;
-	SCPKilled = 0;
-	SCPMax = 0;
-
-	int total;
-	int[] clients = new int[MaxClients];
-	for(int client=1; client<=MaxClients; client++)
-	{
-		Client[client].NextSongAt = 0.0;
-		Client[client].AloneIn = FAR_FUTURE;
-		if(!IsValidClient(client) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
-		{
-			Client[client].Class = Class_Spec;
-			continue;
-		}
-
-		if(TestForceClass[client] <= Class_Spec)
-		{
-			clients[total++] = client;
-			continue;
-		}
-
-		Client[client].Class = TestForceClass[client];
-		TestForceClass[client] = Class_Spec;
-		switch(Client[client].Class)
-		{
-			case Class_DBoi:
-			{
-				DClassMax++;
-			}
-			case Class_Scientist:
-			{
-				SciMax++;
-			}
-			default:
-			{
-				if(IsSCP(client))
-					SCPMax++;
-			}
-		}
-		AssignTeam(client);
-	}
-
-	if(!total)
-		return;
-
-	Enabled = true;
-
-	int client = clients[GetRandomInt(0, total-1)];
-	switch(Gamemode)
-	{
-		case Gamemode_Nut:
-			Client[client].Class = total>1 ? Class_173 : Class_DBoi;
-
-		case Gamemode_Steals:
-			Client[client].Class = total>1 ? Class_Stealer : Class_DBoi;
-
-		default:
-			Client[client].Class = Class_DBoi;
-	}
-	AssignTeam(client);
-
-	float time = GetEngineTime()+5.0;
-	ArrayList list = GetSCPList();
-	for(int i; i<total; i++)
-	{
-		if(clients[i] == client)
-			continue;
-
-		if(Client[clients[i]].Setup(view_as<TFTeam>(GetRandomInt(2, 3)), IsFakeClient(clients[i]), list, DClassMax, SciMax, SCPMax) != Class_DBoi)
-			Client[clients[i]].InvisFor = time;
-
-		AssignTeam(clients[i]);
-	}
-	delete list;
+	Enabled = Gamemode_RoundStart();
 }
 
 public MRESReturn DHook_AllowedToHealTarget(int weapon, DHookReturn ret, DHookParam param)
@@ -203,22 +116,19 @@ public MRESReturn DHook_AllowedToHealTarget(int weapon, DHookReturn ret, DHookPa
 
 public MRESReturn DHook_ForceRespawn(int client)
 {
-	if(Enabled && Client[client].Class==Class_Spec && !CvarSpecGhost.BoolValue)
-		return MRES_Supercede;
+	ClassEnum class;
+	if(!Classes_GetByIndex(Client[client].Class, class))
+	{
+		Client[client].Class = 0;
+		Classes_GetByIndex(0, class);
+	}
 
-	if(view_as<TFClassType>(GetEntProp(client, Prop_Send, "m_iDesiredPlayerClass")) == TFClass_Unknown)
-		SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", ClassClass[Client[client].Class]);
-
+	ChangeClientTeamEx(client, class.Team>TFTeam_Spectator ? class.Team : class.Team+view_as<TFTeam>(2));
+	SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", class.Class);
+	Client[client].CurrentClass = class.Class;
+	Client[client].WeaponClass = TFClass_Unknown;
+	Client[client].Floor = class.Floor;
 	return MRES_Ignored;
-}
-
-public MRESReturn DHook_SetWinningTeam(DHookParam param)
-{
-	if(Enabled)
-		return MRES_Supercede;
-
-	param.Set(4, false);
-	return MRES_ChangedOverride;
 }
 
 /*public MRESReturn DHook_StartLagCompensationPre(Address manager, DHookParam param)
@@ -253,18 +163,19 @@ public MRESReturn DHook_PhysicsDispatchThinkPre(int entity)
 
 				if(address != Address_Null)
 				{
+					ClassEnum class;
 					for(int client=1; client<=MaxClients; client++)
 					{
-						if(!IsValidClient(client) || IsSpec(client))
+						if(!IsValidClient(client) || IsSpec(client) || !Classes_GetByIndex(Client[client].Class, class))
 							continue;
 
-						if(IsSCP(client))
+						if(class.Human)
 						{
-							SDKCall_AddPlayer(address, client);
+							SDKCall_RemovePlayer(address, client);
 						}
 						else
 						{
-							SDKCall_RemovePlayer(address, client);
+							SDKCall_AddPlayer(address, client);
 						}
 					}
 				}
@@ -286,7 +197,8 @@ public MRESReturn DHook_PhysicsDispatchThinkPre(int entity)
 			{
 				if(IsPlayerAlive(entity) && SDKCall_GetNextThink(entity, "RegenThink")==-1.0)	// CTFPlayer::RegenThink
 				{
-					if(Client[entity].Class == Class_096)
+					ClassEnum class;
+					if(Classes_GetByIndex(Client[entity].Class, class) && class.Regen)
 					{
 						ThinkFunction = ThinkFunction_RegenThink;
 						TF2_SetPlayerClass(entity, TFClass_Medic);
@@ -315,18 +227,19 @@ public MRESReturn DHook_PhysicsDispatchThinkPost(int entity)
 			TFTeam team = TF2_GetTeam(entity)==TFTeam_Red ? TFTeam_Blue : TFTeam_Red;
 			Address address = SDKCall_GetGlobalTeam(team);
 
+			ClassEnum class;
 			for(int client=1; client<=MaxClients; client++)
 			{
-				if(!IsValidClient(client) || IsSpec(client))
+				if(!IsValidClient(client) || IsSpec(client) || !Classes_GetByIndex(Client[client].Class, class))
 					continue;
 
-				if(IsSCP(client))
-				{
-					SDKCall_RemovePlayer(address, client);
-				}
-				else if(Client[client].TeamTF() == team)
+				if(class.Human)
 				{
 					SDKCall_AddPlayer(address, client);
+				}
+				else
+				{
+					SDKCall_RemovePlayer(address, client);
 				}
 			}
 
@@ -341,9 +254,10 @@ public MRESReturn DHook_PhysicsDispatchThinkPost(int entity)
 		}
 		case ThinkFunction_RegenThink:
 		{
-			if(Client[entity].Class == Class_096)
+			ClassEnum class;
+			if(Classes_GetByIndex(Client[entity].Class, class) && class.Regen)
 			{
-				TF2_SetPlayerClass(entity, view_as<TFClassType>(ClassClass[Class_096]));
+				TF2_SetPlayerClass(entity, class.Class);
 			}
 			else if(TF2_GetPlayerClass(entity) == TFClass_Unknown)
 			{
@@ -358,11 +272,11 @@ public MRESReturn DHook_PhysicsDispatchThinkPost(int entity)
 
 public MRESReturn DHook_CanPickupDroppedWeaponPre(int client, DHookReturn ret, DHookParam param)
 {
-	if(!IsSpec(client) && !IsSCP(client) && !Client[client].Disarmer)
+	ClassEnum class;
+	if(Classes_GetByIndex(Client[client].Class, class) && !(Client[client].Disarmer && class.Human))
 	{
 		int entity = param.Get(1);
-		if(Items_Pickup(client, GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), entity))
-			AcceptEntityInput(entity, "Kill");
+		Classes_OnPickup(client, entity);
 	}
 
 	ret.Value = false;
@@ -371,29 +285,20 @@ public MRESReturn DHook_CanPickupDroppedWeaponPre(int client, DHookReturn ret, D
 
 public MRESReturn DHook_DoAnimationEventPre(int client, DHookParam param)
 {
-	if(Client[client].OnAnimation != INVALID_FUNCTION)
+	PlayerAnimEvent_t anim = param.Get(1);
+	int data = param.Get(2);
+
+	Action action = Classes_OnAnimation(client, anim, data);
+	if(action >= Plugin_Handled)
+		return MRES_Supercede;
+
+	if(action == Plugin_Changed)
 	{
-		PlayerAnimEvent_t anim = param.Get(1);
-		int data = param.Get(2);
-
-		Call_StartFunction(null, Client[client].OnAnimation);
-		Call_PushCell(client);
-		Call_PushCellRef(anim);
-		Call_PushCellRef(data);
-
-		Action action;
-		Call_Finish(action);
-
-		if(action >= Plugin_Handled)
-			return MRES_Supercede;
-
-		if(action == Plugin_Changed)
-		{
-			param.Set(1, anim);
-			param.Set(2, data);
-			return MRES_ChangedOverride;
-		}
+		param.Set(1, anim);
+		param.Set(2, data);
+		return MRES_ChangedOverride;
 	}
+
 	return MRES_Ignored;
 }
 
@@ -450,42 +355,17 @@ public MRESReturn DHook_CalculateMaxSpeedPost(int clientwhen, DHookReturn ret)
 		if(TF2_IsPlayerInCondition(client, TFCond_Dazed))
 			return MRES_Ignored;
 
-		switch(Client[client].Class)
+		ClassEnum class;
+		if(Classes_GetByIndex(Client[client].Class, class))
 		{
-			case Class_Spec:
-			{
-				speed = 400.0;
-			}
-			case Class_DBoi, Class_Scientist:
-			{
-				if(Gamemode == Gamemode_Steals)
-				{
-					speed = Client[client].Sprinting ? 360.0 : 270.0;
-				}
-				else
-				{
-					speed = Client[client].Disarmer ? 230.0 : Client[client].Sprinting ? 310.0 : 260.0;
-				}
-			}
-			case Class_Chaos, Class_MTFE:
-			{
-				speed = (Client[client].Sprinting && !Client[client].Disarmer) ? 270.0 : 230.0;
-			}
-			case Class_MTF3:
-			{
-				speed = Client[client].Disarmer ? 230.0 : Client[client].Sprinting ? 280.0 : 240.0;
-			}
-			case Class_Guard, Class_MTF, Class_MTF2, Class_MTFS:
-			{
-				speed = Client[client].Disarmer ? 230.0 : Client[client].Sprinting ? 290.0 : 250.0;
-			}
-			default:
-			{
-				Function_OnSpeed(client, speed);
-			}
+			speed = class.Speed;
+			Classes_OnSpeed(client, speed);
 		}
 
 		speed *= CvarSpeedMulti.FloatValue;
+		if(Client[client].Sprinting)
+			speed *= 1.2;
+
 		if(TF2_IsPlayerInCondition(client, TFCond_SpeedBuffAlly))
 			speed *= 1.35;
 	}
@@ -500,31 +380,29 @@ public MRESReturn DHook_TauntPre(int client)
 	if(TF2_IsPlayerInCondition(client, TFCond_Disguising) || TF2_IsPlayerInCondition(client, TFCond_Disguised) || TF2_IsPlayerInCondition(client, TFCond_Cloaked))
 		return MRES_Supercede;
 
-	if(Client[client].Class!=Class_Scientist && Client[client].Class!=Class_Guard)
+	//Player wants to taunt, set class to whoever can actually taunt with active weapon
+	int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	if(weapon > MaxClients)
 	{
-		//Player wants to taunt, set class to whoever can actually taunt with active weapon
-		int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-		if(weapon > MaxClients)
-		{
-			TFClassType class = TF2_GetDefaultClassFromItem(weapon);
-			if(class != TFClass_Unknown)
-				TF2_SetPlayerClass(client, class, false);
-		}
+		TFClassType class = TF2_GetDefaultClassFromItem(weapon);
+		if(class != TFClass_Unknown)
+			TF2_SetPlayerClass(client, class, false);
 	}
 	return MRES_Ignored;
 }
 
 public MRESReturn DHook_TauntPost(int client)
 {
-	TF2_SetPlayerClass(client, ClassClass[Client[client].Class], false);
+	ClassEnum class;
+	if(Classes_GetByIndex(Client[client].Class, class))
+		TF2_SetPlayerClass(client, class.Class, false);
 }
 
 public MRESReturn DHook_GetMaxAmmoPre(int client, DHookReturn ret, DHookParam param)
 {
-	int type = param.Get(1);
-	int ammo = ClassMaxAmmo(type, Client[client].Class);
-	//if(ammo < 2)
-		//return MRES_Ignored;
+	int ammo = Classes_GetMaxAmmo(client, param.Get(1));
+	if(!ammo)
+		return MRES_Ignored;
 
 	ret.Value = ammo;
 	return MRES_Supercede;

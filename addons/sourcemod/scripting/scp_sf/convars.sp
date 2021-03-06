@@ -7,33 +7,17 @@ enum struct CvarInfo
 
 static ArrayList CvarList;
 
-ConVar CvarQuickRounds;
-ConVar CvarSpecGhost;
-ConVar CvarFriendlyFire;
-ConVar CvarDiscFF;
-ConVar CvarTimelimit;
-ConVar CvarSpeedMulti;
-ConVar CvarSpeedMax;
-ConVar CvarAchievement;
-ConVar CvarWinStyle;
-ConVar CvarChatHook;
-
 void ConVar_Setup()
 {
-	CvarQuickRounds = CreateConVar("scp_quickrounds", "1", "If to end the round if winning outcome can no longer be changed", _, true, 0.0, true, 1.0);
-	CvarSpecGhost = CreateConVar("scp_specmode", "1", "If to spawn as a ghost while spectating", _, true, 0.0, true, 1.0);
+	//CvarSpecGhost = CreateConVar("scp_specmode", "1", "If to spawn as a ghost while spectating", _, true, 0.0, true, 1.0);
 	CvarFriendlyFire = CreateConVar("scp_friendlyfire", "0", "If to enable friendly fire", _, true, 0.0, true, 1.0);
-	CvarDiscFF = CreateConVar("scp_discff", "0", "DISC-FF.com private features", _, true, 0.0, true, 1.0);
-	CvarTimelimit = CreateConVar("scp_timelimit", "898", "Round timelimit (0 to disable)", _, true, 120.0);
 	CvarSpeedMulti = CreateConVar("scp_speedmulti", "1.0", "Player movement speed multiplier", _, true, 0.004167);
 	CvarSpeedMax = CreateConVar("scp_speedmax", "3000.0", "Maximum player speed (SCP-173's blink speed)", _, true, 1.0);
 	CvarAchievement = CreateConVar("scp_achievements", "1", "If to call SCPSF_OnAchievement forward", _, true, 0.0, true, 1.0);
-	CvarWinStyle = CreateConVar("scp_winstyle", "1", "If winner will be determined with the amount of escaped players", _, true, 0.0, true, 1.0);
 	CvarChatHook = CreateConVar("scp_chathook", "1", "If to use it's own chat processor to manage chat and voice messages", _, true, 0.0, true, 1.0);
 
 	AutoExecConfig(true, "SCPSecretFortress");
 
-	ChatHook = CvarChatHook.BoolValue;
 	CvarChatHook.AddChangeHook(ConVar_OnChatHook);
 
 	if(CvarList != INVALID_HANDLE)

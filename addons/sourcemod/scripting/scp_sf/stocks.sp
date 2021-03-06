@@ -229,10 +229,25 @@ enum
 	HITGROUP_GEAR = 10
 };
 
+enum
+{
+	TFSpell_Fireball = 1,
+	TFSpell_Bats,
+	TFSpell_OverHeal,
+	TFSpell_MIRV,
+	TFSpell_BlastJump,
+	TFSpell_Stealth,
+	TFSpell_Teleport,
+	TFSpell_LightningBall,
+	TFSpell_Athletic,
+	TFSpell_Meteor,
+	TFSpell_SkeletonHorde
+}
+
 static const char Characters[] = "abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOQRTUVWXYZ~`1234567890@#$^&*(){}:[]|¶�;<>.,?/'|";
 static const float OFF_THE_MAP[3] = { 16383.0, 16383.0, -16383.0 };
 
-stock int GetClassCount(ClassEnum c)
+stock int GetClassCount(int c)
 {
 	int a;
 	for(int i=1; i<=MaxClients; i++)
@@ -243,7 +258,7 @@ stock int GetClassCount(ClassEnum c)
 	return a;
 }
 
-stock bool IsClassTaken(ClassEnum c)
+stock bool IsClassTaken(int c)
 {
 	for(int i=1; i<=MaxClients; i++)
 	{
@@ -291,49 +306,6 @@ void PrintRandomHintText(int client)
 	}
 
 	PrintHintText(client, buffer);
-}
-
-ArrayList GetSCPList()
-{
-	ArrayList list = new ArrayList();
-	for(ClassEnum i=Class_035; i<ClassEnum; i++)
-	{
-		if(ClassEnabled[i])
-			list.Push(i);
-	}
-	return list;
-}
-
-ClassEnum GetSCPRand(ArrayList list, ClassEnum pref=Class_Spec)
-{
-	if(pref >= Class_035)
-	{
-		int index = list.FindValue(pref);
-		if(index != -1)
-		{
-			list.Erase(index);
-			return pref;
-		}
-
-		if(pref == Class_939)
-		{
-			index = list.FindValue(Class_9392);
-			if(index != -1)
-			{
-				list.Erase(index);
-				return Class_9392;
-			}
-		}
-	}
-
-	int index = list.Length;
-	if(!index)
-		return Class_Spec;
-	
-	index = GetRandomInt(0, index-1);
-	ClassEnum scp = list.Get(index);
-	list.Erase(index);
-	return scp;
 }
 
 public void RemoveRagdoll(int userid)
@@ -450,22 +422,6 @@ int GetClientPointVisible(int iClient, float flDistance = 100.0)
 	return iReturn;
 }
 
-void SpawnPickup(int iClient, const char[] sClassname)
-{
-	float vecOrigin[3];
-	GetClientAbsOrigin(iClient, vecOrigin);
-	vecOrigin[2] += 16.0;
-	
-	int iEntity = CreateEntityByName(sClassname);
-	DispatchKeyValue(iEntity, "OnPlayerTouch", "!self,Kill,,0,-1");
-	if (DispatchSpawn(iEntity))
-	{
-		SetEntProp(iEntity, Prop_Send, "m_iTeamNum", 0, 4);
-		TeleportEntity(iEntity, vecOrigin, NULL_VECTOR, NULL_VECTOR);
-		CreateTimer(0.15, Timer_RemoveEntity, EntIndexToEntRef(iEntity));
-	}
-}
-
 float fabs(float x)
 {
 	return x<0 ? -x : x;
@@ -552,17 +508,9 @@ int GetAmmo(int client, int type)
 	return ammo;
 }
 
-stock void SetAmmo(int client, int weapon, int ammo=-1, int clip=-1)
+void SetAmmo(int client, int ammo, int type)
 {
-	if(IsValidEntity(weapon))
-	{
-		if(clip > -1)
-			SetEntProp(weapon, Prop_Data, "m_iClip1", clip);
-
-		int ammoType = (ammo>-1 ? GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType") : -1);
-		if(ammoType != -1)
-			SetEntProp(client, Prop_Data, "m_iAmmo", ammo, _, ammoType);
-	}
+	SetEntProp(client, Prop_Data, "m_iAmmo", ammo, _, type);
 }
 
 stock void TF2_RefillWeaponAmmo(int client, int weapon)
@@ -661,7 +609,7 @@ stock int TF2_GetClassnameSlot(const char[] classname)
 	{
 		return TFWeaponSlot_Secondary;
 	}
-	else if(!StrContains(classname, "tf_weapon_pda_engineer_b", false) ||
+	else if(!StrContains(classname, "tf_weapon_pda_engineer_b") ||
 	  !StrContains(classname, "tf_weapon_pda_s"))
 	{
 		return TFWeaponSlot_Grenade;
@@ -1017,7 +965,7 @@ int SpawnWeapon(int client, char[] name, int index, int level, int qual, const c
 	return entity;
 }
 
-int PrecacheModelEx(const char[] model, bool preload=false)
+stock int PrecacheModelEx(const char[] model, bool preload=false)
 {
 	static char buffer[PLATFORM_MAX_PATH];
 	strcopy(buffer, sizeof(buffer), model);
@@ -1038,7 +986,7 @@ int PrecacheModelEx(const char[] model, bool preload=false)
 	return PrecacheModel(model, preload);
 }
 
-int PrecacheSoundEx(const char[] sound, bool preload=false)
+stock int PrecacheSoundEx(const char[] sound, bool preload=false)
 {
 	char buffer[PLATFORM_MAX_PATH];
 	FormatEx(buffer, sizeof(buffer), "sound/%s", sound);
@@ -1098,59 +1046,6 @@ stock void TF2_SendHudNotification(HudNotification_t type, bool forceShow=false)
 	EndMessage();
 }
 
-stock void ChangeClientClass(int client, any class)
-{
-	SetEntProp(client, Prop_Send, "m_iClass", class);
-	SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", class);
-
-	float primary = 1.0;
-	float secondary = 1.0;
-	switch(class)
-	{
-		case TFClass_Scout:
-		{
-			primary = 31.25;		// 32 -> 1000
-			secondary = 5.555555;	// 36 -> 200
-		}
-		case TFClass_Soldier:
-		{
-			primary = 50.0;		// 20 -> 1000
-			secondary = 6.25;	// 32 -> 200
-		}
-		case TFClass_Pyro, TFClass_Heavy:
-		{
-			primary = 5.0;		// 200 -> 1000
-			secondary = 6.25;	// 32 -> 200
-		}
-		case TFClass_DemoMan, TFClass_Spy:
-		{
-			primary = 62.5;		// 16 -> 1000
-			secondary = 8.333333;	// 24 -> 200
-		}
-		case TFClass_Engineer:
-		{
-			primary = 31.25;		// 32 -> 1000
-			secondary = 1.0;		// 200 -> 200
-		}
-		case TFClass_Medic:
-		{
-			primary = 6.666667;	// 150 -> 1000
-			// Medic class is never used as a gun class so...
-		}
-		case TFClass_Sniper:
-		{
-			primary = 40.0;		// 25 -> 1000
-			secondary = 2.666666;	// 75 -> 200
-		}
-	}
-
-	if(Client[client].Class==Class_DBoi || Client[client].Class==Class_Scientist)
-		secondary /= 2.0;
-
-	TF2Attrib_SetByDefIndex(client, 37, primary);
-	TF2Attrib_SetByDefIndex(client, 25, secondary);
-}
-
 TFClassType TF2_GetDefaultClassFromItem(int weapon)
 {
 	static char classname[36];
@@ -1174,27 +1069,45 @@ TFClassType TF2_GetDefaultClassFromItem(int weapon)
 	return TFClass_Unknown;
 }
 
-stock TFClassType KvGetClass(KeyValues kv, const char[] string)
+stock TFClassType KvGetClass(KeyValues kv, const char[] string, TFClassType defaul=TFClass_Unknown)
 {
 	TFClassType class;
 	static char buffer[24];
 	kv.GetString(string, buffer, sizeof(buffer));
 	class = view_as<TFClassType>(StringToInt(buffer));
 	if(class == TFClass_Unknown)
+	{
 		class = TF2_GetClass(buffer);
-
+		if(class == TFClass_Unknown)
+			return defaul;
+	}
 	return class;
 }
 
-stock Function KvGetFunction(KeyValues kv, const char[] string)
+Function KvGetFunction(KeyValues kv, const char[] string, Function defaul=INVALID_FUNCTION)
 {
 	static char buffer[64];
 	kv.GetString(string, buffer, sizeof(buffer));
 	if(buffer[0])
-		return GetFunctionByName(null, buffer);
-
-	return INVALID_FUNCTION;
+	{
+		Function func = GetFunctionByName(null, buffer);
+		if(func != INVALID_FUNCTION)
+			return func;
+	}
+	return defaul;
 }
+
+/*float KvGetSound(KeyValues kv, const char[] string, char[] value, int length, const char[] defaul)
+{
+	static char buffer[2][PLATFORM_MAX_PATH+9];
+	kv.GetString(string, buffer[0], sizeof(buffer[]), defaul);
+	float value;
+	if(ExplodeString(buffer[0], ";", buffer, sizeof(buffer), sizeof(buffer[])) > 1)
+		value = StringToFloat(buffer[1]);
+
+	strcopy(value, length, buffer[0]);
+	return value;
+}*/
 
 public Action Timer_Stun(Handle timer, DataPack pack)
 {
@@ -1218,11 +1131,12 @@ public Action Timer_MyBlood(Handle timer, int userid)
 	return Plugin_Continue;
 }
 
-void StartHealingTimer(int client, float delay, int health, int amount=0, bool maxhealth=true)
+void StartHealingTimer(int client, float delay, int health, int amount=0, bool maxhealth=true, bool require=false)
 {
 	DataPack pack;
 	CreateDataTimer(delay, Timer_Healing, pack, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	pack.WriteCell(GetClientUserId(client));
+	pack.WriteCell(require);
 	pack.WriteCell(health);
 	pack.WriteCell(maxhealth);
 	pack.WriteCell(amount);
@@ -1236,17 +1150,27 @@ public Action Timer_Healing(Handle timer, DataPack pack)
 	if(!client || !IsClientInGame(client) || !IsPlayerAlive(client))
 		return Plugin_Stop;
 
+	if(pack.ReadCell() && !Client[client].Extra2)
+		return Plugin_Stop;
+
 	int current = GetClientHealth(client);
 	int health = pack.ReadCell();
 	if(pack.ReadCell())
 	{
-		int max = 125;
-		OnGetMaxHealth(client, max);
+		int max = Classes_GetMaxHealth(client);
 		if(current<=max && current+health>max)
 			health = max-current;
 	}
 
-	SetEntityHealth(client, current+health);
+	health = current+health;
+	if(health < 1)
+	{
+		ForcePlayerSuicide(client);
+	}
+	else if(health)
+	{
+		SetEntityHealth(client, health);
+	}
 
 	current = pack.ReadCell();
 	if(current < 1)
@@ -1266,6 +1190,93 @@ void ApplyHealEvent(int patient, int healer, int amount)
 	event.SetInt("heals", amount);
 
 	event.Fire();
+}
+
+void EndRound(any team)
+{
+	int entity = CreateEntityByName("game_round_win"); 
+	DispatchSpawn(entity);
+
+	SetVariantString("force_map_reset 1");
+	AcceptEntityInput(entity, "AddOutput");
+	SetVariantInt(team);
+	AcceptEntityInput(entity, "SetTeam");
+	AcceptEntityInput(entity, "RoundWin");
+}
+
+stock void EmitSoundToAll2(const char[] sample,
+				 int entity = SOUND_FROM_PLAYER,
+				 int channel = SNDCHAN_AUTO,
+				 int level = SNDLEVEL_NORMAL,
+				 int flags = SND_NOFLAGS,
+				 float volume = SNDVOL_NORMAL,
+				 int pitch = SNDPITCH_NORMAL,
+				 int speakerentity = -1,
+				 const float origin[3] = NULL_VECTOR,
+				 const float dir[3] = NULL_VECTOR,
+				 bool updatePos = true,
+				 float soundtime = 0.0)
+{
+	int[] clients = new int[MaxClients];
+	int total = 0;
+
+	for (int i=1; i<=MaxClients; i++)
+	{
+		if (IsClientInGame(i) && !Client[client].DownloadMode)
+		{
+			clients[total++] = i;
+		}
+	}
+
+	if (total)
+	{
+		EmitSound(clients, total, sample, entity, channel,
+			level, flags, volume, pitch, speakerentity,
+			origin, dir, updatePos, soundtime);
+	}
+}
+
+int TF2_CreateGlow(int client, const char[] model)
+{
+	int prop = CreateEntityByName("tf_taunt_prop");
+	if(IsValidEntity(prop))
+	{
+		int team = GetClientTeam(client);
+		SetEntProp(prop, Prop_Data, "m_iInitialTeamNum", team);
+		SetEntProp(prop, Prop_Send, "m_iTeamNum", team);
+
+		DispatchSpawn(prop);
+
+		SetEntityModel(prop, model);
+		SetEntPropEnt(prop, Prop_Data, "m_hEffectEntity", client);
+		SetEntProp(prop, Prop_Send, "m_bGlowEnabled", true);
+		SetEntProp(prop, Prop_Send, "m_fEffects", GetEntProp(prop, Prop_Send, "m_fEffects")|EF_BONEMERGE|EF_NOSHADOW|EF_NOINTERP);
+
+		SetVariantString("!activator");
+		AcceptEntityInput(prop, "SetParent", client);
+
+		SetEntityRenderMode(prop, RENDER_TRANSCOLOR);
+		SetEntityRenderColor(prop, 255, 255, 255, 255);
+		SDKHook(prop, SDKHook_SetTransmit, GlowTransmit);
+	}
+	return prop;
+}
+
+public Action GlowTransmit(int entity, int target)
+{
+	if(Enabled)
+	{
+		if(!IsValidClient(target))
+			return Plugin_Continue;
+
+		int client = GetEntPropEnt(entity, Prop_Data, "m_hParent");
+		if(IsValidClient(client) && IsPlayerAlive(client))
+			return Classes_OnGlowPlayer(target, client) ? Plugin_Continue : Plugin_Stop;
+	}
+
+	SDKUnhook(entity, SDKHook_SetTransmit, GlowTransmit);
+	AcceptEntityInput(entity, "Kill");
+	return Plugin_Continue;
 }
 
 public bool TraceRayPlayerOnly(int client, int mask, any data)
@@ -1290,20 +1301,8 @@ public bool Trace_DontHitEntity(int entity, int mask, any data)
 
 bool IsSpec(int client)
 {
-	if(Client[client].Class == Class_Spec)
+	if(!IsPlayerAlive(client) || TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode))
 		return true;
-
-	if(!IsPlayerAlive(client))
-	{
-		LogMessage("%N (%d) was not alive and was not Class Spec", client, client);
-		return true;
-	}
-
-	if(TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode))
-	{
-		LogMessage("%N (%d) was a ghost and was not Class Spec", client, client);
-		return true;
-	}
 
 	return false;
 }

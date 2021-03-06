@@ -31,12 +31,13 @@ void ViewModel_Create(int iClient, const char[] sModel, const float vecAnglesOff
 	SDKHook(iViewModel, SDKHook_SetTransmit, ViewModel_SetTransmit);
 	
 	ViewmodelRef[iClient] = EntIndexToEntRef(iViewModel);
+	
+	ViewChange_Switch(iClient);
 }
 
-void ViewModel_Hide(int iClient)
+bool ViewModel_Enabled(int iClient)
 {
-	if (IsValidEntity(ViewmodelRef[iClient]))
-		SetEntProp(GetEntPropEnt(iClient, Prop_Send, "m_hViewModel"), Prop_Send, "m_fEffects", EF_NODRAW);
+	return IsValidEntity(ViewmodelRef[iClient]);
 }
 
 void ViewModel_SetAnimation(int iClient, const char[] sAnimation)

@@ -2,8 +2,8 @@
 {
 	"$baseTexture" "models\fart\ragdolls\bms_heads\base_m_d"
 	"$bumpmap" "models\fart\ragdolls\bms_heads\base_m_n"
-        "$lightwarptexture" "models\fart\ragdolls\bms_heads\Base_M_caucasian_wrp"
-//        "$lightwarptexture" "models\fart\ragdolls\bms_heads\Base_M_african_wrp"
+        "$lightwarptexture" "models\fart\ragdolls\bms_heads\base_m_caucasian_wrp"
+//        "$lightwarptexture" "models\fart\ragdolls\bms_heads\base_m_african_wrp"
         $halflambert 0
 	"$nodecal" "1"
 	"$model" "1"
@@ -12,7 +12,7 @@
 // -- From here down is new stuff which will only be applied if $phong is set to 1 --
         $phong 1
         $phongboost "1.4"
-	$phongexponenttexture "models/humans/male_exponent"
+	$phongexponenttexture "models\fart\ragdolls\bms_heads\male_exponent"
         $phongtint "[.85 .85 1]"
         $phongfresnelranges "[.2 .5 5]"
 

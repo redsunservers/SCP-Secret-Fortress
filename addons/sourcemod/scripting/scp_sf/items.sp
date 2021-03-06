@@ -1,15 +1,3 @@
-#define ITEMS_MAX	8
-
-enum
-{
-	Item_None = -1,
-	Item_Weapon,
-	Item_Keycard,
-	Item_Medical,
-	Item_Radio,
-	Item_SCP
-}
-
 static const int ItemLimits[] =
 {
 	2,	// Weapons
@@ -21,20 +9,17 @@ static const int ItemLimits[] =
 
 enum
 {
-	Ammo_Micro = 1,
-	Ammo_9mm,
-	Ammo_Metal,
-	Ammo_Misc1,
-	Ammo_Misc2,
-	Ammo_7mm,
-	Ammo_5mm,
-	Ammo_Grenade,
-	Ammo_Radio,
-	Ammo_MAX
+	Item_Weapon = 0,
+	Item_Keycard,
+	Item_Medical,
+	Item_Radio,
+	Item_SCP
 }
 
 enum struct WeaponEnum
 {
+	char Display[16];
+
 	// Weapon Stats
 	char Classname[36];
 	char Attributes[256];
@@ -57,6 +42,7 @@ enum struct WeaponEnum
 	bool Hidden;
 
 	char Model[PLATFORM_MAX_PATH];
+	int Viewmodel;
 	int Skin;
 
 	Function OnButton;	// Action(int client, int weapon, int &buttons, int &holding)
@@ -68,27 +54,34 @@ enum struct WeaponEnum
 }
 
 static ArrayList Weapons;
-static int MaxWeapons;
 
-void Items_Setup()
+void Items_Setup(KeyValues main, KeyValues map)
 {
 	if(Weapons != INVALID_HANDLE)
 		delete Weapons;
 
 	Weapons = new ArrayList(sizeof(WeaponEnum));
 
-	KeyValues kv = new KeyValues("Weapons");
+	main.Rewind();
+	KeyValues kv = main;
+	if(map)	// Check if the map has it's own gamemode config
+	{
+		map.Rewind();
+		if(map.JumpToKey("Weapons"))
+			kv = map;
+	}
 
-	char buffer[PLATFORM_MAX_PATH];
-	BuildPath(Path_SM, buffer, sizeof(buffer), CFG_WEAPONS);
-	kv.ImportFromFile(buffer);
-
+	char buffer[16];
 	WeaponEnum weapon;
 	kv.GotoFirstSubKey();
 	do
 	{
 		kv.GetSectionName(buffer, sizeof(buffer));
 		weapon.Index = StringToInt(buffer);
+
+		Format(weapon.Display, sizeof(weapon.Display), "weapon_%d", weapon.Index);
+		if(!TranslationPhraseExists(weapon.Display))
+			strcopy(weapon.Display, sizeof(weapon.Display), "weapon_0");
 
 		weapon.Ammo = kv.GetNum("ammo", -1);
 		weapon.Clip = kv.GetNum("clip", -1);
@@ -111,6 +104,10 @@ void Items_Setup()
 
 		kv.GetString("classname", weapon.Classname, sizeof(weapon.Classname));
 		kv.GetString("attributes", weapon.Attributes, sizeof(weapon.Attributes));
+
+		kv.GetString("viewmodel", weapon.Model, sizeof(weapon.Model));
+		weapon.Viewmodel = weapon.Model[0] ? PrecacheModel(weapon.Model, true) : 0;
+
 		kv.GetString("model", weapon.Model, sizeof(weapon.Model));
 		if(weapon.Model[0])
 			PrecacheModel(weapon.Model, true);
@@ -139,11 +136,9 @@ bool Items_GetWeaponByIndex(int index, WeaponEnum weapon)
 
 int Items_Iterator(int client, int &index, bool all=false)
 {
-	if(!MaxWeapons)
-		MaxWeapons = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
-
+	int max = GetMaxWeapons(client);
 	WeaponEnum weapon;
-	for(; index<MaxWeapons; index++)
+	for(; index<max; index++)
 	{
 		int entity = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", index);
 		if(entity<=MaxClients || !IsValidEntity(entity))
@@ -161,8 +156,9 @@ int Items_Iterator(int client, int &index, bool all=false)
 ArrayList Items_ArrayList(int client, int slot, bool all=false)
 {
 	ArrayList list = new ArrayList();
+	int max = GetMaxWeapons(client);
 	WeaponEnum weapon;
-	for(int i; i<MaxWeapons; i++)
+	for(int i; i<max; i++)
 	{
 		int entity = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i);
 		if(entity<=MaxClients || !IsValidEntity(entity))
@@ -184,194 +180,230 @@ ArrayList Items_ArrayList(int client, int slot, bool all=false)
 
 int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, bool ammo=false, int ground=-1)
 {
+	int entity = -1;
 	WeaponEnum weapon;
-	if(!Items_GetWeaponByIndex(index, weapon))
-		return -1;
-
-	Handle tf2item;
-	if(weapon.Strip)
+	if(Items_GetWeaponByIndex(index, weapon))
 	{
-		tf2item = TF2Items_CreateItem(OVERRIDE_ALL|FORCE_GENERATION);
-	}
-	else
-	{
-		tf2item = TF2Items_CreateItem(OVERRIDE_ALL|FORCE_GENERATION|PRESERVE_ATTRIBUTES);
-	}
+		static char buffers[40][16];
+		int count = ExplodeString(weapon.Attributes, " ; ", buffers, sizeof(buffers), sizeof(buffers));
 
-	if(tf2item == INVALID_HANDLE)
-		return -1;
+		if(count % 2)
+			count--;
 
-	if(weapon.Class != TFClass_Unknown)
-		TF2_SetPlayerClass(client, weapon.Class, false, false);
-
-	TF2Items_SetClassname(tf2item, weapon.Classname);
-
-	TF2Items_SetItemIndex(tf2item, weapon.Index);
-	TF2Items_SetLevel(tf2item, 101);
-	TF2Items_SetQuality(tf2item, 6);
-
-	static char buffers[40][16];
-	int count = ExplodeString(weapon.Attributes, " ; ", buffers, sizeof(buffers), sizeof(buffers));
-
-	if(count % 2)
-		count--;
-
-	int i;
-	if(count > 0)
-	{
-		TF2Items_SetNumAttributes(tf2item, count/2);
-		int a;
-		for(; i<count && i<32; i+=2)
+		int i;
+		bool wearable = view_as<bool>(StrContains(weapon.Classname, "tf_weap", false));
+		if(wearable)
 		{
-			int attrib = StringToInt(buffers[i]);
-			if(!attrib)
+			entity = CreateEntityByName(weapon.Classname);
+			if(IsValidEntity(entity))
 			{
-				LogError("[Config] Bad weapon attribute passed for index %d: %s ; %s", index, buffers[i], buffers[i+1]);
-				continue;
-			}
+				SetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex", index);
+				SetEntProp(entity, Prop_Send, "m_bInitialized", true);
+				SetEntProp(entity, Prop_Send, "m_iEntityQuality", 6);
+				SetEntProp(entity, Prop_Send, "m_iEntityLevel", 101);
 
-			TF2Items_SetAttribute(tf2item, a++, attrib, StringToFloat(buffers[i+1]));
-		}
-	}
-	else
-	{
-		TF2Items_SetNumAttributes(tf2item, 0);
-	}
+				DispatchSpawn(entity);
 
-	int entity = TF2Items_GiveNamedItem(client, tf2item);
-	delete tf2item;
-
-	if(entity > MaxClients)
-	{
-		EquipPlayerWeapon(client, entity);
-
-		while(i < count)
-		{
-			int attrib = StringToInt(buffers[i]);
-			if(attrib)
-			{
-				TF2Attrib_SetByDefIndex(entity, attrib, StringToFloat(buffers[i+1]));
+				SDKCall_EquipWearable(client, entity);
 			}
 			else
 			{
-				LogError("[Config] Bad weapon attribute passed for index %d: %s ; %s", index, buffers[i], buffers[i+1]);
-			}
-			i += 2;
-		}
-
-		if(weapon.Hide)
-		{
-			SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", -1);
-			SetEntPropFloat(entity, Prop_Send, "m_flModelScale", 0.001);
-			SetEntPropFloat(entity, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
-			SetEntPropFloat(entity, Prop_Send, "m_flNextSecondaryAttack", FAR_FUTURE);
-			SetEntityRenderMode(entity, RENDER_TRANSCOLOR);
-			SetEntityRenderColor(entity, 255, 255, 255, 0);
-		}
-		else
-		{
-			SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", true);
-		}
-
-		if(ground > MaxClients)
-		{
-			i = GetEntProp(entity, Prop_Send, "m_iAccountID");
-		}
-		else
-		{
-			i = GetSteamAccountID(client);
-		}
-		SetEntProp(entity, Prop_Send, "m_iAccountID", i);
-
-		if(weapon.Bullet>=0 && weapon.Bullet<Ammo_MAX)
-		{
-			SetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType", weapon.Bullet);
-		}
-		else
-		{
-			weapon.Bullet = GetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType");
-		}
-
-		if(ground > MaxClients)
-		{
-			// Save our current ammo
-			int ammos[Ammo_MAX];
-			for(i=1; i<Ammo_MAX; i++)
-			{
-				ammos[i] = GetAmmo(client, i);
-				SetEntProp(client, Prop_Data, "m_iAmmo", 0, _, i);
-			}
-
-			// Get the new weapon's ammo
-			SDKCall_InitPickup(ground, client, entity);
-
-			// See where the ammo was sent to, add to our current ammo count
-			for(i=0; i<Ammo_MAX; i++)
-			{
-				count = GetEntProp(client, Prop_Data, "m_iAmmo", _, i);
-				if(!count)
-					continue;
-
-				if(count < 0)	// Guess we give a new set of ammo
-					count = weapon.Ammo;
-
-				ammos[weapon.Bullet] += count;
-
-				count = ClassMaxAmmo(weapon.Bullet, Client[client].Class);
-				if(ammos[weapon.Bullet] > count)
-					ammos[weapon.Bullet] = count;
-
-				break;
-			}
-
-			// Set our ammo back
-			for(i=0; i<Ammo_MAX; i++)
-			{
-				if(ammos[i])
-					SetEntProp(client, Prop_Data, "m_iAmmo", ammos[i], _, i);
+				LogError("[Config] Invalid classname '%s' for index '%d'", weapon.Classname, index);
 			}
 		}
 		else
 		{
-			if(clip && weapon.Clip>=0)
-				SetEntProp(entity, Prop_Data, "m_iClip1", weapon.Clip);
-
-			if(ammo && weapon.Ammo>0 && weapon.Bullet>0)
+			Handle item;
+			if(weapon.Strip)
 			{
-				count = weapon.Ammo+GetEntProp(client, Prop_Data, "m_iAmmo", _, weapon.Bullet);
+				item = TF2Items_CreateItem(OVERRIDE_ALL|FORCE_GENERATION);
+			}
+			else
+			{
+				item = TF2Items_CreateItem(OVERRIDE_ALL|FORCE_GENERATION|PRESERVE_ATTRIBUTES);
+			}
 
-				i = ClassMaxAmmo(weapon.Bullet, Client[client].Class);
-				if(count > i)
-					count = i;
+			if(item)
+			{
+				TFClassType class = weapon.Class;
+				if(class == TFClass_Unknown)
+					class = Client[client].CurrentClass;
 
-				SetEntProp(client, Prop_Data, "m_iAmmo", count, _, weapon.Bullet);
+				if(class != TFClass_Unknown)
+					TF2_SetPlayerClass(client, class, false, false);
+
+				TF2Items_SetClassname(item, weapon.Classname);
+
+				TF2Items_SetItemIndex(item, weapon.Index);
+				TF2Items_SetLevel(item, 101);
+				TF2Items_SetQuality(item, 6);
+
+				if(count > 0)
+				{
+					TF2Items_SetNumAttributes(item, count/2);
+					int a;
+					for(; i<count && i<32; i+=2)
+					{
+						int attrib = StringToInt(buffers[i]);
+						if(!attrib)
+						{
+							LogError("[Config] Bad weapon attribute passed for index %d: %s ; %s", index, buffers[i], buffers[i+1]);
+							continue;
+						}
+
+						TF2Items_SetAttribute(item, a++, attrib, StringToFloat(buffers[i+1]));
+					}
+				}
+				else
+				{
+					TF2Items_SetNumAttributes(item, 0);
+				}
+
+				entity = TF2Items_GiveNamedItem(client, item);
+				delete item;
 			}
 		}
 
-		if(weapon.OnCreate != INVALID_FUNCTION)
+		if(entity > MaxClients)
 		{
-			Call_StartFunction(null, weapon.OnCreate);
-			Call_PushCell(client);
-			Call_PushCell(entity);
-			Call_Finish();
+			if(!wearable)
+				EquipPlayerWeapon(client, entity);
+
+			while(i < count)
+			{
+				int attrib = StringToInt(buffers[i]);
+				if(attrib)
+				{
+					TF2Attrib_SetByDefIndex(entity, attrib, StringToFloat(buffers[i+1]));
+				}
+				else
+				{
+					LogError("[Config] Bad weapon attribute passed for index %d: %s ; %s", index, buffers[i], buffers[i+1]);
+				}
+				i += 2;
+			}
+
+			ApplyStrangeRank(entity, GetRandomInt(0, 20));
+
+			if(weapon.Hide)
+			{
+				SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", -1);
+				SetEntityRenderMode(entity, RENDER_TRANSCOLOR);
+				SetEntityRenderColor(entity, 255, 255, 255, 0);
+
+				if(!wearable)
+				{
+					SetEntPropFloat(entity, Prop_Send, "m_flModelScale", 0.001);
+					SetEntPropFloat(entity, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
+					SetEntPropFloat(entity, Prop_Send, "m_flNextSecondaryAttack", FAR_FUTURE);
+				}
+			}
+			else
+			{
+				SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", true);
+			}
+
+			if(!wearable)
+			{
+				if(ground > MaxClients)
+				{
+					i = GetEntProp(entity, Prop_Send, "m_iAccountID");
+				}
+				else
+				{
+					i = GetSteamAccountID(client);
+				}
+				SetEntProp(entity, Prop_Send, "m_iAccountID", i);
+
+				if(weapon.Bullet>=0 && weapon.Bullet<Ammo_MAX)
+				{
+					SetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType", weapon.Bullet);
+				}
+				else
+				{
+					weapon.Bullet = GetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType");
+				}
+
+				if(ground > MaxClients)
+				{
+					// Save our current ammo
+					int ammos[Ammo_MAX];
+					for(i=1; i<Ammo_MAX; i++)
+					{
+						ammos[i] = GetAmmo(client, i);
+						SetAmmo(client, 0, i);
+					}
+
+					// Get the new weapon's ammo
+					SDKCall_InitPickup(ground, client, entity);
+
+					// See where the ammo was sent to, add to our current ammo count
+					for(i=0; i<Ammo_MAX; i++)
+					{
+						count = GetEntProp(client, Prop_Data, "m_iAmmo", _, i);
+						if(!count)
+							continue;
+
+						if(count < 0)	// Guess we give a new set of ammo
+							count = weapon.Ammo;
+
+						ammos[weapon.Bullet] += count;
+
+						count = Classes_GetMaxAmmo(client, weapon.Bullet);
+						if(ammos[weapon.Bullet] > count)
+							ammos[weapon.Bullet] = count;
+
+						break;
+					}
+
+					// Set our ammo back
+					for(i=0; i<Ammo_MAX; i++)
+					{
+						if(ammos[i])
+							SetAmmo(client, ammos[i], i);
+					}
+				}
+				else
+				{
+					if(clip && weapon.Clip>=0)
+						SetEntProp(entity, Prop_Data, "m_iClip1", weapon.Clip);
+
+					if(ammo && weapon.Ammo>0 && weapon.Bullet>0)
+					{
+						count = weapon.Ammo+GetAmmo(client, weapon.Bullet);
+
+						i = Classes_GetMaxAmmo(client, weapon.Bullet);
+						if(count > i)
+							count = i;
+
+						SetAmmo(client, count, weapon.Bullet);
+					}
+				}
+			}
+
+			if(weapon.OnCreate != INVALID_FUNCTION)
+			{
+				Call_StartFunction(null, weapon.OnCreate);
+				Call_PushCell(client);
+				Call_PushCell(entity);
+				Call_Finish();
+			}
+
+			if(!wearable && equip)
+				SetActiveWeapon(client, entity);
+
+			Forward_OnWeapon(client, entity);
 		}
-
-		if(equip)
-			SetActiveWeapon(client, entity);
-
-		Forward_OnWeapon(client, entity);
 	}
 	return entity;
 }
 
 void Items_SwapWeapons(int client, int wep1, int wep2)
 {
-	if(!MaxWeapons)
-		MaxWeapons = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
-
 	int slot1 = -1;
 	int slot2 = -1;
-	for(int i; i<MaxWeapons; i++)
+	int max = GetMaxWeapons(client);
+	for(int i; i<max; i++)
 	{
 		int entity = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i);
 		if(entity == wep1)
@@ -401,11 +433,12 @@ void Items_SwitchItem(int client, int holding)
 {
 	int slot = 2;
 	static char buffer[36];
-	if(GetEntityClassname(holding, buffer, sizeof(buffer)))
+	if(holding>MaxClients && GetEntityClassname(holding, buffer, sizeof(buffer)))
 	{
 		slot = TF2_GetClassnameSlot(buffer);
 		ArrayList list = Items_ArrayList(client, slot);
 
+		bool found;
 		int length = list.Length;
 		if(length > 1)
 		{
@@ -423,17 +456,19 @@ void Items_SwitchItem(int client, int holding)
 					int entity = list.Get(i);
 					Items_SwapWeapons(client, entity, holding);
 					SetActiveWeapon(client, entity);
+					found = true;
 					break;
 				}
 				break;
 			}
 		}
 		delete list;
+
+		if(found)
+			return;
 	}
-	else
-	{
-		FakeClientCommand(client, "slot%d", slot+1);
-	}
+
+	FakeClientCommand(client, "use tf_weapon_fists");
 }
 
 bool Items_CanGiveItem(int client, int type, bool &full=false)
@@ -521,7 +556,7 @@ bool Items_DropItem(int client, int helditem, const float origin[3], const float
 		{
 			ammo = GetAmmo(client, type);
 			int clip = GetEntProp(helditem, Prop_Data, "m_iClip1");
-			int max = ClassMaxAmmo(type, Client[client].Class);
+			int max = Classes_GetMaxAmmo(client, type);
 
 			if(ammo > max)
 			{
@@ -631,7 +666,7 @@ bool Items_Pickup(int client, int index, int entity=-1)
 			return true;
 		}
 
-		ClientCommand(client, "playgamesound WallHealth.Deny");
+		ClientCommand(client, "playgamesound items/medshotno1.wav");
 
 		BfWrite bf = view_as<BfWrite>(StartMessageOne("HudNotifyCustom", client));
 		if(bf)
@@ -755,11 +790,19 @@ float Items_Radio(int client)
 	return distance;
 }
 
-void Items_GetTranName(int index, char[] buffer, int length)
+int Items_GetTranName(int index, char[] buffer, int length)
 {
-	Format(buffer, length, "weapon_%d", index);
-	if(!TranslationPhraseExists(buffer))
-		strcopy(buffer, length, "weapon_0");
+	WeaponEnum weapon;
+	if(Items_GetWeaponByIndex(index, weapon))
+		return strcopy(buffer, length, weapon.Display);
+
+	return strcopy(buffer, length, "weapon_0");
+}
+
+void RemoveAndSwitchItem(int client, int weapon)
+{
+	Items_SwitchItem(client, weapon);
+	TF2_RemoveItem(client, weapon);
 }
 
 static void SpawnPlayerPickup(int client, const char[] classname)
@@ -780,10 +823,13 @@ static void SpawnPlayerPickup(int client, const char[] classname)
 	}
 }
 
-void RemoveAndSwitchItem(int client, int weapon)
+static int GetMaxWeapons(int client)
 {
-	Items_SwitchItem(client, weapon);
-	TF2_RemoveItem(client, weapon);
+	static int max;
+	if(!max)
+		max = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
+
+	return max;
 }
 
 public bool Items_NoDrop(int client, int weapon, bool &swap)
@@ -865,8 +911,11 @@ public Action Items_DisarmerHit(int client, int victim, int &inflictor, float &d
 				}
 				FakeClientCommand(victim, "use tf_weapon_fists");
 
-				if(Client[victim].Class>=Class_Guard && Client[victim].Class<=Class_MTFE)
+				ClassEnum class;
+				if(Classes_GetByIndex(Client[victim].Class, class) && class.Group==2 && !class.Vip)
 					GiveAchievement(Achievement_DisarmMTF, client);
+
+				CreateTimer(1.0, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
 			}
 		}
 
@@ -882,7 +931,7 @@ public Action Items_DisarmerHit(int client, int victim, int &inflictor, float &d
 
 public Action Items_HeadshotHit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	if((IsSCP(victim) && Client[victim].Class!=Class_0492) ||
+	if((IsSCP(victim) && Client[victim].Class!=Classes_GetByName("scp0492")) ||
 	   GetEntProp(victim, Prop_Data, "m_LastHitGroup") != HITGROUP_HEAD)
 		return Plugin_Continue;
 
@@ -900,7 +949,7 @@ public Action Items_LogicerHit(int client, int victim, int &inflictor, float &da
 		changed = true;
 	}
 
-	if((!isSCP || Client[victim].Class==Class_0492) &&
+	if((!isSCP || Client[victim].Class==Classes_GetByName("scp0492")) &&
 	   GetEntProp(victim, Prop_Data, "m_LastHitGroup") == HITGROUP_HEAD)
 	{
 		damagetype |= DMG_CRIT;
@@ -931,31 +980,12 @@ public void Items_BuilderCreate(int client, int entity)
 	}
 }
 
-public bool Items_NoneButton(int client, int weapon, int &buttons, int &holding)
-{
-	if(!holding && Gamemode==Gamemode_Steals)
-	{
-		if(buttons & IN_ATTACK2)
-		{
-			if(Client[client].Extra1)
-			{
-				TurnOffFlashlight(client);
-			}
-			else
-			{
-				TurnOnFlashlight(client);
-			}
-		}
-	}
-	return false;
-}
-
 public bool Items_MicroButton(int client, int weapon, int &buttons, int &holding)
 {
 	int type = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
 	int ammo = GetAmmo(client, type);
 	static float charge[MAXTF2PLAYERS];
-	if(ammo<1 || !(buttons & IN_ATTACK))
+	if(ammo<2 || !(buttons & IN_ATTACK))
 	{
 		charge[client] = 0.0;
 		SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
@@ -975,7 +1005,7 @@ public bool Items_MicroButton(int client, int weapon, int &buttons, int &holding
 		else if(charge[client] < engineTime)
 		{
 			charge[client] = FAR_FUTURE;
-			SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", 0.0);
+			SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", GetGameTime()+0.1);
 		}
 		else
 		{
@@ -1048,8 +1078,8 @@ public bool Items_AdrenalineButton(int client, int weapon, int &buttons, int &ho
 		RemoveAndSwitchItem(client, weapon);
 		StartHealingTimer(client, 0.334, 1, 60, true);
 		TF2_AddCondition(client, TFCond_DefenseBuffNoCritBlock, 20.0, client);
-		TF2_AddCondition(client, TFCond_CritHype, 20.0, client);
-		FadeClientVolume(client, 0.7, 2.5, 17.5, 2.5);
+		Client[client].Extra3 = GetEngineTime()+20.0;
+		FadeClientVolume(client, 0.3, 2.5, 17.5, 2.5);
 	}
 	return false;
 }
@@ -1060,7 +1090,7 @@ public bool Items_RadioButton(int client, int entity, int &buttons, int &holding
 	{
 		if(buttons & IN_ATTACK)
 		{
-			buttons = IN_ATTACK;
+			holding = IN_ATTACK;
 
 			int clip = GetEntProp(entity, Prop_Data, "m_iClip1");
 			if(clip > 3)
@@ -1076,7 +1106,7 @@ public bool Items_RadioButton(int client, int entity, int &buttons, int &holding
 		}
 		else if(buttons & IN_ATTACK2)
 		{
-			buttons = IN_ATTACK2;
+			holding = IN_ATTACK2;
 
 			int clip = GetEntProp(entity, Prop_Data, "m_iClip1");
 			if(clip < 1)
@@ -1098,12 +1128,89 @@ public bool Items_500Button(int client, int weapon, int &buttons, int &holding)
 {
 	if(!holding && (buttons & IN_ATTACK))
 	{
-		buttons = IN_ATTACK;
+		holding = IN_ATTACK;
 		RemoveAndSwitchItem(client, weapon);
-		SpawnPickup(client, "item_healthkit_full");
+		SpawnPlayerPickup(client, "item_healthkit_full");
 		StartHealingTimer(client, 0.334, 1, 36, true);
-		TF2_AddCondition(client, TFCond_DefenseBuffNoCritBlock, 20.0, client);
-		TF2_AddCondition(client, TFCond_CritHype, 20.0, client);
+		Client[client].Extra2 = 0;
+
+		ClassEnum class;
+		if(Classes_GetByIndex(Client[client].Class, class) && class.Group==1)
+			Gamemode_GiveTicket(1, 2);
+	}
+	return false;
+}
+
+public bool Items_207Button(int client, int weapon, int &buttons, int &holding)
+{
+	if(!holding && (buttons & IN_ATTACK))
+	{
+		holding = IN_ATTACK;
+		RemoveAndSwitchItem(client, weapon);
+
+		int current = GetClientHealth(client);
+		int max = Classes_GetMaxHealth(client);
+		if(current < max)
+		{
+			int health = max/3;
+			if(current+health > max)
+				health = max-current;
+
+			SetEntityHealth(client, current+health);
+			ApplyHealEvent(client, client, health);
+		}
+
+		if(Client[client].Extra2 < 4)
+		{
+			StartHealingTimer(client, 2.5, -1, 250, _, true);
+			Client[client].Extra2++;
+		}
+
+		ClassEnum class;
+		if(Classes_GetByIndex(Client[client].Class, class) && class.Group==1)
+			Gamemode_GiveTicket(1, 2);
+	}
+	return false;
+}
+
+public bool Items_018Button(int client, int weapon, int &buttons, int &holding)
+{
+	if(!holding && (buttons & IN_ATTACK))
+	{
+		holding = IN_ATTACK;
+		RemoveAndSwitchItem(client, weapon);
+		TF2_AddCondition(client, TFCond_CritCola, 6.0);
+		TF2_AddCondition(client, TFCond_RestrictToMelee, 6.0);
+
+		ClassEnum class;
+		if(Classes_GetByIndex(Client[client].Class, class) && class.Group==1)
+			Gamemode_GiveTicket(1, 2);
+	}
+	return false;
+}
+
+public bool Items_268Button(int client, int weapon, int &buttons, int &holding)
+{
+	if(!holding && (buttons & IN_ATTACK))
+	{
+		holding = IN_ATTACK;
+
+		float engineTime = GetEngineTime();
+		static float delay[MAXTF2PLAYERS];
+		if(delay[client] > engineTime)
+		{
+			ClientCommand(client, "playgamesound items/medshotno1.wav");
+			PrintCenterText(client, "%T", "in_cooldown", client);
+			return false;
+		}
+
+		delay[client] = engineTime+90.0;
+		TF2_AddCondition(client, TFCond_Stealthed, 15.0);
+		ClientCommand(client, "playgamesound misc/halloween/spell_stealth.wav");
+
+		ClassEnum class;
+		if(Classes_GetByIndex(Client[client].Class, class) && class.Group==1)
+			Gamemode_GiveTicket(1, 1);
 	}
 	return false;
 }

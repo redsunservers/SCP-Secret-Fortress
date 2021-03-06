@@ -1,69 +1,18 @@
-//static const char Name[] = "106";
-static const char Model[] = "models/scp_sf/106/scp106_player_3.mdl";
 static const char ModelMelee[] = "models/scp_sf/106/scp106_hands_1.mdl";
-static const int Health = 800;
-static const float Speed = 240.0;
-static const float TeleStun = 8.0;		// Teleport stun duration
+static const float TeleFreeze = 8.0;	// Teleport freeze duration
+static const float TeleStun = 5.0;		// Teleport stun duration
 static const float TeleDelay = 4.0;	// Teleport delay
 
-static const char Downloads[][] =
+public bool SCP106_Create(int client)
 {
-	"models/scp_sf/106/scp106_player_3.dx80.vtx",
-	"models/scp_sf/106/scp106_player_3.dx90.vtx",
-	"models/scp_sf/106/scp106_player_3.mdl",
-	"models/scp_sf/106/scp106_player_3.phy",
-	"models/scp_sf/106/scp106_player_3.sw.vtx",
-	"models/scp_sf/106/scp106_player_3.vvd",
+	Classes_VipSpawn(client);
 
-	"models/scp_sf/106/scp106_hands_1.dx80.vtx",
-	"models/scp_sf/106/scp106_hands_1.dx90.vtx",
-	"models/scp_sf/106/scp106_hands_1.mdl",
-	"models/scp_sf/106/scp106_hands_1.sw.vtx",
-	"models/scp_sf/106/scp106_hands_1.vvd",
-
-	"materials/models/vinrax/scp/106_diffuse.vmt",
-	"materials/models/vinrax/scp/106_diffuse.vtf",
-	"materials/models/vinrax/scp/106_normal.vtf"
-};
-
-void SCP106_Enable()
-{
-	PrecacheModel(ModelMelee, true);
-
-	int table = FindStringTable("downloadables");
-	bool save = LockStringTables(false);
-	for(int i; i<sizeof(Downloads); i++)
-	{
-		if(!FileExists(Downloads[i], true))
-		{
-			LogError("Missing file: '%s'", Downloads[i]);
-			continue;
-		}
-
-		AddToStringTable(table, Downloads[i]);
-	}
-	LockStringTables(save);
-}
-
-void SCP106_Create(int client)
-{
 	Client[client].Pos[0] = 0.0;
 	Client[client].Pos[1] = 0.0;
 	Client[client].Pos[2] = 0.0;
 	Client[client].Extra2 = 0;
-	Client[client].Floor = Floor_Heavy;
 
-	Client[client].OnAnimation = SCP106_OnAnimation;
-	Client[client].OnButton = SCP106_OnButton;
-	Client[client].OnCondRemoved = SCP106_OnCondRemoved;
-	Client[client].OnDealDamage = SCP106_OnDealDamage;
-	Client[client].OnDeath = SCP106_OnDeath;
-	Client[client].OnKeycard = Items_KeycardAll;
-	Client[client].OnKill = SCP106_OnKill;
-	Client[client].OnMaxHealth = SCP106_OnMaxHealth;
-	Client[client].OnSpeed = SCP106_OnSpeed;
-
-	int weapon = SpawnWeapon(client, "tf_weapon_shovel", 195, 60, 13, "28 ; 0 ; 66 ; 0.1 ; 252 ; 0.4", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_shovel", 195, 60, 13, "1 ; 0.769231 ; 28 ; 0 ; 66 ; 0.1 ; 252 ; 0.4", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 12);
@@ -72,19 +21,9 @@ void SCP106_Create(int client)
 	}
 
 	ViewModel_Create(client, ModelMelee);
-	ViewModel_Hide(client);
 	ViewModel_SetDefaultAnimation(client, "a_fists_idle_02");
 	ViewModel_SetAnimation(client, "fists_draw");
-}
-
-public void SCP106_OnMaxHealth(int client, int &health)
-{
-	health = Health;
-}
-
-public void SCP106_OnSpeed(int client, float &speed)
-{
-	speed = Speed;
+	return false;
 }
 
 public Action SCP106_OnAnimation(int client, PlayerAnimEvent_t &anim, int &data)
@@ -101,8 +40,9 @@ public void SCP106_OnCondRemoved(int client, TFCond cond)
 		ViewModel_SetAnimation(client, "fists_draw");
 }
 
-public void SCP106_OnDeath(int client, int attacker)
+public void SCP106_OnDeath(int client, Event event)
 {
+	Classes_DeathScp(client, event);
 	if(Client[client].Extra2)
 		HideAnnotation(client);
 
@@ -119,7 +59,11 @@ public void SCP106_OnDeath(int client, int attacker)
 			TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
 		}
 		DispatchKeyValue(entity, "skin", "0");
-		DispatchKeyValue(entity, "model", Model);	
+		{
+			char model[PLATFORM_MAX_PATH];
+			GetEntPropString(client, Prop_Data, "m_ModelName", model, sizeof(model));
+			DispatchKeyValue(entity, "model", model);
+		}	
 		{
 			float angles[3];
 			GetClientEyeAngles(client, angles);
@@ -147,29 +91,30 @@ public Action SCP106_OnDealDamage(int client, int victim, int &inflictor, float 
 	SetEntPropFloat(client, Prop_Send, "m_flNextAttack", GetGameTime()+2.0);
 
 	int entity = -1;
-	static char name[16];
-	static int spawns[4];
-	int count;
+	ArrayList spawns = new ArrayList();
 	while((entity=FindEntityByClassname2(entity, "info_target")) != -1)
 	{
+		static char name[16];
 		GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
 		if(!StrContains(name, "scp_pocket", false))
-			spawns[count++] = entity;
-
-		if(count > 3)
-			break;
+			spawns.Push(entity);
 	}
 
-	if(count)
-	{
-		entity = spawns[GetRandomInt(0, count-1)];
+	int length = spawns.Length;
+	if(length)
+		entity = spawns.Get(GetRandomInt(0, length-1));
 
+	delete spawns;
+
+	if(entity != -1)
+	{
 		static float pos[3];
 		GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
 		TeleportEntity(victim, pos, NULL_VECTOR, TRIPLE_D);
 	}
 	else if(GetRandomInt(0, 2))
 	{
+		damage *= 2.0;
 		damagetype |= DMG_CRIT;
 		return Plugin_Changed;
 	}
@@ -226,11 +171,71 @@ public void SCP106_OnButton(int client, int button)
 		else
 		{
 			TF2_StunPlayer(client, TeleStun, 1.0, TF_STUNFLAG_BONKSTUCK|TF_STUNFLAG_NOSOUNDOREFFECT);
-			TF2_AddCondition(client, TFCond_MegaHeal, TeleStun);
-			Client[client].ChargeIn = GetEngineTime()+TeleDelay;
+
+			float engineTime = GetEngineTime();
+			Client[client].ChargeIn = engineTime+TeleDelay;
+			Client[client].FreezeFor = engineTime+TeleFreeze;
+
+			SetEntityMoveType(client, MOVETYPE_NONE);
 			PrintRandomHintText(client);
 		}
 	}
+}
+
+public bool SCP106_OnPickup(int client, int entity)
+{
+	char buffer[64];
+	GetEntityClassname(entity, buffer, sizeof(buffer));
+	if(StrEqual(buffer, "tf_dropped_weapon"))
+	{
+		RemoveEntity(entity);
+		return true;
+	}
+	else if(!StrContains(buffer, "prop_dynamic"))
+	{
+		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
+		if(!StrContains(buffer, "scp_trigger", false))
+		{
+			ClassEnum class;
+			if(Classes_GetByIndex(Client[client].Class, class))
+			{
+				switch(class.Group)
+				{
+					case 0:
+						AcceptEntityInput(entity, "FireUser1", client, client);
+
+					case 1:
+						AcceptEntityInput(entity, "FireUser2", client, client);
+
+					case 2:
+						AcceptEntityInput(entity, "FireUser3", client, client);
+
+					default:
+						AcceptEntityInput(entity, "FireUser4", client, client);
+				}
+				return true;
+			}
+		}
+	}
+	else if(StrEqual(buffer, "func_button"))
+	{
+		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
+		if(!StrContains(buffer, "scp_trigger", false))
+		{
+			AcceptEntityInput(entity, "Press", client, client);
+			return true;
+		}
+	}
+	return false;
+}
+
+public Action SCP106_TakeDamage(int client, int attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	if(Client[client].ChargeIn < GetEngineTime())
+		return Plugin_Continue;
+
+	damagetype |= DMG_PREVENT_PHYSICS_FORCE;
+	return Plugin_Changed;
 }
 
 static void ShowAnnotation(int client)
@@ -256,7 +261,7 @@ static void ShowAnnotation(int client)
 	}
 }
 
-void HideAnnotation(int client)
+static void HideAnnotation(int client)
 {
 	Event event = CreateEvent("hide_annotation");
 	if(event != INVALID_HANDLE)
