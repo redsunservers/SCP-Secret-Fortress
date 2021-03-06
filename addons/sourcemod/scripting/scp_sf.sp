@@ -2059,7 +2059,6 @@ public void UpdateListenOverrides(float engineTime)
 
 	int total;
 	int[] client = new int[MaxClients];
-	int[] team = new int[MaxClients];
 	bool[] spec = new bool[MaxClients];
 	bool[] admin = new bool[MaxClients];
 	float[] radio = new float[MaxClients];
@@ -2114,7 +2113,7 @@ public void UpdateListenOverrides(float engineTime)
 			}
 
 			float range, hearing;
-			Classes_GetByIndex(Client[a].Class, aclass);
+			Classes_GetByIndex(Client[client[a]].Class, aclass);
 			if(aclass.Group == iclass.Group)
 			{
 				range = aclass.SpeakTeam;
