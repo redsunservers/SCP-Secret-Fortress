@@ -11,7 +11,6 @@
 #include <dhooks>
 #undef REQUIRE_PLUGIN
 #tryinclude <goomba>
-#tryinclude <devzones>
 #tryinclude <sourcecomms>
 #tryinclude <basecomm>
 #define REQUIRE_PLUGIN
@@ -46,7 +45,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"2"
 #define MINOR_REVISION	"0"
-#define STABLE_REVISION	"0"
+#define STABLE_REVISION	"1"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE	100000000.0
@@ -113,6 +112,7 @@ ConVar CvarSpeedMulti;
 ConVar CvarSpeedMax;
 ConVar CvarAchievement;
 ConVar CvarChatHook;
+ConVar CvarVoiceHook;
 
 float NextHintAt = FAR_FUTURE;
 float RoundStartAt;
@@ -2001,6 +2001,7 @@ public Action CheckAlivePlayers(Handle timer)
 
 public void UpdateListenOverrides(float engineTime)
 {
+	bool manage = CvarVoiceHook.BoolValue;
 	if(!Enabled)
 	{
 		for(int client=1; client<=MaxClients; client++)
@@ -2010,7 +2011,7 @@ public void UpdateListenOverrides(float engineTime)
 
 			for(int target=1; target<=MaxClients; target++)
 			{
-				if(!ChatHook)
+				if(!manage)
 				{
 					Client[target].CanTalkTo[client] = true;
 					continue;
@@ -2085,13 +2086,13 @@ public void UpdateListenOverrides(float engineTime)
 		{
 			if(client[i] == client[a])
 			{
-				if(ChatHook)
+				if(manage)
 					SetListenOverride(client[i], client[a], Listen_Default);
 
 				continue;
 			}
 
-			bool muted = (ChatHook && IsClientMuted(client[i], client[a]));
+			bool muted = (manage && IsClientMuted(client[i], client[a]));
 			bool blocked = muted;
 
 			#if defined _basecomm_included
@@ -2107,7 +2108,7 @@ public void UpdateListenOverrides(float engineTime)
 			if(admin[a] || spec[i] || Client[client[a]].ComFor>engineTime)	// Admin speaking, spec team listner, Comm System speaking
 			{
 				Client[client[a]].CanTalkTo[client[i]] = !muted;
-				if(ChatHook)
+				if(manage)
 					SetListenOverride(client[i], client[a], blocked ? Listen_No : Listen_Default);
 
 				continue;
@@ -2137,7 +2138,7 @@ public void UpdateListenOverrides(float engineTime)
 			}
 
 			Client[client[a]].CanTalkTo[client[i]] = (success && !muted);
-			if(ChatHook)
+			if(manage)
 				SetListenOverride(client[i], client[a], (success && !blocked) ? Listen_Yes : Listen_No);
 		}
 	}
@@ -2394,12 +2395,6 @@ public Action OnStomp(int attacker, int victim)
 
 	OnGetMaxHealth(victim, health);
 	return health<300 ? Plugin_Handled : Plugin_Continue;
-}
-
-public void Zone_OnClientEntry(int client, char[] zone)
-{
-	if(!StrContains(zone, "scp_escort", false))
-		TF2_AddCondition(client, TFCond_TeleportedGlow, 0.5);
 }
 
 #if defined _SENDPROXYMANAGER_INC_

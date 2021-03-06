@@ -14,11 +14,13 @@ void ConVar_Setup()
 	CvarSpeedMulti = CreateConVar("scp_speedmulti", "1.0", "Player movement speed multiplier", _, true, 0.004167);
 	CvarSpeedMax = CreateConVar("scp_speedmax", "3000.0", "Maximum player speed (SCP-173's blink speed)", _, true, 1.0);
 	CvarAchievement = CreateConVar("scp_achievements", "1", "If to call SCPSF_OnAchievement forward", _, true, 0.0, true, 1.0);
-	CvarChatHook = CreateConVar("scp_chathook", "1", "If to use it's own chat processor to manage chat and voice messages", _, true, 0.0, true, 1.0);
+	CvarChatHook = CreateConVar("scp_chathook", "1", "If to use it's own chat processor to manage chat messages", _, true, 0.0, true, 1.0);
+	CvarVoiceHook = CreateConVar("scp_voicehook", "1", "If to use it's own voice processor to manage voice chat", _, true, 0.0, true, 1.0);
 
 	AutoExecConfig(true, "SCPSecretFortress");
 
 	CvarChatHook.AddChangeHook(ConVar_OnChatHook);
+	CvarVoiceHook.AddChangeHook(ConVar_OnVoiceHook);
 
 	if(CvarList != INVALID_HANDLE)
 		delete CvarList;
@@ -95,17 +97,6 @@ public void ConVar_OnChatHook(ConVar cvar, const char[] oldValue, const char[] n
 		if(!cvar.BoolValue)
 		{
 			ChatHook = false;
-			for(int client=1; client<=MaxClients; client++)
-			{
-				if(!IsValidClient(client, false))
-					continue;
-
-				for(int target=1; target<=MaxClients; target++)
-				{
-					if(client==target || IsValidClient(target))
-						SetListenOverride(client, target, Listen_Default);
-				}
-			}
 			RemoveCommandListener(OnSayCommand, "say");
 			RemoveCommandListener(OnSayCommand, "say_team");
 		}
@@ -115,5 +106,23 @@ public void ConVar_OnChatHook(ConVar cvar, const char[] oldValue, const char[] n
 		ChatHook = true;
 		AddCommandListener(OnSayCommand, "say");
 		AddCommandListener(OnSayCommand, "say_team");
+	}
+}
+
+public void ConVar_OnVoiceHook(ConVar cvar, const char[] oldValue, const char[] newValue)
+{
+	if(!cvar.BoolValue && StringToFloat(oldValue))
+	{
+		for(int client=1; client<=MaxClients; client++)
+		{
+			if(!IsValidClient(client, false))
+				continue;
+
+			for(int target=1; target<=MaxClients; target++)
+			{
+				if(client==target || IsValidClient(target))
+					SetListenOverride(client, target, Listen_Default);
+			}
+		}
 	}
 }
