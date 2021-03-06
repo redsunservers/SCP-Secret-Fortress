@@ -127,8 +127,8 @@ static void GrabKvValues(KeyValues kv, ClassEnum class, ClassEnum defaul, int in
 	class.Speed = kv.GetFloat("speed", defaul.Speed);
 	class.Speak = kv.GetFloat("speak", defaul.Speak);
 	class.Hear = kv.GetFloat("hear", defaul.Hear);
-	class.SpeakTeam = kv.GetFloat("speakteam", defaul.SpeakTeam);
-	class.HearTeam = kv.GetFloat("hearteam", defaul.HearTeam);
+	class.SpeakTeam = kv.GetFloat("speak_team", defaul.SpeakTeam);
+	class.HearTeam = kv.GetFloat("hear_team", defaul.HearTeam);
 
 	class.Health = kv.GetNum("health", defaul.Health);
 	class.Group = kv.GetNum("group", defaul.Group);
