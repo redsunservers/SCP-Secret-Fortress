@@ -2084,6 +2084,7 @@ public void UpdateListenOverrides(float engineTime)
 		{
 			if(client[i] == client[a])
 			{
+				Client[client[a]].CanTalkTo[client[i]] = true;
 				if(manage)
 					SetListenOverride(client[i], client[a], Listen_Default);
 
