@@ -2070,7 +2070,6 @@ public void UpdateListenOverrides(float engineTime)
 			continue;
 
 		client[total] = i;
-		team[total] = GetClientTeam(i);
 		radio[total] = Items_Radio(i);
 		spec[total] = GetClientTeam(i)==view_as<int>(TFTeam_Spectator);
 		admin[total] = (spec[total] && CheckCommandAccess(i, "sm_mute", ADMFLAG_CHAT));
@@ -2081,7 +2080,7 @@ public void UpdateListenOverrides(float engineTime)
 	ClassEnum iclass, aclass;
 	for(int i; i<total; i++)
 	{
-		Classes_GetByIndex(Client[i].Class, iclass);
+		Classes_GetByIndex(Client[client[i]].Class, iclass);
 		for(int a; a<total; a++)
 		{
 			if(client[i] == client[a])
