@@ -28,6 +28,7 @@ void ConVar_Setup()
 	CvarList = new ArrayList(sizeof(CvarInfo));
 	
 	ConVar_Add("mp_autoteambalance", 0.0);
+	ConVar_Add("mp_bonusroundtime", 15.0);
 	ConVar_Add("mp_disable_respawn_times", 1.0);
 	ConVar_Add("mp_forcecamera", 0.0);
 	ConVar_Add("mp_friendlyfire", 1.0);
