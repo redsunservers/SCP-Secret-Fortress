@@ -4,29 +4,11 @@
 	{
 		"Signatures"
 		{
-			"CBaseEntity::GetNextThink"
-			{
-				"library"	"server"
-				"linux" 	"@_ZN11CBaseEntity12GetNextThinkEPKc"
-				"windows"	"\x55\x8B\xEC\x8B\x45\x08\x56\x8B\xF1\x85\xC0\x75\x2A\x8B\x86\xD0\x00\x00\x00\x89\x45\x08"
-			}
 			"CBaseEntity::InSameTeam"
 			{
 				"library"	"server"
 				"linux"		"@_ZNK11CBaseEntity10InSameTeamEPKS_"
 				"windows"	"\x55\x8B\xEC\x8B\x45\x08\x57\x8B\xF9\x85\xC0\x75\x2A"
-			}
-			"CBaseEntity::PhysicsDispatchThink"
-			{
-				"library"	"server"
-				"linux" 	"@_ZN11CBaseEntity20PhysicsDispatchThinkEMS_FvvE"
-				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x83\xEC\x08\x83\x78\x30\x00\x53"
-			}
-			"CLagCompensationManager::StartLagCompensation"
-			{
-				"library"	"server"
-				"linux"		"@_ZN23CLagCompensationManager20StartLagCompensationEP11CBasePlayerP8CUserCmd"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x24\x57\x8B\xF9\x89\x7D\xE8"
 			}
 			"CTFDroppedWeapon::Create"
 			{
@@ -76,6 +58,12 @@
 				"linux"		"@_ZN9CTFPlayer10GetMaxAmmoEii"
 				"windows"	"\x55\x8B\xEC\x8B\x45\x0C\x56\x57\x8B\xF9\x83\xF8\xFF\x75\x2A\xFF\xB7\x2A\x2A\x2A\x2A\xEB\x01\x50\xE8"
 			}
+			"CTFPlayer::RegenThink"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CTFPlayer10RegenThinkEv"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x74\x57\x8B\xF9\x8B\x07"
+			}
 			"CTFPlayer::Taunt"
 			{
 				"library"	"server"
@@ -106,12 +94,6 @@
 				"linux"		"@_ZN14CWeaponMedigun19AllowedToHealTargetEP11CBaseEntity"
 				"windows"	"\x55\x8B\xEC\x53\x8B\xD9\x56\x57\x8B\xB3\xE8"
 			}
-			"GetGlobalTeam"
-			{
-				"library"	"server"
-				"linux"		"@_Z13GetGlobalTeami"
-				"windows"	"\x55\x8B\xEC\x8B\x4D\x08\x85\xC9\x78\x2A\x3B\x0D\x2A\x2A\x2A\x2A\x7D\x2A\xA1\x2A\x2A\x2A\x2A\x8B\x04\x88\x5D\xC3"
-			}
 		}
 		"Functions"
 		{
@@ -129,44 +111,12 @@
 					}
 				}
 			}
-			"CBaseEntity::PhysicsDispatchThink"
-			{
-				"signature"	"CBaseEntity::PhysicsDispatchThink"
-				"callconv"	"thiscall"
-				"return"	"void"
-				"this"		"entity"
-				"arguments"
-				{
-					"thinkFunc"
-					{
-						"type"	"int"
-					}
-				}
-			}
 			"CBasePlayer::ForceRespawn"
 			{
 				"offset"	"CBasePlayer::ForceRespawn"
 				"hooktype"	"entity"
 				"return"	"void"
 				"this"		"entity"
-			}
-			"CLagCompensationManager::StartLagCompensation"
-			{
-				"signature"	"CLagCompensationManager::StartLagCompensation"
-				"callconv"	"thiscall"
-				"return"	"void"
-				"this"		"address"
-				"arguments"
-				{
-					"player"
-					{
-						"type"	"cbaseentity"
-					}
-					"cmd"
-					{
-						"type"	"objectptr"
-					}
-				}
 			}
 			"CTeamplayRoundBasedRules::RoundRespawn"
 			{
@@ -300,6 +250,13 @@
 					}
 				}
 			}
+			"CTFPlayer::RegenThink"
+			{
+				"signature"	"CTFPlayer::RegenThink"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"entity"
+			}
 			"CTFPlayer::Taunt"
 			{
 				"signature"	"CTFPlayer::Taunt"
@@ -335,11 +292,6 @@
 		}
 		"Offsets"
 		{
-			"CBaseEntity::ChangeTeam"
-			{
-				"linux"		"92"
-				"windows"	"91"	
-			}
 			"CBaseEntity::GetBaseEntity"
 			{
 				"linux" 	"6"
@@ -378,7 +330,7 @@
 		}
 		"Addresses"
 		{
-			"ProcessMovement"
+			"Patch_ProcessMovement"
 			{
 				"linux"
 				{
@@ -390,6 +342,14 @@
 					"signature"	"CTFGameMovement::ProcessMovement"
 					"offset"	"70"
 				}
+			}
+		}
+		"Keys"
+		{
+			"Patch_ProcessMovement"
+			{
+				"windows"	"\x90\x90\x90\x90\x90\x90\x90"
+				"linux"		"\x90\x90\x90\x90\x90\x90\x90"
 			}
 		}
 	}

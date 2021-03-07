@@ -8,6 +8,7 @@
 #include <tf2items>
 #include <morecolors>
 #include <tf2attributes>
+#include <memorypatch>
 #include <dhooks>
 #undef REQUIRE_PLUGIN
 #tryinclude <goomba>
@@ -97,6 +98,8 @@ bool NoMusic = false;
 bool ChatHook = false;
 bool SourceComms = false;		// SourceComms++
 bool BaseComm = false;		// BaseComm
+
+MemoryPatch PatchProcessMovement;
 
 Handle HudPlayer;
 Handle HudClass;
@@ -290,18 +293,17 @@ public void OnPluginStart()
 		SDKCall_Setup(gamedata);
 		DHook_Setup(gamedata);
 
-		Address address = GameConfGetAddress(gamedata, "ProcessMovement");
-		if(address == Address_Null)
+		MemoryPatch.SetGameData(gamedata);
+		PatchProcessMovement = new MemoryPatch("Patch_ProcessMovement");
+		if(PatchProcessMovement)
 		{
-			LogError("[Gamedata] Could not find ProcessMovement");
+			PatchProcessMovement.Enable();
 		}
 		else
 		{
-			for(int i; i<7; i++)
-			{
-				StoreToAddress(address+view_as<Address>(i), 0x90, NumberType_Int8);
-			}
+			LogError("[Gamedata] Could not find Patch_ProcessMovement");
 		}
+
 		delete gamedata;
 	}
 	else
@@ -418,6 +420,9 @@ public void OnPluginEnd()
 		if(IsClientInGame(i))
 			DHook_UnhookClient(i);
 	}
+
+	if(PatchProcessMovement)
+		PatchProcessMovement.Disable();
 
 	if(Enabled)
 		EndRound(0);
@@ -918,7 +923,6 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	Client[client].SprintPower = 100.0;
 	Client[client].Extra2 = 0;
 	Client[client].Extra3 = 0.0;
-	Client[client].NextSongAt = 0.0;
 	Client[client].WeaponClass = TFClass_Unknown;
 
 	Classes_PlayerSpawn(client);

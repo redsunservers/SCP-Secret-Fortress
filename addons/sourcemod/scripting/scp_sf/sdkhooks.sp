@@ -24,11 +24,6 @@ public void OnEntityCreated(int entity, const char[] classname)
 	{
 		SDKHook(entity, SDKHook_SpawnPost, OnPipeSpawned);
 	}
-	else if(Enabled && !StrContains(classname, "obj_"))
-	{
-		SDKHook(entity, SDKHook_OnTakeDamage, OnObjDamage);
-	}
-}
 
 public void OnKitSpawned(int entity)
 {
@@ -102,16 +97,6 @@ public Action OnPipeTouch(int entity, int client)
 	return IsValidClient(client) ? Plugin_Handled : Plugin_Continue;
 }
 
-public Action OnObjDamage(int entity, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
-{
-	if(Enabled && IsValidClient(attacker) && !CvarFriendlyFire.BoolValue)
-	{
-		if(GetEntProp(entity, Prop_Send, "m_iTeamNum") == GetClientTeam(attacker))
-			return Plugin_Handled;
-	}
-	return Plugin_Continue;
-}
-
 public bool OnShouldCollide(int client, int collisiongroup, int contentsmask, bool original)
 {
 	if(collisiongroup == COLLISION_GROUP_PLAYER_MOVEMENT)
@@ -124,10 +109,6 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 {
 	if(!Enabled)
 		return Plugin_Continue;
-
-	float engineTime = GetEngineTime();
-	if(Client[victim].InvisFor > engineTime)
-		return Plugin_Handled;
 
 	bool validAttacker = IsValidClient(attacker);
 	if(validAttacker && victim!=attacker)

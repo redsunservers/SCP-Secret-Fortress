@@ -1,29 +1,20 @@
-enum ThinkFunctionEnum
-{
-	ThinkFunction_None,
-	ThinkFunction_SentryThink,
-	ThinkFunction_RegenThink
-}
-
 static DynamicDetour AllowedToHealTarget;
 static DynamicHook RoundRespawn;
 static DynamicHook ForceRespawn;
 static int ForceRespawnHook[MAXTF2PLAYERS];
-static int ThinkData[MAXENTITIES];
-static ThinkFunctionEnum ThinkFunction;
 static int CalculateSpeedClient;
 //static int ClientTeam;
 
 void DHook_Setup(GameData gamedata)
 {
 	DHook_CreateDetour(gamedata, "CBaseEntity::InSameTeam", DHook_InSameTeamPre);
-	DHook_CreateDetour(gamedata, "CBaseEntity::PhysicsDispatchThink", DHook_PhysicsDispatchThinkPre, DHook_PhysicsDispatchThinkPost);
 	//DHook_CreateDetour(gamedata, "CLagCompensationManager::StartLagCompensation", DHook_StartLagCompensationPre, DHook_StartLagCompensationPost);
 	DHook_CreateDetour(gamedata, "CTFGameMovement::ProcessMovement", DHook_ProcessMovementPre);
 	DHook_CreateDetour(gamedata, "CTFPlayer::CanPickupDroppedWeapon", DHook_CanPickupDroppedWeaponPre);
 	DHook_CreateDetour(gamedata, "CTFPlayer::DoAnimationEvent", DHook_DoAnimationEventPre);
 	DHook_CreateDetour(gamedata, "CTFPlayer::DropAmmoPack", DHook_DropAmmoPackPre);
 	DHook_CreateDetour(gamedata, "CTFPlayer::GetMaxAmmo", DHook_GetMaxAmmoPre);
+	DHook_CreateDetour(gamedata, "CTFPlayer::RegenThink", DHook_RegenThinkPre, DHook_RegenThinkPost);
 	DHook_CreateDetour(gamedata, "CTFPlayer::Taunt", DHook_TauntPre, DHook_TauntPost);
 	DHook_CreateDetour(gamedata, "CTFPlayer::TeamFortress_CalculateMaxSpeed", DHook_CalculateMaxSpeedPre, DHook_CalculateMaxSpeedPost);
 
@@ -144,132 +135,6 @@ public MRESReturn DHook_StartLagCompensationPost(Address manager, DHookParam par
 	ChangeClientTeamEx(client, ClientTeam);
 }*/
 
-public MRESReturn DHook_PhysicsDispatchThinkPre(int entity)
-{
-	//This detour calls everytime an entity was about to call a think function, useful as it only requires 1 gamedata
-	if(Enabled)
-	{
-		static char classname[256];
-		if(GetEntityClassname(entity, classname, sizeof(classname)))
-		{
-			if(StrEqual(classname, "obj_sentrygun"))	// CObjectSentrygun::SentryThink
-			{
-				ThinkFunction = ThinkFunction_SentryThink;
-
-				//Sentry can only target one team, move all friendly to sentry team, move everyone else to enemy team.
-				//CTeam class is used to collect players, so m_iTeamNum change wont be enough to fix it.
-				TFTeam team = TF2_GetTeam(entity);
-				Address address = SDKCall_GetGlobalTeam(team==TFTeam_Red ? TFTeam_Blue : TFTeam_Red);
-
-				if(address != Address_Null)
-				{
-					ClassEnum class;
-					for(int client=1; client<=MaxClients; client++)
-					{
-						if(!IsValidClient(client) || IsSpec(client) || !Classes_GetByIndex(Client[client].Class, class))
-							continue;
-
-						if(class.Human)
-						{
-							SDKCall_RemovePlayer(address, client);
-						}
-						else
-						{
-							SDKCall_AddPlayer(address, client);
-						}
-					}
-				}
-
-				int building = MaxClients+1;
-				while((building=FindEntityByClassname(building, "obj_*")) > MaxClients)
-				{
-					ThinkData[building] = GetEntProp(building, Prop_Send, "m_iTeamNum");
-					if(!GetEntProp(building, Prop_Send, "m_bPlacing"))
-						SDKCall_ChangeTeam(building, team);
-				}
-
-				//eyeball_boss uses InSameTeam check but obj_sentrygun owner is itself
-				SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", GetEntPropEnt(entity, Prop_Send, "m_hBuilder"));
-				return MRES_Ignored;
-			}
-
-			if(StrEqual(classname, "player"))
-			{
-				if(IsPlayerAlive(entity) && SDKCall_GetNextThink(entity, "RegenThink")==-1.0)	// CTFPlayer::RegenThink
-				{
-					ClassEnum class;
-					if(Classes_GetByIndex(Client[entity].Class, class) && class.Regen)
-					{
-						ThinkFunction = ThinkFunction_RegenThink;
-						TF2_SetPlayerClass(entity, TFClass_Medic);
-						return MRES_Ignored;
-					}
-					else if(TF2_GetPlayerClass(entity) == TFClass_Medic)
-					{
-						ThinkFunction = ThinkFunction_RegenThink;
-						TF2_SetPlayerClass(entity, TFClass_Unknown);
-						return MRES_Ignored;
-					}
-				}
-			}
-		}
-	}
-	ThinkFunction = ThinkFunction_None;
-	return MRES_Ignored;
-}
-
-public MRESReturn DHook_PhysicsDispatchThinkPost(int entity)
-{
-	switch(ThinkFunction)
-	{
-		case ThinkFunction_SentryThink:
-		{
-			TFTeam team = TF2_GetTeam(entity)==TFTeam_Red ? TFTeam_Blue : TFTeam_Red;
-			Address address = SDKCall_GetGlobalTeam(team);
-
-			ClassEnum class;
-			for(int client=1; client<=MaxClients; client++)
-			{
-				if(!IsValidClient(client) || IsSpec(client) || !Classes_GetByIndex(Client[client].Class, class))
-					continue;
-
-				if(class.Human)
-				{
-					SDKCall_AddPlayer(address, client);
-				}
-				else
-				{
-					SDKCall_RemovePlayer(address, client);
-				}
-			}
-
-			int building = MaxClients+1;
-			while((building=FindEntityByClassname(building, "obj_*")) > MaxClients)
-			{
-				if(!GetEntProp(building, Prop_Send, "m_bPlacing"))
-					SDKCall_ChangeTeam(building, ThinkData[building]);
-			}
-
-			SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", entity);
-		}
-		case ThinkFunction_RegenThink:
-		{
-			ClassEnum class;
-			if(Classes_GetByIndex(Client[entity].Class, class) && class.Regen)
-			{
-				TF2_SetPlayerClass(entity, class.Class);
-			}
-			else if(TF2_GetPlayerClass(entity) == TFClass_Unknown)
-			{
-				TF2_SetPlayerClass(entity, TFClass_Medic);
-			}
-		}
-	}
-
-	ThinkFunction = ThinkFunction_None;
-	return MRES_Ignored;
-}
-
 public MRESReturn DHook_CanPickupDroppedWeaponPre(int client, DHookReturn ret, DHookParam param)
 {
 	ClassEnum class;
@@ -374,6 +239,44 @@ public MRESReturn DHook_CalculateMaxSpeedPost(int clientwhen, DHookReturn ret)
 	return MRES_Override;
 }
 
+public MRESReturn DHook_GetMaxAmmoPre(int client, DHookReturn ret, DHookParam param)
+{
+	int ammo = Classes_GetMaxAmmo(client, param.Get(1));
+	if(!ammo)
+		return MRES_Ignored;
+
+	ret.Value = ammo;
+	return MRES_Supercede;
+}
+
+public MRESReturn DHook_RegenThinkPre(int client, DHookParam param)
+{
+	ClassEnum class;
+	if(Classes_GetByIndex(Client[client].Class, class) && class.Regen)
+	{
+		TF2_SetPlayerClass(client, TFClass_Medic);
+	}
+	else if(TF2_GetPlayerClass(client) == TFClass_Medic)
+	{
+		TF2_SetPlayerClass(client, TFClass_Unknown);
+	}
+	return MRES_Ignored;
+}
+
+public MRESReturn DHook_RegenThinkPost(int client, DHookParam param)
+{
+	ClassEnum class;
+	if(Classes_GetByIndex(Client[client].Class, class) && class.Regen)
+	{
+		TF2_SetPlayerClass(client, class.Class);
+	}
+	else if(TF2_GetPlayerClass(client) == TFClass_Unknown)
+	{
+		TF2_SetPlayerClass(client, TFClass_Medic);
+	}
+	return MRES_Ignored;
+}
+
 public MRESReturn DHook_TauntPre(int client)
 {
 	//Dont allow taunting if disguised or cloaked
@@ -396,14 +299,4 @@ public MRESReturn DHook_TauntPost(int client)
 	ClassEnum class;
 	if(Classes_GetByIndex(Client[client].Class, class))
 		TF2_SetPlayerClass(client, class.Class, false);
-}
-
-public MRESReturn DHook_GetMaxAmmoPre(int client, DHookReturn ret, DHookParam param)
-{
-	int ammo = Classes_GetMaxAmmo(client, param.Get(1));
-	if(!ammo)
-		return MRES_Ignored;
-
-	ret.Value = ammo;
-	return MRES_Supercede;
 }

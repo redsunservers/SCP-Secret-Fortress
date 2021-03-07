@@ -1,40 +1,20 @@
-static Handle SDKChangeTeam;
 static Handle SDKGetBaseEntity;
-static Handle SDKGetNextThink;
 static Handle SDKEquipWearable;
-static Handle SDKTeamAddPlayerRaw;
 static Handle SDKTeamAddPlayer;
-static Handle SDKTeamRemovePlayerRaw;
 static Handle SDKTeamRemovePlayer;
 Handle SDKCreateWeapon;
 Handle SDKInitWeapon;
 static Handle SDKInitPickup;
 static Handle SDKSetSpeed;
-static Handle SDKGlobalTeam;
 
 void SDKCall_Setup(GameData gamedata)
 {
-	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CBaseEntity::ChangeTeam");
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	SDKChangeTeam = EndPrepSDKCall();
-	if(!SDKChangeTeam)
-		LogError("[Gamedata] Could not find CBaseEntity::ChangeTeam");
-
 	StartPrepSDKCall(SDKCall_Raw);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CBaseEntity::GetBaseEntity");
 	PrepSDKCall_SetReturnInfo(SDKType_CBaseEntity, SDKPass_Pointer);
 	SDKGetBaseEntity = EndPrepSDKCall();
 	if(!SDKGetBaseEntity)
 		LogError("[Gamedata] Could not find CBaseEntity::GetBaseEntity");
-
-	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CBaseEntity::GetNextThink");
-	PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL);
-	PrepSDKCall_SetReturnInfo(SDKType_Float, SDKPass_Plain);
-	SDKGetNextThink = EndPrepSDKCall();
-	if(!SDKGetNextThink)
-		LogError("[Gamedata] Could not find CBaseEntity::GetNextThink");
 
 	StartPrepSDKCall(SDKCall_Player);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CBasePlayer::EquipWearable");
@@ -43,29 +23,19 @@ void SDKCall_Setup(GameData gamedata)
 	if(!SDKEquipWearable)
 		LogError("[Gamedata] Could not find CBasePlayer::EquipWearable");
 
-	StartPrepSDKCall(SDKCall_Raw);
-	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTeam::AddPlayer");
-	PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer);
-	SDKTeamAddPlayerRaw = EndPrepSDKCall();
-	if(!SDKTeamAddPlayerRaw)
-		LogError("[Gamedata] Could not find CTeam::AddPlayer");
-
 	StartPrepSDKCall(SDKCall_Entity);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTeam::AddPlayer");
 	PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer);
 	SDKTeamAddPlayer = EndPrepSDKCall();
-
-	StartPrepSDKCall(SDKCall_Raw);
-	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTeam::RemovePlayer");
-	PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer);
-	SDKTeamRemovePlayerRaw = EndPrepSDKCall();
-	if(!SDKTeamRemovePlayerRaw)
-		LogError("[Gamedata] Could not find CTeam::RemovePlayer");
+	if(!SDKTeamAddPlayer)
+		LogError("[Gamedata] Could not find CTeam::AddPlayer");
 
 	StartPrepSDKCall(SDKCall_Entity);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTeam::RemovePlayer");
 	PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer);
 	SDKTeamRemovePlayer = EndPrepSDKCall();
+	if(!SDKTeamRemovePlayer)
+		LogError("[Gamedata] Could not find CTeam::RemovePlayer");
 
 	StartPrepSDKCall(SDKCall_Static);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFDroppedWeapon::Create");
@@ -102,43 +72,6 @@ void SDKCall_Setup(GameData gamedata)
 	SDKSetSpeed = EndPrepSDKCall();
 	if(!SDKSetSpeed)
 		LogError("[Gamedata] Could not find CTFPlayer::TeamFortress_SetSpeed");
-
-	StartPrepSDKCall(SDKCall_Static);
-	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "GetGlobalTeam");
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
-	SDKGlobalTeam = EndPrepSDKCall();
-	if(!SDKGlobalTeam)
-		LogError("[Gamedata] Could not find GetGlobalTeam");
-}
-
-void SDKCall_ChangeTeam(int entity, any team)
-{
-	if(SDKChangeTeam)
-		SDKCall(SDKChangeTeam, entity, team);
-}
-
-void SDKCall_AddPlayer(Address team, int client)
-{
-	if(SDKTeamAddPlayerRaw)
-		SDKCall(SDKTeamAddPlayerRaw, team, client);
-}
-
-void SDKCall_RemovePlayer(Address team, int client)
-{
-	if(SDKTeamRemovePlayerRaw)
-		SDKCall(SDKTeamRemovePlayerRaw, team, client);
-}
-
-float SDKCall_GetNextThink(int entity, const char[] buffer="")
-{
-	if(!SDKGetNextThink)
-		return 0.0;
-
-	if(buffer[0])
-		return SDKCall(SDKGetNextThink, entity, buffer);
-
-	return SDKCall(SDKGetNextThink, entity, NULL_STRING);
 }
 
 void SDKCall_EquipWearable(int client, int entity)
@@ -179,14 +112,6 @@ void SDKCall_SetSpeed(int client)
 {
 	if(SDKSetSpeed)
 		SDKCall(SDKSetSpeed, client);
-}
-
-Address SDKCall_GetGlobalTeam(any team)
-{
-	if(SDKGlobalTeam)
-		return SDKCall(SDKGlobalTeam, team);
-
-	return Address_Null;
 }
 
 void ChangeClientTeamEx(int client, any newTeam)

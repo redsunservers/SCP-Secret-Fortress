@@ -692,11 +692,6 @@ void SetActiveWeapon(int client, int entity)
 	SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", entity);
 }
 
-TFTeam TF2_GetTeam(int entity)
-{
-	return view_as<TFTeam>(GetEntProp(entity, Prop_Send, "m_iTeamNum"));
-}
-
 stock void SetSpeed(int client, float speed)
 {
 	SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", speed);
