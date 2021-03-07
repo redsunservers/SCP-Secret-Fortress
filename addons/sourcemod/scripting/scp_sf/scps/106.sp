@@ -92,7 +92,7 @@ public Action SCP106_OnDealDamage(int client, int victim, int &inflictor, float 
 
 	int entity = -1;
 	ArrayList spawns = new ArrayList();
-	while((entity=FindEntityByClassname2(entity, "info_target")) != -1)
+	while((entity=FindEntityByClassname(entity, "info_target")) != -1)
 	{
 		static char name[16];
 		GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));

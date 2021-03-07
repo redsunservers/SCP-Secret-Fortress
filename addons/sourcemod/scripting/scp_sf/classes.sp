@@ -370,7 +370,7 @@ void Classes_SpawnPoint(int client, int index)
 		ArrayList list = new ArrayList();
 		int entity = -1;
 		static char name[32];
-		while((entity=FindEntityByClassname2(entity, "info_target")) != -1)
+		while((entity=FindEntityByClassname(entity, "info_target")) != -1)
 		{
 			GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
 			if(!StrContains(name, class.Spawn, false))
@@ -381,7 +381,7 @@ void Classes_SpawnPoint(int client, int index)
 		if(!length && !class.Human)	// Temp backwards compability
 		{
 			entity = -1;
-			while((entity=FindEntityByClassname2(entity, "info_target")) != -1)
+			while((entity=FindEntityByClassname(entity, "info_target")) != -1)
 			{
 				GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
 				if(StrEqual(name, "scp_spawn_p", false))
@@ -404,7 +404,7 @@ void Classes_SpawnPoint(int client, int index)
 			}
 		}
 
-		if(!class.Human)	// Remove this soonTM
+		if(Classes_GetByIndex(Client[client].Class, class) && !class.Human)	// Remove this soonTM
 		{
 			Client[client].InvisFor = GetEngineTime()+15.0;
 
@@ -1032,7 +1032,7 @@ public bool Classes_PickupStandard(int client, int entity)
 					}
 					return true;
 				}
-				else if(!StrContains(buffer, "scp_item_", false))
+				else if(!StrContains(buffer, "scp_item_", false) || !StrContains(buffer, "scp_rand_", false))
 				{
 					AcceptEntityInput(entity, "FireUser1", client, client);
 
@@ -1040,6 +1040,7 @@ public bool Classes_PickupStandard(int client, int entity)
 					ExplodeString(buffer, "_", buffers, sizeof(buffers), sizeof(buffers[]));
 					if(Items_Pickup(client, StringToInt(buffers[2])))
 					{
+						AcceptEntityInput(entity, "FireUser2", client, client);
 						TF2_RemoveCondition(client, TFCond_Stealthed);
 						AcceptEntityInput(entity, "KillHierarchy");
 					}

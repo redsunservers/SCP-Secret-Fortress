@@ -122,6 +122,31 @@ void Items_Setup(KeyValues main, KeyValues map)
 	} while(kv.GotoNextKey());
 }
 
+void Items_RoundStart()
+{
+	int players;
+	for(int client=1; client<=MaxClients; client++)
+	{
+		if(IsValidClient(client) && IsPlayerAlive(client))
+			players++;
+	}
+
+	if(players < 8)
+		players = 8;
+
+	char buffer[16];
+	int entity = -1;
+	while((entity=FindEntityByClassname(entity, "prop_dynamic*")) != -1)
+	{
+		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
+		if(!StrContains(buffer, "scp_rand_", false))
+		{
+			if(GetRandomInt(1, 32) > players)
+				RemoveEntity(entity);
+		}
+	}
+}
+
 bool Items_GetWeaponByIndex(int index, WeaponEnum weapon)
 {
 	int length = Weapons.Length;

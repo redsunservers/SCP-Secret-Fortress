@@ -46,7 +46,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"2"
 #define MINOR_REVISION	"0"
-#define STABLE_REVISION	"1"
+#define STABLE_REVISION	"2"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE	100000000.0
@@ -362,7 +362,7 @@ public void OnMapStart()
 
 	char buffer[16];
 	int entity = -1;
-	while((entity=FindEntityByClassname2(entity, "info_target")) != -1)
+	while((entity=FindEntityByClassname(entity, "info_target")) != -1)
 	{
 		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
 		if(!StrEqual(buffer, "scp_nomusic", false))
@@ -483,16 +483,18 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 	NextHintAt = RoundStartAt+60.0;
 
 	int entity = -1;
-	while((entity=FindEntityByClassname2(entity, "func_regenerate")) != -1)
+	while((entity=FindEntityByClassname(entity, "func_regenerate")) != -1)
 	{
 		AcceptEntityInput(entity, "Disable");
 	}
 
 	entity = -1;
-	while((entity=FindEntityByClassname2(entity, "func_respawnroomvisualizer")) != -1)
+	while((entity=FindEntityByClassname(entity, "func_respawnroomvisualizer")) != -1)
 	{
 		AcceptEntityInput(entity, "Disable");
 	}
+
+	Items_RoundStart();
 
 	NoAchieve = !CvarAchievement.BoolValue;
 
@@ -1956,41 +1958,44 @@ public void OnGameFrame()
 	nextAt = engineTime+1.0;
 	UpdateListenOverrides(engineTime);
 
-	if(NextHintAt < engineTime)
+	if(Enabled)
 	{
-		DisplayHint(false);
-		NextHintAt = engineTime+60.0;
-	}
-
-	if(EndRoundIn)
-	{
-		float timeleft = EndRoundIn-engineTime;
-		if(!NoMusic && !NoMusicRound)
+		if(NextHintAt < engineTime)
 		{
-			static char buffer[PLATFORM_MAX_PATH];
-			float duration = Gamemode_GetMusic(0, Music_Timeleft, buffer);
-			if(duration > timeleft)
-			{
-				ChangeGlobalSong(FAR_FUTURE, buffer);
-				NoMusicRound = true;
-			}
+			DisplayHint(false);
+			NextHintAt = engineTime+60.0;
 		}
 
-		if(timeleft < 0)
+		if(EndRoundIn)
 		{
-			for(int client=1; client<=MaxClients; client++)
+			float timeleft = EndRoundIn-engineTime;
+			if(!NoMusic && !NoMusicRound)
 			{
-				if(!IsValidClient(client))
-					continue;
-
-				if(IsPlayerAlive(client))
-					ForcePlayerSuicide(client);
-
-				FadeMessage(client, 36, 1536, 0x0012, 255, 228, 200, 228);
-				FadeClientVolume(client, 1.0, 4.0, 4.0, 0.2);
+				static char buffer[PLATFORM_MAX_PATH];
+				float duration = Gamemode_GetMusic(0, Music_Timeleft, buffer);
+				if(duration > timeleft)
+				{
+					ChangeGlobalSong(FAR_FUTURE, buffer);
+					NoMusicRound = true;
+				}
 			}
 
-			EndRoundIn = 0.0;
+			if(timeleft < 0)
+			{
+				for(int client=1; client<=MaxClients; client++)
+				{
+					if(!IsValidClient(client))
+						continue;
+
+					if(IsPlayerAlive(client))
+						ForcePlayerSuicide(client);
+
+					FadeMessage(client, 36, 1536, 0x0012, 255, 228, 200, 228);
+					FadeClientVolume(client, 1.0, 4.0, 4.0, 0.2);
+				}
+
+				EndRoundIn = 0.0;
+			}
 		}
 	}
 }

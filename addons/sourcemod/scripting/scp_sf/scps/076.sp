@@ -1,5 +1,5 @@
-static const float Speeds[] = {240.0, 246.0, 252.0, 258.0, 276.0};
-static const int MaxHeads = 4;
+static const float Speeds[] = {240.0, 246.0, 252.0, 258.0, 264.0, 276.0};
+static const int MaxHeads = 5;
 static const int HealthKill = 15;
 static const int HealthRage = 250;
 
@@ -34,10 +34,10 @@ public void SCP076_OnKill(int client, int victim)
 	Client[client].Extra2++;
 	if(Client[client].Extra2 == MaxHeads)
 	{
+		TF2_AddCondition(client, TFCond_CritCola);
 		TF2_StunPlayer(client, 2.0, 0.5, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
 		ClientCommand(client, "playgamesound items/powerup_pickup_knockback.wav");
 
-		TF2_AddCondition(client, TFCond_CritCola);
 		TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 		SetEntityHealth(client, GetClientHealth(client)+HealthRage);
 
@@ -52,8 +52,9 @@ public void SCP076_OnKill(int client, int victim)
 	else if(Client[client].Extra2 < MaxHeads)
 	{
 		SetEntityHealth(client, GetClientHealth(client)+HealthKill);
-		SDKCall_SetSpeed(client);
 	}
+
+	SDKCall_SetSpeed(client);
 }
 
 public void SCP076_OnDeath(int client, Event event)

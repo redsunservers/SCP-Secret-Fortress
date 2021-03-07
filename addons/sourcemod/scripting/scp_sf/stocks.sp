@@ -481,15 +481,6 @@ stock bool IsInvuln(int client)
 		!GetEntProp(client, Prop_Data, "m_takedamage"));
 }
 
-int FindEntityByClassname2(int startEnt, const char[] classname)
-{
-	while(startEnt>-1 && !IsValidEntity(startEnt))
-	{
-		startEnt--;
-	}
-	return FindEntityByClassname(startEnt, classname);
-}
-
 int GetOwnerLoop(int entity)
 {
 	int owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
@@ -1084,11 +1075,8 @@ Function KvGetFunction(KeyValues kv, const char[] string, Function defaul=INVALI
 	static char buffer[64];
 	kv.GetString(string, buffer, sizeof(buffer));
 	if(buffer[0])
-	{
-		Function func = GetFunctionByName(null, buffer);
-		if(func != INVALID_FUNCTION)
-			return func;
-	}
+		return GetFunctionByName(null, buffer);
+
 	return defaul;
 }
 
