@@ -24,6 +24,7 @@ public void OnEntityCreated(int entity, const char[] classname)
 	{
 		SDKHook(entity, SDKHook_SpawnPost, OnPipeSpawned);
 	}
+}
 
 public void OnKitSpawned(int entity)
 {
