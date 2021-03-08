@@ -1683,20 +1683,24 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 	bool changed = Items_OnRunCmd(client, buttons, holding[client]);
 
 	// Sprinting Related
-	if((buttons & IN_JUMP) || (buttons & IN_SPEED))
+	ClassEnum class;
+	if(Classes_GetByIndex(Client[client].Class, class) && class.Human && !Client[client].Disarmer)
 	{
-		if(!Client[client].Sprinting)
+		if(((buttons & IN_JUMP) || (buttons & IN_SPEED)) && ((buttons & IN_FORWARD) || (buttons & IN_BACK) || (buttons & IN_MOVELEFT) || (buttons & IN_MOVERIGHT)) && GetEntPropEnt(client, Prop_Data, "m_hGroundEntity")!=-1)
 		{
-			Client[client].HelpSprint = false;
-			Client[client].Sprinting = (Client[client].SprintPower>15 && (GetEntityFlags(client) & FL_ONGROUND));
-			if(Client[client].Sprinting)
+			if(!Client[client].Sprinting && Client[client].SprintPower>15)
+			{
+				ClientCommand(client, "playgamesound HL2Player.SprintStart");
+				Client[client].HelpSprint = false;
+				Client[client].Sprinting = true;
 				SDKCall_SetSpeed(client);
+			}
 		}
-	}
-	else if(Client[client].Sprinting)
-	{
-		Client[client].Sprinting = false;
-		SDKCall_SetSpeed(client);
+		else if(Client[client].Sprinting)
+		{
+			Client[client].Sprinting = false;
+			SDKCall_SetSpeed(client);
+		}
 	}
 
 	// Everything else
@@ -1799,8 +1803,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 			}
 		}
 
-		ClassEnum class;
-		if(Classes_GetByIndex(Client[client].Class, class) && class.Human && !IsSpec(client))
+		if(class.Human && !IsSpec(client))
 		{
 			if(DisarmCheck(client))
 			{
