@@ -80,6 +80,15 @@ enum AccessEnum
 
 enum
 {
+	Item_Weapon = 0,
+	Item_Keycard,
+	Item_Medical,
+	Item_Radio,
+	Item_SCP
+}
+
+enum
+{
 	Ammo_Micro = 1,
 	Ammo_9mm,
 	Ammo_Metal,
@@ -753,6 +762,11 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 			GiveAchievement(Achievement_Intercom, client);
 		}
 	}
+	else if(!StrContains(name, "scp_nukecancel", false))
+	{
+		if(Enabled && IsValidClient(client))
+			GiveAchievement(Achievement_SurviveCancel, client);
+	}
 	else if(!StrContains(name, "scp_nuke", false))
 	{
 		if(Enabled)
@@ -1182,7 +1196,10 @@ public Action OnSayCommand(int client, const char[] command, int args)
 		for(int target=1; target<=MaxClients; target++)
 		{
 			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target] && IsSpec(target)))
+			{
+				Client[target].ThinkIsDead[client] = true;
 				CPrintToChat(target, "*SPEC* %s {default}: %s", name, msg);
+			}
 		}
 	}
 	else if(IsSpec(client))
@@ -1198,7 +1215,10 @@ public Action OnSayCommand(int client, const char[] command, int args)
 		for(int target=1; target<=MaxClients; target++)
 		{
 			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target]))
+			{
+				Client[target].ThinkIsDead[client] = false;
 				CPrintToChat(target, "*COMM* %s {default}: %s", name, msg);
+			}
 		}
 	}
 	else
@@ -1222,6 +1242,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 				if(!IsValidClient(target, false) || !Client[client].CanTalkTo[target])
 					continue;
 
+				Client[target].ThinkIsDead[client] = false;
 				if(!IsSpec(target))
 				{
 					if(!class.Human && IsFriendly(Client[client].Class, Client[target].Class))
@@ -2058,6 +2079,12 @@ public void UpdateListenOverrides(float engineTime)
 
 			for(int target=1; target<=MaxClients; target++)
 			{
+				if(!manage)
+				{
+					Client[target].CanTalkTo[client] = true;
+					continue;
+				}
+
 				if(client == target)
 				{
 					Client[target].CanTalkTo[client] = true;

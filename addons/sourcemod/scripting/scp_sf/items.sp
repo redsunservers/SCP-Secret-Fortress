@@ -7,15 +7,6 @@ static const int ItemLimits[] =
 	3	// SCPs
 };
 
-enum
-{
-	Item_Weapon = 0,
-	Item_Keycard,
-	Item_Medical,
-	Item_Radio,
-	Item_SCP
-}
-
 enum struct WeaponEnum
 {
 	char Display[16];
@@ -824,6 +815,23 @@ int Items_GetTranName(int index, char[] buffer, int length)
 	return strcopy(buffer, length, "weapon_0");
 }
 
+int Items_GetItemsOfType(int client, int type)
+{
+	int count;
+	int max = GetMaxWeapons(client);
+	WeaponEnum weapon;
+	for(int i; i<max; i++)
+	{
+		int entity = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i);
+		if(entity<=MaxClients || !IsValidEntity(entity))
+			continue;
+
+		if(Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) && weapon.Type==type)
+			count++;
+	}
+	return count;
+}
+
 void RemoveAndSwitchItem(int client, int weapon)
 {
 	Items_SwitchItem(client, weapon);
@@ -1155,6 +1163,10 @@ public bool Items_500Button(int client, int weapon, int &buttons, int &holding)
 	{
 		holding = IN_ATTACK;
 		RemoveAndSwitchItem(client, weapon);
+
+		if(GetClientHealth(client) < 26)
+			GiveAchievement(Achievement_Survive500, client);
+
 		SpawnPlayerPickup(client, "item_healthkit_full");
 		StartHealingTimer(client, 0.334, 1, 36, true);
 		Client[client].Extra2 = 0;

@@ -16,19 +16,19 @@ enum Achievements
 	Achievement_KillMirco,
 	Achievement_KillSci,
 	Achievement_KillDClass,
-	Achievement_KillSpree,	//TODO
+	Achievement_KillSpree,
 	Achievement_FindGun,
 	Achievement_FindO5,
-	Achievement_FindSCP,	// TODO
+	Achievement_FindSCP,
 	Achievement_EscapeDClass,
 	Achievement_EscapeSci,
-	Achievement_EscapeSpeed,	// TODO
-	Achievement_Escape207,	// TODO
+	Achievement_EscapeSpeed,
+	Achievement_Escape207,
 	Achievement_SurvivePocket,
 	Achievement_SurviveWarhead,
 	Achievement_Survive500,
-	Achievement_SurviveAdren,	// TODO
-	Achievement_SurviveCancel,	// TODO
+	Achievement_SurviveAdren,
+	Achievement_SurviveCancel,
 	Achievement_Intercom,
 	Achievement_Upgrade,
 	Achievement_Revive,
@@ -69,4 +69,13 @@ void GiveAchievement(Achievements achievement, int client)
 	}
 
 	Forward_OnAchievement(client, achievement);
+}
+
+public Action Achievement_AdrenCheck(Handle timer, int userid)
+{
+	int client = GetClientOfUserId(userid);
+	if(client && IsClientInGame(client) && !IsSpec(client))
+		GiveAchievement(Achievement_SurviveAdren, client);
+
+	return Plugin_Continue;
 }

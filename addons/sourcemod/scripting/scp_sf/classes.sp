@@ -883,6 +883,13 @@ public Action Classes_TakeDamageHuman(int client, int attacker, int &inflictor, 
 			damage *= 5.0;
 			return Plugin_Changed;
 		}
+
+		if(TF2_IsPlayerInCondition(client, TFCond_DefenseBuffNoCritBlock))
+		{
+			int health = GetClientHealth(client);
+			if(damage >= health)
+				CreateTimer(0.5, Achievement_AdrenCheck, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
+		}
 	}
 	else if(!CvarFriendlyFire.BoolValue)
 	{
@@ -903,71 +910,94 @@ public Action Classes_TakeDamageScp(int client, int attacker, int &inflictor, fl
 
 public void Classes_CondDBoi(int client, TFCond cond)
 {
-	if(cond==TFCond_TeleportedGlow && Client[client].IgnoreTeleFor<GetEngineTime())
+	if(cond == TFCond_TeleportedGlow)
 	{
-		int index;
-		ClassEnum class;
-		if(Client[client].Disarmer)
+		float engineTime = GetEngineTime();
+		if(Client[client].IgnoreTeleFor < engineTime)
 		{
-			Gamemode_AddValue("dcapture");
-			index = Classes_GetByName("mtf1", class);
-		}
-		else
-		{
-			Gamemode_AddValue("descape");
-			GiveAchievement(Achievement_EscapeDClass, client);
-			index = Classes_GetByName("chaos", class);
-		}
+			int index;
+			ClassEnum class;
+			if(Client[client].Disarmer)
+			{
+				Gamemode_AddValue("dcapture");
+				index = Classes_GetByName("mtf1", class);
+			}
+			else
+			{
+				Gamemode_AddValue("descape");
+				GiveAchievement(Achievement_EscapeDClass, client);
+				index = Classes_GetByName("chaos", class);
 
-		if(index == -1)
-		{
-			index = 0;
-		}
-		else
-		{
-			Gamemode_GiveTicket(class.Group, 1);
-		}
+				if(Client[client].Extra2)
+					GiveAchievement(Achievement_Escape207, client);
 
-		Items_DropAllItems(client);
-		Forward_OnEscape(client, Client[client].Disarmer);
-		Client[client].Class = index;
-		TF2_RespawnPlayer(client);
-		CreateTimer(0.3, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
+				if(RoundStartAt > engineTime-180.0)
+					GiveAchievement(Achievement_EscapeSpeed, client);
+
+				if(Items_GetItemsOfType(client, Item_SCP) > 1)
+					GiveAchievement(Achievement_FindSCP, client);
+			}
+
+			if(index == -1)
+			{
+				index = 0;
+			}
+			else
+			{
+				Gamemode_GiveTicket(class.Group, 1);
+			}
+
+			Items_DropAllItems(client);
+			Forward_OnEscape(client, Client[client].Disarmer);
+			Client[client].Class = index;
+			TF2_RespawnPlayer(client);
+			CreateTimer(0.3, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
+		}
 	}
 }
 
 public void Classes_CondSci(int client, TFCond cond)
 {
-	if(cond==TFCond_TeleportedGlow && Client[client].IgnoreTeleFor<GetEngineTime())
+	if(cond == TFCond_TeleportedGlow)
 	{
-		int index;
-		ClassEnum class;
-		if(Client[client].Disarmer)
+		float engineTime = GetEngineTime();
+		if(Client[client].IgnoreTeleFor < engineTime)
 		{
-			Gamemode_AddValue("scapture");
-			index = Classes_GetByName("chaos", class);
-		}
-		else
-		{
-			Gamemode_AddValue("sescape");
-			GiveAchievement(Achievement_EscapeDClass, client);
-			index = Classes_GetByName("mtfs", class);
-		}
+			int index;
+			ClassEnum class;
+			if(Client[client].Disarmer)
+			{
+				Gamemode_AddValue("scapture");
+				index = Classes_GetByName("chaos", class);
+			}
+			else
+			{
+				Gamemode_AddValue("sescape");
+				GiveAchievement(Achievement_EscapeDClass, client);
+				index = Classes_GetByName("mtfs", class);
 
-		if(index == -1)
-		{
-			index = 0;
-		}
-		else
-		{
-			Gamemode_GiveTicket(class.Group, Client[client].Disarmer ? 2 : 1);
-		}
+				if(Client[client].Extra2)
+					GiveAchievement(Achievement_Escape207, client);
 
-		Items_DropAllItems(client);
-		Forward_OnEscape(client, Client[client].Disarmer);
-		Client[client].Class = index;
-		TF2_RespawnPlayer(client);
-		CreateTimer(0.3, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
+				if(RoundStartAt > engineTime-180.0)
+					GiveAchievement(Achievement_EscapeSpeed, client);
+			}
+
+			if(index == -1)
+			{
+				index = 0;
+			}
+			else
+			{
+				Gamemode_GiveTicket(class.Group, Client[client].Disarmer ? 2 : 1);
+			}
+
+			Items_DropAllItems(client);
+			Forward_OnEscape(client, Client[client].Disarmer);
+			Client[client].Class = index;
+			TF2_RespawnPlayer(client);
+			CreateTimer(0.3, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
+		}
 	}
 }
 
