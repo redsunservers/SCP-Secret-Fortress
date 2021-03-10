@@ -16,7 +16,6 @@
 #tryinclude <basecomm>
 #define REQUIRE_PLUGIN
 #undef REQUIRE_EXTENSIONS
-//#tryinclude <collisionhook>
 #tryinclude <sendproxy>
 #define REQUIRE_EXTENSIONS
 
@@ -130,6 +129,7 @@ enum struct ClientEnum
 
 	bool IsVip;
 	bool CanTalkTo[MAXTF2PLAYERS];
+	bool ThinkIsDead[MAXTF2PLAYERS];
 
 	TFClassType CurrentClass;
 	TFClassType WeaponClass;
@@ -165,6 +165,14 @@ enum struct ClientEnum
 	// Music
 	float NextSongAt;
 	char CurrentSong[PLATFORM_MAX_PATH];
+
+	void ResetThinkIsDead()
+	{
+		for(int i=1; i<=MaxClients; i++)
+		{
+			this.ThinkIsDead[i] = false;
+		}
+	}
 }
 
 ClientEnum Client[MAXTF2PLAYERS];
@@ -378,12 +386,28 @@ public void OnMapStart()
 		entity = FindEntityByClassname(-1, "tf_player_manager");
 		if(entity > MaxClients)
 		{
+			#if defined SENDPROXY_LIB
+			bool newer = GetFeatureStatus(FeatureType_Native, "SendProxy_IsHookedArrayProp")==FeatureStatus_Available;
+			#endif
+
 			for(int i=1; i<=MaxClients; i++)
 			{
+				#if defined SENDPROXY_LIB
+				if(newer)
+				{
+					SendProxy_HookArrayProp(entity, "m_bAlive", i, Prop_Int, SendProp_OnAliveMulti);
+				}
+				else
+				{
+					SendProxy_HookArrayProp(entity, "m_bAlive", i, Prop_Int, view_as<SendProxyCallback>(SendProp_OnAlive));
+				}
+				#else
 				SendProxy_HookArrayProp(entity, "m_bAlive", i, Prop_Int, SendProp_OnAlive);
-				SendProxy_HookArrayProp(entity, "m_iTeam", i, Prop_Int, SendProp_OnTeam);
-				SendProxy_HookArrayProp(entity, "m_iPlayerClass", i, Prop_Int, SendProp_OnClass);
-				SendProxy_HookArrayProp(entity, "m_iPlayerClassWhenKilled", i, Prop_Int, SendProp_OnClass);
+				#endif
+
+				SendProxy_HookArrayProp(entity, "m_iTeam", i, Prop_Int, view_as<SendProxyCallback>(SendProp_OnTeam));
+				SendProxy_HookArrayProp(entity, "m_iPlayerClass", i, Prop_Int, view_as<SendProxyCallback>(SendProp_OnClass));
+				SendProxy_HookArrayProp(entity, "m_iPlayerClassWhenKilled", i, Prop_Int, view_as<SendProxyCallback>(SendProp_OnClass));
 			}
 		}
 	}
@@ -438,7 +462,7 @@ public void OnClientPutInServer(int client)
 	DHook_HookClient(client);
 	#if defined _SENDPROXYMANAGER_INC_
 	if(GetFeatureStatus(FeatureType_Native, "SendProxy_Hook") == FeatureStatus_Available)
-		SendProxy_Hook(client, "m_iClass", Prop_Int, SendProp_OnClientClass);
+		SendProxy_Hook(client, "m_iClass", Prop_Int, view_as<SendProxyCallback>(SendProp_OnClientClass));
 	#endif
 }
 
@@ -919,6 +943,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 
 	ViewModel_Destroy(client);
 
+	Client[client].ResetThinkIsDead();
 	Client[client].Sprinting = false;
 	Client[client].ChargeIn = 0.0;
 	Client[client].Disarmer = 0;
@@ -1592,11 +1617,21 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 			for(int i=1; i<=MaxClients; i++)
 			{
 				if(i==client || i==attacker || (IsValidClient(i) && IsFriendly(Client[attacker].Class, Client[i].Class) && Client[attacker].CanTalkTo[i]))
+				{
+					Client[i].ThinkIsDead[client] = true;
 					event.FireToClient(i);
+				}
 			}
 		}
 	}
-	else if(!Classes_OnDeath(client, event))
+	else if(Classes_OnDeath(client, event))
+	{
+		for(int i=1; i<=MaxClients; i++)
+		{
+			Client[i].ThinkIsDead[client] = true;
+		}
+	}
+	else
 	{
 		event.BroadcastDisabled = true;
 
@@ -1621,7 +1656,7 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 			else
 			{
 				int weapon = event.GetInt("weaponid");
-				if(weapon>MaxClients && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")==308)
+				if(weapon>MaxClients && HasEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")==308)
 					GiveAchievement(Achievement_DeathGrenade, client);
 			}
 		}
@@ -1690,7 +1725,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 		{
 			if(!Client[client].Sprinting && Client[client].SprintPower>15)
 			{
-				ClientCommand(client, "playgamesound HL2Player.SprintStart");
+				ClientCommand(client, "playgamesound player/suit_sprint.wav");
 				Client[client].HelpSprint = false;
 				Client[client].Sprinting = true;
 				SDKCall_SetSpeed(client);
@@ -2023,14 +2058,9 @@ public void UpdateListenOverrides(float engineTime)
 
 			for(int target=1; target<=MaxClients; target++)
 			{
-				if(!manage)
-				{
-					Client[target].CanTalkTo[client] = true;
-					continue;
-				}
-
 				if(client == target)
 				{
+					Client[target].CanTalkTo[client] = true;
 					SetListenOverride(client, target, Listen_Default);
 					continue;
 				}
@@ -2408,10 +2438,52 @@ public Action OnStomp(int attacker, int victim)
 	return health<300 ? Plugin_Handled : Plugin_Continue;
 }
 
+public Action CH_ShouldCollide(int client, int entity, bool &result)
+{
+	//if(result)
+	{
+		if(client>0 && client<=MaxClients)
+		{
+			static char buffer[16];
+			GetEntityClassname(entity, buffer, sizeof(buffer));
+			if(!StrContains(buffer, "func_door") || !StrContains(buffer, "func_brush"))
+			{
+				result = Classes_OnDoorWalk(client, entity);
+				return Plugin_Handled;
+			}
+		}
+	}
+	return Plugin_Continue;
+}
+
 #if defined _SENDPROXYMANAGER_INC_
 public Action SendProp_OnAlive(int entity, const char[] propname, int &value, int client) 
 {
 	value = 1;
+	return Plugin_Changed;
+}
+
+public Action SendProp_OnAliveMulti(int entity, const char[] propname, int &value, int client, int target) 
+{
+	if(!Enabled)
+	{
+		value = 1;
+	}
+	else if(IsSpec(target))
+	{
+		if(!IsValidClient(client))
+			return Plugin_Continue;
+
+		value = IsSpec(client) ? 0 : 1;
+	}
+	else if(Client[target].ThinkIsDead[client])
+	{
+		value = 0;
+	}
+	else
+	{
+		value = 1;
+	}
 	return Plugin_Changed;
 }
 
@@ -2441,6 +2513,13 @@ public Action SendProp_OnClientClass(int client, const char[] name, int &value, 
 	value = view_as<int>(Client[client].WeaponClass);
 	return Plugin_Changed;
 }
+
+#if defined SENDPROXY_LIB
+public void SendProxy_ForkOfAForkOfAFork()
+{
+	SendProxy_IsHookedArrayProp(0, "", 0);
+}
+#endif
 #endif
 
 #file "SCP: Secret Fortress"

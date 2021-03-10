@@ -63,6 +63,18 @@ public void SCP076_OnDeath(int client, Event event)
 	CreateTimer(5.0, Timer_DissolveRagdoll, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 }
 
+public bool SCP076_DoorWalk(int client, int entity)
+{
+	if(Client[client].Extra2 >= MaxHeads)
+	{
+		static char buffer[16];
+		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
+		if(!StrContains(buffer, "scp", false))
+			AcceptEntityInput(entity, "FireUser1", client, client);
+	}
+	return true;
+}
+
 public int SCP076_OnKeycard(int client, AccessEnum access)
 {
 	if(access == Access_Checkpoint)

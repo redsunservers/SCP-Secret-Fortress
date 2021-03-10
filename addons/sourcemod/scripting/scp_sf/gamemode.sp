@@ -705,19 +705,22 @@ public bool Gamemode_ConditionVip(TFTeam &team)
 	}
 	else if(sescape<descape || scapture>dcapture)	// More Class-D than Scientists || More Scientists than Class-D
 	{
-		team = TFTeam_Blue;
+		team = TFTeam_Red;
 		group = 1;
 	}
 	else if(scapture < dcapture)	// More Class-D than Scientists
 	{
+		team = TFTeam_Blue;
 		group = 2;
 	}
 	else if(salive && !sescape)	// SCP alive and none escaped
 	{
+		team = TFTeam_Red;
 		group = 3;
 	}
 	else	// Tied escapes & captures
 	{
+		team = TFTeam_Unassigned;
 		group = 0;
 	}
 
@@ -789,21 +792,31 @@ public float Gamemode_WaveRespawnTickets(ArrayList &list, ArrayList &players)
 				count++;
 
 			if(wave.Message[0])
+			{
 				CPrintToChat(i, "%s%t", PREFIX, wave.Message);
+				Client[i].ResetThinkIsDead();
+			}
 
 			if(players.FindValue(i) == -1)
 			{
 				if(!found || class.Group!=wave.Group)
 				{
 					if(wave.Sound.Path[0])
+					{
 						ChangeSong(i, engineTime+wave.Sound.Time, wave.Sound.Path);
-
+						if(!wave.Message[0])
+							Client[i].ResetThinkIsDead();
+					}
 					continue;
 				}
 			}
 
 			if(wave.SoundTeam.Path[0])
+			{
 				ChangeSong(i, engineTime+wave.SoundTeam.Time, wave.SoundTeam.Path, 1);
+				if(!wave.Message[0])
+					Client[i].ResetThinkIsDead();
+			}
 		}
 
 		if(wave.ShowSCPs)

@@ -1262,11 +1262,6 @@ public Action GlowTransmit(int entity, int target)
 	return Plugin_Continue;
 }
 
-public bool TraceRayPlayerOnly(int client, int mask, any data)
-{
-	return (client!=data && IsValidClient(client) && IsValidClient(data));
-}
-
 public bool TraceWallsOnly(int entity, int contentsMask)
 {
 	return false;
@@ -1280,6 +1275,11 @@ public bool Trace_OnlyHitWorld(int entity, int mask)
 public bool Trace_DontHitEntity(int entity, int mask, any data)
 {
 	return entity!=data;
+}
+
+public bool Trace_PlayerOnly(int client, int mask, any data)
+{
+	return (client!=data && client>0 && client<=MaxClients);
 }
 
 bool IsSpec(int client)

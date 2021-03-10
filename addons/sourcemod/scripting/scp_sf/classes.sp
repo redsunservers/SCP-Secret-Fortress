@@ -37,6 +37,7 @@ enum struct ClassEnum
 	Function OnCondRemoved;	// void(int client, TFCond cond)
 	Function OnDealDamage;	// Action(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 	Function OnDeath;		// void(int client, int attacker)
+	Function OnDoorWalk;	// bool(int client, int entity)
 	Function OnGlowPlayer;	// bool(int client, int victim)
 	Function OnKeycard;	// int(int client, AccessEnum access)
 	Function OnKill;		// void(int client, int victim)
@@ -58,6 +59,7 @@ enum struct ClassEnum
 		this.OnCondRemoved = INVALID_FUNCTION;
 		this.OnDealDamage = INVALID_FUNCTION;
 		this.OnDeath = INVALID_FUNCTION;
+		this.OnDoorWalk = INVALID_FUNCTION;
 		this.OnGlowPlayer = INVALID_FUNCTION;
 		this.OnKeycard = INVALID_FUNCTION;
 		this.OnKill = INVALID_FUNCTION;
@@ -155,6 +157,7 @@ static void GrabKvValues(KeyValues kv, ClassEnum class, ClassEnum defaul, int in
 	class.OnCondRemoved = KvGetFunction(kv, "func_condremove", defaul.OnCondRemoved);
 	class.OnDealDamage = KvGetFunction(kv, "func_dealdamage", defaul.OnDealDamage);
 	class.OnDeath = KvGetFunction(kv, "func_death", defaul.OnDeath);
+	class.OnDoorWalk = KvGetFunction(kv, "func_doorwalk", defaul.OnDoorWalk);
 	class.OnGlowPlayer = KvGetFunction(kv, "func_glow", defaul.OnGlowPlayer);
 	class.OnKeycard = KvGetFunction(kv, "func_keycard", defaul.OnKeycard);
 	class.OnKill = KvGetFunction(kv, "func_kill", defaul.OnKill);
@@ -547,6 +550,20 @@ bool Classes_OnDeath(int client, Event event)
 		Call_StartFunction(null, class.OnDeath);
 		Call_PushCell(client);
 		Call_PushCell(event);
+		Call_Finish(result);
+	}
+	return result;
+}
+
+stock bool Classes_OnDoorWalk(int client, int entity)	// TODO: Find a good way to ShouldCollide on func entities per player
+{
+	bool result = true;
+	ClassEnum class;
+	if(Classes_GetByIndex(Client[client].Class, class) && class.OnDoorWalk!=INVALID_FUNCTION)
+	{
+		Call_StartFunction(null, class.OnDoorWalk);
+		Call_PushCell(client);
+		Call_PushCell(entity);
 		Call_Finish(result);
 	}
 	return result;
@@ -1126,4 +1143,9 @@ public float Classes_GhostTheme(int client, char path[PLATFORM_MAX_PATH])
 {
 	strcopy(path, PLATFORM_MAX_PATH, "#scp_sf/music/unexplainedbehaviors.mp3");
 	return 49.0;
+}
+
+public bool Classes_GhostDoors(int client, int entity)
+{
+	return false;
 }

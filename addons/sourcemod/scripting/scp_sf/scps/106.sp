@@ -111,6 +111,7 @@ public Action SCP106_OnDealDamage(int client, int victim, int &inflictor, float 
 		static float pos[3];
 		GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
 		TeleportEntity(victim, pos, NULL_VECTOR, TRIPLE_D);
+		Client[client].ThinkIsDead[victim] = true;
 	}
 	else if(GetRandomInt(0, 2))
 	{
@@ -236,6 +237,13 @@ public Action SCP106_TakeDamage(int client, int attacker, int &inflictor, float 
 
 	damagetype |= DMG_PREVENT_PHYSICS_FORCE;
 	return Plugin_Changed;
+}
+
+public bool SCP106_DoorWalk(int client, int entity)
+{
+	static char buffer[16];
+	GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
+	return !StrContains(buffer, "scp", false);
 }
 
 static void ShowAnnotation(int client)

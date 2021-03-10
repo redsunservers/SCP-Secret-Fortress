@@ -430,6 +430,12 @@ public void SCP049_OnRevive(Event event, const char[] name, bool dontBroadcast)
 	static float pos[3];
 	GetEntPropVector(client, Prop_Send, "m_vecOrigin", pos);
 	TeleportEntity(target, pos, NULL_VECTOR, NULL_VECTOR);
+
+	for(int i=1; i<=MaxClients; i++)
+	{
+		if(target!=i && (client==i || IsFriendly(Client[i].Class, Client[client].Class)))
+			Client[i].ThinkIsDead[target] = false;
+	}
 }
 
 public void SCP049_Think(int client)

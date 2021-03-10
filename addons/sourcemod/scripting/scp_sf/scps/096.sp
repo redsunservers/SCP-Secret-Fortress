@@ -161,6 +161,18 @@ public int SCP096_OnKeycard(int client, AccessEnum access)
 	return 1;
 }
 
+public bool SCP096_DoorWalk(int client, int entity)
+{
+	if(Client[client].Extra2 == 2)
+	{
+		static char buffer[16];
+		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
+		if(!StrContains(buffer, "scp", false))
+			AcceptEntityInput(entity, "FireUser1", client, client);
+	}
+	return true;
+}
+
 public void SCP096_OnButton(int client, int button)
 {
 	float engineTime = GetEngineTime();
