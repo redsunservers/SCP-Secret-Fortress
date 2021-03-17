@@ -18,8 +18,14 @@ public bool SCP173_Create(int client)
 
 public void SCP173_OnSpeed(int client, float &speed)
 {
-	if(Client[client].Extra2 == 2)
-		speed = FAR_FUTURE;
+	switch(Client[client].Extra2)
+	{
+		case 1:
+			speed = 1.0;
+
+		case 2:
+			speed = FAR_FUTURE;
+	}
 }
 
 public void SCP173_OnKill(int client, int victim)
@@ -112,31 +118,17 @@ public void SCP173_OnButton(int client, int button)
 		SetEntPropFloat(client, Prop_Send, "m_flNextAttack", FAR_FUTURE);
 		SetEntProp(client, Prop_Send, "m_bUseClassAnimations", false);
 		SetEntProp(client, Prop_Send, "m_bCustomModelRotates", false);
-		if(GetEntityMoveType(client) != MOVETYPE_NONE)
-		{
-			if(GetEntityFlags(client) & FL_ONGROUND)
-			{
-				SetEntityMoveType(client, MOVETYPE_NONE);
-			}
-			else
-			{
-				GetEntPropVector(client, Prop_Data, "m_vecVelocity", pos1);
-				pos1[0] = 0.0;
-				pos1[1] = 0.0;
-				TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, pos1);
-			}
-		}
+
+		GetEntPropVector(client, Prop_Data, "m_vecVelocity", pos1);
+		pos1[0] = 0.0;
+		pos1[1] = 0.0;
+		TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, pos1);
 	}
 	else
 	{
 		SetEntPropFloat(client, Prop_Send, "m_flNextAttack", 0.0);
 		SetEntProp(client, Prop_Send, "m_bUseClassAnimations", true);
 		SetEntProp(client, Prop_Send, "m_bCustomModelRotates", true);
-		if(GetEntityMoveType(client) != MOVETYPE_WALK)
-		{
-			TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, TRIPLE_D);
-			SetEntityMoveType(client, MOVETYPE_WALK);
-		}
 	}
 
 	if(Client[client].Extra2 != status)
