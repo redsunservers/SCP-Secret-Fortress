@@ -670,14 +670,31 @@ void Items_DropAllItems(int client)
 
 bool Items_Pickup(int client, int index, int entity=-1)
 {
+	int index2 = index;
+	switch(Forward_OnWeaponPre(client, entity, index2))
+	{
+		case Plugin_Continue:
+		{
+			index2 = index;
+		}
+		case Plugin_Handled:
+		{
+			return true;
+		}
+		case Plugin_Stop:
+		{
+			return true;
+		}
+	}
+
 	WeaponEnum weapon;
-	if(Items_GetWeaponByIndex(index, weapon))
+	if(Items_GetWeaponByIndex(index2, weapon))
 	{
 		bool full;
 		if(Items_CanGiveItem(client, weapon.Type, full))
 		{
 			bool newWep = entity==-1;
-			Items_CreateWeapon(client, index, true, newWep, newWep, entity);
+			Items_CreateWeapon(client, index2, true, newWep, newWep, entity);
 			ClientCommand(client, "playgamesound AmmoPack.Touch");
 			return true;
 		}

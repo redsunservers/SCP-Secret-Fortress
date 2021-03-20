@@ -116,7 +116,21 @@ forward void SCPSF_OnEscape(int client, int disarmer);
 forward void SCPSF_OnAchievement(int client, SCPAchievement achievement);
 
 /**
- * Calls when a client is given a new weapon
+ * Calls when a client is picking up a new item
+ *
+ * @param client 	Client index
+ * @param entity 	Entity index of dropped weapon, -1 if a map item was picked up
+ * @param index		Weapon index
+ *
+ * @return		Plugin_Continue - No changes
+ *			Plugin_Changed - Changed weapon index, if index is invalid nothing will happen
+ *			Plugin_Handled - Item gets removed, no weapon is given
+ *			Plugin_Stop - Nothing happens
+ */
+forward Action SCPSF_OnWeaponPre(int client, int entity, int &index);
+
+/**
+ * Calls when a client is given a new item
  *
  * @param client 	Client index
  * @param entity 	Entity index of weapon

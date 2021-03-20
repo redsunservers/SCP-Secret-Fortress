@@ -96,6 +96,8 @@ ArrayList Gamemode_Setup(KeyValues main, KeyValues map)
 	}
 
 	GameCondition = KvGetFunction(kv, "wincondition");
+	if(kv.GetNum("noachieve"))
+		CvarAchievement.BoolValue = false;
 
 	if(kv.JumpToKey("presets"))
 	{
