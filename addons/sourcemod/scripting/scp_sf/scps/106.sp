@@ -16,7 +16,7 @@ public bool SCP106_Create(int client)
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 12);
-		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client));
+		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 	}
 

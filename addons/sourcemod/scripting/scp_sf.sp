@@ -45,7 +45,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"2"
 #define MINOR_REVISION	"0"
-#define STABLE_REVISION	"3"
+#define STABLE_REVISION	"4"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE	100000000.0
@@ -208,6 +208,7 @@ ClientEnum Client[MAXTF2PLAYERS];
 #include "scp_sf/scps/106.sp"
 #include "scp_sf/scps/173.sp"
 #include "scp_sf/scps/939.sp"
+//#include "scp_sf/scps/sjm08.sp"
 
 // SourceMod Events
 
@@ -459,6 +460,10 @@ public void OnPluginEnd()
 
 	if(Enabled)
 		EndRound(0);
+
+	#if defined _included_smjm08
+	SJM08_Clean();
+	#endif
 }
 
 public void OnClientPutInServer(int client)
@@ -555,18 +560,15 @@ public void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 
 		SDKCall_SetSpeed(client);
 		Client[client].NextSongAt = FAR_FUTURE;
-		if(!Client[client].CurrentSong[0])
-			continue;
-
-		for(int i; i<3; i++)
-		{
-			StopSound(client, SNDCHAN_STATIC, Client[client].CurrentSong);
-		}
-		Client[client].CurrentSong[0] = 0;
+		ChangeSong(client, 0.0, "");
 	}
 
 	UpdateListenOverrides(FAR_FUTURE);
 	Gamemode_RoundEnd();
+
+	#if defined _included_smjm08
+	SJM08_Clean();
+	#endif
 }
 
 public Action OnWinPanel(Event event, const char[] name, bool dontBroadcast)
@@ -638,16 +640,7 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 	else if(!StrContains(name, "scp_endmusic", false))
 	{
 		NoMusicRound = true;
-		for(int target=1; target<=MaxClients; target++)
-		{
-			Client[target].NextSongAt = FAR_FUTURE;
-			if(!IsValidClient(target) || !Client[target].CurrentSong[0])
-				continue;
-
-			StopSound(target, SNDCHAN_STATIC, Client[target].CurrentSong);
-			StopSound(target, SNDCHAN_STATIC, Client[target].CurrentSong);
-			Client[target].CurrentSong[0] = 0;
-		}
+		ChangeGlobalSong(FAR_FUTURE, "");
 	}
 	else if(!StrContains(name, "scp_respawn", false))	// Temp backwards compability
 	{
@@ -2241,8 +2234,10 @@ void ChangeSong(int client, float next, const char[] filepath, int volume=2)
 {
 	if(Client[client].CurrentSong[0])
 	{
-		StopSound(client, SNDCHAN_STATIC, Client[client].CurrentSong);
-		StopSound(client, SNDCHAN_STATIC, Client[client].CurrentSong);
+		for(int i; i<3; i++)
+		{
+			StopSound(client, SNDCHAN_STATIC, Client[client].CurrentSong);
+		}
 	}
 
 	if(Client[client].DownloadMode || !filepath[0])

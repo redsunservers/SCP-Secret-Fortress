@@ -196,7 +196,20 @@ ArrayList Items_ArrayList(int client, int slot, bool all=false)
 
 int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, bool ammo=false, int ground=-1)
 {
-	int entity = -1;
+	int entity = index;
+	switch(Forward_OnWeaponPre(client, ground, entity))
+	{
+		case Plugin_Changed:
+		{
+			index = entity;
+		}
+		case Plugin_Handled, Plugin_Stop:
+		{
+			return -1;
+		}
+	}
+
+	entity = -1;
 	WeaponEnum weapon;
 	if(Items_GetWeaponByIndex(index, weapon))
 	{
@@ -327,7 +340,7 @@ int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, 
 				}
 				else
 				{
-					i = GetSteamAccountID(client);
+					i = GetSteamAccountID(client, false);
 				}
 				SetEntProp(entity, Prop_Send, "m_iAccountID", i);
 
@@ -670,31 +683,14 @@ void Items_DropAllItems(int client)
 
 bool Items_Pickup(int client, int index, int entity=-1)
 {
-	int index2 = index;
-	switch(Forward_OnWeaponPre(client, entity, index2))
-	{
-		case Plugin_Continue:
-		{
-			index2 = index;
-		}
-		case Plugin_Handled:
-		{
-			return true;
-		}
-		case Plugin_Stop:
-		{
-			return true;
-		}
-	}
-
 	WeaponEnum weapon;
-	if(Items_GetWeaponByIndex(index2, weapon))
+	if(Items_GetWeaponByIndex(index, weapon))
 	{
 		bool full;
 		if(Items_CanGiveItem(client, weapon.Type, full))
 		{
 			bool newWep = entity==-1;
-			Items_CreateWeapon(client, index2, true, newWep, newWep, entity);
+			Items_CreateWeapon(client, index, true, newWep, newWep, entity);
 			ClientCommand(client, "playgamesound AmmoPack.Touch");
 			return true;
 		}

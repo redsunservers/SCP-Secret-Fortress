@@ -40,7 +40,7 @@ void DHook_Setup(GameData gamedata)
 
 	RoundRespawn = DynamicHook.FromConf(gamedata, "CTeamplayRoundBasedRules::RoundRespawn");
 	if(!RoundRespawn)
-		LogError("[Gamedata] Could not find CTFPlayer::RoundRespawn");
+		LogError("[Gamedata] Could not find CTeamplayRoundBasedRules::RoundRespawn");
 
 	ForceRespawn = DynamicHook.FromConf(gamedata, "CBasePlayer::ForceRespawn");
 	if(!ForceRespawn)

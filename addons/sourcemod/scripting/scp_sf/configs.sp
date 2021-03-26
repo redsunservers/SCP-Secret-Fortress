@@ -128,12 +128,32 @@ void Config_DoReaction(int client, const char[] name)
 				Reactions.GetString(buffer, buffer, sizeof(buffer));
 			} while(buffer[0]);
 
+			char buffer2[PLATFORM_MAX_PATH];
 			if(amount > 1)
 			{
 				IntToString(GetRandomInt(1, amount-1), buffer, sizeof(buffer));
 				Reactions.GetString(buffer, buffer, sizeof(buffer));
-				EmitSoundToAll(buffer, client, SNDCHAN_VOICE, 95);
+				strcopy(buffer2, sizeof(buffer2), buffer);
 			}
+
+			switch(Forward_OnReactionPre(client, name, buffer2))
+			{
+				case Plugin_Changed:
+				{
+					strcopy(buffer, sizeof(buffer), buffer2);
+				}
+				case Plugin_Handled, Plugin_Stop:
+				{
+					return;
+				}
+				default:
+				{
+					if(amount < 2)
+						return;
+				}
+			}
+
+			EmitSoundToAll(buffer, client, SNDCHAN_VOICE, 95);
 		}
 	}
 }

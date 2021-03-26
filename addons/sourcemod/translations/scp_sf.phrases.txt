@@ -425,6 +425,14 @@
 	{
 		"en"		"Look around for players.\nMore times you get hit by a player, the more rage you gain.\nAfter a certain amount of times, you'll have enough."
 	}
+	"class_sjm08"
+	{
+		"en"		"Specimen 8"
+	}
+	"desc_sjm08"
+	{
+		"en"		"A tech demo character.\nYour not normally supposed to play this unless forced by an admin."
+	}
 
 	// Weapon Phrases
 

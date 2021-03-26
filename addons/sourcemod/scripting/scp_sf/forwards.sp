@@ -2,6 +2,7 @@ static GlobalForward OnEscape;
 static GlobalForward OnAchievement;
 static GlobalForward OnWeapon;
 static GlobalForward OnWeaponPre;
+static GlobalForward OnReactionPre;
 
 void Forward_Setup()
 {
@@ -9,6 +10,7 @@ void Forward_Setup()
 	OnAchievement = new GlobalForward("SCPSF_OnAchievement", ET_Ignore, Param_Cell, Param_Cell);
 	OnWeapon = new GlobalForward("SCPSF_OnWeapon", ET_Ignore, Param_Cell, Param_Cell);
 	OnWeaponPre = new GlobalForward("SCPSF_OnWeaponPre", ET_Event, Param_Cell, Param_Cell, Param_CellByRef);
+	OnReactionPre = new GlobalForward("SCPSF_OnReactionPre", ET_Event, Param_Cell, Param_String, Param_String);
 }
 
 void Forward_OnEscape(int client, int disarmer)
@@ -42,6 +44,17 @@ Action Forward_OnWeaponPre(int client, int entity, int &index)
 	Call_PushCell(client);
 	Call_PushCell(entity);
 	Call_PushCellRef(index);
+	Call_Finish(action);
+	return action;
+}
+
+Action Forward_OnReactionPre(int client, const char[] event, char sound[PLATFORM_MAX_PATH])
+{
+	Action action;
+	Call_StartForward(OnReactionPre);
+	Call_PushCell(client);
+	Call_PushString(event);
+	Call_PushStringEx(sound, PLATFORM_MAX_PATH, SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
 	Call_Finish(action);
 	return action;
 }

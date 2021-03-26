@@ -27,7 +27,7 @@ public bool SCP049_Create(int client)
 {
 	Classes_VipSpawn(client);
 
-	int account = GetSteamAccountID(client);
+	int account = GetSteamAccountID(client, false);
 
 	GiveMelee(client, account);
 
@@ -51,7 +51,7 @@ public bool SCP0492_Create(int client)
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 4);
-		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client));
+		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 	}
 
@@ -99,7 +99,7 @@ public void SCP049_OnWeaponSwitch(int client, int entity)
 			if(Enabled)
 			{
 				TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
-				GiveMelee(client, GetSteamAccountID(client), false);
+				GiveMelee(client, GetSteamAccountID(client, false), false);
 			}
 			Revive[client].MoveAt = FAR_FUTURE;
 			Revive[client].GoneAt = GetEngineTime()+3.0;
@@ -297,7 +297,7 @@ public void SCP049_OnButton(int client, int button)
 			if(target > MaxClients)
 			{
 				ApplyStrangeRank(target, 6);
-				SetEntProp(target, Prop_Send, "m_iAccountID", GetSteamAccountID(client));
+				SetEntProp(target, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
 				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", target);
 			}
 
@@ -317,7 +317,7 @@ public void SCP049_OnButton(int client, int button)
 		FakeClientCommandEx(client, "voicemenu 2 4");	// Positive
 		ViewModel_Destroy(client);
 		TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
-		GiveMelee(client, GetSteamAccountID(client));
+		GiveMelee(client, GetSteamAccountID(client, false));
 		Revive[client].MoveAt = FAR_FUTURE;
 		Revive[client].GoneAt = engineTime+2.0;
 	}
@@ -408,7 +408,7 @@ public void SCP049_OnRevive(Event event, const char[] name, bool dontBroadcast)
 		return;
 
 	target = GetEntPropEnt(target, Prop_Send, "m_hOwner");
-	if(!IsValidClient(target))
+	if(!IsValidClient(target) || Client[target].Class==Index0492)
 		return;
 
 	Revive[client].Index++;

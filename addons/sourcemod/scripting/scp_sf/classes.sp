@@ -283,7 +283,7 @@ static void GrabKvValues(KeyValues kv, ClassEnum class, ClassEnum defaul, int in
 
 bool Classes_GetByIndex(int index, ClassEnum class)
 {
-	if(index<0 || index>=Classes.Length)
+	if(!Classes || index<0 || index>=Classes.Length)
 		return false;
 
 	Classes.GetArray(index, class);
@@ -405,18 +405,6 @@ void Classes_SpawnPoint(int client, int index)
 				delete list;
 				return;
 			}
-		}
-
-		if(Classes_GetByIndex(Client[client].Class, class) && !class.Human)	// Remove this soonTM
-		{
-			Client[client].InvisFor = GetEngineTime()+15.0;
-
-			DataPack pack;
-			CreateDataTimer(1.0, Timer_Stun, pack, TIMER_FLAG_NO_MAPCHANGE);
-			pack.WriteCell(GetClientUserId(client));
-			pack.WriteFloat(14.0);
-			pack.WriteFloat(1.0);
-			pack.WriteCell(TF_STUNFLAGS_NORMALBONK|TF_STUNFLAG_NOSOUNDOREFFECT);
 		}
 
 		if(length)

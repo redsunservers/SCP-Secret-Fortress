@@ -119,13 +119,13 @@ forward void SCPSF_OnAchievement(int client, SCPAchievement achievement);
  * Calls when a client is picking up a new item
  *
  * @param client 	Client index
- * @param entity 	Entity index of dropped weapon, -1 if a map item was picked up
+ * @param entity 	Entity index of dropped weapon, -1 if came from other sources
  * @param index		Weapon index
  *
  * @return		Plugin_Continue - No changes
- *			Plugin_Changed - Changed weapon index, if index is invalid nothing will happen
- *			Plugin_Handled - Item gets removed, no weapon is given
- *			Plugin_Stop - Nothing happens
+ *			Plugin_Changed - Changed weapon index, if index is invalid nothing is given
+ *			Plugin_Handled - Nothing is given
+ *			Plugin_Stop - Nothing is given
  */
 forward Action SCPSF_OnWeaponPre(int client, int entity, int &index);
 
@@ -138,6 +138,20 @@ forward Action SCPSF_OnWeaponPre(int client, int entity, int &index);
  * @noreturn
  */
 forward void SCPSF_OnWeapon(int client, int entity);
+
+/**
+ * Calls when a client is reacting to a certain event
+ *
+ * @param client 	Client index
+ * @param event		Name of the event
+ * @param sound		Filepath of sound
+ *
+ * @return		Plugin_Continue - No changes
+ *			Plugin_Changed - Changed sound
+ *			Plugin_Handled - No sound is played
+ *			Plugin_Stop - No sound is played
+ */
+forward Action SCPSF_OnReactionPre(int client, const char[] event, char sound[PLATFORM_MAX_PATH]);
 
 /**
  * Calls when a client messages when the chat processor is enabled

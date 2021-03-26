@@ -13,7 +13,7 @@ public bool SCP076_Create(int client)
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 11);
-		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client));
+		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 		CreateTimer(15.0, Timer_UpdateClientHud, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 	}
@@ -45,7 +45,7 @@ public void SCP076_OnKill(int client, int victim)
 		if(weapon > MaxClients)
 		{
 			ApplyStrangeRank(weapon, 18);
-			SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client));
+			SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
 			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 		}
 	}
