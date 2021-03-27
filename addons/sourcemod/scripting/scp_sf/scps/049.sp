@@ -31,7 +31,7 @@ public bool SCP049_Create(int client)
 
 	GiveMelee(client, account);
 
-	int weapon = SpawnWeapon(client, "tf_weapon_medigun", 211, 5, 13, "7 ; 0.65 ; 9 ; 0 ; 18 ; 1 ; 252 ; 0.95 ; 292 ; 2", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_medigun", 211, 5, 13, "8 ; 91.01 ; 9 ; 0 ; 18 ; 1 ; 252 ; 0.95 ; 292 ; 2", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 11);
@@ -47,7 +47,7 @@ public bool SCP049_Create(int client)
 
 public bool SCP0492_Create(int client)
 {
-	int weapon = SpawnWeapon(client, "tf_weapon_bat", 572, 50, 13, "2 ; 1.25 ; 5 ; 1.3 ; 28 ; 0.5 ; 252 ; 0.5", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_bat_fish", 221, 50, 13, "6 ; 0.85 ; 28 ; 0.5 ; 63 ; 1.90 ; 252 ; 0.5", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 4);
@@ -67,7 +67,7 @@ public bool SCP0492_Create(int client)
 	// Model stuff
 	SetVariantString(class.Model);
 	AcceptEntityInput(client, "SetCustomModel");
-	SetEntProp(client, Prop_Send, "m_bUseClassAnimations", true);
+	SetEntProp(client, Prop_Send, "m_bUseClassAnimations", false);
 	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", class.ModelIndex, _, 0);
 	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", class.ModelAlt, _, 3);
 	TF2_CreateGlow(client, class.Model);
@@ -115,75 +115,57 @@ public Action SCP049_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &ch
 {
 	if(!StrContains(sample, "vo", false))
 	{
-		float engineTime = GetEngineTime();
-		static float delay[MAXTF2PLAYERS];
-		if(delay[client] > engineTime)
-			return Plugin_Handled;
-
 		if(StrContains(sample, "activatecharge", false) != -1)
 		{
-			delay[client] = engineTime+2.0;
 			Format(sample, PLATFORM_MAX_PATH, "scp_sf/049/found%d.mp3", GetRandomInt(1, 2));
 		}
 		else if(StrContains(sample, "autochargeready", false)!=-1 || StrContains(sample, "taunts", false)!=-1)
 		{
-			delay[client] = engineTime+6.0;
 			Format(sample, PLATFORM_MAX_PATH, "scp_sf/049/meleedare%d.mp3", GetRandomInt(1, 3));
 		}
 		else if(StrContains(sample, "autodejectedtie", false) != -1)
 		{
-			delay[client] = engineTime+15.0;
 			strcopy(sample, PLATFORM_MAX_PATH, "scp_sf/049/battlecry2.mp3");
 		}
 		else if(StrContains(sample, "battlecry", false) != -1)
 		{
 			int value = GetRandomInt(1, 2);
-			delay[client] = engineTime+(value*7.5);
 			Format(sample, PLATFORM_MAX_PATH, "scp_sf/049/battlecry%d.mp3", value);
 		}
 		else if(StrContains(sample, "cheers", false) != -1)
 		{
-			delay[client] = engineTime+3.0;
 			Format(sample, PLATFORM_MAX_PATH, "scp_sf/049/cheers%d.mp3", GetRandomInt(1, 3));
 		}
 		else if(StrContains(sample, "cloakedspy", false) != -1)
 		{
-			delay[client] = engineTime+2.0;
 			Format(sample, PLATFORM_MAX_PATH, "scp_sf/049/doctor%d.mp3", GetRandomInt(1, 2));
 		}
 		else if(StrContains(sample, "medic_go", false)!=-1 || StrContains(sample, "head", false)!=-1 || StrContains(sample, "moveup", false)!=-1 || StrContains(sample, "medic_no", false)!=-1 || StrContains(sample, "thanks", false)!=-1 || StrContains(sample, "medic_yes", false)!=-1)
 		{
-			delay[client] = engineTime+2.0;
 			Format(sample, PLATFORM_MAX_PATH, "scp_sf/049/hello%d.mp3", GetRandomInt(1, 3));
 		}
 		else if(StrContains(sample, "goodjob", false)!=-1 || StrContains(sample, "incoming", false)!=-1 || StrContains(sample, "need", false)!=-1 || StrContains(sample, "niceshot", false)!=-1 || StrContains(sample, "sentry", false)!=-1)
 		{
-			delay[client] = engineTime+2.0;
 			Format(sample, PLATFORM_MAX_PATH, "scp_sf/049/greet%d.mp3", GetRandomInt(1, 3));
 		}
 		else if(StrContains(sample, "helpme", false) != -1)
 		{
-			delay[client] = engineTime+3.0;
 			Format(sample, PLATFORM_MAX_PATH, "scp_sf/049/chase%d.mp3", GetRandomInt(1, 3));
 		}
 		else if(StrContains(sample, "jeers", false) != -1)
 		{
-			delay[client] = engineTime+4.0;
 			Format(sample, PLATFORM_MAX_PATH, "scp_sf/049/jeers%d.mp3", GetRandomInt(1, 2));
 		}
 		else if(StrContains(sample, "negative", false) != -1)
 		{
-			delay[client] = engineTime+2.0;
 			Format(sample, PLATFORM_MAX_PATH, "scp_sf/049/neg%d.mp3", GetRandomInt(1, 2));
 		}
 		else if(StrContains(sample, "positive", false) != -1)
 		{
-			delay[client] = engineTime+2.0;
 			Format(sample, PLATFORM_MAX_PATH, "scp_sf/049/pos%d.mp3", GetRandomInt(1, 3));
 		}
 		else if(StrContains(sample, "specialcompleted", false) != -1)
 		{
-			delay[client] = engineTime+4.0;
 			Format(sample, PLATFORM_MAX_PATH, "scp_sf/049/kill%d.mp3", GetRandomInt(1, 5));
 		}
 		else
@@ -413,7 +395,7 @@ public void SCP049_OnRevive(Event event, const char[] name, bool dontBroadcast)
 
 	Revive[client].Index++;
 	float amount = float(Revive[client].Index)*0.05;
-	TF2Attrib_SetByDefIndex(entity, 7, 0.7+amount);
+	//TF2Attrib_SetByDefIndex(entity, 7, 0.7+amount);
 	if(Revive[client].Index < 41)
 		SetEntPropFloat(entity, Prop_Send, "m_flChargeLevel", 1.0-Pow(10.0, (1.0-amount))/10.0);
 
@@ -512,7 +494,7 @@ static void SpawnMarker(int victim, int client)
 	SetEntProp(entity, Prop_Send, "m_CollisionGroup", 1); 
 	SetEntProp(entity, Prop_Send, "m_bSimulatedEveryTick", true);
 	SetEntDataEnt2(victim, FindSendPropInfo("CTFPlayer", "m_nForcedSkin")+4, entity);
-	SetEntProp(entity, Prop_Send, "m_nBody", view_as<int>(TFClass_Scout)-1); // character hologram that is shown
+	SetEntProp(entity, Prop_Send, "m_nBody", GetRandomInt(0, 8)); // character hologram that is shown
 	SetEntProp(entity, Prop_Send, "m_nSequence", 1); 
 	SetEntPropFloat(entity, Prop_Send, "m_flPlaybackRate", 1.0);
 	SetEntProp(entity, Prop_Data, "m_iInitialTeamNum", team);
@@ -528,7 +510,7 @@ static void SpawnMarker(int victim, int client)
 
 static void GiveMelee(int client, int account, bool equip=true)
 {
-	int weapon = SpawnWeapon(client, "tf_weapon_bonesaw", 413, 1, 13, "138 ; 0 ; 252 ; 0.2", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_bonesaw", 413, 1, 13, "1 ; 0.25 ; 6 ; 0.25 ; 138 ; 0 ; 525 ; 10.01", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 6);

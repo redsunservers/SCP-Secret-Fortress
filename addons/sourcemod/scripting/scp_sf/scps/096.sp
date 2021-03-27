@@ -6,13 +6,13 @@ static const int HealthMax = 1875;	// Max standard health
 static const int HealthExtra = 425;//437.5// Max regenerable health
 static const int HealthRage = 75;//87.5	// Extra health per target in rage
 
-static const float SpeedRage = 2.1;
+static const float SpeedRage = 4.0;
 
 static const float RageWarmup = 6.0;	// Rage warmup time
-static const float RageDuration = 12.0;	// Rage initial duration
-static const float RageExtra = 3.0;	// Rage duration per target
+static const float RageDuration = 4.0;	// Rage initial duration
+static const float RageExtra = 1.0;	// Rage duration per target
 static const float RageWinddown = 6.0;	// After rage stun
-static const float RageCooldown = 15.0;	// After rage cooldown
+static const float RageCooldown = 6.0;	// After rage cooldown
 
 static int Triggered[MAXTF2PLAYERS];
 
@@ -120,7 +120,7 @@ public Action SCP096_OnTakeDamage(int client, int attacker, int &inflictor, floa
 			return Plugin_Changed;
 		}
 	}
-	else if(Triggered[attacker]<2 && !TF2_IsPlayerInCondition(client, TFCond_Dazed))
+	else if(Triggered[attacker]<3 && !TF2_IsPlayerInCondition(client, TFCond_Dazed))
 	{
 		TriggerShyGuy(client, attacker, true);
 	}
@@ -134,17 +134,17 @@ public Action SCP096_OnTakeDamage(int client, int attacker, int &inflictor, floa
 
 public Action SCP096_OnDealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	return (Triggered[victim] > 1) ? Plugin_Continue : Plugin_Handled;
+	return (Triggered[victim] > 2) ? Plugin_Continue : Plugin_Handled;
 }
 
 public bool SCP096_OnSeePlayer(int client, int victim)
 {
-	return (!Client[client].Extra2 || Triggered[victim]>1);
+	return (!Client[client].Extra2 || Triggered[victim]>2);
 }
 
 public bool SCP096_OnGlowPlayer(int client, int victim)
 {
-	return (Client[client].Extra2==2 && Triggered[victim]>1);
+	return (Client[client].Extra2==2 && Triggered[victim]>2);
 }
 
 public int SCP096_OnKeycard(int client, AccessEnum access)
@@ -191,10 +191,10 @@ public void SCP096_OnButton(int client, int button)
 				TF2_AddCondition(client, TFCond_CritCola, 99.9);
 
 				TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
-				int weapon = SpawnWeapon(client, "tf_weapon_sword", 195, 100, 13, "2 ; 11 ; 6 ; 0.95 ; 28 ; 3 ; 252 ; 0 ; 326 ; 2 ; 4328 ; 1", false);
+				int weapon = SpawnWeapon(client, "tf_weapon_sword", 195, 100, 13, "2 ; 11 ; 6 ; 0.25 ; 28 ; 3 ; 252 ; 0 ; 326 ; 2", false);
 				if(weapon > MaxClients)
 				{
-					ApplyStrangeRank(weapon, 16);
+					ApplyStrangeRank(weapon, 20);
 					SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
 					SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 				}
@@ -280,13 +280,13 @@ public void SCP096_OnButton(int client, int button)
 		bool found;
 		for(int target=1; target<=MaxClients; target++)
 		{
-			if(!IsValidClient(target) || IsFriendly(Client[client].Class, Client[target].Class) || Triggered[target]>1)
+			if(!IsValidClient(target) || IsFriendly(Client[client].Class, Client[target].Class) || Triggered[target]>2)
 				continue;
 
 			static float pos2[3];
 			GetClientEyePosition(target, pos2);
-			if(GetVectorDistance(pos1, pos2, true) > 499999)
-				continue;
+			//if(GetVectorDistance(pos1, pos2, true) > 499999)
+				//continue;
 
 			static float ang2[3], ang3[3];
 			GetClientEyeAngles(target, ang2);
@@ -345,13 +345,19 @@ public void SCP096_OnButton(int client, int button)
 			{
 				if(Client[client].Pos[0])
 				{
-					StopSound(client, SNDCHAN_VOICE, SoundPassive);
+					StopSound(client, SNDCHAN_STATIC, SoundPassive);
+					StopSound(client, SNDCHAN_STATIC, SoundPassive);
+					StopSound(client, SNDCHAN_STATIC, SoundPassive);
+					StopSound(client, SNDCHAN_STATIC, SoundPassive);
 					Client[client].Pos[0] = 0.0;
 				}
 			}
 			else if(!Client[client].Pos[0])
 			{
-				EmitSoundToAll(SoundPassive, client, SNDCHAN_VOICE, SNDLEVEL_TRAIN, _, _, _, client);
+				EmitSoundToAll(SoundPassive, client, SNDCHAN_STATIC, SNDLEVEL_HOME, _, _, _, client);
+				EmitSoundToAll(SoundPassive, client, SNDCHAN_STATIC, SNDLEVEL_HOME, _, _, _, client);
+				EmitSoundToAll(SoundPassive, client, SNDCHAN_STATIC, SNDLEVEL_HOME, _, _, _, client);
+				EmitSoundToAll(SoundPassive, client, SNDCHAN_STATIC, SNDLEVEL_HOME, _, _, _, client);
 				Client[client].Pos[0] = 1.0;
 			}
 		}
@@ -362,12 +368,12 @@ static void TriggerShyGuy(int client, int target, bool full)
 {
 	if(full)
 	{
-		//if(Triggered[target] == 2)
+		//if(Triggered[target] == 3)
 			//return;
 
-		Triggered[target] = 2;
+		Triggered[target] = 3;
 	}
-	else if(++Triggered[target] != 2)
+	else if(++Triggered[target] != 3)
 	{
 		return;
 	}
@@ -388,7 +394,12 @@ static void TriggerShyGuy(int client, int target, bool full)
 		default:
 		{
 			if(Client[client].Pos[0])
-				StopSound(client, SNDCHAN_VOICE, SoundPassive);
+			{
+				StopSound(client, SNDCHAN_STATIC, SoundPassive);
+				StopSound(client, SNDCHAN_STATIC, SoundPassive);
+				StopSound(client, SNDCHAN_STATIC, SoundPassive);
+				StopSound(client, SNDCHAN_STATIC, SoundPassive);
+			}
 
 			Client[client].Pos[0] = 0.0;
 			Client[client].Extra3 = GetEngineTime()+RageWarmup;

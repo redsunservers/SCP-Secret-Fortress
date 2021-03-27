@@ -34,7 +34,7 @@ void SJM08_Clean()	// OnRoundEnd, OnPluginEnd
 
 public bool SJM08_Create(int client)
 {
-	int weapon = SpawnWeapon(client, "tf_weapon_club", 880, 8, 14, "1 ; 0.615385 ; 5 ; 3 ; 28 ; 0.5 ; 206 ; 0.1 ; 252 ; 0 ; 4328 ; 1", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_club", 880, 8, 14, "1 ; 0.615385 ; 5 ; 3 ; 28 ; 0.5 ; 66 ; 0.5 ; 206 ; 0.1 ; 252 ; 0 ; 4328 ; 1", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 8);

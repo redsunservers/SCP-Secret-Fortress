@@ -1,5 +1,5 @@
-static const float SpeedExtra = 50.0;
-static const float GlowRange = 800.0;
+static const float SpeedExtra = -50.0;
+static const float GlowRange = 8000.0;
 
 public bool SCP939_Create(int client)
 {
@@ -7,7 +7,7 @@ public bool SCP939_Create(int client)
 
 	int account = GetSteamAccountID(client, false);
 
-	int weapon = SpawnWeapon(client, "tf_weapon_knife", 461, 70, 13, "2 ; 1.625 ; 15 ; 0 ; 35 ; 2.5 ; 252 ; 0.3 ; 4328 ; 1", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_knife", 461, 70, 13, "2 ; 1.625 ; 15 ; 0 ; 252 ; 0.3 ; 4328 ; 1", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 10);
@@ -15,7 +15,7 @@ public bool SCP939_Create(int client)
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 	}
 
-	weapon = SpawnWeapon(client, "tf_weapon_pda_spy", 27, 70, 13, "816 ; 1", false);
+	weapon = SpawnWeapon(client, "tf_weapon_pda_spy", 27, 70, 13, "", false);
 	if(weapon > MaxClients)
 	{
 		TF2Attrib_SetByDefIndex(weapon, 214, view_as<float>(GetRandomInt(250, 374))); // Sharp
@@ -51,13 +51,13 @@ public Action SCP939_OnDealDamage(int client, int victim, int &inflictor, float 
 {
 	if(damagecustom!=TF_CUSTOM_BACKSTAB || damage<108)
 	{
-		Client[victim].HudIn = GetEngineTime()+6.0;
+		Client[victim].HudIn = GetEngineTime()+2.0;
 		return Plugin_Continue;
 	}
 
 	damage = 21.667;
 	damagetype |= DMG_CRIT;
-	Client[victim].HudIn = GetEngineTime()+13.0;
+	Client[victim].HudIn = GetEngineTime()+90.0;
 	return Plugin_Changed;
 }
 
@@ -68,7 +68,7 @@ public Action SCP939_OnTakeDamage(int client, int attacker, int &inflictor, floa
 	if(!(damagetype & DMG_FALL))
 		return Plugin_Continue;
 
-	damage *= 0.015;
+	damage *= -0.015;
 	return Plugin_Changed;
 }
 

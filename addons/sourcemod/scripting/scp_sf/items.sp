@@ -1084,11 +1084,7 @@ public bool Items_PainKillerButton(int client, int weapon, int &buttons, int &ho
 	{
 		holding = IN_ATTACK;
 
-		int userid = GetClientUserId(client);
-		ApplyHealEvent(userid, userid, 6);
-
-		SetEntityHealth(client, GetClientHealth(client)+6);
-		StartHealingTimer(client, 0.4, 1, 50);
+		StartHealingTimer(client, 12.0, 56, 1);
 	}
 	else if(buttons & IN_ATTACK2)
 	{
@@ -1122,10 +1118,13 @@ public bool Items_AdrenalineButton(int client, int weapon, int &buttons, int &ho
 	{
 		holding = IN_ATTACK;
 		RemoveAndSwitchItem(client, weapon);
-		StartHealingTimer(client, 0.334, 1, 60, true);
-		TF2_AddCondition(client, TFCond_DefenseBuffNoCritBlock, 20.0, client);
+
+		int userid = GetClientUserId(client);
+		ApplyHealEvent(userid, userid, 120);
+		SetEntityHealth(client, GetClientHealth(client)+120);
+
 		Client[client].Extra3 = GetEngineTime()+20.0;
-		FadeClientVolume(client, 0.3, 2.5, 17.5, 2.5);
+		FadeClientVolume(client, 1.0, 2.5, 17.5, 2.5);
 	}
 	return false;
 }
@@ -1210,10 +1209,10 @@ public bool Items_207Button(int client, int weapon, int &buttons, int &holding)
 			ApplyHealEvent(client, client, health);
 		}
 
-		if(Client[client].Extra2 < 4)
+		if(Client[client].Extra2 < 8)
 		{
-			StartHealingTimer(client, 2.5, -1, 250, _, true);
-			Client[client].Extra2++;
+			StartHealingTimer(client, 1.25, -1, 500, _, true);
+			Client[client].Extra2 += 2;
 		}
 
 		ClassEnum class;
@@ -1229,12 +1228,25 @@ public bool Items_018Button(int client, int weapon, int &buttons, int &holding)
 	{
 		holding = IN_ATTACK;
 		RemoveAndSwitchItem(client, weapon);
-		TF2_AddCondition(client, TFCond_CritCola, 6.0);
-		TF2_AddCondition(client, TFCond_RestrictToMelee, 6.0);
 
 		ClassEnum class;
 		if(Classes_GetByIndex(Client[client].Class, class) && class.Group==1)
 			Gamemode_GiveTicket(1, 2);
+
+		int explosion = CreateEntityByName("env_explosion");
+		DispatchKeyValueFloat(explosion, "DamageForce", 1000.0);
+
+		SetEntProp(explosion, Prop_Data, "m_iMagnitude", 420);
+		SetEntProp(explosion, Prop_Data, "m_iRadiusOverride", 300);
+		SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", client);
+
+		DispatchSpawn(explosion);
+
+		static float explosionPosition[3];
+		GetEntPropVector(client, Prop_Send, "m_vecOrigin", explosionPosition);
+		TeleportEntity(explosion, explosionPosition, NULL_VECTOR, NULL_VECTOR);
+		AcceptEntityInput(explosion, "Explode");
+		AcceptEntityInput(explosion, "kill");
 	}
 	return false;
 }
@@ -1245,22 +1257,24 @@ public bool Items_268Button(int client, int weapon, int &buttons, int &holding)
 	{
 		holding = IN_ATTACK;
 
-		float engineTime = GetEngineTime();
-		static float delay[MAXTF2PLAYERS];
-		if(delay[client] > engineTime)
-		{
-			ClientCommand(client, "playgamesound items/medshotno1.wav");
-			PrintCenterText(client, "%T", "in_cooldown", client);
-			return false;
-		}
-
-		delay[client] = engineTime+90.0;
-		TF2_AddCondition(client, TFCond_Stealthed, 15.0);
-		ClientCommand(client, "playgamesound misc/halloween/spell_stealth.wav");
-
 		ClassEnum class;
 		if(Classes_GetByIndex(Client[client].Class, class) && class.Group==1)
 			Gamemode_GiveTicket(1, 1);
+
+		int explosion = CreateEntityByName("env_explosion");
+		DispatchKeyValueFloat(explosion, "DamageForce", 1000.0);
+
+		SetEntProp(explosion, Prop_Data, "m_iMagnitude", 420);
+		SetEntProp(explosion, Prop_Data, "m_iRadiusOverride", 300);
+		SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", client);
+
+		DispatchSpawn(explosion);
+
+		static float explosionPosition[3];
+		GetEntPropVector(client, Prop_Send, "m_vecOrigin", explosionPosition);
+		TeleportEntity(explosion, explosionPosition, NULL_VECTOR, NULL_VECTOR);
+		AcceptEntityInput(explosion, "Explode");
+		AcceptEntityInput(explosion, "kill");
 	}
 	return false;
 }

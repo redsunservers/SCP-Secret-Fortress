@@ -20,7 +20,16 @@ public bool SCP106_Create(int client)
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 	}
 
-	ViewModel_Create(client, ModelMelee);
+	SetEntityRenderMode(client, RENDER_TRANSCOLOR);
+	SetEntityRenderColor(client, 198, 64, 255);
+
+	weapon = ViewModel_Create(client, ModelMelee);
+	if(weapon > MaxClients)
+	{
+		SetEntityRenderMode(weapon, RENDER_TRANSCOLOR);
+		SetEntityRenderColor(weapon, 198, 64, 255);
+	}
+
 	ViewModel_SetDefaultAnimation(client, "a_fists_idle_02");
 	ViewModel_SetAnimation(client, "fists_draw");
 	return false;
@@ -90,30 +99,7 @@ public Action SCP106_OnDealDamage(int client, int victim, int &inflictor, float 
 {
 	SetEntPropFloat(client, Prop_Send, "m_flNextAttack", GetGameTime()+2.0);
 
-	int entity = -1;
-	ArrayList spawns = new ArrayList();
-	while((entity=FindEntityByClassname(entity, "info_target")) != -1)
-	{
-		static char name[16];
-		GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
-		if(!StrContains(name, "scp_pocket", false))
-			spawns.Push(entity);
-	}
-
-	int length = spawns.Length;
-	if(length)
-		entity = spawns.Get(GetRandomInt(0, length-1));
-
-	delete spawns;
-
-	if(entity != -1)
-	{
-		static float pos[3];
-		GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
-		TeleportEntity(victim, pos, NULL_VECTOR, TRIPLE_D);
-		Client[client].ThinkIsDead[victim] = true;
-	}
-	else if(GetRandomInt(0, 2))
+	if(GetRandomInt(0, 2))
 	{
 		damage *= 2.0;
 		damagetype |= DMG_CRIT;
@@ -128,20 +114,6 @@ public void SCP106_OnButton(int client, int button)
 	{
 		Client[client].ChargeIn = 0.0;
 		TeleportEntity(client, Client[client].Pos, NULL_VECTOR, TRIPLE_D);
-	}
-	else if(Client[client].Pos[0] || Client[client].Pos[1] || Client[client].Pos[2])
-	{
-		static float pos[3];
-		GetClientEyePosition(client, pos);
-		if(Client[client].Extra2)
-		{
-			if(GetVectorDistance(pos, Client[client].Pos, true) > 150000)
-				HideAnnotation(client);
-		}
-		else if(GetVectorDistance(pos, Client[client].Pos, true) < 100000)
-		{
-			ShowAnnotation(client);
-		}
 	}
 
 	if(button == IN_ATTACK2)

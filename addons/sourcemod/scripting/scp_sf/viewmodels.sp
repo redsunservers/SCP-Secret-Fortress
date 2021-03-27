@@ -2,11 +2,11 @@
 
 static int ViewmodelRef[MAXTF2PLAYERS] = {INVALID_ENT_REFERENCE, ...};
 
-void ViewModel_Create(int iClient, const char[] sModel, const float vecAnglesOffset[3] = NULL_VECTOR, float flHeight = 0.0)
+int ViewModel_Create(int iClient, const char[] sModel, const float vecAnglesOffset[3] = NULL_VECTOR, float flHeight = 0.0)
 {
 	int iViewModel = CreateEntityByName("prop_dynamic");
 	if (iViewModel <= MaxClients)
-		return;
+		return -1;
 	
 	SetEntPropEnt(iViewModel, Prop_Send, "m_hOwnerEntity", iClient);
 	SetEntProp(iViewModel, Prop_Send, "m_nSkin", 0);
@@ -33,6 +33,7 @@ void ViewModel_Create(int iClient, const char[] sModel, const float vecAnglesOff
 	ViewmodelRef[iClient] = EntIndexToEntRef(iViewModel);
 	
 	ViewChange_Switch(iClient);
+	return iViewModel;
 }
 
 bool ViewModel_Enabled(int iClient)

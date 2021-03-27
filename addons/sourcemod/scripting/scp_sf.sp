@@ -46,7 +46,7 @@ void DisplayCredits(int i)
 #define MAJOR_REVISION	"2"
 #define MINOR_REVISION	"0"
 #define STABLE_REVISION	"4"
-#define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
+#define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION..." Featuring Dante from the Devil May Cry series"
 
 #define FAR_FUTURE	100000000.0
 #define MAXTF2PLAYERS	36
@@ -208,7 +208,7 @@ ClientEnum Client[MAXTF2PLAYERS];
 #include "scp_sf/scps/106.sp"
 #include "scp_sf/scps/173.sp"
 #include "scp_sf/scps/939.sp"
-//#include "scp_sf/scps/sjm08.sp"
+#include "scp_sf/scps/sjm08.sp"
 
 // SourceMod Events
 

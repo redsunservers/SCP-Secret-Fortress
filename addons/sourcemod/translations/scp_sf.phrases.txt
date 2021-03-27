@@ -4,91 +4,7 @@
 
 	"hint_1"
 	{
-		"en"		"As a ghost you can call for medic\nto teleport to alive players"
-	}
-	"hint_2"
-	{
-		"en"		"SCP-939-89 and SCP-939-53 can only see\nplayers if they moved or attacked recently.\n \nTry standing still if you haven't been spotted."
-	}
-	"hint_3"
-	{
-		"en"		"SCP-079 can help D-Class escape by opening\neither Gate A or Gate B, speak with it."
-	}
-	"hint_4"
-	{
-		"en"		"Facility Manager and O5 keycards allows\nyou to escape without help from MTF or Chaos."
-	}
-	"hint_5"
-	{
-		"en"		"Guards and MTF can use there melees to\ndisarm D-Class or Chaos instead of harming."
-	}
-	"hint_6"
-	{
-		"en"		"SCP-173 can only move while nobody is\nlooking. It can move if someone blinks."
-	}
-	"hint_7"
-	{
-		"en"		"Most SCPs can kill someone in\none blow, disregarding HP."
-	}
-	"hint_8"
-	{
-		"en"		"Crouching helps you stay silent towards others."
-	}
-	"hint_9"
-	{
-		"en"		"Every 3 minutes either MTF or Chaos will spawn."
-	}
-	"hint_10"
-	{
-		"en"		"MTF can save Scientists by bringing them\ntowards one of the gates and letting them through.\n \nOnly Lieutenants and Commanders have access though."
-	}
-	"hint_11"
-	{
-		"en"		"Chaos can save D-Class by bringing them\ntowards one of the gates and letting them through."
-	}
-	"hint_12"
-	{
-		"en"		"Died? Don't worry, you'll respawn soon."
-	}
-	"hint_13"
-	{
-		"en"		"Iron Bomber can blind players but also yourself."
-	}
-	"hint_14"
-	{
-		"en"		"This is a work-in-progress gamemode.\nThere may be bugs and glitches.\nBut playing here helps the development!\n \nThanks for playing here and enjoy!"
-	}
-	"hint_15"
-	{
-		"en"		"There may be useless hints."
-	}
-	"hint_16"
-	{
-		"en"		"All weapons can headshot except against SCPs."
-	}
-	"hint_17"
-	{
-		"en"		"You can use ATTACK1, ATTACK2, or Call for Medic\nto pick up weapons & keycards."
-	}
-	"hint_18"
-	{
-		"en"		"To use a Health Kit, use ATTACK2 to drop the\nkit and stand over it until it's used."
-	}
-	"hint_19"
-	{
-		"en"		"SCP-939-89 and SCP-939-53 are able to talk to humans."
-	}
-	"hint_20"
-	{
-		"en"		"SCPs can talk to each other from any distance."
-	}
-	"hint_21"
-	{
-		"en"		"SCP-3008-2 will only attack if attacked or during closing hours."
-	}
-	"hint_22"
-	{
-		"en"		"Hold RELOAD to view description about the item your holding."
+		"en"		"Merry Happy April Fools"
 	}
 
 	// SCP-3008-1 Phrases
@@ -175,7 +91,7 @@
 	}
 	"class_spec"
 	{
-		"en"		"Spectator"
+		"en"		"Ghosty Boi"
 	}
 	"desc_spec"
 	{
@@ -187,11 +103,11 @@
 	}
 	"class_dboi"
 	{
-		"en"		"Class-D Personnel"
+		"en"		"Dboi"
 	}
 	"desc_dboi"
 	{
-		"en"		"Escape from the facility.\nCooperate with the Chaos Insurgency.\nAvoid other teams."
+		"en"		"Escape from the facility.\nCooperate with the Google Chrome.\nAvoid other teams."
 	}
 	"train_dboi"
 	{
@@ -199,11 +115,11 @@
 	}
 	"class_chaos"
 	{
-		"en"		"Chaos Insurgency Agent"
+		"en"		"Google Chrome"
 	}
 	"desc_chaos"
 	{
-		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects."
+		"en"		"Help Dboi escape.\nNeutralize other subjects."
 	}
 	"train_chaos"
 	{
@@ -211,11 +127,11 @@
 	}
 	"class_sci"
 	{
-		"en"		"Scientist"
+		"en"		"Hahaha Nerd"
 	}
 	"desc_sci"
 	{
-		"en"		"Escape from the facility.\nCooperate with the MTF.\nAvoid other teams."
+		"en"		"Escape from the facility.\nCooperate with the Firefox.\nAvoid other teams."
 	}
 	"train_sci"
 	{
@@ -223,11 +139,11 @@
 	}
 	"class_guard"
 	{
-		"en"		"Facility Guard"
+		"en"		"Internet Explorer"
 	}
 	"desc_guard"
 	{
-		"en"		"Help Scientists escape.\nCooperate with MTF.\nNeutralize other subjects."
+		"en"		"Help Hahaha Nerd escape.\nCooperate with Firefox.\nNeutralize other subjects."
 	}
 	"train_guard"
 	{
@@ -235,11 +151,11 @@
 	}
 	"class_mtf1"
 	{
-		"en"		"Nine-Tailed Fox Cadet"
+		"en"		"Firefox Pocket"
 	}
 	"desc_mtf1"
 	{
-		"en"		"Help Scientists escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
+		"en"		"Help Hahaha Nerd escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
 	}
 	"train_mtf1"
 	{
@@ -247,11 +163,11 @@
 	}
 	"class_mtf2"
 	{
-		"en"		"Nine-Tailed Fox Lieutenant"
+		"en"		"Firefox Tracking Protection"
 	}
 	"desc_mtf2"
 	{
-		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your superiors."
+		"en"		"Help Hahaha Nerd escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your superiors."
 	}
 	"train_mtf2"
 	{
@@ -259,11 +175,11 @@
 	}
 	"class_mtfs"
 	{
-		"en"		"Nine-Tailed Fox Scientist"
+		"en"		"Firefox Extensions & Plugins"
 	}
 	"desc_mtfs"
 	{
-		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your commanders."
+		"en"		"Help Hahaha Nerd escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your commanders."
 	}
 	"train_mtfs"
 	{
@@ -271,11 +187,11 @@
 	}
 	"class_mtf3"
 	{
-		"en"		"Nine-Tailed Fox Commander"
+		"en"		"Firefox Browser"
 	}
 	"desc_mtf3"
 	{
-		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers."
+		"en"		"Help Hahaha Nerd escape.\nNeutralize other subjects.\nInstruct your soldiers."
 	}
 	"train_mtf3"
 	{
@@ -283,11 +199,11 @@
 	}
 	"class_mtfe"
 	{
-		"en"		"Nine-Tailed Fox Engineer"
+		"en"		"Firefox Themes"
 	}
 	"desc_mtfe"
 	{
-		"en"		"Help Scientists escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
+		"en"		"Help Hahaha Nerd escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
 	}
 	"train_mtfe"
 	{
@@ -295,7 +211,7 @@
 	}
 	"class_scp049"
 	{
-		"en"		"SCP-049"
+		"en"		"The Medic from SCP"
 	}
 	"desc_scp049"
 	{
@@ -307,11 +223,11 @@
 	}
 	"class_scp0492"
 	{
-		"en"		"SCP-049-2"
+		"en"		"fish."
 	}
 	"desc_scp0492"
 	{
-		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nFollow orders from SCP-049"
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nFollow orders from The Medic from SCP"
 	}
 	"train_scp0492"
 	{
@@ -319,7 +235,7 @@
 	}
 	"class_scp076"
 	{
-		"en"		"SCP-076-2"
+		"en"		"Axe Man"
 	}
 	"desc_scp076"
 	{
@@ -331,7 +247,7 @@
 	}
 	"class_scp096"
 	{
-		"en"		"SCP-096"
+		"en"		"WOW MAN WHY DID YOU HAVE TO RDM IT'S NOT LIKE YO"
 	}
 	"desc_scp096"
 	{
@@ -343,7 +259,7 @@
 	}
 	"class_scp106"
 	{
-		"en"		"SCP-106"
+		"en"		"Purple Guy"
 	}
 	"desc_scp106"
 	{
@@ -379,7 +295,7 @@
 	}
 	"class_scp939"
 	{
-		"en"		"SCP-939-89"
+		"en"		"Totally Normal Dog"
 	}
 	"desc_scp939"
 	{
@@ -391,7 +307,7 @@
 	}
 	"class_scp9392"
 	{
-		"en"		"SCP-939-53"
+		"en"		"Totally Normal Puppy"
 	}
 	"desc_scp9392"
 	{
@@ -431,7 +347,11 @@
 	}
 	"desc_sjm08"
 	{
-		"en"		"A tech demo character.\nYour not normally supposed to play this unless forced by an admin."
+		"en"		"Wait how did you get this guy twice he was supposed to be a character in development oh well now you know about a future"
+	}
+	"train_sjm08"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nGo through walls."
 	}
 
 	// Weapon Phrases
@@ -446,7 +366,7 @@
 	}
 	"info_5"
 	{
-		"en"		"It's your fists, they don't do much."
+		"en"		"NANOMACHINES SON THEY HARDEN TO PYHSICAL TRANMAMA"
 	}
 	"weapon_192"
 	{
@@ -454,7 +374,7 @@
 	}
 	"info_192"
 	{
-		"en"		"High damage, slow fire rate."
+		"en"		"You want more damage?"
 	}
 	"weapon_153"
 	{
@@ -462,7 +382,7 @@
 	}
 	"info_152"
 	{
-		"en"		"Great for destorying objects and buildings."
+		"en"		"I heard you like mazes."
 	}
 	"weapon_30758"
 	{
@@ -470,7 +390,7 @@
 	}
 	"info_30758"
 	{
-		"en"		"Able to backstab players."
+		"en"		"Able to backstab players. AND WE MEAN IT."
 	}
 	"weapon_325"
 	{
@@ -478,7 +398,7 @@
 	}
 	"info_325"
 	{
-		"en"		"You won't hurt yourself if you miss though."
+		"en"		"Swing.png"
 	}
 	"weapon_1013"
 	{
@@ -486,7 +406,7 @@
 	}
 	"info_1013"
 	{
-		"en"		"Hope you like increased random crit chance."
+		"en"		"You better hope random crits are enabled here."
 	}
 	"weapon_197"
 	{
@@ -494,7 +414,7 @@
 	}
 	"info_197"
 	{
-		"en"		"Hit a building to repair it or build it up."
+		"en"		"Hit your babies."
 	}
 	"weapon_264"
 	{
@@ -502,7 +422,7 @@
 	}
 	"info_264"
 	{
-		"en"		"They'll hear it coming."
+		"en"		"Hey hey, taunt for a second :)"
 	}
 	"weapon_954"
 	{
@@ -510,7 +430,7 @@
 	}
 	"info_954"
 	{
-		"en"		"Able to disarm players not wielding a weapon, bring disarmed\nplayers to the escape zone to convert them into your team."
+		"en"		"I heard you like hitting SCPs with the disarmer.\nSo I buffed it."
 	}
 	"weapon_773"
 	{
@@ -518,7 +438,7 @@
 	}
 	"info_773"
 	{
-		"en"		"Your handy pocket pistol."
+		"en"		"gun"
 	}
 	"weapon_209"
 	{
@@ -526,7 +446,7 @@
 	}
 	"info_209"
 	{
-		"en"		"Slower but holds more bullets and deals more damage then your average pistol."
+		"en"		"gun 2"
 	}
 	"weapon_751"
 	{
@@ -534,7 +454,7 @@
 	}
 	"info_751"
 	{
-		"en"		"Weaker then the bunch but saves you some bullets when your on a budget."
+		"en"		"DarkRP Junior Mod"
 	}
 	"weapon_1150"
 	{
@@ -542,7 +462,7 @@
 	}
 	"info_1150"
 	{
-		"en"		"Your personal SMG when you need it in a punch."
+		"en"		"More like 90000000000000000000000000000000000000000000000000000000000000000"
 	}
 	"weapon_425"
 	{
@@ -550,7 +470,7 @@
 	}
 	"info_425"
 	{
-		"en"		"The rifle when you want to get rid of some nasty [REDACTED]."
+		"en"		"More like MTF-E11-MR"
 	}
 	"weapon_415"
 	{
@@ -558,7 +478,7 @@
 	}
 	"info_415"
 	{
-		"en"		"Heavy gun to deal high amounts of damage but less effective against SCPs."
+		"en"		"gun 3"
 	}
 	"weapon_1151"
 	{
@@ -566,7 +486,7 @@
 	}
 	"info_1151"
 	{
-		"en"		"No damage but blinds players when it explodes."
+		"en"		"People seeing your plans?\nWith this new flash greande, anybody in a mile radius is now blind."
 	}
 	"weapon_308"
 	{
@@ -574,7 +494,7 @@
 	}
 	"info_308"
 	{
-		"en"		"High damage when it does explode."
+		"en"		"Boom"
 	}
 	"weapon_199"
 	{
@@ -582,7 +502,7 @@
 	}
 	"info_199"
 	{
-		"en"		"Costs 20 bullets to fire 20 bullets, best melee weapon in the game."
+		"en"		"Still the best melee weapon in the game."
 	}
 	"weapon_594"
 	{
@@ -590,7 +510,7 @@
 	}
 	"info_594"
 	{
-		"en"		"Hold to charge up and after 6 seconds, release to fire high-damage beam.\nThe best tool to deal with SCPs and well worth pulling it off."
+		"en"		"Micro broken? Here I fixed it."
 	}
 	"weapon_25"
 	{
@@ -598,7 +518,7 @@
 	}
 	"info_25"
 	{
-		"en"		"Anti-SCP Sentries, Dispensers, Two-Way Teleporters."
+		"en"		"We removed beep boop machines from the game."
 	}
 	"weapon_26"
 	{
@@ -606,7 +526,7 @@
 	}
 	"info_26"
 	{
-		"en"		"You can't pick up buildings but you can use this."
+		"en"		"But you can pick up stuff :)"
 	}
 	"weapon_28"
 	{
@@ -718,7 +638,7 @@
 	}
 	"info_30013"
 	{
-		"en"		"%%+attack%% to use and gain health regeneration."
+		"en"		"Hope you like waiting"
 	}
 	"weapon_30014"
 	{
@@ -726,7 +646,7 @@
 	}
 	"info_30014"
 	{
-		"en"		"%%+attack%% to drop and stand over it to gain back half your max health."
+		"en"		"I kept it ''normal''."
 	}
 	"weapon_30015"
 	{
@@ -734,7 +654,7 @@
 	}
 	"info_30015"
 	{
-		"en"		"%%+attack%% to use and gain unlimited sprint and health regeneration."
+		"en"		"Ok fine you can have the health regen now."
 	}
 	"weapon_30016"
 	{
@@ -742,7 +662,7 @@
 	}
 	"info_30016"
 	{
-		"en"		"This allows you to speak to others at a longer range.\nPressing will toggle it's range and power consumption.\nYou only need to pull it out when you need to change the range."
+		"en"		"Do you even now how to use this?"
 	}
 	"weapon_30017"
 	{
@@ -750,7 +670,7 @@
 	}
 	"info_30017"
 	{
-		"en"		"%%+attack%% to use restore health and gain health regneration."
+		"en"		"If finding stuff I changed was this easy :)"
 	}
 	"weapon_46"
 	{
@@ -758,7 +678,7 @@
 	}
 	"info_46"
 	{
-		"en"		"%%+attack%% to use restore health and increase your movement speed.\nYou passively lose health over time until you take SCP-500."
+		"en"		"I hope you like stacking."
 	}
 	"weapon_30018"
 	{
@@ -766,7 +686,7 @@
 	}
 	"info_30018"
 	{
-		"en"		"%%+attack%% to break down a door in front of you."
+		"en"		"Is it still useless now?"
 	}
 	"weapon_107"
 	{
@@ -774,7 +694,7 @@
 	}
 	"info_107"
 	{
-		"en"		"%%+attack%% to become invisible for 15 seconds."
+		"en"		"I removed the cooldown, try it out."
 	}
 
 
@@ -782,26 +702,26 @@
 
 	"team_0"
 	{
-		"en"		"Stalemate"
+		"en"		"You aren't connected to the Internet"
 	}
 	"team_1"
 	{
-		"en"		"Class-D Won"
+		"en"		"Google Chrome Won"
 	}
 	"team_2"
 	{
-		"en"		"MTF Won"
+		"en"		"Firefox Won"
 	}
 	"team_3"
 	{
-		"en"		"SCPs Won"
+		"en"		"Microsoft Edge Won"
 	}
 
 	// SCP-914 Phrases
 
 	"914_very"
 	{
-		"en"		"Very Fine"
+		"en"		"Supa Fine"
 	}
 	"914_fine"
 	{
@@ -809,7 +729,7 @@
 	}
 	"914_onetoone"
 	{
-		"en"		"1:1"
+		"en"		"2:2"
 	}
 	"914_coarse"
 	{
@@ -817,7 +737,7 @@
 	}
 	"914_rough"
 	{
-		"en"		"Rough"
+		"en"		"Harder"
 	}
 	"in_cooldown"
 	{
@@ -829,7 +749,7 @@
 	}
 	"914_delet"
 	{
-		"en"		"The item vanished!"
+		"en"		"The item was sent to the shadow realm."
 	}
 	"914_gained"
 	{
@@ -854,15 +774,15 @@
 	}
 	"Red"
 	{
-		"en"		"Red"
+		"en"		"Green"
 	}
 	"Green"
 	{
-		"en"		"Green"
+		"en"		"Blue"
 	}
 	"Blue"
 	{
-		"en"		"Blue"
+		"en"		"Red"
 	}
 	"Reset"
 	{
@@ -870,7 +790,7 @@
 	}
 	"Off"
 	{
-		"en"		"Off"
+		"en"		"On"
 	}
 
 
@@ -893,7 +813,7 @@
 	}
 	"mtf_spawn"	// Chat
 	{
-		"en"		"{mediumblue}Mobile Task Force Unit, Epsilon-11{default} has entered the facility."
+		"en"		"{mediumblue}Firefox browser{default} has entered the facility."
 	}
 	"mtf_spawn_scp"	// Chat
 	{
@@ -902,7 +822,7 @@
 	}
 	"mtf_spawn_scp_over"	// Chat
 	{
-		"en"		"Awaiting re-containment of: {red}An uncountable number of SCP subjects{default}."
+		"en"		"Awaiting re-containment of: {red}Your fucked{default}."
 	}
 	"time_remaining"	// Game
 	{
@@ -911,11 +831,11 @@
 	}
 	"inv_full"	// Game
 	{
-		"en"		"Inventory is Full"
+		"en"		"How the hell can you hold this much?"
 	}
 	"type_full"	// Game
 	{
-		"en"		"Too Many Similar Items"
+		"en"		"Stop hogging the keycards"
 	}
 	"disarmed_by"	// HUD
 	{
@@ -924,7 +844,7 @@
 	}
 	"disarmed"	// Game
 	{
-		"en"		"You have been disarmed!"
+		"en"		"You are now a sex slave."
 	}
 	"radar"	// HUD
 	{
@@ -945,24 +865,24 @@
 	}
 	"help_sprint"	// Hint
 	{
-		"en"		"%%+jump%% Press and hold to use sprint"
+		"en"		"%%+reload%% Press and hold to view item descriptions"
 	}
 	"end_screen"	// HUD
 	{
 		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d}"
-		"en"		"{1}\n \nClass-D Escaped: {2} / {3}\nScientist(s) Survived: {4} / {5}\nTerminated SCPs: {6} / {7}"
+		"en"		"{1}\n \nGoogle Chrome Ratings: {2} / {3}\nFirefox Ratings: {4} / {5}\nTerminated Browsers: {6} / {7}"
 	}
 	"tesla_gate"	// Chat
 	{
-		"en"		"Tesla Gate"
+		"en"		"Zap Thingy"
 	}
 	"femur_breaker"	// Chat
 	{
-		"en"		"Femur Breaker"
+		"en"		"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 	}
 	"alpha_warhead"	// Chat
 	{
-		"en"		"Alpha Warhead"
+		"en"		"Boom"
 	}
 	"redacted"	// Chat, Hint
 	{
