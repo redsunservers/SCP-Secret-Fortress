@@ -257,7 +257,7 @@ public void SCP049_OnButton(int client, int button)
 	ang1[1] = fixAngle(ang1[1]);
 	for(int target=1; target<=MaxClients; target++)
 	{
-		if(!IsValidClient(target) || IsFriendly(Client[client].Class, Client[target].Class))
+		if(target==client || !IsValidClient(target) || IsSpec(target) || IsFriendly(Client[client].Class, Client[target].Class))
 			continue;
 
 		static float pos2[3];

@@ -80,7 +80,7 @@ public void SJM08_OnButton(int client, int button)
 	GetClientAbsOrigin(client, pos1);
 	for(int target=1; target<=MaxClients; target++)
 	{
-		if(target==client || !IsValidClient(target) || IsFriendly(Client[client].Class, Client[target].Class))
+		if(target==client || !IsValidClient(target) || IsSpec(target) || IsFriendly(Client[client].Class, Client[target].Class))
 			continue;
 
 		bool inState = StrEqual(Client[target].CurrentSong, Theme);

@@ -44,8 +44,8 @@ void DisplayCredits(int i)
 }
 
 #define MAJOR_REVISION	"2"
-#define MINOR_REVISION	"0"
-#define STABLE_REVISION	"4"
+#define MINOR_REVISION	"1"
+#define STABLE_REVISION	"0"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE	100000000.0
@@ -622,7 +622,8 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 				}
 			}
 
-			for(int i; (ent=Items_Iterator(client, i))!=-1; i++)
+			int i;
+			while((ent=Items_Iterator(client, i, true)) != -1)
 			{
 				if(Items_GetWeaponByIndex(GetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex"), weapon) && weapon.Type==Item_Keycard)
 					TF2_RemoveItem(client, ent);
@@ -764,6 +765,37 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 	{
 		if(Enabled)
 			GiveAchievement(Achievement_SurviveWarhead, 0);
+	}
+	else if(!StrContains(name, "scp_giveitem_", false))
+	{
+		if(IsValidClient(client))
+		{
+			char buffers[4][6];
+			ExplodeString(name, "_", buffers, sizeof(buffers), sizeof(buffers[]));
+			Items_CreateWeapon(client, StringToInt(buffers[2]), _, true, true);
+		}
+	}
+	else if(!StrContains(name, "scp_removeitem_", false))
+	{
+		if(IsValidClient(client))
+		{
+			char buffers[4][6];
+			ExplodeString(name, "_", buffers, sizeof(buffers), sizeof(buffers[]));
+
+			int index = StringToInt(buffers[2]);
+			int active = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+
+			int i, ent;
+			while((ent=Items_Iterator(client, i, true)) != -1)
+			{
+				if(GetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex") == index)
+				{
+					TF2_RemoveItem(client, ent);
+					if(ent == active)
+						Items_SwitchItem(client, ent);
+				}
+			}
+		}
 	}
 	return Plugin_Continue;
 }
@@ -945,7 +977,7 @@ public Action TF2_OnPlayerTeleport(int client, int teleporter, bool &result)
 public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
-	if(!client)
+	if(!client || !IsPlayerAlive(client))
 		return;
 
 	ViewModel_Destroy(client);
@@ -1067,33 +1099,10 @@ public Action OnVoiceMenu(int client, const char[] command, int args)
 	if(!client || !IsClientInGame(client))
 		return Plugin_Continue;
 
-	Client[client].IdleAt = GetEngineTime()+2.5;
-	if(TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode))
-	{
-		int attempts;
-		int i = Client[client].Extra2+1;
-		do
-		{
-			if(IsValidClient(i) && !IsSpec(i))
-			{
-				static float pos[3], ang[3];
-				GetEntPropVector(i, Prop_Send, "m_vecOrigin", pos);
-				GetClientEyeAngles(i, ang);
-				SetEntProp(client, Prop_Send, "m_bDucked", true);
-				SetEntityFlags(client, GetEntityFlags(client)|FL_DUCKING);
-				TeleportEntity(client, pos, ang, TRIPLE_D);
-				Client[client].Extra2 = i;
-				break;
-			}
-			i++;
-			attempts++;
-
-			if(i > MaxClients)
-				i = 1;
-		} while(attempts < MAXTF2PLAYERS);
+	if(Classes_OnVoiceCommand(client))
 		return Plugin_Handled;
-	}
 
+	Client[client].IdleAt = GetEngineTime()+2.5;
 	if(AttemptGrabItem(client))
 		return Plugin_Handled;
 
@@ -1484,6 +1493,11 @@ public Action Command_ForceClass(int client, int args)
 
 		Client[targets[target]].Class = index;
 		TF2_RespawnPlayer(targets[target]);
+
+		for(int i=1; i<=MaxClients; i++)
+		{
+			Client[i].ThinkIsDead[targets[target]] = false;
+		}
 	}
 
 	if(targetNounIsMultiLanguage)
@@ -2221,7 +2235,7 @@ public Action Timer_ConnectPost(Handle timer, int userid)
 
 		static char buffer[PLATFORM_MAX_PATH];
 		float duration = Gamemode_GetMusic(client, song, buffer);
-		ChangeSong(client, duration+GetEngineTime(), buffer);
+		ChangeSong(client, duration+GetEngineTime(), buffer, 1);
 	}
 
 	PrintToConsole(client, " \n \nWelcome to SCP: Secret Fortress\n \nThis is a gamemode based on the SCP series and community\nPlugin is created by Batfoxkid\n ");
@@ -2398,10 +2412,10 @@ bool DisarmCheck(int client)
 bool IsFriendly(int index1, int index2)
 {
 	ClassEnum class1, class2;
-	if(Classes_GetByIndex(index1, class1) && class1.Group>=0
-	&& Classes_GetByIndex(index2, class2) && class2.Group>=0)
+	if(Classes_GetByIndex(index1, class1) && class1.Group!=-1
+	&& Classes_GetByIndex(index2, class2) && class2.Group!=-1)
 	{
-		if(class1.Group != class2.Group)
+		if(class1.Group<0 || class1.Group!=class2.Group)
 			return false;
 	}
 	return true;

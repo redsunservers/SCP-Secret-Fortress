@@ -50,6 +50,7 @@ enum struct ClassEnum
 	Function OnTakeDamage;	// Action(int client, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 	Function OnTheme;		// void(int client, char path[PLATFORM_MAX_PATH])
 	Function OnWeaponSwitch;	// void(int client, int entity)
+	Function OnVoiceCommand;	// bool(int client)
 
 	void SetDefaults()
 	{
@@ -72,6 +73,7 @@ enum struct ClassEnum
 		this.OnTakeDamage = INVALID_FUNCTION;
 		this.OnTheme = INVALID_FUNCTION;
 		this.OnWeaponSwitch = INVALID_FUNCTION;
+		this.OnVoiceCommand = INVALID_FUNCTION;
 	}
 }
 
@@ -170,6 +172,7 @@ static void GrabKvValues(KeyValues kv, ClassEnum class, ClassEnum defaul, int in
 	class.OnTakeDamage = KvGetFunction(kv, "func_takedamage", defaul.OnTakeDamage);
 	class.OnTheme = KvGetFunction(kv, "func_theme", defaul.OnTheme);
 	class.OnWeaponSwitch = KvGetFunction(kv, "func_switch", defaul.OnWeaponSwitch);
+	class.OnVoiceCommand = KvGetFunction(kv, "func_voice", defaul.OnVoiceCommand);
 
 	kv.GetString("spawn", class.Spawn, sizeof(class.Spawn), defaul.Spawn);
 	kv.GetString("color", class.Color, sizeof(class.Color), defaul.Color);
@@ -409,9 +412,14 @@ void Classes_SpawnPoint(int client, int index)
 
 		if(length)
 		{
-			static float pos[3];
-			GetEntPropVector(list.Get(GetRandomInt(0, length-1)), Prop_Send, "m_vecOrigin", pos);
-			TeleportEntity(client, pos, NULL_VECTOR, NULL_VECTOR);
+			entity = list.Get(GetRandomInt(0, length-1));
+
+			static float pos[3], ang[3];
+			GetEntPropVector(entity, Prop_Data, "m_vecAbsOrigin", pos);
+			GetEntPropVector(entity, Prop_Data, "m_vecAbsOrigin", ang);
+			ang[0] = 0.0;
+			ang[2] = 0.0;
+			TeleportEntity(client, pos, ang, NULL_VECTOR);
 		}
 
 		delete list;
@@ -701,6 +709,19 @@ void Classes_OnWeaponSwitch(int client, int entity)
 	Call_PushCell(client);
 	Call_PushCell(entity);
 	Call_Finish();
+}
+
+bool Classes_OnVoiceCommand(int client)
+{
+	bool result;
+	ClassEnum class;
+	if(Classes_GetByIndex(Client[client].Class, class) && class.OnVoiceCommand!=INVALID_FUNCTION)
+	{
+		Call_StartFunction(null, class.OnVoiceCommand);
+		Call_PushCell(client);
+		Call_Finish(result);
+	}
+	return result;
 }
 
 public bool Classes_GhostSpawn(int client)
@@ -1108,6 +1129,9 @@ public bool Classes_PickupStandard(int client, int entity)
 
 public bool Classes_PickupScp(int client, int entity)
 {
+	if(TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode))
+		return false;
+
 	char buffer[64];
 	GetEntityClassname(entity, buffer, sizeof(buffer));
 	if(StrEqual(buffer, "func_button"))
@@ -1151,6 +1175,45 @@ public bool Classes_PickupScp(int client, int entity)
 	return false;
 }
 
+public Action Classes_SoundHuman(int client, char sample[PLATFORM_MAX_PATH], int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
+{
+	if(!StrContains(sample, "vo", false))
+	{
+		if(IsSpec(client))
+			return Plugin_Handled;
+	}
+	else if(StrContains(sample, "step", false) != -1)
+	{
+		if(Client[client].Sprinting)
+		{
+			volume = 1.0;
+			level += 30;
+			return Plugin_Changed;
+		}
+
+		int flag = GetEntityFlags(client);
+		if((flag & FL_DUCKING) && (flag & FL_ONGROUND))
+			return Plugin_Stop;
+	}
+	return Plugin_Continue;
+}
+
+public Action Classes_SoundScp(int client, char sample[PLATFORM_MAX_PATH], int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
+{
+	if(!StrContains(sample, "vo", false))
+	{
+		if(!TF2_IsPlayerInCondition(client, TFCond_Disguised))
+			return Plugin_Handled;
+	}
+	else if(StrContains(sample, "step", false) != -1)
+	{
+		volume = 1.0;
+		level += 30;
+		return Plugin_Changed;
+	}
+	return Plugin_Continue;
+}
+
 public float Classes_SpeedHuman(int client, float &speed)
 {
 	if(Client[client].Extra2)
@@ -1163,7 +1226,80 @@ public float Classes_GhostTheme(int client, char path[PLATFORM_MAX_PATH])
 	return 49.0;
 }
 
+public float Classes_GhostThemeAlt(int client, char path[PLATFORM_MAX_PATH])
+{
+	strcopy(path, PLATFORM_MAX_PATH, "#scp_containmentbreach/music/elevator.mp3");
+	return 84.0;
+}
+
 public bool Classes_GhostDoors(int client, int entity)
 {
 	return false;
+}
+
+public bool Classes_GhostVoice(int client)
+{
+	int attempts;
+	int i = Client[client].Extra2+1;
+	do
+	{
+		if(Client[client].Class!=Client[i].Class && IsValidClient(i) && !IsSpec(i))
+		{
+			static float pos[3], ang[3];
+			GetEntPropVector(i, Prop_Send, "m_vecOrigin", pos);
+			GetClientEyeAngles(i, ang);
+			SetEntProp(client, Prop_Send, "m_bDucked", true);
+			SetEntityFlags(client, GetEntityFlags(client)|FL_DUCKING);
+			TeleportEntity(client, pos, ang, TRIPLE_D);
+			Client[client].Extra2 = i;
+			break;
+		}
+		i++;
+		attempts++;
+
+		if(i > MaxClients)
+			i = 1;
+	} while(attempts < MAXTF2PLAYERS);
+	return true;
+}
+
+public bool Classes_GhostVoiceAlt(int client)
+{
+	if(!TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode))
+	{
+		char buffer[8];
+		GetCmdArgString(buffer, sizeof(buffer));
+		if(StrContains(buffer, "0 0"))
+			return false;
+	}
+
+	int attempts;
+	int i = Client[client].Extra2+1;
+	do
+	{
+		if(Client[client].Class!=Client[i].Class && IsValidClient(i) && !IsSpec(i))
+		{
+			TF2_AddCondition(client, TFCond_HalloweenGhostMode);
+
+			static float pos[3], ang[3];
+			GetEntPropVector(i, Prop_Send, "m_vecOrigin", pos);
+			GetClientEyeAngles(i, ang);
+			SetEntProp(client, Prop_Send, "m_bDucked", true);
+			SetEntityFlags(client, GetEntityFlags(client)|FL_DUCKING);
+			TeleportEntity(client, pos, ang, TRIPLE_D);
+			Client[client].Extra2 = i;
+			break;
+		}
+		i++;
+		attempts++;
+
+		if(i > MaxClients)
+		{
+			Client[client].Extra2 = 0;
+			Classes_SpawnPoint(client, Client[client].Class);
+			TF2_RemoveCondition(client, TFCond_HalloweenGhostMode);
+			break;
+		}
+	} while(attempts < MAXTF2PLAYERS);
+	return true;
 }

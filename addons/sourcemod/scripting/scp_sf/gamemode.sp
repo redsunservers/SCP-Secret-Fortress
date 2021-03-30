@@ -509,6 +509,7 @@ static int PresetToClass(const char[] name, ArrayList current)
 
 static ArrayList DeadPlayersList()
 {
+	int spec = Classes_GetByName("spec");
 	ArrayList list = new ArrayList();
 	for(int client=1; client<=MaxClients; client++)
 	{
@@ -518,7 +519,7 @@ static ArrayList DeadPlayersList()
 		if(!TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode))	// If not a dead ghost
 		{
 			// Check if player is alive or in spectator team
-			if(IsPlayerAlive(client) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
+			if((IsPlayerAlive(client) && spec!=Client[client].Class) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
 				continue;
 		}
 

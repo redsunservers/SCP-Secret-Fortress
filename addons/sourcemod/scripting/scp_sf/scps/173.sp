@@ -52,7 +52,7 @@ public void SCP173_OnButton(int client, int button)
 	int status;
 	for(int target=1; target<=MaxClients; target++)
 	{
-		if(!IsValidClient(target) || IsFriendly(Client[client].Class, Client[target].Class))
+		if(target==client || !IsValidClient(target) || IsSpec(target) || IsFriendly(Client[client].Class, Client[target].Class))
 			continue;
 
 		static float pos2[3], ang2[3], ang3[3];

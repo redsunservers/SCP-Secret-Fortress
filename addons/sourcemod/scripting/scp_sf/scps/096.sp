@@ -280,7 +280,7 @@ public void SCP096_OnButton(int client, int button)
 		bool found;
 		for(int target=1; target<=MaxClients; target++)
 		{
-			if(!IsValidClient(target) || IsFriendly(Client[client].Class, Client[target].Class) || Triggered[target]>1)
+			if(target==client || !IsValidClient(target) || IsSpec(target) || IsFriendly(Client[client].Class, Client[target].Class) || Triggered[target]>1)
 				continue;
 
 			static float pos2[3];

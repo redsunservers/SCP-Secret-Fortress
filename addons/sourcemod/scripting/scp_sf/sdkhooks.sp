@@ -172,24 +172,6 @@ public Action HookSound(int clients[MAXPLAYERS], int &numClients, char sample[PL
 	if(Classes_OnSound(action, entity, sample, channel, volume, level, pitch, flags, soundEntry, seed))
 		return action;
 
-	if(!StrContains(sample, "vo", false))
-	{
-		if(IsSpec(entity) || (IsSCP(entity) && !TF2_IsPlayerInCondition(entity, TFCond_Disguised)))
-			return Plugin_Handled;
-	}
-	else if(StrContains(sample, "step", false) != -1)
-	{
-		if(IsSCP(entity) || Client[entity].Sprinting)
-		{
-			volume = 1.0;
-			level += 30;
-			return Plugin_Changed;
-		}
-
-		int flag = GetEntityFlags(entity);
-		if((flag & FL_DUCKING) && (flag & FL_ONGROUND))
-			return Plugin_Stop;
-	}
 	return Plugin_Continue;
 }
 
