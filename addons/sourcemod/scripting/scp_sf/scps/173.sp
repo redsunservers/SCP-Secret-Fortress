@@ -6,7 +6,7 @@ public bool SCP173_Create(int client)
 
 	Client[client].Extra2 = 0;
 
-	int weapon = SpawnWeapon(client, "tf_weapon_knife", 195, 90, 13, "1 ; 0.05 ; 6 ; 0.01 ; 15 ; 0 ; 138 ; 101 ; 252 ; 0 ; 263 ; 1.15 ; 264 ; 1.15 ; 275 ; 1 ; 362 ; 1 ; 4328 ; 1", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_knife", 331, 90, 13, "1 ; 0.05 ; 6 ; 0.01 ; 15 ; 0 ; 138 ; 101 ; 252 ; 0 ; 263 ; 1.15 ; 264 ; 1.15 ; 275 ; 1 ; 362 ; 1 ; 4328 ; 1", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 17);
