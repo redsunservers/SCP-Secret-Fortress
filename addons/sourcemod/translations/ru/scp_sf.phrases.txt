@@ -1,0 +1,7 @@
+"Phrases"
+{
+	"hint_1"
+	{
+		"ru"		"Merry Happy April Fools"
+	}
+}
