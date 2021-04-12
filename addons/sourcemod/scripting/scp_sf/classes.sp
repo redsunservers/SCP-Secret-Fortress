@@ -1182,12 +1182,12 @@ public Action Classes_SoundHuman(int client, char sample[PLATFORM_MAX_PATH], int
 		if(IsSpec(client))
 			return Plugin_Handled;
 	}
-	else if(StrContains(sample, "step", false) != -1)
+	else if(StrContains(sample, "footsteps", false) != -1)
 	{
 		if(Client[client].Sprinting)
 		{
-			volume = 1.0;
 			level += 30;
+			EmitSoundToAll(sample, client, channel, level, flags, volume, pitch);
 			return Plugin_Changed;
 		}
 
@@ -1205,10 +1205,10 @@ public Action Classes_SoundScp(int client, char sample[PLATFORM_MAX_PATH], int &
 		if(!TF2_IsPlayerInCondition(client, TFCond_Disguised))
 			return Plugin_Handled;
 	}
-	else if(StrContains(sample, "step", false) != -1)
+	else if(StrContains(sample, "footsteps", false) != -1)
 	{
-		volume = 1.0;
 		level += 30;
+		EmitSoundToAll(sample, client, channel, level, flags, volume, pitch);
 		return Plugin_Changed;
 	}
 	return Plugin_Continue;

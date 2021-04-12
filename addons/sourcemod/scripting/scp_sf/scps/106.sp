@@ -230,6 +230,28 @@ public bool SCP106_OnPickup(int client, int entity)
 	return false;
 }
 
+public Action SCP106_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
+{
+	if(!StrContains(sample, "vo", false))
+	{
+		return Plugin_Handled;
+	}
+	else if(StrContains(sample, "footsteps", false) != -1)
+	{
+		level += 30;
+
+		int value = strlen(sample);
+		value = StringToInt(sample[value-5]);
+		if(value<0 || value>4)
+			value = GetRandomInt(1, 4);
+
+		Format(sample, sizeof(sample), "player/footsteps/metalgrate%d.wav", value);
+		EmitSoundToAll(sample, client, channel, level, flags, volume, pitch);
+		return Plugin_Changed;
+	}
+	return Plugin_Continue;
+}
+
 public Action SCP106_TakeDamage(int client, int attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
 	if(Client[client].ChargeIn < GetEngineTime())

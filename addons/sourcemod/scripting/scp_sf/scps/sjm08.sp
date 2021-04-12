@@ -178,7 +178,7 @@ public Action SJM08_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &cha
 		return Plugin_Changed;
 	}
 
-	if(StrContains(sample, "step", false) != -1)
+	if(StrContains(sample, "footsteps", false) != -1)
 		return Plugin_Handled;
 
 	return Plugin_Continue;

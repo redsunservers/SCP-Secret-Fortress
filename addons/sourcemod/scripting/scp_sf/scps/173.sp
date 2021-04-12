@@ -137,3 +137,18 @@ public void SCP173_OnButton(int client, int button)
 		SDKCall_SetSpeed(client);
 	}
 }
+
+public Action SCP173_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
+{
+	if(!StrContains(sample, "vo", false))
+	{
+		return Plugin_Handled;
+	}
+	else if(StrContains(sample, "footsteps", false) != -1)
+	{
+		Format(sample, sizeof(sample), "physics/concrete/concrete_scrape_smooth_loop1.wav");
+		EmitSoundToAll(sample, client, channel, level+30, flags, volume, pitch+10, _, _, _, _, 0.6);
+		return Plugin_Stop;
+	}
+	return Plugin_Continue;
+}

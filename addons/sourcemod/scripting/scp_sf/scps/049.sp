@@ -198,10 +198,10 @@ public Action SCP049_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &ch
 		return Plugin_Handled;
 	}
 
-	if(StrContains(sample, "step", false) != -1)
+	if(StrContains(sample, "footsteps", false) != -1)
 	{
-		volume = 1.0;
 		level += 30;
+		EmitSoundToAll(sample, client, channel, level, flags, volume, pitch);
 		return Plugin_Changed;
 	}
 	return Plugin_Continue;
@@ -230,11 +230,11 @@ public Action SCP0492_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &c
 		return Plugin_Changed;
 	}
 
-	if(StrContains(sample, "step", false) != -1)
+	if(StrContains(sample, "footsteps", false) != -1)
 	{
-		volume = 1.0;
 		level += 30;
 		Format(sample, PLATFORM_MAX_PATH, "npc/zombie/foot%d.wav", GetRandomInt(1, 3));
+		EmitSoundToAll(sample, client, channel, level, flags, volume, pitch);
 		return Plugin_Changed;
 	}
 	return Plugin_Continue;
