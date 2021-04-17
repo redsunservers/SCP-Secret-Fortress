@@ -1010,6 +1010,11 @@ public void Classes_CondSci(int client, TFCond cond)
 	}
 }
 
+public bool Classes_GlowHuman(int client, int victim)
+{
+	return Client[client].Disarmer==victim;
+}
+
 public bool Classes_PickupStandard(int client, int entity)
 {
 	char buffer[64];
@@ -1228,6 +1233,9 @@ public float Classes_GhostTheme(int client, char path[PLATFORM_MAX_PATH])
 
 public float Classes_GhostThemeAlt(int client, char path[PLATFORM_MAX_PATH])
 {
+	if(TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode))
+		return Classes_GhostTheme(client, path);
+
 	strcopy(path, PLATFORM_MAX_PATH, "#scp_containmentbreach/music/elevator.mp3");
 	return 84.0;
 }
@@ -1279,7 +1287,18 @@ public bool Classes_GhostVoiceAlt(int client)
 	{
 		if(Client[client].Class!=Client[i].Class && IsValidClient(i) && !IsSpec(i))
 		{
-			TF2_AddCondition(client, TFCond_HalloweenGhostMode);
+			if(!TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode))
+			{
+				TF2_AddCondition(client, TFCond_HalloweenGhostMode);
+				Client[client].NextSongAt = 0.0;
+
+				int model = PrecacheModel(Client[client].IsVip ? "models/props_halloween/ghost.mdl" : "models/props_halloween/ghost_no_hat.mdl");
+				SetVariantString(Client[client].IsVip ? "models/props_halloween/ghost.mdl" : "models/props_halloween/ghost_no_hat.mdl");
+				AcceptEntityInput(client, "SetCustomModel");
+				SetEntProp(client, Prop_Send, "m_bUseClassAnimations", true);
+				SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", model, _, 0);
+				SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", model, _, 3);
+			}
 
 			static float pos[3], ang[3];
 			GetEntPropVector(i, Prop_Send, "m_vecOrigin", pos);
@@ -1296,8 +1315,8 @@ public bool Classes_GhostVoiceAlt(int client)
 		if(i > MaxClients)
 		{
 			Client[client].Extra2 = 0;
-			Classes_SpawnPoint(client, Client[client].Class);
-			TF2_RemoveCondition(client, TFCond_HalloweenGhostMode);
+			TF2_RespawnPlayer(client);
+			Client[client].NextSongAt = 0.0;
 			break;
 		}
 	} while(attempts < MAXTF2PLAYERS);
