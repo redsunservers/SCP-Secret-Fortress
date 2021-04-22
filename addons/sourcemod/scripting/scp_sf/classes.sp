@@ -9,6 +9,7 @@ enum struct ClassEnum
 	int ModelAlt;
 	bool Human;
 	bool Vip;
+	bool Driver;
 
 	float Speak;
 	float Hear;
@@ -141,6 +142,7 @@ static void GrabKvValues(KeyValues kv, ClassEnum class, ClassEnum defaul, int in
 	class.Regen = view_as<bool>(kv.GetNum("regen", defaul.Regen ? 1 : 0));
 	class.Human = view_as<bool>(kv.GetNum("human", defaul.Human ? 1 : 0));
 	class.Vip = view_as<bool>(kv.GetNum("vip", defaul.Vip ? 1 : 0));
+	class.Driver = view_as<bool>(kv.GetNum("driver", defaul.Driver ? 1 : 0));
 
 	class.Color4 = defaul.Color4;
 	kv.GetColor4("color4", class.Color4);
@@ -1029,6 +1031,10 @@ public bool Classes_PickupStandard(int client, int entity)
 			return true;
 		}
 	}
+	else if(StrEqual(buffer, "prop_vehicle_driveable"))
+	{
+		return true;
+	}
 	else
 	{
 		ClassEnum class;
@@ -1148,6 +1154,10 @@ public bool Classes_PickupScp(int client, int entity)
 			return true;
 		}
 	}
+	else if(StrEqual(buffer, "prop_vehicle_driveable"))
+	{
+		return true;
+	}
 	else
 	{
 		ClassEnum class;
@@ -1245,6 +1255,17 @@ public bool Classes_GhostDoors(int client, int entity)
 	return false;
 }
 
+public bool Classes_DefaultVoice(int client)
+{
+	char buffer[8];
+	GetCmdArgString(buffer, sizeof(buffer));
+	if(StrContains(buffer, "0 0"))
+		return false;
+
+	Client[client].UseBuffer = true;
+	return AttemptGrabItem(client);
+}
+
 public bool Classes_GhostVoice(int client)
 {
 	int attempts;
@@ -1278,7 +1299,10 @@ public bool Classes_GhostVoiceAlt(int client)
 		char buffer[8];
 		GetCmdArgString(buffer, sizeof(buffer));
 		if(StrContains(buffer, "0 0"))
+		{
+			AttemptGrabItem(client);
 			return false;
+		}
 	}
 
 	int attempts;

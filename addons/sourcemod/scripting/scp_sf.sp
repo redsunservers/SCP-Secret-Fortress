@@ -45,7 +45,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"2"
 #define MINOR_REVISION	"1"
-#define STABLE_REVISION	"0"
+#define STABLE_REVISION	"1"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE	100000000.0
@@ -145,6 +145,7 @@ enum struct ClientEnum
 
 	bool HelpSprint;
 	bool HelpSwitch;
+	bool UseBuffer;
 
 	int Extra1;
 	int Extra2;
@@ -207,6 +208,7 @@ ClientEnum Client[MAXTF2PLAYERS];
 #include "scp_sf/scps/096.sp"
 #include "scp_sf/scps/106.sp"
 #include "scp_sf/scps/173.sp"
+#include "scp_sf/scps/457.sp"
 #include "scp_sf/scps/939.sp"
 //#include "scp_sf/scps/sjm08.sp"
 
@@ -1103,9 +1105,6 @@ public Action OnVoiceMenu(int client, const char[] command, int args)
 		return Plugin_Handled;
 
 	Client[client].IdleAt = GetEngineTime()+2.5;
-	if(AttemptGrabItem(client))
-		return Plugin_Handled;
-
 	return Plugin_Continue;
 }
 
@@ -2011,6 +2010,21 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 		}
 	}
 
+	if(class.Driver && !Client[client].Disarmer)
+	{
+		if(Client[client].UseBuffer && !(buttons & IN_USE))
+		{
+			buttons |= IN_USE;
+			changed = true;
+		}
+	}
+	else if(buttons & IN_USE)
+	{
+		buttons &= ~IN_USE;
+		changed = true;
+	}
+
+	Client[client].UseBuffer = false;
 	return changed ? Plugin_Changed : Plugin_Continue;
 }
 

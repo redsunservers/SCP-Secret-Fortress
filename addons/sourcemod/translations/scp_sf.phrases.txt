@@ -377,6 +377,18 @@
 	{
 		"en"		"Your attacks one-shots humans.\nYou can only move for a short time while being looked at.\nTry to time your attacks.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
+	"class_scp457"
+	{
+		"en"		"SCP-457"
+	}
+	"desc_scp457"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs."
+	}
+	"train_scp457"
+	{
+		"en"		"Your attacks sets players on fire.\nYour able to split apart after gaining full health.\nWater hurts you the most.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
 	"class_scp939"
 	{
 		"en"		"SCP-939-89"
@@ -591,6 +603,14 @@
 	"info_594"
 	{
 		"en"		"Hold to charge up and after 6 seconds, release to fire high-damage beam.\nThe best tool to deal with SCPs and well worth pulling it off."
+	}
+	"weapon_205"
+	{
+		"en"		"Rocket Launcher"
+	}
+	"info_205"
+	{
+		"en"		"Launch slow but powerful rockets."
 	}
 	"weapon_25"
 	{

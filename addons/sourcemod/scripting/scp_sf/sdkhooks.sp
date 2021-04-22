@@ -7,6 +7,7 @@ void SDKHook_HookClient(int client)
 {
 	SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+	SDKHook(client, SDKHook_OnTakeDamageAlive, OnTakeDamageAlive);
 	SDKHook(client, SDKHook_SetTransmit, OnTransmit);
 	SDKHook(client, SDKHook_ShouldCollide, OnShouldCollide);
 	SDKHook(client, SDKHook_WeaponSwitchPost, OnWeaponSwitch);
@@ -161,6 +162,14 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	}
 
 	return changed ? Plugin_Changed : Plugin_Continue;
+}
+
+public Action OnTakeDamageAlive(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	if(!(damagetype & DMG_VEHICLE))
+		return Plugin_Continue;
+
+	return OnTakeDamage(victim, attacker, inflictor, damage, damagetype, weapon, damageForce, damagePosition, damagecustom);
 }
 
 public Action HookSound(int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH], int &entity, int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)

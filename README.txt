@@ -11,5 +11,6 @@ Recommended:
 https://github.com/SlidyBat/sendproxy or https://github.com/TheByKotik/sendproxy or https://github.com/arthurdead/sendproxy
 
 Supported:
+https://github.com/Mikusch/tf-vehicles
 https://github.com/sbpp/sourcebans-pp
 https://github.com/Flyflo/SM-Goomba-Stomp
