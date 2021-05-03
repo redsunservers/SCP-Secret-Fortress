@@ -1205,7 +1205,7 @@ stock void EmitSoundToAll2(const char[] sample,
 
 	for (int i=1; i<=MaxClients; i++)
 	{
-		if (IsClientInGame(i) && !Client[client].DownloadMode)
+		if (IsClientInGame(i) && !Client[i].DownloadMode)
 		{
 			clients[total++] = i;
 		}

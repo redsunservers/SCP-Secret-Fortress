@@ -12,7 +12,7 @@ public bool SCP457_Create(int client)
 {
 	Classes_VipSpawn(client);
 
-	int weapon = SpawnWeapon(client, "tf_weapon_fireaxe", 348, 50, 13, "1 ; 0.061538 ; 28 ; 0.5 ; 60 ; 0.3 ; 138 ; 2 ; 208 ; 1 ; 219 ; 1 ; 252 ; 0.65", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_fireaxe", 649, 50, 13, "1 ; 0.061538 ; 28 ; 0.5 ; 60 ; 0.3 ; 138 ; 2.5 ; 208 ; 1 ; 219 ; 1 ; 252 ; 0.65", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 14);
@@ -20,7 +20,6 @@ public bool SCP457_Create(int client)
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 	}
 	
-	Client[client].WeaponClass = TFClass_Pyro;
 	return false;
 }
 
@@ -44,10 +43,11 @@ public void SCP457_OnDeath(int client, Event event)
 
 public void SCP457_OnKill(int client, int victim)
 {
-	int health = GetClientHealth(client)+HealthKill;
-	if(health >= HealthSplit)
+	int health = GetClientHealth(client);
+	int newHealth = health+HealthKill;
+	if(newHealth >= HealthSplit)
 	{
-		health -= 1250;
+		newHealth -= 1250;
 
 		DataPack pack;
 		CreateDataTimer(0.5, SCP457_Timer, pack, TIMER_FLAG_NO_MAPCHANGE);
@@ -55,12 +55,21 @@ public void SCP457_OnKill(int client, int victim)
 		pack.WriteCell(GetClientUserId(victim));
 	}
 
-	SetEntityHealth(client, health);
+	ApplyHealEvent(client, client, newHealth-health);
+	SetEntityHealth(client, newHealth);
 }
 
 public void SCP457_OnMaxHealth(int client, int &health)
 {
 	health = HealthSplit;
+}
+
+public Action SCP457_OnDealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	if(TF2_GetPlayerClass(victim) == TFClass_Pyro)
+		TF2_AddCondition(victim, TFCond_Gas, 3.0, client); 
+
+	return Plugin_Continue;
 }
 
 public Action SCP457_Timer(Handle timer, DataPack pack)

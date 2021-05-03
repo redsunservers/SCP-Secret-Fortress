@@ -233,6 +233,8 @@ public MRESReturn DHook_CalculateMaxSpeedPost(int clientwhen, DHookReturn ret)
 
 		if(TF2_IsPlayerInCondition(client, TFCond_SpeedBuffAlly))
 			speed *= 1.35;
+
+		Items_Speed(client, speed);
 	}
 
 	ret.Value = speed;
@@ -241,9 +243,12 @@ public MRESReturn DHook_CalculateMaxSpeedPost(int clientwhen, DHookReturn ret)
 
 public MRESReturn DHook_GetMaxAmmoPre(int client, DHookReturn ret, DHookParam param)
 {
-	int ammo = Classes_GetMaxAmmo(client, param.Get(1));
+	int type = param.Get(1);
+	int ammo = Classes_GetMaxAmmo(client, type);
 	if(!ammo)
 		return MRES_Ignored;
+
+	Items_Ammo(client, type, ammo);
 
 	ret.Value = ammo;
 	return MRES_Supercede;

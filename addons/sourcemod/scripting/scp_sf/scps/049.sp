@@ -193,7 +193,7 @@ public Action SCP049_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &ch
 
 		for(int i; i<3; i++)
 		{
-			EmitSoundToAll(sample, client, _, level, flags, _, pitch);
+			EmitSoundToAll2(sample, client, _, level, flags, _, pitch);
 		}
 		return Plugin_Handled;
 	}
@@ -440,10 +440,10 @@ public void SCP049_OnRevive(Event event, const char[] name, bool dontBroadcast)
 
 public void SCP049_Think(int client)
 {
+	int entity = EntRefToEntIndex(Revive[client].Index);
 	if(Revive[client].MoveAt < GetEngineTime())
 	{
 		Revive[client].MoveAt = FAR_FUTURE;
-		int entity = EntRefToEntIndex(Revive[client].Index);
 		if(!IsValidMarker(entity)) // Oh fiddlesticks, what now..
 		{
 			SDKUnhook(client, SDKHook_PreThink, SCP049_Think);
@@ -466,12 +466,18 @@ public void SCP049_Think(int client)
 		if(!IsPlayerAlive(client) && GetClientTeam(client)==view_as<int>(TFTeam_Unassigned))
 			ChangeClientTeamEx(client, TFTeam_Red);
 
-		int entity = EntRefToEntIndex(Revive[client].Index);
-		if(!IsValidMarker(entity))
-			return;
+		if(IsValidMarker(entity))
+		{
+			AcceptEntityInput(entity, "Kill");
+			entity = INVALID_ENT_REFERENCE;
+		}
+		return;
+	}
 
-		AcceptEntityInput(entity, "Kill");
-		entity = INVALID_ENT_REFERENCE;
+	if(GetClientTeam(client) != view_as<int>(TFTeam_Unassigned))
+	{
+		ChangeClientTeamEx(client, TFTeam_Unassigned);
+		SetEntProp(entity, Prop_Send, "m_iTeamNum", TFTeam_Unassigned);
 	}
 }
 

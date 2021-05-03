@@ -443,6 +443,18 @@ int Classes_GetMaxAmmo(int client, int type)
 	return 0;
 }
 
+void Classes_GetMaxAmmoList(int client, int ammo[Ammo_MAX])
+{
+	ClassEnum class;
+	if(Classes_GetByIndex(Client[client].Class, class))
+	{
+		for(int i; i<Ammo_MAX; i++)
+		{
+			ammo[i] = class.MaxAmmo[i];
+		}
+	}
+}
+
 int Classes_GetMaxHealth(int client)
 {
 	ClassEnum class;
@@ -830,6 +842,10 @@ public bool Classes_DeathScp(int client, Event event)
 		{
 			CPrintToChatAll("%s%t", PREFIX, "scp_killed", clientClass.Color, clientClass.Display, "gray", "alpha_warhead");
 		}
+		else if(damage & DMG_POISON)
+		{
+			CPrintToChatAll("%s%t", PREFIX, "scp_killed", clientClass.Color, clientClass.Display, "gray", "light_decontamination");
+		}
 		else
 		{
 			CPrintToChatAll("%s%t", PREFIX, "scp_killed", clientClass.Color, clientClass.Display, "black", "redacted");
@@ -938,6 +954,54 @@ public void Classes_CondDBoi(int client, TFCond cond)
 				Gamemode_AddValue("descape");
 				GiveAchievement(Achievement_EscapeDClass, client);
 				index = Classes_GetByName("chaos", class);
+
+				if(Client[client].Extra2)
+					GiveAchievement(Achievement_Escape207, client);
+
+				if(RoundStartAt > engineTime-180.0)
+					GiveAchievement(Achievement_EscapeSpeed, client);
+
+				if(Items_GetItemsOfType(client, Item_SCP) > 1)
+					GiveAchievement(Achievement_FindSCP, client);
+			}
+
+			if(index == -1)
+			{
+				index = 0;
+			}
+			else
+			{
+				Gamemode_GiveTicket(class.Group, 1);
+			}
+
+			Items_DropAllItems(client);
+			Forward_OnEscape(client, Client[client].Disarmer);
+			Client[client].Class = index;
+			TF2_RespawnPlayer(client);
+			CreateTimer(0.3, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
+		}
+	}
+}
+
+public void Classes_CondDBoiAlt(int client, TFCond cond)
+{
+	if(cond == TFCond_TeleportedGlow)
+	{
+		float engineTime = GetEngineTime();
+		if(Client[client].IgnoreTeleFor < engineTime)
+		{
+			int index;
+			ClassEnum class;
+			if(Client[client].Disarmer)
+			{
+				Gamemode_AddValue("dcapture");
+				index = Classes_GetByName("mtf1", class);
+			}
+			else
+			{
+				Gamemode_AddValue("descape");
+				GiveAchievement(Achievement_EscapeDClass, client);
+				index = Classes_GetByName("chaos2", class);
 
 				if(Client[client].Extra2)
 					GiveAchievement(Achievement_Escape207, client);

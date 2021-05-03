@@ -351,7 +351,7 @@ public void SCP096_OnButton(int client, int button)
 			}
 			else if(!Client[client].Pos[0])
 			{
-				EmitSoundToAll(SoundPassive, client, SNDCHAN_VOICE, SNDLEVEL_TRAIN, _, _, _, client);
+				EmitSoundToAll2(SoundPassive, client, SNDCHAN_VOICE, SNDLEVEL_TRAIN, _, _, _, client);
 				Client[client].Pos[0] = 1.0;
 			}
 		}
@@ -396,7 +396,7 @@ static void TriggerShyGuy(int client, int target, bool full)
 			Client[client].Extra2 = 1;
 			Client[client].Disarmer = 1;
 			TF2_StunPlayer(client, RageWarmup-2.0, 0.9, TF_STUNFLAG_BONKSTUCK|TF_STUNFLAG_NOSOUNDOREFFECT);
-			EmitSoundToAll(SoundEnrage, client, SNDCHAN_VOICE, SNDLEVEL_TRAIN, _, _, _, client);
+			EmitSoundToAll2(SoundEnrage, client, SNDCHAN_VOICE, SNDLEVEL_TRAIN, _, _, _, client);
 			if(!full)
 				Config_DoReaction(target, "trigger096");
 		}

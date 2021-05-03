@@ -45,7 +45,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"2"
 #define MINOR_REVISION	"1"
-#define STABLE_REVISION	"1"
+#define STABLE_REVISION	"2"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE	100000000.0
@@ -84,7 +84,8 @@ enum
 	Item_Keycard,
 	Item_Medical,
 	Item_Radio,
-	Item_SCP
+	Item_SCP,
+	Item_Armor
 }
 
 enum
@@ -98,6 +99,8 @@ enum
 	Ammo_5mm,
 	Ammo_Grenade,
 	Ammo_Radio,
+	Ammo_Revolver,
+	Ammo_Shell,
 	Ammo_MAX
 }
 
@@ -1189,7 +1192,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 		for(int target=1; target<=MaxClients; target++)
 		{
 			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target]))
-				CPrintToChat(target, "%s {default}: %s", name, msg);
+				CPrintToChat(target, "%s{default}: %s", name, msg);
 		}
 	}
 	else if(!IsPlayerAlive(client) && GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
@@ -1199,7 +1202,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target] && IsSpec(target)))
 			{
 				Client[target].ThinkIsDead[client] = true;
-				CPrintToChat(target, "*SPEC* %s {default}: %s", name, msg);
+				CPrintToChat(target, "*SPEC* %s{default}: %s", name, msg);
 			}
 		}
 	}
@@ -1208,7 +1211,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 		for(int target=1; target<=MaxClients; target++)
 		{
 			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target] && IsSpec(target)))
-				CPrintToChat(target, "*DEAD* %s {default}: %s", name, msg);
+				CPrintToChat(target, "*DEAD* %s{default}: %s", name, msg);
 		}
 	}
 	else if(Client[client].ComFor > engineTime)
@@ -1218,7 +1221,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target]))
 			{
 				Client[target].ThinkIsDead[client] = false;
-				CPrintToChat(target, "*COMM* %s {default}: %s", name, msg);
+				CPrintToChat(target, "*COMM* %s{default}: %s", name, msg);
 			}
 		}
 	}
@@ -1248,7 +1251,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 				{
 					if(!class.Human && IsFriendly(Client[client].Class, Client[target].Class))
 					{
-						CPrintToChat(target, "(%t) %s {default}: %s", class.Display, name, msg);
+						CPrintToChat(target, "(%t) %s{default}: %s", class.Display, name, msg);
 						continue;
 					}
 
@@ -1258,7 +1261,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 						GetEntPropVector(target, Prop_Send, "m_vecOrigin", targetPos);
 						if(GetVectorDistance(clientPos, targetPos) > 400)
 						{
-							CPrintToChat(target, "*RADIO* %s {default}: %s", name, msg);
+							CPrintToChat(target, "*RADIO* %s{default}: %s", name, msg);
 							continue;
 						}
 					}
@@ -1266,11 +1269,11 @@ public Action OnSayCommand(int client, const char[] command, int args)
 			}
 			else if(!class.Human)
 			{
-				CPrintToChat(target, "(%t) %s {default}: %s", class.Display, name, msg);
+				CPrintToChat(target, "(%t) %s{default}: %s", class.Display, name, msg);
 				continue;
 			}
 
-			CPrintToChat(target, "%s {default}: %s", name, msg);
+			CPrintToChat(target, "%s{default}: %s", name, msg);
 		}
 	}
 	return Plugin_Handled;
@@ -1469,8 +1472,23 @@ public Action Command_ForceClass(int client, int args)
 
 	if(!found)
 	{
-		ReplyToCommand(client, "[SM] Invalid class string");
-		return Plugin_Handled;
+		index = 0;
+		while(Classes_GetByIndex(index, class))
+		{
+			if(StrContains(class.Name, pattern, false) != -1)
+			{
+				found = true;
+				break;
+			}
+
+			index++;
+		}
+
+		if(!found)
+		{
+			ReplyToCommand(client, "[SM] Invalid class string");
+			return Plugin_Handled;
+		}
 	}
 
 	int targets[MAXPLAYERS], matches;
@@ -2012,7 +2030,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 
 	if(class.Driver && !Client[client].Disarmer)
 	{
-		if(Client[client].UseBuffer && !(buttons & IN_USE))
+		if(Client[client].UseBuffer)
 		{
 			buttons |= IN_USE;
 			changed = true;

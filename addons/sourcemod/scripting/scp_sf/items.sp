@@ -4,7 +4,8 @@ static const int ItemLimits[] =
 	3,	// Keycards
 	3,	// Medical
 	1,	// Radio
-	3	// SCPs
+	3,	// SCPs
+	1	// Armor
 };
 
 enum struct WeaponEnum
@@ -36,12 +37,14 @@ enum struct WeaponEnum
 	int Viewmodel;
 	int Skin;
 
+	Function OnAmmo;		// void(int client, int type, int &ammo)
 	Function OnButton;	// Action(int client, int weapon, int &buttons, int &holding)
 	Function OnCard;		// int(int client, AccessEnum access)
 	Function OnCreate;	// void(int client, int weapon)
 	Function OnDamage;	// Action(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 	Function OnDrop;		// bool(int client, int weapon, bool swap)
 	Function OnRadio;		// int(int client, int weapon)
+	Function OnSpeed;		// void(int client, float &speed)
 }
 
 static ArrayList Weapons;
@@ -86,12 +89,14 @@ void Items_Setup(KeyValues main, KeyValues map)
 
 		weapon.Class = KvGetClass(kv, "class");
 
+		weapon.OnAmmo = KvGetFunction(kv, "func_ammo");
 		weapon.OnButton = KvGetFunction(kv, "func_button");
 		weapon.OnCard = KvGetFunction(kv, "func_card");
 		weapon.OnCreate = KvGetFunction(kv, "func_create");
 		weapon.OnDamage = KvGetFunction(kv, "func_damage");
 		weapon.OnDrop = KvGetFunction(kv, "func_drop");
 		weapon.OnRadio = KvGetFunction(kv, "func_radio");
+		weapon.OnSpeed = KvGetFunction(kv, "func_speed");
 
 		kv.GetString("classname", weapon.Classname, sizeof(weapon.Classname));
 		kv.GetString("attributes", weapon.Attributes, sizeof(weapon.Attributes));
@@ -379,6 +384,7 @@ int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, 
 						ammos[weapon.Bullet] += count;
 
 						count = Classes_GetMaxAmmo(client, weapon.Bullet);
+						Items_Ammo(client, weapon.Bullet, count);
 						if(ammos[weapon.Bullet] > count)
 							ammos[weapon.Bullet] = count;
 
@@ -402,6 +408,7 @@ int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, 
 						count = weapon.Ammo+GetAmmo(client, weapon.Bullet);
 
 						i = Classes_GetMaxAmmo(client, weapon.Bullet);
+						Items_Ammo(client, weapon.Bullet, i);
 						if(count > i)
 							count = i;
 
@@ -586,6 +593,7 @@ bool Items_DropItem(int client, int helditem, const float origin[3], const float
 			ammo = GetAmmo(client, type);
 			int clip = GetEntProp(helditem, Prop_Data, "m_iClip1");
 			int max = Classes_GetMaxAmmo(client, type);
+			Items_Ammo(client, type, max);
 
 			if(ammo > max)
 			{
@@ -819,6 +827,39 @@ float Items_Radio(int client)
 	return distance;
 }
 
+void Items_Ammo(int client, int type, int &ammo)
+{
+	int i, entity;
+	WeaponEnum weapon;
+	while((entity=Items_Iterator(client, i, true)) != -1)
+	{
+		if(!Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) || weapon.OnAmmo==INVALID_FUNCTION)
+			continue;
+
+		Call_StartFunction(null, weapon.OnAmmo);
+		Call_PushCell(client);
+		Call_PushCell(type);
+		Call_PushCellRef(ammo);
+		Call_Finish();
+	}
+}
+
+void Items_Speed(int client, float &speed)
+{
+	int i, entity;
+	WeaponEnum weapon;
+	while((entity=Items_Iterator(client, i, true)) != -1)
+	{
+		if(!Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) || weapon.OnSpeed==INVALID_FUNCTION)
+			continue;
+
+		Call_StartFunction(null, weapon.OnSpeed);
+		Call_PushCell(client);
+		Call_PushFloatRef(speed);
+		Call_Finish();
+	}
+}
+
 int Items_GetTranName(int index, char[] buffer, int length)
 {
 	WeaponEnum weapon;
@@ -918,6 +959,21 @@ public bool Items_RadioDrop(int client, int weapon, bool &swap)
 		Items_SwitchItem(client, weapon);
 
 	swap = false;
+	return true;
+}
+
+public bool Items_ArmorDrop(int client, int weapon, bool &swap)
+{
+	int ammo[Ammo_MAX];
+	Classes_GetMaxAmmoList(client, ammo);
+
+	for(int i; i<Ammo_MAX; i++)
+	{
+		if(ammo[i] && GetEntProp(client, Prop_Data, "m_iAmmo", _, i)>ammo[i])
+		{
+			SetEntProp(client, Prop_Data, "m_iAmmo", ammo[i], _, i);
+		}
+	}
 	return true;
 }
 
@@ -1321,6 +1377,66 @@ public bool Items_RadioRadio(int client, int entity, float &multi)
 		}
 	}
 	return !off;
+}
+
+public void Items_GuardSpeed(int client, float &speed)
+{
+	speed *= 0.96;
+}
+
+public void Items_CombatSpeed(int client, float &speed)
+{
+	speed *= 0.92;
+}
+
+public void Items_HeavySpeed(int client, float &speed)
+{
+	speed *= 0.88;
+}
+
+public void Items_GuardAmmo(int client, int type, int &ammo)
+{
+	switch(type)
+	{
+		case 2, 6, 7, 10:
+		{
+			ammo = RoundFloat(ammo*1.5);
+		}
+		case 8:
+		{
+			ammo++;
+		}
+	}
+}
+
+public void Items_CombatAmmo(int client, int type, int &ammo)
+{
+	switch(type)
+	{
+		case 2, 6, 7, 10, 11:
+		{
+			ammo *= 2;
+		}
+		case 8:
+		{
+			ammo += 2;
+		}
+	}
+}
+
+public void Items_HeavyAmmo(int client, int type, int &ammo)
+{
+	switch(type)
+	{
+		case 2, 6, 7, 10, 11:
+		{
+			ammo *= 3;
+		}
+		case 8:
+		{
+			ammo += 3;
+		}
+	}
 }
 
 public int Items_KeycardJan(int client, AccessEnum access)

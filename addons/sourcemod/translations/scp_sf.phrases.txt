@@ -209,6 +209,42 @@
 	{
 		"en"		"You need to free Class-D Personnel from the facility.\nKill other teams to help Class-D Personnel escape.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
+	"class_chaos1"
+	{
+		"en"		"Chaos Insurgency Agent"
+	}
+	"desc_chaos1"
+	{
+		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects.\nYour equipped with a AK-12"
+	}
+	"train_chaos1"
+	{
+		"en"		"You need to free Class-D Personnel from the facility.\nKill other teams to help Class-D Personnel escape.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
+	}
+	"class_chaos2"
+	{
+		"en"		"Chaos Insurgency Agent"
+	}
+	"desc_chaos2"
+	{
+		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects.\nYour equipped with a Shotgun and Revolver"
+	}
+	"train_chaos2"
+	{
+		"en"		"You need to free Class-D Personnel from the facility.\nKill other teams to help Class-D Personnel escape.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
+	}
+	"class_chaos3"
+	{
+		"en"		"Chaos Insurgency Agent"
+	}
+	"desc_chaos3"
+	{
+		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects.\nYour equipped with a Logicer"
+	}
+	"train_chaos3"
+	{
+		"en"		"You need to free Class-D Personnel from the facility.\nKill other teams to help Class-D Personnel escape.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
+	}
 	"class_sci"
 	{
 		"en"		"Scientist"
@@ -323,11 +359,11 @@
 	}
 	"desc_scp076"
 	{
-		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nGain 4 heads to enter rage."
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nGain 5 heads to enter rage."
 	}
 	"train_scp076"
 	{
-		"en"		"Your main goal is too kill any Guards, MTF, or Chaos.\nOnce you gain 4 heads you enter a rage state.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+		"en"		"Your main goal is too kill any Guards, MTF, or Chaos.\nOnce you gain 5 heads you enter a rage state.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
 	"class_scp096"
 	{
@@ -383,7 +419,7 @@
 	}
 	"desc_scp457"
 	{
-		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs."
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nKill players to maintain your fire."
 	}
 	"train_scp457"
 	{
@@ -556,6 +592,14 @@
 	{
 		"en"		"Your personal SMG when you need it in a punch."
 	}
+	"weapon_203"
+	{
+		"en"		"Crossvec"
+	}
+	"info_203"
+	{
+		"en"		"Your personal rifle when you need it in a punch."
+	}
 	"weapon_425"
 	{
 		"en"		"MTF-E11-SR"
@@ -571,6 +615,30 @@
 	"info_415"
 	{
 		"en"		"Heavy gun to deal high amounts of damage but less effective against SCPs."
+	}
+	"weapon_1153"
+	{
+		"en"		"AK-12"
+	}
+	"info_1153"
+	{
+		"en"		"The anti-human rifle when you need to save some orange jumpsuit kids."
+	}
+	"weapon_199"
+	{
+		"en"		"Shotgun"
+	}
+	"info_199"
+	{
+		"en"		"The best melee weapon in the game."
+	}
+	"weapon_61"
+	{
+		"en"		"Revolver"
+	}
+	"info_61"
+	{
+		"en"		"For when you need the distance and the precision."
 	}
 	"weapon_1151"
 	{
@@ -588,14 +656,6 @@
 	{
 		"en"		"High damage when it does explode."
 	}
-	"weapon_199"
-	{
-		"en"		"M97"
-	}
-	"info_199"
-	{
-		"en"		"Costs 20 bullets to fire 20 bullets, best melee weapon in the game."
-	}
 	"weapon_594"
 	{
 		"en"		"Micro H.I.D."
@@ -606,7 +666,7 @@
 	}
 	"weapon_205"
 	{
-		"en"		"Rocket Launcher"
+		"en"		"Smoothy Maker"
 	}
 	"info_205"
 	{
@@ -796,6 +856,30 @@
 	{
 		"en"		"%%+attack%% to become invisible for 15 seconds."
 	}
+	"weapon_30019"
+	{
+		"en"		"Guard Armor"
+	}
+	"info_30019"
+	{
+		"en"		"1.16x damage resistance, 1.5x ammo capacity, 0.96x movement speed"
+	}
+	"weapon_30020"
+	{
+		"en"		"Combat Armor"
+	}
+	"info_30020"
+	{
+		"en"		"1.26x damage resistance, 2x ammo capacity, 0.92x movement speed"
+	}
+	"weapon_30021"
+	{
+		"en"		"Heavy Armor"
+	}
+	"info_30021"
+	{
+		"en"		"1.32x damage resistance, 3x ammo capacity, 0.88x movement speed"
+	}
 
 
 	// Team Phrases
@@ -983,6 +1067,10 @@
 	"alpha_warhead"	// Chat
 	{
 		"en"		"Alpha Warhead"
+	}
+	"light_decontamination"	// Chat
+	{
+		"en"		"Light Decontamination"
 	}
 	"redacted"	// Chat, Hint
 	{

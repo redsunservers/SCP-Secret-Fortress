@@ -173,9 +173,9 @@ public Action SJM08_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &cha
 	if(!StrContains(sample, "vo", false))
 	{
 		Format(sample, PLATFORM_MAX_PATH, "scp_sf/sjm08/voice%d.mp3", GetRandomInt(1, 4));
-		EmitSoundToAll(sample, client, channel, level, flags, volume);
-		EmitSoundToAll(sample, client, channel, level, flags, volume);
-		return Plugin_Changed;
+		EmitSoundToAll2(sample, client, channel, level, flags, volume);
+		EmitSoundToAll2(sample, client, channel, level, flags, volume);
+		return Plugin_Handled;
 	}
 
 	if(StrContains(sample, "footsteps", false) != -1)

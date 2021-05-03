@@ -7,7 +7,7 @@ public bool SCP939_Create(int client)
 
 	int account = GetSteamAccountID(client, false);
 
-	int weapon = SpawnWeapon(client, "tf_weapon_knife", 461, 70, 13, "2 ; 1.625 ; 15 ; 0 ; 35 ; 2.5 ; 252 ; 0.3 ; 4328 ; 1", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_knife", 461, 70, 13, "2 ; 1.625 ; 15 ; 0 ; 252 ; 0.3 ; 4328 ; 1", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 10);
@@ -15,7 +15,7 @@ public bool SCP939_Create(int client)
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 	}
 
-	weapon = SpawnWeapon(client, "tf_weapon_pda_spy", 27, 70, 13, "816 ; 1", false);
+	weapon = SpawnWeapon(client, "tf_weapon_pda_spy", 27, 70, 13, "", false);
 	if(weapon > MaxClients)
 	{
 		TF2Attrib_SetByDefIndex(weapon, 214, view_as<float>(GetRandomInt(250, 374))); // Sharp
