@@ -1076,6 +1076,51 @@ public void Classes_CondSci(int client, TFCond cond)
 	}
 }
 
+public void Classes_CondSciAlt(int client, TFCond cond)
+{
+	if(cond == TFCond_TeleportedGlow)
+	{
+		float engineTime = GetEngineTime();
+		if(Client[client].IgnoreTeleFor < engineTime)
+		{
+			int index;
+			ClassEnum class;
+			if(Client[client].Disarmer)
+			{
+				Gamemode_AddValue("scapture");
+				index = Classes_GetByName("chaos1", class);
+			}
+			else
+			{
+				Gamemode_AddValue("sescape");
+				GiveAchievement(Achievement_EscapeDClass, client);
+				index = Classes_GetByName("mtfs", class);
+
+				if(Client[client].Extra2)
+					GiveAchievement(Achievement_Escape207, client);
+
+				if(RoundStartAt > engineTime-180.0)
+					GiveAchievement(Achievement_EscapeSpeed, client);
+			}
+
+			if(index == -1)
+			{
+				index = 0;
+			}
+			else
+			{
+				Gamemode_GiveTicket(class.Group, Client[client].Disarmer ? 2 : 1);
+			}
+
+			Items_DropAllItems(client);
+			Forward_OnEscape(client, Client[client].Disarmer);
+			Client[client].Class = index;
+			TF2_RespawnPlayer(client);
+			CreateTimer(0.3, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
+		}
+	}
+}
+
 public bool Classes_GlowHuman(int client, int victim)
 {
 	return Client[client].Disarmer==victim;
@@ -1113,7 +1158,7 @@ public bool Classes_PickupStandard(int client, int entity)
 				}
 				return true;
 			}
-			else if(!StrContains(buffer, "prop_dynamic"))
+			else if(!StrContains(buffer, "prop_dynamic") || !StrContains(buffer, "prop_physics"))
 			{
 				GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
 				if(!StrContains(buffer, "scp_keycard_", false))	// Backwards compatibility

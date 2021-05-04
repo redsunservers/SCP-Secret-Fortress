@@ -45,7 +45,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"2"
 #define MINOR_REVISION	"1"
-#define STABLE_REVISION	"2"
+#define STABLE_REVISION	"3"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE	100000000.0
@@ -1101,7 +1101,7 @@ public Action OnJoinTeam(int client, const char[] command, int args)
 
 public Action OnVoiceMenu(int client, const char[] command, int args)
 {
-	if(!client || !IsClientInGame(client))
+	if(!client || !IsClientInGame(client) || !IsPlayerAlive(client))
 		return Plugin_Continue;
 
 	if(Classes_OnVoiceCommand(client))

@@ -9,7 +9,7 @@ public bool SCP076_Create(int client)
 
 	Client[client].Extra2 = 0;
 
-	int weapon = SpawnWeapon(client, "tf_weapon_sword", 195, 1, 13, "2 ; 1.5 ; 28 ; 0.5 ; 219 ; 1 ; 252 ; 0.8", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_sword", 1, 1, 13, "2 ; 1.5 ; 28 ; 0.5 ; 219 ; 1 ; 252 ; 0.8", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 11);
@@ -41,7 +41,7 @@ public void SCP076_OnKill(int client, int victim)
 		TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 		SetEntityHealth(client, GetClientHealth(client)+HealthRage);
 
-		int weapon = SpawnWeapon(client, "tf_weapon_sword", 266, 90, 13, "2 ; 11 ; 5 ; 1.15 ; 252 ; 0 ; 326 ; 1.67", true, true);
+		int weapon = SpawnWeapon(client, "tf_weapon_sword", 266, 90, 13, "2 ; 11 ; 5 ; 1.15 ; 252 ; 0 ; 326 ; 1.67", 2, true);
 		if(weapon > MaxClients)
 		{
 			ApplyStrangeRank(weapon, 18);
