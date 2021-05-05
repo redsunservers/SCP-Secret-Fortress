@@ -24,24 +24,27 @@ void ConVar_Setup()
 	CvarChatHook.AddChangeHook(ConVar_OnChatHook);
 	CvarVoiceHook.AddChangeHook(ConVar_OnVoiceHook);
 
+	FindConVar("mp_bonusroundtime").SetBounds(ConVarBound_Upper, true, 20.0);
+
 	if(CvarList != INVALID_HANDLE)
 		delete CvarList;
 
 	CvarList = new ArrayList(sizeof(CvarInfo));
 
 	ConVar_Add("mp_autoteambalance", 0.0);
-	ConVar_Add("mp_bonusroundtime", 15.0, false);
+	ConVar_Add("mp_bonusroundtime", 20.0, false);
 	ConVar_Add("mp_disable_respawn_times", 1.0);
 	ConVar_Add("mp_forcecamera", 0.0, false);
 	ConVar_Add("mp_friendlyfire", 1.0);
 	ConVar_Add("mp_teams_unbalance_limit", 0.0);
+	ConVar_Add("mp_scrambleteams_auto", 0.0);
 	ConVar_Add("mp_waitingforplayers_time", 70.0);
 	ConVar_Add("tf_bot_join_after_player", 0.0, false);
 	ConVar_Add("tf_dropped_weapon_lifetime", 99999.0);
 	ConVar_Add("tf_ghost_xy_speed", 400.0, false);
 	ConVar_Add("tf_helpme_range", -1.0);
 	ConVar_Add("tf_spawn_glows_duration", 0.0);
-	ConVar_Add("tf_weapon_criticals_distance_falloff", 0.0);
+	ConVar_Add("tf_weapon_criticals_distance_falloff", 1.0);
 }
 
 void ConVar_Add(const char[] name, float value, bool enforce=true)

@@ -662,7 +662,7 @@ public bool Gamemode_ConditionClassic(TFTeam &team)
 
 	char buffer[16];
 	FormatEx(buffer, sizeof(buffer), "team_%d", group);
-	SetHudTextParamsEx(-1.0, 0.3, 13.0, TeamColors[group], {255, 255, 255, 255}, 1, 2.0, 1.0, 1.0);
+	SetHudTextParamsEx(-1.0, 0.3, 17.5, TeamColors[group], {255, 255, 255, 255}, 1, 2.0, 1.0, 1.0);
 	for(int client=1; client<=MaxClients; client++)
 	{
 		if(!IsValidClient(client))
@@ -731,7 +731,7 @@ public bool Gamemode_ConditionVip(TFTeam &team)
 
 	char buffer[16];
 	FormatEx(buffer, sizeof(buffer), "team_%d", group);
-	SetHudTextParamsEx(-1.0, 0.3, 13.0, TeamColors[group], {255, 255, 255, 255}, 1, 2.0, 1.0, 1.0);
+	SetHudTextParamsEx(-1.0, 0.3, 17.5, TeamColors[group], {255, 255, 255, 255}, 1, 2.0, 1.0, 1.0);
 	for(int client=1; client<=MaxClients; client++)
 	{
 		if(!IsValidClient(client))

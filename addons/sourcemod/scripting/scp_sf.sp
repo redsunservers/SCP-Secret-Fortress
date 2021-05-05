@@ -45,7 +45,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"2"
 #define MINOR_REVISION	"1"
-#define STABLE_REVISION	"3"
+#define STABLE_REVISION	"4"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE	100000000.0
@@ -274,6 +274,7 @@ public void OnPluginStart()
 
 	RegAdminCmd("scp_forceclass", Command_ForceClass, ADMFLAG_SLAY, "Usage: scp_forceclass <target> <class>.  Forces that class to be played.");
 	RegAdminCmd("scp_giveitem", Command_ForceItem, ADMFLAG_SLAY, "Usage: scp_giveitem <target> <index>.  Gives a specific item.");
+	RegAdminCmd("scp_giveammo", Command_ForceAmmo, ADMFLAG_SLAY, "Usage: scp_giveammo <target> <type>.  Gives a specific ammo.");
 
 	AddCommandListener(OnBlockCommand, "explode");
 	AddCommandListener(OnBlockCommand, "kill");
@@ -1574,6 +1575,60 @@ public Action Command_ForceItem(int client, int args)
 	else
 	{
 		CShowActivity2(client, PREFIX, "Gave %t to %s", pattern, targetName);
+	}
+	return Plugin_Handled;
+}
+
+public Action Command_ForceAmmo(int client, int args)
+{
+	if(args < 2)
+	{
+		ReplyToCommand(client, "[SM] Usage: scp_giveammo <target> <type> [amount]");
+		return Plugin_Handled;
+	}
+
+	static char targetName[MAX_TARGET_LENGTH];
+	GetCmdArg(2, targetName, sizeof(targetName));
+	int type = StringToInt(targetName);
+	if(type<1 || type>=Ammo_MAX)
+	{
+		ReplyToCommand(client, "[SM] Invalid weapon index");
+		return Plugin_Handled;
+	}
+
+	int amount = 999999;
+	if(args > 2)
+	{
+		GetCmdArg(3, targetName, sizeof(targetName));
+		amount = StringToInt(targetName);
+	}
+
+	static char pattern[PLATFORM_MAX_PATH];
+	GetCmdArg(1, pattern, sizeof(pattern));
+
+	int targets[MAXPLAYERS], matches;
+	bool targetNounIsMultiLanguage;
+	if((matches=ProcessTargetString(pattern, client, targets, sizeof(targets), 0, targetName, sizeof(targetName), targetNounIsMultiLanguage)) < 1)
+	{
+		ReplyToTargetError(client, matches);
+		return Plugin_Handled;
+	}
+
+	NoAchieve = true;
+
+	for(int target; target<matches; target++)
+	{
+		if(!IsClientSourceTV(targets[target]) && !IsClientReplay(targets[target]))
+			SetAmmo(targets[target], GetAmmo(targets[target], type)+amount, type);
+	}
+
+	if(targetNounIsMultiLanguage)
+	{
+		CShowActivity2(client, PREFIX, "Gave %d ammo of %d to %t", amount, type, targetName);
+	}
+	else
+	{
+		CShowActivity2(client, PREFIX, "Gave %d ammo of %d to %s", amount, type, targetName);
 	}
 	return Plugin_Handled;
 }
