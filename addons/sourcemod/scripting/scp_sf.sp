@@ -45,7 +45,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"2"
 #define MINOR_REVISION	"1"
-#define STABLE_REVISION	"4"
+#define STABLE_REVISION	"5"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE	100000000.0
@@ -214,6 +214,9 @@ ClientEnum Client[MAXTF2PLAYERS];
 #include "scp_sf/scps/457.sp"
 #include "scp_sf/scps/939.sp"
 //#include "scp_sf/scps/sjm08.sp"
+
+#include "scp_sf/maps/frostbite.sp"
+#include "scp_sf/maps/ikea.sp"
 
 // SourceMod Events
 

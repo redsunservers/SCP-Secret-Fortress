@@ -1178,12 +1178,9 @@ void ApplyHealEvent(int patient, int healer, int amount)
 void EndRound(any team)
 {
 	int entity = CreateEntityByName("game_round_win"); 
+	DispatchKeyValue(entity, "force_map_reset", "1");
+	SetEntProp(entity, Prop_Data, "m_iTeamNum", team);
 	DispatchSpawn(entity);
-
-	SetVariantString("force_map_reset 1");
-	AcceptEntityInput(entity, "AddOutput");
-	SetVariantInt(team);
-	AcceptEntityInput(entity, "SetTeam");
 	AcceptEntityInput(entity, "RoundWin");
 }
 

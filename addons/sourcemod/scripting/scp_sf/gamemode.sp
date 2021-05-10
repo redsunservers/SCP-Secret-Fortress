@@ -44,6 +44,7 @@ static int TeamColors[][] =
 
 static Handle WaveTimer;
 static Function GameCondition;
+static Function GameRoundStart;
 static StringMap GameInfo;
 
 static ArrayList Presets;
@@ -96,6 +97,7 @@ ArrayList Gamemode_Setup(KeyValues main, KeyValues map)
 	}
 
 	GameCondition = KvGetFunction(kv, "wincondition");
+	GameRoundStart = KvGetFunction(kv, "roundstart");
 	if(kv.GetNum("noachieve"))
 		CvarAchievement.BoolValue = false;
 
@@ -262,6 +264,12 @@ bool Gamemode_RoundStart()
 {
 	GameInfo = new StringMap();
 
+	if(GameRoundStart != INVALID_FUNCTION)
+	{
+		Call_StartFunction(null, GameRoundStart);
+		Call_Finish();
+	}
+
 	ArrayList players = new ArrayList();
 	for(int client; client<MAXTF2PLAYERS; client++)
 	{
@@ -284,7 +292,7 @@ bool Gamemode_RoundStart()
 	}
 
 	players.Sort(Sort_Random, Sort_Integer);
-	ArrayList classes = MakeClassList(SetupList, length);
+	ArrayList classes = Gamemode_MakeClassList(SetupList, length);
 	int length2 = classes.Length;
 	if(length > length2)
 		length = length2;
@@ -417,14 +425,19 @@ float Gamemode_GetMusic(int client, int floor, char path[PLATFORM_MAX_PATH])
 	return MusicFloors[floor].Time;
 }
 
-void Gamemode_AddValue(const char[] value)
+void Gamemode_AddValue(const char[] key, int amount=1)
 {
 	if(GameInfo)
 	{
-		int amount;
-		GameInfo.GetValue(value, amount);
-		GameInfo.SetValue(value, amount+1);
+		int value;
+		GameInfo.GetValue(key, value);
+		GameInfo.SetValue(key, value+amount);
 	}
+}
+
+bool Gamemode_GetValue(const char[] key, int &value)
+{
+	return GameInfo.GetValue(key, value);
 }
 
 void Gamemode_GiveTicket(int group, int amount)
@@ -442,23 +455,27 @@ void Gamemode_GiveTicket(int group, int amount)
 	}
 }
 
-static ArrayList GrabClassList(KeyValues kv)
+void Gamemode_GetWaveTimes(float &min, float &max)
 {
-	char buffer[16];
-	ArrayList list = new ArrayList(16);
-	for(int i=1; ; i++)
-	{
-		IntToString(i, buffer, sizeof(buffer));
-		kv.GetString(buffer, buffer, sizeof(buffer));
-		if(!buffer[0])
-			break;
-
-		list.PushString(buffer);
-	}
-	return list;
+	min = WaveTimes[0];
+	max = WaveTimes[1];
 }
 
-static ArrayList MakeClassList(ArrayList classes, int max)
+bool Gamemode_GetWave(int index, WaveEnum wave)
+{
+	if(index<0 || index>=WaveList.Length)
+		return false;
+
+	WaveList.GetArray(index, wave);
+	return true;
+}
+
+stock void Gamemode_SetWave(int index, WaveEnum wave)
+{
+	WaveList.SetArray(index, wave);
+}
+
+ArrayList Gamemode_MakeClassList(ArrayList classes, int max)
 {
 	ArrayList list = new ArrayList();
 	int length = classes.Length;
@@ -480,6 +497,22 @@ static ArrayList MakeClassList(ArrayList classes, int max)
 		{
 			list.Push(class);
 		}
+	}
+	return list;
+}
+
+static ArrayList GrabClassList(KeyValues kv)
+{
+	char buffer[16];
+	ArrayList list = new ArrayList(16);
+	for(int i=1; ; i++)
+	{
+		IntToString(i, buffer, sizeof(buffer));
+		kv.GetString(buffer, buffer, sizeof(buffer));
+		if(!buffer[0])
+			break;
+
+		list.PushString(buffer);
 	}
 	return list;
 }
@@ -834,7 +867,7 @@ public float Gamemode_WaveRespawnTickets(ArrayList &list, ArrayList &players)
 			}
 		}
 
-		list = MakeClassList(wave.Classes, length);
+		list = Gamemode_MakeClassList(wave.Classes, length);
 	}
 	return GetRandomFloat(WaveTimes[0], WaveTimes[1]);
 }

@@ -17,9 +17,13 @@ void SDKHook_HookClient(int client)
 
 public void OnEntityCreated(int entity, const char[] classname)
 {
-	if(StrContains(classname, "item_healthkit") != -1)
+	if(StrEqual(classname, "item_healthkit_small"))
 	{
-		SDKHook(entity, SDKHook_Spawn, StrEqual(classname, "item_healthkit_small") ? OnKitSpawned : OnMedSpawned);
+		SDKHook(entity, SDKHook_Spawn, OnSmallSpawned);
+	}
+	else if(StrEqual(classname, "item_healthkit_medium"))
+	{
+		SDKHook(entity, SDKHook_Spawn, OnMedSpawned);
 	}
 	else if(StrEqual(classname, "tf_projectile_pipe"))
 	{
@@ -27,18 +31,17 @@ public void OnEntityCreated(int entity, const char[] classname)
 	}
 }
 
-public void OnKitSpawned(int entity)
+public void OnSmallSpawned(int entity)
 {
-	SetEntProp(entity, Prop_Data, "m_iHammerID", RoundToCeil((GetEngineTime()+0.75)*10.0));
 	SDKHook(entity, SDKHook_StartTouch, OnPipeTouch);
-	SDKHook(entity, SDKHook_Touch, OnKitPickup);
+	SDKHook(entity, SDKHook_Touch, OnSmallPickup);
 }
 
 public void OnMedSpawned(int entity)
 {
 	SetEntProp(entity, Prop_Data, "m_iHammerID", RoundToFloor((GetEngineTime()+2.0)*10.0));
 	SDKHook(entity, SDKHook_StartTouch, OnPipeTouch);
-	SDKHook(entity, SDKHook_Touch, OnKitPickup);
+	SDKHook(entity, SDKHook_Touch, OnMedPickup);
 }
 
 public Action OnSmallPickup(int entity, int client)
@@ -46,9 +49,7 @@ public Action OnSmallPickup(int entity, int client)
 	if(!Enabled || !IsValidClient(client))
 		return Plugin_Continue;
 
-	if(!IsSCP(client) && !Client[client].Disarmer &&
-	   GetEntProp(entity, Prop_Data, "m_iHammerID")/10.0 < GetEngineTime() &&
-	   Items_CanGiveItem(client, Item_Medical))
+	if(!IsSCP(client) && !Client[client].Disarmer && Items_CanGiveItem(client, Item_Medical))
 	{
 		Items_CreateWeapon(client, 30013, false, true, true);
 		AcceptEntityInput(entity, "Kill");
@@ -56,12 +57,12 @@ public Action OnSmallPickup(int entity, int client)
 	return Plugin_Handled;
 }
 
-public Action OnKitPickup(int entity, int client)
+public Action OnMedPickup(int entity, int client)
 {
 	if(!Enabled || !IsValidClient(client))
 		return Plugin_Continue;
 
-	if(!IsSCP(client) && !Client[client].Disarmer)
+	if(!IsSCP(client))
 	{
 		float time = GetEntProp(entity, Prop_Data, "m_iHammerID")/10.0;
 		float engineTime = GetEngineTime();
@@ -73,11 +74,11 @@ public Action OnKitPickup(int entity, int client)
 				OnGetMaxHealth(client, health);
 				if(health > GetClientHealth(client))
 				{
-					SDKUnhook(entity, SDKHook_Touch, OnKitPickup);
+					SDKUnhook(entity, SDKHook_Touch, OnMedPickup);
 					return Plugin_Continue;
 				}
 			}
-			else if(Items_CanGiveItem(client, Item_Medical))
+			else if(!Client[client].Disarmer && Items_CanGiveItem(client, Item_Medical))
 			{
 				Items_CreateWeapon(client, 30014, false, true, true);
 				AcceptEntityInput(entity, "Kill");

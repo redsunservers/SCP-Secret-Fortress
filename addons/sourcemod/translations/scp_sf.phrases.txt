@@ -1120,6 +1120,123 @@
 		"en"		"{gray}cl_downloadfilter is set to nosounds. You won't hear any music. If you want to enable, set cl_downloadfilter to all"
 	}
 
+	// Ikea
+
+	"class_ikea1"
+	{
+		"en"		"Survivor"
+	}
+	"desc_ikea1"
+	{
+		"en"		"Search during the day. Survive during night.\nTry to find your escape."
+	}
+	"train_ikea1"
+	{
+		"en"		"Find weapons, ammo, and other supplies during the day.\nSurvive against Ikea Employees during the night.\nCooperate with other survivors.\nFind your escape when it's available.\nPress ATTACK, ATTACK2, ATTACK3, USE or use VOICEMENU to interact with items."
+	}
+	"class_ikea2"
+	{
+		"en"		"Veteran Survivor"
+	}
+	"desc_ikea2"
+	{
+		"en"		"Search during the day. Survive during night.\nTry to find your escape.\nAssist in other survivors' escape."
+	}
+	"train_ikea2"
+	{
+		"en"		"Find weapons, ammo, and other supplies during the day.\nSurvive against Ikea Employees during the night.\nCooperate with other survivors.\nFind your escape when it's available.\nPress ATTACK2, USE or use VOICEMENU to interact with items."
+	}
+	"class_ikea3"
+	{
+		"en"		"Camp Leader Survivor"
+	}
+	"desc_ikea3"
+	{
+		"en"		"Search during the day. Survive during night.\nTry to find your escape.\nAssist in other survivors' escape."
+	}
+	"train_ikea3"
+	{
+		"en"		"Find weapons, ammo, and other supplies during the day.\nSurvive against Ikea Employees during the night.\nCooperate with other survivors.\nFind your escape when it's available.\nPress ATTACK2, USE or use VOICEMENU to interact with items."
+	}
+	"class_scp3008"
+	{
+		"en"		"SCP-3008-2"
+	}
+	"desc_scp3008"
+	{
+		"en"		"Assist customers during the day.\nMake sure they leave during the night.\nCooperate with other SCPs."
+	}
+	"train_scp3008"
+	{
+		"en"		"Your harmless during the day unless attacked.\nDuring the night you can attack until day.\nKill survivor any classes when you can."
+	}
+	"ikea_win"
+	{
+		"#format"	"{1:d},{2:d},{3:s}"
+		"en"		"Survivors Win\n \nSurvivors Escaped: {1} / {2}\nTime Survived: {3}"
+	}
+	"ikea_lose"
+	{
+		"#format"	"{1:d},{2:d},{3:s}"
+		"en"		"SCP-3008 Wins\n \nSurvivors Escaped: {1} / {2}\nTime Survived: {3}"
+	}
+
+
+	// Frostbite
+
+	"class_seeman"
+	{
+		"en"		"Seeman"
+	}
+	"desc_seeman"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nExplode every player with enough kills."
+	}
+	"train_seeman"
+	{
+		"en"		"Every attack explodes on hit.\nUpon a certain amount of kills, your able to instantly kill all players.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
+	"class_seeldier"
+	{
+		"en"		"Seeldier"
+	}
+	"desc_seeldier"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nSummon a Seeman minion every kill."
+	}
+	"train_seeldier"
+	{
+		"en"		"Every kill summons a clone with 200 health.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
+	"class_seeldier2"
+	{
+		"en"		"Seeldier Clone"
+	}
+	"desc_seeldier2"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nFollow orders from Seeldier."
+	}
+	"train_seeldier2"
+	{
+		"en"		"You have been cloned by Seeldier.\nFollow his orders and attack other teams.\nPrevent escape.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
+	"seeman_5"
+	{
+		"en"		"{darkred}Seeman{default} has 5 more kills before he explodes!"
+	}
+	"seeman_3"
+	{
+		"en"		"{darkred}Seeman{default} has 3 more kills before he explodes!"
+	}
+	"seeman_2"
+	{
+		"en"		"{darkred}Seeman{default} has 2 more kills before he explodes!"
+	}
+	"seeman_1"
+	{
+		"en"		"{darkred}Seeman{default} has 1 more kill before he explodes!"
+	}
+
 	// Unused
 
 	"welcome"
