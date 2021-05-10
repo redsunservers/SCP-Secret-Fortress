@@ -1,5 +1,6 @@
 static float Triggered[MAXTF2PLAYERS];
 static bool IsBackup;
+static int IkeaIndex;
 
 public void Ikea_RoundStart()
 {
@@ -58,12 +59,12 @@ public float Ikea_RespawnWave(ArrayList &list, ArrayList &players)
 		WaveEnum wave;
 		if(Triggered[0] && !IsBackup && Gamemode_GetWave(1, wave))
 		{
-			list = Gamemode_MakeClassList(wave.Classes, length);
+			list = Gamemode_MakeClassList(wave.Classes, length>wave.TicketsLeft ? wave.TicketsLeft : length);
 			IsBackup = true;
 		}
 		else if(Gamemode_GetWave(0, wave))
 		{
-			list = Gamemode_MakeClassList(wave.Classes, length);
+			list = Gamemode_MakeClassList(wave.Classes, length>wave.TicketsLeft ? wave.TicketsLeft : length);
 		}
 		else
 		{
@@ -78,9 +79,15 @@ public float Ikea_RespawnWave(ArrayList &list, ArrayList &players)
 	}
 	else
 	{
-		for(int i; i<=MaxClients; i++)
+		Triggered[0] = 1.0;
+		for(int client=1; client<=MaxClients; client++)
 		{
-			Triggered[i] = 1.0;
+			Triggered[client] = 1.0;
+			if(IsClientInGame(client) && IsPlayerAlive(client) && Client[client].Class==IkeaIndex)
+			{
+				TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
+				GiveAngerWeapon(client);
+			}
 		}
 	}
 
@@ -99,6 +106,11 @@ public float Ikea_RespawnWave(ArrayList &list, ArrayList &players)
 	float min, max;
 	Gamemode_GetWaveTimes(min, max);
 	return GetRandomFloat(min, max);
+}
+
+public void Ikea_Enable(int index)
+{
+	IkeaIndex = index;
 }
 
 public bool Ikea_Create(int client)
@@ -168,7 +180,7 @@ public bool Ikea_OnSeePlayer(int client, int victim)
 
 static void GivePassiveWeapon(int client)
 {
-	int weapon = SpawnWeapon(client, "tf_weapon_club", 954, 50, 13, "1 ; 0 ; 57 ; 5", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_club", 954, 50, 13, "1 ; 0 ; 57 ; 5 ; 206 ; 2.5", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 5);
@@ -182,7 +194,7 @@ static void GivePassiveWeapon(int client)
 
 static void GiveAngerWeapon(int client)
 {
-	int weapon = SpawnWeapon(client, "tf_weapon_club", 195, 1, 13, "1 ; 0.65 ; 28 ; 0.25 ; 57 ; 5", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_club", 195, 1, 13, "1 ; 0.65 ; 28 ; 0.25 ; 57 ; 5 ; 206 ; 2.5", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 15);
