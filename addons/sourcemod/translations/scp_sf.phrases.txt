@@ -640,6 +640,22 @@
 	{
 		"en"		"For when you need the distance and the precision."
 	}
+	"weapon_201"
+	{
+		"en"		"Sniper Rifle"
+	}
+	"info_201"
+	{
+		"en"		"When your tired being asked ''Do you need help?''."
+	}
+	"weapon_423"
+	{
+		"en"		"The Saxxy"
+	}
+	"info_423"
+	{
+		"en"		"The actual best melee in the game, just mind the loud noise."
+	}
 	"weapon_1151"
 	{
 		"en"		"Flash Grenade"

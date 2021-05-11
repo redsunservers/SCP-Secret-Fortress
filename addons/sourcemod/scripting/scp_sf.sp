@@ -1986,10 +1986,9 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 						}
 					}
 				}
-				else
+				else if(Client[client].SprintPower<100 && (GetEntityFlags(client) & FL_ONGROUND))
 				{
-					if(Client[client].SprintPower < 100)
-						Client[client].SprintPower += 0.75;
+					Client[client].SprintPower += 0.75;
 				}
 
 				if(showHud)

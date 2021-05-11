@@ -180,7 +180,7 @@ public bool Ikea_OnSeePlayer(int client, int victim)
 
 static void GivePassiveWeapon(int client)
 {
-	int weapon = SpawnWeapon(client, "tf_weapon_club", 954, 50, 13, "1 ; 0 ; 57 ; 5 ; 206 ; 2.5", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_club", 954, 50, 13, "1 ; 0 ; 57 ; 5 ; 206 ; 2", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 5);
@@ -194,7 +194,7 @@ static void GivePassiveWeapon(int client)
 
 static void GiveAngerWeapon(int client)
 {
-	int weapon = SpawnWeapon(client, "tf_weapon_club", 195, 1, 13, "1 ; 0.65 ; 28 ; 0.25 ; 57 ; 5 ; 206 ; 2.5", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_club", 195, 1, 13, "1 ; 0.65 ; 28 ; 0.25 ; 57 ; 5 ; 206 ; 2", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 15);
