@@ -24,6 +24,11 @@ public bool SCP096_Create(int client)
 	Client[client].Extra1 = HealthMax;
 	Client[client].Extra2 = 0;
 
+	for(int i; i<MAXTF2PLAYERS; i++)
+	{
+		Triggered[i] = 0;
+	}
+
 	GiveMelee(client);
 	return false;
 }
@@ -273,6 +278,7 @@ public void SCP096_OnButton(int client, int button)
 		delay = engineTime+0.25;
 		static float pos1[3], ang1[3];
 		GetClientEyePosition(client, pos1);
+		pos1[0] += 15.0;
 		GetClientEyeAngles(client, ang1);
 		ang1[0] = fixAngle(ang1[0]);
 		ang1[1] = fixAngle(ang1[1]);
@@ -351,7 +357,7 @@ public void SCP096_OnButton(int client, int button)
 			}
 			else if(!Client[client].Pos[0])
 			{
-				EmitSoundToAll2(SoundPassive, client, SNDCHAN_VOICE, SNDLEVEL_TRAIN, _, _, _, client);
+				EmitSoundToAll2(SoundPassive, client, SNDCHAN_VOICE, SNDLEVEL_MINIBIKE, _, _, _, client);
 				Client[client].Pos[0] = 1.0;
 			}
 		}
@@ -396,7 +402,7 @@ static void TriggerShyGuy(int client, int target, bool full)
 			Client[client].Extra2 = 1;
 			Client[client].Disarmer = 1;
 			TF2_StunPlayer(client, RageWarmup-2.0, 0.9, TF_STUNFLAG_BONKSTUCK|TF_STUNFLAG_NOSOUNDOREFFECT);
-			EmitSoundToAll2(SoundEnrage, client, SNDCHAN_VOICE, SNDLEVEL_TRAIN, _, _, _, client);
+			EmitSoundToAll2(SoundEnrage, client, SNDCHAN_VOICE, SNDLEVEL_SCREAMING, _, _, _, client);
 			if(!full)
 				Config_DoReaction(target, "trigger096");
 		}

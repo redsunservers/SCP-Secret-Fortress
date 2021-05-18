@@ -138,18 +138,25 @@ public void Ikea_OnButton(int client, int button)
 	}
 }
 
+public void Ikea_OnDeath(int client, Event event)
+{
+	Client[client].Class = IkeaIndex;
+}
+
 public Action Ikea_OnTakeDamage(int client, int attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
 	if(attacker>0 && attacker<=MaxClients)
 	{
-		if(!Triggered[client])
+		bool calm = !Triggered[client];
+
+		Triggered[client] = GetEngineTime()+15.0;
+		Triggered[attacker] = Triggered[client]+45.0;
+
+		if(calm)
 		{
 			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 			GiveAngerWeapon(client);
 		}
-
-		Triggered[client] = GetEngineTime()+15.0;
-		Triggered[attacker] = Triggered[client]+45.0;
 	}
 	return Plugin_Continue;
 }
@@ -178,9 +185,15 @@ public bool Ikea_OnSeePlayer(int client, int victim)
 	return Triggered[victim]>engineTime;
 }
 
+public void Ikea_OnSpeed(int client, float &speed)
+{
+	if(Triggered[0] || Triggered[client]>GetEngineTime())
+		speed += 50.0;
+}
+
 static void GivePassiveWeapon(int client)
 {
-	int weapon = SpawnWeapon(client, "tf_weapon_club", 954, 50, 13, "1 ; 0 ; 57 ; 5 ; 206 ; 2", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_club", 954, 50, 13, "1 ; 0 ; 57 ; 10 ; 412 ; 3.25", 2);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 5);
@@ -194,7 +207,7 @@ static void GivePassiveWeapon(int client)
 
 static void GiveAngerWeapon(int client)
 {
-	int weapon = SpawnWeapon(client, "tf_weapon_club", 195, 1, 13, "1 ; 0.65 ; 28 ; 0.25 ; 57 ; 5 ; 206 ; 2", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_club", 195, 1, 13, "1 ; 0.65 ; 28 ; 0.25 ; 57 ; 5 ; 206 ; 2.5", 2);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 15);

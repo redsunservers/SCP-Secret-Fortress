@@ -656,6 +656,14 @@
 	{
 		"en"		"The actual best melee in the game, just mind the loud noise."
 	}
+	"weapon_58"
+	{
+		"en"		"Jarate"
+	}
+	"info_58"
+	{
+		"en"		"Literal piss."
+	}
 	"weapon_1151"
 	{
 		"en"		"Flash Grenade"
@@ -682,7 +690,7 @@
 	}
 	"weapon_205"
 	{
-		"en"		"Smoothy Maker"
+		"en"		"''Smoothy Maker''"
 	}
 	"info_205"
 	{

@@ -30,7 +30,7 @@ enum struct ClassEnum
 
 	int Ammo[Ammo_MAX];
 	int MaxAmmo[Ammo_MAX];
-	int Items[ITEMS_MAX+1];
+	int Items[12];
 
 	Function OnAnimation;	// Action(int client, PlayerAnimEvent_t &anim, int &data)
 	Function OnButton;	// void(int client, int button)
@@ -1305,6 +1305,9 @@ public Action Classes_SoundHuman(int client, char sample[PLATFORM_MAX_PATH], int
 	{
 		if(IsSpec(client))
 			return Plugin_Handled;
+
+		level /= 1.75;
+		return Plugin_Changed;
 	}
 	else if(StrContains(sample, "footsteps", false) != -1)
 	{
