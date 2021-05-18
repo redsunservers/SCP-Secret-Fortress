@@ -1306,7 +1306,7 @@ public Action Classes_SoundHuman(int client, char sample[PLATFORM_MAX_PATH], int
 		if(IsSpec(client))
 			return Plugin_Handled;
 
-		level /= 1.75;
+		level = RoundFloat(level / 1.2);
 		return Plugin_Changed;
 	}
 	else if(StrContains(sample, "footsteps", false) != -1)
