@@ -63,13 +63,11 @@ public bool SCP3008_OnGlowPlayer(int client, int victim)
 
 void SCP3008_WeaponNone(int client)
 {
-	int weapon = SpawnWeapon(client, "tf_weapon_club", 195, 1, 13, "1 ; 0 ; 252 ; 0.99", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_club", 954, 1, 13, "1 ; 0 ; 252 ; 0.99", 2);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 0);
 		SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
-		SetEntityRenderMode(weapon, RENDER_TRANSCOLOR);
-		SetEntityRenderColor(weapon, 255, 255, 255, 0);
 		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client));
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 	}
