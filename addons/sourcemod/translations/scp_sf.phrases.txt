@@ -1284,6 +1284,18 @@
 	{
 		"en"		"You deal more damage and move faster with more rage.\nGain rage by keep taking damage from attacks.\nPress ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
+	"class_saxtron"
+	{
+		"en"		"Saxtron H4le"
+	}
+	"desc_saxtron"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nYour on no one's side."
+	}
+	"train_saxtron"
+	{
+		"en"		"Turning on...\nExecuting...\nEliminate all hippies...\nGo..."
+	}
 	"class_chaos4"
 	{
 		"en"		"Chaos Insurgency Agent"
