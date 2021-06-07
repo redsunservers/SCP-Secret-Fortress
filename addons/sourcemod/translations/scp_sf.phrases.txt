@@ -696,6 +696,14 @@
 	{
 		"en"		"Launch slow but powerful rockets."
 	}
+	"weapon_15"
+	{
+		"en"		"Minigun"
+	}
+	"info_15"
+	{
+		"en"		"I am heavy weapons guy, and this, is my weapon."
+	}
 	"weapon_25"
 	{
 		"en"		"Construction PDA"
@@ -947,6 +955,10 @@
 	{
 		"en"		"Rough"
 	}
+	"914_copy"
+	{
+		"en"		"Copy Item"
+	}
 	"in_cooldown"
 	{
 		"en"		"In Cooldown..."
@@ -963,6 +975,10 @@
 	{
 		"#format"	"{1:t}"
 		"en"		"It transformed into {red}{1}"
+	}
+	"914_nowork"
+	{
+		"en"		"Can't use with this item"
 	}
 
 
@@ -1214,7 +1230,7 @@
 	}
 	"desc_seeman"
 	{
-		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nExplode every player with enough kills."
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other freaks.\nExplode every player with enough kills."
 	}
 	"train_seeman"
 	{
@@ -1226,7 +1242,7 @@
 	}
 	"desc_seeldier"
 	{
-		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nSummon a Seeman minion every kill."
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other freaks.\nSummon a Seeman minion every kill."
 	}
 	"train_seeldier"
 	{
@@ -1238,11 +1254,83 @@
 	}
 	"desc_seeldier2"
 	{
-		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nFollow orders from Seeldier."
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other freaks.\nFollow orders from Seeldier."
 	}
 	"train_seeldier2"
 	{
 		"en"		"You have been cloned by Seeldier.\nFollow his orders and attack other teams.\nPrevent escape.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
+	"class_pootisblu"
+	{
+		"en"		"Booty Executioner"
+	}
+	"desc_pootisblu"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other freaks.\nGet enraged by being looked at or damaged."
+	}
+	"train_pootisblu"
+	{
+		"en"		"You can move while not being looked at or while enraged.\nGain rage while being looked at or taking any damage.\nPress ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
+	"class_pootisred"
+	{
+		"en"		"Sandvich Slayer"
+	}
+	"desc_pootisred"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other freaks.\nGet more powerful by keep taking damage."
+	}
+	"train_pootisred"
+	{
+		"en"		"You deal more damage and move faster with more rage.\nGain rage by keep taking damage from attacks.\nPress ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
+	"class_chaos4"
+	{
+		"en"		"Chaos Insurgency Agent"
+	}
+	"desc_chaos4"
+	{
+		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects.\nYour equipped with a Minigun"
+	}
+	"train_chaos4"
+	{
+		"en"		"You need to free Class-D Personnel from the facility.\nKill other teams to help Class-D Personnel escape.\nPress USE or use VOICEMENU to interact with buttons and items."
+	}
+	"class_mtf4"
+	{
+		"en"		"Nine-Tailed Fox Elite"
+	}
+	"desc_mtf4"
+	{
+		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your superiors."
+	}
+	"train_mtf4"
+	{
+		"en"		"You need to free Scientists from the facility.\nSupport your elite group, follow your commander SCP-076-2.\nUse your radio too.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
+	}
+	"class_mtf076"
+	{
+		"en"		"SCP-076-2"
+	}
+	"desc_mtf076"
+	{
+		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers."
+	}
+	"train_mtf076"
+	{
+		"en"		"You need to free Scientists from the facility.\nCommand your troops down the facility.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons and items."
+	}
+	"class_mtf105"
+	{
+		"en"		"SCP-105"
+	}
+	"desc_mtf105"
+	{
+		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your superiors."
+	}
+	"train_mtf105"
+	{
+		"en"		"You need to free Scientists from the facility.\nSupport your elite group, follow your commander SCP-076-2.\nUse your radio too.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"seeman_5"
 	{
@@ -1259,6 +1347,10 @@
 	"seeman_1"
 	{
 		"en"		"{darkred}Seeman{default} has 1 more kill before he explodes!"
+	}
+	"mtf_spawn_pandora"
+	{
+		"en"		"{mediumblue}Mobile Task Force Unit, Omega-7{default} has entered the facility."
 	}
 
 	// Unused

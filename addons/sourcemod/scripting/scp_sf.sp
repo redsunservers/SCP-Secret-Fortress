@@ -44,8 +44,8 @@ void DisplayCredits(int i)
 }
 
 #define MAJOR_REVISION	"2"
-#define MINOR_REVISION	"1"
-#define STABLE_REVISION	"5"
+#define MINOR_REVISION	"2"
+#define STABLE_REVISION	"0"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE	100000000.0
@@ -693,6 +693,16 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 			}
 		}
 
+		index = Classes_GetByName("pootisred", class);
+		for(int target=1; target<=MaxClients; target++)
+		{
+			if(IsValidClient(target) && index==Client[target].Class)
+			{
+				SDKHooks_TakeDamage(target, target, target, 9001.0, DMG_NERVEGAS);
+				found = target;
+			}
+		}
+
 		index = class.Group;
 		if(Enabled && found)
 		{
@@ -754,6 +764,58 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 
 				menu.ExitButton = false;
 				menu.Display(client, 10);
+			}
+		}
+	}
+	else if(!StrContains(name, "scp_printer", false))
+	{
+		if(Enabled && IsValidClient(client))
+		{
+			int index = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+			if(index>MaxClients && IsValidEntity(index))
+				index = GetEntProp(index, Prop_Send, "m_iItemDefinitionIndex");
+
+			char buffer[64];
+			Items_GetTranName(index, buffer, sizeof(buffer));
+
+			SetGlobalTransTarget(client);
+			if(Client[client].Cooldown > GetEngineTime())
+			{
+				Menu menu = new Menu(Handler_None);
+				menu.SetTitle("%t\n ", buffer);
+
+				FormatEx(buffer, sizeof(buffer), "%t", "in_cooldown");
+				menu.AddItem("", buffer);
+
+				menu.ExitButton = false;
+				menu.Display(client, 3);
+			}
+			else
+			{
+
+				WeaponEnum weapon;
+				if(Items_GetWeaponByIndex(index, weapon) && weapon.Type==Item_Keycard)
+				{
+					Menu menu = new Menu(Handler_Printer);
+					menu.SetTitle("%t\n ", buffer);
+
+					FormatEx(buffer, sizeof(buffer), "%t", "914_copy");
+					menu.AddItem("", buffer);
+
+					menu.ExitButton = false;
+					menu.Display(client, 6);
+				}
+				else
+				{
+					Menu menu = new Menu(Handler_None);
+					menu.SetTitle("%t\n ", buffer);
+
+					FormatEx(buffer, sizeof(buffer), "%t", "914_nowork");
+					menu.AddItem("", buffer);
+
+					menu.ExitButton = false;
+					menu.Display(client, 3);
+				}
 			}
 		}
 	}
@@ -937,6 +999,43 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 						else
 						{
 							CPrintToChat(client, "%s%t", PREFIX, "914_noeffect");
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+public int Handler_Printer(Menu menu, MenuAction action, int client, int choice)
+{
+	switch(action)
+	{
+		case MenuAction_End:
+		{
+			delete menu;
+		}
+		case MenuAction_Select:
+		{
+			if(IsPlayerAlive(client))
+			{
+				int index = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+				if(index > MaxClients)
+				{
+					index = GetEntProp(index, Prop_Send, "m_iItemDefinitionIndex");
+					WeaponEnum weapon;
+					if(Items_GetWeaponByIndex(index, weapon) && weapon.Type==Item_Keycard)
+					{
+						Client[client].Cooldown = GetEngineTime()+20.0;
+
+						bool canGive = Items_CanGiveItem(client, weapon.Type);
+						index = Items_CreateWeapon(client, index, canGive, true, false);
+						if(!canGive && index>MaxClients)
+						{
+							static float pos[3], ang[3];
+							GetClientEyePosition(client, pos);
+							GetClientEyeAngles(client, ang);
+							Items_DropItem(client, index, pos, ang, true);
 						}
 					}
 				}
@@ -2076,12 +2175,13 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 		// And next theme please
 		if(!NoMusic && !NoMusicRound && Client[client].NextSongAt<engineTime)
 		{
+			int volume;
 			float time = Classes_OnTheme(client, buffer);
 			if(time <= 0)
-				time = Gamemode_GetMusic(client, Client[client].Floor, buffer);
+				time = Gamemode_GetMusic(client, Client[client].Floor, buffer, volume);
 
 			if(time > 0)
-				ChangeSong(client, engineTime+time, buffer);
+				ChangeSong(client, engineTime+time, buffer, volume);
 		}
 	}
 
@@ -2126,11 +2226,12 @@ public void OnGameFrame()
 			float timeleft = EndRoundIn-engineTime;
 			if(!NoMusic && !NoMusicRound)
 			{
+				int volume;
 				static char buffer[PLATFORM_MAX_PATH];
-				float duration = Gamemode_GetMusic(0, Music_Timeleft, buffer);
+				float duration = Gamemode_GetMusic(0, Music_Timeleft, buffer, volume);
 				if(duration > timeleft)
 				{
-					ChangeGlobalSong(FAR_FUTURE, buffer);
+					ChangeGlobalSong(FAR_FUTURE, buffer, volume);
 					NoMusicRound = true;
 				}
 			}
@@ -2322,9 +2423,10 @@ public Action Timer_ConnectPost(Handle timer, int userid)
 	{
 		int song = CheckCommandAccess(client, "thediscffthing", ADMFLAG_CUSTOM4) ? Music_JoinAlt : Music_Join;
 
+		int volume;
 		static char buffer[PLATFORM_MAX_PATH];
-		float duration = Gamemode_GetMusic(client, song, buffer);
-		ChangeSong(client, duration+GetEngineTime(), buffer, 1);
+		float duration = Gamemode_GetMusic(client, song, buffer, volume);
+		ChangeSong(client, duration+GetEngineTime(), buffer, volume);
 	}
 
 	PrintToConsole(client, " \n \nWelcome to SCP: Secret Fortress\n \nThis is a gamemode based on the SCP series and community\nPlugin is created by Batfoxkid\n ");

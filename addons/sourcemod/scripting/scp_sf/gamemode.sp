@@ -9,12 +9,14 @@ enum struct SoundEnum
 {
 	char Path[PLATFORM_MAX_PATH];
 	float Time;
+	int Volume;
 }
 
 enum struct WaveEnum
 {
 	int Group;
 	int Tickets;
+	bool Once;
 	ArrayList Classes;
 
 	bool ShowSCPs;
@@ -166,6 +168,7 @@ ArrayList Gamemode_Setup(KeyValues main, KeyValues map)
 
 					wave.Group = StringToInt(preset.Name);
 					wave.Tickets = kv.GetNum("tickets");
+					wave.Once = view_as<bool>(kv.GetNum("once"));
 					wave.ShowSCPs = view_as<bool>(kv.GetNum("showscps"));
 					kv.GetString("message", wave.Message, sizeof(wave.Message));
 					if(!TranslationPhraseExists(wave.Message))
@@ -391,23 +394,26 @@ public Action Gamemode_WaveTimer(Handle timer)
 	}
 }
 
-float Gamemode_GetMusic(int client, int floor, char path[PLATFORM_MAX_PATH])
+float Gamemode_GetMusic(int client, int floor, char path[PLATFORM_MAX_PATH], int &volume)
 {
 	switch(floor)
 	{
 		case Music_JoinAlt:
 		{
 			strcopy(path, sizeof(path), MusicJoinAlt.Path);
+			volume = MusicJoinAlt.Volume;
 			return MusicJoinAlt.Time;
 		}
 		case Music_Join:
 		{
 			strcopy(path, sizeof(path), MusicJoin.Path);
+			volume = MusicJoin.Volume;
 			return MusicJoin.Time;
 		}
 		case Music_Timeleft:
 		{
 			strcopy(path, sizeof(path), MusicTimeleft.Path);
+			volume = MusicTimeleft.Volume;
 			return MusicTimeleft.Time;
 		}
 	}
@@ -415,6 +421,7 @@ float Gamemode_GetMusic(int client, int floor, char path[PLATFORM_MAX_PATH])
 	if(Client[client].AloneIn < GetEngineTime())
 	{
 		strcopy(path, sizeof(path), MusicAlone.Path);
+		volume = MusicAlone.Volume;
 		return MusicAlone.Time;
 	}
 
@@ -422,6 +429,7 @@ float Gamemode_GetMusic(int client, int floor, char path[PLATFORM_MAX_PATH])
 		return 0.0;
 
 	strcopy(path, sizeof(path), MusicFloors[floor].Path);
+	volume = MusicFloors[floor].Volume;
 	return MusicFloors[floor].Time;
 }
 
@@ -593,7 +601,7 @@ static bool EndRoundRelay(int group)
 
 static void KvGetSound(KeyValues kv, const char[] string, SoundEnum sound, const SoundEnum defaul=0)
 {
-	static char buffers[2][PLATFORM_MAX_PATH];
+	static char buffers[3][PLATFORM_MAX_PATH];
 	kv.GetString(string, buffers[0], sizeof(buffers[]));
 	if(buffers[0][0])
 	{
@@ -606,10 +614,19 @@ static void KvGetSound(KeyValues kv, const char[] string, SoundEnum sound, const
 				if(sound.Path[0])
 					PrecacheSound(sound.Path, true);
 			}
+			case 2:
+			{
+				sound.Time = StringToFloat(buffers[0]);
+				strcopy(sound.Path, sizeof(sound.Path), buffers[1]);
+				sound.Volume = 2;
+				if(sound.Path[0])
+					PrecacheSound(sound.Path, true);
+			}
 			default:
 			{
 				sound.Time = StringToFloat(buffers[0]);
 				strcopy(sound.Path, sizeof(sound.Path), buffers[1]);
+				sound.Volume = StringToInt(buffers[2]);
 				if(sound.Path[0])
 					PrecacheSound(sound.Path, true);
 			}
@@ -809,10 +826,15 @@ public float Gamemode_WaveRespawnTickets(ArrayList &list, ArrayList &players)
 		delete list;
 
 		WaveList.GetArray(i, wave);
+
 		if(length > wave.TicketsLeft)
 			length = wave.TicketsLeft;
 
 		wave.TicketsLeft -= length;
+		int ticketsleft = wave.TicketsLeft;
+		if(wave.Once)
+			wave.TicketsLeft = 0;
+
 		WaveList.SetArray(i, wave);
 
 		int count;
@@ -867,7 +889,7 @@ public float Gamemode_WaveRespawnTickets(ArrayList &list, ArrayList &players)
 			}
 		}
 
-		list = Gamemode_MakeClassList(wave.Classes, length>wave.TicketsLeft ? wave.TicketsLeft : length);
+		list = Gamemode_MakeClassList(wave.Classes, length>ticketsleft ? ticketsleft : length);
 	}
 	return GetRandomFloat(WaveTimes[0], WaveTimes[1]);
 }
