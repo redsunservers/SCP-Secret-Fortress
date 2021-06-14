@@ -142,7 +142,6 @@ public void HeavyBlu_OnButton(int client, int button)
 			{
 				Client[client].Extra2 = 1;
 				SDKCall_SetSpeed(client);
-				TF2_AddCondition(client, TFCond_HalloweenKartDash, 2.0);
 			}
 		}
 		else if(Client[client].Extra2 == 1)
@@ -185,7 +184,7 @@ public void HeavyBlu_OnSpeed(int client, float &speed)
 	switch(Client[client].Extra2)
 	{
 		case 0:
-			speed *= 0.75;
+			speed *= 0.85;
 
 		case 1:
 			speed = 1.0;

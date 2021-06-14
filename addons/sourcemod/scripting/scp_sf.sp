@@ -45,7 +45,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"2"
 #define MINOR_REVISION	"2"
-#define STABLE_REVISION	"0"
+#define STABLE_REVISION	"1"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE	100000000.0
@@ -177,6 +177,7 @@ enum struct ClientEnum
 
 	// Music
 	float NextSongAt;
+	int CurrentVolume;
 	char CurrentSong[PLATFORM_MAX_PATH];
 
 	void ResetThinkIsDead()
@@ -2439,7 +2440,7 @@ void ChangeSong(int client, float next, const char[] filepath, int volume=2)
 {
 	if(Client[client].CurrentSong[0])
 	{
-		for(int i; i<3; i++)
+		for(int i; i<Client[client].CurrentVolume; i++)
 		{
 			StopSound(client, SNDCHAN_STATIC, Client[client].CurrentSong);
 		}
@@ -2448,11 +2449,13 @@ void ChangeSong(int client, float next, const char[] filepath, int volume=2)
 	if(Client[client].DownloadMode || !filepath[0])
 	{
 		Client[client].CurrentSong[0] = 0;
+		Client[client].CurrentVolume = 0;
 		Client[client].NextSongAt = FAR_FUTURE;
 		return;
 	}
 
 	strcopy(Client[client].CurrentSong, sizeof(Client[].CurrentSong), filepath);
+	Client[client].CurrentVolume = volume;
 	Client[client].NextSongAt = next;
 	for(int i; i<volume; i++)
 	{

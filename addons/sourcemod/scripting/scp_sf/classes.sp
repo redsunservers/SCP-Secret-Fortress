@@ -373,7 +373,7 @@ void Classes_PlayerSpawn(int client)
 void Classes_SpawnPoint(int client, int index)
 {
 	ClassEnum class;
-	if(Classes_GetByIndex(index, class))
+	if(Classes_GetByIndex(index, class) && class.Spawn[0])
 	{
 		ArrayList list = new ArrayList();
 		int entity = -1;
@@ -1142,6 +1142,7 @@ public bool Classes_PickupStandard(int client, int entity)
 	}
 	else if(StrEqual(buffer, "prop_vehicle_driveable"))
 	{
+		Client[client].UseBuffer = true;
 		return true;
 	}
 	else
@@ -1265,6 +1266,7 @@ public bool Classes_PickupScp(int client, int entity)
 	}
 	else if(StrEqual(buffer, "prop_vehicle_driveable"))
 	{
+		Client[client].UseBuffer = true;
 		return true;
 	}
 	else
