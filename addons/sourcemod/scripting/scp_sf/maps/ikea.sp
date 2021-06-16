@@ -198,8 +198,6 @@ static void GivePassiveWeapon(int client)
 	{
 		ApplyStrangeRank(weapon, 5);
 		SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
-		SetEntityRenderMode(weapon, RENDER_TRANSCOLOR);
-		SetEntityRenderColor(weapon, 255, 255, 255, 0);
 		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 	}
