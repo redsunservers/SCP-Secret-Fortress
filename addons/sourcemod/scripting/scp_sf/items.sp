@@ -919,7 +919,7 @@ static int GetMaxWeapons(int client)
 	return max;
 }
 
-public bool Items_NoDrop(int client, int weapon, bool &swap)
+public bool Items_NoneDrop(int client, int weapon, bool &swap)
 {
 	return false;
 }

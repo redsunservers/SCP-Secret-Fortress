@@ -179,7 +179,10 @@ public Action SJM08_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &cha
 	}
 
 	if(StrContains(sample, "footsteps", false) != -1)
-		return Plugin_Handled;
+	{
+		StopSound(client, SNDCHAN_AUTO, sample);
+		return Plugin_Changed;
+	}
 
 	return Plugin_Continue;
 }

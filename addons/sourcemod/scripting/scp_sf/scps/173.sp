@@ -146,9 +146,9 @@ public Action SCP173_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &ch
 	}
 	else if(StrContains(sample, "footsteps", false) != -1)
 	{
-		Format(sample, sizeof(sample), "physics/concrete/concrete_scrape_smooth_loop1.wav");
-		EmitSoundToAll(sample, client, channel, level+30, flags, volume, pitch+10, _, _, _, _, 0.6);
-		return Plugin_Stop;
+		StopSound(client, SNDCHAN_AUTO, sample);
+		EmitSoundToAll("physics/concrete/concrete_scrape_smooth_loop1.wav", client, channel, level+30, flags, volume, pitch+10, _, _, _, _, 0.6);
+		return Plugin_Changed;
 	}
 	return Plugin_Continue;
 }

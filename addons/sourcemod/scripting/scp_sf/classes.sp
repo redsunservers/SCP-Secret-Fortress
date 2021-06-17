@@ -1322,7 +1322,10 @@ public Action Classes_SoundHuman(int client, char sample[PLATFORM_MAX_PATH], int
 
 		int flag = GetEntityFlags(client);
 		if((flag & FL_DUCKING) && (flag & FL_ONGROUND))
-			return Plugin_Stop;
+		{
+			StopSound(client, SNDCHAN_AUTO, sample);
+			return Plugin_Changed;
+		}
 	}
 	return Plugin_Continue;
 }
