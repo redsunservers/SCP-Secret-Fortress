@@ -1315,8 +1315,8 @@ public Action Classes_SoundHuman(int client, char sample[PLATFORM_MAX_PATH], int
 	{
 		if(Client[client].Sprinting)
 		{
-			level += 30;
-			EmitSoundToAll(sample, client, channel, level, flags, volume, pitch);
+			level += 20;
+			volume *= 2.0;
 			return Plugin_Changed;
 		}
 
@@ -1339,8 +1339,8 @@ public Action Classes_SoundScp(int client, char sample[PLATFORM_MAX_PATH], int &
 	}
 	else if(StrContains(sample, "footsteps", false) != -1)
 	{
-		level += 30;
-		EmitSoundToAll(sample, client, channel, level, flags, volume, pitch);
+		level += 20;
+		volume *= 2.0;
 		return Plugin_Changed;
 	}
 	return Plugin_Continue;
