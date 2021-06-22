@@ -299,13 +299,13 @@
 			}
 			"CBasePlayer::EquipWearable"
 			{
-				"linux"		"431"
-				"windows"	"430"
+				"linux"		"432"
+				"windows"	"431"
 			}
 			"CBasePlayer::ForceRespawn"
 			{
-				"linux"		"330"
-				"windows"	"329"
+				"linux"		"331"
+				"windows"	"330"
 			}
 			"CTeamplayRoundBasedRules::RoundRespawn"
 			{
@@ -319,13 +319,13 @@
 			}
 			"CTeam::AddPlayer"
 			{
-				"linux"		"202"
-				"windows"	"201"
+				"linux"		"203"
+				"windows"	"202"
 			}
 			"CTeam::RemovePlayer"
 			{
-				"linux"		"203"
-				"windows"	"202"
+				"linux"		"204"
+				"windows"	"203"
 			}
 		}
 		"Addresses"
