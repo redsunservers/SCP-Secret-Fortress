@@ -36,7 +36,7 @@ void DisplayCredits(int i)
 	PrintToConsole(i, "Chaos, SCP-049-2 Rigs | DoctorKrazy | forums.alliedmods.net/member.php?u=288676");
 	PrintToConsole(i, "MTF Rig | JuegosPablo | forums.alliedmods.net/showthread.php?t=308656");
 	PrintToConsole(i, "SCP-173 Port | RavensBro | forums.alliedmods.net/showthread.php?t=203464");
-	PrintToConsole(i, "SCP Animations | Badget | steamcommunity.com/profiles/76561198097667312");
+	PrintToConsole(i, "SCP Animations | Baget | steamcommunity.com/profiles/76561198097667312");
 	PrintToConsole(i, "Soundtracks | Jacek \"Burnert\" Rogal");
 
 	PrintToConsole(i, "Cosmic Inspiration | Marxvee | forums.alliedmods.net/member.php?u=289257");
