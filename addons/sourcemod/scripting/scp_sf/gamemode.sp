@@ -44,6 +44,7 @@ static int TeamColors[][] =
 	{ 139, 0, 0, 255 }
 };
 
+static int GameSortSeed;
 static Handle WaveTimer;
 static Function GameCondition;
 static Function GameRoundStart;
@@ -273,9 +274,22 @@ bool Gamemode_RoundStart()
 		Call_Finish();
 	}
 
-	ArrayList players = new ArrayList();
-	for(int client; client<MAXTF2PLAYERS; client++)
+	// This was done to prevent RNG just being funky against repeating classes
+	if(!GameSortSeed)
 	{
+		GameSortSeed = GetRandomInt(1, MaxClients);
+	}
+	else if(++GameSortSeed > MaxClients)
+	{
+		GameSortSeed = 1;
+	}
+
+	ArrayList players = new ArrayList();
+	for(int client=GameSortSeed+1; ; client++)
+	{
+		if(client >= MAXTF2PLAYERS)
+			client = 1;
+
 		if(IsValidClient(client) && GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
 		{
 			Client[client].NextSongAt = 0.0;
@@ -285,6 +299,9 @@ bool Gamemode_RoundStart()
 		{
 			Client[client].Class = 0;
 		}
+
+		if(client == GameSortSeed)
+			break;
 	}
 
 	int length = players.Length;
@@ -294,16 +311,15 @@ bool Gamemode_RoundStart()
 		return false;
 	}
 
-	players.Sort(Sort_Random, Sort_Integer);
 	ArrayList classes = Gamemode_MakeClassList(SetupList, length);
-	int length2 = classes.Length;
-	if(length > length2)
-		length = length2;
+	int client = classes.Length;
+	if(length > client)
+		length = client;
 
 	ClassEnum class;
 	for(int i; i<length; i++)
 	{
-		int client = players.Get(i);
+		client = players.Get(i);
 		Client[client].Class = classes.Get(i);
 		if(Classes_GetByIndex(Client[client].Class, class))
 		{
@@ -848,6 +864,9 @@ public float Gamemode_WaveRespawnTickets(ArrayList &list, ArrayList &players)
 			bool found = Classes_GetByIndex(Client[i].Class, class);
 			if(found && !class.Group)
 				count++;
+
+			if(!wave.TicketsLeft && IsSpec(i))
+				CPrintToChat(i, "%s%t", PREFIX, "spawn_ranout");
 
 			if(wave.Message[0])
 			{

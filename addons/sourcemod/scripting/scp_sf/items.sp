@@ -584,10 +584,9 @@ bool Items_DropItem(int client, int helditem, const float origin[3], const float
 
 	// If were swapping, don't drop any ammo with this weapon
 	int ammo;
-	int type = -1;
+	int type = GetEntProp(helditem, Prop_Send, "m_iPrimaryAmmoType");
 	if(swap)
 	{
-		type = GetEntProp(helditem, Prop_Send, "m_iPrimaryAmmoType");
 		if(type != -1)
 		{
 			ammo = GetAmmo(client, type);
@@ -1068,12 +1067,6 @@ public Action Items_FlashHit(int client, int victim, int &inflictor, float &dama
 	return Plugin_Continue;
 }
 
-public void Items_MicroCreate(int client, int entity)
-{
-	SetEntPropFloat(entity, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
-	SetEntPropFloat(entity, Prop_Send, "m_flNextSecondaryAttack", FAR_FUTURE);
-}
-
 public void Items_BuilderCreate(int client, int entity)
 {
 	for(int i; i<4; i++)
@@ -1090,7 +1083,7 @@ public bool Items_MicroButton(int client, int weapon, int &buttons, int &holding
 	if(ammo<2 || !(buttons & IN_ATTACK))
 	{
 		charge[client] = 0.0;
-		SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
+		TF2Attrib_SetByDefIndex(weapon, 821, 1.0);
 		SetEntPropFloat(client, Prop_Send, "m_flRageMeter", 99.0);
 		return false;
 	}
@@ -1107,11 +1100,11 @@ public bool Items_MicroButton(int client, int weapon, int &buttons, int &holding
 		else if(charge[client] < engineTime)
 		{
 			charge[client] = FAR_FUTURE;
-			SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", GetGameTime()+0.1);
+			TF2Attrib_SetByDefIndex(weapon, 821, 0.0);
 		}
 		else
 		{
-			SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
+			TF2Attrib_SetByDefIndex(weapon, 821, 1.0);
 			SetEntPropFloat(client, Prop_Send, "m_flRageMeter", (charge[client]-engineTime)*16.5);
 
 			static float time[MAXTF2PLAYERS];

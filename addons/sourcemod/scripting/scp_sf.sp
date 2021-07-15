@@ -45,7 +45,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"2"
 #define MINOR_REVISION	"2"
-#define STABLE_REVISION	"1"
+#define STABLE_REVISION	"2"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE	100000000.0

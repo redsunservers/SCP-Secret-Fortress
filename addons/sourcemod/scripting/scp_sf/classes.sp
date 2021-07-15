@@ -365,6 +365,7 @@ void Classes_PlayerSpawn(int client)
 
 			// Other stuff
 			TF2_AddCondition(client, TFCond_NoHealingDamageBuff, 1.0);
+			TF2_AddCondition(client, TFCond_DodgeChance, 3.0);
 			TF2Attrib_SetByDefIndex(client, 49, 1.0);
 		}
 	}

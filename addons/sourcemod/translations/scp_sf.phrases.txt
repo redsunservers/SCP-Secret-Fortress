@@ -1048,6 +1048,10 @@
 	{
 		"en"		"Awaiting re-containment of: {red}An uncountable number of SCP subjects{default}."
 	}
+	"spawn_ranout"	// Chat
+	{
+		"en"		"This team ran out of respawn tickets so less players have spawned in."
+	}
 	"time_remaining"	// Game
 	{
 		"#format"	"{1:d},{2:s}"
