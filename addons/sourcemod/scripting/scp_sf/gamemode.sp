@@ -279,9 +279,17 @@ bool Gamemode_RoundStart()
 	{
 		GameSortSeed = GetRandomInt(1, MaxClients);
 	}
-	else if(++GameSortSeed > MaxClients)
+	else
 	{
-		GameSortSeed = 1;
+		int players;
+		for(int client=1; client<=MaxClients; client++)
+		{
+			if(IsClientInGame(client) && GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
+				players++;
+		}
+
+		if(++GameSortSeed > players)
+			GameSortSeed = 1;
 	}
 
 	ArrayList players = new ArrayList();
