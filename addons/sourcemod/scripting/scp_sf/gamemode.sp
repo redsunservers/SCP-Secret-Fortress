@@ -293,10 +293,10 @@ bool Gamemode_RoundStart()
 	}
 
 	ArrayList players = new ArrayList();
-	for(int client=GameSortSeed+1; ; client++)
+	for(int client=GameSortSeed; ; client++)
 	{
 		if(client >= MAXTF2PLAYERS)
-			client = 1;
+			client = 0;
 
 		if(IsValidClient(client) && GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
 		{
@@ -308,7 +308,7 @@ bool Gamemode_RoundStart()
 			Client[client].Class = 0;
 		}
 
-		if(client == GameSortSeed)
+		if(client == (GameSortSeed-1))
 			break;
 	}
 

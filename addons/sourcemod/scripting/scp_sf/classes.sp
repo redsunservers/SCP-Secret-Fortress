@@ -801,7 +801,7 @@ public bool Classes_DeathScp(int client, Event event)
 	if(attacker!=client && IsValidClient(attacker) && Classes_GetByIndex(Client[attacker].Class, attackerClass))
 	{
 		int weapon = event.GetInt("weaponid");
-		if(weapon>MaxClients && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")==594)
+		if(weapon>MaxClients && HasEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")==594)
 			GiveAchievement(Achievement_KillSCPMirco, attacker);
 
 		if(StrEqual(attackerClass.Name, "sci"))
