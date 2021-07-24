@@ -1050,7 +1050,7 @@
 	}
 	"spawn_ranout"	// Chat
 	{
-		"en"		"This team ran out of respawn tickets so less players have spawned in."
+		"en"		"This team didn't have enough respawn tickets for all players to spawn in."
 	}
 	"time_remaining"	// Game
 	{

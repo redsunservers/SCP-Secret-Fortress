@@ -855,7 +855,6 @@ public float Gamemode_WaveRespawnTickets(ArrayList &list, ArrayList &players)
 			length = wave.TicketsLeft;
 
 		wave.TicketsLeft -= length;
-		int ticketsleft = wave.TicketsLeft;
 		if(wave.Once)
 			wave.TicketsLeft = 0;
 
@@ -916,7 +915,7 @@ public float Gamemode_WaveRespawnTickets(ArrayList &list, ArrayList &players)
 			}
 		}
 
-		list = Gamemode_MakeClassList(wave.Classes, length>ticketsleft ? ticketsleft : length);
+		list = Gamemode_MakeClassList(wave.Classes, length);
 	}
 	return GetRandomFloat(WaveTimes[0], WaveTimes[1]);
 }

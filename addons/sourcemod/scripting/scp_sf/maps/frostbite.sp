@@ -508,7 +508,7 @@ public bool Seeldier_Create(int client)
 {
 	Classes_VipSpawn(client);
 
-	int weapon = SpawnWeapon(client, "tf_weapon_shovel", 6, 101, 5, "2 ; 3.1 ; 28 ; 0.5 ; 68 ; 2 ; 252 ; 0.6", 0);
+	int weapon = SpawnWeapon(client, "tf_weapon_shovel", 6, 101, 5, "2 ; 3.1 ; 28 ; 0.5 ; 68 ; 2 ; 252 ; 0.6 ; 476 ; 0.372", 0);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 20);
@@ -529,7 +529,7 @@ public bool Seeldier_Create(int client)
 
 public bool Seeldier2_Create(int client)
 {
-	int weapon = SpawnWeapon(client, "tf_weapon_shovel", 6, 101, 5, "15 ; 0", 0);
+	int weapon = SpawnWeapon(client, "tf_weapon_shovel", 6, 101, 5, "15 ; 0 ; 180 ; 200 ; 191 ; -2", 0);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 0);
@@ -635,7 +635,7 @@ public bool MTF105_OnGlow(int client, int target)
 
 public bool MTF076_Create(int client)
 {
-	int weapon = SpawnWeapon(client, "tf_weapon_sword", 266, 90, 13, "2 ; 101 ; 5 ; 1.1 ; 28 ; 0.25 ; 138 ; 0.061 ; 252 ; 0", 2);
+	int weapon = SpawnWeapon(client, "tf_weapon_sword", 266, 90, 13, "2 ; 101 ; 5 ; 1.1 ; 28 ; 0.25 ; 138 ; 0.0305 ; 252 ; 0", 2);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 18);
