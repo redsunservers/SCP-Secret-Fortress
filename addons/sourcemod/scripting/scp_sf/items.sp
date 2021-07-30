@@ -1060,10 +1060,15 @@ public Action Items_LogicerHit(int client, int victim, int &inflictor, float &da
 	return changed ? Plugin_Changed : Plugin_Continue;
 }
 
+public void Items_ExplosiveHit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	ClientCommand(victim, "dsp_player %d", GetRandomInt(32, 34));
+}
+
 public Action Items_FlashHit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
 	FadeMessage(victim, 36, 768, 0x0012);
-	FadeClientVolume(victim, 1.0, 2.0, 2.0, 0.2);
+	ClientCommand(victim, "dsp_player %d", GetRandomInt(35, 37));
 	return Plugin_Continue;
 }
 
