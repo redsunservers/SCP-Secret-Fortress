@@ -60,6 +60,7 @@ void ViewChange_Switch(int client)
 						SetEntProp(entity, Prop_Send, "m_usSolidFlags", 4);
 						SetEntProp(entity, Prop_Send, "m_CollisionGroup", 11);
 						SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", 1);
+						SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
 						DispatchSpawn(entity);
 						SetVariantString("!activator");
 						ActivateEntity(entity);
