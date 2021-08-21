@@ -1324,25 +1324,25 @@ public bool Items_RadioRadio(int client, int entity, float &multi)
 		case 1:
 		{
 			multi = 2.6;
-			if(time[client]+8.0 < engineTime)
+			if(time[client]+15.0 < engineTime)
 				remove = true;
 		}
 		case 2:
 		{
 			multi = 3.5;
-			if(time[client]+4.0 < engineTime)
+			if(time[client]+10.0 < engineTime)
 				remove = true;
 		}
 		case 3:
 		{
 			multi = 5.7;
-			if(time[client]+2.0 < engineTime)
+			if(time[client]+7.0 < engineTime)
 				remove = true;
 		}
 		case 4:
 		{
 			multi = 10.8;
-			if(time[client]+1.0 < engineTime)
+			if(time[client]+4.0 < engineTime)
 				remove = true;
 		}
 		default:

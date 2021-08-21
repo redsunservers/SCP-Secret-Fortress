@@ -24,7 +24,7 @@ public void SCP173_OnSpeed(int client, float &speed)
 			speed = 1.0;
 
 		case 2:
-			speed = FAR_FUTURE;
+			speed = 2300.0;
 	}
 }
 

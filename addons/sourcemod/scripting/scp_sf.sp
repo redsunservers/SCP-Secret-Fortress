@@ -1306,7 +1306,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target] && IsSpec(target)))
 			{
 				Client[target].ThinkIsDead[client] = true;
-				CPrintToChat(target, "*SPEC* %s{default}: %s", name, msg);
+				CPrintToChat(target, "*관전* %s{default}: %s", name, msg);
 			}
 		}
 	}
@@ -1315,7 +1315,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 		for(int target=1; target<=MaxClients; target++)
 		{
 			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target] && IsSpec(target)))
-				CPrintToChat(target, "*DEAD* %s{default}: %s", name, msg);
+				CPrintToChat(target, "*사망* %s{default}: %s", name, msg);
 		}
 	}
 	else if(Client[client].ComFor > engineTime)
@@ -1325,7 +1325,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target]))
 			{
 				Client[target].ThinkIsDead[client] = false;
-				CPrintToChat(target, "*COMM* %s{default}: %s", name, msg);
+				CPrintToChat(target, "*방송* %s{default}: %s", name, msg);
 			}
 		}
 	}
@@ -1365,7 +1365,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 						GetEntPropVector(target, Prop_Send, "m_vecOrigin", targetPos);
 						if(GetVectorDistance(clientPos, targetPos) > 400)
 						{
-							CPrintToChat(target, "*RADIO* %s{default}: %s", name, msg);
+							CPrintToChat(target, "*무전* %s{default}: %s", name, msg);
 							continue;
 						}
 					}
