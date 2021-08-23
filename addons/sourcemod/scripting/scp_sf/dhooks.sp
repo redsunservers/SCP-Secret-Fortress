@@ -170,7 +170,7 @@ public MRESReturn DHook_DoAnimationEventPre(int client, DHookParam param)
 public MRESReturn DHook_DropAmmoPackPre(int client, DHookParam param)
 {
 	//TODO: Remove this hook, move to OnEntityCreated and OnPlayerDeath
-	if(!param.Get(2) && !IsSpec(client))
+	if(!param.Get(2) && !IsSpec(client) && !IsSCP(client))
 		Items_DropAllItems(client);
 
 	return MRES_Supercede;

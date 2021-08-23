@@ -8,7 +8,7 @@
 	}
 	"hint_2"
 	{
-		"en"		"SCP-939-89 and SCP-939-53 can only see\nplayers if they moved or attacked recently.\n \nTry standing still if you haven't been spotted."
+		"en"		"SCP-939-89 and SCP-939-53 can only see\nplayers if they moved or attacked recently.\nTry standing still if you haven't been spotted."
 	}
 	"hint_3"
 	{
@@ -40,7 +40,7 @@
 	}
 	"hint_10"
 	{
-		"en"		"MTF can save Scientists by bringing them\ntowards one of the gates and letting them through.\n \nOnly Lieutenants and Commanders have access though."
+		"en"		"MTF can save Scientists by bringing them\ntowards one of the gates and letting them through.\nOnly Sergeants and Captains have access though."
 	}
 	"hint_11"
 	{
@@ -52,41 +52,37 @@
 	}
 	"hint_13"
 	{
-		"en"		"Iron Bomber can blind players but also yourself."
+		"en"		"Flash Grenades can be used blind other players and make your escape."
 	}
 	"hint_14"
 	{
-		"en"		"This is a work-in-progress gamemode.\nThere may be bugs and glitches.\nBut playing here helps the development!\n \nThanks for playing here and enjoy!"
+		"en"		"There may be useless hints."
 	}
 	"hint_15"
 	{
-		"en"		"There may be useless hints."
+		"en"		"All weapons can headshot except against SCPs."
 	}
 	"hint_16"
 	{
-		"en"		"All weapons can headshot except against SCPs."
+		"en"		"You can use ATTACK1, ATTACK2, or Call for Medic\nto pick up weapons & keycards."
 	}
 	"hint_17"
 	{
-		"en"		"You can use ATTACK1, ATTACK2, or Call for Medic\nto pick up weapons & keycards."
+		"en"		"To use a Health Kit, use ATTACK2 to drop the\nkit and stand over it until it's used."
 	}
 	"hint_18"
 	{
-		"en"		"To use a Health Kit, use ATTACK2 to drop the\nkit and stand over it until it's used."
+		"en"		"SCP-939-89 and SCP-939-53 are able to talk to humans."
 	}
 	"hint_19"
 	{
-		"en"		"SCP-939-89 and SCP-939-53 are able to talk to humans."
+		"en"		"SCPs can talk to each other from any distance."
 	}
 	"hint_20"
 	{
-		"en"		"SCPs can talk to each other from any distance."
-	}
-	"hint_21"
-	{
 		"en"		"SCP-3008-2 will only attack if attacked or during closing hours."
 	}
-	"hint_22"
+	"hint_21"
 	{
 		"en"		"Hold RELOAD to view description about the item your holding."
 	}
@@ -211,23 +207,35 @@
 	}
 	"class_chaos1"
 	{
-		"en"		"Chaos Insurgency Agent"
+		"en"		"Chaos Insurgency Riflemann"
 	}
 	"desc_chaos1"
 	{
-		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects.\nYour equipped with a AK-12"
+		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects."
 	}
 	"train_chaos1"
 	{
 		"en"		"You need to free Class-D Personnel from the facility.\nKill other teams to help Class-D Personnel escape.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
+	"class_chaosd"
+	{
+		"en"		"Chaos Insurgency Riflemann"
+	}
+	"desc_chaosd"
+	{
+		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects."
+	}
+	"train_chaosd"
+	{
+		"en"		"You need to free Class-D Personnel from the facility.\nKill other teams to help Class-D Personnel escape.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
+	}
 	"class_chaos2"
 	{
-		"en"		"Chaos Insurgency Agent"
+		"en"		"Chaos Insurgency Repressor"
 	}
 	"desc_chaos2"
 	{
-		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects.\nYour equipped with a Shotgun and Revolver"
+		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects."
 	}
 	"train_chaos2"
 	{
@@ -235,11 +243,11 @@
 	}
 	"class_chaos3"
 	{
-		"en"		"Chaos Insurgency Agent"
+		"en"		"Chaos Insurgency Marauder"
 	}
 	"desc_chaos3"
 	{
-		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects.\nYour equipped with a Logicer"
+		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects."
 	}
 	"train_chaos3"
 	{
@@ -271,7 +279,7 @@
 	}
 	"class_mtf1"
 	{
-		"en"		"Nine-Tailed Fox Cadet"
+		"en"		"Nine-Tailed Fox Private"
 	}
 	"desc_mtf1"
 	{
@@ -279,11 +287,11 @@
 	}
 	"train_mtf1"
 	{
-		"en"		"You need to free Scientists from the facility.\nStay with your lieutenants and commander.\nKeep in touch using the radio.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
+		"en"		"You need to free Scientists from the facility.\nStay with your sergeants and captain.\nKeep in touch using the radio.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_mtf2"
 	{
-		"en"		"Nine-Tailed Fox Lieutenant"
+		"en"		"Nine-Tailed Fox Sergeant"
 	}
 	"desc_mtf2"
 	{
@@ -291,23 +299,23 @@
 	}
 	"train_mtf2"
 	{
-		"en"		"You need to free Scientists from the facility.\nSupport your group of cadets, follow your commander.\nUse your radio too.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
+		"en"		"You need to free Scientists from the facility.\nSupport your group of privates, follow your captain.\nUse your radio too.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_mtfs"
 	{
-		"en"		"Nine-Tailed Fox Scientist"
+		"en"		"Nine-Tailed Fox Specialist"
 	}
 	"desc_mtfs"
 	{
-		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your commanders."
+		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your captain."
 	}
 	"train_mtfs"
 	{
-		"en"		"You escaped! Now free your other Scientists or prevent non-disarmed Class-D Personnel from escaping.\nTake down other SCPs too.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
+		"en"		"You need to free Scientists from the facility.\nSupport your group of privates, follow your captain.\nUse your radio too.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_mtf3"
 	{
-		"en"		"Nine-Tailed Fox Commander"
+		"en"		"Nine-Tailed Fox Captain"
 	}
 	"desc_mtf3"
 	{
@@ -335,11 +343,11 @@
 	}
 	"desc_scp049"
 	{
-		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nInteract with a recently-dead human to revive them as an ally."
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nSwitch to your knife with a recently-dead human to revive them as an ally."
 	}
 	"train_scp049"
 	{
-		"en"		"Your attacks one-shots humans.\nUse your Medi-Gun to revive dead players into SCP-049-2.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons and items."
+		"en"		"Your attacks one-shots humans.\nUse your knife to revive dead players into SCP-049-2.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_scp0492"
 	{
@@ -395,11 +403,11 @@
 	}
 	"desc_scp173"
 	{
-		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can only move while no one is looking."
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nATTACK2 to blink when ready.\nRELOAD to place a puddle trap.\nATTACK3 to sprint."
 	}
 	"train_scp173"
 	{
-		"en"		"Your attacks one-shots humans.\nYou can only move for a short time while being looked at.\nTry to time your attacks.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+		"en"		"Your attacks one-shots humans.\nYou can only move while not being looked at.\nYou can blink while being looked at.\nYou can press traps using RELOAD and sprint using ATTACK3.\nPress USE or use VOICEMENU to interact with buttons."
 	}
 	"class_scp1732"
 	{
@@ -407,11 +415,11 @@
 	}
 	"desc_scp1732"
 	{
-		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can only move while no one is looking."
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nATTACK2 to blink when ready.\nRELOAD to place a puddle trap.\nATTACK3 to sprint."
 	}
 	"train_scp1732"
 	{
-		"en"		"Your attacks one-shots humans.\nYou can only move for a short time while being looked at.\nTry to time your attacks.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+		"en"		"Your attacks one-shots humans.\nYou can only move while not being looked at.\nYou can blink while being looked at.\nYou can press traps using RELOAD and sprint using ATTACK3.\nPress USE or use VOICEMENU to interact with buttons."
 	}
 	"class_scp457"
 	{
@@ -570,7 +578,7 @@
 	}
 	"weapon_209"
 	{
-		"en"		"USP"
+		"en"		"COM-18 Sidearm"
 	}
 	"info_209"
 	{
@@ -578,19 +586,19 @@
 	}
 	"weapon_751"
 	{
-		"en"		"MP7"
+		"en"		"FSP-9"
 	}
 	"info_751"
 	{
 		"en"		"Weaker then the bunch but saves you some bullets when your on a budget."
 	}
-	"weapon_1150"
+	"weapon_1150"	// Backwards Compatibility
 	{
 		"en"		"Project 90"
 	}
 	"info_1150"
 	{
-		"en"		"Your personal SMG when you need it in a punch."
+		"en"		"Your personal rifle when you need it in a punch."
 	}
 	"weapon_203"
 	{
@@ -598,7 +606,7 @@
 	}
 	"info_203"
 	{
-		"en"		"Your personal rifle when you need it in a punch."
+		"en"		"Your personal SMG when you need it in a punch."
 	}
 	"weapon_425"
 	{
@@ -618,7 +626,7 @@
 	}
 	"weapon_1153"
 	{
-		"en"		"AK-12"
+		"en"		"AK"
 	}
 	"info_1153"
 	{
@@ -634,7 +642,7 @@
 	}
 	"weapon_61"
 	{
-		"en"		"Revolver"
+		"en"		".44 Revolver"
 	}
 	"info_61"
 	{
@@ -674,7 +682,7 @@
 	}
 	"weapon_308"
 	{
-		"en"		"Fragmentation Grenade"
+		"en"		"High-Explosive Grenade"
 	}
 	"info_308"
 	{
@@ -770,7 +778,7 @@
 	}
 	"weapon_30006"
 	{
-		"en"		"MTF Cadet Keycard"
+		"en"		"MTF Private Keycard"
 	}
 	"info_30006"
 	{
@@ -778,7 +786,7 @@
 	}
 	"weapon_30007"
 	{
-		"en"		"MTF Lieutenant Keycard"
+		"en"		"MTF Sergeant Keycard"
 	}
 	"info_30007"
 	{
@@ -786,7 +794,7 @@
 	}
 	"weapon_30008"
 	{
-		"en"		"MTF Commander Keycard"
+		"en"		"MTF Captain Keycard"
 	}
 	"info_30008"
 	{
@@ -890,11 +898,11 @@
 	}
 	"weapon_30019"
 	{
-		"en"		"Guard Armor"
+		"en"		"Light Armor"
 	}
 	"info_30019"
 	{
-		"en"		"1.16x damage resistance, 1.5x ammo capacity, 0.96x movement speed"
+		"en"		"Light damage resistance with no movement loss"
 	}
 	"weapon_30020"
 	{
@@ -902,7 +910,7 @@
 	}
 	"info_30020"
 	{
-		"en"		"1.26x damage resistance, 2x ammo capacity, 0.92x movement speed"
+		"en"		"Good damage resistance, extra reserve ammo, with some sprint loss"
 	}
 	"weapon_30021"
 	{
@@ -910,7 +918,7 @@
 	}
 	"info_30021"
 	{
-		"en"		"1.32x damage resistance, 3x ammo capacity, 0.88x movement speed"
+		"en"		"High damage resistance, extra reserve ammo, with some speed loss"
 	}
 
 
@@ -1083,17 +1091,9 @@
 		"#format"	"{1:s}"
 		"en"		"Sprint: {1}"
 	}
-	"switch"	// HUD
-	{
-		"en"		"ATTACK3 to switch items"
-	}
-	"help_switch"	// Hint
-	{
-		"en"		"%%+attack3%% Press to switch between items"
-	}
 	"help_sprint"	// Hint
 	{
-		"en"		"%%+jump%% Press and hold to use sprint"
+		"en"		"%%+attack3%% Press and hold to use sprint"
 	}
 	"end_screen"	// HUD
 	{
@@ -1130,7 +1130,7 @@
 	}
 	"106_create"	// Hint
 	{
-		"en"		"Portal created, use ATTACK3 to teleport"
+		"en"		"Portal created, use %%+attack3%% to teleport"
 	}
 	"106_create_deny"	// Hint
 	{
@@ -1138,7 +1138,7 @@
 	}
 	"106_create_none"	// Hint
 	{
-		"en"		"No portal created, use ATTACK2 to create one"
+		"en"		"No portal created, use %%+attack2%% to create one"
 	}
 	"106_tele_deny"	// Hint
 	{
@@ -1583,5 +1583,13 @@
 	{
 		"en"		"UR"
 		"ru"		"УД"
+	}
+	"help_switch"
+	{
+		"en"		"%%+attack3%% Press to switch between items"
+	}
+	"switch"
+	{
+		"en"		"ATTACK3 to switch items"
 	}
 }

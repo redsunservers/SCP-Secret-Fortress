@@ -1,3 +1,6 @@
+#define ITEMS_MAX	8
+#define AMMO_MAX		8
+
 enum struct ClassEnum
 {
 	char Name[16];
@@ -28,9 +31,10 @@ enum struct ClassEnum
 	char Color[16];
 	int Color4[4];
 
-	int Ammo[Ammo_MAX];
-	int MaxAmmo[Ammo_MAX];
+	int Ammo[AMMO_MAX];
+	int MaxAmmo[AMMO_MAX];
 	int Items[12];
+	int MaxItems[ITEMS_MAX];
 
 	Function OnAnimation;	// Action(int client, PlayerAnimEvent_t &anim, int &data)
 	Function OnButton;	// void(int client, int button)
@@ -222,6 +226,20 @@ static void GrabKvValues(KeyValues kv, ClassEnum class, ClassEnum defaul, int in
 		class.Items = defaul.Items;
 	}
 
+	if(kv.JumpToKey("maxitems"))
+	{
+		for(int i; i<sizeof(class.MaxItems); i++)
+		{
+			IntToString(i, num, sizeof(num));
+			class.MaxItems[i] = kv.GetNum(num, defaul.MaxItems[i]);
+		}
+		kv.GoBack();
+	}
+	else
+	{
+		class.MaxItems = defaul.MaxItems;
+	}
+
 	if(kv.JumpToKey("precache"))
 	{
 		for(int i=1; ; i++)
@@ -349,7 +367,8 @@ void Classes_PlayerSpawn(int client)
 			SetEntityHealth(client, class.Health);
 
 			// Weapon stuff
-			for(int i; i<sizeof(class.Items); i++)
+			int i;
+			for(; i<sizeof(class.Items); i++)
 			{
 				if(!class.Items[i])
 					break;
@@ -357,8 +376,11 @@ void Classes_PlayerSpawn(int client)
 				Items_CreateWeapon(client, class.Items[i], !i, true);
 			}
 
+			if(i > 1)
+				Items_ShowItemMenu(client);
+
 			// Ammo stuff
-			for(int i; i<Ammo_MAX; i++)
+			for(i=0; i<AMMO_MAX; i++)
 			{
 				SetEntProp(client, Prop_Data, "m_iAmmo", class.Ammo[i], _, i);
 			}
@@ -431,7 +453,7 @@ void Classes_SpawnPoint(int client, int index)
 
 int Classes_GetMaxAmmo(int client, int type)
 {
-	if(type>=0 && type<Ammo_MAX)
+	if(type>=0 && type<AMMO_MAX)
 	{
 		ClassEnum class;
 		if(Classes_GetByIndex(Client[client].Class, class))
@@ -444,16 +466,27 @@ int Classes_GetMaxAmmo(int client, int type)
 	return 0;
 }
 
-void Classes_GetMaxAmmoList(int client, int ammo[Ammo_MAX])
+void Classes_GetMaxAmmoList(int client, int ammo[AMMO_MAX])
 {
 	ClassEnum class;
 	if(Classes_GetByIndex(Client[client].Class, class))
 	{
-		for(int i; i<Ammo_MAX; i++)
+		for(int i; i<AMMO_MAX; i++)
 		{
 			ammo[i] = class.MaxAmmo[i];
 		}
 	}
+}
+
+int Classes_GetMaxItems(int client, int type)
+{
+	if(type>=0 && type<ITEMS_MAX)
+	{
+		ClassEnum class;
+		if(Classes_GetByIndex(Client[client].Class, class))
+			return class.MaxItems[type];
+	}
+	return 0;
 }
 
 int Classes_GetMaxHealth(int client)
@@ -948,13 +981,13 @@ public void Classes_CondDBoi(int client, TFCond cond)
 			if(Client[client].Disarmer)
 			{
 				Gamemode_AddValue("dcapture");
-				index = Classes_GetByName("mtf1", class);
+				index = Classes_GetByName("mtfs", class);
 			}
 			else
 			{
 				Gamemode_AddValue("descape");
 				GiveAchievement(Achievement_EscapeDClass, client);
-				index = Classes_GetByName("chaos", class);
+				index = Classes_GetByName("chaosd", class);
 
 				if(Client[client].Extra2)
 					GiveAchievement(Achievement_Escape207, client);
@@ -962,55 +995,7 @@ public void Classes_CondDBoi(int client, TFCond cond)
 				if(RoundStartAt > engineTime-180.0)
 					GiveAchievement(Achievement_EscapeSpeed, client);
 
-				if(Items_GetItemsOfType(client, Item_SCP) > 1)
-					GiveAchievement(Achievement_FindSCP, client);
-			}
-
-			if(index == -1)
-			{
-				index = 0;
-			}
-			else
-			{
-				Gamemode_GiveTicket(class.Group, 1);
-			}
-
-			Items_DropAllItems(client);
-			Forward_OnEscape(client, Client[client].Disarmer);
-			Client[client].Class = index;
-			TF2_RespawnPlayer(client);
-			CreateTimer(0.3, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
-		}
-	}
-}
-
-public void Classes_CondDBoiAlt(int client, TFCond cond)
-{
-	if(cond == TFCond_TeleportedGlow)
-	{
-		float engineTime = GetEngineTime();
-		if(Client[client].IgnoreTeleFor < engineTime)
-		{
-			int index;
-			ClassEnum class;
-			if(Client[client].Disarmer)
-			{
-				Gamemode_AddValue("dcapture");
-				index = Classes_GetByName("mtf1", class);
-			}
-			else
-			{
-				Gamemode_AddValue("descape");
-				GiveAchievement(Achievement_EscapeDClass, client);
-				index = Classes_GetByName("chaos2", class);
-
-				if(Client[client].Extra2)
-					GiveAchievement(Achievement_Escape207, client);
-
-				if(RoundStartAt > engineTime-180.0)
-					GiveAchievement(Achievement_EscapeSpeed, client);
-
-				if(Items_GetItemsOfType(client, Item_SCP) > 1)
+				if(Items_GetItemsOfType(client, 5) > 1)
 					GiveAchievement(Achievement_FindSCP, client);
 			}
 
@@ -1044,52 +1029,7 @@ public void Classes_CondSci(int client, TFCond cond)
 			if(Client[client].Disarmer)
 			{
 				Gamemode_AddValue("scapture");
-				index = Classes_GetByName("chaos", class);
-			}
-			else
-			{
-				Gamemode_AddValue("sescape");
-				GiveAchievement(Achievement_EscapeDClass, client);
-				index = Classes_GetByName("mtfs", class);
-
-				if(Client[client].Extra2)
-					GiveAchievement(Achievement_Escape207, client);
-
-				if(RoundStartAt > engineTime-180.0)
-					GiveAchievement(Achievement_EscapeSpeed, client);
-			}
-
-			if(index == -1)
-			{
-				index = 0;
-			}
-			else
-			{
-				Gamemode_GiveTicket(class.Group, Client[client].Disarmer ? 2 : 1);
-			}
-
-			Items_DropAllItems(client);
-			Forward_OnEscape(client, Client[client].Disarmer);
-			Client[client].Class = index;
-			TF2_RespawnPlayer(client);
-			CreateTimer(0.3, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
-		}
-	}
-}
-
-public void Classes_CondSciAlt(int client, TFCond cond)
-{
-	if(cond == TFCond_TeleportedGlow)
-	{
-		float engineTime = GetEngineTime();
-		if(Client[client].IgnoreTeleFor < engineTime)
-		{
-			int index;
-			ClassEnum class;
-			if(Client[client].Disarmer)
-			{
-				Gamemode_AddValue("scapture");
-				index = Classes_GetByName("chaos1", class);
+				index = Classes_GetByName("chaosd", class);
 			}
 			else
 			{
@@ -1125,6 +1065,11 @@ public void Classes_CondSciAlt(int client, TFCond cond)
 public bool Classes_GlowHuman(int client, int victim)
 {
 	return Client[client].Disarmer==victim;
+}
+
+public bool Classes_SeeHuman(int client, int victim)
+{
+	return (victim<1 || victim>MaxClients || (IsFriendly(Client[client].Class, Client[victim].Class) || (!TF2_IsPlayerInCondition(victim, TFCond_Stealthed) && !TF2_IsPlayerInCondition(victim, TFCond_StealthedUserBuffFade))));
 }
 
 public bool Classes_PickupStandard(int client, int entity)
@@ -1350,7 +1295,7 @@ public Action Classes_SoundScp(int client, char sample[PLATFORM_MAX_PATH], int &
 public float Classes_SpeedHuman(int client, float &speed)
 {
 	if(Client[client].Extra2)
-		speed += speed*(Client[client].Extra2*0.2);
+		speed += speed*(Client[client].Extra2*0.125);
 }
 
 public float Classes_GhostTheme(int client, char path[PLATFORM_MAX_PATH])

@@ -242,6 +242,19 @@ public Action SCP0492_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &c
 
 public void SCP049_OnButton(int client, int button)
 {
+	if(button & IN_ATTACK2)
+	{
+		int melee = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+		if(melee == GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon"))
+		{
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary));
+		}
+		else
+		{
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", melee);
+		}
+	}
+
 	float engineTime = GetEngineTime();
 	if(Revive[client].GoneAt > engineTime)
 		return;
@@ -293,7 +306,7 @@ public void SCP049_OnButton(int client, int button)
 		{
 			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 
-			target = SpawnWeapon(client, "tf_weapon_fists", 195, 80, 13, "138 ; 11 ; 252 ; 0.2", false);
+			target = SpawnWeapon(client, "tf_weapon_bonesaw", 310, 80, 13, "138 ; 11 ; 252 ; 0.2", false);
 			if(target > MaxClients)
 			{
 				ApplyStrangeRank(target, 6);

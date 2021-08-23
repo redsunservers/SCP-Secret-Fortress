@@ -55,7 +55,7 @@ public void SCP457_OnKill(int client, int victim)
 		pack.WriteCell(GetClientUserId(victim));
 	}
 
-	ApplyHealEvent(client, client, newHealth-health);
+	ApplyHealEvent(client, newHealth-health);
 	SetEntityHealth(client, newHealth);
 }
 

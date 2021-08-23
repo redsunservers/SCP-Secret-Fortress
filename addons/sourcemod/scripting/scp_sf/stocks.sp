@@ -688,6 +688,14 @@ stock void SetSpeed(int client, float speed)
 	SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", speed);
 }
 
+void constrainDistance(const float[] startPoint, float[] endPoint, float distance, float maxDistance)
+{
+	float constrainFactor = maxDistance / distance;
+	endPoint[0] = ((endPoint[0] - startPoint[0]) * constrainFactor) + startPoint[0];
+	endPoint[1] = ((endPoint[1] - startPoint[1]) * constrainFactor) + startPoint[1];
+	endPoint[2] = ((endPoint[2] - startPoint[2]) * constrainFactor) + startPoint[2];
+}
+
 void FadeMessage(int client, int arg1, int arg2, int arg3, int arg4=255, int arg5=255, int arg6=255, int arg7=255)
 {
 	Handle msg = StartMessageOne("Fade", client);
@@ -1164,13 +1172,12 @@ public Action Timer_Healing(Handle timer, DataPack pack)
 	return Plugin_Continue;
 }
 
-void ApplyHealEvent(int patient, int healer, int amount)
+void ApplyHealEvent(int entindex, int amount)
 {
-	Event event = CreateEvent("player_healed", true);
+	Event event = CreateEvent("player_healonhit", true);
 
-	event.SetInt("patient", patient);
-	event.SetInt("healer", healer);
-	event.SetInt("heals", amount);
+	event.SetInt("entindex", entindex);
+	event.SetInt("amount", amount);
 
 	event.Fire();
 }
@@ -1299,10 +1306,10 @@ bool IsSpec(int client)
 static bool ResizeTraceFailed;
 public bool Resize_TracePlayersAndBuildings(int entity, int contentsMask, any data)
 {
-	if(entity>0 && entity<=MaxClients && IsPlayerAlive(entity))
+	if(entity>0 && entity<=MaxClients/* && IsPlayerAlive(entity)*/)
 	{
-		if(GetClientTeam(entity) != data)
-			ResizeTraceFailed = true;
+		//if(GetClientTeam(entity) != data)
+			//ResizeTraceFailed = true;
 	}
 	else if(IsValidEntity(entity))
 	{
@@ -1440,7 +1447,7 @@ bool Resize_TestSquare(const float bossOrigin[3], float xmin, float xmax, float 
 bool IsSpotSafe(int clientIdx, float playerPos[3], float sizeMultiplier)
 {
 	ResizeTraceFailed = false;
-	ResizeMyTeam = GetClientTeam(clientIdx);
+	int team = GetClientTeam(clientIdx);
 	static float mins[3];
 	static float maxs[3];
 	mins[0] = -24.0 * sizeMultiplier;

@@ -15,6 +15,24 @@ void SDKHook_HookClient(int client)
 	SDKHook(client, SDKHook_PostThinkPost, OnPostThinkPost);
 }
 
+void SDKHook_DealDamage(int client, int inflictor, int attacker, float damage, int damagetype=DMG_GENERIC, int weapon=-1, const float damageForce[3]=NULL_VECTOR, const float damagePosition[3]=NULL_VECTOR)
+{
+	int inflictor2 = inflictor;
+	int attacker2 = attacker;
+	float damage2 = damage;
+	int damagetype2 = damagetype;
+	int weapon2 = weapon;
+	float damageForce2[3], damagePosition2[3];
+	for(int i; i<3; i++)
+	{
+		damageForce2[i] = damageForce[i];
+		damagePosition2[i] = damagePosition[i];
+	}
+
+	if(OnTakeDamage(client, inflictor2, attacker2, damage2, damagetype2, weapon2, damageForce2, damagePosition2, -1) < Plugin_Handled)
+		SDKHooks_TakeDamage(client, inflictor2, attacker2, damage2, damagetype2, weapon2, damageForce2, damagePosition2);
+}
+
 public void OnEntityCreated(int entity, const char[] classname)
 {
 	if(StrEqual(classname, "item_healthkit_small"))
@@ -49,7 +67,7 @@ public Action OnSmallPickup(int entity, int client)
 	if(!Enabled || !IsValidClient(client))
 		return Plugin_Continue;
 
-	if(!IsSCP(client) && !Client[client].Disarmer && Items_CanGiveItem(client, Item_Medical))
+	if(!IsSCP(client) && !Client[client].Disarmer && Items_CanGiveItem(client, 3))
 	{
 		Items_CreateWeapon(client, 30013, false, true, true);
 		AcceptEntityInput(entity, "Kill");
@@ -78,7 +96,7 @@ public Action OnMedPickup(int entity, int client)
 					return Plugin_Continue;
 				}
 			}
-			else if(!Client[client].Disarmer && Items_CanGiveItem(client, Item_Medical))
+			else if(!Client[client].Disarmer && Items_CanGiveItem(client, 3))
 			{
 				Items_CreateWeapon(client, 30014, false, true, true);
 				AcceptEntityInput(entity, "Kill");
@@ -217,7 +235,7 @@ static void OnWeaponSwitchFrame(int userid)
 	int client = GetClientOfUserId(userid);
 	if(client && IsClientInGame(client))
 	{
-		int ammo[Ammo_MAX];
+		/*int ammo[Ammo_MAX];
 		for(int i=1; i<Ammo_MAX; i++)
 		{
 			ammo[i] = GetEntProp(client, Prop_Data, "m_iAmmo", _, i);
@@ -234,8 +252,9 @@ static void OnWeaponSwitchFrame(int userid)
 			int type = GetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType");
 			if(type>0 && type<Ammo_MAX && ammo[type]<1)
 				TF2_RemoveItem(client, entity);
-		}
+		}*/
 
+		Items_ShowItemMenu(client);
 		ViewChange_Switch(client);
 	}
 }
