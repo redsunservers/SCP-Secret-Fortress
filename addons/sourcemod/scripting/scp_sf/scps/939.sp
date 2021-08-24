@@ -49,7 +49,7 @@ public void SCP939_OnSpeed(int client, float &speed)
 
 public Action SCP939_OnDealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	if(Client[victim].IdleAt > GetEngineTime())
+	if(Client[victim].IdleAt < GetEngineTime())
 	{
 		damage = 60.0;
 		damagetype &= ~DMG_CRIT;

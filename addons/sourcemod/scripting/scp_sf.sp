@@ -1963,6 +1963,10 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 	{
 		holding[client] = IN_RELOAD;
 	}
+	else if(buttons & IN_ATTACK3)
+	{
+		holding[client] = IN_ATTACK3;
+	}
 
 	// Check if the player moved at all or is speaking
 	#if SOURCEMOD_V_MAJOR==1 && SOURCEMOD_V_MINOR<=10

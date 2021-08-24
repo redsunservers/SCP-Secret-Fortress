@@ -1080,7 +1080,7 @@ void RemoveAndSwitchItem(int client, int weapon)
 	TF2_RemoveItem(client, weapon);
 }
 
-static void SpawnPlayerPickup(int client, const char[] classname)
+static void SpawnPlayerPickup(int client, const char[] classname, bool timed=false)
 {
 	int entity = CreateEntityByName(classname);
 	if(entity > MaxClients)
@@ -1095,6 +1095,9 @@ static void SpawnPlayerPickup(int client, const char[] classname)
 		SetEntityMoveType(entity, MOVETYPE_VPHYSICS);
 
 		TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
+
+		if(timed)
+			CreateTimer(0.1, Timer_RemoveEntity, EntIndexToEntRef(entity), TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
 
@@ -1442,7 +1445,7 @@ public bool Items_500Button(int client, int weapon, int &buttons, int &holding)
 		if(GetClientHealth(client) < 26)
 			GiveAchievement(Achievement_Survive500, client);
 
-		SpawnPlayerPickup(client, "item_healthkit_full");
+		SpawnPlayerPickup(client, "item_healthkit_full", true);
 		StartHealingTimer(client, 0.334, 1, 36, true);
 		Client[client].Extra2 = 0;
 

@@ -5,7 +5,7 @@ static const int HealthMax = 2000;	// Max standard health
 static const int HealthExtra = 1500;	// Max regenerable health
 static const int HealthKill = 150;	// Health gain on stunned kill
 
-static const float DistanceMax = 600.0;	// Teleport distance
+static const float DistanceMax = 750.0;	// Teleport distance
 
 static int Health[MAXTF2PLAYERS];
 static int ModelRef[MAXTF2PLAYERS] = {INVALID_ENT_REFERENCE, ...};
@@ -213,6 +213,7 @@ public void SCP173_OnButton(int client, int button)
 				SetEntPropFloat(client, Prop_Send, "m_flNextAttack", 0.0);
 				SetEntProp(client, Prop_Send, "m_bUseClassAnimations", true);
 				SetEntProp(client, Prop_Send, "m_bCustomModelRotates", true);
+				TF2_AddCondition(client, TFCond_Slowed, 0.1);
 				SDKCall_SetSpeed(client);
 			}
 		}
@@ -285,7 +286,7 @@ public void SCP173_OnButton(int client, int button)
 				TeleportEntity(client, pos2, NULL_VECTOR, NULL_VECTOR);
 
 				int victim;
-				float distance = 9000.0;
+				float distance = 10000.0;
 				for(int target=1; target<=MaxClients; target++)
 				{
 					if(target==client || IsInvuln(target) || IsFriendly(Client[client].Class, Client[target].Class))
@@ -392,7 +393,7 @@ public Action SCP173_PuddleTimer(Handle timer, DataPack pack)
 			{
 				static float pos2[3];
 				GetClientAbsOrigin(target, pos2);
-				if(GetVectorDistance(pos1, pos2, true) < 1800.0)
+				if(GetVectorDistance(pos1, pos2, true) < 2300.0)
 					TF2_StunPlayer(target, 3.0, 0.2, TF_STUNFLAG_SLOWDOWN);
 			}
 		}

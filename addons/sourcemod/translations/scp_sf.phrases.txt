@@ -640,6 +640,14 @@
 	{
 		"en"		"The best melee weapon in the game."
 	}
+	"weapon_200"
+	{
+		"en"		"Shotgun"
+	}
+	"info_200"
+	{
+		"en"		"The best melee weapon in the game."
+	}
 	"weapon_61"
 	{
 		"en"		".44 Revolver"

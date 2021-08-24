@@ -244,14 +244,16 @@ public void SCP049_OnButton(int client, int button)
 {
 	if(button & IN_ATTACK2)
 	{
-		int melee = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
-		if(melee == GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon"))
+		int entity = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+		if(entity == GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon"))
 		{
-			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary));
+			entity = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
+			if(entity > MaxClients)
+				SetActiveWeapon(client, entity);
 		}
-		else
+		else if(entity > MaxClients)
 		{
-			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", melee);
+			SetActiveWeapon(client, entity);
 		}
 	}
 
