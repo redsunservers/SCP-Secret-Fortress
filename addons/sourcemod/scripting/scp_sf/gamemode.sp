@@ -817,6 +817,56 @@ public bool Gamemode_ConditionVip(TFTeam &team)
 	return true;
 }
 
+public bool Gamemode_ConditionBoss(TFTeam &team)
+{
+	ClassEnum class;
+	for(int i=1; i<=MaxClients; i++)
+	{
+		if(!IsValidClient(i) || IsSpec(i) || !Classes_GetByIndex(Client[i].Class, class))
+			continue;
+
+		if(class.Vip)
+			return false;
+	}
+
+	int descape, dtotal;
+	GameInfo.GetValue("descape", descape);
+	GameInfo.GetValue("dtotal", dtotal);
+
+	int group;
+	if(descape)
+	{
+		for(int i=1; i<=MaxClients; i++)
+		{
+			if(IsValidClient(i) && !IsSpec(i) && GetClientTeam(i)==view_as<int>(TFTeam_Red))
+				ChangeClientTeamEx(i, TFTeam_Red);
+		}
+
+		team = TFTeam_Blue;
+		group = 2;
+	}
+	else
+	{
+		team = TFTeam_Unassigned;
+		group = 3;
+	}
+
+	EndRoundRelay(group);
+
+	char buffer[16];
+	FormatEx(buffer, sizeof(buffer), "team_%d", group);
+	SetHudTextParamsEx(-1.0, 0.3, 17.5, TeamColors[group], {255, 255, 255, 255}, 1, 2.0, 1.0, 1.0);
+	for(int client=1; client<=MaxClients; client++)
+	{
+		if(!IsValidClient(client))
+			continue;
+
+		SetGlobalTransTarget(client);
+		ShowSyncHudText(client, HudGame, "%t", "end_screen_boss", buffer, descape, dtotal);
+	}
+	return true;
+}
+
 public float Gamemode_WaveStartCountdown(ArrayList &list, ArrayList &players)
 {
 	EndRoundIn = GetEngineTime()+121.0;

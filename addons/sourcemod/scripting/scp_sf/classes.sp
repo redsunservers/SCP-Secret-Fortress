@@ -1074,6 +1074,9 @@ public bool Classes_SeeHuman(int client, int victim)
 
 public bool Classes_PickupStandard(int client, int entity)
 {
+	if(Client[client].Disarmer)
+		return false;
+
 	char buffer[64];
 	GetEntityClassname(entity, buffer, sizeof(buffer));
 	if(StrEqual(buffer, "func_button"))
@@ -1187,6 +1190,10 @@ public bool Classes_PickupStandard(int client, int entity)
 							AcceptEntityInput(entity, "FireUser4", client, client);
 					}
 					return true;
+				}
+				else
+				{
+					return SZF_Pickup(client, entity, buffer);
 				}
 			}
 		}

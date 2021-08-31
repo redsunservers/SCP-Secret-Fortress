@@ -1223,6 +1223,54 @@ stock void EmitSoundToAll2(const char[] sample,
 	}
 }
 
+void AnglesToVelocity(const float ang[3], float vel[3], float speed=1.0)
+{
+	vel[0] = Cosine(DegToRad(ang[1]));
+	vel[1] = Sine(DegToRad(ang[1]));
+	vel[2] = Sine(DegToRad(ang[0])) * -1.0;
+	
+	NormalizeVector(vel, vel);
+	
+	ScaleVector(vel, speed);
+}
+
+bool ObstactleBetweenEntities(int entity1, int entity2)
+{
+	static float pos1[3], pos2[3];
+	if(IsValidClient(entity1))
+	{
+		GetClientEyePosition(entity1, pos1);
+	}
+	else
+	{
+		GetEntPropVector(entity1, Prop_Send, "m_vecOrigin", pos1);
+	}
+
+	GetEntPropVector(entity2, Prop_Send, "m_vecOrigin", pos2);
+
+	Handle trace = TR_TraceRayFilterEx(pos1, pos2, MASK_ALL, RayType_EndPoint, Trace_DontHitEntity, entity1);
+
+	bool hit = TR_DidHit(trace);
+	int index = TR_GetEntityIndex(trace);
+	delete trace;
+
+	if(!hit || index!=entity2)
+		return true;
+
+	return false;
+}
+
+bool IsEntityStuck(int entity)
+{
+	static float min[3], max[3], pos[3];
+	GetEntPropVector(entity, Prop_Send, "m_vecMins", min);
+	GetEntPropVector(entity, Prop_Send, "m_vecMaxs", max);
+	GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
+	
+	TR_TraceHullFilter(pos, pos, min, max, MASK_SOLID, Trace_DontHitEntity, entity);
+	return (TR_DidHit());
+}
+
 int TF2_CreateGlow(int client, const char[] model)
 {
 	int prop = CreateEntityByName("tf_taunt_prop");

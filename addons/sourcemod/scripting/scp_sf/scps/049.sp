@@ -468,6 +468,8 @@ public void SCP049_Think(int client)
 			return;
 		}
 
+		ChangeClientTeamEx(client, view_as<TFTeam>(GetEntProp(entity, Prop_Send, "m_iTeamNum")));
+
 		// get position to teleport the Marker to
 		static float position[3];
 		GetEntPropVector(client, Prop_Send, "m_vecOrigin", position);

@@ -190,6 +190,7 @@ ClientEnum Client[MAXTF2PLAYERS];
 
 #include "scp_sf/maps/frostbite.sp"
 #include "scp_sf/maps/ikea.sp"
+#include "scp_sf/maps/szf.sp"
 
 // SourceMod Events
 
@@ -514,6 +515,7 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 		AcceptEntityInput(entity, "Disable");
 	}
 
+	SZF_RoundStart();
 	Items_RoundStart();
 
 	NoAchieve = !CvarAchievement.BoolValue;
@@ -944,6 +946,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 								if(canGive && entity>MaxClients && IsValidEntity(entity))
 								{
 									SetActiveWeapon(client, entity);
+									SZF_DropItem(client);
 								}
 								else
 								{
@@ -1057,6 +1060,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 		return;
 
 	ViewModel_Destroy(client);
+	SZF_DropItem(client, false);
 
 	Client[client].ResetThinkIsDead();
 	Client[client].Sprinting = false;
@@ -1722,6 +1726,7 @@ public Action Command_ForceAmmo(int client, int args)
 
 public void OnClientDisconnect(int client)
 {
+	SZF_DropItem(client);
 	CreateTimer(1.0, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
 }
 
@@ -1781,6 +1786,8 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 		CancelClientMenu(client);
 		RequestFrame(UpdateListenOverrides, engineTime);
 	}
+
+	SZF_DropItem(client);
 
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
 	if(client!=attacker && IsValidClient(attacker))
@@ -1886,6 +1893,8 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 		}
 	}
 
+	SZF_PlayerRunCmd(client);
+
 	if(Client[client].InvisFor)
 	{
 		if(Client[client].InvisFor > engineTime)
@@ -1983,7 +1992,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 	static float specialTick[MAXTF2PLAYERS];
 	if(specialTick[client] < engineTime)
 	{
-		bool showHud = (Client[client].HudIn<engineTime && !(GetClientButtons(client) & IN_SCORE));
+		bool showHud = (Client[client].HudIn<engineTime && !SZF_Enabled() && !(GetClientButtons(client) & IN_SCORE));
 		specialTick[client] = engineTime+0.2;
 
 		static char buffer[PLATFORM_MAX_PATH];

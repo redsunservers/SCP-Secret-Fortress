@@ -36,6 +36,7 @@ enum struct WeaponEnum
 	char Model[PLATFORM_MAX_PATH];
 	int Viewmodel;
 	int Skin;
+	int Rarity;
 
 	Function OnAmmo;		// void(int client, int type, int &ammo)
 	Function OnButton;	// Action(int client, int weapon, int &buttons, int &holding)
@@ -84,6 +85,7 @@ void Items_Setup(KeyValues main, KeyValues map)
 		weapon.Bullet = kv.GetNum("bullet");
 		weapon.Type = kv.GetNum("type");
 		weapon.Skin = kv.GetNum("skin", -1);
+		weapon.Rarity = kv.GetNum("rarity", -1);
 
 		weapon.Strip = view_as<bool>(kv.GetNum("strip"));
 		weapon.Hide = view_as<bool>(kv.GetNum("hide"));
@@ -157,6 +159,41 @@ bool Items_GetWeaponByIndex(int index, WeaponEnum weapon)
 			return true;
 	}
 	return false;
+}
+
+bool Items_GetWeaponByModel(const char[] model, WeaponEnum weapon)
+{
+	int length = Weapons.Length;
+	for(int i; i<length; i++)
+	{
+		Weapons.GetArray(i, weapon);
+		if(StrEqual(model, weapon.Model, false))
+			return true;
+	}
+	return false;
+}
+
+bool Items_GetRandomWeapon(int rarity, WeaponEnum weapon)
+{
+	ArrayList list = new ArrayList();
+	int length = Weapons.Length;
+	for(int i; i<length; i++)
+	{
+		Weapons.GetArray(i, weapon);
+		if(weapon.Rarity == rarity)
+			list.Push(i);
+	}
+
+	length = list.Length;
+	if(length < 1)
+	{
+		delete list;
+		return false;
+	}
+
+	Weapons.GetArray(list.Get(GetRandomInt(0, length-1)), weapon);
+	delete list;
+	return true;
 }
 
 int Items_Iterator(int client, int &index, bool all=false)
@@ -433,7 +470,10 @@ int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, 
 			}
 
 			if(!wearable && equip)
+			{
 				SetActiveWeapon(client, entity);
+				SZF_DropItem(client);
+			}
 
 			Items_ShowItemMenu(client);
 			Forward_OnWeapon(client, entity);
@@ -500,6 +540,7 @@ void Items_SwitchItem(int client, int holding)
 					int entity = list.Get(i);
 					Items_SwapWeapons(client, entity, holding);
 					SetActiveWeapon(client, entity);
+					SZF_DropItem(client);
 					Items_ShowItemMenu(client);
 					found = true;
 					break;
@@ -865,7 +906,10 @@ public int Items_ShowItemMenuH(Menu menu, MenuAction action, int client, int cho
 				{
 					entity = EntRefToEntIndex(entity);
 					if(entity > MaxClients)
+					{
 						SetActiveWeapon(client, entity);
+						SZF_DropItem(client);
+					}
 				}
 
 				Items_ShowItemMenu(client);
@@ -1197,6 +1241,7 @@ public Action Items_DisarmerHit(int client, int victim, int &inflictor, float &d
 					EndMessage();
 				}
 
+				SZF_DropItem(victim);
 				Items_DropAllItems(victim);
 				for(int i; i<AMMO_MAX; i++)
 				{
