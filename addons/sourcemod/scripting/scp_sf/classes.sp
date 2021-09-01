@@ -325,6 +325,38 @@ int Classes_GetByName(const char[] name, ClassEnum class=0)
 	return -1;
 }
 
+bool Classes_AssignClass(int client, ClassSpawnEnum context, int &index)
+{
+	ClassEnum class;
+	if(!Classes_GetByIndex(index, class))
+	{
+		index = 0;
+		Classes_GetByIndex(index, class);
+	}
+
+	switch(Forward_OnClassPre(client, context, class.Name, sizeof(class.Name)))
+	{
+		case Plugin_Changed:
+		{
+			index = Classes_GetByName(class.Name);
+			if(index == -1)
+				index = 0;
+		}
+		case Plugin_Handled, Plugin_Stop:
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+void Classes_AssignClassPost(int client, ClassSpawnEnum context)
+{
+	ClassEnum class;
+	if(Classes_GetByIndex(Client[client].Class, class))
+		Forward_OnClass(client, context, class.Name);
+}
+
 void Classes_PlayerSpawn(int client)
 {
 	ClassEnum class;
@@ -815,11 +847,13 @@ public bool Classes_VipSpawn(int client)
 
 public void Classes_MoveToSpec(int client, Event event)
 {
-	int index = Classes_GetByName("spec");
-	if(index == -1)
-		index = 0;
-
-	Client[client].Class = index;
+	char buffer[16] = "spec";
+	int index = Classes_GetByName(buffer);
+	if(Classes_AssignClass(client, ClassSpawn_Death, index))
+	{
+		Client[client].Class = index;
+		Classes_AssignClassPost(client, ClassSpawn_Death);
+	}
 }
 
 public bool Classes_DeathScp(int client, Event event)
@@ -902,7 +936,7 @@ public void Classes_KillDBoi(int client, int victim)
 	if(Classes_GetByName("sci") == Client[victim].Class)
 	{
 		if(Items_OnKeycard(victim, Access_Main))
-			GiveAchievement(Achievement_KillSCPSci, client);
+			GiveAchievement(Achievement_KillSci, client);
 
 		ClassEnum class;
 		if(Classes_GetByIndex(Client[client].Class, class))
@@ -1002,6 +1036,7 @@ public void Classes_CondDBoi(int client, TFCond cond)
 			if(index == -1)
 			{
 				index = 0;
+				Classes_GetByIndex(0, class);
 			}
 			else
 			{
@@ -1010,9 +1045,14 @@ public void Classes_CondDBoi(int client, TFCond cond)
 
 			Items_DropAllItems(client);
 			Forward_OnEscape(client, Client[client].Disarmer);
-			Client[client].Class = index;
-			TF2_RespawnPlayer(client);
-			CreateTimer(0.3, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
+
+			if(Classes_AssignClass(client, ClassSpawn_Escape, index))
+			{
+				Client[client].Class = index;
+				TF2_RespawnPlayer(client);
+				Classes_AssignClassPost(client, ClassSpawn_Escape);
+				CreateTimer(0.3, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
+			}
 		}
 	}
 }
@@ -1034,7 +1074,7 @@ public void Classes_CondSci(int client, TFCond cond)
 			else
 			{
 				Gamemode_AddValue("sescape");
-				GiveAchievement(Achievement_EscapeDClass, client);
+				GiveAchievement(Achievement_EscapeSci, client);
 				index = Classes_GetByName("mtfs", class);
 
 				if(Client[client].Extra2)
@@ -1047,6 +1087,7 @@ public void Classes_CondSci(int client, TFCond cond)
 			if(index == -1)
 			{
 				index = 0;
+				Classes_GetByIndex(0, class);
 			}
 			else
 			{
@@ -1055,9 +1096,14 @@ public void Classes_CondSci(int client, TFCond cond)
 
 			Items_DropAllItems(client);
 			Forward_OnEscape(client, Client[client].Disarmer);
-			Client[client].Class = index;
-			TF2_RespawnPlayer(client);
-			CreateTimer(0.3, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
+
+			if(Classes_AssignClass(client, ClassSpawn_Escape, index))
+			{
+				Client[client].Class = index;
+				TF2_RespawnPlayer(client);
+				Classes_AssignClassPost(client, ClassSpawn_Escape);
+				CreateTimer(0.3, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
+			}
 		}
 	}
 }

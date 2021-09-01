@@ -732,6 +732,9 @@ bool Items_DropItem(int client, int helditem, const float origin[3], const float
 
 			TF2_RemoveItem(client, helditem);
 
+			if(swap)
+				Items_ShowItemMenu(client);
+
 			if(weapon.Skin >= 0)
 			{
 				SetVariantInt(weapon.Skin);
@@ -773,6 +776,14 @@ bool Items_Pickup(int client, int index, int entity=-1)
 			bool newWep = entity==-1;
 			Items_CreateWeapon(client, index, true, newWep, newWep, entity);
 			ClientCommand(client, "playgamesound AmmoPack.Touch");
+			if(index == 30012)
+			{
+				GiveAchievement(Achievement_FindO5, client);
+			}
+			else if(weapon.Type==1 && Classes_GetByName("dboi")==Client[client].Class)
+			{
+				GiveAchievement(Achievement_FindGun, client);
+			}
 			return true;
 		}
 
@@ -1122,6 +1133,7 @@ void RemoveAndSwitchItem(int client, int weapon)
 {
 	Items_SwitchItem(client, weapon);
 	TF2_RemoveItem(client, weapon);
+	Items_ShowItemMenu(client);
 }
 
 static void SpawnPlayerPickup(int client, const char[] classname, bool timed=false)
@@ -1248,6 +1260,7 @@ public Action Items_DisarmerHit(int client, int victim, int &inflictor, float &d
 					SetEntProp(victim, Prop_Data, "m_iAmmo", 0, _, i);
 				}
 				FakeClientCommand(victim, "use tf_weapon_fists");
+				Items_ShowItemMenu(client);
 
 				ClassEnum class;
 				if(Classes_GetByIndex(Client[victim].Class, class) && class.Group==2 && !class.Vip)

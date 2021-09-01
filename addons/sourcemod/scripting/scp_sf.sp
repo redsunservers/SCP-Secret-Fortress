@@ -77,6 +77,16 @@ enum AccessEnum
 	Access_Intercom
 }
 
+enum ClassSpawnEnum
+{
+	ClassSpawn_Other = 0,
+	ClassSpawn_RoundStart,
+	ClassSpawn_WaveSystem,
+	ClassSpawn_Death,
+	ClassSpawn_Escape,
+	ClassSpawn_Revive
+}
+
 bool Enabled = false;
 bool NoMusic = false;
 bool ChatHook = false;
@@ -947,14 +957,17 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 								{
 									SetActiveWeapon(client, entity);
 									SZF_DropItem(client);
+									Items_ShowItemMenu(client);
+									if(amount == 30012)
+										GiveAchievement(Achievement_FindO5, client);
 								}
 								else
 								{
 									static float pos[3], ang[3];
 									GetClientEyePosition(client, pos);
 									GetClientEyeAngles(client, ang);
-									Items_DropItem(client, entity, pos, ang, true);
 									FakeClientCommand(client, "use tf_weapon_fists");
+									Items_DropItem(client, entity, pos, ang, true);
 								}
 
 								static char buffer[64];
@@ -1600,8 +1613,25 @@ public Action Command_ForceClass(int client, int args)
 		if(IsClientSourceTV(targets[target]) || IsClientReplay(targets[target]))
 			continue;
 
-		Client[targets[target]].Class = index;
+		strcopy(pattern, sizeof(pattern), class.Name);
+		switch(Forward_OnClassPre(targets[target], ClassSpawn_Other, pattern, sizeof(pattern)))
+		{
+			case Plugin_Changed:
+			{
+				Client[targets[target]].Class = Classes_GetByName(pattern);
+			}
+			case Plugin_Handled, Plugin_Stop:
+			{
+				continue;
+			}
+			default:
+			{
+				Client[targets[target]].Class = index;
+			}
+		}
+
 		TF2_RespawnPlayer(targets[target]);
+		Forward_OnClass(targets[target], ClassSpawn_Other, pattern);
 
 		for(int i=1; i<=MaxClients; i++)
 		{
