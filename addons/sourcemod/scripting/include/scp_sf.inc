@@ -42,6 +42,16 @@ enum SCPAchievement
 	Achievement_Christmas	// Play the Christmas version of the game
 }
 
+enum SCPSpawnContext
+{
+	ClassSpawn_Other = 0,
+	ClassSpawn_RoundStart,
+	ClassSpawn_WaveSystem,
+	ClassSpawn_Death,
+	ClassSpawn_Escape,
+	ClassSpawn_Revive
+}
+
 /**
  * Get the client's current class
  *
@@ -95,16 +105,6 @@ native void SCPSF_StopMusic(int client=0);
 native bool SCPSF_CanTalkTo(int client, int target);
 
 /**
- * Calls when a client escapes
- *
- * @param client 	Client index
- * @param disarmer 	Client index of the disarmer, 0 if none
- *
- * @noreturn
- */
-forward void SCPSF_OnEscape(int client, int disarmer);
-
-/**
  * Calls when a specific event happens
  *
  * @param client 	Client index
@@ -114,6 +114,62 @@ forward void SCPSF_OnEscape(int client, int disarmer);
  * @noreturn
  */
 forward void SCPSF_OnAchievement(int client, SCPAchievement achievement);
+
+/**
+ * Calls when a client messages when the chat processor is enabled
+ *
+ * @param client 	Client index
+ * @param name 		Name shown (size of 64)
+ * @param message 	Message shown (size of 512)
+ *
+ * @noreturn
+ */
+forward void SCPSF_OnChatMessage(int client, char[] name, char[] message);
+
+/**
+ * Calls when a client is being assigned a new class
+ *
+ * @param client 	Client index
+ * @param class		Class short string (size of 16)
+ * @param context 	Context on why a new class is assigned
+ *
+ * @return		Plugin_Continue - No changes
+ *			Plugin_Changed - Changed class
+ *			Plugin_Handled - Class is unchanged
+ *			Plugin_Stop - Class is unchanged
+ */
+forward Action SCPSF_OnClassPre(int client, char[] class, SCPSpawnContext context);
+
+/**
+ * Calls when a client is assigned a new class
+ *
+ * @param client 	Client index
+ * @param class		Class short string
+ * @param context 	Context on why a new class is assigned
+ *
+ * @noreturn
+ */
+forward void SCPSF_OnClass(int client, const char[] class, SCPSpawnContext context);
+
+/**
+ * Calls when a client is given a new item
+ *
+ * @param client 	Client index
+ * @param entity 	Entity index of weapon
+ *
+ * @noreturn
+ */
+forward void SCPSF_OnClass(int client, int entity);
+
+/**
+ * Calls when a client escapes
+ *
+ * @param client 	Client index
+ * @param disarmer 	Client index of the disarmer, 0 if none
+ *
+ * @noreturn
+ */
+forward void SCPSF_OnEscape(int client, int disarmer);
 
 /**
  * Calls when a client is picking up a new item
@@ -152,17 +208,6 @@ forward void SCPSF_OnWeapon(int client, int entity);
  *			Plugin_Stop - No sound is played
  */
 forward Action SCPSF_OnReactionPre(int client, const char[] event, char sound[PLATFORM_MAX_PATH]);
-
-/**
- * Calls when a client messages when the chat processor is enabled
- *
- * @param client 	Client index
- * @param name 		Name shown
- * @param message 	Message shown
- *
- * @noreturn
- */
-forward void SCPSF_OnChatMessage(int client, char[] name, char[] message);
 
 public SharedPlugin __pl_SCPSF =
 {

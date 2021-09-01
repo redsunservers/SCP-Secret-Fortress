@@ -49,14 +49,22 @@ public void SCP939_OnSpeed(int client, float &speed)
 
 public Action SCP939_OnDealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
+	if(Client[victim].IdleAt < GetEngineTime())
+	{
+		damage = 60.0;
+		damagetype &= ~DMG_CRIT;
+		Client[victim].HudIn = GetEngineTime()+6.0;
+		return Plugin_Changed;
+	}
+
 	if(damagecustom!=TF_CUSTOM_BACKSTAB || damage<108)
 	{
 		Client[victim].HudIn = GetEngineTime()+6.0;
 		return Plugin_Continue;
 	}
 
-	damage = 21.667;
-	damagetype |= DMG_CRIT;
+	damage = 65.0;
+	damagetype &= ~DMG_CRIT;
 	Client[victim].HudIn = GetEngineTime()+13.0;
 	return Plugin_Changed;
 }

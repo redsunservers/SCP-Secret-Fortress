@@ -44,15 +44,14 @@ void DisplayCredits(int i)
 }
 
 #define MAJOR_REVISION	"2"
-#define MINOR_REVISION	"2"
-#define STABLE_REVISION	"2"
+#define MINOR_REVISION	"3"
+#define STABLE_REVISION	"0"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE	100000000.0
 #define MAXTF2PLAYERS	36
 #define MAXENTITIES	2048
 
-#define ITEMS_MAX	8
 #define MAXANGLEPITCH	45.0
 #define MAXANGLEYAW	90.0
 
@@ -78,30 +77,14 @@ enum AccessEnum
 	Access_Intercom
 }
 
-enum
+enum ClassSpawnEnum
 {
-	Item_Weapon = 0,
-	Item_Keycard,
-	Item_Medical,
-	Item_Radio,
-	Item_SCP,
-	Item_Armor
-}
-
-enum
-{
-	Ammo_Micro = 1,
-	Ammo_9mm,
-	Ammo_Metal,
-	Ammo_Misc1,
-	Ammo_Misc2,
-	Ammo_7mm,
-	Ammo_5mm,
-	Ammo_Grenade,
-	Ammo_Radio,
-	Ammo_Revolver,
-	Ammo_Shell,
-	Ammo_MAX
+	ClassSpawn_Other = 0,
+	ClassSpawn_RoundStart,
+	ClassSpawn_WaveSystem,
+	ClassSpawn_Death,
+	ClassSpawn_Escape,
+	ClassSpawn_Revive
 }
 
 bool Enabled = false;
@@ -147,7 +130,6 @@ enum struct ClientEnum
 	TFClassType WeaponClass;
 
 	bool HelpSprint;
-	bool HelpSwitch;
 	bool UseBuffer;
 
 	int Extra1;
@@ -218,6 +200,7 @@ ClientEnum Client[MAXTF2PLAYERS];
 
 #include "scp_sf/maps/frostbite.sp"
 #include "scp_sf/maps/ikea.sp"
+#include "scp_sf/maps/szf.sp"
 
 // SourceMod Events
 
@@ -542,6 +525,7 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 		AcceptEntityInput(entity, "Disable");
 	}
 
+	SZF_RoundStart();
 	Items_RoundStart();
 
 	NoAchieve = !CvarAchievement.BoolValue;
@@ -624,7 +608,7 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 			int ent = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 			if(ent > MaxClients)
 			{
-				if(Items_GetWeaponByIndex(GetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex"), weapon) && weapon.Type==Item_Keycard)
+				if(Items_GetWeaponByIndex(GetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex"), weapon) && weapon.Type==2)
 				{
 					Items_SwitchItem(client, ent);
 					TF2_RemoveItem(client, ent);
@@ -635,7 +619,7 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 			int i;
 			while((ent=Items_Iterator(client, i, true)) != -1)
 			{
-				if(Items_GetWeaponByIndex(GetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex"), weapon) && weapon.Type==Item_Keycard)
+				if(Items_GetWeaponByIndex(GetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex"), weapon) && weapon.Type==2)
 					TF2_RemoveItem(client, ent);
 			}
 		}
@@ -737,7 +721,6 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 				FormatEx(buffer, sizeof(buffer), "%t", "in_cooldown");
 				menu.AddItem("", buffer);
 
-				menu.ExitButton = false;
 				menu.Display(client, 3);
 			}
 			else
@@ -763,7 +746,6 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 				FormatEx(buffer, sizeof(buffer), "%t", "914_rough");
 				menu.AddItem("", buffer, weapon.Rough[0] ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 
-				menu.ExitButton = false;
 				menu.Display(client, 10);
 			}
 		}
@@ -788,14 +770,13 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 				FormatEx(buffer, sizeof(buffer), "%t", "in_cooldown");
 				menu.AddItem("", buffer);
 
-				menu.ExitButton = false;
 				menu.Display(client, 3);
 			}
 			else
 			{
 
 				WeaponEnum weapon;
-				if(Items_GetWeaponByIndex(index, weapon) && weapon.Type==Item_Keycard)
+				if(Items_GetWeaponByIndex(index, weapon) && weapon.Type==2)
 				{
 					Menu menu = new Menu(Handler_Printer);
 					menu.SetTitle("%t\n ", buffer);
@@ -803,7 +784,6 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 					FormatEx(buffer, sizeof(buffer), "%t", "914_copy");
 					menu.AddItem("", buffer);
 
-					menu.ExitButton = false;
 					menu.Display(client, 6);
 				}
 				else
@@ -814,7 +794,6 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 					FormatEx(buffer, sizeof(buffer), "%t", "914_nowork");
 					menu.AddItem("", buffer);
 
-					menu.ExitButton = false;
 					menu.Display(client, 3);
 				}
 			}
@@ -952,7 +931,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 							else if(Items_GetWeaponByIndex(amount, weapon))
 							{
 								TF2_RemoveItem(client, entity);
-								if(choice<2 && weapon.Type==Item_Keycard && Client[client].Class==Classes_GetByName("sci"))
+								if(choice<2 && weapon.Type==2 && Client[client].Class==Classes_GetByName("sci"))
 								{
 									static float pos[3];
 									GetClientAbsOrigin(client, pos);
@@ -977,14 +956,18 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 								if(canGive && entity>MaxClients && IsValidEntity(entity))
 								{
 									SetActiveWeapon(client, entity);
+									SZF_DropItem(client);
+									Items_ShowItemMenu(client);
+									if(amount == 30012)
+										GiveAchievement(Achievement_FindO5, client);
 								}
 								else
 								{
 									static float pos[3], ang[3];
 									GetClientEyePosition(client, pos);
 									GetClientEyeAngles(client, ang);
-									Items_DropItem(client, entity, pos, ang, true);
 									FakeClientCommand(client, "use tf_weapon_fists");
+									Items_DropItem(client, entity, pos, ang, true);
 								}
 
 								static char buffer[64];
@@ -1025,7 +1008,7 @@ public int Handler_Printer(Menu menu, MenuAction action, int client, int choice)
 				{
 					index = GetEntProp(index, Prop_Send, "m_iItemDefinitionIndex");
 					WeaponEnum weapon;
-					if(Items_GetWeaponByIndex(index, weapon) && weapon.Type==Item_Keycard)
+					if(Items_GetWeaponByIndex(index, weapon) && weapon.Type==2)
 					{
 						Client[client].Cooldown = GetEngineTime()+20.0;
 
@@ -1090,6 +1073,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 		return;
 
 	ViewModel_Destroy(client);
+	SZF_DropItem(client, false);
 
 	Client[client].ResetThinkIsDead();
 	Client[client].Sprinting = false;
@@ -1099,6 +1083,10 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	Client[client].Extra2 = 0;
 	Client[client].Extra3 = 0.0;
 	Client[client].WeaponClass = TFClass_Unknown;
+
+	SetEntProp(client, Prop_Send, "m_bForcedSkin", false);
+	SetEntProp(client, Prop_Send, "m_nForcedSkin", 0);
+	SetEntProp(client, Prop_Send, "m_iPlayerSkinOverride", false);
 
 	Classes_PlayerSpawn(client);
 
@@ -1132,6 +1120,19 @@ public Action OnPlayerHurt(Event event, const char[] name, bool dontBroadcast)
 {
 	event.SetBool("allseecrit", false);
 	event.SetInt("damageamount", 0);
+
+	int userid = event.GetInt("userid");
+	int client = GetClientOfUserId(client);
+	if(client)
+	{
+		Event event2 = CreateEvent("npc_hurt", true);
+		event2.SetInt("entindex", client);
+		event2.SetInt("damageamount", 1);
+		event2.SetInt("attacker_player", userid);
+		event2.SetBool("crit", event.GetBool("crit"));
+		event2.FireToClient(client);
+		event2.Cancel();
+	}
 	return Plugin_Changed;
 }
 
@@ -1226,7 +1227,7 @@ public Action OnDropItem(int client, const char[] command, int args)
 			if(entity > MaxClients)
 			{
 				WeaponEnum weapon;
-				bool big = (Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) && weapon.Type==Item_Weapon);
+				bool big = (Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) && weapon.Type==1);
 
 				static float pos[3], ang[3];
 				GetClientEyePosition(client, pos);
@@ -1268,7 +1269,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 	if(Client[client].ChatIn > time)
 		return Plugin_Handled;
 
-	Client[client].ChatIn = time+1.5;
+	Client[client].ChatIn = time+1.25;
 
 	static char msg[256];
 	GetCmdArgString(msg, sizeof(msg));
@@ -1296,7 +1297,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 		for(int target=1; target<=MaxClients; target++)
 		{
 			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target]))
-				CPrintToChat(target, "%s{default}: %s", name, msg);
+				CPrintToChat(target, "%s {default}: %s", name, msg);
 		}
 	}
 	else if(!IsPlayerAlive(client) && GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
@@ -1306,7 +1307,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target] && IsSpec(target)))
 			{
 				Client[target].ThinkIsDead[client] = true;
-				CPrintToChat(target, "*SPEC* %s{default}: %s", name, msg);
+				CPrintToChat(target, "*SPEC* %s {default}: %s", name, msg);
 			}
 		}
 	}
@@ -1315,7 +1316,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 		for(int target=1; target<=MaxClients; target++)
 		{
 			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target] && IsSpec(target)))
-				CPrintToChat(target, "*DEAD* %s{default}: %s", name, msg);
+				CPrintToChat(target, "*DEAD* %s {default}: %s", name, msg);
 		}
 	}
 	else if(Client[client].ComFor > engineTime)
@@ -1325,7 +1326,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target]))
 			{
 				Client[target].ThinkIsDead[client] = false;
-				CPrintToChat(target, "*COMM* %s{default}: %s", name, msg);
+				CPrintToChat(target, "*COMM* %s {default}: %s", name, msg);
 			}
 		}
 	}
@@ -1355,7 +1356,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 				{
 					if(!class.Human && IsFriendly(Client[client].Class, Client[target].Class))
 					{
-						CPrintToChat(target, "(%t) %s{default}: %s", class.Display, name, msg);
+						CPrintToChat(target, "(%t) %s {default}: %s", class.Display, name, msg);
 						continue;
 					}
 
@@ -1365,7 +1366,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 						GetEntPropVector(target, Prop_Send, "m_vecOrigin", targetPos);
 						if(GetVectorDistance(clientPos, targetPos) > 400)
 						{
-							CPrintToChat(target, "*RADIO* %s{default}: %s", name, msg);
+							CPrintToChat(target, "*RADIO* %s {default}: %s", name, msg);
 							continue;
 						}
 					}
@@ -1373,11 +1374,11 @@ public Action OnSayCommand(int client, const char[] command, int args)
 			}
 			else if(!class.Human)
 			{
-				CPrintToChat(target, "(%t) %s{default}: %s", class.Display, name, msg);
+				CPrintToChat(target, "(%t) %s {default}: %s", class.Display, name, msg);
 				continue;
 			}
 
-			CPrintToChat(target, "%s{default}: %s", name, msg);
+			CPrintToChat(target, "%s {default}: %s", name, msg);
 		}
 	}
 	return Plugin_Handled;
@@ -1612,8 +1613,25 @@ public Action Command_ForceClass(int client, int args)
 		if(IsClientSourceTV(targets[target]) || IsClientReplay(targets[target]))
 			continue;
 
-		Client[targets[target]].Class = index;
+		strcopy(pattern, sizeof(pattern), class.Name);
+		switch(Forward_OnClassPre(targets[target], ClassSpawn_Other, pattern, sizeof(pattern)))
+		{
+			case Plugin_Changed:
+			{
+				Client[targets[target]].Class = Classes_GetByName(pattern);
+			}
+			case Plugin_Handled, Plugin_Stop:
+			{
+				continue;
+			}
+			default:
+			{
+				Client[targets[target]].Class = index;
+			}
+		}
+
 		TF2_RespawnPlayer(targets[target]);
+		Forward_OnClass(targets[target], ClassSpawn_Other, pattern);
 
 		for(int i=1; i<=MaxClients; i++)
 		{
@@ -1693,9 +1711,9 @@ public Action Command_ForceAmmo(int client, int args)
 	static char targetName[MAX_TARGET_LENGTH];
 	GetCmdArg(2, targetName, sizeof(targetName));
 	int type = StringToInt(targetName);
-	if(type<1 || type>=Ammo_MAX)
+	if(type<1 || type>31)
 	{
-		ReplyToCommand(client, "[SM] Invalid weapon index");
+		ReplyToCommand(client, "[SM] Invalid ammo index");
 		return Plugin_Handled;
 	}
 
@@ -1738,6 +1756,7 @@ public Action Command_ForceAmmo(int client, int args)
 
 public void OnClientDisconnect(int client)
 {
+	SZF_DropItem(client);
 	CreateTimer(1.0, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
 }
 
@@ -1794,8 +1813,11 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 				SetEntProp(entity, Prop_Send, "m_bDisabled", 1);
 		}
 
+		CancelClientMenu(client);
 		RequestFrame(UpdateListenOverrides, engineTime);
 	}
+
+	SZF_DropItem(client);
 
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
 	if(client!=attacker && IsValidClient(attacker))
@@ -1901,6 +1923,8 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 		}
 	}
 
+	SZF_PlayerRunCmd(client);
+
 	if(Client[client].InvisFor)
 	{
 		if(Client[client].InvisFor > engineTime)
@@ -1924,7 +1948,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 	ClassEnum class;
 	if(Classes_GetByIndex(Client[client].Class, class) && class.Human && !Client[client].Disarmer)
 	{
-		if(((buttons & IN_JUMP) || (buttons & IN_SPEED)) && ((buttons & IN_FORWARD) || (buttons & IN_BACK) || (buttons & IN_MOVELEFT) || (buttons & IN_MOVERIGHT)) && GetEntPropEnt(client, Prop_Data, "m_hGroundEntity")!=-1)
+		if(((buttons & IN_ATTACK3) || (buttons & IN_SPEED)) && ((buttons & IN_FORWARD) || (buttons & IN_BACK) || (buttons & IN_MOVELEFT) || (buttons & IN_MOVERIGHT)) && GetEntPropEnt(client, Prop_Data, "m_hGroundEntity")!=-1)
 		{
 			if(!Client[client].Sprinting && Client[client].SprintPower>15)
 			{
@@ -1965,15 +1989,6 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 		}
 		holding[client] = IN_ATTACK2;
 	}
-	else if(buttons & IN_ATTACK3)
-	{
-		Client[client].HelpSwitch = false;
-		int entity = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-		if(entity>MaxClients && IsValidEntity(entity))
-			Items_SwitchItem(client, entity);
-
-		holding[client] = IN_ATTACK3;
-	}
 	else if(buttons & IN_USE)
 	{
 		if(AttemptGrabItem(client))
@@ -1986,6 +2001,10 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 	else if(buttons & IN_RELOAD)
 	{
 		holding[client] = IN_RELOAD;
+	}
+	else if(buttons & IN_ATTACK3)
+	{
+		holding[client] = IN_ATTACK3;
 	}
 
 	// Check if the player moved at all or is speaking
@@ -2003,7 +2022,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 	static float specialTick[MAXTF2PLAYERS];
 	if(specialTick[client] < engineTime)
 	{
-		bool showHud = (Client[client].HudIn<engineTime && !(GetClientButtons(client) & IN_SCORE));
+		bool showHud = (Client[client].HudIn<engineTime && !SZF_Enabled() && !(GetClientButtons(client) & IN_SCORE));
 		specialTick[client] = engineTime+0.2;
 
 		static char buffer[PLATFORM_MAX_PATH];
@@ -2077,7 +2096,9 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 				{
 					if(!Client[client].Extra2 && Client[client].Extra3<engineTime)
 					{
-						Client[client].SprintPower -= 2.0;
+						float drain = 0.5;
+						Items_Sprint(client, drain);
+						Client[client].SprintPower -= drain;
 						if(Client[client].SprintPower < 0)
 						{
 							Client[client].SprintPower = 0.0;
@@ -2093,6 +2114,9 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 
 				if(showHud)
 				{
+					if(GetClientMenu(client) == MenuSource_None)
+						Items_ShowItemMenu(client);
+
 					bool showingHelp;
 					int active = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 					if(active>MaxClients && IsValidEntity(active) && GetEntityClassname(active, buffer, sizeof(buffer)))
@@ -2115,31 +2139,6 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 						{
 							time[client] = FAR_FUTURE;
 						}
-
-						ArrayList list = Items_ArrayList(client, TF2_GetClassnameSlot(buffer));
-						int length = list.Length;
-						if(length)
-						{
-							if(!showingHelp && length>1 && Client[client].HelpSwitch)
-							{
-								showingHelp = true;
-								PrintKeyHintText(client, "%t", "help_switch");
-							}
-
-							buffer[0] = 0;
-
-							for(int i=length-1; i>=0; i--)
-							{
-								static char tran[16];
-								int entity = list.Get(i);
-								Items_GetTranName(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), tran, sizeof(tran));
-								Format(buffer, sizeof(buffer), "%t%s\n%s", tran, entity==active ? " <" : "", buffer);
-							}
-
-							SetHudTextParamsEx(0.01, 0.4-(float(length)/30.0), 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
-							ShowSyncHudText(client, HudPlayer, buffer);
-						}
-						delete list;
 					}
 
 					if(!showingHelp && Client[client].HelpSprint)
@@ -2512,18 +2511,16 @@ public Action ShowClassInfoTimer(Handle timer, int userid)
 void ShowClassInfo(int client, bool help=false)
 {
 	Client[client].HelpSprint = true;
-	Client[client].HelpSwitch = true;
 
 	ClassEnum class;
 	if(Classes_GetByIndex(Client[client].Class, class))
 	{
 		SetGlobalTransTarget(client);
 
-		SetHudTextParamsEx(-1.0, 0.3, help ? 20.0 : 10.0, Client[client].Colors, Client[client].Colors, 0, 5.0, 1.0, 1.0);
+		SetHudTextParamsEx(-1.0, 0.3, help ? 16.0 : 3.5, Client[client].Colors, Client[client].Colors, 0, 5.0, 1.0, 4.0);
 		ShowSyncHudText(client, HudClass, "%t", "you_are", class.Display);
 
 		char buffer[32];
-		bool full = help;
 		if(!help && AreClientCookiesCached(client))	// If where not using !scpinfo, check if we ever played the tutorial before for this class
 		{
 			CookieTraining.Get(client, buffer, sizeof(buffer));	// TODO: Support for dynamic classes
@@ -2535,26 +2532,19 @@ void ShowClassInfo(int client, bool help=false)
 				flags |= flag;
 				IntToString(flags, buffer, sizeof(buffer));
 				CookieTraining.Set(client, buffer);
-				full = true;
+				help = true;
 			}
 		}
 
-		if(full)
+		if(help)
 		{
 			Client[client].HudIn = GetEngineTime();
-			if(help)
-			{
-				Client[client].HudIn += 21.0;
-			}
-			else
-			{
-				Client[client].HudIn += 31.0;
-			}
+			Client[client].HudIn += 19.5;
 
 			FormatEx(buffer, sizeof(buffer), "train_%s", class.Name);
 			if(TranslationPhraseExists(buffer))
 			{
-				SetHudTextParamsEx(-1.0, 0.5, help ? 20.0 : 30.0, Client[client].Colors, Client[client].Colors, 1, 5.0, 1.0, 1.0);
+				SetHudTextParamsEx(-1.0, 0.5, 16.0, Client[client].Colors, Client[client].Colors, 1, 5.0, 1.0, 4.0);
 				ShowSyncHudText(client, HudGame, "%t", buffer);
 				return;
 			}
@@ -2565,7 +2555,7 @@ void ShowClassInfo(int client, bool help=false)
 		FormatEx(buffer, sizeof(buffer), "desc_%s", class.Name);
 		if(TranslationPhraseExists(buffer))
 		{
-			SetHudTextParamsEx(-1.0, 0.5, help ? 20.0 : 10.0, Client[client].Colors, Client[client].Colors, 1, 5.0, 1.0, 1.0);
+			SetHudTextParamsEx(-1.0, 0.5, 3.5, Client[client].Colors, Client[client].Colors, 1, 5.0, 1.0, 4.0);
 			ShowSyncHudText(client, HudGame, "%t", buffer);
 		}
 	}

@@ -242,6 +242,21 @@ public Action SCP0492_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &c
 
 public void SCP049_OnButton(int client, int button)
 {
+	if(button & IN_ATTACK2)
+	{
+		int entity = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+		if(entity == GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon"))
+		{
+			entity = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
+			if(entity > MaxClients)
+				SetActiveWeapon(client, entity);
+		}
+		else if(entity > MaxClients)
+		{
+			SetActiveWeapon(client, entity);
+		}
+	}
+
 	float engineTime = GetEngineTime();
 	if(Revive[client].GoneAt > engineTime)
 		return;
@@ -283,7 +298,7 @@ public void SCP049_OnButton(int client, int button)
 			continue;
 
 		// ensure no wall is obstructing
-		TR_TraceRayFilter(pos1, pos2, (CONTENTS_SOLID|CONTENTS_AREAPORTAL|CONTENTS_GRATE), RayType_EndPoint, TraceWallsOnly);
+		TR_TraceRayFilter(pos1, pos2, MASK_VISIBLE, RayType_EndPoint, Trace_WallsOnly);
 		TR_GetEndPosition(ang3);
 		if(ang3[0]!=pos2[0] || ang3[1]!=pos2[1] || ang3[2]!=pos2[2])
 			continue;
@@ -293,7 +308,7 @@ public void SCP049_OnButton(int client, int button)
 		{
 			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 
-			target = SpawnWeapon(client, "tf_weapon_fists", 195, 80, 13, "138 ; 11 ; 252 ; 0.2", false);
+			target = SpawnWeapon(client, "tf_weapon_bonesaw", 310, 80, 13, "138 ; 11 ; 252 ; 0.2", false);
 			if(target > MaxClients)
 			{
 				ApplyStrangeRank(target, 6);
@@ -452,6 +467,8 @@ public void SCP049_Think(int client)
 
 			return;
 		}
+
+		ChangeClientTeamEx(client, view_as<TFTeam>(GetEntProp(entity, Prop_Send, "m_iTeamNum")));
 
 		// get position to teleport the Marker to
 		static float position[3];

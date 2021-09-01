@@ -331,9 +331,46 @@ bool Gamemode_RoundStart()
 		Client[client].Class = classes.Get(i);
 		if(Classes_GetByIndex(Client[client].Class, class))
 		{
+			switch(Forward_OnClassPre(client, ClassSpawn_RoundStart, class.Name, sizeof(class.Name)))
+			{
+				case Plugin_Changed:
+				{
+					Client[client].Class = Classes_GetByName(class.Name, class);
+					if(Client[client].Class == -1)
+					{
+						Client[client].Class = 0;
+						Classes_GetByIndex(0, class);
+					}
+				}
+				case Plugin_Handled, Plugin_Stop:
+				{
+					Client[client].Class = 0;
+					continue;
+				}
+			}
+
 			ChangeClientTeamEx(client, class.Team>TFTeam_Spectator ? class.Team : class.Team+view_as<TFTeam>(2));
 			TF2_SetPlayerClass(client, class.Class);
 		}
+		else
+		{
+			Client[client].Class = 0;
+			Classes_GetByIndex(Client[client].Class, class);
+			if(Forward_OnClassPre(client, ClassSpawn_RoundStart, class.Name, sizeof(class.Name)) == Plugin_Changed)
+			{
+				Client[client].Class = Classes_GetByName(class.Name, class);
+				if(Client[client].Class == -1)
+				{
+					Client[client].Class = 0;
+					Classes_GetByIndex(0, class);
+				}
+
+				ChangeClientTeamEx(client, class.Team>TFTeam_Spectator ? class.Team : class.Team+view_as<TFTeam>(2));
+				TF2_SetPlayerClass(client, class.Class);
+			}
+		}
+
+		Forward_OnClass(client, ClassSpawn_RoundStart, class.Name);
 	}
 	delete classes;
 	delete players;
@@ -401,8 +438,13 @@ public Action Gamemode_WaveTimer(Handle timer)
 		for(int i; i<length; i++)
 		{
 			int client = players.Get(i);
-			Client[client].Class = classes.Get(i);
-			TF2_RespawnPlayer(client);
+			int index = classes.Get(i);
+			if(Classes_AssignClass(client, ClassSpawn_WaveSystem, index))
+			{
+				Client[client].Class = index;
+				TF2_RespawnPlayer(client);
+				Classes_AssignClassPost(client, ClassSpawn_WaveSystem);
+			}
 		}
 		delete classes;
 	}

@@ -688,6 +688,14 @@ stock void SetSpeed(int client, float speed)
 	SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", speed);
 }
 
+void constrainDistance(const float[] startPoint, float[] endPoint, float distance, float maxDistance)
+{
+	float constrainFactor = maxDistance / distance;
+	endPoint[0] = ((endPoint[0] - startPoint[0]) * constrainFactor) + startPoint[0];
+	endPoint[1] = ((endPoint[1] - startPoint[1]) * constrainFactor) + startPoint[1];
+	endPoint[2] = ((endPoint[2] - startPoint[2]) * constrainFactor) + startPoint[2];
+}
+
 void FadeMessage(int client, int arg1, int arg2, int arg3, int arg4=255, int arg5=255, int arg6=255, int arg7=255)
 {
 	Handle msg = StartMessageOne("Fade", client);
@@ -1164,13 +1172,12 @@ public Action Timer_Healing(Handle timer, DataPack pack)
 	return Plugin_Continue;
 }
 
-void ApplyHealEvent(int patient, int healer, int amount)
+void ApplyHealEvent(int entindex, int amount)
 {
-	Event event = CreateEvent("player_healed", true);
+	Event event = CreateEvent("player_healonhit", true);
 
-	event.SetInt("patient", patient);
-	event.SetInt("healer", healer);
-	event.SetInt("heals", amount);
+	event.SetInt("entindex", entindex);
+	event.SetInt("amount", amount);
 
 	event.Fire();
 }
@@ -1216,6 +1223,54 @@ stock void EmitSoundToAll2(const char[] sample,
 	}
 }
 
+void AnglesToVelocity(const float ang[3], float vel[3], float speed=1.0)
+{
+	vel[0] = Cosine(DegToRad(ang[1]));
+	vel[1] = Sine(DegToRad(ang[1]));
+	vel[2] = Sine(DegToRad(ang[0])) * -1.0;
+	
+	NormalizeVector(vel, vel);
+	
+	ScaleVector(vel, speed);
+}
+
+bool ObstactleBetweenEntities(int entity1, int entity2)
+{
+	static float pos1[3], pos2[3];
+	if(IsValidClient(entity1))
+	{
+		GetClientEyePosition(entity1, pos1);
+	}
+	else
+	{
+		GetEntPropVector(entity1, Prop_Send, "m_vecOrigin", pos1);
+	}
+
+	GetEntPropVector(entity2, Prop_Send, "m_vecOrigin", pos2);
+
+	Handle trace = TR_TraceRayFilterEx(pos1, pos2, MASK_ALL, RayType_EndPoint, Trace_DontHitEntity, entity1);
+
+	bool hit = TR_DidHit(trace);
+	int index = TR_GetEntityIndex(trace);
+	delete trace;
+
+	if(!hit || index!=entity2)
+		return true;
+
+	return false;
+}
+
+bool IsEntityStuck(int entity)
+{
+	static float min[3], max[3], pos[3];
+	GetEntPropVector(entity, Prop_Send, "m_vecMins", min);
+	GetEntPropVector(entity, Prop_Send, "m_vecMaxs", max);
+	GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
+	
+	TR_TraceHullFilter(pos, pos, min, max, MASK_SOLID, Trace_DontHitEntity, entity);
+	return (TR_DidHit());
+}
+
 int TF2_CreateGlow(int client, const char[] model)
 {
 	int prop = CreateEntityByName("tf_taunt_prop");
@@ -1259,9 +1314,15 @@ public Action GlowTransmit(int entity, int target)
 	return Plugin_Continue;
 }
 
-public bool TraceWallsOnly(int entity, int contentsMask)
+public bool Trace_WallsOnly(int entity, int mask)
 {
 	return false;
+}
+
+public bool Trace_DoorOnly(int entity, int mask)
+{
+	static char buffer[16];
+	return (GetEntityClassname(entity, buffer, sizeof(buffer)) && !StrContains(buffer, "func_door"));
 }
 
 public bool Trace_OnlyHitWorld(int entity, int mask)
@@ -1285,4 +1346,191 @@ bool IsSpec(int client)
 		return true;
 
 	return false;
+}
+
+/**
+ * The below is sarysa's safe location code
+ */
+static bool ResizeTraceFailed;
+public bool Resize_TracePlayersAndBuildings(int entity, int contentsMask, any data)
+{
+	if(entity>0 && entity<=MaxClients/* && IsPlayerAlive(entity)*/)
+	{
+		//if(GetClientTeam(entity) != data)
+			//ResizeTraceFailed = true;
+	}
+	else if(IsValidEntity(entity))
+	{
+		static char classname[32];
+		GetEntityClassname(entity, classname, sizeof(classname));
+		if(!StrContains(classname, "obj_") || !StrContains(classname, "prop_dynamic") || StrEqual(classname, "func_physbox") || StrEqual(classname, "func_breakable"))
+			ResizeTraceFailed = true;
+	}
+	return false;
+}
+
+bool Resize_OneTrace(const float startPos[3], const float endPos[3], int team)
+{
+	static float result[3];
+	TR_TraceRayFilter(startPos, endPos, MASK_PLAYERSOLID, RayType_EndPoint, Resize_TracePlayersAndBuildings, team);
+	if(ResizeTraceFailed)
+		return false;
+
+	TR_GetEndPosition(result);
+	if(endPos[0] != result[0] || endPos[1] != result[1] || endPos[2] != result[2])
+		return false;
+
+	return true;
+}
+
+// the purpose of this method is to first trace outward, upward, and then back in.
+bool Resize_TestResizeOffset(const float bossOrigin[3], float xOffset, float yOffset, float zOffset, int team)
+{
+	static float tmpOrigin[3];
+	tmpOrigin[0] = bossOrigin[0];
+	tmpOrigin[1] = bossOrigin[1];
+	tmpOrigin[2] = bossOrigin[2];
+	static float targetOrigin[3];
+	targetOrigin[0] = bossOrigin[0] + xOffset;
+	targetOrigin[1] = bossOrigin[1] + yOffset;
+	targetOrigin[2] = bossOrigin[2];
+	
+	if (!(xOffset == 0.0 && yOffset == 0.0))
+		if (!Resize_OneTrace(tmpOrigin, targetOrigin, team))
+			return false;
+		
+	tmpOrigin[0] = targetOrigin[0];
+	tmpOrigin[1] = targetOrigin[1];
+	tmpOrigin[2] = targetOrigin[2] + zOffset;
+
+	if (!Resize_OneTrace(targetOrigin, tmpOrigin, team))
+		return false;
+		
+	targetOrigin[0] = bossOrigin[0];
+	targetOrigin[1] = bossOrigin[1];
+	targetOrigin[2] = bossOrigin[2] + zOffset;
+		
+	if (!(xOffset == 0.0 && yOffset == 0.0))
+		if (!Resize_OneTrace(tmpOrigin, targetOrigin, team))
+			return false;
+		
+	return true;
+}
+
+bool Resize_TestSquare(const float bossOrigin[3], float xmin, float xmax, float ymin, float ymax, float zOffset, int team)
+{
+	static float pointA[3];
+	static float pointB[3];
+	for (int phase = 0; phase <= 7; phase++)
+	{
+		// going counterclockwise
+		if (phase == 0)
+		{
+			pointA[0] = bossOrigin[0] + 0.0;
+			pointA[1] = bossOrigin[1] + ymax;
+			pointB[0] = bossOrigin[0] + xmax;
+			pointB[1] = bossOrigin[1] + ymax;
+		}
+		else if (phase == 1)
+		{
+			pointA[0] = bossOrigin[0] + xmax;
+			pointA[1] = bossOrigin[1] + ymax;
+			pointB[0] = bossOrigin[0] + xmax;
+			pointB[1] = bossOrigin[1] + 0.0;
+		}
+		else if (phase == 2)
+		{
+			pointA[0] = bossOrigin[0] + xmax;
+			pointA[1] = bossOrigin[1] + 0.0;
+			pointB[0] = bossOrigin[0] + xmax;
+			pointB[1] = bossOrigin[1] + ymin;
+		}
+		else if (phase == 3)
+		{
+			pointA[0] = bossOrigin[0] + xmax;
+			pointA[1] = bossOrigin[1] + ymin;
+			pointB[0] = bossOrigin[0] + 0.0;
+			pointB[1] = bossOrigin[1] + ymin;
+		}
+		else if (phase == 4)
+		{
+			pointA[0] = bossOrigin[0] + 0.0;
+			pointA[1] = bossOrigin[1] + ymin;
+			pointB[0] = bossOrigin[0] + xmin;
+			pointB[1] = bossOrigin[1] + ymin;
+		}
+		else if (phase == 5)
+		{
+			pointA[0] = bossOrigin[0] + xmin;
+			pointA[1] = bossOrigin[1] + ymin;
+			pointB[0] = bossOrigin[0] + xmin;
+			pointB[1] = bossOrigin[1] + 0.0;
+		}
+		else if (phase == 6)
+		{
+			pointA[0] = bossOrigin[0] + xmin;
+			pointA[1] = bossOrigin[1] + 0.0;
+			pointB[0] = bossOrigin[0] + xmin;
+			pointB[1] = bossOrigin[1] + ymax;
+		}
+		else if (phase == 7)
+		{
+			pointA[0] = bossOrigin[0] + xmin;
+			pointA[1] = bossOrigin[1] + ymax;
+			pointB[0] = bossOrigin[0] + 0.0;
+			pointB[1] = bossOrigin[1] + ymax;
+		}
+
+		for (int shouldZ = 0; shouldZ <= 1; shouldZ++)
+		{
+			pointA[2] = pointB[2] = shouldZ == 0 ? bossOrigin[2] : (bossOrigin[2] + zOffset);
+			if (!Resize_OneTrace(pointA, pointB, team))
+				return false;
+		}
+	}
+		
+	return true;
+}
+
+bool IsSpotSafe(int clientIdx, float playerPos[3], float sizeMultiplier)
+{
+	ResizeTraceFailed = false;
+	int team = GetClientTeam(clientIdx);
+	static float mins[3];
+	static float maxs[3];
+	mins[0] = -24.0 * sizeMultiplier;
+	mins[1] = -24.0 * sizeMultiplier;
+	mins[2] = 0.0;
+	maxs[0] = 24.0 * sizeMultiplier;
+	maxs[1] = 24.0 * sizeMultiplier;
+	maxs[2] = 82.0 * sizeMultiplier;
+
+	// the eight 45 degree angles and center, which only checks the z offset
+	if (!Resize_TestResizeOffset(playerPos, mins[0], mins[1], maxs[2], team)) return false;
+	if (!Resize_TestResizeOffset(playerPos, mins[0], 0.0, maxs[2], team)) return false;
+	if (!Resize_TestResizeOffset(playerPos, mins[0], maxs[1], maxs[2], team)) return false;
+	if (!Resize_TestResizeOffset(playerPos, 0.0, mins[1], maxs[2], team)) return false;
+	if (!Resize_TestResizeOffset(playerPos, 0.0, 0.0, maxs[2], team)) return false;
+	if (!Resize_TestResizeOffset(playerPos, 0.0, maxs[1], maxs[2], team)) return false;
+	if (!Resize_TestResizeOffset(playerPos, maxs[0], mins[1], maxs[2], team)) return false;
+	if (!Resize_TestResizeOffset(playerPos, maxs[0], 0.0, maxs[2], team)) return false;
+	if (!Resize_TestResizeOffset(playerPos, maxs[0], maxs[1], maxs[2], team)) return false;
+
+	// 22.5 angles as well, for paranoia sake
+	if (!Resize_TestResizeOffset(playerPos, mins[0], mins[1] * 0.5, maxs[2], team)) return false;
+	if (!Resize_TestResizeOffset(playerPos, mins[0], maxs[1] * 0.5, maxs[2], team)) return false;
+	if (!Resize_TestResizeOffset(playerPos, maxs[0], mins[1] * 0.5, maxs[2], team)) return false;
+	if (!Resize_TestResizeOffset(playerPos, maxs[0], maxs[1] * 0.5, maxs[2], team)) return false;
+	if (!Resize_TestResizeOffset(playerPos, mins[0] * 0.5, mins[1], maxs[2], team)) return false;
+	if (!Resize_TestResizeOffset(playerPos, maxs[0] * 0.5, mins[1], maxs[2], team)) return false;
+	if (!Resize_TestResizeOffset(playerPos, mins[0] * 0.5, maxs[1], maxs[2], team)) return false;
+	if (!Resize_TestResizeOffset(playerPos, maxs[0] * 0.5, maxs[1], maxs[2], team)) return false;
+
+	// four square tests
+	if (!Resize_TestSquare(playerPos, mins[0], maxs[0], mins[1], maxs[1], maxs[2], team)) return false;
+	if (!Resize_TestSquare(playerPos, mins[0] * 0.75, maxs[0] * 0.75, mins[1] * 0.75, maxs[1] * 0.75, maxs[2], team)) return false;
+	if (!Resize_TestSquare(playerPos, mins[0] * 0.5, maxs[0] * 0.5, mins[1] * 0.5, maxs[1] * 0.5, maxs[2], team)) return false;
+	if (!Resize_TestSquare(playerPos, mins[0] * 0.25, maxs[0] * 0.25, mins[1] * 0.25, maxs[1] * 0.25, maxs[2], team)) return false;
+	
+	return true;
 }

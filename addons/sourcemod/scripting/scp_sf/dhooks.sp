@@ -114,6 +114,15 @@ public MRESReturn DHook_ForceRespawn(int client)
 		Classes_GetByIndex(0, class);
 	}
 
+	if(!StrContains(class.Name, "mtf"))
+	{
+		GiveAchievement(Achievement_MTFSpawn, client);
+	}
+	else if(!StrContains(class.Name, "chaos"))
+	{
+		GiveAchievement(Achievement_ChaosSpawn, client);
+	}
+
 	ChangeClientTeamEx(client, class.Team>TFTeam_Spectator ? class.Team : class.Team+view_as<TFTeam>(2));
 	SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", class.Class);
 	Client[client].CurrentClass = class.Class;
@@ -170,7 +179,7 @@ public MRESReturn DHook_DoAnimationEventPre(int client, DHookParam param)
 public MRESReturn DHook_DropAmmoPackPre(int client, DHookParam param)
 {
 	//TODO: Remove this hook, move to OnEntityCreated and OnPlayerDeath
-	if(!param.Get(2) && !IsSpec(client))
+	if(!param.Get(2) && !IsSpec(client) && !IsSCP(client))
 		Items_DropAllItems(client);
 
 	return MRES_Supercede;
@@ -229,7 +238,7 @@ public MRESReturn DHook_CalculateMaxSpeedPost(int clientwhen, DHookReturn ret)
 
 		speed *= CvarSpeedMulti.FloatValue;
 		if(Client[client].Sprinting)
-			speed *= 1.2;
+			speed *= 1.125;
 
 		if(TF2_IsPlayerInCondition(client, TFCond_SpeedBuffAlly))
 			speed *= 1.35;

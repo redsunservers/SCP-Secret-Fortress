@@ -2,9 +2,9 @@ static const char ModelMelee[] = "models/scp_sf/096/scp096_hands_7.mdl";
 static const char SoundPassive[] = "freak_fortress_2/scp096/bgm.mp3";
 static const char SoundEnrage[] = "freak_fortress_2/scp096/fullrage.mp3";
 
-static const int HealthMax = 1875;	// Max standard health
-static const int HealthExtra = 425;//437.5// Max regenerable health
-static const int HealthRage = 75;//87.5	// Extra health per target in rage
+static const int HealthMax = 1500;	// Max standard health
+static const int HealthExtra = 350;	// Max regenerable health
+static const int HealthRage = 70;		// Extra health per target in rage
 
 static const float SpeedRage = 2.1;
 
@@ -196,7 +196,7 @@ public void SCP096_OnButton(int client, int button)
 				TF2_AddCondition(client, TFCond_CritCola, 99.9);
 
 				TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
-				int weapon = SpawnWeapon(client, "tf_weapon_sword", 195, 100, 13, "2 ; 11 ; 6 ; 0.95 ; 28 ; 3 ; 252 ; 0 ; 326 ; 2 ; 4328 ; 1", false);
+				int weapon = SpawnWeapon(client, "tf_weapon_sword", 310, 100, 13, "2 ; 11 ; 6 ; 0.95 ; 28 ; 3 ; 252 ; 0 ; 326 ; 2 ; 4328 ; 1", false);
 				if(weapon > MaxClients)
 				{
 					ApplyStrangeRank(weapon, 16);
@@ -313,8 +313,8 @@ public void SCP096_OnButton(int client, int button)
 			(fabs(ang2[1] - ang3[1]) >= (360.0-MAXANGLEYAW))))
 				continue;
 
-			// ensure no wall is obstructing
-			TR_TraceRayFilter(pos2, pos1, MASK_VISIBLE, RayType_EndPoint, TraceWallsOnly);
+			// ensure no wall or door is obstructing
+			TR_TraceRayFilter(pos2, pos1, MASK_VISIBLE, RayType_EndPoint, Trace_DoorOnly);
 			TR_GetEndPosition(ang3);
 			if(ang3[0]!=pos1[0] || ang3[1]!=pos1[1] || ang3[2]!=pos1[2])
 				continue;
@@ -334,8 +334,8 @@ public void SCP096_OnButton(int client, int button)
 			(fabs(ang1[1] - ang3[1]) >= (360.0-MAXANGLEYAW))))
 				continue;
 
-			// ensure no wall is obstructing
-			TR_TraceRayFilter(pos1, pos2, (CONTENTS_SOLID | CONTENTS_AREAPORTAL | CONTENTS_GRATE), RayType_EndPoint, TraceWallsOnly);
+			// ensure no wall or door is obstructing
+			TR_TraceRayFilter(pos1, pos2, MASK_VISIBLE, RayType_EndPoint, Trace_DoorOnly);
 			TR_GetEndPosition(ang3);
 			if(ang3[0]!=pos2[0] || ang3[1]!=pos2[1] || ang3[2]!=pos2[2])
 				continue;
