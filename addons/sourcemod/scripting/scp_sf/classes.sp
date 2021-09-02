@@ -1,5 +1,5 @@
 #define ITEMS_MAX	8
-#define AMMO_MAX		8
+#define AMMO_MAX		16
 
 enum struct ClassEnum
 {
