@@ -23,7 +23,16 @@ enum // Collision_Group_t in const.h - m_CollisionGroup
 	COLLISION_GROUP_NPC_ACTOR,		// Used so NPCs in scripts ignore the player.
 	COLLISION_GROUP_NPC_SCRIPTED = 19,	// Used for NPCs in scripts that should not collide with each other.
 
-	LAST_SHARED_COLLISION_GROUP
+	LAST_SHARED_COLLISION_GROUP,
+
+	TF_COLLISIONGROUP_GRENADE = 20,
+	TFCOLLISION_GROUP_OBJECT,
+	TFCOLLISION_GROUP_OBJECT_SOLIDTOPLAYERMOVEMENT,
+	TFCOLLISION_GROUP_COMBATOBJECT,
+	TFCOLLISION_GROUP_ROCKETS,		// Solid to players, but not player movement. ensures touch calls are originating from rocket
+	TFCOLLISION_GROUP_RESPAWNROOMS,
+	TFCOLLISION_GROUP_TANK,
+	TFCOLLISION_GROUP_ROCKET_BUT_NOT_WITH_OTHER_ROCKETS
 };
 
 // entity effects

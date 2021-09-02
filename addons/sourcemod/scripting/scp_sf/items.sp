@@ -379,6 +379,14 @@ int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, 
 			else
 			{
 				SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", true);
+				if(weapon.Model[0])
+				{
+					int precache = PrecacheModel(weapon.Model);
+					for(i=0; i<4; i++)
+					{
+						SetEntProp(entity, Prop_Send, "m_nModelIndexOverrides", precache, _, i);
+					}
+				}
 			}
 
 			if(!wearable)
@@ -809,7 +817,7 @@ void Items_ShowItemMenu(int client)
 	Items_Items(client, 0, max);
 
 	Menu menu = new Menu(Items_ShowItemMenuH);
-	menu.SetTitle("                                                ");
+	menu.SetTitle("Inventory            ");
 
 	SetGlobalTransTarget(client);
 	int active = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
@@ -913,7 +921,19 @@ public int Items_ShowItemMenuH(Menu menu, MenuAction action, int client, int cho
 				menu.GetItem(choice, buffer, sizeof(buffer));
 
 				int entity = StringToInt(buffer);
-				if(entity != -1)
+				if(entity == -1)
+				{
+					int i;
+					while((entity=Items_Iterator(client, i, true)) != -1)
+					{
+						if(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex") == 5)
+						{
+							SetActiveWeapon(client, entity);
+							break;
+						}
+					}
+				}
+				else
 				{
 					entity = EntRefToEntIndex(entity);
 					if(entity > MaxClients)
@@ -924,6 +944,7 @@ public int Items_ShowItemMenuH(Menu menu, MenuAction action, int client, int cho
 				}
 
 				Items_ShowItemMenu(client);
+				ClientCommand(client, "playgamesound common/wpn_moveselect.wav");
 			}
 		}
 	}
@@ -1398,6 +1419,193 @@ public bool Items_MicroButton(int client, int weapon, int &buttons, int &holding
 	return true;
 }
 
+public bool Items_FragButton(int client, int weapon, int &buttons, int &holding)
+{
+	if(!holding)
+	{
+		bool short = view_as<bool>(buttons & IN_ATTACK2);
+		if(short || (buttons & IN_ATTACK))
+		{
+			holding = short ? IN_ATTACK2 : IN_ATTACK;
+			RemoveAndSwitchItem(client, weapon);
+			Config_DoReaction(client, "throwgrenade");
+
+			int entity = CreateEntityByName("prop_physics_multiplayer");
+			if(IsValidEntity(entity))
+			{
+				DispatchKeyValue(entity, "physicsmode", "2");
+
+				static float ang[3], pos[3], vel[3];
+				GetEntPropVector(client, Prop_Send, "m_vecOrigin", pos);
+				GetClientEyeAngles(client, ang);
+				pos[2] += 63.0;
+
+				vel[0] = Cosine(DegToRad(ang[0]))*Cosine(DegToRad(ang[1]))*1200.0;
+				vel[1] = Cosine(DegToRad(ang[0]))*Sine(DegToRad(ang[1]))*1200.0;
+				vel[2] = Sine(DegToRad(ang[0]))*-1200.0;
+
+				if(short)
+					ScaleVector(vel, 0.5);
+
+				SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
+				SetEntProp(entity, Prop_Send, "m_iTeamNum", GetClientTeam(client));
+
+				SetEntityModel(entity, "models/weapons/w_models/w_grenade_grenadelauncher.mdl");
+				SetEntProp(entity, Prop_Send, "m_nSkin", 0);
+
+				DispatchSpawn(entity);
+				TeleportEntity(entity, pos, ang, vel);
+
+				CreateTimer(5.0, Items_FragTimer, EntIndexToEntRef(entity), TIMER_FLAG_NO_MAPCHANGE);
+			}
+		}
+	}
+	return false;
+}
+
+public Action Items_FragTimer(Handle timer, int ref)
+{
+	int entity = EntRefToEntIndex(ref);
+	if(entity > MaxClients)
+	{
+		static float pos[3];
+		GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
+
+		int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
+		int explosion = CreateEntityByName("env_explosion");
+		if(IsValidEntity(explosion))
+		{
+			DispatchKeyValueVector(explosion, "origin", pos);
+			DispatchKeyValue(explosion, "iMagnitude", "1000");
+			DispatchKeyValue(explosion, "iRadiusOverride", "350");
+			//DispatchKeyValue(explosion, "flags", "516");
+
+			SetEntPropEnt(explosion, Prop_Send, "m_hOwnerEntity", client);
+			DispatchSpawn(explosion);
+
+			//CreateTimer(3.0, Timer_RemoveEntity, AttachParticle(explosion, "Explosion_CoreFlash", _, false), TIMER_FLAG_NO_MAPCHANGE);
+			//CreateTimer(3.0, Timer_RemoveEntity, AttachParticle(explosion, "ExplosionCore_buildings", _, false), TIMER_FLAG_NO_MAPCHANGE);
+
+			AcceptEntityInput(explosion, "Explode");
+			AcceptEntityInput(explosion, "Kill");
+		}
+
+		explosion = CreateEntityByName("env_physexplosion");
+		if(IsValidEntity(explosion))
+		{
+			DispatchKeyValueVector(explosion, "origin", pos);
+			DispatchKeyValue(explosion, "magnitude", "500");
+			DispatchKeyValue(explosion, "radius", "300");
+			DispatchKeyValue(explosion, "flags", "19");
+
+			SetEntPropEnt(explosion, Prop_Send, "m_hOwnerEntity", client);
+			DispatchSpawn(explosion);
+
+			HookSingleEntityOutput(explosion, "OnPushedPlayer", Items_FragHook);
+			AcceptEntityInput(explosion, "Explode");
+
+			UnhookSingleEntityOutput(explosion, "OnPushedPlayer", Items_FragHook);
+			AcceptEntityInput(explosion, "Kill");
+		}
+
+		AcceptEntityInput(entity, "Kill");
+	}
+}
+
+public void Items_FragHook(const char[] output, int caller, int activator, float delay)
+{
+	if(activator > 0 && activator <= MaxClients)
+		ClientCommand(activator, "dsp_player %d", GetRandomInt(32, 34));
+}
+
+public bool Items_FlashButton(int client, int weapon, int &buttons, int &holding)
+{
+	if(!holding)
+	{
+		bool short = view_as<bool>(buttons & IN_ATTACK2);
+		if(short || (buttons & IN_ATTACK))
+		{
+			holding = short ? IN_ATTACK2 : IN_ATTACK;
+			RemoveAndSwitchItem(client, weapon);
+			Config_DoReaction(client, "throwgrenade");
+
+			int entity = CreateEntityByName("prop_physics_multiplayer");
+			if(IsValidEntity(entity))
+			{
+				DispatchKeyValue(entity, "physicsmode", "2");
+
+				static float ang[3], pos[3], vel[3];
+				GetEntPropVector(client, Prop_Send, "m_vecOrigin", pos);
+				GetClientEyeAngles(client, ang);
+				pos[2] += 63.0;
+
+				vel[0] = Cosine(DegToRad(ang[0]))*Cosine(DegToRad(ang[1]))*1200.0;
+				vel[1] = Cosine(DegToRad(ang[0]))*Sine(DegToRad(ang[1]))*1200.0;
+				vel[2] = Sine(DegToRad(ang[0]))*-1200.0;
+
+				if(short)
+					ScaleVector(vel, 0.5);
+
+				SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
+				SetEntProp(entity, Prop_Send, "m_iTeamNum", GetClientTeam(client));
+				SetEntProp(entity, Prop_Data, "m_iHammerID", Client[client].Class);
+
+				SetEntityModel(entity, "models/workshop/weapons/c_models/c_quadball/w_quadball_grenade.mdl");
+				SetEntProp(entity, Prop_Send, "m_nSkin", 1);
+
+				DispatchSpawn(entity);
+				TeleportEntity(entity, pos, ang, vel);
+
+				CreateTimer(3.0, Items_FlashTimer, EntIndexToEntRef(entity), TIMER_FLAG_NO_MAPCHANGE);
+			}
+		}
+	}
+	return false;
+}
+
+public Action Items_FlashTimer(Handle timer, int ref)
+{
+	int entity = EntRefToEntIndex(ref);
+	if(entity > MaxClients)
+	{
+		static float pos1[3];
+		GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos1);
+
+		int i = CreateEntityByName("env_explosion");
+		if(IsValidEntity(i))
+		{
+			DispatchKeyValueVector(i, "origin", pos1);
+			DispatchKeyValue(i, "iMagnitude", "0");
+			DispatchKeyValue(i, "flags", "532");
+
+			SetEntPropEnt(i, Prop_Send, "m_hOwnerEntity", GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"));
+			DispatchSpawn(i);
+
+			//CreateTimer(2.0, Timer_RemoveEntity, AttachParticle(i, "Explosions_MA_Flash_1", _, false), TIMER_FLAG_NO_MAPCHANGE);
+
+			AcceptEntityInput(i, "Explode");
+			AcceptEntityInput(i, "Kill");
+		}
+
+		int class = GetEntProp(entity, Prop_Data, "m_iHammerID");
+		for(i=1; i<=MaxClients; i++)
+		{
+			if(IsClientInGame(i) && IsPlayerAlive(i) && !IsFriendly(class, Client[i].Class))
+			{
+				static float pos2[3];
+				GetClientEyePosition(i, pos2);
+				if(GetVectorDistance(pos1, pos2, true) < 250000.0)
+				{
+					FadeMessage(i, 1000, 1000, 0x0001, 200, 200, 200, 255);
+					ClientCommand(i, "dsp_player %d", GetRandomInt(35, 37));
+				}
+			}
+		}
+
+		AcceptEntityInput(entity, "Kill");
+	}
+}
+
 public bool Items_PainKillerButton(int client, int weapon, int &buttons, int &holding)
 {
 	if(holding)
@@ -1670,10 +1878,6 @@ public void Items_CombatAmmo(int client, int type, int &ammo)
 		{
 			ammo += 80;
 		}
-		case 8:	// Grenades
-		{
-			ammo += 1;
-		}
 		case 10:	// 4mag
 		{
 			ammo += 30;
@@ -1682,6 +1886,18 @@ public void Items_CombatAmmo(int client, int type, int &ammo)
 		{
 			ammo += 40;
 		}
+	}
+}
+
+public void Items_CombatItem(int client, int type, int &amount)
+{
+	switch(type)
+	{
+		case 1:	// Weapons
+			amount ++;
+
+		case 7:	// Grenades
+			amount++;
 	}
 }
 
@@ -1702,10 +1918,6 @@ public void Items_HeavyAmmo(int client, int type, int &ammo)
 		{
 			ammo += 160;
 		}
-		case 8:	// Grenades
-		{
-			ammo += 2;
-		}
 		case 10:	// 4mag
 		{
 			ammo += 50;
@@ -1725,6 +1937,9 @@ public void Items_HeavyItem(int client, int type, int &amount)
 			amount += 2;
 
 		case 3:	// Medical
+			amount++;
+
+		case 7:	// Grenades
 			amount++;
 	}
 }

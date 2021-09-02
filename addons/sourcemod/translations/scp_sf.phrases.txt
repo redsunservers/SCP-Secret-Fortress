@@ -674,11 +674,19 @@
 	}
 	"weapon_58"
 	{
-		"en"		"Jarate"
+		"en"		"Flash Grenade"
 	}
 	"info_58"
 	{
-		"en"		"Literal piss."
+		"en"		"No damage but blinds players when it explodes."
+	}
+	"weapon_1083"
+	{
+		"en"		"High-Explosive Grenade"
+	}
+	"info_1083"
+	{
+		"en"		"High damage when it does explode."
 	}
 	"weapon_1151"
 	{

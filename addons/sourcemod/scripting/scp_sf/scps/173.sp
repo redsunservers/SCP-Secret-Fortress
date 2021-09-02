@@ -203,9 +203,10 @@ public void SCP173_OnButton(int client, int button)
 			if(BlinkCharge[client] > 100.0)
 				BlinkCharge[client] = 100.0;
 		}
-		else if(BlinkExpire[client] < engineTime)
+		else
 		{
-			BlinkCharge[client] = 0.0;
+			if(BlinkExpire[client] < engineTime)
+				BlinkCharge[client] = 0.0;
 
 			if(Frozen[client])
 			{
@@ -213,7 +214,6 @@ public void SCP173_OnButton(int client, int button)
 				SetEntPropFloat(client, Prop_Send, "m_flNextAttack", 0.0);
 				SetEntProp(client, Prop_Send, "m_bUseClassAnimations", true);
 				SetEntProp(client, Prop_Send, "m_bCustomModelRotates", true);
-				TF2_AddCondition(client, TFCond_Slowed, 0.1);
 				SDKCall_SetSpeed(client);
 			}
 		}
