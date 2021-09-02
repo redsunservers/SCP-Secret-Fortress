@@ -1,13 +1,3 @@
-static const int ItemLimits[] =
-{
-	2,	// Weapons
-	3,	// Keycards
-	3,	// Medical
-	1,	// Radio
-	3,	// SCPs
-	1	// Armor
-};
-
 enum struct WeaponEnum
 {
 	char Display[16];
@@ -587,7 +577,7 @@ bool Items_CanGiveItem(int client, int type, bool &full=false)
 			Call_Finish();
 		}
 
-		if(type<1 || type>=sizeof(ItemLimits))
+		if(type<1 || type>=ITEMS_MAX)
 			continue;
 
 		if(weapon.OnItem != INVALID_FUNCTION)

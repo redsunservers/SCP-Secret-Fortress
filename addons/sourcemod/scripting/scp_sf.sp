@@ -1180,7 +1180,7 @@ public Action OnJoinSpec(int client, const char[] command, int args)
 
 public Action OnJoinTeam(int client, const char[] command, int args)
 {
-	if(!client)
+	if(!client || !IsClientInGame(client))
 		return Plugin_Continue;
 
 	if(Enabled && !IsSpec(client))
@@ -1218,7 +1218,7 @@ public Action OnVoiceMenu(int client, const char[] command, int args)
 
 public Action OnDropItem(int client, const char[] command, int args)
 {
-	if(client && !IsSpec(client))
+	if(client && IsClientInGame(client) && !IsSpec(client))
 	{
 		ClassEnum class;
 		if(Classes_GetByIndex(Client[client].Class, class) && class.Human)
@@ -1252,7 +1252,7 @@ public Action OnDropItem(int client, const char[] command, int args)
 
 public Action OnSayCommand(int client, const char[] command, int args)
 {
-	if(!client)
+	if(!client || !IsClientInGame(client))
 		return Plugin_Continue;
 
 	#if defined _sourcecomms_included
