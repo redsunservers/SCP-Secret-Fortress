@@ -1,0 +1,11 @@
+"VertexLitGeneric"
+{
+                "$alphatest" "1"
+	"$baseTexture" "Toilet_12/Toilet_diffuse"
+	"$bumpmap" "Toilet_12/Toilet_normals"
+	"$phong" "1"
+	"$phongboost" "1"	
+	"$phongfresnelranges"	"[0.5 1 1]"
+	"$phongexponenttexture" "Toilet_12/Toilet_exp"
+	"$phongalbedotint" "1"								
+}

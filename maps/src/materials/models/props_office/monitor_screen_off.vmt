@@ -1,0 +1,9 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/props_office/monitor_screen_off"
+	"$envmap" "env_cubemap"
+	"$envmaptint" "[ .65 .65 .65 ]"
+	"$envmapcontrast" "1.0"
+    "$model" 1
+
+}

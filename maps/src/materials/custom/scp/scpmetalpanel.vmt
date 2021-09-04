@@ -1,0 +1,5 @@
+"LightmappedGeneric"
+{
+	"$basetexture" "custom/scp/scpmetalpanel"
+	"$surfaceprop" "Metal"
+}

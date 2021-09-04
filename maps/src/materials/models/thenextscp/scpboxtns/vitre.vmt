@@ -1,0 +1,8 @@
+"VertexlitGeneric"
+{
+    "$basetexture" "models/thenextscp/scpboxtns/base"
+    "$bumpmap"    "models/thenextscp/scpboxtns/base_n"
+     $surfaceprop "metal"
+    $translucent 1
+
+}

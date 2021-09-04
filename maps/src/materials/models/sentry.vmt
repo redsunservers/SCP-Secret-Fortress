@@ -1,0 +1,15 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models\npcs\sentry_undeployed"
+	"$bumpmap" "models\npcs\sentry_normal"
+	"$normalmapalphaenvmapmask" 1
+	"$envmap" "env_cubemap"
+	"$envmaptint" "[ .4 .4 .4 ]"
+
+        $detail detail\bm_rustymetal_detail_01
+        $detailscale 5
+        $detailblendfactor 1
+        $detailblendmode 0
+    "$model" 1
+
+}

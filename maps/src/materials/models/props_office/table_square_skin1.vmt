@@ -1,0 +1,9 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/props_office/table_square_skin1"
+	"$envmapmask" "models/props_office/table_square_ref"
+	"$envmap" "env_cubemap"
+	"$envmaptint" "[ .5 .5 .5 ]"
+    "$model" 1
+
+}

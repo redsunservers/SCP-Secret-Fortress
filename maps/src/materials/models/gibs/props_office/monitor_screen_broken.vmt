@@ -1,0 +1,11 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/gibs/props_office/monitor_screen_broken"
+	"$envmap" "env_cubemap"
+	"$envmaptint" "[ .25 .25 .25 ]"
+	"$translucent" "1"
+	"$nodecal" "1"
+	"$nolod" "1"
+    "$model" 1
+
+}
