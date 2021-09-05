@@ -1184,6 +1184,10 @@
 	{
 		"en"		"{gray}cl_downloadfilter is set to nosounds. You won't hear any music. If you want to enable, set cl_downloadfilter to all"
 	}
+	"gameover_stuck"	// HUD
+	{
+		"en"		"ASSIGNMENT: TERMINATED\nSUBJECT: MTF OPERATIVE E11\nREASON: DEMONSTRATION OF EXCEEDINGLY POOR JUDGMENT"
+	}
 
 	// Ikea
 

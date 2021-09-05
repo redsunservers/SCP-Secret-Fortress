@@ -238,7 +238,7 @@ public MRESReturn DHook_CalculateMaxSpeedPost(int clientwhen, DHookReturn ret)
 
 		speed *= CvarSpeedMulti.FloatValue;
 		if(Client[client].Sprinting)
-			speed *= 1.125;
+			speed *= 1.15;
 
 		if(TF2_IsPlayerInCondition(client, TFCond_SpeedBuffAlly))
 			speed *= 1.35;

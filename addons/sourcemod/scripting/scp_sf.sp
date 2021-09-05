@@ -138,6 +138,7 @@ enum struct ClientEnum
 	int Floor;
 	int Disarmer;
 	int DownloadMode;
+	int BadKills;
 
 	float IdleAt;
 	float ComFor;
@@ -1082,6 +1083,8 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	Client[client].Extra2 = 0;
 	Client[client].Extra3 = 0.0;
 	Client[client].WeaponClass = TFClass_Unknown;
+	if(Client[client].BadKills > 0)
+		Client[client].BadKills--;
 
 	SetEntProp(client, Prop_Send, "m_bForcedSkin", false);
 	SetEntProp(client, Prop_Send, "m_nForcedSkin", 0);
@@ -1819,6 +1822,9 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 	SZF_DropItem(client);
 
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
+	if(client!=attacker && !IsValidClient(attacker))
+		attacker = event.GetInt("inflictor_entindex");
+
 	if(client!=attacker && IsValidClient(attacker))
 	{
 		static int spree[MAXTF2PLAYERS];
@@ -1834,6 +1840,21 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 		spreeFor[attacker] = engineTime+6.0;
 
 		Classes_OnKill(attacker, client);
+
+		if(IsFriendly(Client[client].Class, Client[attacker].Class))
+			Client[attacker].BadKills++;
+
+		if(Client[attacker].BadKills > 2)
+		{
+			ForcePlayerSuicide(attacker);
+			FadeMessage(attacker, 1000, 3000, 0x0002, 0, 0, 0, 255);
+			SetHudTextParamsEx(-1.0, -1.0, 3.5, {100, 100, 100, 255}, {240, 110, 0, 255}, 2, 0.25, 0.01, 1.5);
+			ShowSyncHudText(attacker, HudGame, "%T", "gameover_stuck", attacker);
+		}
+		else
+		{
+			SDKCall_SetSpeed(attacker);
+		}
 
 		if(deadringer || !Classes_OnDeath(client, event))
 		{
@@ -2095,7 +2116,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 				{
 					if(!Client[client].Extra2 && Client[client].Extra3<engineTime)
 					{
-						float drain = 0.5;
+						float drain = 1.0;
 						Items_Sprint(client, drain);
 						Client[client].SprintPower -= drain;
 						if(Client[client].SprintPower < 0)
@@ -2108,7 +2129,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 				}
 				else if(Client[client].SprintPower<100 && (GetEntityFlags(client) & FL_ONGROUND))
 				{
-					Client[client].SprintPower += 0.75;
+					Client[client].SprintPower += 1.5;
 				}
 
 				if(showHud)

@@ -940,6 +940,18 @@ public int Items_ShowItemMenuH(Menu menu, MenuAction action, int client, int cho
 	}
 }
 
+bool Items_IsHoldingWeapon(int client)
+{
+	int entity = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	if(entity>MaxClients && IsValidEntity(entity) && HasEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"))
+	{
+		WeaponEnum weapon;
+		if(!Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) || !weapon.Hide)
+			return true;
+	}
+	return false;
+}
+
 int Items_OnKeycard(int client, any access)
 {
 	int value;
@@ -1242,14 +1254,7 @@ public Action Items_DisarmerHit(int client, int victim, int &inflictor, float &d
 		bool cancel;
 		if(!Client[victim].Disarmer)
 		{
-			int entity = GetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon");
-			if(entity>MaxClients && IsValidEntity(entity) && HasEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"))
-			{
-				WeaponEnum weapon;
-				if(!Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) || !weapon.Hide)
-					cancel = true;
-			}
-
+			cancel = Items_IsHoldingWeapon(victim);
 			if(!cancel)
 			{
 				TF2_AddCondition(victim, TFCond_PasstimePenaltyDebuff);
@@ -1278,13 +1283,15 @@ public Action Items_DisarmerHit(int client, int victim, int &inflictor, float &d
 					GiveAchievement(Achievement_DisarmMTF, client);
 
 				CreateTimer(1.0, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
+				Client[victim].Disarmer = client;
+				SDKCall_SetSpeed(victim);
 			}
 		}
 
 		if(!cancel)
 		{
-			Client[victim].Disarmer = client;
-			SDKCall_SetSpeed(victim);
+			//Client[victim].Disarmer = client;
+			//SDKCall_SetSpeed(victim);
 			return Plugin_Handled;
 		}
 	}

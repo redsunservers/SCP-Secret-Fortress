@@ -152,16 +152,6 @@ forward Action SCPSF_OnClassPre(int client, char[] class, SCPSpawnContext contex
 forward void SCPSF_OnClass(int client, const char[] class, SCPSpawnContext context);
 
 /**
- * Calls when a client is given a new item
- *
- * @param client 	Client index
- * @param entity 	Entity index of weapon
- *
- * @noreturn
- */
-forward void SCPSF_OnClass(int client, int entity);
-
-/**
  * Calls when a client escapes
  *
  * @param client 	Client index

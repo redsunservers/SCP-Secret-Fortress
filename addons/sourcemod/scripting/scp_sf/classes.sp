@@ -954,10 +954,16 @@ public void Classes_KillChaos(int client, int victim)
 	}
 }
 
-public void Classes_KillMtf(int client, int victim)
+public void Classes_KillSci(int client, int victim)
 {
 	if(Classes_GetByName("dboi") == Client[victim].Class)
 		GiveAchievement(Achievement_KillDClass, client);
+}
+
+public void Classes_KillMtf(int client, int victim)
+{
+	if(Classes_GetByName("dboi")==Client[victim].Class && !Items_IsHoldingWeapon(victim))
+		Client[client].BadKills++;
 }
 
 public Action Classes_TakeDamageHuman(int client, int attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
@@ -1348,7 +1354,10 @@ public Action Classes_SoundScp(int client, char sample[PLATFORM_MAX_PATH], int &
 public float Classes_SpeedHuman(int client, float &speed)
 {
 	if(Client[client].Extra2)
-		speed += speed*(Client[client].Extra2*0.125);
+		speed *= 1.0+(Client[client].Extra2*0.125);
+
+	if(Client[client].BadKills)
+		speed *= 2.0-Pow(0.9, float(-Client[client].BadKills));
 }
 
 public float Classes_GhostTheme(int client, char path[PLATFORM_MAX_PATH])
