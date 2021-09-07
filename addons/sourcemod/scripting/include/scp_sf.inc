@@ -134,9 +134,9 @@ forward void SCPSF_OnChatMessage(int client, char[] name, char[] message);
  * @param context 	Context on why a new class is assigned
  *
  * @return		Plugin_Continue - No changes
- *			Plugin_Changed - Changed class
- *			Plugin_Handled - Class is unchanged
- *			Plugin_Stop - Class is unchanged
+ *			Plugin_Changed - Changed class, a queue will move on to the next class
+ *			Plugin_Handled - Changed class, a queue will keep the last class for the next player
+ *			Plugin_Stop - Class is unchanged, a queue will keep the last class for the next player
  */
 forward Action SCPSF_OnClassPre(int client, char[] class, SCPSpawnContext context);
 

@@ -336,13 +336,13 @@ bool Classes_AssignClass(int client, ClassSpawnEnum context, int &index)
 
 	switch(Forward_OnClassPre(client, context, class.Name, sizeof(class.Name)))
 	{
-		case Plugin_Changed:
+		case Plugin_Changed, Plugin_Handled:
 		{
 			index = Classes_GetByName(class.Name);
 			if(index == -1)
 				index = 0;
 		}
-		case Plugin_Handled, Plugin_Stop:
+		case Plugin_Stop:
 		{
 			return false;
 		}
