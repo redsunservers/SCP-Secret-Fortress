@@ -1372,7 +1372,7 @@ public bool Resize_TracePlayersAndBuildings(int entity, int contentsMask, any da
 	{
 		static char classname[32];
 		GetEntityClassname(entity, classname, sizeof(classname));
-		if(!StrContains(classname, "obj_") || !StrContains(classname, "prop_dynamic") || StrEqual(classname, "func_physbox") || StrEqual(classname, "func_breakable"))
+		if(!StrContains(classname, "obj_") || !StrContains(classname, "prop_dynamic") || !StrContains(classname, "func_door") || StrEqual(classname, "func_physbox") || StrEqual(classname, "func_breakable"))
 			ResizeTraceFailed = true;
 	}
 	return false;

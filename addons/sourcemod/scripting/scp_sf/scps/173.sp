@@ -161,7 +161,7 @@ public void SCP173_OnButton(int client, int button)
 				continue;
 
 			// ensure no wall or door is obstructing
-			TR_TraceRayFilter(pos2, pos1, MASK_VISIBLE, RayType_EndPoint, Trace_DoorOnly);
+			TR_TraceRayFilter(pos2, pos1, MASK_ALL, RayType_EndPoint, Trace_DoorOnly);
 			TR_GetEndPosition(ang3);
 			if(ang3[0]!=pos1[0] || ang3[1]!=pos1[1] || ang3[2]!=pos1[2])
 				continue;
@@ -502,7 +502,7 @@ static bool DPT_TryTeleport(int clientIdx, float maxDistance, const float startP
 				// before we test this position, ensure it has line of sight from the point our player looked from
 				// this ensures the player can't teleport through walls
 				static float tmpPos[3];
-				TR_TraceRayFilter(endPos, testPos, MASK_PLAYERSOLID, RayType_EndPoint, Trace_WallsOnly);
+				TR_TraceRayFilter(endPos, testPos, MASK_PLAYERSOLID, RayType_EndPoint, Trace_DoorOnly);
 				TR_GetEndPosition(tmpPos);
 				if (testPos[0] != tmpPos[0] || testPos[1] != tmpPos[1] || testPos[2] != tmpPos[2])
 					continue;
