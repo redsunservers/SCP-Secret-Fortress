@@ -44,7 +44,7 @@ void DisplayCredits(int i)
 
 #define MAJOR_REVISION	"2"
 #define MINOR_REVISION	"3"
-#define STABLE_REVISION	"1"
+#define STABLE_REVISION	"2"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE	100000000.0
@@ -1618,11 +1618,11 @@ public Action Command_ForceClass(int client, int args)
 		strcopy(pattern, sizeof(pattern), class.Name);
 		switch(Forward_OnClassPre(targets[target], ClassSpawn_Other, pattern, sizeof(pattern)))
 		{
-			case Plugin_Changed:
+			case Plugin_Changed, Plugin_Handled:
 			{
 				Client[targets[target]].Class = Classes_GetByName(pattern);
 			}
-			case Plugin_Handled, Plugin_Stop:
+			case Plugin_Stop:
 			{
 				continue;
 			}

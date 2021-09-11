@@ -329,13 +329,15 @@ bool Gamemode_RoundStart()
 	{
 		client = players.Get(i);
 		Client[client].Class = classes.Get(i);
+		static char buffer[48];
 		if(Classes_GetByIndex(Client[client].Class, class))
 		{
-			switch(Forward_OnClassPre(client, ClassSpawn_RoundStart, class.Name, sizeof(class.Name)))
+			strcopy(buffer, sizeof(buffer), class.Name);
+			switch(Forward_OnClassPre(client, ClassSpawn_RoundStart, buffer, sizeof(buffer)))
 			{
 				case Plugin_Changed:
 				{
-					Client[client].Class = Classes_GetByName(class.Name, class);
+					Client[client].Class = Classes_GetByName(buffer, class);
 					if(Client[client].Class == -1)
 					{
 						Client[client].Class = 0;
@@ -349,7 +351,7 @@ bool Gamemode_RoundStart()
 					if(length > size)
 						length = size;
 
-					Client[client].Class = Classes_GetByName(class.Name, class);
+					Client[client].Class = Classes_GetByName(buffer, class);
 					if(Client[client].Class == -1)
 					{
 						Client[client].Class = 0;
@@ -372,11 +374,12 @@ bool Gamemode_RoundStart()
 		{
 			Client[client].Class = 0;
 			Classes_GetByIndex(Client[client].Class, class);
-			switch(Forward_OnClassPre(client, ClassSpawn_RoundStart, class.Name, sizeof(class.Name)))
+			strcopy(buffer, sizeof(buffer), class.Name);
+			switch(Forward_OnClassPre(client, ClassSpawn_RoundStart, buffer, sizeof(buffer)))
 			{
 				case Plugin_Changed:
 				{
-					Client[client].Class = Classes_GetByName(class.Name, class);
+					Client[client].Class = Classes_GetByName(buffer, class);
 					if(Client[client].Class == -1)
 					{
 						Client[client].Class = 0;
@@ -390,7 +393,7 @@ bool Gamemode_RoundStart()
 					if(length > size)
 						length = size;
 
-					Client[client].Class = Classes_GetByName(class.Name, class);
+					Client[client].Class = Classes_GetByName(buffer, class);
 					if(Client[client].Class == -1)
 					{
 						Client[client].Class = 0;
@@ -485,13 +488,15 @@ public Action Gamemode_WaveTimer(Handle timer)
 		{
 			int client = players.Get(i);
 			Client[client].Class = classes.Get(i);
+			static char buffer[48];
 			if(Classes_GetByIndex(Client[client].Class, class))
 			{
-				switch(Forward_OnClassPre(client, ClassSpawn_WaveSystem, class.Name, sizeof(class.Name)))
+				strcopy(buffer, sizeof(buffer), class.Name);
+				switch(Forward_OnClassPre(client, ClassSpawn_WaveSystem, buffer, sizeof(buffer)))
 				{
 					case Plugin_Changed:
 					{
-						Client[client].Class = Classes_GetByName(class.Name, class);
+						Client[client].Class = Classes_GetByName(buffer, class);
 						if(Client[client].Class == -1)
 						{
 							Client[client].Class = 0;
@@ -505,7 +510,7 @@ public Action Gamemode_WaveTimer(Handle timer)
 						if(length > size)
 							length = size;
 
-						Client[client].Class = Classes_GetByName(class.Name, class);
+						Client[client].Class = Classes_GetByName(buffer, class);
 						if(Client[client].Class == -1)
 						{
 							Client[client].Class = 0;
@@ -528,11 +533,12 @@ public Action Gamemode_WaveTimer(Handle timer)
 			{
 				Client[client].Class = 0;
 				Classes_GetByIndex(Client[client].Class, class);
-				switch(Forward_OnClassPre(client, ClassSpawn_WaveSystem, class.Name, sizeof(class.Name)))
+				strcopy(buffer, sizeof(buffer), class.Name);
+				switch(Forward_OnClassPre(client, ClassSpawn_WaveSystem, buffer, sizeof(buffer)))
 				{
 					case Plugin_Changed:
 					{
-						Client[client].Class = Classes_GetByName(class.Name, class);
+						Client[client].Class = Classes_GetByName(buffer, class);
 						if(Client[client].Class == -1)
 						{
 							Client[client].Class = 0;
@@ -546,7 +552,7 @@ public Action Gamemode_WaveTimer(Handle timer)
 						if(length > size)
 							length = size;
 
-						Client[client].Class = Classes_GetByName(class.Name, class);
+						Client[client].Class = Classes_GetByName(buffer, class);
 						if(Client[client].Class == -1)
 						{
 							Client[client].Class = 0;
