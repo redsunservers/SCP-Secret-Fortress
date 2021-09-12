@@ -329,7 +329,7 @@ bool Gamemode_RoundStart()
 	{
 		client = players.Get(i);
 		Client[client].Class = classes.Get(i);
-		static char buffer[48];
+		static char buffer[16];
 		if(Classes_GetByIndex(Client[client].Class, class))
 		{
 			strcopy(buffer, sizeof(buffer), class.Name);
@@ -488,7 +488,7 @@ public Action Gamemode_WaveTimer(Handle timer)
 		{
 			int client = players.Get(i);
 			Client[client].Class = classes.Get(i);
-			static char buffer[48];
+			static char buffer[16];
 			if(Classes_GetByIndex(Client[client].Class, class))
 			{
 				strcopy(buffer, sizeof(buffer), class.Name);

@@ -490,6 +490,19 @@ stock bool IsInvuln(int client)
 		!GetEntProp(client, Prop_Data, "m_takedamage"));
 }
 
+void TakeDamage(int entity, int inflictor, int attacker, float damage, int damagetype=DMG_GENERIC, int weapon=-1, const float damageForce[3]=NULL_VECTOR, const float damagePosition[3]=NULL_VECTOR, int damagecustom=0)
+{
+	static float damageForce2[3], damagePosition2[3];
+	for(int i; i<3; i++)
+	{
+		damageForce2[i] = damageForce[i];
+		damagePosition2[i] = damagePosition[i];
+	}
+
+	if(OnTakeDamage(entity, inflictor, attacker, damage, damagetype, weapon, damageForce2, damagePosition2, damagecustom) < Plugin_Handled)
+		SDKHooks_TakeDamage(entity, inflictor, attacker, damage, damagetype, weapon, damageForce2, damagePosition2);
+}
+
 int GetOwnerLoop(int entity)
 {
 	int owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");

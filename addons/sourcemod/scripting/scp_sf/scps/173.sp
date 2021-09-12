@@ -264,7 +264,7 @@ public void SCP173_OnButton(int client, int button)
 			SetEntityRenderColor(entity, 15, 15, 25);
 
 			DataPack pack;
-			CreateDataTimer(0.25, SCP173_PuddleTimer, pack, TIMER_FLAG_NO_MAPCHANGE);
+			CreateDataTimer(0.25, SCP173_PuddleTimer, pack, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 			pack.WriteCell(EntIndexToEntRef(entity));
 			pack.WriteCell(Client[client].Class);
 			pack.WriteCell(720);

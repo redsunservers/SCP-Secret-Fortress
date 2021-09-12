@@ -491,7 +491,7 @@ public void SCP049_Think(int client)
 		return;
 	}
 
-	if(GetClientTeam(client) != view_as<int>(TFTeam_Unassigned))
+	if(GetClientTeam(client)!=view_as<int>(TFTeam_Unassigned) && IsValidMarker(entity))
 	{
 		ChangeClientTeamEx(client, TFTeam_Unassigned);
 		SetEntProp(entity, Prop_Send, "m_iTeamNum", TFTeam_Unassigned);
