@@ -1,0 +1,27 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models\npcs\sentry"
+	"$bumpmap" "models\npcs\sentry_normal"
+	"$normalmapalphaenvmapmask" 1
+	"$envmap" "env_cubemap"
+	"$envmaptint" "[ .4 .4 .4 ]"
+        "$selfillum" 1
+
+        $detail detail\bm_rustymetal_detail_01
+        $detailscale 5
+        $detailblendfactor 1
+        $detailblendmode 0
+"$phong" "1"
+	"$phongexponent" "7"
+	"$phongboost"	"1"
+	  $phongfresnelranges "[.4 .8 30]"
+
+	"$halflambert" 1
+	"$multipass" 1
+	"$model" "1"
+
+	// Rim lighting parameters
+	"$rimlight" "1"				// To enable rim lighting (requires phong)
+	"$rimlightexponent" "35"		// Exponent for phong component of rim lighting
+	"$rimlightboost" ".2"			// Boost for ambient cube component 
+}

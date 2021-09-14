@@ -1,0 +1,26 @@
+"VertexLitGeneric"
+{
+   "$basetexture" "models/props_vehicles/lav"
+   "$bumpmap" "models/props_vehicles/lav_normal"
+   "$surfaceprop" "metal"
+
+   "$envmap" "env_cubemap"
+   "$envmaptint" "[.9 .9 .9]"
+   "$normalmapalphaenvmapmask" 1
+
+        "$detail" "detail\bm_metal_detail_01"
+	"$detailscale" "5"
+	"$detailblendfactor" .8
+	"$detailblendmode" 0
+
+	"$nodecal" "1"
+	"$multipass" 0
+
+	"$phong" "1"
+	"$phongexponent" "35"
+	"$phongboost" "1.5"
+	"$phongfresnelranges"	"[0.4 0.9 2.6]"
+	"$phongalbedotint" "1"
+
+    "$model" 1
+}

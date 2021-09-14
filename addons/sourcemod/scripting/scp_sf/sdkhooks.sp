@@ -15,41 +15,71 @@ void SDKHook_HookClient(int client)
 	SDKHook(client, SDKHook_PostThinkPost, OnPostThinkPost);
 }
 
+void SDKHook_DealDamage(int client, int inflictor, int attacker, float damage, int damagetype=DMG_GENERIC, int weapon=-1, const float damageForce[3]=NULL_VECTOR, const float damagePosition[3]=NULL_VECTOR)
+{
+	int inflictor2 = inflictor;
+	int attacker2 = attacker;
+	float damage2 = damage;
+	int damagetype2 = damagetype;
+	int weapon2 = weapon;
+	float damageForce2[3], damagePosition2[3];
+	for(int i; i<3; i++)
+	{
+		damageForce2[i] = damageForce[i];
+		damagePosition2[i] = damagePosition[i];
+	}
+
+	if(OnTakeDamage(client, inflictor2, attacker2, damage2, damagetype2, weapon2, damageForce2, damagePosition2, -1) < Plugin_Handled)
+		SDKHooks_TakeDamage(client, inflictor2, attacker2, damage2, damagetype2, weapon2, damageForce2, damagePosition2);
+}
+
 public void OnEntityCreated(int entity, const char[] classname)
 {
 	if(StrEqual(classname, "item_healthkit_small"))
 	{
-		SDKHook(entity, SDKHook_Spawn, OnSmallSpawned);
+		SDKHook(entity, SDKHook_Spawn, OnSmallHealthSpawned);
 	}
 	else if(StrEqual(classname, "item_healthkit_medium"))
 	{
-		SDKHook(entity, SDKHook_Spawn, OnMedSpawned);
+		SDKHook(entity, SDKHook_Spawn, OnMediumHealthSpawned);
+	}
+	else if(StrEqual(classname, "item_ammopack_small"))
+	{
+		SDKHook(entity, SDKHook_Spawn, OnSmallAmmoSpawned);
+	}
+	else if(StrEqual(classname, "item_ammopack_medium"))
+	{
+		SDKHook(entity, SDKHook_Spawn, OnMediumAmmoSpawned);
+	}
+	else if(StrEqual(classname, "item_ammopack_full"))
+	{
+		SDKHook(entity, SDKHook_Spawn, OnFullAmmoSpawned);
 	}
 	else if(StrEqual(classname, "tf_projectile_pipe"))
 	{
-		SDKHook(entity, SDKHook_SpawnPost, OnPipeSpawned);
+		SDKHook(entity, SDKHook_Spawn, OnPipeSpawned);
 	}
 }
 
-public void OnSmallSpawned(int entity)
+public void OnSmallHealthSpawned(int entity)
 {
 	SDKHook(entity, SDKHook_StartTouch, OnPipeTouch);
-	SDKHook(entity, SDKHook_Touch, OnSmallPickup);
+	SDKHook(entity, SDKHook_Touch, OnSmallHealthPickup);
 }
 
-public void OnMedSpawned(int entity)
+public void OnMediumHealthSpawned(int entity)
 {
 	SetEntProp(entity, Prop_Data, "m_iHammerID", RoundToFloor((GetEngineTime()+2.0)*10.0));
 	SDKHook(entity, SDKHook_StartTouch, OnPipeTouch);
-	SDKHook(entity, SDKHook_Touch, OnMedPickup);
+	SDKHook(entity, SDKHook_Touch, OnMediumHealthPickup);
 }
 
-public Action OnSmallPickup(int entity, int client)
+public Action OnSmallHealthPickup(int entity, int client)
 {
 	if(!Enabled || !IsValidClient(client))
 		return Plugin_Continue;
 
-	if(!IsSCP(client) && !Client[client].Disarmer && Items_CanGiveItem(client, Item_Medical))
+	if(!IsSCP(client) && !Client[client].Disarmer && Items_CanGiveItem(client, 3))
 	{
 		Items_CreateWeapon(client, 30013, false, true, true);
 		AcceptEntityInput(entity, "Kill");
@@ -57,7 +87,7 @@ public Action OnSmallPickup(int entity, int client)
 	return Plugin_Handled;
 }
 
-public Action OnMedPickup(int entity, int client)
+public Action OnMediumHealthPickup(int entity, int client)
 {
 	if(!Enabled || !IsValidClient(client))
 		return Plugin_Continue;
@@ -74,16 +104,216 @@ public Action OnMedPickup(int entity, int client)
 				OnGetMaxHealth(client, health);
 				if(health > GetClientHealth(client))
 				{
-					SDKUnhook(entity, SDKHook_Touch, OnMedPickup);
+					SDKUnhook(entity, SDKHook_Touch, OnMediumHealthPickup);
 					return Plugin_Continue;
 				}
 			}
-			else if(!Client[client].Disarmer && Items_CanGiveItem(client, Item_Medical))
+			else if(!Client[client].Disarmer && Items_CanGiveItem(client, 3))
 			{
 				Items_CreateWeapon(client, 30014, false, true, true);
 				AcceptEntityInput(entity, "Kill");
 			}
 		}
+	}
+	return Plugin_Handled;
+}
+
+public void OnSmallAmmoSpawned(int entity)
+{
+	SDKHook(entity, SDKHook_StartTouch, OnPipeTouch);
+	SDKHook(entity, SDKHook_Touch, OnSmallAmmoPickup);
+}
+
+public void OnMediumAmmoSpawned(int entity)
+{
+	SDKHook(entity, SDKHook_StartTouch, OnPipeTouch);
+	SDKHook(entity, SDKHook_Touch, OnMediumAmmoPickup);
+}
+
+public void OnFullAmmoSpawned(int entity)
+{
+	SDKHook(entity, SDKHook_StartTouch, OnPipeTouch);
+	SDKHook(entity, SDKHook_Touch, OnFullAmmoPickup);
+}
+
+public Action OnSmallAmmoPickup(int entity, int client)
+{
+	if(!Enabled || !IsValidClient(client))
+		return Plugin_Continue;
+
+	if(!IsSCP(client) && !Client[client].Disarmer)
+	{
+		int ammo = GetAmmo(client, 2);
+
+		int max = Classes_GetMaxAmmo(client, 2);
+		Items_Ammo(client, 2, max);
+		if(ammo < max)
+		{
+			ammo += 30;
+			if(ammo > max)
+				ammo = max;
+
+			SetAmmo(client, ammo, 2);
+			AcceptEntityInput(entity, "Kill");
+		}
+	}
+	return Plugin_Handled;
+}
+
+public Action OnMediumAmmoPickup(int entity, int client)
+{
+	if(!Enabled || !IsValidClient(client))
+		return Plugin_Continue;
+
+	if(!IsSCP(client) && !Client[client].Disarmer)
+	{
+		bool found;
+		int ammo = GetAmmo(client, 2);
+		int max = Classes_GetMaxAmmo(client, 2);
+		Items_Ammo(client, 2, max);
+		if(ammo < max)
+		{
+			ammo += 90;
+			if(ammo > max)
+				ammo = max;
+
+			SetAmmo(client, ammo, 2);
+			found = true;
+		}
+
+		ammo = GetAmmo(client, 6);
+		max = Classes_GetMaxAmmo(client, 6);
+		Items_Ammo(client, 6, max);
+		if(ammo < max)
+		{
+			ammo += 80;
+			if(ammo > max)
+				ammo = max;
+
+			SetAmmo(client, ammo, 6);
+			found = true;
+		}
+
+		ammo = GetAmmo(client, 7);
+		max = Classes_GetMaxAmmo(client, 7);
+		Items_Ammo(client, 7, max);
+		if(ammo < max)
+		{
+			ammo += 80;
+			if(ammo > max)
+				ammo = max;
+
+			SetAmmo(client, ammo, 7);
+			found = true;
+		}
+
+		ammo = GetAmmo(client, 10);
+		max = Classes_GetMaxAmmo(client, 10);
+		Items_Ammo(client, 10, max);
+		if(ammo < max)
+		{
+			ammo += 30;
+			if(ammo > max)
+				ammo = max;
+
+			SetAmmo(client, ammo, 10);
+			found = true;
+		}
+
+		ammo = GetAmmo(client, 11);
+		max = Classes_GetMaxAmmo(client, 11);
+		Items_Ammo(client, 11, max);
+		if(ammo < max)
+		{
+			ammo += 40;
+			if(ammo > max)
+				ammo = max;
+
+			SetAmmo(client, ammo, 11);
+			found = true;
+		}
+
+		if(found)
+			AcceptEntityInput(entity, "Kill");
+	}
+	return Plugin_Handled;
+}
+
+public Action OnFullAmmoPickup(int entity, int client)
+{
+	if(!Enabled || !IsValidClient(client))
+		return Plugin_Continue;
+
+	if(!IsSCP(client) && !Client[client].Disarmer)
+	{
+		bool found;
+		int ammo = GetAmmo(client, 2);
+		int max = Classes_GetMaxAmmo(client, 2);
+		Items_Ammo(client, 2, max);
+		if(ammo < max)
+		{
+			ammo += 170;
+			if(ammo > max)
+				ammo = max;
+
+			SetAmmo(client, ammo, 2);
+			found = true;
+		}
+
+		ammo = GetAmmo(client, 6);
+		max = Classes_GetMaxAmmo(client, 6);
+		Items_Ammo(client, 6, max);
+		if(ammo < max)
+		{
+			ammo += 160;
+			if(ammo > max)
+				ammo = max;
+
+			SetAmmo(client, ammo, 6);
+			found = true;
+		}
+
+		ammo = GetAmmo(client, 7);
+		max = Classes_GetMaxAmmo(client, 7);
+		Items_Ammo(client, 7, max);
+		if(ammo < max)
+		{
+			ammo += 160;
+			if(ammo > max)
+				ammo = max;
+
+			SetAmmo(client, ammo, 7);
+			found = true;
+		}
+
+		ammo = GetAmmo(client, 10);
+		max = Classes_GetMaxAmmo(client, 10);
+		Items_Ammo(client, 10, max);
+		if(ammo < max)
+		{
+			ammo += 50;
+			if(ammo > max)
+				ammo = max;
+
+			SetAmmo(client, ammo, 10);
+			found = true;
+		}
+
+		ammo = GetAmmo(client, 11);
+		max = Classes_GetMaxAmmo(client, 11);
+		Items_Ammo(client, 11, max);
+		if(ammo < max)
+		{
+			ammo += 60;
+			if(ammo > max)
+				ammo = max;
+
+			SetAmmo(client, ammo, 11);
+			found = true;
+		}
+
+		if(found)
+			AcceptEntityInput(entity, "Kill");
 	}
 	return Plugin_Handled;
 }
@@ -170,6 +400,7 @@ public Action OnTakeDamageAlive(int victim, int &attacker, int &inflictor, float
 	if(!(damagetype & DMG_VEHICLE))
 		return Plugin_Continue;
 
+	damage *= 15.0;
 	return OnTakeDamage(victim, attacker, inflictor, damage, damagetype, weapon, damageForce, damagePosition, damagecustom);
 }
 
@@ -217,7 +448,7 @@ static void OnWeaponSwitchFrame(int userid)
 	int client = GetClientOfUserId(userid);
 	if(client && IsClientInGame(client))
 	{
-		int ammo[Ammo_MAX];
+		/*int ammo[Ammo_MAX];
 		for(int i=1; i<Ammo_MAX; i++)
 		{
 			ammo[i] = GetEntProp(client, Prop_Data, "m_iAmmo", _, i);
@@ -234,8 +465,9 @@ static void OnWeaponSwitchFrame(int userid)
 			int type = GetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType");
 			if(type>0 && type<Ammo_MAX && ammo[type]<1)
 				TF2_RemoveItem(client, entity);
-		}
+		}*/
 
+		Items_ShowItemMenu(client);
 		ViewChange_Switch(client);
 	}
 }

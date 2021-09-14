@@ -1,0 +1,6 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/props_office/computer_devices01"
+    "$model" 1
+
+}

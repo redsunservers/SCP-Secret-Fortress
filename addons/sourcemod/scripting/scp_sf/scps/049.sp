@@ -242,6 +242,21 @@ public Action SCP0492_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &c
 
 public void SCP049_OnButton(int client, int button)
 {
+	if(button & IN_ATTACK2)
+	{
+		int entity = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+		if(entity == GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon"))
+		{
+			entity = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
+			if(entity > MaxClients)
+				SetActiveWeapon(client, entity);
+		}
+		else if(entity > MaxClients)
+		{
+			SetActiveWeapon(client, entity);
+		}
+	}
+
 	float engineTime = GetEngineTime();
 	if(Revive[client].GoneAt > engineTime)
 		return;
@@ -293,7 +308,7 @@ public void SCP049_OnButton(int client, int button)
 		{
 			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 
-			target = SpawnWeapon(client, "tf_weapon_fists", 195, 80, 13, "138 ; 11 ; 252 ; 0.2", false);
+			target = SpawnWeapon(client, "tf_weapon_bonesaw", 310, 80, 13, "138 ; 11 ; 252 ; 0.2", false);
 			if(target > MaxClients)
 			{
 				ApplyStrangeRank(target, 6);
@@ -453,6 +468,8 @@ public void SCP049_Think(int client)
 			return;
 		}
 
+		ChangeClientTeamEx(client, view_as<TFTeam>(GetEntProp(entity, Prop_Send, "m_iTeamNum")));
+
 		// get position to teleport the Marker to
 		static float position[3];
 		GetEntPropVector(client, Prop_Send, "m_vecOrigin", position);
@@ -474,7 +491,7 @@ public void SCP049_Think(int client)
 		return;
 	}
 
-	if(GetClientTeam(client) != view_as<int>(TFTeam_Unassigned))
+	if(GetClientTeam(client)!=view_as<int>(TFTeam_Unassigned) && IsValidMarker(entity))
 	{
 		ChangeClientTeamEx(client, TFTeam_Unassigned);
 		SetEntProp(entity, Prop_Send, "m_iTeamNum", TFTeam_Unassigned);

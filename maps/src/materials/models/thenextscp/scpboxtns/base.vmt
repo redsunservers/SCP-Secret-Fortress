@@ -1,0 +1,11 @@
+"VertexlitGeneric"
+{
+    "$basetexture" "models/thenextscp/scpboxtns/base"
+    "$bumpmap"    "models/thenextscp/scpboxtns/base_n"
+      $surfaceprop "metal"
+    $phong 1
+//    $phongexponent 33
+    $phongexponenttexture "models/thenextscp/scpboxtns/base_r"
+    $phongboost    6
+    $phongfresnelranges    "[0 10 60]"
+}

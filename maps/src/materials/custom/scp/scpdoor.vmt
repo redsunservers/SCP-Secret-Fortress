@@ -1,0 +1,6 @@
+"LightmappedGeneric"
+{
+	"$basetexture" "custom/scp/scpdoor"
+	"$surfaceprop" "Metal"
+	"$nolod" 1
+}
