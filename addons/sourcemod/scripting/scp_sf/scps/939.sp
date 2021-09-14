@@ -7,7 +7,7 @@ public bool SCP939_Create(int client)
 
 	int account = GetSteamAccountID(client, false);
 
-	int weapon = SpawnWeapon(client, "tf_weapon_knife", 461, 70, 13, "2 ; 1.875 ; 15 ; 0 ; 252 ; 0.3 ; 4328 ; 1", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_knife", 461, 70, 13, "2 ; 1.625 ; 15 ; 0 ; 252 ; 0.3 ; 4328 ; 1", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 10);
@@ -88,7 +88,7 @@ public bool SCP939_OnSeePlayer(int client, int victim)
 public bool SCP939_OnGlowPlayer(int client, int victim)
 {
 	float time = Client[victim].IdleAt-GetEngineTime();
-	if(time > 0.5)
+	if(time > 0)
 	{
 		static float clientPos[3], targetPos[3];
 		GetEntPropVector(client, Prop_Send, "m_vecOrigin", clientPos);

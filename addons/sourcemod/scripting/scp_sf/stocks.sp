@@ -23,7 +23,16 @@ enum // Collision_Group_t in const.h - m_CollisionGroup
 	COLLISION_GROUP_NPC_ACTOR,		// Used so NPCs in scripts ignore the player.
 	COLLISION_GROUP_NPC_SCRIPTED = 19,	// Used for NPCs in scripts that should not collide with each other.
 
-	LAST_SHARED_COLLISION_GROUP
+	LAST_SHARED_COLLISION_GROUP,
+
+	TF_COLLISIONGROUP_GRENADE = 20,
+	TFCOLLISION_GROUP_OBJECT,
+	TFCOLLISION_GROUP_OBJECT_SOLIDTOPLAYERMOVEMENT,
+	TFCOLLISION_GROUP_COMBATOBJECT,
+	TFCOLLISION_GROUP_ROCKETS,		// Solid to players, but not player movement. ensures touch calls are originating from rocket
+	TFCOLLISION_GROUP_RESPAWNROOMS,
+	TFCOLLISION_GROUP_TANK,
+	TFCOLLISION_GROUP_ROCKET_BUT_NOT_WITH_OTHER_ROCKETS
 };
 
 // entity effects
@@ -481,6 +490,19 @@ stock bool IsInvuln(int client)
 		!GetEntProp(client, Prop_Data, "m_takedamage"));
 }
 
+void TakeDamage(int entity, int inflictor, int attacker, float damage, int damagetype=DMG_GENERIC, int weapon=-1, const float damageForce[3]=NULL_VECTOR, const float damagePosition[3]=NULL_VECTOR, int damagecustom=0)
+{
+	static float damageForce2[3], damagePosition2[3];
+	for(int i; i<3; i++)
+	{
+		damageForce2[i] = damageForce[i];
+		damagePosition2[i] = damagePosition[i];
+	}
+
+	if(OnTakeDamage(entity, inflictor, attacker, damage, damagetype, weapon, damageForce2, damagePosition2, damagecustom) < Plugin_Handled)
+		SDKHooks_TakeDamage(entity, inflictor, attacker, damage, damagetype, weapon, damageForce2, damagePosition2);
+}
+
 int GetOwnerLoop(int entity)
 {
 	int owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
@@ -686,6 +708,14 @@ void SetActiveWeapon(int client, int entity)
 stock void SetSpeed(int client, float speed)
 {
 	SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", speed);
+}
+
+void constrainDistance(const float[] startPoint, float[] endPoint, float distance, float maxDistance)
+{
+	float constrainFactor = maxDistance / distance;
+	endPoint[0] = ((endPoint[0] - startPoint[0]) * constrainFactor) + startPoint[0];
+	endPoint[1] = ((endPoint[1] - startPoint[1]) * constrainFactor) + startPoint[1];
+	endPoint[2] = ((endPoint[2] - startPoint[2]) * constrainFactor) + startPoint[2];
 }
 
 void FadeMessage(int client, int arg1, int arg2, int arg3, int arg4=255, int arg5=255, int arg6=255, int arg7=255)
@@ -1164,13 +1194,12 @@ public Action Timer_Healing(Handle timer, DataPack pack)
 	return Plugin_Continue;
 }
 
-void ApplyHealEvent(int patient, int healer, int amount)
+void ApplyHealEvent(int entindex, int amount)
 {
-	Event event = CreateEvent("player_healed", true);
+	Event event = CreateEvent("player_healonhit", true);
 
-	event.SetInt("patient", patient);
-	event.SetInt("healer", healer);
-	event.SetInt("heals", amount);
+	event.SetInt("entindex", entindex);
+	event.SetInt("amount", amount);
 
 	event.Fire();
 }
@@ -1214,6 +1243,54 @@ stock void EmitSoundToAll2(const char[] sample,
 			level, flags, volume, pitch, speakerentity,
 			origin, dir, updatePos, soundtime);
 	}
+}
+
+void AnglesToVelocity(const float ang[3], float vel[3], float speed=1.0)
+{
+	vel[0] = Cosine(DegToRad(ang[1]));
+	vel[1] = Sine(DegToRad(ang[1]));
+	vel[2] = Sine(DegToRad(ang[0])) * -1.0;
+	
+	NormalizeVector(vel, vel);
+	
+	ScaleVector(vel, speed);
+}
+
+bool ObstactleBetweenEntities(int entity1, int entity2)
+{
+	static float pos1[3], pos2[3];
+	if(IsValidClient(entity1))
+	{
+		GetClientEyePosition(entity1, pos1);
+	}
+	else
+	{
+		GetEntPropVector(entity1, Prop_Send, "m_vecOrigin", pos1);
+	}
+
+	GetEntPropVector(entity2, Prop_Send, "m_vecOrigin", pos2);
+
+	Handle trace = TR_TraceRayFilterEx(pos1, pos2, MASK_ALL, RayType_EndPoint, Trace_DontHitEntity, entity1);
+
+	bool hit = TR_DidHit(trace);
+	int index = TR_GetEntityIndex(trace);
+	delete trace;
+
+	if(!hit || index!=entity2)
+		return true;
+
+	return false;
+}
+
+bool IsEntityStuck(int entity)
+{
+	static float min[3], max[3], pos[3];
+	GetEntPropVector(entity, Prop_Send, "m_vecMins", min);
+	GetEntPropVector(entity, Prop_Send, "m_vecMaxs", max);
+	GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
+	
+	TR_TraceHullFilter(pos, pos, min, max, MASK_SOLID, Trace_DontHitEntity, entity);
+	return (TR_DidHit());
 }
 
 int TF2_CreateGlow(int client, const char[] model)
@@ -1299,16 +1376,16 @@ bool IsSpec(int client)
 static bool ResizeTraceFailed;
 public bool Resize_TracePlayersAndBuildings(int entity, int contentsMask, any data)
 {
-	if(entity>0 && entity<=MaxClients && IsPlayerAlive(entity))
+	if(entity>0 && entity<=MaxClients/* && IsPlayerAlive(entity)*/)
 	{
-		if(GetClientTeam(entity) != data)
-			ResizeTraceFailed = true;
+		//if(GetClientTeam(entity) != data)
+			//ResizeTraceFailed = true;
 	}
 	else if(IsValidEntity(entity))
 	{
 		static char classname[32];
 		GetEntityClassname(entity, classname, sizeof(classname));
-		if(!StrContains(classname, "obj_") || !StrContains(classname, "prop_dynamic") || StrEqual(classname, "func_physbox") || StrEqual(classname, "func_breakable"))
+		if(!StrContains(classname, "obj_") || !StrContains(classname, "prop_dynamic") || !StrContains(classname, "func_door") || StrEqual(classname, "func_physbox") || StrEqual(classname, "func_breakable"))
 			ResizeTraceFailed = true;
 	}
 	return false;
@@ -1440,7 +1517,7 @@ bool Resize_TestSquare(const float bossOrigin[3], float xmin, float xmax, float 
 bool IsSpotSafe(int clientIdx, float playerPos[3], float sizeMultiplier)
 {
 	ResizeTraceFailed = false;
-	ResizeMyTeam = GetClientTeam(clientIdx);
+	int team = GetClientTeam(clientIdx);
 	static float mins[3];
 	static float maxs[3];
 	mins[0] = -24.0 * sizeMultiplier;
