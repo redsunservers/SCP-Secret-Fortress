@@ -1184,6 +1184,10 @@
 	{
 		"ko"		"{gray}cl_downloadfilter is set to nosounds. You won't hear any music. If you want to enable, set cl_downloadfilter to all"
 	}
+	"gameover_stuck"	// HUD
+	{
+		"ko"		"임무: 종료\n내용: 기동특무부대 가동 엡실론-11\n사유: 공권력 남용"
+	}
 
 	// Ikea
 
