@@ -1,0 +1,16 @@
+"LightmappedGeneric"
+{
+	"$baseTexture" "oceanic/glass/glasswindow001"
+	"$surfaceprop" "glass"
+	"$translucent" 1
+	"$envmap" "env_cubemap"
+	"$envmapcontrast" .25
+	"$envmapsaturation" 1
+	"$envmaptint" "[ .1 .1 .1]"
+
+   	"%keywords" "tf, bulletcrops"
+}
+
+// BulletCrops Project
+// http://www.minerality.fr/bulletcropsproject/
+

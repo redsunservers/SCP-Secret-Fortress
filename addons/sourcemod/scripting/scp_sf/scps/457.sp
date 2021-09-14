@@ -55,7 +55,7 @@ public void SCP457_OnKill(int client, int victim)
 		pack.WriteCell(GetClientUserId(victim));
 	}
 
-	ApplyHealEvent(client, client, newHealth-health);
+	ApplyHealEvent(client, newHealth-health);
 	SetEntityHealth(client, newHealth);
 }
 
@@ -70,6 +70,55 @@ public Action SCP457_OnDealDamage(int client, int victim, int &inflictor, float 
 		TF2_AddCondition(victim, TFCond_Gas, 3.0, client); 
 
 	return Plugin_Continue;
+}
+
+public bool SCP457_OnPickup(int client, int entity)
+{
+	char buffer[64];
+	GetEntityClassname(entity, buffer, sizeof(buffer));
+	if(StrEqual(buffer, "tf_dropped_weapon"))
+	{
+		ApplyHealEvent(client, 100);
+		SetEntityHealth(client, GetClientHealth(client)+100);
+		RemoveEntity(entity);
+		return true;
+	}
+	else if(!StrContains(buffer, "prop_dynamic"))
+	{
+		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
+		if(!StrContains(buffer, "scp_trigger", false))
+		{
+			ClassEnum class;
+			if(Classes_GetByIndex(Client[client].Class, class))
+			{
+				switch(class.Group)
+				{
+					case 0:
+						AcceptEntityInput(entity, "FireUser1", client, client);
+
+					case 1:
+						AcceptEntityInput(entity, "FireUser2", client, client);
+
+					case 2:
+						AcceptEntityInput(entity, "FireUser3", client, client);
+
+					default:
+						AcceptEntityInput(entity, "FireUser4", client, client);
+				}
+				return true;
+			}
+		}
+	}
+	else if(StrEqual(buffer, "func_button"))
+	{
+		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
+		if(!StrContains(buffer, "scp_trigger", false))
+		{
+			AcceptEntityInput(entity, "Press", client, client);
+			return true;
+		}
+	}
+	return false;
 }
 
 public Action SCP457_Timer(Handle timer, DataPack pack)

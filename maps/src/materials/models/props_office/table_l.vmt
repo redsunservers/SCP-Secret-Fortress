@@ -1,0 +1,20 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/props_office/table_l"
+	"$bumpmap" "models/props_office/table_l_normal"
+	"$envmap" "env_cubemap"
+"$envmaptint" "[.1 .1 .1]"
+$phong 1
+        $phongexponent 7
+        $phongboost 2
+        $phongtint "[1 1 1]"
+        $halflambert 0
+        $phongfresnelranges "[.4 .8 30]"
+
+// Rim lighting parameters
+	"$rimlight" "1"				// To enable rim lighting (requires phong)
+	"$rimlightexponent" "80"             // Exponent for phong component of rim lighting
+	"$rimlightboost" ".3"	               // Boost for ambient cube component of rim lighting	
+    "$model" 1
+
+}

@@ -1,0 +1,6 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/props_lab/terminal_kb"
+    "$model" 1
+
+}

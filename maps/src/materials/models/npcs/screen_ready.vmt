@@ -1,0 +1,7 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models\npcs\screen_ready"
+        "$selfillum" 1
+    "$model" 1
+
+}

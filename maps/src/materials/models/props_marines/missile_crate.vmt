@@ -1,0 +1,18 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" 	"models\props_marines/Missile_Crate"
+	"$bumpmap"	"models/props_marines/Missile_Crate_Normal"
+
+	"$phong" "1"
+	"$phongexponent" 5
+	"$phongboost"	"0.5"
+	"$phongfresnelranges"	"[1 2 4]"
+	"$halflambert" 1
+	"$multipass" 1
+	"$model" "1"
+	"$rimlight" "1"				// To enable rim lighting (requires phong)
+	"$rimlightexponent" "45"		// Exponent for phong component of rim lighting
+	"$rimlightboost" ".1"			// Boost for ambient cube component 
+
+	"%keywords" "bms"
+}

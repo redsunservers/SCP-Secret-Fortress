@@ -125,7 +125,7 @@ public void HeavyBlu_OnButton(int client, int button)
 				continue;
 
 			// ensure no wall is obstructing
-			TR_TraceRayFilter(pos2, pos1, MASK_VISIBLE, RayType_EndPoint, TraceWallsOnly);
+			TR_TraceRayFilter(pos2, pos1, MASK_VISIBLE, RayType_EndPoint, Trace_WallsOnly);
 			TR_GetEndPosition(ang3);
 			if(ang3[0]!=pos1[0] || ang3[1]!=pos1[1] || ang3[2]!=pos1[2])
 				continue;

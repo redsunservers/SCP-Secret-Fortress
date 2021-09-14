@@ -1,0 +1,5 @@
+"UnlitGeneric"
+{
+	"$basetexture" "custom/scp/scpteslazap"
+	"$translucent" 1
+}
