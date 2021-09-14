@@ -1,9 +1,9 @@
 static const char PuddleModel[] = "models/props_farm/haypile001.mdl";
 static const char SnapSound[] = "freak_fortress_2/scp173/scp173_kill2.mp3";
 
-static const int HealthMax = 2000;	// Max standard health
-static const int HealthExtra = 1500;	// Max regenerable health
-static const int HealthKill = 150;	// Health gain on stunned kill
+static const int HealthMax = 6000;	// Max standard health
+static const int HealthExtra = 4500;	// Max regenerable health
+static const int HealthKill = 450;	// Health gain on stunned kill
 
 static const float DistanceMax = 750.0;	// Teleport distance
 
