@@ -343,6 +343,10 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	if(!Enabled)
 		return Plugin_Continue;
 
+	int activeWeapon = GetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon");
+	if (activeWeapon>MaxClients)
+		Client[victim].PreDamageWeapon = EntIndexToEntRef(activeWeapon);
+
 	bool validAttacker = IsValidClient(attacker);
 	if(validAttacker && victim!=attacker)
 	{
