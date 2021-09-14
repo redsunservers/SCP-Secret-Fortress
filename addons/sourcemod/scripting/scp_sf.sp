@@ -1296,7 +1296,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 		for(int target=1; target<=MaxClients; target++)
 		{
 			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target]))
-				CPrintToChat(target, "%s{default}: %s", name, msg);
+				CPrintToChat(target, "%s {default}: %s", name, msg);
 		}
 	}
 	else if(!IsPlayerAlive(client) && GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
@@ -1355,7 +1355,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 				{
 					if(!class.Human && IsFriendly(Client[client].Class, Client[target].Class))
 					{
-						CPrintToChat(target, "(%t) %s{default}: %s", class.Display, name, msg);
+						CPrintToChat(target, "(%t) %s {default}: %s", class.Display, name, msg);
 						continue;
 					}
 
@@ -1373,11 +1373,11 @@ public Action OnSayCommand(int client, const char[] command, int args)
 			}
 			else if(!class.Human)
 			{
-				CPrintToChat(target, "(%t) %s{default}: %s", class.Display, name, msg);
+				CPrintToChat(target, "(%t) %s {default}: %s", class.Display, name, msg);
 				continue;
 			}
 
-			CPrintToChat(target, "%s{default}: %s", name, msg);
+			CPrintToChat(target, "%s {default}: %s", name, msg);
 		}
 	}
 	return Plugin_Handled;

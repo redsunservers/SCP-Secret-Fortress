@@ -313,8 +313,8 @@ public void SCP096_OnButton(int client, int button)
 			(fabs(ang2[1] - ang3[1]) >= (360.0-MAXANGLEYAW))))
 				continue;
 
-			// ensure no wall is obstructing
-			TR_TraceRayFilter(pos2, pos1, MASK_VISIBLE, RayType_EndPoint, TraceWallsOnly);
+			// ensure no wall or door is obstructing
+			TR_TraceRayFilter(pos2, pos1, MASK_VISIBLE, RayType_EndPoint, Trace_DoorOnly);
 			TR_GetEndPosition(ang3);
 			if(ang3[0]!=pos1[0] || ang3[1]!=pos1[1] || ang3[2]!=pos1[2])
 				continue;
@@ -334,8 +334,8 @@ public void SCP096_OnButton(int client, int button)
 			(fabs(ang1[1] - ang3[1]) >= (360.0-MAXANGLEYAW))))
 				continue;
 
-			// ensure no wall is obstructing
-			TR_TraceRayFilter(pos1, pos2, (CONTENTS_SOLID | CONTENTS_AREAPORTAL | CONTENTS_GRATE), RayType_EndPoint, TraceWallsOnly);
+			// ensure no wall or door is obstructing
+			TR_TraceRayFilter(pos1, pos2, MASK_VISIBLE, RayType_EndPoint, Trace_DoorOnly);
 			TR_GetEndPosition(ang3);
 			if(ang3[0]!=pos2[0] || ang3[1]!=pos2[1] || ang3[2]!=pos2[2])
 				continue;
