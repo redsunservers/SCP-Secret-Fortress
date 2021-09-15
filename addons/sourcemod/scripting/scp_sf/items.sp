@@ -1446,7 +1446,6 @@ public bool Items_FragButton(int client, int weapon, int &buttons, int &holding)
 
 				SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
 				SetEntProp(entity, Prop_Send, "m_iTeamNum", GetClientTeam(client));
-				SetEntProp(entity, Prop_Data, "m_iHammerID", Client[client].Class);
 
 				SetEntityModel(entity, "models/weapons/w_models/w_grenade_grenadelauncher.mdl");
 				SetEntProp(entity, Prop_Send, "m_nSkin", 0);
@@ -1466,17 +1465,16 @@ public Action Items_FragTimer(Handle timer, int ref)
 	int entity = EntRefToEntIndex(ref);
 	if(entity > MaxClients)
 	{
-		static float pos1[3];
-		GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos1);
+		static float pos[3];
+		GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
 
 		int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
 		int explosion = CreateEntityByName("env_explosion");
 		if(IsValidEntity(explosion))
 		{
-			DispatchKeyValueVector(explosion, "origin", pos1);
-			DispatchKeyValue(explosion, "iMagnitude", "0");
-			//DispatchKeyValue(explosion, "iMagnitude", "1000");
-			//DispatchKeyValue(explosion, "iRadiusOverride", "350");
+			DispatchKeyValueVector(explosion, "origin", pos);
+			DispatchKeyValue(explosion, "iMagnitude", "1000");
+			DispatchKeyValue(explosion, "iRadiusOverride", "350");
 			//DispatchKeyValue(explosion, "flags", "516");
 
 			SetEntPropEnt(explosion, Prop_Send, "m_hOwnerEntity", client);
@@ -1489,23 +1487,10 @@ public Action Items_FragTimer(Handle timer, int ref)
 			AcceptEntityInput(explosion, "Kill");
 		}
 
-		explosion = GetEntProp(entity, Prop_Data, "m_iHammerID");
-		for(int i=1; i<=MaxClients; i++)
-		{
-			if(IsClientInGame(i) && IsPlayerAlive(i) && !IsFriendly(explosion, Client[i].Class))
-			{
-				static float pos2[3];
-				GetClientEyePosition(i, pos2);
-				float distance = GetVectorDistance(pos1, pos2, true);
-				if(distance < 125000.0)
-					TakeDamage(i, client, client, 1000.0-(distance/125.0), DMG_BLAST, -1, _, pos1);
-			}
-		}
-
 		explosion = CreateEntityByName("env_physexplosion");
 		if(IsValidEntity(explosion))
 		{
-			DispatchKeyValueVector(explosion, "origin", pos1);
+			DispatchKeyValueVector(explosion, "origin", pos);
 			DispatchKeyValue(explosion, "magnitude", "500");
 			DispatchKeyValue(explosion, "radius", "300");
 			DispatchKeyValue(explosion, "flags", "19");
