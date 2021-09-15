@@ -490,7 +490,7 @@ stock bool IsInvuln(int client)
 		!GetEntProp(client, Prop_Data, "m_takedamage"));
 }
 
-void TakeDamage(int entity, int inflictor, int attacker, float damage, int damagetype=DMG_GENERIC, int weapon=-1, const float damageForce[3]=NULL_VECTOR, const float damagePosition[3]=NULL_VECTOR, int damagecustom=0)
+stock void TakeDamage(int entity, int inflictor, int attacker, float damage, int damagetype=DMG_GENERIC, int weapon=-1, const float damageForce[3]=NULL_VECTOR, const float damagePosition[3]=NULL_VECTOR, int damagecustom=0)
 {
 	static float damageForce2[3], damagePosition2[3];
 	for(int i; i<3; i++)
