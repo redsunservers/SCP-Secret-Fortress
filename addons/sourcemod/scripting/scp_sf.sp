@@ -139,6 +139,7 @@ enum struct ClientEnum
 	int Disarmer;
 	int DownloadMode;
 	int BadKills;
+	int PreDamageWeapon;
 
 	float IdleAt;
 	float ComFor;
@@ -1886,7 +1887,7 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 			if(damage & DMG_SHOCK)
 			{
 				GiveAchievement(Achievement_DeathTesla, client);
-				int wep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+				int wep = EntRefToEntIndex(Client[client].PreDamageWeapon);
 				if(wep>MaxClients && GetEntProp(wep, Prop_Send, "m_iItemDefinitionIndex")==594)
 					GiveAchievement(Achievement_DeathMicro, client);
 			}

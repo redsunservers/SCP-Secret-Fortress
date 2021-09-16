@@ -343,7 +343,18 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	if(!Enabled)
 		return Plugin_Continue;
 
+	int activeWeapon = GetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon");
+	if (activeWeapon>MaxClients)
+		Client[victim].PreDamageWeapon = EntIndexToEntRef(activeWeapon);
+
 	bool validAttacker = IsValidClient(attacker);
+	if(!validAttacker && victim!=attacker)
+	{
+		static char classname[64];
+		if(attacker>MaxClients && GetEntityClassname(attacker, classname, sizeof(classname)) && StrEqual(classname, "env_explosion"))
+			attacker = GetOwnerLoop(attacker);
+	}
+
 	if(validAttacker && victim!=attacker)
 	{
 		if(!CvarFriendlyFire.BoolValue && !IsFakeClient(victim) && IsFriendly(Client[victim].Class, Client[attacker].Class))
