@@ -2113,14 +2113,14 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 					break;
 				}
 
-				if(Client[client].Sprinting)
+				if(Client[client].Sprinting || !(GetEntityFlags(client) & FL_ONGROUND))
 				{
 					if(!Client[client].Extra2 && Client[client].Extra3<engineTime)
 					{
 						float drain = 1.0;
 						Items_Sprint(client, drain);
 						Client[client].SprintPower -= drain;
-						if(Client[client].SprintPower < 0)
+						if(Client[client].Sprinting && Client[client].SprintPower<0)
 						{
 							Client[client].SprintPower = 0.0;
 							Client[client].Sprinting = false;
@@ -2128,7 +2128,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 						}
 					}
 				}
-				else if(Client[client].SprintPower<100 && (GetEntityFlags(client) & FL_ONGROUND))
+				else if(Client[client].SprintPower < 100)
 				{
 					Client[client].SprintPower += 1.5;
 				}

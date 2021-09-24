@@ -1403,7 +1403,7 @@ public bool Items_MicroButton(int client, int weapon, int &buttons, int &holding
 			static float time[MAXTF2PLAYERS];
 			if(time[client] < engineTime)
 			{
-				time[client] = engineTime+0.1;
+				time[client] = engineTime+0.45;
 				if(type != -1)
 					SetEntProp(client, Prop_Data, "m_iAmmo", ammo-1, _, type);
 			}
@@ -1473,7 +1473,7 @@ public Action Items_FragTimer(Handle timer, int ref)
 		if(IsValidEntity(explosion))
 		{
 			DispatchKeyValueVector(explosion, "origin", pos);
-			DispatchKeyValue(explosion, "iMagnitude", "1000");
+			DispatchKeyValue(explosion, "iMagnitude", "500");
 			DispatchKeyValue(explosion, "iRadiusOverride", "350");
 			//DispatchKeyValue(explosion, "flags", "516");
 
