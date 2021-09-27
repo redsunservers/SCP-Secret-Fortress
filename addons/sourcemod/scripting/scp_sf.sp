@@ -42,9 +42,9 @@ void DisplayCredits(int i)
 	PrintToConsole(i, "Map/Model Development | Artvin | forums.alliedmods.net/member.php?u=304206");
 }
 
-#define MAJOR_REVISION	"2"
-#define MINOR_REVISION	"3"
-#define STABLE_REVISION	"2"
+#define MAJOR_REVISION	"3"
+#define MINOR_REVISION	"0"
+#define STABLE_REVISION	"0"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define FAR_FUTURE	100000000.0
@@ -125,6 +125,7 @@ enum struct ClientEnum
 	bool CanTalkTo[MAXTF2PLAYERS];
 	bool ThinkIsDead[MAXTF2PLAYERS];
 
+	TFClassType PrefClass;
 	TFClassType CurrentClass;
 	TFClassType WeaponClass;
 
@@ -529,6 +530,8 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 	SZF_RoundStart();
 	Items_RoundStart();
 
+	//NoAchieve = false;
+	//GiveAchievement(Achievement_Halloween, 0);
 	NoAchieve = !CvarAchievement.BoolValue;
 
 	UpdateListenOverrides(RoundStartAt);
@@ -560,6 +563,7 @@ public void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 
 	UpdateListenOverrides(FAR_FUTURE);
 	Gamemode_RoundEnd();
+	SZF_RoundEnd();
 
 	#if defined _included_smjm08
 	SJM08_Clean();
@@ -1146,7 +1150,18 @@ public Action OnBlockCommand(int client, const char[] command, int args)
 
 public Action OnJoinClass(int client, const char[] command, int args)
 {
-	return (client && IsPlayerAlive(client)) ? Plugin_Handled : Plugin_Continue;
+	if(client)
+	{
+		char class[16];
+		GetCmdArg(1, class, sizeof(class));
+		Client[client].PrefClass = TF2_GetClass(class);
+		if(IsPlayerAlive(client))
+		{
+			SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", Client[client].PrefClass);
+			return Plugin_Handled;
+		}
+	}
+	return Plugin_Continue;
 }
 
 public Action OnPlayerSpray(const char[] name, const int[] clients, int count, float delay)
@@ -1157,7 +1172,7 @@ public Action OnPlayerSpray(const char[] name, const int[] clients, int count, f
 
 public Action OnJoinAuto(int client, const char[] command, int args)
 {
-	if(!client || !Enabled)
+	if(!client || Classes_AskForClass())
 		return Plugin_Continue;
 
 	if(!IsPlayerAlive(client) && GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
@@ -1197,6 +1212,9 @@ public Action OnJoinTeam(int client, const char[] command, int args)
 		ForcePlayerSuicide(client);
 		return Plugin_Continue;
 	}
+
+	if(Classes_AskForClass())
+		return Plugin_Continue;
 
 	if(GetClientTeam(client) <= view_as<int>(TFTeam_Spectator))
 	{

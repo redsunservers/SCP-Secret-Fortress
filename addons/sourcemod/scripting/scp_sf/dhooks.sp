@@ -1,7 +1,8 @@
 static DynamicDetour AllowedToHealTarget;
 static DynamicHook RoundRespawn;
 static DynamicHook ForceRespawn;
-static int ForceRespawnHook[MAXTF2PLAYERS];
+static int ForceRespawnPreHook[MAXTF2PLAYERS];
+static int ForceRespawnPostHook[MAXTF2PLAYERS];
 static int CalculateSpeedClient;
 //static int ClientTeam;
 
@@ -69,12 +70,16 @@ static void DHook_CreateDetour(GameData gamedata, const char[] name, DHookCallba
 void DHook_HookClient(int client)
 {
 	if(ForceRespawn)
-		ForceRespawnHook[client] = ForceRespawn.HookEntity(Hook_Pre, client, DHook_ForceRespawn);
+	{
+		ForceRespawnPreHook[client] = ForceRespawn.HookEntity(Hook_Pre, client, DHook_ForceRespawnPre);
+		ForceRespawnPostHook[client] = ForceRespawn.HookEntity(Hook_Post, client, DHook_ForceRespawnPost);
+	}
 }
 
 void DHook_UnhookClient(int client)
 {
-	DynamicHook.RemoveHook(ForceRespawnHook[client]);
+	DynamicHook.RemoveHook(ForceRespawnPreHook[client]);
+	DynamicHook.RemoveHook(ForceRespawnPostHook[client]);
 }
 
 void DHook_MapStart()
@@ -105,13 +110,23 @@ public MRESReturn DHook_AllowedToHealTarget(int weapon, DHookReturn ret, DHookPa
 	return MRES_ChangedOverride;
 }
 
-public MRESReturn DHook_ForceRespawn(int client)
+public MRESReturn DHook_ForceRespawnPre(int client)
 {
 	ClassEnum class;
 	if(!Classes_GetByIndex(Client[client].Class, class))
 	{
 		Client[client].Class = 0;
 		Classes_GetByIndex(0, class);
+	}
+
+	if(class.OnCanSpawn != INVALID_FUNCTION)
+	{
+		bool result = true;
+		Call_StartFunction(null, class.OnCanSpawn);
+		Call_PushCell(client);
+		Call_Finish(result);
+		if(!result)
+			return MRES_Supercede;
 	}
 
 	if(!StrContains(class.Name, "mtf"))
@@ -123,12 +138,26 @@ public MRESReturn DHook_ForceRespawn(int client)
 		GiveAchievement(Achievement_ChaosSpawn, client);
 	}
 
+	TFClassType playerClass = class.Class;
+	if(playerClass == TFClass_Unknown)
+	{
+		playerClass = Client[client].PrefClass;
+		if(playerClass == TFClass_Unknown)
+			playerClass = view_as<TFClassType>(GetRandomInt(1, 9));
+	}
+
 	ChangeClientTeamEx(client, class.Team>TFTeam_Spectator ? class.Team : class.Team+view_as<TFTeam>(2));
-	SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", class.Class);
-	Client[client].CurrentClass = class.Class;
+	SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", playerClass);
+	Client[client].CurrentClass = playerClass;
 	Client[client].WeaponClass = TFClass_Unknown;
 	Client[client].Floor = class.Floor;
 	return MRES_Ignored;
+}
+
+public MRESReturn DHook_ForceRespawnPost(int client)
+{
+	if(Client[client].PrefClass != TFClass_Unknown)
+		SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", Client[client].PrefClass);
 }
 
 /*public MRESReturn DHook_StartLagCompensationPre(Address manager, DHookParam param)
@@ -268,11 +297,11 @@ public MRESReturn DHook_RegenThinkPre(int client, DHookParam param)
 	ClassEnum class;
 	if(Classes_GetByIndex(Client[client].Class, class) && class.Regen)
 	{
-		TF2_SetPlayerClass(client, TFClass_Medic);
+		TF2_SetPlayerClass(client, TFClass_Medic, _, false);
 	}
 	else if(TF2_GetPlayerClass(client) == TFClass_Medic)
 	{
-		TF2_SetPlayerClass(client, TFClass_Unknown);
+		TF2_SetPlayerClass(client, TFClass_Unknown, _, false);
 	}
 	return MRES_Ignored;
 }
@@ -282,11 +311,11 @@ public MRESReturn DHook_RegenThinkPost(int client, DHookParam param)
 	ClassEnum class;
 	if(Classes_GetByIndex(Client[client].Class, class) && class.Regen)
 	{
-		TF2_SetPlayerClass(client, class.Class);
+		TF2_SetPlayerClass(client, class.Class, _, false);
 	}
 	else if(TF2_GetPlayerClass(client) == TFClass_Unknown)
 	{
-		TF2_SetPlayerClass(client, TFClass_Medic);
+		TF2_SetPlayerClass(client, TFClass_Medic, _, false);
 	}
 	return MRES_Ignored;
 }
@@ -303,7 +332,7 @@ public MRESReturn DHook_TauntPre(int client)
 	{
 		TFClassType class = TF2_GetDefaultClassFromItem(weapon);
 		if(class != TFClass_Unknown)
-			TF2_SetPlayerClass(client, class, false);
+			TF2_SetPlayerClass(client, class, false, false);
 	}
 	return MRES_Ignored;
 }
@@ -312,5 +341,5 @@ public MRESReturn DHook_TauntPost(int client)
 {
 	ClassEnum class;
 	if(Classes_GetByIndex(Client[client].Class, class))
-		TF2_SetPlayerClass(client, class.Class, false);
+		TF2_SetPlayerClass(client, class.Class, false, false);
 }

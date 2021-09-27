@@ -817,6 +817,8 @@ void Items_ShowItemMenu(int client)
 	ArrayList list = Items_ArrayList(client, _, true);
 	int length = list.Length;
 	WeaponEnum weapon;
+	Weapons.GetArray(0, weapon);
+	int fistsIndex = weapon.Index;
 	for(int i; i<length; i++)
 	{
 		int entity = list.Get(i);
@@ -838,9 +840,8 @@ void Items_ShowItemMenu(int client)
 				continue;
 			}
 
-			if(index == 5 && fists == -1)
+			if(index == fistsIndex && fists == -1)
 			{
-				// Special hardcoded exception for no-weapon fists
 				fists = entity;
 				continue;
 			}
@@ -879,8 +880,9 @@ void Items_ShowItemMenu(int client)
 				menu.AddItem("-1", "", ITEMDRAW_SPACER);
 			}
 
+			Weapons.GetArray(0, weapon);
 			IntToString(EntIndexToEntRef(fists), num, sizeof(num));
-			FormatEx(buffer, sizeof(buffer), "%t", "weapon_5");
+			FormatEx(buffer, sizeof(buffer), "%t", weapon.Display);
 			menu.AddItem(num, buffer, active==fists ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
 		}
 
@@ -914,9 +916,11 @@ public int Items_ShowItemMenuH(Menu menu, MenuAction action, int client, int cho
 				if(entity == -1)
 				{
 					int i;
+					WeaponEnum weapon;
+					Weapons.GetArray(0, weapon);
 					while((entity=Items_Iterator(client, i, true)) != -1)
 					{
-						if(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex") == 5)
+						if(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex") == weapon.Index)
 						{
 							SetActiveWeapon(client, entity);
 							break;
@@ -1854,7 +1858,7 @@ public bool Items_RadioRadio(int client, int entity, float &multi)
 public void Items_LightAmmo(int client, int type, int &ammo)
 {
 	if(ammo == 2)	// 9mm
-		ammo += 30;
+		ammo *= 2;
 }
 
 public void Items_LightItem(int client, int type, int &amount)
@@ -1869,19 +1873,19 @@ public void Items_CombatAmmo(int client, int type, int &ammo)
 	{
 		case 2:	// 9mm
 		{
-			ammo += 90;
+			ammo *= 4;
 		}
 		case 6, 7:	// 7mm, 5mm
 		{
-			ammo += 80;
+			ammo *= 3;
 		}
 		case 10:	// 4mag
 		{
-			ammo += 30;
+			ammo = RoundFloat(ammo * 2.666667);
 		}
 		case 11:	// 12ga
 		{
-			ammo += 40;
+			ammo = RoundFloat(ammo * 3.857143);
 		}
 	}
 }
@@ -1891,7 +1895,7 @@ public void Items_CombatItem(int client, int type, int &amount)
 	switch(type)
 	{
 		case 1:	// Weapons
-			amount ++;
+			amount++;
 
 		case 7:	// Grenades
 			amount++;
@@ -1909,19 +1913,19 @@ public void Items_HeavyAmmo(int client, int type, int &ammo)
 	{
 		case 2:	// 9mm
 		{
-			ammo += 170;
+			ammo = RoundFloat(ammo * 6.666667);
 		}
 		case 6, 7:	// 7mm, 5mm
 		{
-			ammo += 160;
+			ammo *= 5;
 		}
 		case 10:	// 4mag
 		{
-			ammo += 50;
+			ammo *= RoundFloat(ammo * 3.777778);
 		}
 		case 11:	// 12ga
 		{
-			ammo += 60;
+			ammo = RoundFloat(ammo * 5.285714);
 		}
 	}
 }

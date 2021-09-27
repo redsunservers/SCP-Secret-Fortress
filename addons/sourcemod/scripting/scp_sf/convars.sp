@@ -64,7 +64,7 @@ void ConVar_Add(const char[] name, float value, bool enforce=true)
 	CvarList.PushArray(info);
 }
 
-stock void ConVar_Remove(const char[] name)
+void ConVar_Remove(const char[] name)
 {
 	ConVar cvar = FindConVar(name);
 	int index = CvarList.FindValue(cvar, CvarInfo::cvar);
@@ -86,6 +86,15 @@ void ConVar_Enable()
 {
 	if(!CvarEnabled)
 	{
+		if(Classes_AskForClass())
+		{
+			ConVar_Add("mp_forceautoteam", 1.0);
+		}
+		else
+		{
+			ConVar_Remove("mp_forceautoteam");
+		}
+
 		int length = CvarList.Length;
 		for(int i; i<length; i++)
 		{
