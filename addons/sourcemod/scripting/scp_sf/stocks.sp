@@ -1090,13 +1090,13 @@ stock TFClassType KvGetClass(KeyValues kv, const char[] string, TFClassType defa
 	TFClassType class;
 	static char buffer[24];
 	kv.GetString(string, buffer, sizeof(buffer));
+	if(!buffer[0])
+		return defaul;
+
 	class = view_as<TFClassType>(StringToInt(buffer));
 	if(class == TFClass_Unknown)
-	{
 		class = TF2_GetClass(buffer);
-		if(class == TFClass_Unknown)
-			return defaul;
-	}
+
 	return class;
 }
 

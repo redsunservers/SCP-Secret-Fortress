@@ -923,6 +923,7 @@ public int Items_ShowItemMenuH(Menu menu, MenuAction action, int client, int cho
 						if(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex") == weapon.Index)
 						{
 							SetActiveWeapon(client, entity);
+							SZF_DropItem(client);
 							break;
 						}
 					}

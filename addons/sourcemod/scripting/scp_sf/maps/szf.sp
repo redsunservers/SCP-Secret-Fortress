@@ -13,6 +13,8 @@ enum SZFWeaponType
 	WeaponType_UncommonSpawn
 };
 
+static const char ModelMelee[] = "models/scp_sf/106/scp106_hands_1.mdl";
+
 static int Index610;
 static int Index049;
 static int Index0492;
@@ -465,7 +467,7 @@ public bool SZF_610Spawn(int client)
 	TF2_CreateGlow(client, class.Model);
 
 	// Reset health
-	SetEntityHealth(client, class.Health);
+	SetEntityHealth(client, 125);
 
 	// Other stuff
 	TF2_AddCondition(client, TFCond_NoHealingDamageBuff, 1.0);
@@ -542,21 +544,30 @@ public void SZF_106Button(int client, int button)
 		TF2_RemoveCondition(client, TFCond_Dazed);
 		if(TF2_IsPlayerInCondition(client, TFCond_SpeedBuffAlly))
 		{
+			int weapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+			if(weapon > MaxClients)
+				TF2Attrib_SetByDefIndex(weapon, 821, 0.0);
+
+			ViewModel_Create(client, ModelMelee);
+			ViewModel_SetDefaultAnimation(client, "a_fists_idle_02");
 			TF2_RemoveCondition(client, TFCond_SpeedBuffAlly);
-			TF2_RemoveCondition(client, TFCond_Stealthed);
+			TF2_RemoveCondition(client, TFCond_StealthedUserBuffFade);
 			TF2_RemoveCondition(client, TFCond_DodgeChance);
-			TF2_StunPlayer(client, 3.0, 1.0, TF_STUNFLAG_THIRDPERSON|TF_STUNFLAG_NOSOUNDOREFFECT);
+			TF2_StunPlayer(client, 1.5, 1.0, TF_STUNFLAG_THIRDPERSON|TF_STUNFLAG_NOSOUNDOREFFECT);
 		}
 		else
 		{
-			TF2_StunPlayer(client, 999.0, 0.0, TF_STUNFLAG_THIRDPERSON|TF_STUNFLAG_NOSOUNDOREFFECT);
+			int weapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+			if(weapon > MaxClients)
+				TF2Attrib_SetByDefIndex(weapon, 821, 1.0);
+
 			TF2_AddCondition(client, TFCond_SpeedBuffAlly);
-			TF2_AddCondition(client, TFCond_Stealthed);
+			TF2_AddCondition(client, TFCond_StealthedUserBuffFade);
 			TF2_AddCondition(client, TFCond_DodgeChance);
 		}
 	}
 
-	if(button == IN_ATTACK3)
+	if(button==IN_ATTACK2 || button==IN_ATTACK3)
 	{
 		float engineTime = GetEngineTime();
 		if(Client[client].ChargeIn>engineTime || !(GetEntityFlags(client) & FL_ONGROUND))
@@ -568,9 +579,17 @@ public void SZF_106Button(int client, int button)
 			TF2_RemoveCondition(client, TFCond_Dazed);
 			TF2_StunPlayer(client, 9.9, 1.0, TF_STUNFLAG_BONKSTUCK|TF_STUNFLAG_NOSOUNDOREFFECT);
 
-			Client[client].ChargeIn = engineTime+3.0;
 			if(TF2_IsPlayerInCondition(client, TFCond_SpeedBuffAlly))
-				Client[client].FreezeFor = engineTime+7.0;
+			{
+				Client[client].FreezeFor = engineTime+4.0;
+				SetEntityMoveType(client, MOVETYPE_NONE);
+				Client[client].ChargeIn = engineTime+1.0;
+			}
+			else
+			{
+				ViewModel_Destroy(client);
+				Client[client].ChargeIn = engineTime+3.0;
+			}
 
 			PrintRandomHintText(client);
 		}
