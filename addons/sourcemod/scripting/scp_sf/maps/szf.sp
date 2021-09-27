@@ -417,6 +417,7 @@ public void SZF_049Enable(int index)
 public void SZF_0492Enable(int index)
 {
 	Index0492 = index;
+	SCP0492_Enable(index);
 }
 
 public bool SZF_SpecCanSpawn(int client)
@@ -438,6 +439,37 @@ public bool SZF_049Spawn(int client)
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 	}
 	return false;
+}
+
+public bool SZF_610Spawn(int client)
+{
+	int weapon = SpawnWeapon(client, "tf_weapon_bat", 572, 50, 13, "5 ; 1.3 ; 28 ; 0.5 ; 49 ; 1 ; 252 ; 0.5", false);
+	if(weapon > MaxClients)
+	{
+		ApplyStrangeRank(weapon, 4);
+		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
+		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
+	}
+
+	ClassEnum class;
+	Classes_GetByIndex(Index610, class);
+
+	ChangeClientTeamEx(client, class.Team);
+
+	// Model stuff
+	SetVariantString(class.Model);
+	AcceptEntityInput(client, "SetCustomModel");
+	SetEntProp(client, Prop_Send, "m_bUseClassAnimations", true);
+	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", class.ModelIndex, _, 0);
+	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", class.ModelAlt, _, 3);
+	TF2_CreateGlow(client, class.Model);
+
+	// Reset health
+	SetEntityHealth(client, class.Health);
+
+	// Other stuff
+	TF2_AddCondition(client, TFCond_NoHealingDamageBuff, 1.0);
+	return true;
 }
 
 public void SZF_049Kill(int client, int victim)
@@ -741,11 +773,11 @@ public int SZF_DamageSort(int index1, int index2, Handle array, Handle hndl)
 	int client2 = GetArrayCell(array, index2);
 	if(Damage[client1] > Damage[client2])
 	{
-		return 1;
+		return -1;
 	}
 	else if(Damage[client1] < Damage[client2] || client1 > client2)
 	{
-		return -1;
+		return 1;
 	}
-	return 1;
+	return -1;
 }

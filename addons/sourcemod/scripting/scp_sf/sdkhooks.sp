@@ -351,7 +351,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	if(!validAttacker && victim!=attacker)
 	{
 		static char classname[64];
-		if(attacker>MaxClients && GetEntityClassname(attacker, classname, sizeof(classname)) && StrEqual(classname, "env_explosion"))
+		if(inflictor>MaxClients && GetEntityClassname(inflictor, classname, sizeof(classname)) && StrEqual(classname, "env_explosion"))
 			attacker = GetOwnerLoop(attacker);
 	}
 
