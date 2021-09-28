@@ -924,13 +924,6 @@ public bool Classes_DeathScp(int client, Event event)
 	return true;
 }
 
-public void Classes_KillScp(int client, int victim)
-{
-	int wep = GetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon");
-	if(wep>MaxClients && GetEntProp(wep, Prop_Send, "m_iItemDefinitionIndex")==594)
-		GiveAchievement(Achievement_KillMirco, client);
-}
-
 public void Classes_KillDBoi(int client, int victim)
 {
 	if(Classes_GetByName("sci") == Client[victim].Class)
