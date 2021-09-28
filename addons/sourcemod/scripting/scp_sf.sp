@@ -102,13 +102,13 @@ Cookie CookieTraining;
 Cookie CookieColor;
 Cookie CookieDClass;
 
-//ConVar CvarSpecGhost;
 ConVar CvarFriendlyFire;
 ConVar CvarSpeedMulti;
 ConVar CvarSpeedMax;
 ConVar CvarAchievement;
 ConVar CvarChatHook;
 ConVar CvarVoiceHook;
+ConVar CvarSendProxy;
 
 float NextHintAt = FAR_FUTURE;
 float RoundStartAt;
@@ -386,7 +386,7 @@ public void OnMapStart()
 	}
 
 	#if defined _SENDPROXYMANAGER_INC_
-	if(GetFeatureStatus(FeatureType_Native, "SendProxy_HookArrayProp") == FeatureStatus_Available)
+	if(CvarSendProxy.BoolValue && GetFeatureStatus(FeatureType_Native, "SendProxy_HookArrayProp")==FeatureStatus_Available)
 	{
 		entity = FindEntityByClassname(-1, "tf_player_manager");
 		if(entity > MaxClients)
