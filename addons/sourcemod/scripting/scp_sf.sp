@@ -89,8 +89,14 @@ enum ClassSpawnEnum
 bool Enabled = false;
 bool NoMusic = false;
 bool ChatHook = false;
+
+#if defined _sourcecomms_included
 bool SourceComms = false;		// SourceComms++
+#endif
+
+#if defined _basecomm_included
 bool BaseComm = false;		// BaseComm
+#endif
 
 MemoryPatch PatchProcessMovement;
 
