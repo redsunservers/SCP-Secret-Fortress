@@ -1840,6 +1840,13 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 		}
 		spreeFor[attacker] = engineTime+6.0;
 
+		if (IsSCP(attacker))
+		{
+			int wep = EntRefToEntIndex(Client[client].PreDamageWeapon);
+			if(wep>MaxClients && GetEntProp(wep, Prop_Send, "m_iItemDefinitionIndex")==594)
+				GiveAchievement(Achievement_KillMirco, client);
+		}
+
 		Classes_OnKill(attacker, client);
 
 		if(IsFriendly(Client[client].Class, Client[attacker].Class))
