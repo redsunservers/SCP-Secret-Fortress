@@ -1850,7 +1850,7 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 		{
 			int wep = EntRefToEntIndex(Client[client].PreDamageWeapon);
 			if(wep>MaxClients && GetEntProp(wep, Prop_Send, "m_iItemDefinitionIndex")==594)
-				GiveAchievement(Achievement_KillMirco, client);
+				GiveAchievement(Achievement_KillMirco, attacker);
 		}
 
 		Classes_OnKill(attacker, client);
