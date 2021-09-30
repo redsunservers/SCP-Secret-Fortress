@@ -89,8 +89,14 @@ enum ClassSpawnEnum
 bool Enabled = false;
 bool NoMusic = false;
 bool ChatHook = false;
+
+#if defined _sourcecomms_included
 bool SourceComms = false;		// SourceComms++
+#endif
+
+#if defined _basecomm_included
 bool BaseComm = false;		// BaseComm
+#endif
 
 MemoryPatch PatchProcessMovement;
 
@@ -1839,6 +1845,13 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 			GiveAchievement(Achievement_KillSpree, attacker);
 		}
 		spreeFor[attacker] = engineTime+6.0;
+
+		if (IsSCP(attacker))
+		{
+			int wep = EntRefToEntIndex(Client[client].PreDamageWeapon);
+			if(wep>MaxClients && GetEntProp(wep, Prop_Send, "m_iItemDefinitionIndex")==594)
+				GiveAchievement(Achievement_KillMirco, attacker);
+		}
 
 		Classes_OnKill(attacker, client);
 
