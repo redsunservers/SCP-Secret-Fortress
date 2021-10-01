@@ -11,13 +11,13 @@ static bool CvarEnabled;
 
 void ConVar_Setup()
 {
-	//CvarSpecGhost = CreateConVar("scp_specmode", "1", "If to spawn as a ghost while spectating", _, true, 0.0, true, 1.0);
 	CvarFriendlyFire = CreateConVar("scp_friendlyfire", "0", "If to enable friendly fire", _, true, 0.0, true, 1.0);
 	CvarSpeedMulti = CreateConVar("scp_speedmulti", "1.0", "Player movement speed multiplier", _, true, 0.004167);
 	CvarSpeedMax = CreateConVar("scp_speedmax", "3000.0", "Maximum player speed (SCP-173's blink speed)", _, true, 1.0);
 	CvarAchievement = CreateConVar("scp_achievements", "1", "If to call SCPSF_OnAchievement forward", _, true, 0.0, true, 1.0);
 	CvarChatHook = CreateConVar("scp_chathook", "1", "If to use it's own chat processor to manage chat messages", _, true, 0.0, true, 1.0);
 	CvarVoiceHook = CreateConVar("scp_voicehook", "1", "If to use it's own voice processor to manage voice chat", _, true, 0.0, true, 1.0);
+	CvarSendProxy = CreateConVar("scp_sendproxy", "1", "If to use SendProxy, if available", _, true, 0.0, true, 1.0);
 
 	AutoExecConfig(true, "SCPSecretFortress");
 
@@ -64,7 +64,7 @@ void ConVar_Add(const char[] name, float value, bool enforce=true)
 	CvarList.PushArray(info);
 }
 
-stock void ConVar_Remove(const char[] name)
+void ConVar_Remove(const char[] name)
 {
 	ConVar cvar = FindConVar(name);
 	int index = CvarList.FindValue(cvar, CvarInfo::cvar);
@@ -86,6 +86,15 @@ void ConVar_Enable()
 {
 	if(!CvarEnabled)
 	{
+		if(Classes_AskForClass())
+		{
+			ConVar_Add("mp_forceautoteam", 1.0);
+		}
+		else
+		{
+			ConVar_Remove("mp_forceautoteam");
+		}
+
 		int length = CvarList.Length;
 		for(int i; i<length; i++)
 		{

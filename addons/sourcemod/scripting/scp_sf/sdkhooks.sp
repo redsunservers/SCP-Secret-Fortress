@@ -351,7 +351,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	if(!validAttacker && victim!=attacker)
 	{
 		static char classname[64];
-		if(attacker>MaxClients && GetEntityClassname(attacker, classname, sizeof(classname)) && StrEqual(classname, "env_explosion"))
+		if(inflictor>MaxClients && GetEntityClassname(inflictor, classname, sizeof(classname)) && StrEqual(classname, "env_explosion"))
 			attacker = GetOwnerLoop(attacker);
 	}
 
@@ -501,7 +501,7 @@ public void OnPostThink(int client)
 {
 	if(IsPlayerAlive(client) && Client[client].WeaponClass!=TFClass_Unknown)
 	{
-		TF2_SetPlayerClass(client, Client[client].WeaponClass, false);
+		TF2_SetPlayerClass(client, Client[client].WeaponClass, false, false);
 		if(GetEntPropFloat(client, Prop_Send, "m_vecViewOffset[2]") > 64.0)	// Otherwise, shaking
 			SetEntPropFloat(client, Prop_Send, "m_vecViewOffset[2]", ViewHeights[Client[client].WeaponClass]);
 	}
@@ -510,5 +510,5 @@ public void OnPostThink(int client)
 public void OnPostThinkPost(int client)
 {
 	if(IsPlayerAlive(client) && Client[client].CurrentClass!=TFClass_Unknown)
-		TF2_SetPlayerClass(client, Client[client].CurrentClass, false);
+		TF2_SetPlayerClass(client, Client[client].CurrentClass, false, false);
 }

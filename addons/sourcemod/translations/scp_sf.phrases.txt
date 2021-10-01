@@ -123,6 +123,69 @@
 		"en"		"{1}\n \nSurvivors Escaped: {2} / {3}"
 	}
 
+	// Pandemic Phrases
+
+	"class_goc"
+	{
+		"en"		"Global Occult Coalition"
+	}
+	"desc_goc"
+	{
+		"en"		"Make your way through the outbreak.\nNeutralize SCPs and MTF.\nPick up items around the map."
+	}
+	"train_goc"
+	{
+		"en"		"SCP-5000, a story how the SCP Foundation turned against the humanity.\nYour part of a squad to help deal with the chaos.\nMake your way through the map, pick up weapons and items.\nSCPs and MTF will spawn in as a big threat."
+	}
+	"class_mtf5001"
+	{
+		"en"		"Nine-Tailed Fox Private"
+	}
+	"desc_mtf5001"
+	{
+		"en"		"Kill the Global Occult Coalition.\nFollow the orders of your superiors."
+	}
+	"train_mtf5001"
+	{
+		"en"		"SCP-5000, a story how the SCP Foundation turned against the humanity.\nYour part of a squad to fight back against the Global Occult Coalition.\nWork with SCPs if possible to complete your order."
+	}
+	"class_mtf5002"
+	{
+		"en"		"Nine-Tailed Fox Sergeant"
+	}
+	"desc_mtf5002"
+	{
+		"en"		"Kill the Global Occult Coalition.\nInstruct your soldiers.\nFollow the orders of your superiors."
+	}
+	"train_mtf5002"
+	{
+		"en"		"SCP-5000, a story how the SCP Foundation turned against the humanity.\nYour part of a squad to fight back against the Global Occult Coalition.\nWork with SCPs if possible to complete your order."
+	}
+	"class_mtf5003"
+	{
+		"en"		"Nine-Tailed Fox Captain"
+	}
+	"desc_mtf5003"
+	{
+		"en"		"Kill the Global Occult Coalition.\nInstruct your soldiers."
+	}
+	"train_mtf5003"
+	{
+		"en"		"SCP-5000, a story how the SCP Foundation turned against the humanity.\nYour part of a squad to fight back against the Global Occult Coalition.\nWork with SCPs if possible to complete your order."
+	}
+	"class_scp610"
+	{
+		"en"		"SCP-610"
+	}
+	"desc_scp610"
+	{
+		"en"		"Kill the Global Occult Coalition.\nCooperate with other SCPs."
+	}
+	"train_scp610"
+	{
+		"en"		"SCP-5000, a story how the SCP Foundation turned against the humanity.\nStop the Global Occult Coalition from preventing the chaos.\nSpread yourself..."
+	}
+
 	// It Steals Phrases
 
 	"desc_spec_steals"
@@ -727,6 +790,14 @@
 	"info_15"
 	{
 		"en"		"I am heavy weapons guy, and this, is my weapon."
+	}
+	"weapon_210"
+	{
+		"en"		"GOC Issued Revolver"
+	}
+	"info_210"
+	{
+		"en"		"Your only friend when the world grows darker."
 	}
 	"weapon_25"
 	{

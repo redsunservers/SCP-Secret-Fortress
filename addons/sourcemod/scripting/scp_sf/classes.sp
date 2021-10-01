@@ -38,6 +38,7 @@ enum struct ClassEnum
 
 	Function OnAnimation;	// Action(int client, PlayerAnimEvent_t &anim, int &data)
 	Function OnButton;	// void(int client, int button)
+	Function OnCanSpawn;	// bool(int client)
 	Function OnCondAdded;	// void(int client, TFCond cond)
 	Function OnCondRemoved;	// void(int client, TFCond cond)
 	Function OnDealDamage;	// Action(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
@@ -61,6 +62,7 @@ enum struct ClassEnum
 	{
 		this.OnAnimation = INVALID_FUNCTION;
 		this.OnButton = INVALID_FUNCTION;
+		this.OnCanSpawn = INVALID_FUNCTION;
 		this.OnCondAdded = INVALID_FUNCTION;
 		this.OnCondRemoved = INVALID_FUNCTION;
 		this.OnDealDamage = INVALID_FUNCTION;
@@ -83,9 +85,11 @@ enum struct ClassEnum
 }
 
 static ArrayList Classes;
+static bool AskClass;
 
 void Classes_Setup(KeyValues main, KeyValues map, ArrayList whitelist)
 {
+	AskClass = false;
 	if(Classes != INVALID_HANDLE)
 		delete Classes;
 
@@ -132,6 +136,8 @@ void Classes_Setup(KeyValues main, KeyValues map, ArrayList whitelist)
 static void GrabKvValues(KeyValues kv, ClassEnum class, ClassEnum defaul, int index)
 {
 	class.Class = KvGetClass(kv, "class", defaul.Class);
+	if(class.Class==TFClass_Unknown && index!=-1)
+		AskClass = true;
 
 	class.Speed = kv.GetFloat("speed", defaul.Speed);
 	class.Speak = kv.GetFloat("speak", defaul.Speak);
@@ -161,6 +167,7 @@ static void GrabKvValues(KeyValues kv, ClassEnum class, ClassEnum defaul, int in
 
 	class.OnAnimation = KvGetFunction(kv, "func_animation", defaul.OnAnimation);
 	class.OnButton = KvGetFunction(kv, "func_button", defaul.OnButton);
+	class.OnCanSpawn = KvGetFunction(kv, "func_canspawn", defaul.OnCanSpawn);
 	class.OnCondAdded = KvGetFunction(kv, "func_condadded", defaul.OnCondAdded);
 	class.OnCondRemoved = KvGetFunction(kv, "func_condremove", defaul.OnCondRemoved);
 	class.OnDealDamage = KvGetFunction(kv, "func_dealdamage", defaul.OnDealDamage);
@@ -536,6 +543,11 @@ int Classes_GetMaxHealth(int client)
 		Call_Finish();
 	}
 	return health;
+}
+
+bool Classes_AskForClass()
+{
+	return AskClass;
 }
 
 stock bool IsSCP(int client)
