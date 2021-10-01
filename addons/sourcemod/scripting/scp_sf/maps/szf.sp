@@ -22,7 +22,7 @@ static int Carrying[MAXTF2PLAYERS] = {INVALID_ENT_REFERENCE, ...};
 static float Damage[MAXTF2PLAYERS];
 static bool TurnOn;
 
-void SZF_RoundStart()
+public void SZF_RoundStart()
 {
 	char buffer[PLATFORM_MAX_PATH];
 	int entity = -1;

@@ -527,7 +527,6 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 		AcceptEntityInput(entity, "Disable");
 	}
 
-	SZF_RoundStart();
 	Items_RoundStart();
 
 	//NoAchieve = false;
