@@ -529,8 +529,8 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 
 	Items_RoundStart();
 
-	//NoAchieve = false;
-	//GiveAchievement(Achievement_Halloween, 0);
+	NoAchieve = false;
+	GiveAchievement(Achievement_Halloween, 0);
 	NoAchieve = !CvarAchievement.BoolValue;
 
 	UpdateListenOverrides(RoundStartAt);
