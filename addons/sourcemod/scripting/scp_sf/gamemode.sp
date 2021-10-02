@@ -810,7 +810,7 @@ static void KvGetSound(KeyValues kv, const char[] string, SoundEnum sound, const
 				sound.Time = 0.0;
 				strcopy(sound.Path, sizeof(sound.Path), buffers[0]);
 				if(sound.Path[0])
-					PrecacheSound(sound.Path, true);
+					PrecacheSoundEx(sound.Path, true);
 			}
 			case 2:
 			{
@@ -818,7 +818,7 @@ static void KvGetSound(KeyValues kv, const char[] string, SoundEnum sound, const
 				strcopy(sound.Path, sizeof(sound.Path), buffers[1]);
 				sound.Volume = 2;
 				if(sound.Path[0])
-					PrecacheSound(sound.Path, true);
+					PrecacheSoundEx(sound.Path, true);
 			}
 			default:
 			{
@@ -826,7 +826,7 @@ static void KvGetSound(KeyValues kv, const char[] string, SoundEnum sound, const
 				strcopy(sound.Path, sizeof(sound.Path), buffers[1]);
 				sound.Volume = StringToInt(buffers[2]);
 				if(sound.Path[0])
-					PrecacheSound(sound.Path, true);
+					PrecacheSoundEx(sound.Path, true);
 			}
 		}
 	}

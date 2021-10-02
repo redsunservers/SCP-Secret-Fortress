@@ -1004,9 +1004,21 @@ stock int PrecacheModelEx(const char[] model, bool preload=false)
 
 stock int PrecacheSoundEx(const char[] sound, bool preload=false)
 {
+	static const char soundchars[] = { '*', '#', '@', '>', '<', '^', ')', '}', '$' };
+
 	char buffer[PLATFORM_MAX_PATH];
+	strcopy(buffer, sizeof(buffer), sound);
+
+	for(int i=0; i<sizeof(soundchars); i++)
+	{
+		if(buffer[0] == soundchars[i])
+		{
+			strcopy(buffer, sizeof(buffer), sound[1]);
+			break;
+		}
+	}
+
 	FormatEx(buffer, sizeof(buffer), "sound/%s", sound);
-	ReplaceStringEx(buffer, sizeof(buffer), "#", "");
 	if(FileExists(buffer))
 		AddFileToDownloadsTable(buffer);
 
