@@ -297,6 +297,13 @@ void SZF_DropItem(int client, bool teleport=true)
 
 public void SZF_PointCaptured(Event event, const char[] name, bool dontBroadcast)
 {
+	static float Cooldown;
+	float engineTime = GetEngineTime();
+	if(Cooldown > engineTime)
+		return;
+
+	Cooldown = GetEngineTime()+3.0;
+
 	ArrayList players = ZombiePlayersList();
 
 	ArrayList classes;
@@ -673,8 +680,14 @@ public float SZF_RespawnWave(ArrayList &list, ArrayList &players)
 	int length = players.Length;
 	if(length)
 	{
+		if(length > 6)
+			length = 6;
+
 		list = new ArrayList();
-		list.Push(Index610);
+		for(int i; i<length; i++)
+		{
+			list.Push(Index610);
+		}
 	}
 
 	float min, max;
@@ -684,7 +697,7 @@ public float SZF_RespawnWave(ArrayList &list, ArrayList &players)
 
 public float SZF_PointWave(ArrayList &list, ArrayList &players)
 {
-	int length = players.Length/2;
+	int length = players.Length;
 	if(length)
 	{
 		list = new ArrayList();
@@ -776,11 +789,21 @@ static SZFWeaponType GetWeaponType(const char[] buffer)
 static ArrayList ZombiePlayersList()
 {
 	int class = Classes_GetByName("scp610");
+	int spec = Classes_GetByName("spec");
 	ArrayList list = new ArrayList();
 	for(int client=1; client<=MaxClients; client++)
 	{
-		if(class==Client[client].Class && IsClientInGame(client))
-			list.Push(client);
+		if(!IsClientInGame(client))
+			continue;
+
+		if(Client[client].Class!=class && !TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode))	// If not a dead ghost or 610
+		{
+			// Check if player is alive or in spectator team
+			if((IsPlayerAlive(client) && spec!=Client[client].Class) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
+				continue;
+		}
+
+		list.Push(client);
 	}
 	list.SortCustom(SZF_DamageSort);
 	return list;
