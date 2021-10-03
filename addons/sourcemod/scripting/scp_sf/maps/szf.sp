@@ -33,23 +33,7 @@ public void SZF_RoundStart()
 		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
 		switch(GetWeaponType(buffer))
 		{
-			case WeaponType_Common:
-			{
-				if(Items_GetRandomWeapon(1, weapon))
-				{
-					FormatEx(buffer, sizeof(buffer), "scp_rand_%d", weapon.Index);
-					SetEntPropString(entity, Prop_Data, "m_iName", buffer);
-					SetEntityModel(entity, weapon.Model);
-					if(weapon.Skin >= 0)
-						SetEntProp(entity, Prop_Send, "m_nSkin", weapon.Skin);
-				}
-				else
-				{
-					RemoveEntity(entity);
-					continue;
-				}
-			}
-			case WeaponType_Spawn:
+			case WeaponType_Common, WeaponType_Spawn:
 			{
 				if(Items_GetRandomWeapon(1, weapon))
 				{
@@ -65,23 +49,7 @@ public void SZF_RoundStart()
 					continue;
 				}
 			}
-			case WeaponType_Uncommon:
-			{
-				if(Items_GetRandomWeapon(2, weapon))
-				{
-					FormatEx(buffer, sizeof(buffer), "scp_rand_%d", weapon.Index);
-					SetEntPropString(entity, Prop_Data, "m_iName", buffer);
-					SetEntityModel(entity, weapon.Model);
-					if(weapon.Skin >= 0)
-						SetEntProp(entity, Prop_Send, "m_nSkin", weapon.Skin);
-				}
-				else
-				{
-					RemoveEntity(entity);
-					continue;
-				}
-			}
-			case WeaponType_UncommonSpawn:
+			case WeaponType_Uncommon, WeaponType_UncommonSpawn:
 			{
 				if(Items_GetRandomWeapon(2, weapon))
 				{
@@ -97,23 +65,7 @@ public void SZF_RoundStart()
 					continue;
 				}
 			}
-			case WeaponType_Rare:
-			{
-				if(Items_GetRandomWeapon(GetRandomInt(2, 3), weapon))
-				{
-					FormatEx(buffer, sizeof(buffer), "scp_rand_%d", weapon.Index);
-					SetEntPropString(entity, Prop_Data, "m_iName", buffer);
-					SetEntityModel(entity, weapon.Model);
-					if(weapon.Skin >= 0)
-						SetEntProp(entity, Prop_Send, "m_nSkin", weapon.Skin);
-				}
-				else
-				{
-					RemoveEntity(entity);
-					continue;
-				}
-			}
-			case WeaponType_RareSpawn:
+			case WeaponType_Rare, WeaponType_RareSpawn:
 			{
 				if(Items_GetRandomWeapon(3, weapon))
 				{
@@ -134,7 +86,7 @@ public void SZF_RoundStart()
 				int rarity = GetRandomInt(0, 6) ? GetRandomInt(1, 2) : 3;
 				if(Items_GetRandomWeapon(rarity, weapon))
 				{
-					FormatEx(buffer, sizeof(buffer), "scp_rand_%d", weapon.Index);
+					FormatEx(buffer, sizeof(buffer), "scp_item_%d", weapon.Index);
 					SetEntPropString(entity, Prop_Data, "m_iName", buffer);
 					SetEntityModel(entity, weapon.Model);
 					if(weapon.Skin >= 0)
@@ -146,21 +98,7 @@ public void SZF_RoundStart()
 					continue;
 				}
 			}
-			case WeaponType_Static:
-			{
-				GetEntPropString(entity, Prop_Data, "m_ModelName", buffer, sizeof(buffer));
-				if(Items_GetWeaponByModel(buffer, weapon))
-				{
-					FormatEx(buffer, sizeof(buffer), "scp_rand_%d", weapon.Index);
-					SetEntPropString(entity, Prop_Data, "m_iName", buffer);
-				}
-				else
-				{
-					RemoveEntity(entity);
-					continue;
-				}
-			}
-			case WeaponType_StaticSpawn:
+			case WeaponType_Static, WeaponType_StaticSpawn:
 			{
 				GetEntPropString(entity, Prop_Data, "m_ModelName", buffer, sizeof(buffer));
 				if(Items_GetWeaponByModel(buffer, weapon))
@@ -297,6 +235,13 @@ void SZF_DropItem(int client, bool teleport=true)
 
 public void SZF_PointCaptured(Event event, const char[] name, bool dontBroadcast)
 {
+	static float Cooldown;
+	float engineTime = GetEngineTime();
+	if(Cooldown > engineTime)
+		return;
+
+	Cooldown = GetEngineTime()+3.0;
+
 	ArrayList players = ZombiePlayersList();
 
 	ArrayList classes;
@@ -673,8 +618,14 @@ public float SZF_RespawnWave(ArrayList &list, ArrayList &players)
 	int length = players.Length;
 	if(length)
 	{
+		if(length > 6)
+			length = 6;
+
 		list = new ArrayList();
-		list.Push(Index610);
+		for(int i; i<length; i++)
+		{
+			list.Push(Index610);
+		}
 	}
 
 	float min, max;
@@ -684,7 +635,7 @@ public float SZF_RespawnWave(ArrayList &list, ArrayList &players)
 
 public float SZF_PointWave(ArrayList &list, ArrayList &players)
 {
-	int length = players.Length/2;
+	int length = players.Length;
 	if(length)
 	{
 		list = new ArrayList();
@@ -776,11 +727,21 @@ static SZFWeaponType GetWeaponType(const char[] buffer)
 static ArrayList ZombiePlayersList()
 {
 	int class = Classes_GetByName("scp610");
+	int spec = Classes_GetByName("spec");
 	ArrayList list = new ArrayList();
 	for(int client=1; client<=MaxClients; client++)
 	{
-		if(class==Client[client].Class && IsClientInGame(client))
-			list.Push(client);
+		if(!IsClientInGame(client))
+			continue;
+
+		if(Client[client].Class!=class && !TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode))	// If not a dead ghost or 610
+		{
+			// Check if player is alive or in spectator team
+			if((IsPlayerAlive(client) && spec!=Client[client].Class) || GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
+				continue;
+		}
+
+		list.Push(client);
 	}
 	list.SortCustom(SZF_DamageSort);
 	return list;
