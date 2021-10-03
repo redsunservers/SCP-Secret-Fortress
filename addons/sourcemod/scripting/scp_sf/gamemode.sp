@@ -16,7 +16,7 @@ enum struct WaveEnum
 {
 	int Group;
 	int Tickets;
-	bool Once;
+	int Type;
 	ArrayList Classes;
 
 	bool ShowSCPs;
@@ -169,7 +169,7 @@ ArrayList Gamemode_Setup(KeyValues main, KeyValues map)
 
 					wave.Group = StringToInt(preset.Name);
 					wave.Tickets = kv.GetNum("tickets");
-					wave.Once = view_as<bool>(kv.GetNum("once"));
+					wave.Type = kv.GetNum("type");
 					wave.ShowSCPs = view_as<bool>(kv.GetNum("showscps"));
 					kv.GetString("message", wave.Message, sizeof(wave.Message));
 					if(!TranslationPhraseExists(wave.Message))
@@ -417,7 +417,7 @@ bool Gamemode_RoundStart()
 		}
 
 		ChangeClientTeamEx(client, class.Team>TFTeam_Spectator ? class.Team : class.Team+view_as<TFTeam>(2));
-		TF2_SetPlayerClass(client, class.Class);
+		TF2_SetPlayerClass(client, class.Class, _, false);
 		Forward_OnClass(client, ClassSpawn_RoundStart, class.Name);
 	}
 	delete classes;
@@ -676,7 +676,7 @@ bool Gamemode_GetWave(int index, WaveEnum wave)
 	return true;
 }
 
-stock void Gamemode_SetWave(int index, WaveEnum wave)
+void Gamemode_SetWave(int index, WaveEnum wave)
 {
 	WaveList.SetArray(index, wave);
 }
@@ -1013,7 +1013,7 @@ public bool Gamemode_ConditionBoss(TFTeam &team)
 		for(int i=1; i<=MaxClients; i++)
 		{
 			if(IsValidClient(i) && !IsSpec(i) && GetClientTeam(i)==view_as<int>(TFTeam_Red))
-				ChangeClientTeamEx(i, TFTeam_Red);
+				ChangeClientTeamEx(i, TFTeam_Blue);
 		}
 
 		team = TFTeam_Blue;
@@ -1066,6 +1066,8 @@ public float Gamemode_WaveRespawnTickets(ArrayList &list, ArrayList &players)
 
 		if(!list.Length)
 		{
+			delete list;
+			list = null;
 			EndRoundIn = GetEngineTime()+GetRandomFloat(WaveTimes[0], WaveTimes[1]);
 			return 0.0;
 		}
@@ -1078,9 +1080,14 @@ public float Gamemode_WaveRespawnTickets(ArrayList &list, ArrayList &players)
 		if(length > wave.TicketsLeft)
 			length = wave.TicketsLeft;
 
-		wave.TicketsLeft -= length;
-		if(wave.Once)
-			wave.TicketsLeft = 0;
+		switch(wave.Type)
+		{
+			case 0:
+				wave.TicketsLeft -= length;
+
+			case 1:
+				wave.TicketsLeft = 0;
+		}
 
 		WaveList.SetArray(i, wave);
 

@@ -1102,13 +1102,13 @@ stock TFClassType KvGetClass(KeyValues kv, const char[] string, TFClassType defa
 	TFClassType class;
 	static char buffer[24];
 	kv.GetString(string, buffer, sizeof(buffer));
+	if(!buffer[0])
+		return defaul;
+
 	class = view_as<TFClassType>(StringToInt(buffer));
 	if(class == TFClass_Unknown)
-	{
 		class = TF2_GetClass(buffer);
-		if(class == TFClass_Unknown)
-			return defaul;
-	}
+
 	return class;
 }
 
@@ -1307,6 +1307,9 @@ bool IsEntityStuck(int entity)
 
 int TF2_CreateGlow(int client, const char[] model)
 {
+	if(!model[0])
+		return -1;
+
 	int prop = CreateEntityByName("tf_taunt_prop");
 	if(IsValidEntity(prop))
 	{

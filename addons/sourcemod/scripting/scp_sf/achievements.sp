@@ -32,7 +32,9 @@ enum Achievements
 	Achievement_Intercom,
 	Achievement_Upgrade,
 	Achievement_Revive,
-	Achievement_DisarmMTF
+	Achievement_DisarmMTF,
+	Achievement_Halloween,
+	Achievement_Christmas
 }
 
 bool NoAchieve;
@@ -58,6 +60,15 @@ void GiveAchievement(Achievements achievement, int client)
 				return;
 		}
 		case Achievement_SurviveWarhead:
+		{
+			for(int i=1; i<=MaxClients; i++)
+			{
+				if(IsValidClient(i) && !IsSpec(i))
+					Forward_OnAchievement(i, achievement);
+			}
+			return;
+		}
+		case Achievement_Halloween:
 		{
 			for(int i=1; i<=MaxClients; i++)
 			{
