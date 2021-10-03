@@ -33,23 +33,7 @@ public void SZF_RoundStart()
 		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
 		switch(GetWeaponType(buffer))
 		{
-			case WeaponType_Common:
-			{
-				if(Items_GetRandomWeapon(1, weapon))
-				{
-					FormatEx(buffer, sizeof(buffer), "scp_rand_%d", weapon.Index);
-					SetEntPropString(entity, Prop_Data, "m_iName", buffer);
-					SetEntityModel(entity, weapon.Model);
-					if(weapon.Skin >= 0)
-						SetEntProp(entity, Prop_Send, "m_nSkin", weapon.Skin);
-				}
-				else
-				{
-					RemoveEntity(entity);
-					continue;
-				}
-			}
-			case WeaponType_Spawn:
+			case WeaponType_Common, WeaponType_Spawn:
 			{
 				if(Items_GetRandomWeapon(1, weapon))
 				{
@@ -65,23 +49,7 @@ public void SZF_RoundStart()
 					continue;
 				}
 			}
-			case WeaponType_Uncommon:
-			{
-				if(Items_GetRandomWeapon(2, weapon))
-				{
-					FormatEx(buffer, sizeof(buffer), "scp_rand_%d", weapon.Index);
-					SetEntPropString(entity, Prop_Data, "m_iName", buffer);
-					SetEntityModel(entity, weapon.Model);
-					if(weapon.Skin >= 0)
-						SetEntProp(entity, Prop_Send, "m_nSkin", weapon.Skin);
-				}
-				else
-				{
-					RemoveEntity(entity);
-					continue;
-				}
-			}
-			case WeaponType_UncommonSpawn:
+			case WeaponType_Uncommon, WeaponType_UncommonSpawn:
 			{
 				if(Items_GetRandomWeapon(2, weapon))
 				{
@@ -97,23 +65,7 @@ public void SZF_RoundStart()
 					continue;
 				}
 			}
-			case WeaponType_Rare:
-			{
-				if(Items_GetRandomWeapon(GetRandomInt(2, 3), weapon))
-				{
-					FormatEx(buffer, sizeof(buffer), "scp_rand_%d", weapon.Index);
-					SetEntPropString(entity, Prop_Data, "m_iName", buffer);
-					SetEntityModel(entity, weapon.Model);
-					if(weapon.Skin >= 0)
-						SetEntProp(entity, Prop_Send, "m_nSkin", weapon.Skin);
-				}
-				else
-				{
-					RemoveEntity(entity);
-					continue;
-				}
-			}
-			case WeaponType_RareSpawn:
+			case WeaponType_Rare, WeaponType_RareSpawn:
 			{
 				if(Items_GetRandomWeapon(3, weapon))
 				{
@@ -134,7 +86,7 @@ public void SZF_RoundStart()
 				int rarity = GetRandomInt(0, 6) ? GetRandomInt(1, 2) : 3;
 				if(Items_GetRandomWeapon(rarity, weapon))
 				{
-					FormatEx(buffer, sizeof(buffer), "scp_rand_%d", weapon.Index);
+					FormatEx(buffer, sizeof(buffer), "scp_item_%d", weapon.Index);
 					SetEntPropString(entity, Prop_Data, "m_iName", buffer);
 					SetEntityModel(entity, weapon.Model);
 					if(weapon.Skin >= 0)
@@ -146,21 +98,7 @@ public void SZF_RoundStart()
 					continue;
 				}
 			}
-			case WeaponType_Static:
-			{
-				GetEntPropString(entity, Prop_Data, "m_ModelName", buffer, sizeof(buffer));
-				if(Items_GetWeaponByModel(buffer, weapon))
-				{
-					FormatEx(buffer, sizeof(buffer), "scp_rand_%d", weapon.Index);
-					SetEntPropString(entity, Prop_Data, "m_iName", buffer);
-				}
-				else
-				{
-					RemoveEntity(entity);
-					continue;
-				}
-			}
-			case WeaponType_StaticSpawn:
+			case WeaponType_Static, WeaponType_StaticSpawn:
 			{
 				GetEntPropString(entity, Prop_Data, "m_ModelName", buffer, sizeof(buffer));
 				if(Items_GetWeaponByModel(buffer, weapon))
