@@ -199,7 +199,7 @@ public void SCP173_OnButton(int client, int button)
 			}
 
 			BlinkExpire[client] = engineTime + 3.0;
-			BlinkCharge[client] += 20.0 / (players + 2.0);
+			BlinkCharge[client] += 40.0 / (players + 2.0);
 			if(BlinkCharge[client] > 100.0)
 				BlinkCharge[client] = 100.0;
 		}
