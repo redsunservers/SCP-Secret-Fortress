@@ -2,9 +2,9 @@ static const char ModelMelee[] = "models/scp_sf/096/scp096_hands_7.mdl";
 static const char SoundPassive[] = "freak_fortress_2/scp096/bgm.mp3";
 static const char SoundEnrage[] = "freak_fortress_2/scp096/fullrage.mp3";
 
-static const int HealthMax = 4500;	// Max standard health
-static const int HealthExtra = 1050;	// Max regenerable health
-static const int HealthRage = 210;		// Extra health per target in rage
+static const int HealthMax = 3000;	// Max standard health
+static const int HealthExtra = 700;	// Max regenerable health
+static const int HealthRage = 140;		// Extra health per target in rage
 
 static const float SpeedRage = 2.1;
 
