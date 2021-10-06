@@ -60,16 +60,16 @@ Artvin - Map/Model development
 [GitHub Profile](https://github.com/artvin01 "artvin01 (Artvin)")
 
 Crust - SCP custom animations  
-[Steam Profile](https://steamcommunity.com/profiles/76561198097667312 "AlliedModders - View Profile: RavensBro")
+[Steam Profile](https://steamcommunity.com/profiles/76561198097667312 "Steam Community :: Crust")
 
 DoctorKrazy - Chaos & SCP-049-2 rigs  
 [AlliedModders Profile](https://forums.alliedmods.net/member.php?u=288676 "AlliedModders - View Profile: DoctorKrazy")
 
 JuegosPablo - MTF rig  
-[AlliedModders Profile](https://forums.alliedmods.net/showthread.php?t=308656 "AlliedModders - View Profile: JuegosPablo")
+[AlliedModders Profile](https://forums.alliedmods.net/member.php?u=268021 "AlliedModders - View Profile: JuegosPablo")
 
 RavensBro - SCP-173 rig  
-[AlliedModders Profile](https://forums.alliedmods.net/showthread.php?t=203464 "AlliedModders - View Profile: RavensBro")
+[AlliedModders Profile](https://forums.alliedmods.net/member.php?u=60510 "AlliedModders - View Profile: RavensBro")
 
 Marxvee - Special thanks  
 [GitHub Profile](https://github.com/spundarce "spundarce (Marxvee)")
