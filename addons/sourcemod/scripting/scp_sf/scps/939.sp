@@ -1,5 +1,5 @@
 static const float SpeedExtra = 50.0;
-static const float GlowRange = 800.0;
+static const float GlowRange = 1200.0;
 
 public bool SCP939_Create(int client)
 {
