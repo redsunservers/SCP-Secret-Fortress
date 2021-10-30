@@ -2792,5 +2792,3 @@ public void SendProxy_ForkOfAForkOfAFork()
 }
 #endif
 #endif
-
-#file "SCP: Secret Fortress"
