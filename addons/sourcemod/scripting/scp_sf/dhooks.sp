@@ -92,6 +92,7 @@ void DHook_UnhookClient(int client)
 {
 	DynamicHook.RemoveHook(ForceRespawnPreHook[client]);
 	DynamicHook.RemoveHook(ForceRespawnPostHook[client]);
+	DynamicHook.RemoveHook(WantsLagCompensationOnEntityPreHook[client]);
 	DynamicHook.RemoveHook(WantsLagCompensationOnEntityPostHook[client]);
 }
 
