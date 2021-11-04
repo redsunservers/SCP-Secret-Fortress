@@ -4,8 +4,10 @@ static DynamicHook ForceRespawn;
 static DynamicHook WantsLagCompensationOnEntity;
 static int ForceRespawnPreHook[MAXTF2PLAYERS];
 static int ForceRespawnPostHook[MAXTF2PLAYERS];
+static int WantsLagCompensationOnEntityPreHook[MAXTF2PLAYERS];
 static int WantsLagCompensationOnEntityPostHook[MAXTF2PLAYERS];
 static int CalculateSpeedClient;
+static int ClientTeam[MAXTF2PLAYERS];
 
 void DHook_Setup(GameData gamedata)
 {
@@ -80,7 +82,10 @@ void DHook_HookClient(int client)
 	}
 	
 	if(WantsLagCompensationOnEntity)
+	{
+		WantsLagCompensationOnEntityPreHook[client] = WantsLagCompensationOnEntity.HookEntity(Hook_Pre, client, DHook_WantsLagCompensationOnEntityPre);
 		WantsLagCompensationOnEntityPostHook[client] = WantsLagCompensationOnEntity.HookEntity(Hook_Post, client, DHook_WantsLagCompensationOnEntityPost);
+	}
 }
 
 void DHook_UnhookClient(int client)
@@ -168,9 +173,24 @@ public MRESReturn DHook_ForceRespawnPost(int client)
 		SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", Client[client].PrefClass);
 }
 
+public MRESReturn DHook_WantsLagCompensationOnEntityPre(int client, DHookReturn ret, DHookParam param)
+{
+	int player = param.Get(1);
+	
+	ClientTeam[client] = GetClientTeam(client);
+	ClientTeam[player] = GetClientTeam(player);
+	
+	ChangeClientTeamEx(client, TFTeam_Red);
+	ChangeClientTeamEx(player, TFTeam_Blue);
+}
+
 public MRESReturn DHook_WantsLagCompensationOnEntityPost(int client, DHookReturn ret, DHookParam param)
 {
 	int player = param.Get(1);
+	
+	ChangeClientTeamEx(client, ClientTeam[client]);
+	ChangeClientTeamEx(player, ClientTeam[player]);
+	
 	ret.Value = ret.Value || !IsFriendly(Client[client].Class, Client[player].Class);
 	return MRES_Supercede;
 }
