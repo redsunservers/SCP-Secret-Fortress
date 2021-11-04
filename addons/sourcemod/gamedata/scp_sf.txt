@@ -118,6 +118,28 @@
 				"return"	"void"
 				"this"		"entity"
 			}
+			"CBasePlayer::WantsLagCompensationOnEntity"
+			{
+				"offset"	"CBasePlayer::WantsLagCompensationOnEntity"
+				"hooktype"	"entity"
+				"return"	"bool"
+				"this"		"entity"
+				"arguments"
+				{
+					"pPlayer"
+					{
+						"type"	"cbaseentity"
+					}
+					"pCmd"
+					{
+						"type"	"objectptr"
+					}
+					"pEntityTransmitBits"
+					{
+						"type"	"objectptr"
+					}
+				}
+			}
 			"CTeamplayRoundBasedRules::RoundRespawn"
 			{
 				"offset"	"CTeamplayRoundBasedRules::RoundRespawn"
@@ -306,6 +328,11 @@
 			{
 				"linux"		"331"
 				"windows"	"330"
+			}
+			"CBasePlayer::WantsLagCompensationOnEntity"
+			{
+				"linux"		"329"
+				"windows"	"328"
 			}
 			"CTeamplayRoundBasedRules::RoundRespawn"
 			{

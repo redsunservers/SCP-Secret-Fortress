@@ -1,15 +1,17 @@
 static DynamicDetour AllowedToHealTarget;
 static DynamicHook RoundRespawn;
 static DynamicHook ForceRespawn;
+static DynamicHook WantsLagCompensationOnEntity;
 static int ForceRespawnPreHook[MAXTF2PLAYERS];
 static int ForceRespawnPostHook[MAXTF2PLAYERS];
+static int WantsLagCompensationOnEntityPreHook[MAXTF2PLAYERS];
+static int WantsLagCompensationOnEntityPostHook[MAXTF2PLAYERS];
 static int CalculateSpeedClient;
-//static int ClientTeam;
+static int ClientTeam[MAXTF2PLAYERS];
 
 void DHook_Setup(GameData gamedata)
 {
 	DHook_CreateDetour(gamedata, "CBaseEntity::InSameTeam", DHook_InSameTeamPre);
-	//DHook_CreateDetour(gamedata, "CLagCompensationManager::StartLagCompensation", DHook_StartLagCompensationPre, DHook_StartLagCompensationPost);
 	DHook_CreateDetour(gamedata, "CTFGameMovement::ProcessMovement", DHook_ProcessMovementPre);
 	DHook_CreateDetour(gamedata, "CTFPlayer::CanPickupDroppedWeapon", DHook_CanPickupDroppedWeaponPre);
 	DHook_CreateDetour(gamedata, "CTFPlayer::DoAnimationEvent", DHook_DoAnimationEventPre);
@@ -46,6 +48,10 @@ void DHook_Setup(GameData gamedata)
 	ForceRespawn = DynamicHook.FromConf(gamedata, "CBasePlayer::ForceRespawn");
 	if(!ForceRespawn)
 		LogError("[Gamedata] Could not find CBasePlayer::ForceRespawn");
+	
+	WantsLagCompensationOnEntity = DynamicHook.FromConf(gamedata, "CBasePlayer::WantsLagCompensationOnEntity");
+	if(!WantsLagCompensationOnEntity)
+		LogError("[Gamedata] Could not find CBasePlayer::WantsLagCompensationOnEntity");
 }
 
 static void DHook_CreateDetour(GameData gamedata, const char[] name, DHookCallback preCallback = INVALID_FUNCTION, DHookCallback postCallback = INVALID_FUNCTION)
@@ -74,12 +80,20 @@ void DHook_HookClient(int client)
 		ForceRespawnPreHook[client] = ForceRespawn.HookEntity(Hook_Pre, client, DHook_ForceRespawnPre);
 		ForceRespawnPostHook[client] = ForceRespawn.HookEntity(Hook_Post, client, DHook_ForceRespawnPost);
 	}
+	
+	if(WantsLagCompensationOnEntity)
+	{
+		WantsLagCompensationOnEntityPreHook[client] = WantsLagCompensationOnEntity.HookEntity(Hook_Pre, client, DHook_WantsLagCompensationOnEntityPre);
+		WantsLagCompensationOnEntityPostHook[client] = WantsLagCompensationOnEntity.HookEntity(Hook_Post, client, DHook_WantsLagCompensationOnEntityPost);
+	}
 }
 
 void DHook_UnhookClient(int client)
 {
 	DynamicHook.RemoveHook(ForceRespawnPreHook[client]);
 	DynamicHook.RemoveHook(ForceRespawnPostHook[client]);
+	DynamicHook.RemoveHook(WantsLagCompensationOnEntityPreHook[client]);
+	DynamicHook.RemoveHook(WantsLagCompensationOnEntityPostHook[client]);
 }
 
 void DHook_MapStart()
@@ -160,18 +174,27 @@ public MRESReturn DHook_ForceRespawnPost(int client)
 		SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", Client[client].PrefClass);
 }
 
-/*public MRESReturn DHook_StartLagCompensationPre(Address manager, DHookParam param)
+public MRESReturn DHook_WantsLagCompensationOnEntityPre(int client, DHookReturn ret, DHookParam param)
 {
-	int client = param.Get(1);
-	ClientTeam = GetClientTeam(client);
+	int player = param.Get(1);
+	
+	ClientTeam[client] = GetClientTeam(client);
+	ClientTeam[player] = GetClientTeam(player);
+	
 	ChangeClientTeamEx(client, TFTeam_Red);
+	ChangeClientTeamEx(player, TFTeam_Blue);
 }
 
-public MRESReturn DHook_StartLagCompensationPost(Address manager, DHookParam param)
+public MRESReturn DHook_WantsLagCompensationOnEntityPost(int client, DHookReturn ret, DHookParam param)
 {
-	int client = param.Get(1);
-	ChangeClientTeamEx(client, ClientTeam);
-}*/
+	int player = param.Get(1);
+	
+	ChangeClientTeamEx(client, ClientTeam[client]);
+	ChangeClientTeamEx(player, ClientTeam[player]);
+	
+	ret.Value = ret.Value || !IsFriendly(Client[client].Class, Client[player].Class);
+	return MRES_Supercede;
+}
 
 public MRESReturn DHook_CanPickupDroppedWeaponPre(int client, DHookReturn ret, DHookParam param)
 {
