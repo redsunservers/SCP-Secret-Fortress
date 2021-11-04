@@ -1,0 +1,17 @@
+"vertexlitgeneric"
+{
+	"$basetexture" "freak_fortress_2/corruptor/corrupt"
+	$alphatest "0"
+	$translucent "1"
+	$nolod "1"
+
+	"Proxies" 
+	{ 
+		"AnimatedTexture" 
+		{
+			"animatedTextureVar" "$basetexture" 
+			"animatedTextureFrameNumVar" "$frame" 
+			"animatedTextureFrameRate" "23"
+		 } 
+	} 
+}

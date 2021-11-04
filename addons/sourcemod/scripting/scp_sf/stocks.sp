@@ -1295,6 +1295,9 @@ bool IsEntityStuck(int entity)
 
 int TF2_CreateGlow(int client, const char[] model)
 {
+	if(!model[0])
+		return -1;
+
 	int prop = CreateEntityByName("tf_taunt_prop");
 	if(IsValidEntity(prop))
 	{

@@ -552,6 +552,30 @@
 	{
 		"en"		"A tech demo character.\nYour not normally supposed to play this unless forced by an admin."
 	}
+	"class_itstlives"
+	{
+		"en"		"C ̨O R ̵R҉ ̡U P ͢T͞ O͘ ́R̛"
+	}
+	"desc_itstlives"
+	{
+		"en"		"S͞PR̡E͞A̸D̵ I̸T̡ S͟PRE͘A͞D̡ ̨IT SP̵RÈA̡D ̢ĮT̕ SP̛R̕E̷AD͜ I͞T S͡P͢R̸EAD͢ ̴I҉T̷ S̕PRE҉AD ̀ÍT ŞP͝RE̕AD͡ IT͏ S̷P͜R̡E̢A͜D͘ ̴I͡T S̕PRE̴A̧D ̨IT SP̨RE̵ÀD ̨I͡T̨ ŚPREA҉D ͠IT̕ S̢P͟R̡EA̸D ҉I͏T S̵PREA͘D̶ ͟I͠Ţ ̵S̶PREAD I̧T ́SP̸R̴EA̷D ̨I͞T S̀PR̢E͝A̸D I͟T͏ SPR͡EAD̢ IT͟ ŚP͞ŖEAD̡ IT SP̴R̴EA̷D̡ IT ̨S̡PRE̕A͞D̸ IT͞ ͞SP̷RĘAD͟ ̴IT S̕PREA̷D I̕T S͠P̨R̴EA̛D ̢IT̛ S̛PRE̛AD͜ IT͡ ̨SPR̴EA͟D̸ ̵I͠T͡ SP̕READ IT ͞SP̀R͠ÈA̷D ̶I̧T͢ SP̡ŖEA̶D̨ ͡I̕T ͏S̡PREA̴D ̵I̢T̨ ͟SPR͝EA̶D ͡I͜T̕ ́SP̷R͞EA͜D ̀I͢T͟ S̷PREAD́ I͘T̷ S̢P͏R͘E͏AD̨ I̸T ̵SP҉R̶E̷ÁD I̡T͜ ͞SP͡REA̕D͡ IT͢ SPR͞E̢A͜D͜ ̷I͜T ̶SPRȨĄD IT S̴P͟R͞EA͏D̢ ́I͢T͡ S̡PREA̷D̶ ÌT ̸S̕P̧R̢E͏A̴D̷ ͠IT̢ ͏S͝PR̶EA̴D͟ I͠T SPR͞E͜A̛D̕ ̸ÌT҉ ̸S͡P͟READ ͟IT̀ ̶SP̛REA̴D IT̡ ͞SP͞R͠E̴AD̶ I͟T͢ ̷S̀PRE̕A̕D IT S͞P͏R̡EAD ́I͜T̷ SP̸R͘E͢A̕D́ ҉I͘T̸ ̨SṔREA͟D̢ I̧T ͡S̸PRE҉AD̕ I҉T͞ S͞P̷R͡EĄD͞ I͟T̵ SPR̨EAD͘ IT͜ S̶P͡REAḐ IT҉ ŞPR͠E͞A͞D ̷I͟T́ ͡S̶P̷REA͝D ͠IT͏ ̷SPR͠EA̛D ̵ĮT̢ ̶"
+	}
+	"train_itstlives"
+	{
+		"en"		"S͞PR̡E͞A̸D̵ I̸T̡ S͟PRE͘A͞D̡ ̨IT SP̵RÈA̡D ̢ĮT̕ SP̛R̕E̷AD͜ I͞T S͡P͢R̸EAD͢ ̴I҉T̷ S̕PRE҉AD ̀ÍT ŞP͝RE̕AD͡ IT͏ S̷P͜R̡E̢A͜D͘ ̴I͡T S̕PRE̴A̧D ̨IT SP̨RE̵ÀD ̨I͡T̨ ŚPREA҉D ͠IT̕ S̢P͟R̡EA̸D ҉I͏T S̵PREA͘D̶ ͟I͠Ţ ̵S̶PREAD I̧T ́SP̸R̴EA̷D ̨I͞T S̀PR̢E͝A̸D I͟T͏ SPR͡EAD̢ IT͟ ŚP͞ŖEAD̡ IT SP̴R̴EA̷D̡ IT ̨S̡PRE̕A͞D̸ IT͞ ͞SP̷RĘAD͟ ̴IT S̕PREA̷D I̕T S͠P̨R̴EA̛D ̢IT̛ S̛PRE̛AD͜ IT͡ ̨SPR̴EA͟D̸ ̵I͠T͡ SP̕READ IT ͞SP̀R͠ÈA̷D ̶I̧T͢ SP̡ŖEA̶D̨ ͡I̕T ͏S̡PREA̴D ̵I̢T̨ ͟SPR͝EA̶D ͡I͜T̕ ́SP̷R͞EA͜D ̀I͢T͟ S̷PREAD́ I͘T̷ S̢P͏R͘E͏AD̨ I̸T ̵SP҉R̶E̷ÁD I̡T͜ ͞SP͡REA̕D͡ IT͢ SPR͞E̢A͜D͜ ̷I͜T ̶SPRȨĄD IT S̴P͟R͞EA͏D̢ ́I͢T͡ S̡PREA̷D̶ ÌT ̸S̕P̧R̢E͏A̴D̷ ͠IT̢ ͏S͝PR̶EA̴D͟ I͠T SPR͞E͜A̛D̕ ̸ÌT҉ ̸S͡P͟READ ͟IT̀ ̶SP̛REA̴D IT̡ ͞SP͞R͠E̴AD̶ I͟T͢ ̷S̀PRE̕A̕D IT S͞P͏R̡EAD ́I͜T̷ SP̸R͘E͢A̕D́ ҉I͘T̸ ̨SṔREA͟D̢ I̧T ͡S̸PRE҉AD̕ I҉T͞ S͞P̷R͡EĄD͞ I͟T̵ SPR̨EAD͘ IT͜ S̶P͡REAḐ IT҉ ŞPR͠E͞A͞D ̷I͟T́ ͡S̶P̷REA͝D ͠IT͏ ̷SPR͠EA̛D ̵ĮT̢ ̶"
+	}
+	"class_void"
+	{
+		"en"		"Lost Soul"
+	}
+	"desc_void"
+	{
+		"en"		"Now what do we do?"
+	}
+	"train_void"
+	{
+		"en"		"Now what do we do?"
+	}
 
 	// Weapon Phrases
 
