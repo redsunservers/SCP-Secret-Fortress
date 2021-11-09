@@ -69,7 +69,7 @@ public void SCP096_OnDeath(int client, Event event)
 	if(Client[client].Extra2 == 1)
 	{
 		GiveAchievement(Achievement_DeathEnrage, client);
-		StopSound(client, SNDCHAN_VOICE, SoundEnrage);
+		StopSound(client, SNDCHAN_AUTO, SoundEnrage);
 	}
 
 	if(GetEntityFlags(client) & FL_ONGROUND)
@@ -178,16 +178,6 @@ public bool SCP096_DoorWalk(int client, int entity)
 	return true;
 }
 
-public bool SCP096_OnVoice(int client)
-{
-	//Prevent using voice while enraged to cancel enraged sound
-	if (Client[client].Extra2)
-		return true;
-	
-	//Otherwise use default stuff, like opening doors
-	return Classes_DefaultVoice(client);
-}
-
 public void SCP096_OnButton(int client, int button)
 {
 	float engineTime = GetEngineTime();
@@ -236,7 +226,7 @@ public void SCP096_OnButton(int client, int button)
 
 				TF2_StunPlayer(client, RageWinddown, 0.9, TF_STUNFLAG_SLOWDOWN);
 				TF2_RemoveCondition(client, TFCond_CritCola);
-				StopSound(client, SNDCHAN_VOICE, SoundEnrage);
+				StopSound(client, SNDCHAN_AUTO, SoundEnrage);
 
 				bool another096;
 				for(int i=1; i<=MaxClients; i++)
@@ -412,7 +402,7 @@ static void TriggerShyGuy(int client, int target, bool full)
 			Client[client].Extra2 = 1;
 			Client[client].Disarmer = 1;
 			TF2_StunPlayer(client, RageWarmup-2.0, 0.9, TF_STUNFLAG_BONKSTUCK|TF_STUNFLAG_NOSOUNDOREFFECT);
-			EmitSoundToAll2(SoundEnrage, client, SNDCHAN_VOICE, SNDLEVEL_SCREAMING, _, _, _, client);
+			EmitSoundToAll2(SoundEnrage, client, SNDCHAN_AUTO, SNDLEVEL_SCREAMING, _, _, _, client);
 			if(!full)
 				Config_DoReaction(target, "trigger096");
 		}
