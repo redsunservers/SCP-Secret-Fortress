@@ -178,6 +178,16 @@ public bool SCP096_DoorWalk(int client, int entity)
 	return true;
 }
 
+public bool SCP096_OnVoice(int client)
+{
+	//Prevent using voice while enraged to cancel enraged sound
+	if (Client[client].Extra2)
+		return true;
+	
+	//Otherwise use default stuff, like opening doors
+	return Classes_DefaultVoice(client);
+}
+
 public void SCP096_OnButton(int client, int button)
 {
 	float engineTime = GetEngineTime();
