@@ -1359,7 +1359,7 @@ public bool Trace_WallsOnly(int entity, int mask)
 public bool Trace_DoorOnly(int entity, int mask)
 {
 	static char buffer[16];
-	return (GetEntityClassname(entity, buffer, sizeof(buffer)) && !StrContains(buffer, "func_door"));
+	return (GetEntityClassname(entity, buffer, sizeof(buffer)) && (!StrContains(buffer, "func_door") || StrEqual(buffer, "func_movelinear")));
 }
 
 public bool Trace_OnlyHitWorld(int entity, int mask)
@@ -1400,8 +1400,15 @@ public bool Resize_TracePlayersAndBuildings(int entity, int contentsMask, any da
 	{
 		static char classname[32];
 		GetEntityClassname(entity, classname, sizeof(classname));
-		if(!StrContains(classname, "obj_") || !StrContains(classname, "prop_dynamic") || !StrContains(classname, "func_door") || StrEqual(classname, "func_physbox") || StrEqual(classname, "func_breakable"))
+		if(!StrContains(classname, "obj_")
+			|| !StrContains(classname, "prop_dynamic")
+			|| !StrContains(classname, "func_door")
+			|| StrEqual(classname, "func_movelinear")
+			|| StrEqual(classname, "func_physbox")
+			|| StrEqual(classname, "func_breakable"))
+		{
 			ResizeTraceFailed = true;
+		}
 	}
 	return false;
 }
