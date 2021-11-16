@@ -321,18 +321,18 @@
 			}
 			"CBasePlayer::EquipWearable"
 			{
-				"linux"		"432"
-				"windows"	"431"
+				"linux"		"435"
+				"windows"	"434"
 			}
 			"CBasePlayer::ForceRespawn"
 			{
-				"linux"		"331"
-				"windows"	"330"
+				"linux"		"334"
+				"windows"	"333"
 			}
 			"CBasePlayer::WantsLagCompensationOnEntity"
 			{
-				"linux"		"329"
-				"windows"	"328"
+				"linux"		"332"
+				"windows"	"331"
 			}
 			"CTeamplayRoundBasedRules::RoundRespawn"
 			{
