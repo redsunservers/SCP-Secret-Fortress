@@ -321,18 +321,18 @@
 			}
 			"CBasePlayer::EquipWearable"
 			{
-				"linux"		"432"
-				"windows"	"431"
+				"linux"		"435"
+				"windows"	"434"
 			}
 			"CBasePlayer::ForceRespawn"
 			{
-				"linux"		"331"
-				"windows"	"330"
+				"linux"		"334"
+				"windows"	"333"
 			}
 			"CBasePlayer::WantsLagCompensationOnEntity"
 			{
-				"linux"		"329"
-				"windows"	"328"
+				"linux"		"332"
+				"windows"	"331"
 			}
 			"CTeamplayRoundBasedRules::RoundRespawn"
 			{
@@ -346,13 +346,13 @@
 			}
 			"CTeam::AddPlayer"
 			{
-				"linux"		"203"
-				"windows"	"202"
+				"linux"		"206"
+				"windows"	"205"
 			}
 			"CTeam::RemovePlayer"
 			{
-				"linux"		"204"
-				"windows"	"203"
+				"linux"		"207"
+				"windows"	"206"
 			}
 		}
 		"Addresses"
