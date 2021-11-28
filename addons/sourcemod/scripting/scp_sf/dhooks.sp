@@ -1,7 +1,9 @@
 static DynamicDetour AllowedToHealTarget;
 static DynamicHook RoundRespawn;
+static DynamicHook ShouldCollide;
 static DynamicHook ForceRespawn;
 static DynamicHook WantsLagCompensationOnEntity;
+static int ShouldCollidePreHook[MAXTF2PLAYERS];
 static int ForceRespawnPreHook[MAXTF2PLAYERS];
 static int ForceRespawnPostHook[MAXTF2PLAYERS];
 static int WantsLagCompensationOnEntityPreHook[MAXTF2PLAYERS];
@@ -44,7 +46,11 @@ void DHook_Setup(GameData gamedata)
 	RoundRespawn = DynamicHook.FromConf(gamedata, "CTeamplayRoundBasedRules::RoundRespawn");
 	if(!RoundRespawn)
 		LogError("[Gamedata] Could not find CTeamplayRoundBasedRules::RoundRespawn");
-
+	
+	ShouldCollide = DynamicHook.FromConf(gamedata, "CBaseEntity::ShouldCollide");
+	if(!ShouldCollide)
+		LogError("[Gamedata] Could not find CBaseEntity::ShouldCollide");
+	
 	ForceRespawn = DynamicHook.FromConf(gamedata, "CBasePlayer::ForceRespawn");
 	if(!ForceRespawn)
 		LogError("[Gamedata] Could not find CBasePlayer::ForceRespawn");
@@ -75,6 +81,11 @@ static void DHook_CreateDetour(GameData gamedata, const char[] name, DHookCallba
 
 void DHook_HookClient(int client)
 {
+	if(ShouldCollide)
+	{
+		ShouldCollidePreHook[client] = ShouldCollide.HookEntity(Hook_Pre, client, DHook_ShouldCollidePre);
+	}
+	
 	if(ForceRespawn)
 	{
 		ForceRespawnPreHook[client] = ForceRespawn.HookEntity(Hook_Pre, client, DHook_ForceRespawnPre);
@@ -90,6 +101,7 @@ void DHook_HookClient(int client)
 
 void DHook_UnhookClient(int client)
 {
+	DynamicHook.RemoveHook(ShouldCollidePreHook[client]);
 	DynamicHook.RemoveHook(ForceRespawnPreHook[client]);
 	DynamicHook.RemoveHook(ForceRespawnPostHook[client]);
 	DynamicHook.RemoveHook(WantsLagCompensationOnEntityPreHook[client]);
@@ -122,6 +134,18 @@ public MRESReturn DHook_AllowedToHealTarget(int weapon, DHookReturn ret, DHookPa
 
 	ret.Value = false;
 	return MRES_ChangedOverride;
+}
+
+public MRESReturn DHook_ShouldCollidePre(int client, DHookReturn ret, DHookParam param)
+{
+	int collisiongroup = param.Get(1);
+	if(collisiongroup == COLLISION_GROUP_PLAYER_MOVEMENT)
+	{
+		ret.Value = false;
+		return MRES_Supercede;
+	}
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHook_ForceRespawnPre(int client)

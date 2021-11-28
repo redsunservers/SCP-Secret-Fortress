@@ -111,6 +111,24 @@
 					}
 				}
 			}
+			"CBaseEntity::ShouldCollide"
+			{
+				"offset"	"CBaseEntity::ShouldCollide"
+				"hooktype"	"entity"
+				"return"	"bool"
+				"this"		"entity"
+				"arguments"
+				{
+					"collisionGroup"
+					{
+						"type"	"int"
+					}
+					"contentsMask"
+					{
+						"type"	"int"
+					}
+				}
+			}
 			"CBasePlayer::ForceRespawn"
 			{
 				"offset"	"CBasePlayer::ForceRespawn"
@@ -318,6 +336,11 @@
 			{
 				"linux" 	"6"
 				"windows" 	"5"
+			}
+			"CBaseEntity::ShouldCollide"
+			{
+				"linux"		"17"
+				"windows"	"16"
 			}
 			"CBasePlayer::EquipWearable"
 			{
