@@ -9,7 +9,6 @@ void SDKHook_HookClient(int client)
 	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 	SDKHook(client, SDKHook_OnTakeDamageAlive, OnTakeDamageAlive);
 	SDKHook(client, SDKHook_SetTransmit, OnTransmit);
-	SDKHook(client, SDKHook_ShouldCollide, OnShouldCollide);
 	SDKHook(client, SDKHook_WeaponSwitchPost, OnWeaponSwitch);
 	SDKHook(client, SDKHook_PostThink, OnPostThink);
 	SDKHook(client, SDKHook_PostThinkPost, OnPostThinkPost);
@@ -328,14 +327,6 @@ public Action OnPipeSpawned(int entity)
 public Action OnPipeTouch(int entity, int client)
 {
 	return IsValidClient(client) ? Plugin_Handled : Plugin_Continue;
-}
-
-public bool OnShouldCollide(int client, int collisiongroup, int contentsmask, bool original)
-{
-	if(collisiongroup == COLLISION_GROUP_PLAYER_MOVEMENT)
-		return false;
-
-	return original;
 }
 
 public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
