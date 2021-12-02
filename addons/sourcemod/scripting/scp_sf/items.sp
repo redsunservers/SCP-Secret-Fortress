@@ -1655,8 +1655,7 @@ public bool Items_AdrenalineButton(int client, int weapon, int &buttons, int &ho
 	{
 		holding = IN_ATTACK;
 		RemoveAndSwitchItem(client, weapon);
-		StartHealingTimer(client, 0.334, 1, 60, true);
-		TF2_AddCondition(client, TFCond_DefenseBuffNoCritBlock, 20.0, client);
+		TF2_AddCondition(client, TFCond_DefenseBuffed, 20.0, client);
 		Client[client].Extra3 = GetEngineTime()+20.0;
 		FadeClientVolume(client, 0.3, 2.5, 17.5, 2.5);
 	}
@@ -1716,10 +1715,6 @@ public bool Items_500Button(int client, int weapon, int &buttons, int &holding)
 		SpawnPlayerPickup(client, "item_healthkit_full", true);
 		StartHealingTimer(client, 0.334, 1, 36, true);
 		Client[client].Extra2 = 0;
-
-		ClassEnum class;
-		if(Classes_GetByIndex(Client[client].Class, class) && class.Group==1)
-			Gamemode_GiveTicket(1, 2);
 	}
 	return false;
 }
@@ -1748,10 +1743,6 @@ public bool Items_207Button(int client, int weapon, int &buttons, int &holding)
 			StartHealingTimer(client, 2.5, -1, 250, _, true);
 			Client[client].Extra2++;
 		}
-
-		ClassEnum class;
-		if(Classes_GetByIndex(Client[client].Class, class) && class.Group==1)
-			Gamemode_GiveTicket(1, 2);
 	}
 	return false;
 }
@@ -1764,10 +1755,6 @@ public bool Items_018Button(int client, int weapon, int &buttons, int &holding)
 		RemoveAndSwitchItem(client, weapon);
 		TF2_AddCondition(client, TFCond_CritCola, 6.0);
 		TF2_AddCondition(client, TFCond_RestrictToMelee, 6.0);
-
-		ClassEnum class;
-		if(Classes_GetByIndex(Client[client].Class, class) && class.Group==1)
-			Gamemode_GiveTicket(1, 2);
 	}
 	return false;
 }
@@ -1790,10 +1777,6 @@ public bool Items_268Button(int client, int weapon, int &buttons, int &holding)
 		delay[client] = engineTime+90.0;
 		TF2_AddCondition(client, TFCond_Stealthed, 15.0);
 		ClientCommand(client, "playgamesound misc/halloween/spell_stealth.wav");
-
-		ClassEnum class;
-		if(Classes_GetByIndex(Client[client].Class, class) && class.Group==1)
-			Gamemode_GiveTicket(1, 1);
 	}
 	return false;
 }

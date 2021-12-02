@@ -905,7 +905,7 @@ public bool Classes_DeathScp(int client, Event event)
 		}
 
 		if(attackerClass.Group==2 || assisterClass.Group==2)
-			Gamemode_GiveTicket(2, 4);
+			Gamemode_GiveTicket(2, 5);
 	}
 	else
 	{
@@ -957,6 +957,12 @@ public void Classes_KillChaos(int client, int victim)
 		if(Classes_GetByIndex(Client[client].Class, class))
 			Gamemode_GiveTicket(class.Group, 1);
 	}
+	else
+	{
+		ClassEnum class;
+		if(Classes_GetByIndex(Client[victim].Class, class) && class.Group==2 && Classes_GetByIndex(Client[client].Class, class))
+			Gamemode_GiveTicket(class.Group, 1);
+	}
 }
 
 public void Classes_KillSci(int client, int victim)
@@ -967,8 +973,17 @@ public void Classes_KillSci(int client, int victim)
 
 public void Classes_KillMtf(int client, int victim)
 {
-	if(Classes_GetByName("dboi")==Client[victim].Class && !Items_IsHoldingWeapon(victim))
-		Client[client].BadKills++;
+	if(Classes_GetByName("dboi") == Client[victim].Class)
+	{
+		if(!Items_IsHoldingWeapon(victim))
+			Client[client].BadKills++;
+	}
+	else if(!GetRandomInt(0, 3))
+	{
+		ClassEnum class;
+		if(Classes_GetByIndex(Client[victim].Class, class) && class.Group==1 && Classes_GetByIndex(Client[client].Class, class))
+			Gamemode_GiveTicket(class.Group, 1);
+	}
 }
 
 public Action Classes_TakeDamageHuman(int client, int attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)

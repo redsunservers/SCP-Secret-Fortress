@@ -1,5 +1,5 @@
-static const int HealthKill = 300;
-static const int HealthSplit = 2500;
+static const int HealthKill = 450;
+static const int HealthSplit = 3000;
 
 static int Index457;
 
@@ -47,12 +47,13 @@ public void SCP457_OnKill(int client, int victim)
 	int newHealth = health+HealthKill;
 	if(newHealth >= HealthSplit)
 	{
-		newHealth -= 1250;
+		newHealth -= 1500;
 
 		DataPack pack;
 		CreateDataTimer(0.5, SCP457_Timer, pack, TIMER_FLAG_NO_MAPCHANGE);
 		pack.WriteCell(GetClientUserId(client));
 		pack.WriteCell(GetClientUserId(victim));
+		pack.WriteCell(newHealth);
 	}
 
 	ApplyHealEvent(client, newHealth-health);
@@ -78,8 +79,8 @@ public bool SCP457_OnPickup(int client, int entity)
 	GetEntityClassname(entity, buffer, sizeof(buffer));
 	if(StrEqual(buffer, "tf_dropped_weapon"))
 	{
-		ApplyHealEvent(client, 100);
-		SetEntityHealth(client, GetClientHealth(client)+100);
+		ApplyHealEvent(client, 50);
+		SetEntityHealth(client, GetClientHealth(client)+50);
 		RemoveEntity(entity);
 		return true;
 	}
@@ -133,6 +134,8 @@ public Action SCP457_Timer(Handle timer, DataPack pack)
 			Client[victim].Class = Index457;
 			TF2_RespawnPlayer(victim);
 			Client[victim].Floor = Client[client].Floor;
+
+			SetEntityHealth(victim, pack.ReadCell());
 
 			SetEntProp(victim, Prop_Send, "m_bDucked", true);
 			SetEntityFlags(victim, GetEntityFlags(victim)|FL_DUCKING);

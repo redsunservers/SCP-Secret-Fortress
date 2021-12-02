@@ -1,10 +1,17 @@
-static const float SpeedExtra = 50.0;
-static const float GlowRange = 800.0;
+static const int HealthMax = 1800;	// Max standard health
+static const int HealthExtra = 600;	// Max regenerable health
+
+static const float SpeedExtra = 50.0;	// Extra speed while low health
+static const float GlowRange = 800.0;	// Max outline range
+
+static int Health[MAXTF2PLAYERS];
 
 public bool SCP939_Create(int client)
 {
 	Classes_VipSpawn(client);
 
+	Health[client] = HealthMax;
+	
 	int account = GetSteamAccountID(client, false);
 
 	int weapon = SpawnWeapon(client, "tf_weapon_knife", 461, 70, 13, "2 ; 1.625 ; 15 ; 0 ; 252 ; 0.3 ; 4328 ; 1", false);
@@ -39,12 +46,24 @@ public void SCP939_OnButton(int client, int button)
 	Client[client].CurrentClass = TFClass_Spy;
 }
 
+public void SCP939_OnMaxHealth(int client, int &health)
+{
+	health = Health[client] + HealthExtra;
+
+	int current = GetClientHealth(client);
+	if(current > health)
+	{
+		SetEntityHealth(client, health);
+	}
+	else if(current < Health[client]-HealthExtra)
+	{
+		Health[client] = current+HealthExtra;
+	}
+}
+
 public void SCP939_OnSpeed(int client, float &speed)
 {
-	int health;
-	OnGetMaxHealth(client, health);
-	if(health)
-		speed += (1.0-(GetClientHealth(client)/health))*SpeedExtra;
+	speed += (1.0-(Health[client]/HealthMax))*SpeedExtra;
 }
 
 public Action SCP939_OnDealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
