@@ -346,17 +346,23 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 			attacker = GetOwnerLoop(attacker);
 	}
 
+	bool changed;
 	if(validAttacker && victim!=attacker)
 	{
-		if(!CvarFriendlyFire.BoolValue && !IsFakeClient(victim) && IsFriendly(Client[victim].Class, Client[attacker].Class))
-			return Plugin_Handled;
+		if(IsFriendly(Client[victim].Class, Client[attacker].Class))
+		{
+			if(!CvarFriendlyFire.BoolValue && !IsFakeClient(victim))
+				return Plugin_Handled;
+			
+			damage *= 0.4;
+			changed = true;
+		}
 
 		int health = GetClientHealth(victim);
 		if(health>25 && (health-damage)<26)
 			CreateTimer(3.0, Timer_MyBlood, GetClientUserId(victim), TIMER_FLAG_NO_MAPCHANGE);
 	}
 
-	bool changed;
 	Action action;
 	if(validAttacker)
 	{

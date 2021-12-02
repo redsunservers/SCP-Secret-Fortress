@@ -43,7 +43,7 @@ void DisplayCredits(int i)
 }
 
 #define MAJOR_REVISION	"3"
-#define MINOR_REVISION	"0"
+#define MINOR_REVISION	"1"
 #define STABLE_REVISION	"0"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
@@ -206,6 +206,7 @@ ClientEnum Client[MAXTF2PLAYERS];
 #include "scp_sf/scps/939.sp"
 //#include "scp_sf/scps/sjm08.sp"
 
+#include "scp_sf/maps/crypto_forest.sp"
 #include "scp_sf/maps/frostbite.sp"
 #include "scp_sf/maps/ikea.sp"
 #include "scp_sf/maps/szf.sp"

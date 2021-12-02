@@ -4,7 +4,6 @@ static const char SoundEnrage[] = "freak_fortress_2/scp096/fullrage.mp3";
 
 static const int HealthMax = 3000;	// Max standard health
 static const int HealthExtra = 700;	// Max regenerable health
-static const int HealthRage = 140;		// Extra health per target in rage
 
 static const float SpeedRage = 2.1;
 
@@ -35,7 +34,7 @@ public bool SCP096_Create(int client)
 
 public void SCP096_OnMaxHealth(int client, int &health)
 {
-	health = Client[client].Extra1 + HealthExtra + (Client[client].Disarmer*HealthRage);
+	health = Client[client].Extra1 + HealthExtra;
 
 	int current = GetClientHealth(client);
 	if(current > health)
@@ -149,7 +148,7 @@ public bool SCP096_OnSeePlayer(int client, int victim)
 
 public bool SCP096_OnGlowPlayer(int client, int victim)
 {
-	return (Client[client].Extra2==2 && Triggered[victim]>1);
+	return (Client[client].Extra2 && Triggered[victim]>1);
 }
 
 public int SCP096_OnKeycard(int client, AccessEnum access)
@@ -196,7 +195,7 @@ public void SCP096_OnButton(int client, int button)
 				TF2_AddCondition(client, TFCond_CritCola, 99.9);
 
 				TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
-				int weapon = SpawnWeapon(client, "tf_weapon_sword", 310, 100, 13, "2 ; 11 ; 6 ; 0.95 ; 28 ; 3 ; 252 ; 0 ; 326 ; 2 ; 4328 ; 1", false);
+				int weapon = SpawnWeapon(client, "tf_weapon_sword", 310, 100, 13, "2 ; 11 ; 6 ; 0.95 ; 28 ; 3 ; 252 ; 0 ; 326 ; 2 ; 412 ; 0.75 ; 4328 ; 1", false);
 				if(weapon > MaxClients)
 				{
 					ApplyStrangeRank(weapon, 16);
@@ -388,8 +387,6 @@ static void TriggerShyGuy(int client, int target, bool full)
 		}
 		case 2:
 		{
-			if(++Client[client].Disarmer < 7)
-				Client[client].Extra3 += RageExtra;
 		}
 		default:
 		{
@@ -407,13 +404,11 @@ static void TriggerShyGuy(int client, int target, bool full)
 				Config_DoReaction(target, "trigger096");
 		}
 	}
-
-	SetEntityHealth(client, GetClientHealth(client)+HealthRage);
 }
 
 static void GiveMelee(int client)
 {
-	int weapon = SpawnWeapon(client, "tf_weapon_bottle", 1123, 1, 13, "1 ; 0 ; 252 ; 0.6", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_bottle", 1123, 1, 13, "1 ; 0 ; 252 ; 0.6 ; 412 ; 0.666667", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 15);

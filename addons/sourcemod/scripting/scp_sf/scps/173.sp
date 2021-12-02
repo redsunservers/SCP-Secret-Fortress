@@ -5,7 +5,8 @@ static const int HealthMax = 4000;	// Max standard health
 static const int HealthExtra = 3000;	// Max regenerable health
 static const int HealthKill = 300;	// Health gain on stunned kill
 
-static const float DistanceMax = 750.0;	// Teleport distance
+static const float DistanceMax = 1250.0;	// Teleport distance while in speed
+static const float DistanceMin = 750.0;	// Teleport distance
 
 static int Health[MAXTF2PLAYERS];
 static int ModelRef[MAXTF2PLAYERS] = {INVALID_ENT_REFERENCE, ...};
@@ -193,13 +194,11 @@ public void SCP173_OnButton(int client, int button)
 					SetEntProp(client, Prop_Send, "m_bRageDraining", false);
 					SetEntPropFloat(client, Prop_Send, "m_flRageMeter", 0.0);
 				}
-
-				if(TF2_IsPlayerInCondition(client, TFCond_SpeedBuffAlly))
-					TF2_RemoveCondition(client, TFCond_SpeedBuffAlly);
 			}
 
 			BlinkExpire[client] = engineTime + 3.0;
-			BlinkCharge[client] += 30.0 / (players + 2.0);
+			BlinkCharge[client] += 5.6;
+			
 			if(BlinkCharge[client] > 100.0)
 				BlinkCharge[client] = 100.0;
 		}
@@ -278,7 +277,7 @@ public void SCP173_OnButton(int client, int button)
 	{
 		GetClientEyePosition(client, pos1);
 		GetClientEyeAngles(client, ang1);
-		if(DPT_TryTeleport(client, DistanceMax, pos1, ang1, pos2))
+		if(DPT_TryTeleport(client, TF2_IsPlayerInCondition(client, TFCond_SpeedBuffAlly) ? DistanceMax : DistanceMin, pos1, ang1, pos2))
 		{
 			if(button & IN_ATTACK2)
 			{
