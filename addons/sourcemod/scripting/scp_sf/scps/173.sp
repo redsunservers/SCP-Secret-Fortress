@@ -42,7 +42,7 @@ public bool SCP173_Create(int client)
 		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
 	}
 
-	weapon = SpawnWeapon(client, "tf_weapon_fists", 593, 90, 13, "6 ; 0.4 ; 15 ; 0 ; 138 ; 11 ; 236 ; 1 ; 252 ; 0 ; 275 ; 1 ; 362 ; 1 ; 698 ; 1", false);
+	weapon = SpawnWeapon(client, "tf_weapon_fists", 593, 90, 13, "6 ; 0.4 ; 15 ; 0 ; 138 ; 11 ; 236 ; 1 ; 252 ; 0 ; 275 ; 1 ; 362 ; 1 ; 412 ; 0.8 ; 698 ; 1", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 17);
