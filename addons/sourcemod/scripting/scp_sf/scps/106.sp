@@ -12,7 +12,7 @@ public bool SCP106_Create(int client)
 	Client[client].Pos[2] = 0.0;
 	Client[client].Extra2 = 0;
 
-	int weapon = SpawnWeapon(client, "tf_weapon_shovel", 649, 60, 13, "1 ; 0.769231 ; 28 ; 0 ; 66 ; 0.1 ; 252 ; 0.4", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_shovel", 649, 60, 13, "1 ; 0.769231 ; 28 ; 0 ; 66 ; 0.1 ; 252 ; 0.4 ; 412 ; 0.8", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 12);

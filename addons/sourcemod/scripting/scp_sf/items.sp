@@ -1482,7 +1482,7 @@ public Action Items_FragTimer(Handle timer, int ref)
 			DispatchKeyValue(explosion, "iRadiusOverride", "350");
 			//DispatchKeyValue(explosion, "flags", "516");
 
-			SetEntPropEnt(explosion, Prop_Send, "m_hOwnerEntity", client);
+			SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", client);
 			DispatchSpawn(explosion);
 
 			//CreateTimer(3.0, Timer_RemoveEntity, AttachParticle(explosion, "Explosion_CoreFlash", _, false), TIMER_FLAG_NO_MAPCHANGE);
@@ -1580,7 +1580,7 @@ public Action Items_FlashTimer(Handle timer, int ref)
 			DispatchKeyValue(i, "iMagnitude", "0");
 			DispatchKeyValue(i, "flags", "532");
 
-			SetEntPropEnt(i, Prop_Send, "m_hOwnerEntity", GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"));
+			SetEntPropEnt(i, Prop_Data, "m_hOwnerEntity", GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"));
 			DispatchSpawn(i);
 
 			//CreateTimer(2.0, Timer_RemoveEntity, AttachParticle(i, "Explosions_MA_Flash_1", _, false), TIMER_FLAG_NO_MAPCHANGE);
