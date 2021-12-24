@@ -50,6 +50,9 @@ static Function GameCondition;
 static Function GameRoundStart;
 static StringMap GameInfo;
 
+static int PlayerQueue[MAXTF2PLAYERS];
+static int MaxQueueIndex;
+
 static ArrayList Presets;
 static ArrayList SetupList;
 
@@ -293,10 +296,31 @@ bool Gamemode_RoundStart()
 	}
 
 	ArrayList players = new ArrayList();
-	for(int client=GameSortSeed; ; client++)
+
+	// Reduce everyone's queue index by 1
+	// Client with the index 0 will get maxIndex instead
+	int firstIndexClient;
+	for (int client = 1; client <= MaxClients; client++)
 	{
-		if(client >= MAXTF2PLAYERS)
-			client = 0;
+		if (IsValidClient(client))
+		{
+			if (Client[client].QueueIndex > 0)
+			{
+				--Client[client].QueueIndex;
+				PlayerQueue[Client[client].QueueIndex] = client;
+			}
+			else if (Client[client].QueueIndex == 0)
+			{
+				Client[client].QueueIndex = MaxQueueIndex;
+				firstIndexClient = client;
+			}
+		}
+	}
+	PlayerQueue[MaxQueueIndex] = firstIndexClient;
+
+	for (int i = 0; i < MAXTF2PLAYERS; i++)
+	{
+		int client = PlayerQueue[i];
 
 		if(IsValidClient(client) && GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
 		{
@@ -307,9 +331,6 @@ bool Gamemode_RoundStart()
 		{
 			Client[client].Class = 0;
 		}
-
-		if(client == (GameSortSeed-1))
-			break;
 	}
 
 	int length = players.Length;
@@ -332,6 +353,7 @@ bool Gamemode_RoundStart()
 		static char buffer[16];
 		if(Classes_GetByIndex(Client[client].Class, class))
 		{
+			//LogMessage("(%i|%i) %N: %s", client, Client[client].QueueIndex, client, class.Name);
 			strcopy(buffer, sizeof(buffer), class.Name);
 			switch(Forward_OnClassPre(client, ClassSpawn_RoundStart, buffer, sizeof(buffer)))
 			{
@@ -466,6 +488,44 @@ void Gamemode_RoundEnd()
 	{
 		KillTimer(WaveTimer);
 		WaveTimer = null;
+	}
+}
+
+int Gamemode_AssignQueueIndex(int client)
+{
+	if (Client[client].QueueIndex != -1)
+	{
+		LogError("%N (%i) already has a queue index %i", client, client, Client[client].QueueIndex);
+	}
+	else
+	{
+		++MaxQueueIndex;
+
+		Client[client].QueueIndex = MaxQueueIndex;
+		PlayerQueue[MaxQueueIndex] = client;
+	}
+
+	return Client[client].QueueIndex;
+}
+
+void Gamemode_UnassignQueueIndex(int client)
+{
+	if (Client[client].QueueIndex == -1)
+	{
+		LogError("Attempting to unassign queue index from %N (%i) with no queue index", client, client);
+	}
+	else
+	{
+		--MaxQueueIndex;
+
+		for (int i = 1; i <= MaxClients; i++)
+		{
+			if (IsValidClient(i) && Client[i].QueueIndex > Client[client].QueueIndex)
+				--Client[i].QueueIndex;
+		}
+
+		PlayerQueue[Client[client].QueueIndex] = 0;
+		Client[client].QueueIndex = -1;
 	}
 }
 

@@ -126,6 +126,7 @@ enum struct ClientEnum
 	int Class;
 	int Colors[4];
 	int ColorBlind[3];
+	int QueueIndex;
 
 	bool IsVip;
 	bool CanTalkTo[MAXTF2PLAYERS];
@@ -471,6 +472,7 @@ public void OnPluginEnd()
 public void OnClientPutInServer(int client)
 {
 	Client[client] = Client[0];
+	Gamemode_AssignQueueIndex(client);
 	if(AreClientCookiesCached(client))
 		OnClientCookiesCached(client);
 
@@ -1783,6 +1785,7 @@ public Action Command_ForceAmmo(int client, int args)
 
 public void OnClientDisconnect(int client)
 {
+	Gamemode_UnassignQueueIndex(client);
 	SZF_DropItem(client);
 	CreateTimer(1.0, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
 }
