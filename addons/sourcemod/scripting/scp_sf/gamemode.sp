@@ -44,11 +44,14 @@ static int TeamColors[][] =
 	{ 139, 0, 0, 255 }
 };
 
-static int GameSortSeed;
+static int PlayerArrayOffset;
 static Handle WaveTimer;
 static Function GameCondition;
 static Function GameRoundStart;
 static StringMap GameInfo;
+
+static int PlayerQueue[MAXTF2PLAYERS];
+static int MaxQueueIndex = -1;
 
 static ArrayList Presets;
 static ArrayList SetupList;
@@ -275,30 +278,57 @@ bool Gamemode_RoundStart()
 	}
 
 	// This was done to prevent RNG just being funky against repeating classes
-	if(!GameSortSeed)
+	if(!PlayerArrayOffset)
 	{
-		GameSortSeed = GetRandomInt(1, MaxClients);
-	}
-	else
-	{
-		int players;
-		for(int client=1; client<=MaxClients; client++)
+		int players = 0;
+
+		for (int client = 1; client <= MaxClients; client++)
 		{
 			if(IsClientInGame(client) && GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
 				players++;
 		}
+		
+		PlayerArrayOffset = GetRandomInt(0, players);
+	}
+	else
+	{
+		PlayerArrayOffset = 1;
+	}
 
-		if(++GameSortSeed > players)
-			GameSortSeed = 1;
+	// Shift queue indices
+	int start = PlayerArrayOffset;
+	int[] clientBuffer = new int[MaxClients]; // We'll add those clients to the end of the queue
+	for(int i = 0, j; PlayerQueue[i] != 0; i++)
+	{
+		if(i < start)
+		{
+			clientBuffer[j++] = PlayerQueue[i];
+		}
+		else
+		{
+			int client = PlayerQueue[i];
+			Client[client].QueueIndex = i - start;
+			PlayerQueue[Client[client].QueueIndex] = client;
+			PlayerQueue[i] = 0;
+		}
+	}
+
+	// Add clients from clientBuffer back to the queue;
+	for(int i = MaxQueueIndex - (PlayerArrayOffset - 1), j; i <= MaxQueueIndex; i++)
+	{
+		int client = clientBuffer[j++];
+		Client[client].QueueIndex = i;
+		PlayerQueue[Client[client].QueueIndex] = client;
 	}
 
 	ArrayList players = new ArrayList();
-	for(int client=GameSortSeed; ; client++)
-	{
-		if(client >= MAXTF2PLAYERS)
-			client = 0;
 
-		if(IsValidClient(client) && GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
+	// Fill the players ArrayList
+	for(int i = 0; PlayerQueue[i] != 0; i++)
+	{
+		int client = PlayerQueue[i];
+
+		if(GetClientTeam(client)>view_as<int>(TFTeam_Spectator))
 		{
 			Client[client].NextSongAt = 0.0;
 			players.Push(client);
@@ -307,9 +337,6 @@ bool Gamemode_RoundStart()
 		{
 			Client[client].Class = 0;
 		}
-
-		if(client == (GameSortSeed-1))
-			break;
 	}
 
 	int length = players.Length;
@@ -466,6 +493,44 @@ void Gamemode_RoundEnd()
 	{
 		KillTimer(WaveTimer);
 		WaveTimer = null;
+	}
+}
+
+int Gamemode_AssignQueueIndex(int client)
+{
+	if (Client[client].QueueIndex != -1)
+	{
+		LogError("%N (%i) already has a queue index %i", client, client, Client[client].QueueIndex);
+	}
+	else
+	{
+		++MaxQueueIndex;
+
+		Client[client].QueueIndex = MaxQueueIndex;
+		PlayerQueue[MaxQueueIndex] = client;
+	}
+
+	return Client[client].QueueIndex;
+}
+
+void Gamemode_UnassignQueueIndex(int client)
+{
+	if (Client[client].QueueIndex == -1)
+	{
+		LogError("Attempting to unassign queue index from %N (%i) with no queue index", client, client);
+	}
+	else
+	{
+		--MaxQueueIndex;
+
+		for (int i = 1; i <= MaxClients; i++)
+		{
+			if (IsValidClient(i) && Client[i].QueueIndex > Client[client].QueueIndex)
+				--Client[i].QueueIndex;
+		}
+
+		PlayerQueue[Client[client].QueueIndex] = 0;
+		Client[client].QueueIndex = -1;
 	}
 }
 
