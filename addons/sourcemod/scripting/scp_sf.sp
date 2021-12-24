@@ -245,6 +245,7 @@ public void OnPluginStart()
 	Client[0].ColorBlind[0] = -1;
 	Client[0].ColorBlind[1] = -1;
 	Client[0].ColorBlind[2] = -1;
+	Client[0].QueueIndex = -1;
 
 	ConVar_Setup();
 	SDKHook_Setup();
