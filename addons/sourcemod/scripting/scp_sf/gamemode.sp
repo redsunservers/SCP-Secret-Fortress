@@ -278,7 +278,7 @@ bool Gamemode_RoundStart()
 	}
 
 	// This was done to prevent RNG just being funky against repeating classes
-	if(PlayerArrayOffset != -1)
+	if(PlayerArrayOffset == -1)
 	{
 		int players = 0;
 
