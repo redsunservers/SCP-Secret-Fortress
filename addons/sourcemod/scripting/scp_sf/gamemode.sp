@@ -44,7 +44,7 @@ static int TeamColors[][] =
 	{ 139, 0, 0, 255 }
 };
 
-static int PlayerArrayOffset;
+static int PlayerArrayOffset = -1;
 static Handle WaveTimer;
 static Function GameCondition;
 static Function GameRoundStart;
@@ -278,7 +278,7 @@ bool Gamemode_RoundStart()
 	}
 
 	// This was done to prevent RNG just being funky against repeating classes
-	if(!PlayerArrayOffset)
+	if(PlayerArrayOffset != -1)
 	{
 		int players = 0;
 
@@ -288,7 +288,7 @@ bool Gamemode_RoundStart()
 				players++;
 		}
 		
-		PlayerArrayOffset = GetRandomInt(1, players);
+		PlayerArrayOffset = GetRandomInt(0, players);
 	}
 	else
 	{
@@ -296,29 +296,32 @@ bool Gamemode_RoundStart()
 	}
 
 	// Shift queue indices
-	int start = PlayerArrayOffset;
-	int[] clientBuffer = new int[MaxClients]; // We'll add those clients to the end of the queue
-	for(int i = 0, j; PlayerQueue[i] != 0; i++)
+	if(PlayerArrayOffset > 0)
 	{
-		if(i < start)
+		int start = PlayerArrayOffset;
+		int[] clientBuffer = new int[MaxClients]; // We'll add those clients to the end of the queue
+		for(int i = 0, j; PlayerQueue[i] != 0; i++)
 		{
-			clientBuffer[j++] = PlayerQueue[i];
+			if(i < start)
+			{
+				clientBuffer[j++] = PlayerQueue[i];
+			}
+			else
+			{
+				int client = PlayerQueue[i];
+				Client[client].QueueIndex = i - start;
+				PlayerQueue[Client[client].QueueIndex] = client;
+				PlayerQueue[i] = 0;
+			}
 		}
-		else
-		{
-			int client = PlayerQueue[i];
-			Client[client].QueueIndex = i - start;
-			PlayerQueue[Client[client].QueueIndex] = client;
-			PlayerQueue[i] = 0;
-		}
-	}
 
-	// Add clients from clientBuffer back to the queue;
-	for(int i = MaxQueueIndex - (PlayerArrayOffset - 1), j; i <= MaxQueueIndex; i++)
-	{
-		int client = clientBuffer[j++];
-		Client[client].QueueIndex = i;
-		PlayerQueue[Client[client].QueueIndex] = client;
+		// Add clients from clientBuffer back to the queue;
+		for(int i = MaxQueueIndex - (PlayerArrayOffset - 1), j; i <= MaxQueueIndex; i++)
+		{
+			int client = clientBuffer[j++];
+			Client[client].QueueIndex = i;
+			PlayerQueue[Client[client].QueueIndex] = client;
+		}
 	}
 
 	ArrayList players = new ArrayList();
