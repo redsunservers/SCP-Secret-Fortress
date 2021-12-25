@@ -288,7 +288,7 @@ bool Gamemode_RoundStart()
 				players++;
 		}
 		
-		PlayerArrayOffset = GetRandomInt(0, players);
+		PlayerArrayOffset = GetRandomInt(1, players);
 	}
 	else
 	{
