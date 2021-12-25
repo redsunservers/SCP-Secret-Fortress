@@ -521,15 +521,20 @@ void Gamemode_UnassignQueueIndex(int client)
 	}
 	else
 	{
-		--MaxQueueIndex;
+		if (MaxQueueIndex != -1)
+			--MaxQueueIndex;
+
+		PlayerQueue[Client[client].QueueIndex] = 0;
 
 		for (int i = 1; i <= MaxClients; i++)
 		{
-			if (IsValidClient(i) && Client[i].QueueIndex > Client[client].QueueIndex)
+			if (Client[i].QueueIndex > Client[client].QueueIndex)
+			{
 				--Client[i].QueueIndex;
+				PlayerQueue[Client[i].QueueIndex] = i;
+			}
 		}
 
-		PlayerQueue[Client[client].QueueIndex] = 0;
 		Client[client].QueueIndex = -1;
 	}
 }
