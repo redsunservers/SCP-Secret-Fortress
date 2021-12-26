@@ -147,6 +147,7 @@ enum struct ClientEnum
 	int Disarmer;
 	int DownloadMode;
 	int BadKills;
+	int Kills;
 	int PreDamageWeapon;
 
 	float IdleAt;
@@ -1087,6 +1088,11 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	if(!client || !IsPlayerAlive(client))
 		return;
+	
+	// this is terrible, we need a count of currently alive vips (for HUD) on round start 
+	// but we can't do it on round start because players aren't fully spawned yet
+	// so just do it here instead...
+	Gamecode_CountVIPs();
 
 	ViewModel_Destroy(client);
 	SZF_DropItem(client, false);
@@ -1101,6 +1107,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	Client[client].WeaponClass = TFClass_Unknown;
 	if(Client[client].BadKills > 0)
 		Client[client].BadKills--;
+	Client[client].Kills = 0;
 
 	SetEntProp(client, Prop_Send, "m_bForcedSkin", false);
 	SetEntProp(client, Prop_Send, "m_nForcedSkin", 0);
@@ -1876,7 +1883,8 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 		{
 			int wep = EntRefToEntIndex(Client[client].PreDamageWeapon);
 			if(wep>MaxClients && GetEntProp(wep, Prop_Send, "m_iItemDefinitionIndex")==594)
-				GiveAchievement(Achievement_KillMirco, attacker);
+				GiveAchievement(Achievement_KillMirco, attacker);		
+			Client[attacker].Kills++;
 		}
 
 		Classes_OnKill(attacker, client);
@@ -2120,115 +2128,124 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 			}
 		}
 
-		if(class.Human && !IsSpec(client))
+		if(!IsSpec(client))
 		{
-			if(DisarmCheck(client))
+			if (class.Human)
 			{
-				Client[client].AloneIn = FAR_FUTURE;
-				if(showHud)
+				if(DisarmCheck(client))
 				{
-					SetHudTextParamsEx(0.14, 0.93, 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
-					ShowSyncHudText(client, HudPlayer, "%t", "disarmed_by", Client[client].Disarmer);
-				}
-			}
-			else
-			{
-				static float pos1[3];
-				GetClientEyePosition(client, pos1);
-				for(int target=1; target<=MaxClients; target++)
-				{
-					if(!IsValidClient(target) || IsSpec(target) || IsSCP(target))
-						continue;
-
-					static float pos2[3];
-					GetClientEyePosition(target, pos2);
-					if(GetVectorDistance(pos1, pos2) > 400)
-						continue;
-
-					//if(Client[client].AloneIn < engineTime)
-						//Client[client].NextSongAt = 0.0;
-
-					Client[client].AloneIn = engineTime+90.0;
-					break;
-				}
-
-				if(Client[client].Sprinting || !(GetEntityFlags(client) & FL_ONGROUND))
-				{
-					if(!Client[client].Extra2 && Client[client].Extra3<engineTime)
+					Client[client].AloneIn = FAR_FUTURE;
+					if(showHud)
 					{
-						float drain = 1.0;
-						Items_Sprint(client, drain);
-						Client[client].SprintPower -= drain;
-						if(Client[client].Sprinting && Client[client].SprintPower<0)
-						{
-							Client[client].SprintPower = 0.0;
-							Client[client].Sprinting = false;
-							SDKCall_SetSpeed(client);
-						}
+						SetHudTextParamsEx(0.14, 0.93, 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
+						ShowSyncHudText(client, HudPlayer, "%t", "disarmed_by", Client[client].Disarmer);
 					}
 				}
-				else if(Client[client].SprintPower < 100)
+				else
 				{
-					Client[client].SprintPower += 1.5;
-				}
-
-				if(showHud)
-				{
-					if(GetClientMenu(client) == MenuSource_None)
-						Items_ShowItemMenu(client);
-
-					bool showingHelp;
-					int active = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-					if(active>MaxClients && IsValidEntity(active) && GetEntityClassname(active, buffer, sizeof(buffer)))
+					static float pos1[3];
+					GetClientEyePosition(client, pos1);
+					for(int target=1; target<=MaxClients; target++)
 					{
-						static float time[MAXTF2PLAYERS];
-						if(holding[client] == IN_RELOAD)
+						if(!IsValidClient(target) || IsSpec(target) || IsSCP(target))
+							continue;
+
+						static float pos2[3];
+						GetClientEyePosition(target, pos2);
+						if(GetVectorDistance(pos1, pos2) > 400)
+							continue;
+
+						//if(Client[client].AloneIn < engineTime)
+							//Client[client].NextSongAt = 0.0;
+
+						Client[client].AloneIn = engineTime+90.0;
+						break;
+					}
+
+					if(Client[client].Sprinting || !(GetEntityFlags(client) & FL_ONGROUND))
+					{
+						if(!Client[client].Extra2 && Client[client].Extra3<engineTime)
 						{
-							if(time[client] == FAR_FUTURE)
+							float drain = 1.0;
+							Items_Sprint(client, drain);
+							Client[client].SprintPower -= drain;
+							if(Client[client].Sprinting && Client[client].SprintPower<0)
 							{
-								time[client] = engineTime+0.1;
+								Client[client].SprintPower = 0.0;
+								Client[client].Sprinting = false;
+								SDKCall_SetSpeed(client);
 							}
-							else if(time[client] < engineTime)
+						}
+					}
+					else if(Client[client].SprintPower < 100)
+					{
+						Client[client].SprintPower += 1.5;
+					}
+
+					if(showHud)
+					{
+						if(GetClientMenu(client) == MenuSource_None)
+							Items_ShowItemMenu(client);
+
+						bool showingHelp;
+						int active = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+						if(active>MaxClients && IsValidEntity(active) && GetEntityClassname(active, buffer, sizeof(buffer)))
+						{
+							static float time[MAXTF2PLAYERS];
+							if(holding[client] == IN_RELOAD)
 							{
-								showingHelp = Items_ShowItemDesc(client, active);
-								if(!showingHelp)
-									time[client] = FAR_FUTURE;
+								if(time[client] == FAR_FUTURE)
+								{
+									time[client] = engineTime+0.1;
+								}
+								else if(time[client] < engineTime)
+								{
+									showingHelp = Items_ShowItemDesc(client, active);
+									if(!showingHelp)
+										time[client] = FAR_FUTURE;
+								}
 							}
+							else
+							{
+								time[client] = FAR_FUTURE;
+							}
+						}
+
+						if(!showingHelp && Client[client].HelpSprint)
+							PrintKeyHintText(client, "%t", "help_sprint");
+
+						active = RoundToFloor(Client[client].SprintPower*0.13);
+						if(Client[client].Sprinting)
+						{
+							strcopy(buffer, sizeof(buffer), "|");
 						}
 						else
 						{
-							time[client] = FAR_FUTURE;
+							buffer[0] = 0;
 						}
-					}
 
-					if(!showingHelp && Client[client].HelpSprint)
-						PrintKeyHintText(client, "%t", "help_sprint");
+						for(int i=1; i<active; i++)
+						{
+							Format(buffer, sizeof(buffer), "%s|", buffer);
+						}
 
-					active = RoundToFloor(Client[client].SprintPower*0.13);
-					if(Client[client].Sprinting)
-					{
-						strcopy(buffer, sizeof(buffer), "|");
+						SetHudTextParamsEx(0.14, 0.93, 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
+						ShowSyncHudText(client, HudGame, "%t", "sprint", buffer);
 					}
-					else
-					{
-						buffer[0] = 0;
-					}
+				}
 
-					for(int i=1; i<active; i++)
-					{
-						Format(buffer, sizeof(buffer), "%s|", buffer);
-					}
-
-					SetHudTextParamsEx(0.14, 0.93, 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
-					ShowSyncHudText(client, HudGame, "%t", "sprint", buffer);
+				// What class am I again
+				if(showHud)
+				{
+					SetHudTextParamsEx(-1.0, 0.08, 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
+					ShowSyncHudText(client, HudClass, "%t", class.Display);
 				}
 			}
-
-			// What class am I again
-			if(showHud)
+			else if (IsSCP(client) && showHud)
 			{
+				// kill counter + how many dbois/scientists left
 				SetHudTextParamsEx(-1.0, 0.08, 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
-				ShowSyncHudText(client, HudClass, "%t", class.Display);
+				ShowSyncHudText(client, HudClass, "%t", "kill_counter", Client[client].Kills, VIPsAlive);			
 			}
 		}
 

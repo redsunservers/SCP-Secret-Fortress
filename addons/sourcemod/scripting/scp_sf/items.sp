@@ -99,17 +99,24 @@ void Items_Setup(KeyValues main, KeyValues map)
 
 		kv.GetString("viewmodel", weapon.Model, sizeof(weapon.Model));
 		weapon.Viewmodel = weapon.Model[0] ? PrecacheModel(weapon.Model, true) : 0;
+		
+		kv.GetString("sound", weapon.Model, sizeof(weapon.Model));
+		if(weapon.Model[0])
+		{
+			PrecacheSound(weapon.Model, true);		
+			weapon.Model[0] = 0;
+		}			
 
 		kv.GetString("model", weapon.Model, sizeof(weapon.Model));
 		if(weapon.Model[0])
-			PrecacheModel(weapon.Model, true);
+			PrecacheModel(weapon.Model, true);	
 
 		kv.GetString("914++", weapon.VeryFine, sizeof(weapon.VeryFine));
 		kv.GetString("914+", weapon.Fine, sizeof(weapon.Fine));
 		kv.GetString("914", weapon.OneToOne, sizeof(weapon.OneToOne));
 		kv.GetString("914-", weapon.Coarse, sizeof(weapon.Coarse));
 		kv.GetString("914--", weapon.Rough, sizeof(weapon.Rough));
-
+		
 		Weapons.PushArray(weapon);
 	} while(kv.GotoNextKey());
 }
@@ -1470,7 +1477,7 @@ public Action Items_FragTimer(Handle timer, int ref)
 	int entity = EntRefToEntIndex(ref);
 	if(entity > MaxClients)
 	{
-		static float pos[3];
+		float pos[3];
 		GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
 
 		int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
@@ -1480,14 +1487,20 @@ public Action Items_FragTimer(Handle timer, int ref)
 			DispatchKeyValueVector(explosion, "origin", pos);
 			DispatchKeyValue(explosion, "iMagnitude", "500");
 			DispatchKeyValue(explosion, "iRadiusOverride", "350");
-			//DispatchKeyValue(explosion, "flags", "516");
+			// don't want particles or sound, we create them seperately
+			DispatchKeyValue(explosion, "spawnflags", "916");
 
 			SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", client);
 			DispatchSpawn(explosion);
-
-			//CreateTimer(3.0, Timer_RemoveEntity, AttachParticle(explosion, "Explosion_CoreFlash", _, false), TIMER_FLAG_NO_MAPCHANGE);
-			//CreateTimer(3.0, Timer_RemoveEntity, AttachParticle(explosion, "ExplosionCore_buildings", _, false), TIMER_FLAG_NO_MAPCHANGE);
-
+			
+			// this will show the kill icon as a grenade
+			SetVariantString("classname taunt_soldier"); 
+			AcceptEntityInput(explosion, "AddOutput");
+			
+			AttachParticle(explosion, "asplode_hoodoo", false, 5.0);		
+			// entity wil be gone before it plays so it needs to play as ambient sound
+			EmitAmbientSound("weapons/air_burster_explode1.wav", pos, entity, SNDLEVEL_GUNFIRE);
+			
 			AcceptEntityInput(explosion, "Explode");
 			AcceptEntityInput(explosion, "Kill");
 		}
@@ -1573,24 +1586,25 @@ public Action Items_FlashTimer(Handle timer, int ref)
 		static float pos1[3];
 		GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos1);
 
-		int i = CreateEntityByName("env_explosion");
-		if(IsValidEntity(i))
+		int explosion = CreateEntityByName("env_explosion");
+		if(IsValidEntity(explosion))
 		{
-			DispatchKeyValueVector(i, "origin", pos1);
-			DispatchKeyValue(i, "iMagnitude", "0");
-			DispatchKeyValue(i, "flags", "532");
+			DispatchKeyValueVector(explosion, "origin", pos1);
+			DispatchKeyValue(explosion, "iMagnitude", "0");
+			// don't want particles, we create them seperately
+			DispatchKeyValue(explosion, "spawnflags", "852");
 
-			SetEntPropEnt(i, Prop_Data, "m_hOwnerEntity", GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"));
-			DispatchSpawn(i);
+			SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"));
+			DispatchSpawn(explosion);
 
-			//CreateTimer(2.0, Timer_RemoveEntity, AttachParticle(i, "Explosions_MA_Flash_1", _, false), TIMER_FLAG_NO_MAPCHANGE);
+			AttachParticle(explosion, "drg_cow_explosioncore_normal_blue", false, 5.0);
 
-			AcceptEntityInput(i, "Explode");
-			AcceptEntityInput(i, "Kill");
+			AcceptEntityInput(explosion, "Explode");
+			AcceptEntityInput(explosion, "Kill");
 		}
 
 		int class = GetEntProp(entity, Prop_Data, "m_iHammerID");
-		for(i=1; i<=MaxClients; i++)
+		for(int i=1; i<=MaxClients; i++)
 		{
 			if(IsClientInGame(i) && IsPlayerAlive(i) && !IsFriendly(class, Client[i].Class))
 			{

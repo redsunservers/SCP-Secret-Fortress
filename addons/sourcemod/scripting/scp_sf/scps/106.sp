@@ -45,40 +45,10 @@ public void SCP106_OnDeath(int client, Event event)
 	Classes_DeathScp(client, event);
 	if(Client[client].Extra2)
 		HideAnnotation(client);
-
-	RequestFrame(RemoveRagdoll, GetClientUserId(client));
-	if(GetEntityFlags(client) & FL_ONGROUND)
-	{
-		int entity = CreateEntityByName("prop_dynamic_override");
-		if(!IsValidEntity(entity))
-			return;
-
-		{
-			float pos[3];
-			GetEntPropVector(client, Prop_Send, "m_vecOrigin", pos);
-			TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
-		}
-		DispatchKeyValue(entity, "skin", "0");
-		{
-			char model[PLATFORM_MAX_PATH];
-			GetEntPropString(client, Prop_Data, "m_ModelName", model, sizeof(model));
-			DispatchKeyValue(entity, "model", model);
-		}	
-		{
-			float angles[3];
-			GetClientEyeAngles(client, angles);
-			angles[0] = 0.0;
-			angles[2] = 0.0;
-			DispatchKeyValueVector(entity, "angles", angles);
-		}
-		DispatchSpawn(entity);
-
-		SetEntProp(entity, Prop_Send, "m_CollisionGroup", 2);
-		SetVariantString("death_scp_106");
-		AcceptEntityInput(entity, "SetAnimation");
-
-		CreateTimer(3.0, Timer_RemoveEntity, EntIndexToEntRef(entity));
-	}
+		
+	char model[PLATFORM_MAX_PATH];
+	GetEntPropString(client, Prop_Data, "m_ModelName", model, sizeof(model));	
+	Classes_PlayDeathAnimation(client, model, "death_scp_106", "", 3.0);
 }
 
 public void SCP106_OnKill(int client, int victim)

@@ -1182,11 +1182,21 @@
 	{
 		"en"		"%%+attack3%% Press and hold to use sprint"
 	}
+	"kill_counter"	// HUD
+	{
+		"#format"	"{1:d},{2:d}"
+		"en"		"Kills: {1}\nHumans left: {2}"
+	}	
 	"end_screen"	// HUD
 	{
 		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d}"
 		"en"		"{1}\n \nClass-D Escaped: {2} / {3}\nScientist(s) Survived: {4} / {5}\nTerminated SCPs: {6} / {7}"
 	}
+	"end_screen_vip" // HUD
+	{
+		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d},{8:d},{9:d}"
+		"en"		"{1}\n \nClass-D Escaped: {2} / {3} ({4} captured)\nScientists Escaped: {5} / {6} ({7} captured)\nTerminated SCPs: {8} / {9}"
+	}	
 	"end_screen_boss"	// HUD
 	{
 		"#format"	"{1:t},{2:d},{3:d}"
