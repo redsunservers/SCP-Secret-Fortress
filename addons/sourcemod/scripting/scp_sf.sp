@@ -245,7 +245,10 @@ public void OnPluginStart()
 	Client[0].ColorBlind[0] = -1;
 	Client[0].ColorBlind[1] = -1;
 	Client[0].ColorBlind[2] = -1;
-	Client[0].QueueIndex = -1;
+
+	for(int i = 0; i <= MaxClients; i++) {
+		Client[i].QueueIndex = -1;
+	}
 
 	ConVar_Setup();
 	SDKHook_Setup();
@@ -473,7 +476,6 @@ public void OnPluginEnd()
 public void OnClientPutInServer(int client)
 {
 	Client[client] = Client[0];
-	Gamemode_AssignQueueIndex(client);
 	if(AreClientCookiesCached(client))
 		OnClientCookiesCached(client);
 
@@ -1786,7 +1788,9 @@ public Action Command_ForceAmmo(int client, int args)
 
 public void OnClientDisconnect(int client)
 {
-	Gamemode_UnassignQueueIndex(client);
+	if (Client[client].QueueIndex != -1)
+		Gamemode_UnassignQueueIndex(client);
+
 	SZF_DropItem(client);
 	CreateTimer(1.0, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
 }
