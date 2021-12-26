@@ -1,0 +1,5 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models\scp_fixed\shared\mtf_gib"
+	"$halflambert" "1"
+}
