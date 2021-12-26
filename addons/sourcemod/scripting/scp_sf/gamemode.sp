@@ -278,12 +278,12 @@ bool Gamemode_RoundStart()
 	}
 
 	// Assign queue indices here
-	for (int client = 1; client <= MaxClients; client++)
+	for(int client = 1; client <= MaxClients; client++)
 	{
-		if (!IsValidClient(client))
+		if(!IsValidClient(client))
 		{
 			// Invalid client with a queue index, unassign him
-			if (Client[client].QueueIndex != -1)
+			if(Client[client].QueueIndex != -1)
 				Gamemode_UnassignQueueIndex(client);
 		}
 		else if (Client[client].QueueIndex == -1)
@@ -304,17 +304,12 @@ bool Gamemode_RoundStart()
 				players++;
 		}
 		
-		//PlayerArrayOffset = GetRandomInt(0, players-1);
-		PlayerArrayOffset = 2;
+		PlayerArrayOffset = GetRandomInt(0, players-1);
 	}
 	else
 	{
 		PlayerArrayOffset = 1;
 	}
-
-	for (int i = 0; PlayerQueue[i] != 0; i++)
-		LogMessage("%i:%i %i", i, Client[PlayerQueue[i]].QueueIndex, PlayerQueue[i]);
-	LogMessage("AFTER SHIFTING");
 	
 	// Shift queue indices
 	if(PlayerArrayOffset > 0)
@@ -347,9 +342,6 @@ bool Gamemode_RoundStart()
 			}
 		}
 	}
-
-	for (int i = 0; PlayerQueue[i] != 0; i++)
-		LogMessage("%i:%i %i", i, Client[PlayerQueue[i]].QueueIndex, PlayerQueue[i]);
 
 	ArrayList players = new ArrayList();
 
@@ -528,9 +520,9 @@ void Gamemode_RoundEnd()
 
 int Gamemode_AssignQueueIndex(int client)
 {
-	if (IsValidClient(client))
+	if(IsValidClient(client))
 	{
-		if (Client[client].QueueIndex != -1)
+		if(Client[client].QueueIndex != -1)
 		{
 			LogError("%N (%i) already has a queue index %i", client, client, Client[client].QueueIndex);
 		}
@@ -538,7 +530,6 @@ int Gamemode_AssignQueueIndex(int client)
 		{
 			Client[client].QueueIndex = MaxQueueIndex++;
 			PlayerQueue[Client[client].QueueIndex] = client;
-			LogMessage("Assigned %i to %i", client, Client[client].QueueIndex);
 		}
 
 		return Client[client].QueueIndex;
@@ -552,7 +543,7 @@ int Gamemode_AssignQueueIndex(int client)
 
 void Gamemode_UnassignQueueIndex(int client)
 {
-	if (Client[client].QueueIndex == -1)
+	if(Client[client].QueueIndex == -1)
 	{
 		LogError("Attempting to unassign queue index from %N (%i) with no queue index", client, client);
 	}
@@ -560,22 +551,18 @@ void Gamemode_UnassignQueueIndex(int client)
 	{
 		PlayerQueue[Client[client].QueueIndex] = 0;
 
-		for (int i = Client[client].QueueIndex + 1; i < MaxQueueIndex; i++)
+		for(int i = Client[client].QueueIndex + 1; i < MaxQueueIndex; i++)
 		{
 			PlayerQueue[i-1] = PlayerQueue[i];
 			--Client[PlayerQueue[i]].QueueIndex;
-			//LogMessage("Shifted %i from %i to %i", PlayerQueue[i], Client[PlayerQueue[i]].QueueIndex + 1, Client[PlayerQueue[i]].QueueIndex);
 			PlayerQueue[i] = 0;
 		}
 
-		if (MaxQueueIndex != -1)
+		if(MaxQueueIndex != -1)
 			--MaxQueueIndex;
 
 		Client[client].QueueIndex = -1;
 	}
-
-	for (int i = 0; PlayerQueue[i] != 0; i++)
-		LogMessage("(%i) %i:%i %i", client, i, Client[PlayerQueue[i]].QueueIndex, PlayerQueue[i]);
 }
 
 public Action Gamemode_WaveTimer(Handle timer)
