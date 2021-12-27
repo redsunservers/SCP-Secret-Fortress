@@ -354,31 +354,39 @@ int DissolveRagdoll(int ragdoll)
 	AcceptEntityInput(dissolver, "Kill");
 }
 
-stock int AttachParticle(int entity, char[] particleType, float offset=0.0, bool attach=true)
+stock int AttachParticle(int entity, char[] particleType, bool attach=true, float lifetime)
 {
 	int particle = CreateEntityByName("info_particle_system");
 
 	char targetName[128];
 	float position[3];
 	GetEntPropVector(entity, Prop_Send, "m_vecOrigin", position);
-	position[2] += offset;
 	TeleportEntity(particle, position, NULL_VECTOR, NULL_VECTOR);
 
-	Format(targetName, sizeof(targetName), "target%d", entity);
-	DispatchKeyValue(entity, "targetname", targetName);
-
-	DispatchKeyValue(particle, "targetname", "tf2particle");
-	DispatchKeyValue(particle, "parentname", targetName);
+	if (attach)
+	{
+		Format(targetName, sizeof(targetName), "target%d", entity);
+		DispatchKeyValue(entity, "targetname", targetName);
+	
+		DispatchKeyValue(particle, "targetname", "tf2particle");
+		DispatchKeyValue(particle, "parentname", targetName);
+	}
+	
 	DispatchKeyValue(particle, "effect_name", particleType);
 	DispatchSpawn(particle);
-	SetVariantString(targetName);
-	if(attach)
+	
+	if (attach)
 	{
+		SetVariantString(targetName);
 		AcceptEntityInput(particle, "SetParent", particle, particle, 0);
 		SetEntPropEnt(particle, Prop_Send, "m_hOwnerEntity", entity);
 	}
+	
 	ActivateEntity(particle);
 	AcceptEntityInput(particle, "start");
+	
+	CreateTimer(lifetime, Timer_RemoveEntity, EntIndexToEntRef(particle), TIMER_FLAG_NO_MAPCHANGE);	
+	
 	return particle;
 }
 

@@ -303,9 +303,24 @@ static void GrabKvValues(KeyValues kv, ClassEnum class, ClassEnum defaul, int in
 		LockStringTables(save);
 		kv.GoBack();
 	}
-
+	
 	kv.GetString("modelalt", class.Model, sizeof(class.Model));
-	class.ModelAlt = class.Model[0] ? PrecacheModel(class.Model, true) : defaul.ModelAlt;
+	class.ModelAlt = class.Model[0] ? PrecacheModel(class.Model, true) : defaul.ModelAlt;	
+
+	kv.GetString("modelgibs", class.Model, sizeof(class.Model));
+	if (class.Model[0])
+	{
+		// max 8 gibs
+		// first one is relative path
+		char GibBuffers[8][PLATFORM_MAX_PATH];
+		int GibCount = ExplodeString(class.Model, ";", GibBuffers, sizeof(GibBuffers), sizeof(GibBuffers[]));
+		
+		for (int i = 1; i < GibCount; i++)
+		{
+			Format(class.Model, sizeof(class.Model), "%s%s.mdl", GibBuffers[0], GibBuffers[i]);
+			PrecacheModel(class.Model, true);
+		}
+	}
 
 	kv.GetString("model", class.Model, sizeof(class.Model), defaul.Model);
 	class.ModelIndex = class.Model[0] ? PrecacheModel(class.Model, true) : defaul.ModelIndex;
@@ -934,6 +949,54 @@ public bool Classes_DeathScp(int client, Event event)
 
 	Classes_MoveToSpec(client, event);
 	return true;
+}
+
+public void Classes_PlayDeathAnimation(int client, const char[] modelname, const char[] animation, const char[] soundname, float removetime)
+{
+	float pos[3];
+	GetEntPropVector(client, Prop_Send, "m_vecOrigin", pos);
+		
+	if (!(GetEntityFlags(client) & FL_ONGROUND))
+	{
+		// try snap to floor if not on ground
+		TR_TraceRayFilter(pos, view_as<float>({90.0, 0.0, 0.0}), MASK_SOLID, RayType_Infinite, Trace_OnlyHitWorld);
+		if (!TR_DidHit())
+			return;
+		
+		TR_GetEndPosition(pos);
+	}	
+	
+	int entity = CreateEntityByName("prop_dynamic_override");
+	if (!IsValidEntity(entity))
+		return;
+
+	RequestFrame(RemoveRagdoll, GetClientUserId(client));
+	TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
+	
+	DispatchKeyValue(entity, "skin", "0");	
+	DispatchKeyValue(entity, "model", modelname);
+
+	float angles[3];
+	GetClientEyeAngles(client, angles);
+	angles[0] = 0.0;
+	angles[2] = 0.0;
+	DispatchKeyValueVector(entity, "angles", angles);
+	
+	DispatchSpawn(entity);
+
+	SetEntProp(entity, Prop_Send, "m_CollisionGroup", 2);
+	SetVariantString(animation);
+	AcceptEntityInput(entity, "SetAnimation");
+	
+	if (soundname[0])
+	{
+		EmitSoundToAll2(soundname, client, SNDCHAN_AUTO, SNDLEVEL_SCREAMING, _, _, _, client);
+	}
+	
+	if (removetime > 0.0)
+	{
+		CreateTimer(removetime, Timer_RemoveEntity, EntIndexToEntRef(entity));
+	}
 }
 
 public void Classes_KillDBoi(int client, int victim)

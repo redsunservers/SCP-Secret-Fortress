@@ -1,5 +1,9 @@
 static const char PuddleModel[] = "models/props_farm/haypile001.mdl";
+static const char DeathModel[] = "models/scp_new/173/scp_173new_death.mdl";
+
 static const char SnapSound[] = "freak_fortress_2/scp173/scp173_kill2.mp3";
+static const char DeathSound[] = "freak_fortress_2/scp173/173_death.wav";
+static const char MoveSound[] = "physics/concrete/concrete_scrape_smooth_loop1.wav";
 
 static const int HealthMax = 4000;	// Max standard health
 static const int HealthExtra = 3000;	// Max regenerable health
@@ -91,6 +95,13 @@ public void SCP173_OnKill(int client, int victim)
 		SetEntityHealth(client, GetClientHealth(client) + HealthKill);
 }
 
+public void SCP173_OnDeath(int client, Event event)
+{
+	Classes_DeathScp(client, event);
+
+	Classes_PlayDeathAnimation(client, DeathModel, "death", DeathSound, 0.0);
+}
+
 public Action SCP173_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
 {
 	if(!StrContains(sample, "vo", false))
@@ -99,9 +110,13 @@ public Action SCP173_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &ch
 	}
 	else if(StrContains(sample, "footsteps", false) != -1)
 	{
+		// need to stop sound twice here on different channels or it gets stuck looping
+		if (channel != SNDCHAN_AUTO)
+			StopSound(client, channel, sample);		
 		StopSound(client, SNDCHAN_AUTO, sample);
-		//if(!Frozen[client])
-			//EmitSoundToAll("physics/concrete/concrete_scrape_smooth_loop1.wav", client, channel, level+30, flags, volume, pitch+10, _, _, _, _, 0.6);
+		
+		if(!Frozen[client])
+			EmitSoundToAll(MoveSound, client, channel, level+30, flags, volume, pitch+10, _, _, _, _, 0.6);
 
 		return Plugin_Changed;
 	}

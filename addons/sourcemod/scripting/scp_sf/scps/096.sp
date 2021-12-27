@@ -1,6 +1,7 @@
 static const char ModelMelee[] = "models/scp_sf/096/scp096_hands_7.mdl";
 static const char SoundPassive[] = "freak_fortress_2/scp096/bgm.mp3";
 static const char SoundEnrage[] = "freak_fortress_2/scp096/fullrage.mp3";
+static const char SoundDeath[] = "freak_fortress_2/scp096/096_death.mp3";
 
 static const int HealthMax = 3000;	// Max standard health
 static const int HealthExtra = 700;	// Max regenerable health
@@ -71,37 +72,9 @@ public void SCP096_OnDeath(int client, Event event)
 		StopSound(client, SNDCHAN_AUTO, SoundEnrage);
 	}
 
-	if(GetEntityFlags(client) & FL_ONGROUND)
-	{
-		int entity = CreateEntityByName("prop_dynamic_override");
-		if(!IsValidEntity(entity))
-			return;
-
-		RequestFrame(RemoveRagdoll, GetClientUserId(client));
-		{
-			float pos[3];
-			GetEntPropVector(client, Prop_Send, "m_vecOrigin", pos);
-			TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
-		}
-		DispatchKeyValue(entity, "skin", "0");
-		{
-			char model[PLATFORM_MAX_PATH];
-			GetEntPropString(client, Prop_Data, "m_ModelName", model, sizeof(model));
-			DispatchKeyValue(entity, "model", model);
-		}	
-		{
-			float angles[3];
-			GetClientEyeAngles(client, angles);
-			angles[0] = 0.0;
-			angles[2] = 0.0;
-			DispatchKeyValueVector(entity, "angles", angles);
-		}
-		DispatchSpawn(entity);
-
-		SetEntProp(entity, Prop_Send, "m_CollisionGroup", 2);
-		SetVariantString("death_scp_096");
-		AcceptEntityInput(entity, "SetAnimation");
-	}
+	char model[PLATFORM_MAX_PATH];
+	GetEntPropString(client, Prop_Data, "m_ModelName", model, sizeof(model));	
+	Classes_PlayDeathAnimation(client, model, "death_scp_096", SoundDeath, 0.0);
 }
 
 public Action SCP096_OnTakeDamage(int client, int attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)

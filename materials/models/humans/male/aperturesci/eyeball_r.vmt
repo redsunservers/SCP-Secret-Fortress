@@ -1,0 +1,5 @@
+"vertexlitgeneric"
+{
+	"$basetexture" "models/humans/male/aperturesci/eyeball"
+	"$halflambert" 1
+}

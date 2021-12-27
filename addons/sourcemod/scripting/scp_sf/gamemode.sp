@@ -66,6 +66,8 @@ static SoundEnum MusicTimeleft;
 static SoundEnum MusicAlone;
 static SoundEnum MusicFloors[10];
 
+int VIPsAlive;
+
 ArrayList Gamemode_Setup(KeyValues main, KeyValues map)
 {
 	// Delete any arrays inside the arrays
@@ -485,6 +487,7 @@ bool Gamemode_RoundStart()
 
 		WaveTimer = CreateTimer(GetRandomFloat(WaveTimes[0], WaveTimes[1]), Gamemode_WaveTimer, _, TIMER_FLAG_NO_MAPCHANGE);
 	}
+	
 	return true;
 }
 
@@ -1018,21 +1021,32 @@ public bool Gamemode_ConditionClassic(TFTeam &team)
 	return true;
 }
 
-public bool Gamemode_ConditionVip(TFTeam &team)
+public bool Gamecode_CountVIPs()
 {
 	ClassEnum class;
 	bool salive;
+	
+	VIPsAlive = 0;
 	for(int i=1; i<=MaxClients; i++)
 	{
 		if(!IsValidClient(i) || IsSpec(i) || !Classes_GetByIndex(Client[i].Class, class))
 			continue;
 
 		if(class.Vip)	// Class-D and Scientists
-			return false;
+			VIPsAlive++;
 
 		if(!class.Group)	// SCPs
 			salive = true;
 	}
+	
+	return salive;
+}
+
+public bool Gamemode_ConditionVip(TFTeam &team)
+{
+	bool salive = Gamecode_CountVIPs();
+	if (VIPsAlive > 0)
+		return false;
 
 	int descape, dcapture, dtotal, sescape, scapture, stotal, pkill, ptotal;
 	GameInfo.GetValue("descape", descape);
@@ -1082,7 +1096,7 @@ public bool Gamemode_ConditionVip(TFTeam &team)
 			continue;
 
 		SetGlobalTransTarget(client);
-		ShowSyncHudText(client, HudGame, "%t", "end_screen", buffer, descape, dtotal, sescape, stotal, pkill, ptotal);
+		ShowSyncHudText(client, HudGame, "%t", "end_screen_vip", buffer, descape, dtotal, dcapture, sescape, stotal, scapture, pkill, ptotal);
 	}
 	return true;
 }
