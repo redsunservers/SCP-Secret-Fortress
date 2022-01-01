@@ -40,7 +40,7 @@ void ViewChange_Switch(int client)
 			if(Items_GetWeaponByIndex(GetEntProp(active, Prop_Send, "m_iItemDefinitionIndex"), weapon))
 			{
 				SetEntProp(entity, Prop_Send, "m_fEffects", EF_NODRAW);
-				if(!weapon.Hide)
+				if (weapon.Attack && !weapon.Hide)
 				{
 					TFClassType class = weapon.Class;
 					if(class == TFClass_Unknown)

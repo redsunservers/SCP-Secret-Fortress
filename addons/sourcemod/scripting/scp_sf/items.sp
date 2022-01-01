@@ -70,7 +70,7 @@ void Items_Setup(KeyValues main, KeyValues map)
 			kv = map;
 	}
 
-	char buffer[16];
+	char buffer[PLATFORM_MAX_PATH];
 	WeaponEnum weapon;
 	kv.GotoFirstSubKey();
 	do
@@ -108,6 +108,29 @@ void Items_Setup(KeyValues main, KeyValues map)
 
 		kv.GetString("classname", weapon.Classname, sizeof(weapon.Classname));
 		kv.GetString("attributes", weapon.Attributes, sizeof(weapon.Attributes));
+		
+		if(kv.JumpToKey("downloads"))
+		{
+			int table = FindStringTable("downloadables");
+			bool save = LockStringTables(false);
+			for(int i=1; ; i++)
+			{
+				IntToString(i, weapon.Model, sizeof(weapon.Model));
+				kv.GetString(weapon.Model, buffer, sizeof(buffer));
+				if(!buffer[0])
+					break;
+
+				if(!FileExists(buffer, true))
+				{
+					LogError("[Config] '%s' has missing file '%s'", weapon.Display, buffer);
+					continue;
+				}
+
+				AddToStringTable(table, buffer);
+			}
+			LockStringTables(save);
+			kv.GoBack();
+		}	
 
 		kv.GetString("viewmodel", weapon.ViewmodelName, sizeof(weapon.ViewmodelName));
 		weapon.Viewmodel = weapon.ViewmodelName[0] ? PrecacheModel(weapon.ViewmodelName, true) : 0;
@@ -129,7 +152,7 @@ void Items_Setup(KeyValues main, KeyValues map)
 		kv.GetString("914+", weapon.Fine, sizeof(weapon.Fine));
 		kv.GetString("914", weapon.OneToOne, sizeof(weapon.OneToOne));
 		kv.GetString("914-", weapon.Coarse, sizeof(weapon.Coarse));
-		kv.GetString("914--", weapon.Rough, sizeof(weapon.Rough));
+		kv.GetString("914--", weapon.Rough, sizeof(weapon.Rough));		
 		
 		Weapons.PushArray(weapon);
 	} while(kv.GotoNextKey());
@@ -527,7 +550,6 @@ int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, 
 void Items_SetActiveWeapon(int client, int weapon)
 {
 	Items_CancelDelayedAction(client);
-	ViewModel_Destroy(client);
 	
 	SetActiveWeapon(client, weapon);	
 	
@@ -544,6 +566,7 @@ void Items_SetEmptyWeapon(int client)
 void Items_SetupViewmodel(int client, int weapon)
 {
 	// if the current weapon needs a unique viewmodel, set it up
+	ViewModel_Destroy(client);
 	if (IsValidEntity(weapon))
 	{
 		WeaponEnum Weapon;
@@ -1036,8 +1059,16 @@ bool Items_IsHoldingWeapon(int client)
 	if(entity>MaxClients && IsValidEntity(entity) && HasEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"))
 	{
 		WeaponEnum weapon;
-		if(!Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) || !weapon.Hide)
+		
+		if(!Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon))
 			return true;
+			
+		if (weapon.Attack && !weapon.Hide)
+			return true;
+			
+		if (!weapon.Attack && (weapon.Type == 1) || (weapon.Type == 7))
+			return true;
+			
 	}
 	return false;
 }
