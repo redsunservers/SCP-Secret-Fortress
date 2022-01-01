@@ -54,10 +54,9 @@ public bool SCP173_Create(int client)
 		SetEntityRenderColor(weapon, 255, 255, 255, 0);
 		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
+		// no crouching
+		TF2Attrib_SetByDefIndex(weapon, 820, 1.0);		
 	}
-	
-	// no crouching
-	TF2Attrib_SetByDefIndex(client, 820, 1.0);	
 
 	CreateTimer(15.0, Timer_UpdateClientHud, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 	return false;
