@@ -94,7 +94,7 @@ public Action SCP106_OnDealDamage(int client, int victim, int &inflictor, float 
 
 public void SCP106_OnButton(int client, int button)
 {
-	if(Client[client].ChargeIn && Client[client].ChargeIn<GetEngineTime())
+	if(Client[client].ChargeIn && Client[client].ChargeIn<GetGameTime())
 	{
 		Client[client].ChargeIn = 0.0;
 		TeleportEntity(client, Client[client].Pos, NULL_VECTOR, TRIPLE_D);
@@ -143,7 +143,7 @@ public void SCP106_OnButton(int client, int button)
 		{
 			TF2_StunPlayer(client, TeleStun, 1.0, TF_STUNFLAG_BONKSTUCK|TF_STUNFLAG_NOSOUNDOREFFECT);
 
-			float engineTime = GetEngineTime();
+			float engineTime = GetGameTime();
 			Client[client].ChargeIn = engineTime+TeleDelay;
 			Client[client].FreezeFor = engineTime+TeleFreeze;
 
@@ -224,7 +224,7 @@ public Action SCP106_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &ch
 
 public Action SCP106_TakeDamage(int client, int attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	if(Client[client].ChargeIn < GetEngineTime())
+	if(Client[client].ChargeIn < GetGameTime())
 		return Plugin_Continue;
 
 	damagetype |= DMG_PREVENT_PHYSICS_FORCE;

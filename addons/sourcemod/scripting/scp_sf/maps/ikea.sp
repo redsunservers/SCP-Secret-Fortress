@@ -35,7 +35,7 @@ public bool Ikea_Condition(TFTeam &team)
 		team = TFTeam_Red;
 	}
 
-	float time = GetEngineTime()-RoundStartAt;
+	float time = GetGameTime()-RoundStartAt;
 
 	char buffer[16];
 	FormatEx(buffer, sizeof(buffer), "%d:%02d", RoundToFloor(time/60.0), RoundToFloor(time)%60);
@@ -130,7 +130,7 @@ public bool Ikea_Create(int client)
 
 public void Ikea_OnButton(int client, int button)
 {
-	if(!Triggered[0] && Triggered[client] && Triggered[client]<GetEngineTime())
+	if(!Triggered[0] && Triggered[client] && Triggered[client]<GetGameTime())
 	{
 		Triggered[client] = 0.0;
 		TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
@@ -149,7 +149,7 @@ public Action Ikea_OnTakeDamage(int client, int attacker, int &inflictor, float 
 	{
 		bool calm = !Triggered[client];
 
-		Triggered[client] = GetEngineTime()+15.0;
+		Triggered[client] = GetGameTime()+15.0;
 		Triggered[attacker] = Triggered[client]+45.0;
 
 		if(calm)
@@ -166,7 +166,7 @@ public bool Ikea_OnGlowPlayer(int client, int victim)
 	if(Triggered[0] || GetClientTeam(client)==GetClientTeam(victim))
 		return true;
 
-	float engineTime = GetEngineTime();
+	float engineTime = GetGameTime();
 	if(Triggered[client] < engineTime)
 		return false;
 
@@ -178,7 +178,7 @@ public bool Ikea_OnSeePlayer(int client, int victim)
 	if(Triggered[0] || GetClientTeam(client)==GetClientTeam(victim))
 		return true;
 
-	float engineTime = GetEngineTime();
+	float engineTime = GetGameTime();
 	if(Triggered[client] < engineTime)
 		return true;
 
@@ -187,7 +187,7 @@ public bool Ikea_OnSeePlayer(int client, int victim)
 
 public void Ikea_OnSpeed(int client, float &speed)
 {
-	if(Triggered[0] || Triggered[client]>GetEngineTime())
+	if(Triggered[0] || Triggered[client]>GetGameTime())
 		speed += 50.0;
 }
 

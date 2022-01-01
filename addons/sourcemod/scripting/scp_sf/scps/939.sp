@@ -68,23 +68,23 @@ public void SCP939_OnSpeed(int client, float &speed)
 
 public Action SCP939_OnDealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	if(Client[victim].IdleAt < GetEngineTime())
+	if(Client[victim].IdleAt < GetGameTime())
 	{
 		damage = 60.0;
 		damagetype &= ~DMG_CRIT;
-		Client[victim].HudIn = GetEngineTime()+6.0;
+		Client[victim].HudIn = GetGameTime()+6.0;
 		return Plugin_Changed;
 	}
 
 	if(damagecustom!=TF_CUSTOM_BACKSTAB || damage<108)
 	{
-		Client[victim].HudIn = GetEngineTime()+6.0;
+		Client[victim].HudIn = GetGameTime()+6.0;
 		return Plugin_Continue;
 	}
 
 	damage = 65.0;
 	damagetype &= ~DMG_CRIT;
-	Client[victim].HudIn = GetEngineTime()+13.0;
+	Client[victim].HudIn = GetGameTime()+13.0;
 	return Plugin_Changed;
 }
 
@@ -101,12 +101,12 @@ public Action SCP939_OnTakeDamage(int client, int attacker, int &inflictor, floa
 
 public bool SCP939_OnSeePlayer(int client, int victim)
 {
-	return (IsFriendly(Client[client].Class, Client[victim].Class) || Client[victim].IdleAt>GetEngineTime());
+	return (IsFriendly(Client[client].Class, Client[victim].Class) || Client[victim].IdleAt>GetGameTime());
 }
 
 public bool SCP939_OnGlowPlayer(int client, int victim)
 {
-	float time = Client[victim].IdleAt-GetEngineTime();
+	float time = Client[victim].IdleAt-GetGameTime();
 	if(time > 0)
 	{
 		static float clientPos[3], targetPos[3];

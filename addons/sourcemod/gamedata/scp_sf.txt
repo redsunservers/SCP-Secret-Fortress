@@ -10,6 +10,12 @@
 				"linux"		"@_ZNK11CBaseEntity10InSameTeamEPKS_"
 				"windows"	"\x55\x8B\xEC\x8B\x45\x08\x57\x8B\xF9\x85\xC0\x75\x2A"
 			}
+			"CBaseAnimating::GetBoneCache"
+			{
+				"library"	"server"
+				"linux"		"@_ZN14CBaseAnimating12GetBoneCacheEv"
+				"windows"	"\x55\x8B\xEC\xB8\x10\x18\x00\x00"
+			}			
 			"CTFDroppedWeapon::Create"
 			{
 				"library"	"server"
@@ -129,6 +135,13 @@
 					}
 				}
 			}
+			"CBaseAnimating::GetBoneCache"
+			{
+				"signature"	"CBaseAnimating::GetBoneCache"
+				"callconv"	"thiscall"
+				"return"	"int"
+				"this"		"entity"
+			}			
 			"CBasePlayer::ForceRespawn"
 			{
 				"offset"	"CBasePlayer::ForceRespawn"
@@ -342,6 +355,11 @@
 				"linux"		"17"
 				"windows"	"16"
 			}
+			"CBaseAnimating::m_pStudioHdr"
+			{
+				"linux"		"288"
+				"windows"	"283"
+			}			
 			"CBasePlayer::EquipWearable"
 			{
 				"linux"		"435"

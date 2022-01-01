@@ -162,6 +162,7 @@ enum struct ClientEnum
 	float Cooldown;
 	float IgnoreTeleFor;
 	float Pos[3];
+	float NextReactTime;
 
 	// Sprinting
 	bool Sprinting;
@@ -277,6 +278,7 @@ public void OnPluginStart()
 	RegAdminCmd("scp_forceclass", Command_ForceClass, ADMFLAG_SLAY, "Usage: scp_forceclass <target> <class>.  Forces that class to be played.");
 	RegAdminCmd("scp_giveitem", Command_ForceItem, ADMFLAG_SLAY, "Usage: scp_giveitem <target> <index>.  Gives a specific item.");
 	RegAdminCmd("scp_giveammo", Command_ForceAmmo, ADMFLAG_SLAY, "Usage: scp_giveammo <target> <type>.  Gives a specific ammo.");
+	RegAdminCmd("scp_preventroundwin", Command_PreventWin, ADMFLAG_SLAY, "Usage: scp_preventroundwin <0/1>. Ignore round end conditions for debugging.");
 
 	AddCommandListener(OnBlockCommand, "explode");
 	AddCommandListener(OnBlockCommand, "kill");
@@ -525,20 +527,37 @@ public void OnRebuildAdminCache(AdminCachePart part)
 
 public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 {
-	RoundStartAt = GetEngineTime();
+	RoundStartAt = GetGameTime();
 	NextHintAt = RoundStartAt+60.0;
 
 	int entity = -1;
-	while((entity=FindEntityByClassname(entity, "func_regenerate")) != -1)
+	while ((entity = FindEntityByClassname(entity, "func_regenerate")) != -1)
 	{
 		AcceptEntityInput(entity, "Disable");
 	}
 
 	entity = -1;
-	while((entity=FindEntityByClassname(entity, "func_respawnroomvisualizer")) != -1)
+	while ((entity = FindEntityByClassname(entity, "func_respawnroomvisualizer")) != -1)
 	{
 		AcceptEntityInput(entity, "Disable");
 	}
+	
+	entity = -1;
+	char buffer[32];
+	while ((entity = FindEntityByClassname(entity, "trigger_teleport")) != -1)
+	{
+		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
+		if (!StrContains(buffer, "teleport") && ((StrContains(buffer, "light", false) != -1) || (StrContains(buffer, "gate", false) != -1)))
+		{
+			// fix up elevator teleports to allow physics objects (grenades) to teleport as well
+			// FIXME: this still doesn't teleport dropped weapons. they don't even touch the trigger
+			// might need to hook Enable input on trigger_teleport and just search for tf_dropped_weapon manually
+			SetEntProp(entity, Prop_Data, "m_spawnflags", 1033);
+
+			// TODO: hook trigger_teleport touch and place clients in relative position at the destination 
+			// rather than snapping to center of elevator
+		}
+	}	
 
 	Items_RoundStart();
 
@@ -562,6 +581,9 @@ public void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 	{
 		if(!IsValidClient(client))
 			continue;
+
+		// just to be safe...
+		Items_CancelDelayedAction(client);
 
 		Client[client].IsVip = CheckCommandAccess(client, "sm_trailsvip", ADMFLAG_CUSTOM5);
 
@@ -587,6 +609,14 @@ public Action OnWinPanel(Event event, const char[] name, bool dontBroadcast)
 	return Plugin_Handled;
 }
 
+public Action Timer_AccessDeniedReaction(Handle timer, int client)
+{
+	if (IsValidClient(client))
+		Config_DoReaction(client, "accessdenied");
+
+	return Plugin_Stop;
+}
+
 public Action OnRelayTrigger(const char[] output, int entity, int client, float delay)
 {
 	char name[32];
@@ -599,8 +629,24 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 			int access = StringToInt(name[11]);
 			int value;
 			if(!Classes_OnKeycard(client, access, value))
+			{
 				value = Items_OnKeycard(client, access);
+				
+				if (value == 0)
+				{
+					// failed to get access, play sound + reaction
+					float Time = GetGameTime();
+					if (!IsSCP(client) && (Client[client].NextReactTime < Time))
+					{
+						EmitSoundToClient(client, "replay/cameracontrolerror.wav");
 
+						Client[client].NextReactTime = Time + 3.0;
+						// 0.2 - 0.4 seconds
+						CreateTimer(float(GetRandomInt(20, 40)) / 100.0, Timer_AccessDeniedReaction, client, TIMER_FLAG_NO_MAPCHANGE);
+					}
+				}				
+			}
+						
 			switch(value)
 			{
 				case 1:
@@ -621,11 +667,10 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 	{
 		if(IsValidClient(client))
 		{
-			WeaponEnum weapon;
 			int ent = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 			if(ent > MaxClients)
 			{
-				if(Items_GetWeaponByIndex(GetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex"), weapon) && weapon.Type==2)
+				if(Items_IsHoldingKeycard(ent))
 				{
 					Items_SwitchItem(client, ent);
 					TF2_RemoveItem(client, ent);
@@ -636,7 +681,7 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 			int i;
 			while((ent=Items_Iterator(client, i, true)) != -1)
 			{
-				if(Items_GetWeaponByIndex(GetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex"), weapon) && weapon.Type==2)
+				if(Items_IsKeycard(ent))
 					TF2_RemoveItem(client, ent);
 			}
 		}
@@ -730,7 +775,7 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 			Items_GetTranName(index, buffer, sizeof(buffer));
 
 			SetGlobalTransTarget(client);
-			if(Client[client].Cooldown > GetEngineTime())
+			if(Client[client].Cooldown > GetGameTime())
 			{
 				Menu menu = new Menu(Handler_None);
 				menu.SetTitle("%t\n ", buffer);
@@ -779,7 +824,7 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 			Items_GetTranName(index, buffer, sizeof(buffer));
 
 			SetGlobalTransTarget(client);
-			if(Client[client].Cooldown > GetEngineTime())
+			if(Client[client].Cooldown > GetGameTime())
 			{
 				Menu menu = new Menu(Handler_None);
 				menu.SetTitle("%t\n ", buffer);
@@ -820,7 +865,7 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 	{
 		if(Enabled && IsValidClient(client))
 		{
-			Client[client].ComFor = GetEngineTime()+15.0;
+			Client[client].ComFor = GetGameTime()+15.0;
 			GiveAchievement(Achievement_Intercom, client);
 		}
 	}
@@ -898,31 +943,31 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 						{
 							case 0:
 							{
-								Client[client].Cooldown = GetEngineTime()+17.5;
+								Client[client].Cooldown = GetGameTime()+17.5;
 								if(weapon.VeryFine[0])
 									amount = ExplodeString(weapon.VeryFine, ";", buffers, sizeof(buffers), sizeof(buffers[]));
 							}
 							case 1:
 							{
-								Client[client].Cooldown = GetEngineTime()+15.0;
+								Client[client].Cooldown = GetGameTime()+15.0;
 								if(weapon.Fine[0])
 									amount = ExplodeString(weapon.Fine, ";", buffers, sizeof(buffers), sizeof(buffers[]));
 							}
 							case 2:
 							{
-								Client[client].Cooldown = GetEngineTime()+12.5;
+								Client[client].Cooldown = GetGameTime()+12.5;
 								if(weapon.OneToOne[0])
 									amount = ExplodeString(weapon.OneToOne, ";", buffers, sizeof(buffers), sizeof(buffers[]));
 							}
 							case 3:
 							{
-								Client[client].Cooldown = GetEngineTime()+10.0;
+								Client[client].Cooldown = GetGameTime()+10.0;
 								if(weapon.Coarse[0])
 									amount = ExplodeString(weapon.Coarse, ";", buffers, sizeof(buffers), sizeof(buffers[]));
 							}
 							case 4:
 							{
-								Client[client].Cooldown = GetEngineTime()+7.5;
+								Client[client].Cooldown = GetGameTime()+7.5;
 								if(weapon.Rough[0])
 									amount = ExplodeString(weapon.Rough, ";", buffers, sizeof(buffers), sizeof(buffers[]));
 							}
@@ -972,7 +1017,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 								entity = Items_CreateWeapon(client, amount, canGive, true, false);
 								if(canGive && entity>MaxClients && IsValidEntity(entity))
 								{
-									SetActiveWeapon(client, entity);
+									Items_SetActiveWeapon(client, entity);
 									SZF_DropItem(client);
 									Items_ShowItemMenu(client);
 									if(amount == 30012)
@@ -1027,7 +1072,7 @@ public int Handler_Printer(Menu menu, MenuAction action, int client, int choice)
 					WeaponEnum weapon;
 					if(Items_GetWeaponByIndex(index, weapon) && weapon.Type==2)
 					{
-						Client[client].Cooldown = GetEngineTime()+20.0;
+						Client[client].Cooldown = GetGameTime()+20.0;
 
 						bool canGive = Items_CanGiveItem(client, weapon.Type);
 						index = Items_CreateWeapon(client, index, canGive, true, false);
@@ -1074,7 +1119,7 @@ public Action TF2_OnPlayerTeleport(int client, int teleporter, bool &result)
 	{
 		result = (class.Human && !TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode));
 		if(result)
-			Client[client].IgnoreTeleFor = GetEngineTime()+3.0;
+			Client[client].IgnoreTeleFor = GetGameTime()+3.0;
 	}
 	else
 	{
@@ -1104,6 +1149,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	Client[client].SprintPower = 100.0;
 	Client[client].Extra2 = 0;
 	Client[client].Extra3 = 0.0;
+	Client[client].NextReactTime = 0.0;	
 	Client[client].WeaponClass = TFClass_Unknown;
 	if(Client[client].BadKills > 0)
 		Client[client].BadKills--;
@@ -1251,7 +1297,7 @@ public Action OnVoiceMenu(int client, const char[] command, int args)
 	if(Classes_OnVoiceCommand(client))
 		return Plugin_Handled;
 
-	Client[client].IdleAt = GetEngineTime()+2.5;
+	Client[client].IdleAt = GetGameTime()+2.5;
 	return Plugin_Continue;
 }
 
@@ -1304,7 +1350,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 		return Plugin_Handled;
 	#endif
 
-	float time = GetEngineTime();
+	float time = GetGameTime();
 	if(Client[client].ChatIn > time)
 		return Plugin_Handled;
 
@@ -1329,7 +1375,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 
 	Forward_OnMessage(client, name, sizeof(name), msg, sizeof(msg));
 
-	float engineTime = GetEngineTime();
+	float engineTime = GetGameTime();
 
 	if(!Enabled)
 	{
@@ -1793,12 +1839,32 @@ public Action Command_ForceAmmo(int client, int args)
 	return Plugin_Handled;
 }
 
+public Action Command_PreventWin(int client, int args)
+{
+	if (args < 1)
+	{
+		ReplyToCommand(client, "[SM] Usage: scp_preventroundwin <0/1>");
+		return Plugin_Handled;
+	}
+
+	static char togglechar[2];
+	GetCmdArg(1, togglechar, sizeof(togglechar));
+	int toggle = StringToInt(togglechar);
+
+	DebugPreventRoundWin = toggle ? true : false;
+	CShowActivity2(client, PREFIX, "Round win condition %s", toggle ? "disabled" : "enabled");
+
+	return Plugin_Handled;
+}
+
 public void OnClientDisconnect(int client)
 {
 	if (Client[client].QueueIndex != -1)
 		Gamemode_UnassignQueueIndex(client);
 
+	Items_CancelDelayedAction(client);
 	SZF_DropItem(client);
+
 	CreateTimer(1.0, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
 }
 
@@ -1835,7 +1901,12 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 	if(!client)
 		return Plugin_Continue;
 
-	float engineTime = GetEngineTime();
+	Items_CancelDelayedAction(client);
+	
+	// do this before the team gets changed
+	PlayFriendlyDeathReaction(client);
+
+	float engineTime = GetGameTime();
 	bool deadringer = view_as<bool>(event.GetInt("death_flags") & TF_DEATHFLAG_DEADRINGER);
 	if(!deadringer)
 	{
@@ -1936,7 +2007,7 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 				GiveAchievement(Achievement_DeathTesla, client);
 				int wep = EntRefToEntIndex(Client[client].PreDamageWeapon);
 				if(wep>MaxClients && GetEntProp(wep, Prop_Send, "m_iItemDefinitionIndex")==594)
-					GiveAchievement(Achievement_DeathMicro, client);
+					GiveAchievement(Achievement_DeathMicro, client);	
 			}
 			else if(damage & DMG_FALL)
 			{
@@ -1972,7 +2043,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 	if(!Enabled || !IsPlayerAlive(client))
 		return Plugin_Continue;
 
-	float engineTime = GetEngineTime();
+	float engineTime = GetGameTime();
 	if(Client[client].FreezeFor)
 	{
 		if(Client[client].FreezeFor < engineTime)
@@ -2241,10 +2312,10 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 					ShowSyncHudText(client, HudClass, "%t", class.Display);
 				}
 			}
-			else if (IsSCP(client) && showHud)
+			else if (IsSCP(client) && !IsSpec(client) && showHud)
 			{
 				// kill counter + how many dbois/scientists left
-				SetHudTextParamsEx(-1.0, 0.08, 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
+				SetHudTextParamsEx(-1.0, 0.1, 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
 				ShowSyncHudText(client, HudClass, "%t", "kill_counter", Client[client].Kills, VIPsAlive);			
 			}
 		}
@@ -2282,7 +2353,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 
 public void OnGameFrame()
 {
-	float engineTime = GetEngineTime();
+	float engineTime = GetGameTime();
 	static float nextAt;
 	if(nextAt > engineTime)
 		return;
@@ -2503,7 +2574,7 @@ public Action Timer_ConnectPost(Handle timer, int userid)
 		int volume;
 		static char buffer[PLATFORM_MAX_PATH];
 		float duration = Gamemode_GetMusic(client, song, buffer, volume);
-		ChangeSong(client, duration+GetEngineTime(), buffer, volume);
+		ChangeSong(client, duration+GetGameTime(), buffer, volume);
 	}
 
 	PrintToConsole(client, " \n \nWelcome to SCP: Secret Fortress\n \nThis is a gamemode based on the SCP series and community\nPlugin is created by Batfoxkid\n ");
@@ -2615,7 +2686,7 @@ void ShowClassInfo(int client, bool help=false)
 
 		if(help)
 		{
-			Client[client].HudIn = GetEngineTime();
+			Client[client].HudIn = GetGameTime();
 			Client[client].HudIn += 19.5;
 
 			FormatEx(buffer, sizeof(buffer), "train_%s", class.Name);
@@ -2627,7 +2698,7 @@ void ShowClassInfo(int client, bool help=false)
 			}
 		}
 
-		Client[client].HudIn = GetEngineTime()+11.0;
+		Client[client].HudIn = GetGameTime()+11.0;
 
 		FormatEx(buffer, sizeof(buffer), "desc_%s", class.Name);
 		if(TranslationPhraseExists(buffer))
@@ -2680,6 +2751,92 @@ bool IsFriendly(int index1, int index2)
 			return false;
 	}
 	return true;
+}
+
+void PlayFriendlyDeathReaction(int client)
+{
+	float pos[3];
+	GetClientEyePosition(client, pos);
+	
+	int targetclients[MAXPLAYERS];
+	int targetcount = 0;
+
+	float Time = GetGameTime();
+	
+	// when someone dies, check if any players nearby should react to this tragedy
+	for (int i=1; i<=MaxClients; i++)
+	{
+		if (i == client)
+			continue;
+
+		if (!IsValidClient(i) || IsSpec(i) || IsSCP(i))
+			continue;	
+		
+		// can we play a react now?
+		if (Client[i].NextReactTime > Time)
+			continue;
+			
+		if (IsFriendly(Client[client].Class, Client[i].Class))
+		{
+			float pos2[3], ang2[3], fwd2[3];
+			GetClientEyePosition(i, pos2);	
+	
+			float distsqr = GetVectorDistance(pos, pos2, true);	
+			if (distsqr > 1048576.0) // 1024 units - too far away to react
+				continue;
+			
+			GetClientEyeAngles(i, ang2);
+			GetAngleVectors(ang2, fwd2, NULL_VECTOR, NULL_VECTOR);
+			
+			// check if we can see the guy
+			TR_TraceRayFilter(pos, pos2, MASK_BLOCKLOS, RayType_EndPoint, Trace_WorldAndBrushes);			
+			if (TR_DidHit())
+				continue;
+			
+			// add him to target list
+			targetclients[targetcount++] = i;
+		}
+	}
+
+	for (int i = 0; i < targetcount; i++)
+	{	
+		// scale the chance of the reaction playing depending on the amount of targets that saw this player die
+		// if only 1 or 2 players saw it then always play the react, otherwise diminish the chance to 1/3 and then 1/4
+		bool success;
+		int maxdelay;
+
+		if (targetcount <= 2)
+		{
+			success = true;
+			maxdelay = 70;
+		}
+		else if (targetcount <= 5)
+		{
+			success = (GetRandomInt(0, 2) == 0);
+			maxdelay = 100;
+		}
+		else
+		{
+			success = (GetRandomInt(0, 3) == 0);	
+			maxdelay = 130;		
+		}
+
+		if (success)
+		{
+			// between 0.4 and 1.0 seconds
+			int targetclient = targetclients[i];
+			CreateTimer(float(GetRandomInt(40, maxdelay)) / 100.0, Timer_FriendlyDeathReaction, targetclient, TIMER_FLAG_NO_MAPCHANGE);
+			Client[targetclient].NextReactTime = Time + 5.0;
+		}
+	}
+}
+
+public Action Timer_FriendlyDeathReaction(Handle timer, int client)
+{
+	if (IsValidClient(client))
+		Config_DoReaction(client, "friendlydeath");
+
+	return Plugin_Stop;
 }
 
 public int OnQueryFinished(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue, int userid)

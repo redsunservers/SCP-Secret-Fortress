@@ -64,7 +64,7 @@ public bool SJM08_Create(int client)
 
 public void SJM08_OnButton(int client, int button)
 {
-	float engineTime = GetEngineTime();
+	float engineTime = GetGameTime();
 	if(Client[client].Extra3 > engineTime)
 		return;
 

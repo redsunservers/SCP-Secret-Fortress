@@ -253,6 +253,9 @@ enum
 	TFSpell_SkeletonHorde
 }
 
+// anything that blocks visibility
+#define MASK_BLOCKLOS (CONTENTS_SOLID|CONTENTS_MOVEABLE|CONTENTS_MIST)
+
 static const char Characters[] = "abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOQRTUVWXYZ~`1234567890@#$^&*(){}:[]|¶�;<>.,?/'|";
 static const float OFF_THE_MAP[3] = { 16383.0, 16383.0, -16383.0 };
 
@@ -357,7 +360,9 @@ int DissolveRagdoll(int ragdoll)
 stock int AttachParticle(int entity, char[] particleType, bool attach=true, float lifetime)
 {
 	int particle = CreateEntityByName("info_particle_system");
-
+	if (!IsValidEntity(particle))
+		return 0;
+		
 	char targetName[128];
 	float position[3];
 	GetEntPropVector(entity, Prop_Send, "m_vecOrigin", position);
@@ -680,6 +685,9 @@ stock int TF2_GetItemByClassname(int client, const char[] classname)
 
 stock void TF2_RemoveItem(int client, int weapon)
 {
+	// action needs to know about the item when it cancels, so we must do this here to be safe
+	Items_CancelDelayedAction(client);
+
 	/*if(TF2_IsWearable(weapon))
 	{
 		TF2_RemoveWearable(client, weapon);
@@ -1233,6 +1241,8 @@ void EndRound(any team)
 	AcceptEntityInput(entity, "RoundWin");
 }
 
+
+
 stock void EmitSoundToAll2(const char[] sample,
 				 int entity = SOUND_FROM_PLAYER,
 				 int channel = SNDCHAN_AUTO,
@@ -1313,6 +1323,15 @@ bool IsEntityStuck(int entity)
 	return (TR_DidHit());
 }
 
+// Set a single byte of data on the entity which can be accessed by it's own materials (clientside)
+// This overwrites the entity's alpha, which is normally not used so it shouldn't affect any visuals
+void SetEntityMaterialData(int entity, int data)
+{
+	int r, g, b, a;
+	GetEntityRenderColor(entity, r, g, b, a);
+	SetEntityRenderColor(entity, r, g, b, data);
+}
+
 int TF2_CreateGlow(int client, const char[] model)
 {
 	if(!model[0])
@@ -1364,10 +1383,15 @@ public bool Trace_WallsOnly(int entity, int mask)
 	return false;
 }
 
-public bool Trace_DoorOnly(int entity, int mask)
+public bool Trace_WorldAndBrushes(int entity, int mask)
 {
-	static char buffer[16];
-	return (GetEntityClassname(entity, buffer, sizeof(buffer)) && (!StrContains(buffer, "func_door") || StrEqual(buffer, "func_movelinear")));
+	// world
+	if (!entity)
+		return true;
+	
+	char buffer[8];
+	// anything prefixed with func_ can be safely regarded as a brush entity
+	return (GetEntityClassname(entity, buffer, sizeof(buffer)) && (!strncmp(buffer, "func_", 5, false)));
 }
 
 public bool Trace_OnlyHitWorld(int entity, int mask)

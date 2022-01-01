@@ -68,7 +68,6 @@ public void OnSmallHealthSpawned(int entity)
 
 public void OnMediumHealthSpawned(int entity)
 {
-	SetEntProp(entity, Prop_Data, "m_iHammerID", RoundToFloor((GetEngineTime()+2.0)*10.0));
 	SDKHook(entity, SDKHook_StartTouch, OnPipeTouch);
 	SDKHook(entity, SDKHook_Touch, OnMediumHealthPickup);
 }
@@ -93,27 +92,13 @@ public Action OnMediumHealthPickup(int entity, int client)
 
 	if(!IsSCP(client))
 	{
-		float time = GetEntProp(entity, Prop_Data, "m_iHammerID")/10.0;
-		float engineTime = GetEngineTime();
-		if(time < engineTime)
+		if (GetEntPropEnt(entity, Prop_Data, "m_hOwnerEntity") == client)
 		{
-			if(time+0.3 > engineTime)
-			{
-				int health;
-				OnGetMaxHealth(client, health);
-				if(health > GetClientHealth(client))
-				{
-					SDKUnhook(entity, SDKHook_Touch, OnMediumHealthPickup);
-					return Plugin_Continue;
-				}
-			}
-			else if(!Client[client].Disarmer && Items_CanGiveItem(client, 3))
-			{
-				Items_CreateWeapon(client, 30014, false, true, true);
-				AcceptEntityInput(entity, "Kill");
-			}
+			SDKUnhook(entity, SDKHook_Touch, OnMediumHealthPickup);
+			return Plugin_Continue;
 		}
 	}
+	
 	return Plugin_Handled;
 }
 
@@ -432,7 +417,7 @@ public Action OnTransmit(int client, int target)
 	if(TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode))
 		return Plugin_Stop;
 
-	float engineTime = GetEngineTime();
+	float engineTime = GetGameTime();
 	if(Client[client].InvisFor > engineTime)
 		return Plugin_Stop;
 
@@ -474,9 +459,10 @@ static void OnWeaponSwitchFrame(int userid)
 			if(type>0 && type<Ammo_MAX && ammo[type]<1)
 				TF2_RemoveItem(client, entity);
 		}*/
-
+		
 		Items_ShowItemMenu(client);
-		ViewChange_Switch(client);
+		
+		//ViewChange_Switch(client);
 	}
 }
 

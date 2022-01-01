@@ -1,6 +1,6 @@
 static const char TFClassNames[][] =
 {
-	"mercenary",
+	"civilian",
 	"scout",
 	"sniper",
 	"soldier",
@@ -111,6 +111,40 @@ void Config_Setup()
 		SetFailState("Failed to read '%s'", buffer);
 
 	Reactions.ImportFromFile(buffer);
+	
+	Config_PrecacheReactions(Reactions);
+
+	// I have no clue what's the best place to put this in
+	// For now I'll just put it here, if more sounds are needed in this style then it should be moved somewhere else
+	PrecacheSound("replay/cameracontrolerror.wav", true);
+	PrecacheSound("common/wpn_denyselect.wav", true);
+}
+
+void Config_PrecacheReactions(KeyValues kv)
+{
+	char buffer[PLATFORM_MAX_PATH];
+	
+	do
+	{
+		if (kv.GotoFirstSubKey(false))
+		{
+			// recursively go down
+			Config_PrecacheReactions(kv);
+			kv.GoBack();
+		}
+		else
+		{
+			if (kv.GetDataType(NULL_STRING) != KvData_None)
+			{
+				kv.GetString(NULL_STRING, buffer, sizeof(buffer));
+				if (buffer[0])
+				{
+					PrecacheSound(buffer, true);
+				}
+			}
+		}
+	} 
+	while (kv.GotoNextKey(false));	
 }
 
 void Config_DoReaction(int client, const char[] name)

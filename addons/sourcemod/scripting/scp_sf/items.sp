@@ -22,8 +22,10 @@ enum struct WeaponEnum
 	int Type;
 	bool Hide;
 	bool Hidden;
+	bool Attack;
 
 	char Model[PLATFORM_MAX_PATH];
+	char ViewmodelName[PLATFORM_MAX_PATH];
 	int Viewmodel;
 	int Skin;
 	int Rarity;
@@ -41,6 +43,16 @@ enum struct WeaponEnum
 }
 
 static ArrayList Weapons;
+
+// Some items like healthkit or grenades have actions that will be executed while holding them
+// If the player switches weapons or dies though, these actions must be cancelled
+// Use Items_StartDelayedAction to start a new delayed action
+// Use Items_CancelDelayedAction to stop it pre-maturely (there can only be one per client)
+// item actions can assume the item is still valid, so it should always be called before the item gets deleted or stripped etc
+// the action func can detect if it was called while cancelled using Items_IsDelayedActionCancelled
+
+// TODO: shouldn't this be in the class struct?
+static Handle Item_DelayedAction[MAXPLAYERS+1] = {INVALID_HANDLE, ...};
 
 void Items_Setup(KeyValues main, KeyValues map)
 {
@@ -80,7 +92,7 @@ void Items_Setup(KeyValues main, KeyValues map)
 		weapon.Strip = view_as<bool>(kv.GetNum("strip"));
 		weapon.Hide = view_as<bool>(kv.GetNum("hide"));
 		weapon.Hidden = view_as<bool>(kv.GetNum("hidden"));
-
+		weapon.Attack = view_as<bool>(kv.GetNum("attack", 1));
 		weapon.Class = KvGetClass(kv, "class");
 
 		weapon.OnAmmo = KvGetFunction(kv, "func_ammo");
@@ -97,13 +109,15 @@ void Items_Setup(KeyValues main, KeyValues map)
 		kv.GetString("classname", weapon.Classname, sizeof(weapon.Classname));
 		kv.GetString("attributes", weapon.Attributes, sizeof(weapon.Attributes));
 
-		kv.GetString("viewmodel", weapon.Model, sizeof(weapon.Model));
-		weapon.Viewmodel = weapon.Model[0] ? PrecacheModel(weapon.Model, true) : 0;
+		kv.GetString("viewmodel", weapon.ViewmodelName, sizeof(weapon.ViewmodelName));
+		weapon.Viewmodel = weapon.ViewmodelName[0] ? PrecacheModel(weapon.ViewmodelName, true) : 0;
 		
 		kv.GetString("sound", weapon.Model, sizeof(weapon.Model));
 		if(weapon.Model[0])
 		{
-			PrecacheSound(weapon.Model, true);		
+			PrecacheSound(weapon.Model, true);
+			PrecacheScriptSound(weapon.Model);		
+
 			weapon.Model[0] = 0;
 		}			
 
@@ -123,6 +137,8 @@ void Items_Setup(KeyValues main, KeyValues map)
 
 void Items_RoundStart()
 {
+	Items_ClearDelayedActions();
+
 	int players;
 	for(int client=1; client<=MaxClients; client++)
 	{
@@ -133,7 +149,7 @@ void Items_RoundStart()
 	if(players < 8)
 		players = 8;
 
-	char buffer[16];
+	char buffer[PLATFORM_MAX_PATH];
 	int entity = -1;
 	while((entity=FindEntityByClassname(entity, "prop_dynamic*")) != -1)
 	{
@@ -142,6 +158,22 @@ void Items_RoundStart()
 		{
 			if(GetRandomInt(1, 32) > players)
 				RemoveEntity(entity);
+		}
+
+		GetEntPropString(entity, Prop_Data, "m_ModelName", buffer, sizeof(buffer));
+
+		// compatibility, remap old model paths to new ones
+		if (!strcmp(buffer, "models/scp_sl/keycard.mdl", false))
+		{
+			SetEntityModel(entity, "models/scp_fixed/keycard/w_keycard.mdl");
+			// the keycard stores skin inside the alpha, so we need to translate that here too
+			SetEntityMaterialData(entity, GetEntProp(entity, Prop_Data, "m_nSkin"));			
+			continue;
+		}
+		if (!strcmp(buffer, "models/vinrax/props/firstaidkit.mdl", false))
+		{
+			SetEntityModel(entity, "models/scp_fixed/medkit/w_medkit.mdl");
+			continue;
 		}
 	}
 }
@@ -365,15 +397,17 @@ int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, 
 				SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", -1);
 				SetEntityRenderMode(entity, RENDER_TRANSCOLOR);
 				SetEntityRenderColor(entity, 255, 255, 255, 0);
-
-				if(!wearable)
-				{
-					SetEntPropFloat(entity, Prop_Send, "m_flModelScale", 0.001);
-					SetEntPropFloat(entity, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
-					SetEntPropFloat(entity, Prop_Send, "m_flNextSecondaryAttack", FAR_FUTURE);
-				}
 			}
-			else
+
+			if (!wearable && (weapon.Hide || !weapon.Attack))
+			{
+				if (weapon.Hide)
+					SetEntPropFloat(entity, Prop_Send, "m_flModelScale", 0.001);
+				SetEntPropFloat(entity, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
+				SetEntPropFloat(entity, Prop_Send, "m_flNextSecondaryAttack", FAR_FUTURE);
+			}
+			
+			if (!weapon.Hide)
 			{
 				SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", true);
 				if(weapon.Model[0])
@@ -384,6 +418,9 @@ int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, 
 						SetEntProp(entity, Prop_Send, "m_nModelIndexOverrides", precache, _, i);
 					}
 				}
+				
+				// the keycard uses this alt method because skins can't be overwriten when attached to a player
+				SetEntityMaterialData(entity, weapon.Skin);
 			}
 
 			if(!wearable)
@@ -476,7 +513,7 @@ int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, 
 
 			if(!wearable && equip)
 			{
-				SetActiveWeapon(client, entity);
+				Items_SetActiveWeapon(client, entity);
 				SZF_DropItem(client);
 			}
 
@@ -485,6 +522,44 @@ int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, 
 		}
 	}
 	return entity;
+}
+
+void Items_SetActiveWeapon(int client, int weapon)
+{
+	Items_CancelDelayedAction(client);
+	ViewModel_Destroy(client);
+	
+	SetActiveWeapon(client, weapon);	
+	
+	Items_SetupViewmodel(client, weapon);
+}
+
+void Items_SetEmptyWeapon(int client)
+{
+	FakeClientCommand(client, "use tf_weapon_fists");
+	Items_SetupViewmodel(client, -1);
+	Items_ShowItemMenu(client);
+}
+
+void Items_SetupViewmodel(int client, int weapon)
+{
+	// if the current weapon needs a unique viewmodel, set it up
+	if (IsValidEntity(weapon))
+	{
+		WeaponEnum Weapon;
+		if (Items_GetWeaponByIndex(GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex"), Weapon))
+		{
+			if (Weapon.ViewmodelName[0])
+			{
+				// all custom viewmodels follow this anim name convention
+				ViewModel_Create(client, Weapon.ViewmodelName, _, _, Weapon.Skin, false, true);
+				ViewModel_SetDefaultAnimation(client, "idle");
+				ViewModel_SetAnimation(client, "draw");
+			}
+		}
+	}
+	
+	ViewChange_Switch(client);
 }
 
 void Items_SwapWeapons(int client, int wep1, int wep2)
@@ -544,7 +619,7 @@ void Items_SwitchItem(int client, int holding)
 
 					int entity = list.Get(i);
 					Items_SwapWeapons(client, entity, holding);
-					SetActiveWeapon(client, entity);
+					Items_SetActiveWeapon(client, entity);
 					SZF_DropItem(client);
 					Items_ShowItemMenu(client);
 					found = true;
@@ -558,9 +633,8 @@ void Items_SwitchItem(int client, int holding)
 		if(found)
 			return;
 	}
-
-	FakeClientCommand(client, "use tf_weapon_fists");
-	Items_ShowItemMenu(client);
+	
+	Items_SetEmptyWeapon(client);
 }
 
 bool Items_CanGiveItem(int client, int type, bool &full=false)
@@ -744,6 +818,8 @@ bool Items_DropItem(int client, int helditem, const float origin[3], const float
 			{
 				SetVariantInt(weapon.Skin);
 				AcceptEntityInput(entity, "Skin");
+				// the keycard uses this alt method because skins can't be overwriten when attached to a player
+				SetEntityMaterialData(entity, weapon.Skin);
 			}
 
 			TeleportEntity(entity, origin, NULL_VECTOR, NULL_VECTOR);
@@ -759,6 +835,8 @@ bool Items_DropItem(int client, int helditem, const float origin[3], const float
 
 void Items_DropAllItems(int client)
 {
+	Items_CancelDelayedAction(client);
+
 	static float pos[3], ang[3];
 	GetClientEyePosition(client, pos);
 	GetClientEyeAngles(client, ang);
@@ -929,7 +1007,7 @@ public int Items_ShowItemMenuH(Menu menu, MenuAction action, int client, int cho
 					{
 						if(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex") == weapon.Index)
 						{
-							SetActiveWeapon(client, entity);
+							Items_SetActiveWeapon(client, entity);
 							SZF_DropItem(client);
 							break;
 						}
@@ -940,7 +1018,7 @@ public int Items_ShowItemMenuH(Menu menu, MenuAction action, int client, int cho
 					entity = EntRefToEntIndex(entity);
 					if(entity > MaxClients)
 					{
-						SetActiveWeapon(client, entity);
+						Items_SetActiveWeapon(client, entity);
 						SZF_DropItem(client);
 					}
 				}
@@ -961,6 +1039,21 @@ bool Items_IsHoldingWeapon(int client)
 		if(!Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) || !weapon.Hide)
 			return true;
 	}
+	return false;
+}
+
+bool Items_IsKeycard(int entity)
+{
+	WeaponEnum weapon;
+	return (Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) && (weapon.Type == 2));
+}
+
+bool Items_IsHoldingKeycard(int client)
+{
+	int entity = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	if (entity>MaxClients && IsValidEntity(entity))
+		return Items_IsKeycard(entity);
+
 	return false;
 }
 
@@ -1171,7 +1264,7 @@ void RemoveAndSwitchItem(int client, int weapon)
 	Items_ShowItemMenu(client);
 }
 
-static void SpawnPlayerPickup(int client, const char[] classname, bool timed=false)
+static void SpawnPlayerPickup(int client, const char[] classname, bool timed=false, bool instant=false)
 {
 	int entity = CreateEntityByName(classname);
 	if(entity > MaxClients)
@@ -1180,6 +1273,13 @@ static void SpawnPlayerPickup(int client, const char[] classname, bool timed=fal
 		GetClientAbsOrigin(client, pos);
 		pos[2] += 20.0;
 		DispatchKeyValue(entity, "OnPlayerTouch", "!self,Kill,,0,-1");
+
+		if (instant)
+		{
+			// spawn invisible so it doesn't appear for a frame
+			DispatchKeyValue(entity, "rendermode", "10");
+		}
+
 		DispatchSpawn(entity);
 		SetEntProp(entity, Prop_Send, "m_iTeamNum", GetClientTeam(client), 4);
 		SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
@@ -1222,16 +1322,6 @@ public bool Items_PainKillerDrop(int client, int weapon, bool &swap)
 
 	TF2_RemoveItem(client, weapon);
 	SpawnPlayerPickup(client, "item_healthkit_small");
-	return false;
-}
-
-public bool Items_HealthKitDrop(int client, int weapon, bool &swap)
-{
-	if(swap)
-		Items_SwitchItem(client, weapon);
-
-	TF2_RemoveItem(client, weapon);
-	SpawnPlayerPickup(client, "item_healthkit_medium");
 	return false;
 }
 
@@ -1287,8 +1377,7 @@ public Action Items_DisarmerHit(int client, int victim, int &inflictor, float &d
 				{
 					SetEntProp(victim, Prop_Data, "m_iAmmo", 0, _, i);
 				}
-				FakeClientCommand(victim, "use tf_weapon_fists");
-				Items_ShowItemMenu(client);
+				Items_SetEmptyWeapon(victim);
 
 				ClassEnum class;
 				if(Classes_GetByIndex(Client[victim].Class, class) && class.Group==2 && !class.Vip)
@@ -1380,6 +1469,8 @@ public void Items_BuilderCreate(int client, int entity)
 	}
 }
 
+static const char MicroChargeSound[] = "weapons/stickybomblauncher_charge_up.wav";
+
 public bool Items_MicroButton(int client, int weapon, int &buttons, int &holding)
 {
 	int type = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
@@ -1387,6 +1478,9 @@ public bool Items_MicroButton(int client, int weapon, int &buttons, int &holding
 	static float charge[MAXTF2PLAYERS];
 	if(ammo<2 || !(buttons & IN_ATTACK))
 	{
+		if (charge[client])
+			StopSound(client, SNDCHAN_AUTO, MicroChargeSound);
+			
 		charge[client] = 0.0;
 		TF2Attrib_SetByDefIndex(weapon, 821, 1.0);
 		SetEntPropFloat(client, Prop_Send, "m_flRageMeter", 99.0);
@@ -1397,7 +1491,7 @@ public bool Items_MicroButton(int client, int weapon, int &buttons, int &holding
 
 	if(charge[client])
 	{
-		float engineTime = GetEngineTime();
+		float engineTime = GetGameTime();
 		if(charge[client] == FAR_FUTURE)
 		{
 			SetEntPropFloat(client, Prop_Send, "m_flRageMeter", 0.0);
@@ -1423,21 +1517,39 @@ public bool Items_MicroButton(int client, int weapon, int &buttons, int &holding
 	}
 	else
 	{
-		charge[client] = GetEngineTime()+6.0;
+		charge[client] = GetGameTime()+6.0;
+		EmitSoundToAll2(MicroChargeSound, client, SNDCHAN_AUTO, SNDLEVEL_CAR, _, _, 67);
 	}
 	return true;
 }
 
+public Action Items_GrenadeAction(Handle timer, int client)
+{
+	// if we finish successfully or cancel early, we still need to remove the weapon
+	// active weapon should still be the grenade here
+	int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	if (IsValidEntity(weapon))
+	{
+		RemoveAndSwitchItem(client, weapon);
+	}
+
+	return Plugin_Stop;
+}
+
 public bool Items_FragButton(int client, int weapon, int &buttons, int &holding)
 {
-	if(!holding)
+	if(!holding && !Items_InDelayedAction(client))
 	{
 		bool short = view_as<bool>(buttons & IN_ATTACK2);
 		if(short || (buttons & IN_ATTACK))
 		{
 			holding = short ? IN_ATTACK2 : IN_ATTACK;
-			RemoveAndSwitchItem(client, weapon);
-			Config_DoReaction(client, "throwgrenade");
+
+			// remove after a delay so the viewmodel throw animation can play out
+			Items_StartDelayedAction(client, 0.3, Items_GrenadeAction, client);
+
+			ViewModel_SetAnimation(client, "use");
+			Config_DoReaction(client, "throwgrenade");			
 
 			int entity = CreateEntityByName("prop_physics_multiplayer");
 			if(IsValidEntity(entity))
@@ -1459,8 +1571,8 @@ public bool Items_FragButton(int client, int weapon, int &buttons, int &holding)
 				SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
 				SetEntProp(entity, Prop_Send, "m_iTeamNum", GetClientTeam(client));
 
-				SetEntityModel(entity, "models/weapons/w_models/w_grenade_grenadelauncher.mdl");
-				SetEntProp(entity, Prop_Send, "m_nSkin", 0);
+				// shouldn't be hardcoded!!
+				SetEntityModel(entity, "models/scp_fixed/frag/w_frag.mdl");
 
 				DispatchSpawn(entity);
 				TeleportEntity(entity, pos, ang, vel);
@@ -1497,31 +1609,50 @@ public Action Items_FragTimer(Handle timer, int ref)
 			SetVariantString("classname taunt_soldier"); 
 			AcceptEntityInput(explosion, "AddOutput");
 			
-			AttachParticle(explosion, "asplode_hoodoo", false, 5.0);		
-			// entity wil be gone before it plays so it needs to play as ambient sound
-			EmitAmbientSound("weapons/air_burster_explode1.wav", pos, entity, SNDLEVEL_GUNFIRE);
+			int particle = AttachParticle(explosion, "asplode_hoodoo", false, 5.0);
+			if (particle)
+				EmitGameSoundToAll("Weapon_Airstrike.Explosion", particle, entity, _, _, pos);
 			
 			AcceptEntityInput(explosion, "Explode");
 			AcceptEntityInput(explosion, "Kill");
 		}
 
-		explosion = CreateEntityByName("env_physexplosion");
-		if(IsValidEntity(explosion))
+		// push away all dropped stuff
+		// can't use env_physexplosion because it just skips over them
+
+		// TODO: this doesn't work because the objects are put into a sleep state
+		// gonna need the vphysics extension to Wake them up
+
+		/*		
+
+		// make stuff fly higher
+		pos[2] -= 32.0;
+
+		int weapon = 0;
+		while ((weapon = FindEntityByClassname(weapon, "tf_dropped_weapon")) > MaxClients)
 		{
-			DispatchKeyValueVector(explosion, "origin", pos);
-			DispatchKeyValue(explosion, "magnitude", "500");
-			DispatchKeyValue(explosion, "radius", "300");
-			DispatchKeyValue(explosion, "flags", "19");
+			float pos2[3];
+			GetEntPropVector(weapon, Prop_Send, "m_vecOrigin", pos2);
 
-			SetEntPropEnt(explosion, Prop_Send, "m_hOwnerEntity", client);
-			DispatchSpawn(explosion);
+			float delta[3];
+			SubtractVectors(pos2, pos, delta);
 
-			HookSingleEntityOutput(explosion, "OnPushedPlayer", Items_FragHook);
-			AcceptEntityInput(explosion, "Explode");
+			float dist = GetVectorLength(delta, false);
 
-			UnhookSingleEntityOutput(explosion, "OnPushedPlayer", Items_FragHook);
-			AcceptEntityInput(explosion, "Kill");
-		}
+			// in range?
+			if (dist < 350.0)
+			{
+				// apply falloff depending on distance
+				float falloff = (dist / 350.0);
+				if (falloff != 0.0)
+				{
+					ScaleVector(delta, 1.0 - falloff);
+					TeleportEntity(entity, NULL_VECTOR, NULL_VECTOR, delta);
+				}
+			}
+		}		
+
+		*/
 
 		AcceptEntityInput(entity, "Kill");
 	}
@@ -1535,14 +1666,18 @@ public void Items_FragHook(const char[] output, int caller, int activator, float
 
 public bool Items_FlashButton(int client, int weapon, int &buttons, int &holding)
 {
-	if(!holding)
+	if(!holding && !Items_InDelayedAction(client))
 	{
 		bool short = view_as<bool>(buttons & IN_ATTACK2);
 		if(short || (buttons & IN_ATTACK))
 		{
 			holding = short ? IN_ATTACK2 : IN_ATTACK;
-			RemoveAndSwitchItem(client, weapon);
-			Config_DoReaction(client, "throwgrenade");
+
+			// remove after a delay so the viewmodel throw animation can play out
+			Items_StartDelayedAction(client, 0.3, Items_GrenadeAction, client);
+
+			ViewModel_SetAnimation(client, "use");
+			Config_DoReaction(client, "throwgrenade");		
 
 			int entity = CreateEntityByName("prop_physics_multiplayer");
 			if(IsValidEntity(entity))
@@ -1565,8 +1700,8 @@ public bool Items_FlashButton(int client, int weapon, int &buttons, int &holding
 				SetEntProp(entity, Prop_Send, "m_iTeamNum", GetClientTeam(client));
 				SetEntProp(entity, Prop_Data, "m_iHammerID", Client[client].Class);
 
-				SetEntityModel(entity, "models/workshop/weapons/c_models/c_quadball/w_quadball_grenade.mdl");
-				SetEntProp(entity, Prop_Send, "m_nSkin", 1);
+				// shouldn't be hardcoded!!
+				SetEntityModel(entity, "models/scp_fixed/flash/w_flash.mdl");
 
 				DispatchSpawn(entity);
 				TeleportEntity(entity, pos, ang, vel);
@@ -1592,12 +1727,14 @@ public Action Items_FlashTimer(Handle timer, int ref)
 			DispatchKeyValueVector(explosion, "origin", pos1);
 			DispatchKeyValue(explosion, "iMagnitude", "0");
 			// don't want particles, we create them seperately
-			DispatchKeyValue(explosion, "spawnflags", "852");
+			DispatchKeyValue(explosion, "spawnflags", "916");
 
 			SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"));
 			DispatchSpawn(explosion);
 
-			AttachParticle(explosion, "drg_cow_explosioncore_normal_blue", false, 5.0);
+			int particle = AttachParticle(explosion, "drg_cow_explosioncore_normal_blue", false, 5.0);
+			if (particle)
+				EmitGameSoundToAll("Weapon_Detonator.Detonate", particle, entity, _, _, pos1);			
 
 			AcceptEntityInput(explosion, "Explode");
 			AcceptEntityInput(explosion, "Kill");
@@ -1610,7 +1747,8 @@ public Action Items_FlashTimer(Handle timer, int ref)
 			{
 				static float pos2[3];
 				GetClientEyePosition(i, pos2);
-				if(GetVectorDistance(pos1, pos2, true) < 250000.0)
+				// 1024 units
+				if(GetVectorDistance(pos1, pos2, true) < 1048576.0)
 				{
 					FadeMessage(i, 1000, 1000, 0x0001, 200, 200, 200, 255);
 					ClientCommand(i, "dsp_player %d", GetRandomInt(35, 37));
@@ -1652,14 +1790,55 @@ public bool Items_PainKillerButton(int client, int weapon, int &buttons, int &ho
 	return false;
 }
 
+public Action Items_HealthKitAction(Handle timer, int client)
+{
+	int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	if (IsValidEntity(weapon))
+	{
+		if (!Items_IsDelayedActionCancelled(client))
+		{
+			// player will instantly pick this up
+			RemoveAndSwitchItem(client, weapon);
+			SpawnPlayerPickup(client, "item_healthkit_medium", true, true);
+		}
+		else 
+		{
+			// revert to idle animation
+			ViewModel_SetAnimation(client, "idle");
+			// allow movement again
+			TF2_RemoveCondition(client, TFCond_Dazed);
+		}
+	}
+
+	return Plugin_Continue;
+}
+
 public bool Items_HealthKitButton(int client, int weapon, int &buttons, int &holding)
 {
+	bool canHeal = 	GetClientHealth(client) < Classes_GetMaxHealth(client);
 	if(!holding && ((buttons & IN_ATTACK) || (buttons & IN_ATTACK2)))
 	{
 		holding = (buttons & IN_ATTACK) ? IN_ATTACK : IN_ATTACK2;
-		SpawnPlayerPickup(client, "item_healthkit_medium");
-		RemoveAndSwitchItem(client, weapon);
+
+		if (canHeal && !Items_InDelayedAction(client))
+		{
+			// begin delayed action, the heal will be finished at the end of the action unless it gets cancelled early
+			Items_StartDelayedAction(client, 2.5, Items_HealthKitAction, client);
+			ViewModel_SetAnimation(client, "use");
+			// don't allow movement
+			TF2_StunPlayer(client, 2.5, 1.0, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
+		}
+		else 
+		{
+			EmitSoundToClient(client, "common/wpn_denyselect.wav");
+		}
 	}
+	else if (!canHeal || (!(buttons & IN_ATTACK) && !(buttons & IN_ATTACK2)))
+	{
+		// cancel healing as holding was stopped or we can't be healed anymore (player could have been healed externally)
+		Items_CancelDelayedAction(client);
+	}
+
 	return false;
 }
 
@@ -1670,7 +1849,7 @@ public bool Items_AdrenalineButton(int client, int weapon, int &buttons, int &ho
 		holding = IN_ATTACK;
 		RemoveAndSwitchItem(client, weapon);
 		TF2_AddCondition(client, TFCond_DefenseBuffed, 20.0, client);
-		Client[client].Extra3 = GetEngineTime()+20.0;
+		Client[client].Extra3 = GetGameTime()+20.0;
 		FadeClientVolume(client, 0.3, 2.5, 17.5, 2.5);
 	}
 	return false;
@@ -1779,7 +1958,7 @@ public bool Items_268Button(int client, int weapon, int &buttons, int &holding)
 	{
 		holding = IN_ATTACK;
 
-		float engineTime = GetEngineTime();
+		float engineTime = GetGameTime();
 		static float delay[MAXTF2PLAYERS];
 		if(delay[client] > engineTime)
 		{
@@ -1799,7 +1978,7 @@ public bool Items_RadioRadio(int client, int entity, float &multi)
 {
 	static float time[MAXTF2PLAYERS];
 	bool remove, off;
-	float engineTime = GetEngineTime();
+	float engineTime = GetGameTime();
 	switch(GetEntProp(entity, Prop_Data, "m_iClip1"))
 	{
 		case 1:
@@ -2110,4 +2289,44 @@ public int Items_KeycardScp(int client, AccessEnum access)
 		return 1;
 
 	return 0;
+}
+
+public void Items_StartDelayedAction(int client, float length, Timer func, any data)
+{
+	Item_DelayedAction[client] = CreateTimer(length, func, data, TIMER_FLAG_NO_MAPCHANGE);
+}
+
+public void Items_CancelDelayedAction(int client)
+{
+	Handle timer = Item_DelayedAction[client];
+
+	if (timer != INVALID_HANDLE)
+	{
+		// null handle will indicate to the func that it got cancelled, as normally it should still be here
+		Item_DelayedAction[client] = INVALID_HANDLE;
+		TriggerTimer(timer, false);
+	}
+}
+
+public bool Items_InDelayedAction(int client)
+{
+	return (Item_DelayedAction[client] != INVALID_HANDLE);
+}
+
+public bool Items_IsDelayedActionCancelled(int client)
+{
+	return (Item_DelayedAction[client] == INVALID_HANDLE);
+}
+
+public void Items_ClearDelayedActions()
+{
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		Handle timer = Item_DelayedAction[client];
+		if (timer != INVALID_HANDLE)
+		{
+			Item_DelayedAction[client] = INVALID_HANDLE;
+			KillTimer(timer);
+		}
+	}
 }

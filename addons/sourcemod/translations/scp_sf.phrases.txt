@@ -68,7 +68,7 @@
 	}
 	"hint_17"
 	{
-		"en"		"To use a Health Kit, use ATTACK2 to drop the\nkit and stand over it until it's used."
+		"en"		"To use a Health Kit, hold ATTACK1 or ATTACK2."
 	}
 	"hint_18"
 	{
@@ -933,7 +933,7 @@
 	}
 	"info_30014"
 	{
-		"en"		"%%+attack%% to drop and stand over it to gain back half your max health."
+		"en"		"%%+attack%% to use and gain back half your max health."
 	}
 	"weapon_30015"
 	{
