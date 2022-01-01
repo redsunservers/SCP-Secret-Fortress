@@ -117,6 +117,7 @@ void Items_Setup(KeyValues main, KeyValues map)
 		{
 			PrecacheSound(weapon.Model, true);
 			PrecacheScriptSound(weapon.Model);		
+
 			weapon.Model[0] = 0;
 		}			
 

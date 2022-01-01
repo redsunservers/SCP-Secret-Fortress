@@ -187,6 +187,7 @@ void Config_DoReaction(int client, const char[] name)
 				}
 			}
 
+			PrecacheSound(buffer, true);
 			EmitSoundToAll(buffer, client, SNDCHAN_VOICE, 95);
 		}
 	}
