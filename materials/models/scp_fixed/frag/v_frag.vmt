@@ -1,0 +1,24 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "models/scp_fixed/frag/frag"
+	"$bumpmap" "models/scp_fixed/frag/frag_bump"
+	
+	//"$selfillum" "1"
+
+	"$phong" "1"
+	"$phongexponent" "20"
+	"$phongboost" "4"	
+	"$lightwarptexture" "models\lightwarps\weapon_lightwarp"
+	"$phongfresnelranges" "[0.25 0.5 1]"
+	"$halflambert" "1"
+	
+	// Cloaking
+	"$cloakPassEnabled" "1"
+
+	"Proxies"
+	{
+		"spy_invis"
+		{
+		}
+	}
+}

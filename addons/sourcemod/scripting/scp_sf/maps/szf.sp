@@ -236,11 +236,11 @@ void SZF_DropItem(int client, bool teleport=true)
 public void SZF_PointCaptured(Event event, const char[] name, bool dontBroadcast)
 {
 	static float Cooldown;
-	float engineTime = GetEngineTime();
+	float engineTime = GetGameTime();
 	if(Cooldown > engineTime)
 		return;
 
-	Cooldown = GetEngineTime()+3.0;
+	Cooldown = GetGameTime()+3.0;
 
 	ArrayList players = ZombiePlayersList();
 
@@ -483,7 +483,7 @@ public Action SZF_049Timer(Handle timer, DataPack pack)
 
 public void SZF_106Button(int client, int button)
 {
-	if(Client[client].ChargeIn && Client[client].ChargeIn<GetEngineTime())
+	if(Client[client].ChargeIn && Client[client].ChargeIn<GetGameTime())
 	{
 		Client[client].ChargeIn = 0.0;
 		TF2_RemoveCondition(client, TFCond_Dazed);
@@ -514,7 +514,7 @@ public void SZF_106Button(int client, int button)
 
 	if(button==IN_ATTACK2 || button==IN_ATTACK3)
 	{
-		float engineTime = GetEngineTime();
+		float engineTime = GetGameTime();
 		if(Client[client].ChargeIn>engineTime || !(GetEntityFlags(client) & FL_ONGROUND))
 		{
 			PrintHintText(client, "%T", "106_tele_deny", client);
@@ -557,7 +557,7 @@ public Action SZF_610DealDamage(int client, int victim, int &inflictor, float &d
 
 public bool SZF_939GlowPlayer(int client, int victim)
 {
-	return ((Client[victim].IdleAt - GetEngineTime()) > 0.0);
+	return ((Client[victim].IdleAt - GetGameTime()) > 0.0);
 }
 
 public Action SZF_HeadshotHit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)

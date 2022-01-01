@@ -67,6 +67,7 @@ static SoundEnum MusicAlone;
 static SoundEnum MusicFloors[10];
 
 int VIPsAlive;
+bool DebugPreventRoundWin;
 
 ArrayList Gamemode_Setup(KeyValues main, KeyValues map)
 {
@@ -288,11 +289,17 @@ bool Gamemode_RoundStart()
 			if(Client[client].QueueIndex != -1)
 				Gamemode_UnassignQueueIndex(client);
 		}
-		else if (Client[client].QueueIndex == -1)
+		else
 		{
-			// Valid client with no queue index, assign him one
-			Gamemode_AssignQueueIndex(client);
-		}
+			if (Client[client].QueueIndex == -1)
+			{
+				// Valid client with no queue index, assign him one
+				Gamemode_AssignQueueIndex(client);
+			}
+			
+			// clean up decals from previous round
+			ClientCommand(client, "r_cleardecals");			
+		}		
 	}
 
 	// This was done to prevent RNG just being funky against repeating classes
@@ -493,7 +500,7 @@ bool Gamemode_RoundStart()
 
 void Gamemode_CheckRound()
 {
-	if(GameCondition != INVALID_FUNCTION)
+	if ((GameCondition != INVALID_FUNCTION) && !DebugPreventRoundWin)
 	{
 		bool endround;
 		int team;
@@ -715,7 +722,7 @@ float Gamemode_GetMusic(int client, int floor, char path[PLATFORM_MAX_PATH], int
 		}
 	}
 
-	if(Client[client].AloneIn < GetEngineTime())
+	if(Client[client].AloneIn < GetGameTime())
 	{
 		strcopy(path, sizeof(path), MusicAlone.Path);
 		volume = MusicAlone.Volume;
@@ -1153,7 +1160,7 @@ public bool Gamemode_ConditionBoss(TFTeam &team)
 
 public float Gamemode_WaveStartCountdown(ArrayList &list, ArrayList &players)
 {
-	EndRoundIn = GetEngineTime()+121.0;
+	EndRoundIn = GetGameTime()+121.0;
 	return 0.0;
 }
 
@@ -1178,7 +1185,7 @@ public float Gamemode_WaveRespawnTickets(ArrayList &list, ArrayList &players)
 		{
 			delete list;
 			list = null;
-			EndRoundIn = GetEngineTime()+GetRandomFloat(WaveTimes[0], WaveTimes[1]);
+			EndRoundIn = GetGameTime()+GetRandomFloat(WaveTimes[0], WaveTimes[1]);
 			return 0.0;
 		}
 
@@ -1202,7 +1209,7 @@ public float Gamemode_WaveRespawnTickets(ArrayList &list, ArrayList &players)
 		WaveList.SetArray(i, wave);
 
 		int count;
-		float engineTime = GetEngineTime();
+		float engineTime = GetGameTime();
 		ClassEnum class;
 		for(i=1; i<=MaxClients; i++)
 		{

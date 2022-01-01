@@ -11,9 +11,12 @@ static int WantsLagCompensationOnEntityPostHook[MAXTF2PLAYERS];
 static int CalculateSpeedClient;
 static int ClientTeam[MAXTF2PLAYERS];
 
+int StudioHdrOffset;
+
 void DHook_Setup(GameData gamedata)
 {
 	DHook_CreateDetour(gamedata, "CBaseEntity::InSameTeam", DHook_InSameTeamPre);
+	DHook_CreateDetour(gamedata, "CBaseAnimating::GetBoneCache", DHook_GetBoneCache);	
 	DHook_CreateDetour(gamedata, "CTFGameMovement::ProcessMovement", DHook_ProcessMovementPre);
 	DHook_CreateDetour(gamedata, "CTFPlayer::CanPickupDroppedWeapon", DHook_CanPickupDroppedWeaponPre);
 	DHook_CreateDetour(gamedata, "CTFPlayer::DoAnimationEvent", DHook_DoAnimationEventPre);
@@ -58,6 +61,10 @@ void DHook_Setup(GameData gamedata)
 	WantsLagCompensationOnEntity = DynamicHook.FromConf(gamedata, "CBasePlayer::WantsLagCompensationOnEntity");
 	if(!WantsLagCompensationOnEntity)
 		LogError("[Gamedata] Could not find CBasePlayer::WantsLagCompensationOnEntity");
+
+	StudioHdrOffset = GameConfGetOffset(gamedata, "CBaseAnimating::m_pStudioHdr");
+	if (StudioHdrOffset == -1)
+		LogError("[Gamedata] Failed to get offset for CBaseAnimating::m_pStudioHdr");		
 }
 
 static void DHook_CreateDetour(GameData gamedata, const char[] name, DHookCallback preCallback = INVALID_FUNCTION, DHookCallback postCallback = INVALID_FUNCTION)
@@ -280,6 +287,19 @@ public MRESReturn DHook_InSameTeamPre(int entity, DHookReturn ret, DHookParam pa
 
 	ret.Value = result;
 	return MRES_Supercede;
+}
+
+public MRESReturn DHook_GetBoneCache(int entity, DHookReturn ret)
+{
+	// Missing null check for parent studiohdr in CBaseAnimating::SetupBones 
+	// causes crashes when attaching arms to viewmodel
+	if (GetEntData(entity, StudioHdrOffset * 4) == 0)
+	{
+		ret.Value = 0;
+		return MRES_Supercede;
+	}
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHook_ProcessMovementPre(DHookParam param)

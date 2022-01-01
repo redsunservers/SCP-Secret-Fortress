@@ -76,7 +76,7 @@ public void HeavyBlu_OnButton(int client, int button)
 		}
 	}
 
-	float engineTime = GetEngineTime();
+	float engineTime = GetGameTime();
 	static float delay;
 	if(delay < engineTime)
 	{
@@ -269,7 +269,7 @@ public bool HeavyRed_Create(int client)
 
 public void HeavyRed_OnButton(int client, int button)
 {
-	float engineTime = GetEngineTime();
+	float engineTime = GetGameTime();
 	static float delay;
 	if(delay < engineTime)
 	{
@@ -438,7 +438,7 @@ static bool Seeman_Kill(int client)
 			TF2_AddCondition(client, TFCond_MegaHeal, 4.5);
 			CreateTimer(4.5, Seeman_NukeTimer, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 
-			ChangeGlobalSong(GetEngineTime()+10.0, NukeSong);
+			ChangeGlobalSong(GetGameTime()+10.0, NukeSong);
 
 			int weapon = SpawnWeapon(client, "tf_weapon_bottle", 1, 101, 5, "2 ; 3.1 ; 68 ; 2 ; 207 ; 0 ; 252 ; 0.6 ; 2025 ; 1", 0);
 			if(weapon > MaxClients)
@@ -630,7 +630,7 @@ public bool MTF105_OnGlow(int client, int target)
 	static float pos1[3], pos2[3];
 	GetClientEyePosition(client, pos1);
 	GetClientAbsOrigin(target, pos2);
-	return GetVectorDistance(pos1, pos2) < ((GetEngineTime()-RoundStartAt)*3.0);
+	return GetVectorDistance(pos1, pos2) < ((GetGameTime()-RoundStartAt)*3.0);
 }
 
 public bool MTF076_Create(int client)

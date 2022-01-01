@@ -40,7 +40,7 @@ public bool SCP049_Create(int client)
 	}
 
 	Revive[client].Index = 0;
-	Revive[client].GoneAt = GetEngineTime()+20.0;
+	Revive[client].GoneAt = GetGameTime()+20.0;
 	Revive[client].MoveAt = FAR_FUTURE;
 	return false;
 }
@@ -61,7 +61,7 @@ public bool SCP0492_Create(int client)
 	ChangeClientTeamEx(client, class.Team);
 
 	// Show class info
-	Client[client].HudIn = GetEngineTime()+9.9;
+	Client[client].HudIn = GetGameTime()+9.9;
 	CreateTimer(2.0, ShowClassInfoTimer, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 
 	// Model stuff
@@ -102,7 +102,7 @@ public void SCP049_OnWeaponSwitch(int client, int entity)
 				GiveMelee(client, GetSteamAccountID(client, false), false);
 			}
 			Revive[client].MoveAt = FAR_FUTURE;
-			Revive[client].GoneAt = GetEngineTime()+3.0;
+			Revive[client].GoneAt = GetGameTime()+3.0;
 		}
 
 		ViewModel_Create(client, ModelMedi);
@@ -115,7 +115,7 @@ public Action SCP049_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &ch
 {
 	if(!StrContains(sample, "vo", false))
 	{
-		float engineTime = GetEngineTime();
+		float engineTime = GetGameTime();
 		static float delay[MAXTF2PLAYERS];
 		if(delay[client] > engineTime)
 			return Plugin_Handled;
@@ -257,7 +257,7 @@ public void SCP049_OnButton(int client, int button)
 		}
 	}
 
-	float engineTime = GetEngineTime();
+	float engineTime = GetGameTime();
 	if(Revive[client].GoneAt > engineTime)
 		return;
 
@@ -429,7 +429,7 @@ public void SCP049_OnRevive(Event event, const char[] name, bool dontBroadcast)
 public void SCP049_Think(int client)
 {
 	int entity = EntRefToEntIndex(Revive[client].Index);
-	if(Revive[client].MoveAt < GetEngineTime())
+	if(Revive[client].MoveAt < GetGameTime())
 	{
 		Revive[client].MoveAt = FAR_FUTURE;
 		if(!IsValidMarker(entity)) // Oh fiddlesticks, what now..
@@ -450,7 +450,7 @@ public void SCP049_Think(int client)
 		SDKHook(entity, SDKHook_SetTransmit, SCP049_Transmit);
 		SDKUnhook(entity, SDKHook_SetTransmit, SCP049_TransmitNone);
 	}
-	else if(!Enabled || Revive[client].GoneAt<GetEngineTime())
+	else if(!Enabled || Revive[client].GoneAt<GetGameTime())
 	{
 		SDKUnhook(client, SDKHook_PreThink, SCP049_Think);
 		if(!IsPlayerAlive(client) && GetClientTeam(client)==view_as<int>(TFTeam_Unassigned))
@@ -516,7 +516,7 @@ static void SpawnMarker(int victim, int client)
 
 	DispatchSpawn(entity);
 	Revive[victim].Index = EntIndexToEntRef(entity);
-	Revive[victim].MoveAt = GetEngineTime()+0.05;
+	Revive[victim].MoveAt = GetGameTime()+0.05;
 	Revive[victim].GoneAt = Revive[victim].MoveAt+14.95;
 
 	SDKHook(victim, SDKHook_PreThink, SCP049_Think);
