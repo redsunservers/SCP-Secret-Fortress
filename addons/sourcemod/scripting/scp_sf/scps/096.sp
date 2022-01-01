@@ -152,7 +152,7 @@ public bool SCP096_DoorWalk(int client, int entity)
 
 public void SCP096_OnButton(int client, int button)
 {
-	float engineTime = GetEngineTime();
+	float engineTime = GetGameTime();
 	switch(Client[client].Extra2)
 	{
 		case 1:
@@ -286,7 +286,7 @@ public void SCP096_OnButton(int client, int button)
 				continue;
 
 			// ensure no wall or door is obstructing
-			TR_TraceRayFilter(pos2, pos1, MASK_ALL, RayType_EndPoint, Trace_DoorOnly);
+			TR_TraceRayFilter(pos2, pos1, MASK_BLOCKLOS, RayType_EndPoint, Trace_WorldAndBrushes);
 			TR_GetEndPosition(ang3);
 			if(ang3[0]!=pos1[0] || ang3[1]!=pos1[1] || ang3[2]!=pos1[2])
 				continue;
@@ -307,7 +307,7 @@ public void SCP096_OnButton(int client, int button)
 				continue;
 
 			// ensure no wall or door is obstructing
-			TR_TraceRayFilter(pos1, pos2, MASK_ALL, RayType_EndPoint, Trace_DoorOnly);
+			TR_TraceRayFilter(pos1, pos2, MASK_BLOCKLOS, RayType_EndPoint, Trace_WorldAndBrushes);
 			TR_GetEndPosition(ang3);
 			if(ang3[0]!=pos2[0] || ang3[1]!=pos2[1] || ang3[2]!=pos2[2])
 				continue;
@@ -367,7 +367,7 @@ static void TriggerShyGuy(int client, int target, bool full)
 				StopSound(client, SNDCHAN_VOICE, SoundPassive);
 
 			Client[client].Pos[0] = 0.0;
-			Client[client].Extra3 = GetEngineTime()+RageWarmup;
+			Client[client].Extra3 = GetGameTime()+RageWarmup;
 			Client[client].FreezeFor = Client[client].Extra3;
 			Client[client].Extra2 = 1;
 			Client[client].Disarmer = 1;

@@ -54,6 +54,8 @@ public bool SCP173_Create(int client)
 		SetEntityRenderColor(weapon, 255, 255, 255, 0);
 		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
+		// no crouching
+		TF2Attrib_SetByDefIndex(weapon, 820, 1.0);		
 	}
 
 	CreateTimer(15.0, Timer_UpdateClientHud, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
@@ -126,7 +128,7 @@ public Action SCP173_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &ch
 public void SCP173_OnButton(int client, int button)
 {
 	static float pos1[3], ang1[3], pos2[3], ang2[3], ang3[3];
-	float engineTime = GetEngineTime();
+	float engineTime = GetGameTime();
 	static float delay[MAXTF2PLAYERS];
 	if(delay[client] < engineTime)
 	{
@@ -177,7 +179,7 @@ public void SCP173_OnButton(int client, int button)
 				continue;
 
 			// ensure no wall or door is obstructing
-			TR_TraceRayFilter(pos2, pos1, MASK_ALL, RayType_EndPoint, Trace_DoorOnly);
+			TR_TraceRayFilter(pos2, pos1, MASK_BLOCKLOS, RayType_EndPoint, Trace_WorldAndBrushes);
 			TR_GetEndPosition(ang3);
 			if(ang3[0]!=pos1[0] || ang3[1]!=pos1[1] || ang3[2]!=pos1[2])
 				continue;
@@ -332,7 +334,7 @@ public void SCP173_OnButton(int client, int button)
 						continue;
 
 					// ensure no wall or door is obstructing
-					TR_TraceRayFilter(pos1, pos2, MASK_VISIBLE, RayType_EndPoint, Trace_DoorOnly);
+					TR_TraceRayFilter(pos1, pos2, MASK_BLOCKLOS, RayType_EndPoint, Trace_WorldAndBrushes);
 					TR_GetEndPosition(ang3);
 					if(ang3[0]!=pos2[0] || ang3[1]!=pos2[1] || ang3[2]!=pos2[2])
 						continue;
@@ -515,7 +517,7 @@ static bool DPT_TryTeleport(int clientIdx, float maxDistance, const float startP
 				// before we test this position, ensure it has line of sight from the point our player looked from
 				// this ensures the player can't teleport through walls
 				static float tmpPos[3];
-				TR_TraceRayFilter(endPos, testPos, MASK_PLAYERSOLID, RayType_EndPoint, Trace_DoorOnly);
+				TR_TraceRayFilter(endPos, testPos, MASK_BLOCKLOS, RayType_EndPoint, Trace_WorldAndBrushes);
 				TR_GetEndPosition(tmpPos);
 				if (testPos[0] != tmpPos[0] || testPos[1] != tmpPos[1] || testPos[2] != tmpPos[2])
 					continue;

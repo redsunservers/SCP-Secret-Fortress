@@ -34,7 +34,7 @@ void ViewChange_Switch(int client)
 	if(entity > MaxClients)
 	{
 		int active = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-		if(!ViewModel_Enabled(client) && active>MaxClients && IsValidEntity(active))
+		if(!ViewModel_Valid(client) && active>MaxClients && IsValidEntity(active))
 		{
 			WeaponEnum weapon;
 			if(Items_GetWeaponByIndex(GetEntProp(active, Prop_Send, "m_iItemDefinitionIndex"), weapon))
@@ -120,4 +120,9 @@ void ViewChange_UpdateHands(int client, TFClassType class)
 			HandRef[client] = EntIndexToEntRef(entity);
 		}
 	}
+}
+
+void ViewChange_SetHandModel(int client, int entity)
+{
+	DispatchKeyValue(entity, "model", HandModels[Client[client].CurrentClass]);
 }

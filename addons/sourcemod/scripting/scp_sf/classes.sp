@@ -186,7 +186,7 @@ static void GrabKvValues(KeyValues kv, ClassEnum class, ClassEnum defaul, int in
 	class.OnTheme = KvGetFunction(kv, "func_theme", defaul.OnTheme);
 	class.OnWeaponSwitch = KvGetFunction(kv, "func_switch", defaul.OnWeaponSwitch);
 	class.OnVoiceCommand = KvGetFunction(kv, "func_voice", defaul.OnVoiceCommand);
-
+	
 	kv.GetString("spawn", class.Spawn, sizeof(class.Spawn), defaul.Spawn);
 	kv.GetString("color", class.Color, sizeof(class.Color), defaul.Color);
 
@@ -406,7 +406,7 @@ void Classes_PlayerSpawn(int client)
 			Classes_SpawnPoint(client, Client[client].Class);
 
 			// Show class info
-			Client[client].HudIn = GetEngineTime()+9.9;
+			Client[client].HudIn = GetGameTime()+9.9;
 			CreateTimer(2.0, ShowClassInfoTimer, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 
 			// Model stuff
@@ -476,7 +476,7 @@ void Classes_SpawnPoint(int client, int index)
 			length = list.Length;
 			if(!length)
 			{
-				Client[client].InvisFor = GetEngineTime()+30.0;
+				Client[client].InvisFor = GetGameTime()+30.0;
 
 				DataPack pack;
 				CreateDataTimer(1.0, Timer_Stun, pack, TIMER_FLAG_NO_MAPCHANGE);
@@ -1055,7 +1055,7 @@ public Action Classes_TakeDamageHuman(int client, int attacker, int &inflictor, 
 	{
 		if(damagetype & DMG_CRUSH)
 		{
-			float engineTime = GetEngineTime();
+			float engineTime = GetGameTime();
 			static float delay[MAXTF2PLAYERS];
 			if(delay[client] > engineTime)
 				return Plugin_Handled;
@@ -1096,7 +1096,7 @@ public void Classes_CondDBoi(int client, TFCond cond)
 {
 	if(cond == TFCond_TeleportedGlow)
 	{
-		float engineTime = GetEngineTime();
+		float engineTime = GetGameTime();
 		if(Client[client].IgnoreTeleFor < engineTime)
 		{
 			int index;
@@ -1150,7 +1150,7 @@ public void Classes_CondSci(int client, TFCond cond)
 {
 	if(cond == TFCond_TeleportedGlow)
 	{
-		float engineTime = GetEngineTime();
+		float engineTime = GetGameTime();
 		if(Client[client].IgnoreTeleFor < engineTime)
 		{
 			int index;
@@ -1219,6 +1219,10 @@ public bool Classes_PickupStandard(int client, int entity)
 		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
 		if(!StrContains(buffer, "scp_trigger", false))
 		{
+			// play animation if holding a keycard
+			if (Items_IsHoldingKeycard(client))
+				ViewModel_SetAnimation(client, "use");		
+				
 			TF2_RemoveCondition(client, TFCond_Stealthed);
 			AcceptEntityInput(entity, "Press", client, client);
 			return true;

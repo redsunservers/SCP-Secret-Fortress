@@ -1,0 +1,23 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" 	"models/scp_fixed/medkit/medkit"
+	"$bumpmap" 	"models/scp_fixed/medkit/medkit_bump"
+	"$phong" "1"
+	"$phongexponent" "5"
+
+	"$phongboost" "5"	
+	"$lightwarptexture" "models\lightwarps\weapon_lightwarp"
+	"$phongfresnelranges"	"[.3 .5 3]"
+	"$halflambert" "1"
+
+	// Cloaking
+	"$cloakPassEnabled" "1"
+
+	"Proxies"
+	{
+		"spy_invis"
+		{
+		}
+	}
+}
+

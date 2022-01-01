@@ -1,0 +1,15 @@
+"UnlitGeneric"
+{
+	"$basetexture"	"models/scp_fixed/medkit/screen"
+	"$model" "1"
+	
+	"Proxies"
+	{
+		"AnimatedTexture"
+		{
+			"animatedtexturevar" "$basetexture"
+			"animatedtextureframenumvar" "$frame"
+			"animatedtextureframerate" 24
+		}
+	}
+}
