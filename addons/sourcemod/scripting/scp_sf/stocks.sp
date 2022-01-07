@@ -449,6 +449,11 @@ float fabs(float x)
 	return x<0 ? -x : x;
 }
 
+float fmod(float x, float y)
+{
+    return (x - y * RoundToFloor(x / y));
+}
+
 float fixAngle(float angle)
 {
 	int i;
@@ -1415,6 +1420,12 @@ bool IsSpec(int client)
 		return true;
 
 	return false;
+}
+
+void TimeToMinutesSeconds(float time, int& minutes, int& seconds)
+{
+	minutes = RoundToFloor(time / 60.0);
+	seconds = RoundToFloor(fmod(time, 60.0));
 }
 
 /**

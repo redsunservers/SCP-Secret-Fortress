@@ -18,6 +18,7 @@ void ConVar_Setup()
 	CvarChatHook = CreateConVar("scp_chathook", "1", "If to use it's own chat processor to manage chat messages", _, true, 0.0, true, 1.0);
 	CvarVoiceHook = CreateConVar("scp_voicehook", "1", "If to use it's own voice processor to manage voice chat", _, true, 0.0, true, 1.0);
 	CvarSendProxy = CreateConVar("scp_sendproxy", "1", "If to use SendProxy, if available", _, true, 0.0, true, 1.0);
+	CvarKarma = CreateConVar("scp_karma", "1", "If to use karma level for player damage", _, true, 0.0, true, 1.0);
 
 	AutoExecConfig(true, "SCPSecretFortress");
 

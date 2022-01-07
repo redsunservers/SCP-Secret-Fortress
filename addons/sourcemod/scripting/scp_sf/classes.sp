@@ -895,13 +895,16 @@ public bool Classes_DeathScp(int client, Event event)
 	if(attacker!=client && IsValidClient(attacker) && Classes_GetByIndex(Client[attacker].Class, attackerClass))
 	{
 		int weapon = event.GetInt("weaponid");
-		if(weapon>MaxClients && HasEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")==594)
+		if(weapon>MaxClients && HasEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")==ITEM_INDEX_MICROHID)
 			GiveAchievement(Achievement_KillSCPMirco, attacker);
 
 		if(StrEqual(attackerClass.Name, "sci"))
 			GiveAchievement(Achievement_KillSCPSci, attacker);
 
 		Config_DoReaction(attacker, "killscp");
+
+		// 5% reward
+		Classes_ApplyKarmaBonus(attacker, 5.0, false);
 
 		ClassEnum assisterClass;
 		int assister = GetClientOfUserId(event.GetInt("assister"));
@@ -911,6 +914,9 @@ public bool Classes_DeathScp(int client, Event event)
 				GiveAchievement(Achievement_KillSCPSci, assister);
 
 			Config_DoReaction(assister, "killscp");
+
+			// 5% bonus for helping
+			Classes_ApplyKarmaBonus(assister, 5.0, false);
 
 			CPrintToChatAll("%s%t", PREFIX, "scp_killed_duo", clientClass.Color, clientClass.Display, attackerClass.Color, attackerClass.Display, assisterClass.Color, assisterClass.Display);
 		}
@@ -1036,12 +1042,7 @@ public void Classes_KillSci(int client, int victim)
 
 public void Classes_KillMtf(int client, int victim)
 {
-	if(Classes_GetByName("dboi") == Client[victim].Class)
-	{
-		if(!Items_IsHoldingWeapon(victim))
-			Client[client].BadKills++;
-	}
-	else if(!GetRandomInt(0, 3))
+	if ((Classes_GetByName("dboi") != Client[victim].Class) && !GetRandomInt(0, 3))
 	{
 		ClassEnum class;
 		if(Classes_GetByIndex(Client[victim].Class, class) && class.Group==1 && Classes_GetByIndex(Client[client].Class, class))
@@ -1105,6 +1106,9 @@ public void Classes_CondDBoi(int client, TFCond cond)
 			{
 				Gamemode_AddValue("dcapture");
 				index = Classes_GetByName("mtfs", class);
+
+				// reward the disarmer with 15% karma
+				Classes_ApplyKarmaBonus(Client[client].Disarmer, 15.0, false);
 			}
 			else
 			{
@@ -1159,6 +1163,9 @@ public void Classes_CondSci(int client, TFCond cond)
 			{
 				Gamemode_AddValue("scapture");
 				index = Classes_GetByName("chaosd", class);
+
+				// reward the disarmer with 15% karma
+				Classes_ApplyKarmaBonus(Client[client].Disarmer, 15.0, false);				
 			}
 			else
 			{
@@ -1442,9 +1449,6 @@ public float Classes_SpeedHuman(int client, float &speed)
 {
 	if(Client[client].Extra2)
 		speed *= 1.0+(Client[client].Extra2*0.125);
-
-	if(Client[client].BadKills)
-		speed *= 2.0-Pow(0.9, float(-Client[client].BadKills));
 }
 
 public float Classes_GhostTheme(int client, char path[PLATFORM_MAX_PATH])
@@ -1557,4 +1561,70 @@ public bool Classes_GhostVoiceAlt(int client)
 		}
 	} while(attempts < MAXTF2PLAYERS);
 	return true;
+}
+
+public void Classes_ApplyKarmaDamage(int client, int damage)
+{
+	char steamID[64];
+	float karma, oldkarma;
+
+	GetClientAuthId(client, AuthId_SteamID64, steamID, sizeof(steamID));
+	GetTrieValue(PlayerKarmaMap, steamID, karma);
+
+	// karma is a ratio to damage done vs the max health of the client
+	// 15% is the maximum penalty per kill
+	int maxhealth = Classes_GetMaxHealth(client);
+	oldkarma = karma;
+	karma -= 15.0 * (float(damage) / float(maxhealth));
+	if (karma < MINKARMA)
+		karma = MINKARMA;
+
+	if (karma != oldkarma)
+		SetTrieValue(PlayerKarmaMap, steamID, karma, true);		
+}
+
+public void Classes_ApplyKarmaBonus(int client, float amount, bool silent)
+{
+	char steamID[64];
+	float karma, oldkarma;
+	
+	GetClientAuthId(client, AuthId_SteamID64, steamID, sizeof(steamID));
+	GetTrieValue(PlayerKarmaMap, steamID, karma);
+
+	oldkarma = karma;
+	karma += amount;
+	if (karma > MAXKARMA)
+		karma = MAXKARMA;
+
+	SetTrieValue(PlayerKarmaMap, steamID, karma, true);	
+
+	if (!silent && (karma != oldkarma))
+	{
+		BfWrite bf = view_as<BfWrite>(StartMessageOne("HudNotifyCustom", client));
+		if(bf)
+		{
+			char buffer[64];
+			FormatEx(buffer, sizeof(buffer), "%T", "goodkarma", client);
+			bf.WriteString(buffer);
+			bf.WriteString("voice_self");
+			bf.WriteByte(0);
+			EndMessage();
+		}		
+	}
+}
+
+public float Classes_GetKarma(int client)
+{
+	float karma;
+	char steamID[64];
+	GetClientAuthId(client, AuthId_SteamID64, steamID, sizeof(steamID));
+	GetTrieValue(PlayerKarmaMap, steamID, karma);
+	return karma;
+}
+
+public void Classes_SetKarma(int client, float karma)
+{
+	char steamID[64];
+	GetClientAuthId(client, AuthId_SteamID64, steamID, sizeof(steamID));
+	SetTrieValue(PlayerKarmaMap, steamID, karma, true);
 }

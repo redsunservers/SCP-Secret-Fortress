@@ -31,7 +31,7 @@ public bool SCP173_Create(int client)
 	SetEntProp(client, Prop_Send, "m_nForcedSkin", (client % 11));	// Skin 0 to 10
 	SetEntProp(client, Prop_Send, "m_iPlayerSkinOverride", true);
 
-	int weapon = SpawnWeapon(client, "tf_weapon_flamethrower", 594, 90, 13, "", 1, true);
+	int weapon = SpawnWeapon(client, "tf_weapon_flamethrower", ITEM_INDEX_MICROHID, 90, 13, "", 1, true);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 17);
@@ -130,6 +130,7 @@ public void SCP173_OnButton(int client, int button)
 	static float pos1[3], ang1[3], pos2[3], ang2[3], ang3[3];
 	float engineTime = GetGameTime();
 	static float delay[MAXTF2PLAYERS];
+
 	if(delay[client] < engineTime)
 	{
 		delay[client] = engineTime+0.2;
@@ -201,6 +202,8 @@ public void SCP173_OnButton(int client, int button)
 			if(!Frozen[client])
 			{
 				Frozen[client] = true;
+				// prevent jumping
+				TF2Attrib_SetByDefIndex(GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon"), 819, 1.0);	
 				SetEntPropFloat(client, Prop_Send, "m_flNextAttack", FAR_FUTURE);
 				SetEntProp(client, Prop_Send, "m_bUseClassAnimations", false);
 				SetEntProp(client, Prop_Send, "m_bCustomModelRotates", false);
@@ -229,6 +232,8 @@ public void SCP173_OnButton(int client, int button)
 				SetEntPropFloat(client, Prop_Send, "m_flNextAttack", 0.0);
 				SetEntProp(client, Prop_Send, "m_bUseClassAnimations", true);
 				SetEntProp(client, Prop_Send, "m_bCustomModelRotates", true);
+				// allow jumping again
+				TF2Attrib_SetByDefIndex(GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon"), 819, 0.0);	
 				SDKCall_SetSpeed(client);
 			}
 		}

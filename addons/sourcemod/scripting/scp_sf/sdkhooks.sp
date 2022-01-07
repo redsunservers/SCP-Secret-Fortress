@@ -8,6 +8,7 @@ void SDKHook_HookClient(int client)
 	SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 	SDKHook(client, SDKHook_OnTakeDamageAlive, OnTakeDamageAlive);
+	SDKHook(client, SDKHook_OnTakeDamageAlivePost, OnTakeDamageAlivePost);	
 	SDKHook(client, SDKHook_SetTransmit, OnTransmit);
 	SDKHook(client, SDKHook_WeaponSwitchPost, OnWeaponSwitch);
 	SDKHook(client, SDKHook_PostThink, OnPostThink);
@@ -58,6 +59,10 @@ public void OnEntityCreated(int entity, const char[] classname)
 	{
 		SDKHook(entity, SDKHook_Spawn, OnPipeSpawned);
 	}
+	else if(StrEqual(classname, "tf_player_manager"))
+	{
+		SDKHook(entity, SDKHook_Spawn, OnPlayerManagerSpawned);	
+	}	
 }
 
 public void OnSmallHealthSpawned(int entity)
@@ -314,10 +319,48 @@ public Action OnPipeTouch(int entity, int client)
 	return IsValidClient(client) ? Plugin_Handled : Plugin_Continue;
 }
 
+public Action OnPlayerManagerSpawned(int entity)
+{
+	SDKHook(entity, SDKHook_ThinkPost, OnPlayerManagerThink);	
+	return Plugin_Continue;
+}
+
+public void OnPlayerManagerThink(int entity) 
+{
+	static int scoreOffset = -1;
+	if (scoreOffset == -1) 
+		scoreOffset = FindSendPropInfo("CTFPlayerResource", "m_iTotalScore");
+
+	if (CvarKarma.BoolValue)
+	{
+		static int scoreLevels[MAXPLAYERS+1];
+		
+		for (int i = 1; i <= MaxClients; i++) 
+		{
+			if (IsClientInGame(i))
+			{
+				float karma = Classes_GetKarma(i);
+
+				scoreLevels[i] = RoundToFloor(karma);
+				if (scoreLevels[i] < MINKARMA_D)
+					scoreLevels[i] = MINKARMA_D;
+			}
+			else 
+			{
+				scoreLevels[i] = 0;
+			}
+		}
+		
+		SetEntDataArray(entity, scoreOffset, scoreLevels, MaxClients+1);
+	}
+}
+
 public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
 	if(!Enabled)
 		return Plugin_Continue;
+
+	Client[victim].PreDamageHealth = GetClientHealth(victim);
 
 	int activeWeapon = GetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon");
 	if (activeWeapon>MaxClients)
@@ -343,7 +386,13 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 			changed = true;
 		}
 
-		int health = GetClientHealth(victim);
+		if (CvarKarma.BoolValue)
+		{
+			damage *= (Classes_GetKarma(attacker) * 0.01);
+			changed = true;
+		}
+
+		int health = Client[victim].PreDamageHealth;
 		if(health>25 && (health-damage)<26)
 			CreateTimer(3.0, Timer_MyBlood, GetClientUserId(victim), TIMER_FLAG_NO_MAPCHANGE);
 	}
@@ -395,6 +444,79 @@ public Action OnTakeDamageAlive(int victim, int &attacker, int &inflictor, float
 
 	damage *= 15.0;
 	return OnTakeDamage(victim, attacker, inflictor, damage, damagetype, weapon, damageForce, damagePosition, damagecustom);
+}
+
+public void OnTakeDamageAlivePost(int victim, int attacker, int inflictor, float damage, int damagetype)
+{
+	if (!Enabled)
+		return;
+
+	// shouldn't happen but just in case
+	if (Client[victim].PreDamageHealth <= 0)
+		return;
+
+	// ensure attacker is valid and not ourselves
+	if (!IsValidClient(attacker) || (victim == attacker))
+		return;	
+
+	int health = GetClientHealth(victim);
+	int checked = 0;
+
+	// this damage will cause the player to die
+	if (health <= 0)
+	{
+		if (IsBadKill(victim, attacker))
+		{
+			Client[attacker].BadKills++;
+
+			BfWrite bf = view_as<BfWrite>(StartMessageOne("HudNotifyCustom", attacker));
+			if(bf)
+			{
+				char buffer[64];
+				FormatEx(buffer, sizeof(buffer), "%T", "badkill", attacker);
+				bf.WriteString(buffer);
+				bf.WriteString("ico_demolish");
+				bf.WriteByte(0);
+				EndMessage();
+			}
+
+			checked = 2;
+		}
+		else
+		{
+			Client[attacker].GoodKills++;
+			checked = 1;
+		}
+
+		// don't mess up the calculations
+		health = 0;
+	}
+
+	// apply a karma penalty for this damage if possible
+	if (!CvarKarma.BoolValue)
+		return;	
+
+	if (Client[victim].PreDamageHealth <= health)
+		return; // no damage or healed
+
+	int penaltyamount = Client[victim].PreDamageHealth - health;
+	int maxhealth = Classes_GetMaxHealth(attacker);
+	// if we somehow had overheal then don't account for that, it can cause karma to go down too far
+	if (Client[victim].PreDamageHealth > maxhealth)
+		penaltyamount -= (Client[victim].PreDamageHealth - maxhealth);
+
+	if (penaltyamount <= 0)
+		return;	
+
+	// compensate for the other player's karma
+	float victimkarma = Classes_GetKarma(victim);
+	penaltyamount = RoundFloat(float(penaltyamount) * (victimkarma * 0.01));
+
+	if ((checked == 2) || ((checked == 0) && IsBadKill(victim, attacker)))
+	{
+		// karma is applied per damage rather than per kill so players cant shoot others to lowest health possible and get away with it
+		Classes_ApplyKarmaDamage(attacker, penaltyamount);	
+	}
 }
 
 public Action HookSound(int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH], int &entity, int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)

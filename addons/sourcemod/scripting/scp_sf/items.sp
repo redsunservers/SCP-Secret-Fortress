@@ -52,7 +52,7 @@ static ArrayList Weapons;
 // the action func can detect if it was called while cancelled using Items_IsDelayedActionCancelled
 
 // TODO: shouldn't this be in the class struct?
-static Handle Item_DelayedAction[MAXPLAYERS+1] = {INVALID_HANDLE, ...};
+static Handle Item_DelayedAction[MAXTF2PLAYERS] = {INVALID_HANDLE, ...};
 
 void Items_Setup(KeyValues main, KeyValues map)
 {
@@ -552,6 +552,11 @@ void Items_SetActiveWeapon(int client, int weapon)
 	Items_CancelDelayedAction(client);
 	
 	SetActiveWeapon(client, weapon);	
+
+	if (Items_IsHoldingWeapon(client))
+	{
+		Client[client].LastWeaponTime = GetGameTime();
+	}
 	
 	Items_SetupViewmodel(client, weapon);
 }
@@ -871,6 +876,22 @@ void Items_DropAllItems(int client)
 	}
 }
 
+void Items_PlayPickupReact(int client, int type, int index)
+{
+	float Time = GetGameTime();
+	if (Client[client].NextPickupReactTime < Time)
+	{		
+		if (index == ITEM_INDEX_MICROHID)	
+			Config_DoReaction(client, "item_veryrare");
+		else if ((index == ITEM_INDEX_O5) || (type == ITEM_TYPE_WEAPON) || (type == ITEM_TYPE_GRENADE) || (type == ITEM_TYPE_SCP))		
+			Config_DoReaction(client, "item_rare");
+		else if (GetRandomInt(0, 1)) // 50% chance
+			Config_DoReaction(client, "item_common");
+	
+		Client[client].NextPickupReactTime = Time + 5.0;
+	}
+}
+
 bool Items_Pickup(int client, int index, int entity=-1)
 {
 	WeaponEnum weapon;
@@ -880,16 +901,22 @@ bool Items_Pickup(int client, int index, int entity=-1)
 		if(Items_CanGiveItem(client, weapon.Type, full))
 		{
 			bool newWep = entity==-1;
+			Items_PlayPickupReact(client, weapon.Type, index);
 			Items_CreateWeapon(client, index, true, newWep, newWep, entity);
 			ClientCommand(client, "playgamesound AmmoPack.Touch");
-			if(index == 30012)
+
+			if(index == ITEM_INDEX_O5)
 			{
 				GiveAchievement(Achievement_FindO5, client);
 			}
-			else if(weapon.Type==1 && Classes_GetByName("dboi")==Client[client].Class)
+			else if(weapon.Type==ITEM_TYPE_WEAPON)
 			{
-				GiveAchievement(Achievement_FindGun, client);
+				if (Classes_GetByName("dboi")==Client[client].Class)
+				{
+					GiveAchievement(Achievement_FindGun, client);
+				}
 			}
+
 			return true;
 		}
 
@@ -1060,23 +1087,29 @@ bool Items_IsHoldingWeapon(int client)
 	{
 		WeaponEnum weapon;
 		
-		if(!Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon))
+		int index = Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon);
+		if(!index)
 			return true;
 			
-		if (weapon.Attack && !weapon.Hide)
+		if ((weapon.Type == ITEM_TYPE_WEAPON) || (weapon.Type == ITEM_TYPE_GRENADE))
+			return true;		
+
+		// HACK: I'm afraid of breaking something, these weapons don't have types assigned in the config
+		if ((index == ITEM_INDEX_MICROHID) || (index == ITEM_INDEX_DISARMER))
 			return true;
-			
-		if (!weapon.Attack && (weapon.Type == 1) || (weapon.Type == 7))
-			return true;
-			
 	}
 	return false;
+}
+
+bool Items_WasHoldingWeaponRecently(int client)
+{
+	return (Client[client].LastWeaponTime + 15.0) > GetGameTime(); 
 }
 
 bool Items_IsKeycard(int entity)
 {
 	WeaponEnum weapon;
-	return (Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) && (weapon.Type == 2));
+	return (Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) && (weapon.Type == ITEM_TYPE_KEYCARD));
 }
 
 bool Items_IsHoldingKeycard(int client)
@@ -2071,7 +2104,7 @@ public void Items_LightAmmo(int client, int type, int &ammo)
 
 public void Items_LightItem(int client, int type, int &amount)
 {
-	if(type == 1)	// Weapons
+	if(type == ITEM_TYPE_WEAPON)
 		amount++;
 }
 
