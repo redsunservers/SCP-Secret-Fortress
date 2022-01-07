@@ -2839,7 +2839,7 @@ bool IsBadKill(int victim, int attacker)
 	// -> scientist/mtf/guard kills an unarmed dboi, unless he was disarmed recently but is NOT disarmed at the moment
 	// -> dboi kills an unarmed scientist		
 
-	if (Items_WasHoldingWeaponRecently(victim))
+	if (Items_IsHoldingWeapon(victim) || Items_WasHoldingWeaponRecently(victim))
 		return false;
 
 	int dboi_index = Classes_GetByName("dboi");

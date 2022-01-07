@@ -1447,6 +1447,9 @@ public Action Items_DisarmerHit(int client, int victim, int &inflictor, float &d
 				if(Classes_GetByIndex(Client[victim].Class, class) && class.Group==2 && !class.Vip)
 					GiveAchievement(Achievement_DisarmMTF, client);
 
+				// all weapons are gone, so reset the time		
+				Client[victim].LastWeaponTime = 0.0;
+
 				CreateTimer(1.0, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
 				Client[victim].Disarmer = client;
 				SDKCall_SetSpeed(victim);
