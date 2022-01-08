@@ -59,10 +59,6 @@ public void OnEntityCreated(int entity, const char[] classname)
 	{
 		SDKHook(entity, SDKHook_Spawn, OnPipeSpawned);
 	}
-	else if(StrEqual(classname, "tf_player_manager"))
-	{
-		SDKHook(entity, SDKHook_Spawn, OnPlayerManagerSpawned);	
-	}	
 }
 
 public void OnSmallHealthSpawned(int entity)
@@ -319,12 +315,6 @@ public Action OnPipeTouch(int entity, int client)
 	return IsValidClient(client) ? Plugin_Handled : Plugin_Continue;
 }
 
-public Action OnPlayerManagerSpawned(int entity)
-{
-	SDKHook(entity, SDKHook_ThinkPost, OnPlayerManagerThink);	
-	return Plugin_Continue;
-}
-
 public void OnPlayerManagerThink(int entity) 
 {
 	static int scoreOffset = -1;
@@ -367,17 +357,23 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		Client[victim].PreDamageWeapon = EntIndexToEntRef(activeWeapon);
 
 	bool validAttacker = IsValidClient(attacker);
+	int savedclass = -1;
 	if(!validAttacker && victim!=attacker)
 	{
 		static char classname[64];
 		if(inflictor>MaxClients && GetEntityClassname(inflictor, classname, sizeof(classname)) && StrEqual(classname, "env_explosion"))
+		{
 			attacker = GetOwnerLoop(attacker);
+			validAttacker = IsValidClient(attacker);
+			// grenade owner might have died and have a different class, so make sure we are using the correct saved class
+			savedclass = GetEntProp(inflictor, Prop_Data, "m_iHammerID");
+		}
 	}
 
 	bool changed;
 	if(validAttacker && victim!=attacker)
 	{
-		if(IsFriendly(Client[victim].Class, Client[attacker].Class))
+		if(IsFriendly(Client[victim].Class, (savedclass == -1) ? Client[attacker].Class : savedclass))
 		{
 			if(!CvarFriendlyFire.BoolValue && !IsFakeClient(victim))
 				return Plugin_Handled;

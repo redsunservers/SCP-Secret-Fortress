@@ -400,6 +400,13 @@ public void OnMapStart()
 		NoMusic = true;
 		break;
 	}
+	
+	while((entity=FindEntityByClassname(entity, "tf_player_manager")) != -1)
+	{
+		// Hook now rather than when spawned, incase the plugin is loaded in late
+		SDKHook(entity, SDKHook_ThinkPost, OnPlayerManagerThink);		
+		break;
+	}
 
 	#if defined _SENDPROXYMANAGER_INC_
 	if(CvarSendProxy.BoolValue && GetFeatureStatus(FeatureType_Native, "SendProxy_HookArrayProp")==FeatureStatus_Available)

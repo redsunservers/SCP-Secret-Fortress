@@ -1637,6 +1637,7 @@ public bool Items_FragButton(int client, int weapon, int &buttons, int &holding)
 
 				SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
 				SetEntProp(entity, Prop_Send, "m_iTeamNum", GetClientTeam(client));
+				SetEntProp(entity, Prop_Data, "m_iHammerID", Client[client].Class);			
 
 				// shouldn't be hardcoded!!
 				SetEntityModel(entity, "models/scp_fixed/frag/w_frag.mdl");
