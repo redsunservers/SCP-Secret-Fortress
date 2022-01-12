@@ -3,7 +3,7 @@ static const char SoundPassive[] = "freak_fortress_2/scp096/bgm.mp3";
 static const char SoundEnrage[] = "freak_fortress_2/scp096/fullrage.mp3";
 static const char SoundDeath[] = "freak_fortress_2/scp096/096_death.mp3";
 
-static const int HealthMax = 3000;	// Max standard health
+static const int HealthMax = 2500;	// Max standard health
 static const int HealthExtra = 700;	// Max regenerable health
 
 static const float SpeedRage = 2.1;

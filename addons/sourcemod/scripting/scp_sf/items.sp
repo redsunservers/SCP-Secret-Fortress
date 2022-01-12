@@ -1857,7 +1857,7 @@ public bool Items_HealthKitButton(int client, int weapon, int &buttons, int &hol
 			Items_StartDelayedAction(client, 2.5, Items_HealthKitAction, client);
 			ViewModel_SetAnimation(client, "use");
 			// don't allow movement
-			TF2_StunPlayer(client, 2.5, 1.0, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
+			//TF2_StunPlayer(client, 2.5, 1.0, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
 		}
 		else 
 		{
