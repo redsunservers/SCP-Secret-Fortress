@@ -274,7 +274,7 @@
 	}
 	"desc_chaos1"
 	{
-		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects."
+		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects.\nCommunicate with each other through the radio."
 	}
 	"train_chaos1"
 	{
@@ -282,11 +282,11 @@
 	}
 	"class_chaosd"
 	{
-		"en"		"Chaos Insurgency Riflemann"
+		"en"		"Chaos Insurgency Engineer"
 	}
 	"desc_chaosd"
 	{
-		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects."
+		"en"		"You succeeded in escaping and joined the Chaos Insurgency.\nHelp other Class-D Personnel escape.\nNeutralize other subjects."
 	}
 	"train_chaosd"
 	{
@@ -298,7 +298,7 @@
 	}
 	"desc_chaos2"
 	{
-		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects."
+		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects.\nArmed with high-explosion grenades and shotguns."
 	}
 	"train_chaos2"
 	{
@@ -310,7 +310,7 @@
 	}
 	"desc_chaos3"
 	{
-		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects."
+		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects.\nArmed with adrenaline and Logicer."
 	}
 	"train_chaos3"
 	{
