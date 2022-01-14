@@ -775,6 +775,14 @@
 	{
 		"en"		"Hold to charge up and after 6 seconds, release to fire high-damage beam.\nThe best tool to deal with SCPs and well worth pulling it off."
 	}
+	"weapon_1098"
+	{
+		"en"		"MTF-NU7-LMG"
+	}
+	"info_1098"
+	{
+		"en"		"Whatever it is in front of you, you can make it into a hive."
+	}
 	"weapon_205"
 	{
 		"en"		"''Smoothy Maker''"
