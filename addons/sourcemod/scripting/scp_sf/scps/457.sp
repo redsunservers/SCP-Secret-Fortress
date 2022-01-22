@@ -1,5 +1,5 @@
 static const int HealthKill = 450;
-static const int HealthSplit = 3000;
+static const int HealthSplit = 2500;
 
 static int Index457;
 
