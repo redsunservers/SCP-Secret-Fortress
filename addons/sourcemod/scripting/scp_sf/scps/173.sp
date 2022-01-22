@@ -5,8 +5,8 @@ static const char SnapSound[] = "freak_fortress_2/scp173/scp173_kill2.mp3";
 static const char DeathSound[] = "freak_fortress_2/scp173/173_death.wav";
 static const char MoveSound[] = "physics/concrete/concrete_scrape_smooth_loop1.wav";
 
-static const int HealthMax = 4000;	// Max standard health
-static const int HealthExtra = 3000;	// Max regenerable health
+static const int HealthMax = 3000;	// Max standard health
+static const int HealthExtra = 2500;	// Max regenerable health
 static const int HealthKill = 300;	// Health gain on stunned kill
 
 static const float DistanceMax = 1250.0;	// Teleport distance while in speed
