@@ -1076,7 +1076,7 @@ public bool Gamemode_ConditionVip(TFTeam &team)
 		team = TFTeam_Red;
 		group = 1;
 	}
-	else if(salive && !sescape)	// SCP alive and none escaped
+	else if(salive && !sescape && !dcapture && !descape && !scapture)	// SCP alive and none escaped
 	{
 		team = TFTeam_Red;
 		group = 3;
