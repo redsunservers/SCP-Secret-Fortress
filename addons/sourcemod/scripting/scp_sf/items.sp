@@ -1480,6 +1480,26 @@ public void Items_ChaosSprint(int client, float &drain)
 	drain *= 1.02;
 }
 
+public Action Items_P90Hit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+    bool changed;
+    bool isSCP = IsSCP(victim);
+    if(isSCP)
+    {
+        damage *= 2.0;
+        changed = true;
+    }
+
+    if((!isSCP || Client[victim].Class==Classes_GetByName("scp0492")) &&
+       GetEntProp(victim, Prop_Data, "m_LastHitGroup") == HITGROUP_HEAD)
+    {
+        damagetype |= DMG_CRIT;
+        changed = true;
+    }
+
+    return changed ? Plugin_Changed : Plugin_Continue;
+}
+
 public void Items_ExplosiveHit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
 	ClientCommand(victim, "dsp_player %d", GetRandomInt(32, 34));
