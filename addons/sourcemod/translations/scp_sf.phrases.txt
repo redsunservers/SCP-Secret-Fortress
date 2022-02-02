@@ -777,11 +777,11 @@
 	}
 	"weapon_1098"
 	{
-		"en"		"MTF-NU7-LMG"
+		"en"		"Mk.18 'Fixer' CQBR"
 	}
 	"info_1098"
 	{
-		"en"		"Whatever it is in front of you, you can make it into a hive."
+		"en"		"Survival, Concealment, Protection."
 	}
 	"weapon_205"
 	{
@@ -1013,7 +1013,7 @@
 	}
 	"info_30021"
 	{
-		"en"		"High damage resistance, extra reserve ammo, with some speed loss"
+		"en"		"High damage resistance, extra reserve ammo, with more sprint loss"
 	}
 
 
