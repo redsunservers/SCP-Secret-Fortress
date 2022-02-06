@@ -5,6 +5,7 @@ void Native_Setup()
 	CreateNative("SCPSF_StartMusic", Native_StartMusic);
 	CreateNative("SCPSF_StopMusic", Native_StopMusic);
 	CreateNative("SCPSF_CanTalkTo", Native_CanTalkTo);
+	CreateNative("SCPSF_GetChatTag", Native_GetChatTag);
 }
 
 public any Native_GetClientClass(Handle plugin, int numParams)
@@ -93,3 +94,19 @@ public any Native_CanTalkTo(Handle plugin, int numParams)
 
 	return Client[client].CanTalkTo[target];
 }
+
+public any Native_GetChatTag(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	if(client<0 || client>=MAXTF2PLAYERS)
+		return;
+
+	int target = GetNativeCell(2);
+	if(target<0 || target>=MAXTF2PLAYERS)
+		return;
+
+	int length = GetNativeCell(4);
+	char[] buffer = new char[length];
+	GetClientChatTag(client, target, buffer, length);
+	SetNativeString(3, buffer, length);
+} 

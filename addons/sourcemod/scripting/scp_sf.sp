@@ -1424,98 +1424,83 @@ public Action OnSayCommand(int client, const char[] command, int args)
 
 	Forward_OnMessage(client, name, sizeof(name), msg, sizeof(msg));
 
-	float engineTime = GetGameTime();
-
-	if(!Enabled)
+	if (Enabled)
 	{
-		for(int target=1; target<=MaxClients; target++)
+		#if SOURCEMOD_V_MAJOR==1 && SOURCEMOD_V_MINOR>10
+		Client[client].IdleAt = GetGameTime()+2.5;
+		#endif
+	}
+
+	for(int target=1; target<=MaxClients; target++)
+	{
+		if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target]))
 		{
-			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target]))
+			if (Enabled)
+			{
+				if(!IsPlayerAlive(client) && GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
+				{
+					if (IsSpec(target))
+						Client[target].ThinkIsDead[client] = true;
+					else
+						continue;	//Don't show chat to target
+				}
+				else if(IsSpec(client))
+				{
+					if (!IsSpec(target))
+						continue;	//Don't show chat to target
+				}
+				else
+				{
+					Client[target].ThinkIsDead[client] = false;
+				}
+			}
+			
+			char tag[64];
+			GetClientChatTag(client, target, tag, sizeof(tag));
+			if (tag[0])
+				CPrintToChat(target, "%s %s {default}: %s", tag, name, msg);
+			else
 				CPrintToChat(target, "%s {default}: %s", name, msg);
 		}
 	}
+
+	return Plugin_Handled;
+}
+
+public void GetClientChatTag(int client, int target, char[] buffer, int length)
+{
+	if(!Enabled)
+	{
+		//No tag
+	}
 	else if(!IsPlayerAlive(client) && GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
 	{
-		for(int target=1; target<=MaxClients; target++)
-		{
-			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target] && IsSpec(target)))
-			{
-				Client[target].ThinkIsDead[client] = true;
-				CPrintToChat(target, "*SPEC* %s {default}: %s", name, msg);
-			}
-		}
+		strcopy(buffer, length, "*SPEC*");
 	}
 	else if(IsSpec(client))
 	{
-		for(int target=1; target<=MaxClients; target++)
-		{
-			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target] && IsSpec(target)))
-				CPrintToChat(target, "*DEAD* %s {default}: %s", name, msg);
-		}
+		strcopy(buffer, length, "*DEAD*");
 	}
-	else if(Client[client].ComFor > engineTime)
+	else if(Client[client].ComFor > GetGameTime())
 	{
-		for(int target=1; target<=MaxClients; target++)
-		{
-			if(target==client || (IsValidClient(target, false) && Client[client].CanTalkTo[target]))
-			{
-				Client[target].ThinkIsDead[client] = false;
-				CPrintToChat(target, "*COMM* %s {default}: %s", name, msg);
-			}
-		}
+		strcopy(buffer, length, "*INTERCOM*");
 	}
-	else
+	else if(!IsSpec(target))
 	{
-		#if SOURCEMOD_V_MAJOR==1 && SOURCEMOD_V_MINOR>10
-		Client[client].IdleAt = engineTime+2.5;
-		#endif
-
-		bool radio = Items_Radio(client)>1;
-
 		ClassEnum class;
-		if(!Classes_GetByIndex(Client[client].Class, class))
-			class.Human = true;	// If we somehow have an invalid class, atleast prevent errors
-
-		static float clientPos[3];
-		GetEntPropVector(client, Prop_Send, "m_vecOrigin", clientPos);
-		for(int target=1; target<=MaxClients; target++)
+		if(Classes_GetByIndex(Client[client].Class, class) && !class.Human && IsFriendly(Client[client].Class, Client[target].Class))
 		{
-			if(target != client)
-			{
-				if(!IsValidClient(target, false) || !Client[client].CanTalkTo[target])
-					continue;
-
-				Client[target].ThinkIsDead[client] = false;
-				if(!IsSpec(target))
-				{
-					if(!class.Human && IsFriendly(Client[client].Class, Client[target].Class))
-					{
-						CPrintToChat(target, "(%t) %s {default}: %s", class.Display, name, msg);
-						continue;
-					}
-
-					if(radio)
-					{
-						static float targetPos[3];
-						GetEntPropVector(target, Prop_Send, "m_vecOrigin", targetPos);
-						if(GetVectorDistance(clientPos, targetPos) > 400)
-						{
-							CPrintToChat(target, "*RADIO* %s {default}: %s", name, msg);
-							continue;
-						}
-					}
-				}
-			}
-			else if(!class.Human)
-			{
-				CPrintToChat(target, "(%t) %s {default}: %s", class.Display, name, msg);
-				continue;
-			}
-
-			CPrintToChat(target, "%s {default}: %s", name, msg);
+			Format(buffer, length, "(%T)", class.Display, target);
+		}
+		else if (Items_Radio(client) > 1)
+		{
+			static float clientPos[3], targetPos[3];
+			GetEntPropVector(client, Prop_Send, "m_vecOrigin", clientPos);
+			GetEntPropVector(target, Prop_Send, "m_vecOrigin", targetPos);
+			if(GetVectorDistance(clientPos, targetPos) > 400)
+				strcopy(buffer, length, "*RADIO*");
 		}
 	}
-	return Plugin_Handled;
 }
 
 public Action Command_MainMenu(int client, int args)
