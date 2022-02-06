@@ -52,7 +52,7 @@ static ArrayList Weapons;
 // the action func can detect if it was called while cancelled using Items_IsDelayedActionCancelled
 
 // TODO: shouldn't this be in the class struct?
-static Handle Item_DelayedAction[MAXPLAYERS+1] = {INVALID_HANDLE, ...};
+static Handle Item_DelayedAction[MAXTF2PLAYERS] = {INVALID_HANDLE, ...};
 
 void Items_Setup(KeyValues main, KeyValues map)
 {
@@ -552,6 +552,11 @@ void Items_SetActiveWeapon(int client, int weapon)
 	Items_CancelDelayedAction(client);
 	
 	SetActiveWeapon(client, weapon);	
+
+	if (Items_IsHoldingWeapon(client))
+	{
+		Client[client].LastWeaponTime = GetGameTime();
+	}
 	
 	Items_SetupViewmodel(client, weapon);
 }
@@ -871,6 +876,22 @@ void Items_DropAllItems(int client)
 	}
 }
 
+void Items_PlayPickupReact(int client, int type, int index)
+{
+	float Time = GetGameTime();
+	if (Client[client].NextPickupReactTime < Time)
+	{		
+		if (index == ITEM_INDEX_MICROHID)	
+			Config_DoReaction(client, "item_veryrare");
+		else if ((index == ITEM_INDEX_O5) || (type == ITEM_TYPE_WEAPON) || (type == ITEM_TYPE_GRENADE) || (type == ITEM_TYPE_SCP))		
+			Config_DoReaction(client, "item_rare");
+		else if (GetRandomInt(0, 1)) // 50% chance
+			Config_DoReaction(client, "item_common");
+	
+		Client[client].NextPickupReactTime = Time + 5.0;
+	}
+}
+
 bool Items_Pickup(int client, int index, int entity=-1)
 {
 	WeaponEnum weapon;
@@ -880,16 +901,22 @@ bool Items_Pickup(int client, int index, int entity=-1)
 		if(Items_CanGiveItem(client, weapon.Type, full))
 		{
 			bool newWep = entity==-1;
+			Items_PlayPickupReact(client, weapon.Type, index);
 			Items_CreateWeapon(client, index, true, newWep, newWep, entity);
 			ClientCommand(client, "playgamesound AmmoPack.Touch");
-			if(index == 30012)
+
+			if(index == ITEM_INDEX_O5)
 			{
 				GiveAchievement(Achievement_FindO5, client);
 			}
-			else if(weapon.Type==1 && Classes_GetByName("dboi")==Client[client].Class)
+			else if(weapon.Type==ITEM_TYPE_WEAPON)
 			{
-				GiveAchievement(Achievement_FindGun, client);
+				if (Classes_GetByName("dboi")==Client[client].Class)
+				{
+					GiveAchievement(Achievement_FindGun, client);
+				}
 			}
+
 			return true;
 		}
 
@@ -1060,7 +1087,15 @@ bool Items_IsHoldingWeapon(int client)
 	{
 		WeaponEnum weapon;
 		
-		if(!Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon))
+		int index = Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon);
+		if(!index)
+			return true;
+			
+		if ((weapon.Type == ITEM_TYPE_WEAPON) || (weapon.Type == ITEM_TYPE_GRENADE))
+			return true;		
+
+		// HACK: I'm afraid of breaking something, these weapons don't have types assigned in the config
+		if ((index == ITEM_INDEX_MICROHID) || (index == ITEM_INDEX_DISARMER))
 			return true;
 			
 		if (weapon.Attack && !weapon.Hide)
@@ -1073,10 +1108,15 @@ bool Items_IsHoldingWeapon(int client)
 	return false;
 }
 
+bool Items_WasHoldingWeaponRecently(int client)
+{
+	return (Client[client].LastWeaponTime + 15.0) > GetGameTime(); 
+}
+
 bool Items_IsKeycard(int entity)
 {
 	WeaponEnum weapon;
-	return (Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) && (weapon.Type == 2));
+	return (Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) && (weapon.Type == ITEM_TYPE_KEYCARD));
 }
 
 bool Items_IsHoldingKeycard(int client)
@@ -1414,6 +1454,9 @@ public Action Items_DisarmerHit(int client, int victim, int &inflictor, float &d
 				if(Classes_GetByIndex(Client[victim].Class, class) && class.Group==2 && !class.Vip)
 					GiveAchievement(Achievement_DisarmMTF, client);
 
+				// all weapons are gone, so reset the time		
+				Client[victim].LastWeaponTime = 0.0;
+
 				CreateTimer(1.0, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
 				Client[victim].Disarmer = client;
 				SDKCall_SetSpeed(victim);
@@ -1601,6 +1644,7 @@ public bool Items_FragButton(int client, int weapon, int &buttons, int &holding)
 
 				SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
 				SetEntProp(entity, Prop_Send, "m_iTeamNum", GetClientTeam(client));
+				SetEntProp(entity, Prop_Data, "m_iHammerID", Client[client].Class);			
 
 				// shouldn't be hardcoded!!
 				SetEntityModel(entity, "models/scp_fixed/frag/w_frag.mdl");
@@ -1632,9 +1676,12 @@ public Action Items_FragTimer(Handle timer, int ref)
 			DispatchKeyValue(explosion, "iRadiusOverride", "350");
 			// don't want particles or sound, we create them seperately
 			DispatchKeyValue(explosion, "spawnflags", "916");
-
+			
 			SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", client);
-			DispatchSpawn(explosion);
+			// pass the original class of the thrower
+			SetEntPropEnt(explosion, Prop_Data, "m_iHammerID", GetEntProp(entity, Prop_Data, "m_iHammerID"));						
+			
+			DispatchSpawn(explosion);	
 			
 			// this will show the kill icon as a grenade
 			SetVariantString("classname taunt_soldier"); 
@@ -1761,8 +1808,11 @@ public Action Items_FlashTimer(Handle timer, int ref)
 			DispatchKeyValue(explosion, "spawnflags", "916");
 
 			SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"));
+			// pass the original class of the thrower
+			SetEntPropEnt(explosion, Prop_Data, "m_iHammerID", GetEntProp(entity, Prop_Data, "m_iHammerID"));
+		
 			DispatchSpawn(explosion);
-
+			
 			int particle = AttachParticle(explosion, "drg_cow_explosioncore_normal_blue", false, 5.0);
 			if (particle)
 				EmitGameSoundToAll("Weapon_Detonator.Detonate", particle, entity, _, _, pos1);			
@@ -2071,7 +2121,7 @@ public void Items_LightAmmo(int client, int type, int &ammo)
 
 public void Items_LightItem(int client, int type, int &amount)
 {
-	if(type == 1)	// Weapons
+	if(type == ITEM_TYPE_WEAPON)
 		amount++;
 }
 
