@@ -109,6 +109,9 @@ ConVar CvarChatHook;
 ConVar CvarVoiceHook;
 ConVar CvarSendProxy;
 ConVar CvarKarma;
+ConVar CvarKarmaRatio;
+ConVar CvarKarmaMin;
+ConVar CvarKarmaMax;
 float NextHintAt = FAR_FUTURE;
 float RoundStartAt;
 float EndRoundIn;
@@ -520,7 +523,13 @@ public void OnClientPostAdminCheck(int client)
 	int userid = GetClientUserId(client);
 	CreateTimer(0.25, Timer_ConnectPost, userid, TIMER_FLAG_NO_MAPCHANGE);
 
-	Classes_SetKarma(client, MAXKARMA);
+	char steamID[64];
+	GetClientAuthId(client, AuthId_SteamID64, steamID, sizeof(steamID));
+	
+	// initialize their karma level if its first time joining 
+	float karma;
+	if (!GetTrieValue(PlayerKarmaMap, steamID, karma))
+		Classes_SetKarma(client, CvarKarmaMax.FloatValue);
 }
 
 public void OnRebuildAdminCache(AdminCachePart part)
@@ -601,19 +610,24 @@ public void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 			ChangeClientTeamEx(client, TFTeam_Red);
 
 		// Regenerate some karma at the end of the round
-		float KarmaBonus = 5.0;
-		if (Client[client].Kills != 0)		
+		// Don't give anything if the player got more than 3 bad kills
+		if (Client[client].BadKills <= 3)
 		{
-			// If the player got a kill (5 or more for SCPs) and no bad kills, always give additional bonus
-			// If the player had some bad kills but had more good kills (1:3 ratio), give a bonus too
-			if ((IsSCP(client) && (Client[client].Kills >= 5)) ||
-				((Client[client].BadKills == 0) || (Client[client].GoodKills >= (Client[client].BadKills * 3))))
+			float KarmaBonus = 5.0;
+			if (Client[client].Kills != 0)		
 			{
-				KarmaBonus += 5.0;
+				// If the player got a kill (5 or more for SCPs) and no bad kills, always give additional bonus
+				// If the player had some bad kills but had more good kills (1:3 ratio), give a bonus too
+				if ((IsSCP(client) && (Client[client].Kills >= 5)) ||
+					((Client[client].BadKills == 0) || (Client[client].GoodKills >= (Client[client].BadKills * 3))))
+				{
+					KarmaBonus += 5.0;
+				}
 			}
-		}
 
-		Classes_ApplyKarmaBonus(client, KarmaBonus, true);
+
+			Classes_ApplyKarmaBonus(client, KarmaBonus, true);
+		}
 
 		SDKCall_SetSpeed(client);
 		Client[client].NextSongAt = FAR_FUTURE;

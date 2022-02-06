@@ -19,7 +19,10 @@ void ConVar_Setup()
 	CvarVoiceHook = CreateConVar("scp_voicehook", "1", "If to use it's own voice processor to manage voice chat", _, true, 0.0, true, 1.0);
 	CvarSendProxy = CreateConVar("scp_sendproxy", "1", "If to use SendProxy, if available", _, true, 0.0, true, 1.0);
 	CvarKarma = CreateConVar("scp_karma", "1", "If to use karma level for player damage", _, true, 0.0, true, 1.0);
-
+	CvarKarmaRatio = CreateConVar("scp_karmaratio", "20.0", "Maximum karma penalty, as a ratio of max health of client", _, true, 0.0, true, 100.0);
+	CvarKarmaMin = CreateConVar("scp_karmamin", "0.0", "Minimum karma level", _, true, 0.0, true, 100.0);
+	CvarKarmaMax = CreateConVar("scp_karmamax", "100.0", "Maximum karma level", _, true, 0.0, true, 100.0);
+	
 	AutoExecConfig(true, "SCPSecretFortress");
 
 	CvarChatHook.AddChangeHook(ConVar_OnChatHook);

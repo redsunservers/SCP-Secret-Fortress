@@ -1669,9 +1669,12 @@ public Action Items_FragTimer(Handle timer, int ref)
 			DispatchKeyValue(explosion, "iRadiusOverride", "350");
 			// don't want particles or sound, we create them seperately
 			DispatchKeyValue(explosion, "spawnflags", "916");
-
+			
 			SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", client);
-			DispatchSpawn(explosion);
+			// pass the original class of the thrower
+			SetEntPropEnt(explosion, Prop_Data, "m_iHammerID", GetEntProp(entity, Prop_Data, "m_iHammerID"));						
+			
+			DispatchSpawn(explosion);	
 			
 			// this will show the kill icon as a grenade
 			SetVariantString("classname taunt_soldier"); 
@@ -1798,8 +1801,11 @@ public Action Items_FlashTimer(Handle timer, int ref)
 			DispatchKeyValue(explosion, "spawnflags", "916");
 
 			SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"));
+			// pass the original class of the thrower
+			SetEntPropEnt(explosion, Prop_Data, "m_iHammerID", GetEntProp(entity, Prop_Data, "m_iHammerID"));
+		
 			DispatchSpawn(explosion);
-
+			
 			int particle = AttachParticle(explosion, "drg_cow_explosioncore_normal_blue", false, 5.0);
 			if (particle)
 				EmitGameSoundToAll("Weapon_Detonator.Detonate", particle, entity, _, _, pos1);			

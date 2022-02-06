@@ -7,11 +7,6 @@
 
 #define PREFIX		"{red}[SCP]{default} "
 
-#define MINKARMA 10.0
-#define MINKARMA_D 10
-#define MAXKARMA 100.0
-#define MAXKARMA_D 100
-
 #define ITEM_TYPE_MISC 0
 #define ITEM_TYPE_WEAPON 1
 #define ITEM_TYPE_KEYCARD 2

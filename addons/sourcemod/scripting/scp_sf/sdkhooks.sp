@@ -324,6 +324,7 @@ public void OnPlayerManagerThink(int entity)
 	if (CvarKarma.BoolValue)
 	{
 		static int scoreLevels[MAXPLAYERS+1];
+		int MinKarma = CvarKarmaMin.IntValue;
 		
 		for (int i = 1; i <= MaxClients; i++) 
 		{
@@ -332,8 +333,9 @@ public void OnPlayerManagerThink(int entity)
 				float karma = Classes_GetKarma(i);
 
 				scoreLevels[i] = RoundToFloor(karma);
-				if (scoreLevels[i] < MINKARMA_D)
-					scoreLevels[i] = MINKARMA_D;
+				
+				if (scoreLevels[i] < MinKarma)
+					scoreLevels[i] = MinKarma;
 			}
 			else 
 			{
@@ -384,7 +386,22 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 
 		if (CvarKarma.BoolValue)
 		{
-			damage *= (Classes_GetKarma(attacker) * 0.01);
+			float karma = Classes_GetKarma(attacker) * 0.01;
+			if (karma < 1.0)
+			{
+				if (damagetype & DMG_CRIT)
+				{
+					// lower the crit multiplier from x3 to x1 if below 30 karma, and from x3 to x2 if below 60
+					// hack: fudge the multiplier lower due to falloff
+					if (karma <= 0.3)
+						damage *= (1.0 / 5.0);
+					else if (karma <= 0.6)
+						damage *= (1.0 / 3.0);
+				}
+				
+				// and then negate the base damage
+				damage *= karma;
+			}
 			changed = true;
 		}
 
@@ -507,6 +524,8 @@ public void OnTakeDamageAlivePost(int victim, int attacker, int inflictor, float
 	// compensate for the other player's karma
 	float victimkarma = Classes_GetKarma(victim);
 	penaltyamount = RoundFloat(float(penaltyamount) * (victimkarma * 0.01));
+	
+	LogMessage("penalty %d, maxhealth %d, predamagehealth %d", penaltyamount, maxhealth, Client[victim].PreDamageHealth);
 
 	if ((checked == 2) || ((checked == 0) && IsBadKill(victim, attacker)))
 	{

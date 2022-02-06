@@ -1572,12 +1572,16 @@ public void Classes_ApplyKarmaDamage(int client, int damage)
 	GetTrieValue(PlayerKarmaMap, steamID, karma);
 
 	// karma is a ratio to damage done vs the max health of the client
-	// 15% is the maximum penalty per kill
 	int maxhealth = Classes_GetMaxHealth(client);
 	oldkarma = karma;
-	karma -= 15.0 * (float(damage) / float(maxhealth));
-	if (karma < MINKARMA)
-		karma = MINKARMA;
+	float loss = CvarKarmaRatio.FloatValue * (float(damage) / float(maxhealth));
+	karma -= loss;
+	
+	LogMessage("new karma %f (lost %f)", karma, loss);
+	
+	float MinKarma = CvarKarmaMin.FloatValue;
+	if (karma < MinKarma)
+		karma = MinKarma;
 
 	if (karma != oldkarma)
 		SetTrieValue(PlayerKarmaMap, steamID, karma, true);		
@@ -1593,8 +1597,10 @@ public void Classes_ApplyKarmaBonus(int client, float amount, bool silent)
 
 	oldkarma = karma;
 	karma += amount;
-	if (karma > MAXKARMA)
-		karma = MAXKARMA;
+	
+	float MaxKarma = CvarKarmaMax.FloatValue;
+	if (karma > MaxKarma)
+		karma = MaxKarma;
 
 	SetTrieValue(PlayerKarmaMap, steamID, karma, true);	
 
