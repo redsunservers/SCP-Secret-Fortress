@@ -109,4 +109,4 @@ public any Native_GetChatTag(Handle plugin, int numParams)
 	char[] buffer = new char[length];
 	GetClientChatTag(client, target, buffer, length);
 	SetNativeString(3, buffer, length);
-} 
+}

@@ -117,6 +117,18 @@ native bool SCPSF_CanTalkTo(int client, int target);
 native void SCPSF_GetChatTag(int client, int target, char[] buffer, int length);
 
 /**
+ * Gets tag to display in client chat
+ *
+ * @param client 	Client index of speaker
+ * @param target 	Client index of listener
+ * @param buffer 	Buffer string to store
+ * @param length 	Max length of buffer
+ *
+ * @noreturn
+ */
+native void SCPSF_GetChatTag(int client, int target, char[] buffer, int length);
+
+/**
  * Calls when a specific event happens
  *
  * @param client 	Client index

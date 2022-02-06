@@ -1097,6 +1097,13 @@ bool Items_IsHoldingWeapon(int client)
 		// HACK: I'm afraid of breaking something, these weapons don't have types assigned in the config
 		if ((index == ITEM_INDEX_MICROHID) || (index == ITEM_INDEX_DISARMER))
 			return true;
+			
+		if (weapon.Attack && !weapon.Hide)
+			return true;
+			
+		if (!weapon.Attack && (weapon.Type == 1) || (weapon.Type == 7))
+			return true;
+			
 	}
 	return false;
 }
