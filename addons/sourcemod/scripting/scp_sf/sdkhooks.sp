@@ -525,8 +525,6 @@ public void OnTakeDamageAlivePost(int victim, int attacker, int inflictor, float
 	float victimkarma = Classes_GetKarma(victim);
 	penaltyamount = RoundFloat(float(penaltyamount) * (victimkarma * 0.01));
 	
-	LogMessage("penalty %d, maxhealth %d, predamagehealth %d", penaltyamount, maxhealth, Client[victim].PreDamageHealth);
-
 	if ((checked == 2) || ((checked == 0) && IsBadKill(victim, attacker)))
 	{
 		// karma is applied per damage rather than per kill so players cant shoot others to lowest health possible and get away with it
