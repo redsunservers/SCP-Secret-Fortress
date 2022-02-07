@@ -286,7 +286,7 @@
 	}
 	"desc_chaosd"
 	{
-		"en"		"You succeeded in escaping and joined the Chaos Insurgency.\nHelp other Class-D Personnel escape.\nNeutralize other subjects."
+		"en"		"You succeeded in escaping and joined the Chaos Insurgency.\nHelp Class-D Personnel escape.\nNeutralize other subjects."
 	}
 	"train_chaosd"
 	{
@@ -775,14 +775,6 @@
 	{
 		"en"		"Hold to charge up and after 6 seconds, release to fire high-damage beam.\nThe best tool to deal with SCPs and well worth pulling it off."
 	}
-	"weapon_1098"
-	{
-		"en"		"Mk.18 'Fixer' CQBR"
-	}
-	"info_1098"
-	{
-		"en"		"Survival, Concealment, Protection."
-	}
 	"weapon_205"
 	{
 		"en"		"''Smoothy Maker''"
@@ -1015,8 +1007,15 @@
 	{
 		"en"		"High damage resistance, extra reserve ammo, with more sprint loss"
 	}
-
-
+	"weapon_1098"
+	{
+		"en"		"Mk.18 'Fixer' CQBR"
+	}
+	"info_1098"
+	{
+		"en"		"Survival, Concealment, Protection."
+	}
+	
 	// Team Phrases
 
 	"team_0"
