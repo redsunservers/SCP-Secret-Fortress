@@ -118,6 +118,8 @@ void Config_Setup()
 	// For now I'll just put it here, if more sounds are needed in this style then it should be moved somewhere else
 	PrecacheSound("replay/cameracontrolerror.wav", true);
 	PrecacheSound("common/wpn_denyselect.wav", true);
+	PrecacheSound("ui/item_light_gun_drop.wav", true);
+	PrecacheSound("ui/item_store_add_to_cart.wav", true);	
 }
 
 void Config_PrecacheReactions(KeyValues kv)

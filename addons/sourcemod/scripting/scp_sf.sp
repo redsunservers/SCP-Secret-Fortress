@@ -47,16 +47,7 @@ void DisplayCredits(int i)
 #define STABLE_REVISION	"0"
 #define PLUGIN_VERSION	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
-#define FAR_FUTURE	100000000.0
-#define MAXTF2PLAYERS	36
-#define MAXENTITIES	2048
-
-#define MAXANGLEPITCH	45.0
-#define MAXANGLEYAW	90.0
-
-#define PREFIX		"{red}[SCP]{default} "
-
-float TRIPLE_D[3] = { 0.0, 0.0, 0.0 };
+#include "scp_sf/defines.sp"
 
 public Plugin myinfo =
 {
@@ -104,6 +95,8 @@ Handle HudPlayer;
 Handle HudClass;
 Handle HudGame;
 
+Handle PlayerKarmaMap;
+
 Cookie CookieTraining;
 Cookie CookieColor;
 Cookie CookieDClass;
@@ -115,7 +108,10 @@ ConVar CvarAchievement;
 ConVar CvarChatHook;
 ConVar CvarVoiceHook;
 ConVar CvarSendProxy;
-
+ConVar CvarKarma;
+ConVar CvarKarmaRatio;
+ConVar CvarKarmaMin;
+ConVar CvarKarmaMax;
 float NextHintAt = FAR_FUTURE;
 float RoundStartAt;
 float EndRoundIn;
@@ -146,9 +142,11 @@ enum struct ClientEnum
 	int Floor;
 	int Disarmer;
 	int DownloadMode;
-	int BadKills;
 	int Kills;
+	int GoodKills;
+	int BadKills;
 	int PreDamageWeapon;
+	int PreDamageHealth;
 
 	float IdleAt;
 	float ComFor;
@@ -163,6 +161,9 @@ enum struct ClientEnum
 	float IgnoreTeleFor;
 	float Pos[3];
 	float NextReactTime;
+	float NextPickupReactTime;
+	float LastDisarmedTime;
+	float LastWeaponTime;
 
 	// Sprinting
 	bool Sprinting;
@@ -278,6 +279,7 @@ public void OnPluginStart()
 	RegAdminCmd("scp_forceclass", Command_ForceClass, ADMFLAG_SLAY, "Usage: scp_forceclass <target> <class>.  Forces that class to be played.");
 	RegAdminCmd("scp_giveitem", Command_ForceItem, ADMFLAG_SLAY, "Usage: scp_giveitem <target> <index>.  Gives a specific item.");
 	RegAdminCmd("scp_giveammo", Command_ForceAmmo, ADMFLAG_SLAY, "Usage: scp_giveammo <target> <type>.  Gives a specific ammo.");
+	RegAdminCmd("scp_setkarma", Command_ForceKarma, ADMFLAG_SLAY, "Usage: scp_setkarma <target> <0-100>. Sets a specific karma level.");
 	RegAdminCmd("scp_preventroundwin", Command_PreventWin, ADMFLAG_SLAY, "Usage: scp_preventroundwin <0/1>. Ignore round end conditions for debugging.");
 
 	AddCommandListener(OnBlockCommand, "explode");
@@ -339,6 +341,8 @@ public void OnPluginStart()
 		LogError("[Gamedata] Could not find scp_sf.txt");
 	}
 
+	PlayerKarmaMap = CreateTrie();
+
 	for(int i=1; i<=MaxClients; i++)
 	{
 		if(!IsValidClient(i))
@@ -397,6 +401,13 @@ public void OnMapStart()
 			continue;
 
 		NoMusic = true;
+		break;
+	}
+	
+	while((entity=FindEntityByClassname(entity, "tf_player_manager")) != -1)
+	{
+		// Hook now rather than when spawned, incase the plugin is loaded in late
+		SDKHook(entity, SDKHook_ThinkPost, OnPlayerManagerThink);		
 		break;
 	}
 
@@ -511,6 +522,14 @@ public void OnClientPostAdminCheck(int client)
 
 	int userid = GetClientUserId(client);
 	CreateTimer(0.25, Timer_ConnectPost, userid, TIMER_FLAG_NO_MAPCHANGE);
+
+	char steamID[64];
+	GetClientAuthId(client, AuthId_SteamID64, steamID, sizeof(steamID));
+	
+	// initialize their karma level if its first time joining 
+	float karma;
+	if (!GetTrieValue(PlayerKarmaMap, steamID, karma))
+		Classes_SetKarma(client, CvarKarmaMax.FloatValue);
 }
 
 public void OnRebuildAdminCache(AdminCachePart part)
@@ -589,6 +608,26 @@ public void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 
 		if(IsPlayerAlive(client) && GetClientTeam(client)<=view_as<int>(TFTeam_Spectator))
 			ChangeClientTeamEx(client, TFTeam_Red);
+
+		// Regenerate some karma at the end of the round
+		// Don't give anything if the player got more than 3 bad kills
+		if (Client[client].BadKills <= 3)
+		{
+			float KarmaBonus = 5.0;
+			if (Client[client].Kills != 0)		
+			{
+				// If the player got a kill (5 or more for SCPs) and no bad kills, always give additional bonus
+				// If the player had some bad kills but had more good kills (1:3 ratio), give a bonus too
+				if ((IsSCP(client) && (Client[client].Kills >= 5)) ||
+					((Client[client].BadKills == 0) || (Client[client].GoodKills >= (Client[client].BadKills * 3))))
+				{
+					KarmaBonus += 5.0;
+				}
+			}
+
+
+			Classes_ApplyKarmaBonus(client, KarmaBonus, true);
+		}
 
 		SDKCall_SetSpeed(client);
 		Client[client].NextSongAt = FAR_FUTURE;
@@ -838,7 +877,7 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 			{
 
 				WeaponEnum weapon;
-				if(Items_GetWeaponByIndex(index, weapon) && weapon.Type==2)
+				if(Items_GetWeaponByIndex(index, weapon) && weapon.Type==ITEM_TYPE_KEYCARD)
 				{
 					Menu menu = new Menu(Handler_Printer);
 					menu.SetTitle("%t\n ", buffer);
@@ -986,6 +1025,9 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 								}
 								else
 								{
+									Config_DoReaction(client, "accessdenied");
+									EmitSoundToClient(client, "ui/item_light_gun_drop.wav");
+
 									RemoveAndSwitchItem(client, entity);
 									CPrintToChat(client, "%s%t", PREFIX, "914_delet");
 								}
@@ -993,7 +1035,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 							else if(Items_GetWeaponByIndex(amount, weapon))
 							{
 								TF2_RemoveItem(client, entity);
-								if(choice<2 && weapon.Type==2 && Client[client].Class==Classes_GetByName("sci"))
+								if(choice<2 && weapon.Type==ITEM_TYPE_KEYCARD && Client[client].Class==Classes_GetByName("sci"))
 								{
 									static float pos[3];
 									GetClientAbsOrigin(client, pos);
@@ -1012,6 +1054,8 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 										break;
 									}
 								}
+								
+								Items_PlayPickupReact(client, weapon.Type, amount);
 
 								bool canGive = Items_CanGiveItem(client, weapon.Type);
 								entity = Items_CreateWeapon(client, amount, canGive, true, false);
@@ -1020,7 +1064,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 									Items_SetActiveWeapon(client, entity);
 									SZF_DropItem(client);
 									Items_ShowItemMenu(client);
-									if(amount == 30012)
+									if(amount == ITEM_INDEX_O5)
 										GiveAchievement(Achievement_FindO5, client);
 								}
 								else
@@ -1031,6 +1075,8 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 									FakeClientCommand(client, "use tf_weapon_fists");
 									Items_DropItem(client, entity, pos, ang, true);
 								}
+								
+								EmitSoundToClient(client, "ui/item_store_add_to_cart.wav");
 
 								static char buffer[64];
 								Items_GetTranName(amount, buffer, sizeof(buffer));
@@ -1070,7 +1116,7 @@ public int Handler_Printer(Menu menu, MenuAction action, int client, int choice)
 				{
 					index = GetEntProp(index, Prop_Send, "m_iItemDefinitionIndex");
 					WeaponEnum weapon;
-					if(Items_GetWeaponByIndex(index, weapon) && weapon.Type==2)
+					if(Items_GetWeaponByIndex(index, weapon) && weapon.Type==ITEM_TYPE_KEYCARD)
 					{
 						Client[client].Cooldown = GetGameTime()+20.0;
 
@@ -1150,10 +1196,13 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	Client[client].Extra2 = 0;
 	Client[client].Extra3 = 0.0;
 	Client[client].NextReactTime = 0.0;	
+	Client[client].NextPickupReactTime = 0.0;	
+	Client[client].LastDisarmedTime = 0.0;	
+	Client[client].LastWeaponTime = 0.0;	
 	Client[client].WeaponClass = TFClass_Unknown;
-	if(Client[client].BadKills > 0)
-		Client[client].BadKills--;
 	Client[client].Kills = 0;
+	Client[client].GoodKills = 0;
+	Client[client].BadKills = 0;
 
 	SetEntProp(client, Prop_Send, "m_bForcedSkin", false);
 	SetEntProp(client, Prop_Send, "m_nForcedSkin", 0);
@@ -1312,7 +1361,7 @@ public Action OnDropItem(int client, const char[] command, int args)
 			if(entity > MaxClients)
 			{
 				WeaponEnum weapon;
-				bool big = (Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) && weapon.Type==1);
+				bool big = (Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) && weapon.Type==ITEM_TYPE_WEAPON);
 
 				static float pos[3], ang[3];
 				GetClientEyePosition(client, pos);
@@ -1824,6 +1873,53 @@ public Action Command_ForceAmmo(int client, int args)
 	return Plugin_Handled;
 }
 
+public Action Command_ForceKarma(int client, int args)
+{
+	if(args < 2)
+	{
+		ReplyToCommand(client, "[SM] Usage: scp_setkarma <target> <0-100>");
+		return Plugin_Handled;
+	}
+
+	static char targetName[MAX_TARGET_LENGTH];
+	GetCmdArg(2, targetName, sizeof(targetName));
+	float karma = StringToFloat(targetName);
+	if(karma < 0.0 || karma > 100.0)
+	{
+		ReplyToCommand(client, "[SM] Invalid karma level");
+		return Plugin_Handled;
+	}
+
+	static char pattern[PLATFORM_MAX_PATH];
+	GetCmdArg(1, pattern, sizeof(pattern));
+
+	int targets[MAXPLAYERS], matches;
+	bool targetNounIsMultiLanguage;
+	if((matches=ProcessTargetString(pattern, client, targets, sizeof(targets), 0, targetName, sizeof(targetName), targetNounIsMultiLanguage)) < 1)
+	{
+		ReplyToTargetError(client, matches);
+		return Plugin_Handled;
+	}
+
+	NoAchieve = true;
+
+	for(int target; target<matches; target++)
+	{
+		if(IsClientInGame(targets[target]))
+			Classes_SetKarma(targets[target], karma);
+	}
+
+	if(targetNounIsMultiLanguage)
+	{
+		CShowActivity2(client, PREFIX, "Set karma to %f for %t", karma, targetName);
+	}
+	else
+	{
+		CShowActivity2(client, PREFIX, "Set karma to %f for %s", karma, targetName);
+	}
+	return Plugin_Handled;
+}
+
 public Action Command_PreventWin(int client, int args)
 {
 	if (args < 1)
@@ -1885,11 +1981,13 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	if(!client)
 		return Plugin_Continue;
+		
+	int attacker = GetClientOfUserId(event.GetInt("attacker"));		
 
 	Items_CancelDelayedAction(client);
 	
 	// do this before the team gets changed
-	PlayFriendlyDeathReaction(client);
+	PlayFriendlyDeathReaction(client, attacker);
 
 	float engineTime = GetGameTime();
 	bool deadringer = view_as<bool>(event.GetInt("death_flags") & TF_DEATHFLAG_DEADRINGER);
@@ -1917,7 +2015,6 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 
 	SZF_DropItem(client);
 
-	int attacker = GetClientOfUserId(event.GetInt("attacker"));
 	if(client!=attacker && !IsValidClient(attacker))
 		attacker = event.GetInt("inflictor_entindex");
 
@@ -1938,27 +2035,15 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 		if (IsSCP(attacker))
 		{
 			int wep = EntRefToEntIndex(Client[client].PreDamageWeapon);
-			if(wep>MaxClients && GetEntProp(wep, Prop_Send, "m_iItemDefinitionIndex")==594)
+			if(wep>MaxClients && GetEntProp(wep, Prop_Send, "m_iItemDefinitionIndex")==ITEM_INDEX_MICROHID)
 				GiveAchievement(Achievement_KillMirco, attacker);		
-			Client[attacker].Kills++;
 		}
 
 		Classes_OnKill(attacker, client);
 
-		if(IsFriendly(Client[client].Class, Client[attacker].Class))
-			Client[attacker].BadKills++;
-
-		if(Client[attacker].BadKills > 2)
-		{
-			ForcePlayerSuicide(attacker);
-			FadeMessage(attacker, 1000, 3000, 0x0002, 0, 0, 0, 255);
-			SetHudTextParamsEx(-1.0, -1.0, 3.5, {100, 100, 100, 255}, {240, 110, 0, 255}, 2, 0.25, 0.01, 1.5);
-			ShowSyncHudText(attacker, HudGame, "%T", "gameover_stuck", attacker);
-		}
-		else
-		{
-			SDKCall_SetSpeed(attacker);
-		}
+		Client[attacker].Kills++;
+		
+		SDKCall_SetSpeed(attacker);
 
 		if(deadringer || !Classes_OnDeath(client, event))
 		{
@@ -1991,7 +2076,7 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 			{
 				GiveAchievement(Achievement_DeathTesla, client);
 				int wep = EntRefToEntIndex(Client[client].PreDamageWeapon);
-				if(wep>MaxClients && GetEntProp(wep, Prop_Send, "m_iItemDefinitionIndex")==594)
+				if(wep>MaxClients && GetEntProp(wep, Prop_Send, "m_iItemDefinitionIndex")==ITEM_INDEX_MICROHID)
 					GiveAchievement(Achievement_DeathMicro, client);	
 			}
 			else if(damage & DMG_FALL)
@@ -2717,8 +2802,12 @@ bool DisarmCheck(int client)
 		GetEntPropVector(client, Prop_Send, "m_vecOrigin", pos1);
 		GetEntPropVector(Client[client].Disarmer, Prop_Send, "m_vecOrigin", pos2);
 
-		if(GetVectorDistance(pos1, pos2) < 800)
+		// 800 units
+		if(GetVectorDistance(pos1, pos2, true) < 640000.0)
+		{
+			Client[client].LastDisarmedTime = GetGameTime();
 			return true;
+		}
 	}
 
 	TF2_RemoveCondition(client, TFCond_PasstimePenaltyDebuff);
@@ -2738,8 +2827,56 @@ bool IsFriendly(int index1, int index2)
 	return true;
 }
 
-void PlayFriendlyDeathReaction(int client)
+bool IsBadKill(int victim, int attacker)
 {
+	ClassEnum victimclass, attackerclass;
+	if (!Classes_GetByIndex(Client[victim].Class, victimclass) || !Classes_GetByIndex(Client[attacker].Class, attackerclass) )
+		return false;
+
+	if (victimclass.Group < 0)
+		return false;
+	if (attackerclass.Group == victimclass.Group)
+		return true;
+	// SCP
+	if (!victimclass.Human || !attackerclass.Human)
+		return false;
+
+	// apply a kerma penalty for this damage if:
+	// -> scientist/mtf/guard kills an unarmed dboi, unless he was disarmed recently but is NOT disarmed at the moment
+	// -> dboi kills an unarmed scientist		
+
+	if (Items_IsHoldingWeapon(victim) || Items_WasHoldingWeaponRecently(victim))
+		return false;
+
+	int dboi_index = Classes_GetByName("dboi");
+	int sci_index = Classes_GetByName("sci");
+
+	bool attacker_mtf = (attackerclass.Group > 1) || (Client[attacker].Class == sci_index);
+	bool attacker_dboi = (Client[attacker].Class == dboi_index);
+	bool victim_dboi = (Client[victim].Class == dboi_index);
+	bool victim_scientist = (Client[victim].Class == sci_index);
+
+	if ((attacker_mtf && victim_dboi && (Client[victim].Disarmer || ((Client[victim].LastDisarmedTime + 15.0) < GetGameTime())))
+		|| (victim_scientist && attacker_dboi))
+	{
+		return true;
+	}
+
+	return false;
+}
+
+void PlayFriendlyDeathReaction(int client, int attacker)
+{
+	if (client!=attacker && IsValidClient(attacker))
+	{
+		// don't give away players who die to the noise-sensitive creature
+		if ((Classes_GetByName("scp939") == Client[attacker].Class) || 
+			 (Classes_GetByName("scp9392") == Client[attacker].Class))
+		{
+			return;
+		}
+	}
+
 	float pos[3];
 	GetClientEyePosition(client, pos);
 	

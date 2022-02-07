@@ -1014,6 +1014,9 @@ public bool Gamemode_ConditionClassic(TFTeam &team)
 
 	EndRoundRelay(group);
 
+	int minutes, seconds;
+	TimeToMinutesSeconds(GetGameTime() - RoundStartAt, minutes, seconds);
+
 	char buffer[16];
 	FormatEx(buffer, sizeof(buffer), "team_%d", group);
 	SetHudTextParamsEx(-1.0, 0.3, 17.5, TeamColors[group], {255, 255, 255, 255}, 1, 2.0, 1.0, 1.0);
@@ -1023,7 +1026,7 @@ public bool Gamemode_ConditionClassic(TFTeam &team)
 			continue;
 
 		SetGlobalTransTarget(client);
-		ShowSyncHudText(client, HudGame, "%t", "end_screen", buffer, descape, dtotal, sescape, stotal, pkill, ptotal);
+		ShowSyncHudText(client, HudGame, "%t", "end_screen", buffer, descape, dtotal, sescape, stotal, pkill, ptotal, minutes, seconds);
 	}
 	return true;
 }
@@ -1089,6 +1092,9 @@ public bool Gamemode_ConditionVip(TFTeam &team)
 
 	EndRoundRelay(group);
 
+	int minutes, seconds;
+	TimeToMinutesSeconds(GetGameTime() - RoundStartAt, minutes, seconds);	
+
 	char buffer[16];
 	FormatEx(buffer, sizeof(buffer), "team_%d", group);
 	SetHudTextParamsEx(-1.0, 0.3, 17.5, TeamColors[group], {255, 255, 255, 255}, 1, 2.0, 1.0, 1.0);
@@ -1098,7 +1104,7 @@ public bool Gamemode_ConditionVip(TFTeam &team)
 			continue;
 
 		SetGlobalTransTarget(client);
-		ShowSyncHudText(client, HudGame, "%t", "end_screen_vip", buffer, descape, dtotal, dcapture, sescape, stotal, scapture, pkill, ptotal);
+		ShowSyncHudText(client, HudGame, "%t", "end_screen_vip", buffer, descape, dtotal, dcapture, sescape, stotal, scapture, pkill, ptotal, minutes, seconds);
 	}
 	return true;
 }
