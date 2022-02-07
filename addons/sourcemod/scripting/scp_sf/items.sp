@@ -1679,7 +1679,7 @@ public Action Items_FragTimer(Handle timer, int ref)
 			
 			SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", client);
 			// pass the original class of the thrower
-			SetEntPropEnt(explosion, Prop_Data, "m_iHammerID", GetEntProp(entity, Prop_Data, "m_iHammerID"));						
+			SetEntProp(explosion, Prop_Data, "m_iHammerID", GetEntProp(entity, Prop_Data, "m_iHammerID"));						
 			
 			DispatchSpawn(explosion);	
 			
@@ -1809,7 +1809,7 @@ public Action Items_FlashTimer(Handle timer, int ref)
 
 			SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"));
 			// pass the original class of the thrower
-			SetEntPropEnt(explosion, Prop_Data, "m_iHammerID", GetEntProp(entity, Prop_Data, "m_iHammerID"));
+			SetEntProp(explosion, Prop_Data, "m_iHammerID", GetEntProp(entity, Prop_Data, "m_iHammerID"));
 		
 			DispatchSpawn(explosion);
 			
