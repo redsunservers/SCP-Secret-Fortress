@@ -40,11 +40,11 @@
 	}
 	"hint_10"
 	{
-		"chi"		"MTF 能通过将科学家带出\n其中一个大门来拯救他们。\n只有下士和队长有权限访问."
+		"chi"		"MTF 能通过将科学家带出\n其中一个大门来拯救他们。\n只有下士和队长有权限访问。"
 	}
 	"hint_11"
 	{
-		"chi"		"混沌分裂者可以通过将 D 级人员带离某一扇门来解救他们."
+		"chi"		"混沌分裂者可以通过将 D 级人员带离某一扇门来解救他们。"
 	}
 	"hint_12"
 	{
@@ -95,7 +95,7 @@
 	}
 	"desc_dboi_ikea"
 	{
-		"chi"		"逃离SCP-3008-1。\n与 MTF 合作。\n避开其他队伍."
+		"chi"		"逃离SCP-3008-1。\n与 MTF 合作。\n避开其他队伍。"
 	}
 	"desc_mtf1_ikea"
 	{
@@ -119,7 +119,7 @@
 	}
 	"end_screen_ikea"
 	{
-		"#format"	"{1:t},{2:d},{3:d}"
+		"#format"	"{1:t}，{2:d}，{3:d}"
 		"chi"		"{1}\n \n逃离的幸存者: {2} / {3}"
 	}
 
@@ -143,7 +143,7 @@
 	}
 	"desc_mtf5001"
 	{
-		"chi"		"杀死所有全球超自然联盟人员.\n服从你长官的命令."
+		"chi"		"杀死所有全球超自然联盟人员。\n服从你长官的命令。"
 	}
 	"train_mtf5001"
 	{
@@ -155,7 +155,7 @@
 	}
 	"desc_mtf5002"
 	{
-		"chi"		"杀死所有全球超自然联盟人员.\n命令你手下的士兵.\n服从你长官的命令。"
+		"chi"		"杀死所有全球超自然联盟人员。\n命令你手下的士兵。\n服从你长官的命令。"
 	}
 	"train_mtf5002"
 	{
@@ -167,7 +167,7 @@
 	}
 	"desc_mtf5003"
 	{
-		"chi"		"杀死所有全球超自然联盟人员.\n命令你手下的士兵。"
+		"chi"		"杀死所有全球超自然联盟人员。\n命令你手下的士兵。"
 	}
 	"train_mtf5003"
 	{
@@ -179,7 +179,7 @@
 	}
 	"desc_scp610"
 	{
-		"chi"		"杀死全球超自然联盟人员.\n与其他 SCP 合作。"
+		"chi"		"杀死全球超自然联盟人员。\n与其他 SCP 合作。"
 	}
 	"train_scp610"
 	{
@@ -190,7 +190,7 @@
 
 	"desc_spec_steals"
 	{
-		"chi"		"等待直到下一回合."
+		"chi"		"等待直到下一回合。"
 	}
 	"class_dboi_steals"
 	{
@@ -222,8 +222,8 @@
 	}
 	"end_screen_steals"
 	{
-		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d}"
-		"chi"		"{1}\n \n存活的幸存者: {2} / {3}\n收集的球体: {4} / {5}\n \nCreature was triggered {6} time(s)."
+		"#format"	"{1:t}，{2:d}，{3:d}，{4:d}，{5:d}，{6:d}"
+		"chi"		"{1}\n \n存活的幸存者: {2} / {3}\n收集的球体: {4} / {5}\n \nCreature was triggered {6} time(s)。"
 	}
 
 	// Class Phrases
@@ -238,7 +238,7 @@
 	}
 	"desc_spec"
 	{
-		"chi"		"你即将重生."
+		"chi"		"你即将重生。"
 	}
 	"train_spec"
 	{
@@ -250,7 +250,7 @@
 	}
 	"desc_dboi"
 	{
-		"chi"		"逃离这个设施。\n与混沌分裂者合作。\n避开其他团队."
+		"chi"		"逃离这个设施。\n与混沌分裂者合作。\n避开其他团队。"
 	}
 	"train_dboi"
 	{
@@ -262,7 +262,7 @@
 	}
 	"desc_chaos"
 	{
-		"chi"		"帮助 D 级人员逃离.\n消灭其他目标。"
+		"chi"		"帮助 D 级人员逃离。\n消灭其他目标。"
 	}
 	"train_chaos"
 	{
@@ -274,7 +274,7 @@
 	}
 	"desc_chaos1"
 	{
-		"chi"		"帮助 D 级人员逃离.\n无效化其他目标."
+		"chi"		"帮助 D 级人员逃离。\n无效化其他目标。"
 	}
 	"train_chaos1"
 	{
@@ -322,7 +322,7 @@
 	}
 	"desc_sci"
 	{
-		"chi"		"逃离设施.\n与 MTF 合作.\n避开其他团队."
+		"chi"		"逃离设施。\n与 MTF 合作。\n避开其他团队。"
 	}
 	"train_sci"
 	{
@@ -334,11 +334,11 @@
 	}
 	"desc_guard"
 	{
-		"chi"		"帮助科学家逃离设施.\n与 MTF 合作.\n无害化其他目标."
+		"chi"		"帮助科学家逃离设施。\n与 MTF 合作。\n无害化其他目标。"
 	}
 	"train_guard"
 	{
-		"chi"		"你必须保护科学家免遭其他团队攻击.\n通过护送他们去他们需要的地方来帮助他们.\n你可以用近战武器来拷住 D 级人员"
+		"chi"		"你必须保护科学家免遭其他团队攻击。\n通过护送他们去他们需要的地方来帮助他们。\n你可以用近战武器来拷住 D 级人员"
 	}
 	"class_mtf1"
 	{
@@ -346,11 +346,11 @@
 	}
 	"desc_mtf1"
 	{
-		"chi"		"帮助科学家逃离.\n无害化其他目标,\n服从你长官的命令."
+		"chi"		"帮助科学家逃离。\n无害化其他目标，\n服从你长官的命令。"
 	}
 	"train_mtf1"
 	{
-		"chi"		"你需要解救设施中的科学家.\n与你的下士和队长待在一起.\n通过无线电来互相联系.\n按 ATTACK2、USE 或使用 VOICEMENU 来跟物品，按钮互动."
+		"chi"		"你需要解救设施中的科学家。\n与你的下士和队长待在一起。\n通过无线电来互相联系。\n按 ATTACK2、USE 或使用 VOICEMENU 来跟物品，按钮互动。"
 	}
 	"class_mtf2"
 	{
@@ -358,11 +358,11 @@
 	}
 	"desc_mtf2"
 	{
-		"chi"		"帮助科学家逃离.\n消灭其他目标.\n领导你的士兵.\n服从上级指令."
+		"chi"		"帮助科学家逃离。\n消灭其他目标。\n领导你的士兵。\n服从上级指令。"
 	}
 	"train_mtf2"
 	{
-		"chi"		"你需要解救设施中的科学家.\n支援你队伍中的新兵,遵从你的指挥官\n通过无线电来互相联系.\n按 ATTACK2, USE 或使用 VOICEMENU 来和物品，按钮互动."
+		"chi"		"你需要解救设施中的科学家。\n支援你队伍中的新兵，遵从你的指挥官\n通过无线电来互相联系。\n按 ATTACK2， USE 或使用 VOICEMENU 来和物品，按钮互动。"
 	}
 	"class_mtfs"
 	{
@@ -370,11 +370,11 @@
 	}
 	"desc_mtfs"
 	{
-		"chi"		"帮助科学家逃离.\n消灭其他目标.\n领导你的士兵.\n服从指挥官的命令"
+		"chi"		"帮助科学家逃离。\n消灭其他目标。\n领导你的士兵。\n服从指挥官的命令"
 	}
 	"train_mtfs"
 	{
-		"chi"		"你需要解救设施中的科学家.\n支援你队伍中的新兵,服从指挥官的命令\n通过无线电来互相联系.\n按 ATTACK2、USE 或使用 VOICEMENU 来和物品，按钮互动."
+		"chi"		"你需要解救设施中的科学家。\n支援你队伍中的新兵，服从指挥官的命令\n通过无线电来互相联系。\n按 ATTACK2、USE 或使用 VOICEMENU 来和物品，按钮互动。"
 	}
 	"class_mtf3"
 	{
@@ -382,11 +382,11 @@
 	}
 	"desc_mtf3"
 	{
-		"chi"		"帮助科学家逃离.\n消灭其他目标.\n领导你手下的士兵."
+		"chi"		"帮助科学家逃离。\n消灭其他目标。\n领导你手下的士兵。"
 	}
 	"train_mtf3"
 	{
-		"chi"		"你需要解救设施中的科学家.\n指挥你的部队进入设施\n使用无线电命令你周围的部队\n按 ATTACK2、USE 或使用 VOICEMENU 来和物品，按钮互动."
+		"chi"		"你需要解救设施中的科学家。\n指挥你的部队进入设施\n使用无线电命令你周围的部队\n按 ATTACK2、USE 或使用 VOICEMENU 来和物品，按钮互动。"
 	}
 	"class_mtfe"
 	{
@@ -394,11 +394,11 @@
 	}
 	"desc_mtfe"
 	{
-		"chi"		"帮助科学家逃离.\n消灭其他目标.\n服从上级的命令."
+		"chi"		"帮助科学家逃离。\n消灭其他目标。\n服从上级的命令。"
 	}
 	"train_mtfe"
 	{
-		"chi"		"你需要解救设施中的科学家.\n你可以建造一个步哨击退 SCP \n同时你可以为队友建造补给器\n按 ATTACK2、USE 或使用 VOICEMENU 来和物品，按钮互动。"
+		"chi"		"你需要解救设施中的科学家。\n你可以建造一个步哨击退 SCP \n同时你可以为队友建造补给器\n按 ATTACK2、USE 或使用 VOICEMENU 来和物品，按钮互动。"
 	}
 	"class_scp049"
 	{
@@ -406,7 +406,7 @@
 	}
 	"desc_scp049"
 	{
-		"chi"		"杀死所有人类.\n阻止人类逃离.\n与其他 SCP 合作.\n与一个死亡不久的人类交换你的近战武器使他们复活为你的队友。"
+		"chi"		"杀死所有人类。\n阻止人类逃离。\n与其他 SCP 合作。\n与一个死亡不久的人类交换你的近战武器使他们复活为你的队友。"
 	}
 	"train_scp049"
 	{
@@ -418,11 +418,11 @@
 	}
 	"desc_scp0492"
 	{
-		"chi"		"杀死所有人类.\n阻止人类逃离.\n与其他 SCP 合作.\n服从 SCP-049 的命令."
+		"chi"		"杀死所有人类。\n阻止人类逃离。\n与其他 SCP 合作。\n服从 SCP-049 的命令。"
 	}
 	"train_scp0492"
 	{
-		"chi"		"你已经被 SCP-049 复活.\n服从他的命令并攻击其他团队.\n阻止人类逃离.\n按 ATTACK2、USE 或使用 VOICEMENU 来跟按钮互动."
+		"chi"		"你已经被 SCP-049 复活。\n服从他的命令并攻击其他团队。\n阻止人类逃离。\n按 ATTACK2、USE 或使用 VOICEMENU 来跟按钮互动。"
 	}
 	"class_scp076"
 	{
@@ -482,7 +482,7 @@
 	}
 	"train_scp1732"
 	{
-		"chi"		"你的攻击对人类可以一击制敌。\n你只能在不被看到的时候进行移动。\n你可以在不被看到的时候瞬间移动。\nYou can press traps using RELOAD and sprint using ATTACK3.\nPress USE or use VOICEMENU to interact with buttons."
+		"chi"		"你的攻击对人类可以一击制敌。\n你只能在不被看到的时候进行移动。\n你可以在不被看到的时候瞬间移动。\nYou can press traps using RELOAD and sprint using ATTACK3。\nPress USE or use VOICEMENU to interact with buttons。"
 	}
 	"class_scp457"
 	{
@@ -490,11 +490,11 @@
 	}
 	"desc_scp457"
 	{
-		"chi"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nKill players to maintain your fire."
+		"chi"		"Kill everyone。\nPrevent escape。\nCooperate with other SCPs。\nKill players to maintain your fire。"
 	}
 	"train_scp457"
 	{
-		"chi"		"Your attacks sets players on fire.\nYour able to split apart after gaining full health.\nWater hurts you the most.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+		"chi"		"Your attacks sets players on fire。\nYour able to split apart after gaining full health。\nWater hurts you the most。\nPress ATTACK2， ATTACK3， USE or use VOICEMENU to interact with buttons。"
 	}
 	"class_scp939"
 	{
@@ -502,11 +502,11 @@
 	}
 	"desc_scp939"
 	{
-		"chi"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can talk to other humans."
+		"chi"		"Kill everyone。\nPrevent escape。\nCooperate with other SCPs。\nYou can talk to other humans。"
 	}
 	"train_scp939"
 	{
-		"chi"		"You can only see targets making noise.\nYou can trick players by talking to them.\nYou'll get faster with less health you have.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+		"chi"		"You can only see targets making noise。\nYou can trick players by talking to them。\nYou'll get faster with less health you have。\nPress ATTACK2， ATTACK3， USE or use VOICEMENU to interact with buttons。"
 	}
 	"class_scp9392"
 	{
@@ -514,11 +514,11 @@
 	}
 	"desc_scp9392"
 	{
-		"chi"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can talk to other humans."
+		"chi"		"Kill everyone。\nPrevent escape。\nCooperate with other SCPs。\nYou can talk to other humans。"
 	}
 	"train_scp9392"
 	{
-		"chi"		"You can only see targets making noise.\nYou can trick players by talking to them.\nYou'll get faster with less health you have.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+		"chi"		"You can only see targets making noise。\nYou can trick players by talking to them。\nYou'll get faster with less health you have。\nPress ATTACK2， ATTACK3， USE or use VOICEMENU to interact with buttons。"
 	}
 	"class_scp3008"
 	{
@@ -526,11 +526,11 @@
 	}
 	"desc_scp3008"
 	{
-		"chi"		"Kill everyone during the night.\nCooperate with other SCP-3008-2.\nYou can talk to other humans."
+		"chi"		"Kill everyone during the night。\nCooperate with other SCP-3008-2。\nYou can talk to other humans。"
 	}
 	"train_scp3008"
 	{
-		"chi"		"Make sure your customers are enjoying themselves.\nAlso make sure they leave during closing hours.\nUse brute force if needed.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+		"chi"		"Make sure your customers are enjoying themselves。\nAlso make sure they leave during closing hours。\nUse brute force if needed。\nPress ATTACK2， ATTACK3， USE or use VOICEMENU to interact with buttons。"
 	}
 	"class_itsteals"
 	{
@@ -538,11 +538,11 @@
 	}
 	"desc_itsteals"
 	{
-		"chi"		"Kill everyone.\nAttack from behind avoid being seen."
+		"chi"		"Kill everyone。\nAttack from behind avoid being seen。"
 	}
 	"train_itsteals"
 	{
-		"chi"		"Look around for players.\nMore times you get hit by a player, the more rage you gain.\nAfter a certain amount of times, you'll have enough."
+		"chi"		"Look around for players。\nMore times you get hit by a player， the more rage you gain。\nAfter a certain amount of times， you'll have enough。"
 	}
 	"class_sjm08"
 	{
@@ -550,7 +550,7 @@
 	}
 	"desc_sjm08"
 	{
-		"chi"		"A tech demo character.\nYour not normally supposed to play this unless forced by an admin."
+		"chi"		"A tech demo character。\nYour not normally supposed to play this unless forced by an admin。"
 	}
 
 	// Weapon Phrases
@@ -565,7 +565,7 @@
 	}
 	"info_5"
 	{
-		"chi"		"It's your fists, they don't do much."
+		"chi"		"It's your fists， they don't do much。"
 	}
 	"weapon_192"
 	{
@@ -653,7 +653,7 @@
 	}
 	"info_751"
 	{
-		"chi"		"Weaker then the bunch but saves you some bullets when your on a budget. "
+		"chi"		"Weaker then the bunch but saves you some bullets when your on a budget。 "
 	}
 	"weapon_1150"	// Backwards Compatibility
 	{
@@ -661,7 +661,7 @@
 	}
 	"info_1150"
 	{
-		"chi"		"Your personal rifle when you need it in a punch."
+		"chi"		"Your personal rifle when you need it in a punch。"
 	}
 	"weapon_203"
 	{
@@ -669,7 +669,7 @@
 	}
 	"info_203"
 	{
-		"chi"		"Your personal SMG when you need it in a punch."
+		"chi"		"Your personal SMG when you need it in a punch。"
 	}
 	"weapon_425"
 	{
@@ -677,7 +677,7 @@
 	}
 	"info_425"
 	{
-		"chi"		"The rifle when you want to get rid of some nasty [REDACTED]."
+		"chi"		"The rifle when you want to get rid of some nasty [REDACTED]。"
 	}
 	"weapon_415"
 	{
@@ -717,7 +717,7 @@
 	}
 	"info_61"
 	{
-		"chi"		"For when you need the distance and the precision."
+		"chi"		"For when you need the distance and the precision。"
 	}
 	"weapon_201"
 	{
@@ -725,7 +725,7 @@
 	}
 	"info_201"
 	{
-		"chi"		"When your tired being asked ''Do you need help?''."
+		"chi"		"When your tired being asked ''Do you need help?''。"
 	}
 	"weapon_423"
 	{
@@ -733,7 +733,7 @@
 	}
 	"info_423"
 	{
-		"chi"		"The actual best melee in the game, just mind the loud noise."
+		"chi"		"The actual best melee in the game， just mind the loud noise。"
 	}
 	"weapon_58"
 	{
@@ -765,11 +765,11 @@
 	}
 	"info_308"
 	{
-		"chi"		"爆炸时造成大量伤害."
+		"chi"		"爆炸时造成大量伤害。"
 	}
 	"weapon_594"
 	{
-		"chi"		"高压电浆喷射器."
+		"chi"		"高压电浆喷射器。"
 	}
 	"info_594"
 	{
@@ -777,7 +777,7 @@
 	}
 	"weapon_205"
 	{
-		"chi"		"''Smoothy Maker""
+		"chi"		"Smoothy Maker"
 	}
 	"info_205"
 	{
@@ -805,7 +805,7 @@
 	}
 	"info_25"
 	{
-		"chi"		"Anti-SCP Sentries, Dispensers, Two-Way Teleporters."
+		"chi"		"Anti-SCP Sentries， Dispensers， Two-Way Teleporters。"
 	}
 	"weapon_26"
 	{
@@ -813,7 +813,7 @@
 	}
 	"info_26"
 	{
-		"chi"		"You can't pick up buildings but you can use this."
+		"chi"		"You can't pick up buildings but you can use this。"
 	}
 	"weapon_28"
 	{
@@ -877,7 +877,7 @@
 	}
 	"info_30007"
 	{
-		"chi"		"Go anywhere except SCP-106, Comms, Warhead, and the Micro H.I.D."
+		"chi"		"Go anywhere except SCP-106， Comms， Warhead， and the Micro H.I.D."
 	}
 	"weapon_30008"
 	{
@@ -885,7 +885,7 @@
 	}
 	"info_30008"
 	{
-		"chi"		"Go anywhere except SCP-106, Comms, and Warhead"
+		"chi"		"Go anywhere except SCP-106， Comms， and Warhead"
 	}
 	"weapon_30009"
 	{
@@ -893,7 +893,7 @@
 	}
 	"info_30009"
 	{
-		"chi"		"Go anywhere except the gates and armory."
+		"chi"		"Go anywhere except the gates and armory。"
 	}
 	"weapon_30010"
 	{
@@ -901,7 +901,7 @@
 	}
 	"info_30010"
 	{
-		"chi"		"Go anywhere except the armory."
+		"chi"		"Go anywhere except the armory。"
 	}
 	"weapon_30011"
 	{
@@ -909,7 +909,7 @@
 	}
 	"info_30011"
 	{
-		"chi"		"Go anywhere except the SCP-106 room."
+		"chi"		"Go anywhere except the SCP-106 room。"
 	}
 	"weapon_30012"
 	{
@@ -925,7 +925,7 @@
 	}
 	"info_30013"
 	{
-		"chi"		"%%+attack%% to use and gain health regeneration."
+		"chi"		"%%+attack%% to use and gain health regeneration。"
 	}
 	"weapon_30014"
 	{
@@ -933,7 +933,7 @@
 	}
 	"info_30014"
 	{
-		"chi"		"%%+attack%% to use and gain back half your max health."
+		"chi"		"%%+attack%% to use and gain back half your max health。"
 	}
 	"weapon_30015"
 	{
@@ -941,7 +941,7 @@
 	}
 	"info_30015"
 	{
-		"chi"		"%%+attack%% to use and gain unlimited sprint and health regeneration."
+		"chi"		"%%+attack%% to use and gain unlimited sprint and health regeneration。"
 	}
 	"weapon_30016"
 	{
@@ -949,7 +949,7 @@
 	}
 	"info_30016"
 	{
-		"chi"		"This allows you to speak to others at a longer range.\nPressing will toggle it's range and power consumption.\nYou only need to pull it out when you need to change the range."
+		"chi"		"This allows you to speak to others at a longer range。\nPressing will toggle it's range and power consumption。\nYou only need to pull it out when you need to change the range。"
 	}
 	"weapon_30017"
 	{
@@ -957,7 +957,7 @@
 	}
 	"info_30017"
 	{
-		"chi"		"%%+attack%% to use restore health and gain health regneration."
+		"chi"		"%%+attack%% to use restore health and gain health regneration。"
 	}
 	"weapon_46"
 	{
@@ -965,7 +965,7 @@
 	}
 	"info_46"
 	{
-		"chi"		"%%+attack%% to use restore health and increase your movement speed.\nYou passively lose health over time until you take SCP-500."
+		"chi"		"%%+attack%% to use restore health and increase your movement speed。\nYou passively lose health over time until you take SCP-500。"
 	}
 	"weapon_30018"
 	{
@@ -973,7 +973,7 @@
 	}
 	"info_30018"
 	{
-		"chi"		"%%+attack%% to break down a door in front of you."
+		"chi"		"%%+attack%% to break down a door in front of you。"
 	}
 	"weapon_107"
 	{
@@ -981,7 +981,7 @@
 	}
 	"info_107"
 	{
-		"chi"		"%%+attack%% to become invisible for 15 seconds."
+		"chi"		"%%+attack%% to become invisible for 15 seconds。"
 	}
 	"weapon_30019"
 	{
@@ -1056,11 +1056,11 @@
 	}
 	"in_cooldown"
 	{
-		"chi"		"冷却中..."
+		"chi"		"冷却中。。。"
 	}
 	"914_noeffect"
 	{
-		"chi"		"什么也没有发生..."
+		"chi"		"什么也没有发生。。。"
 	}
 	"914_delet"
 	{
@@ -1122,34 +1122,34 @@
 	}
 	"scp_killed"	// Chat
 	{
-		"#format"	"{1:s},{2:t},{3:s},{4:t}"
+		"#format"	"{1:s}，{2:t}，{3:s}，{4:t}"
 		"chi"		"{{1}}{2} {default} 已被 {{3}}{4} 收容"
 	}
 	"scp_killed_duo"	// Chat
 	{
-		"#format"	"{1:s},{2:t},{3:s},{4:t},{5:s},{6:t}"
+		"#format"	"{1:s}，{2:t}，{3:s}，{4:t}，{5:s}，{6:t}"
 		"chi"		"{{1}}{2} {default} 已被 {{3}}{4} {default} 和 {{5}}{6} 收容"
 	}
 	"mtf_spawn"	// Chat
 	{
-		"chi"		"{mediumblue} MTF 机动特遣队, Epsilon-11{default}已经进入了设施."
+		"chi"		"{mediumblue} MTF 机动特遣队， Epsilon-11{default}已经进入了设施。"
 	}
 	"mtf_spawn_scp"	// Chat
 	{
 		"#format"	"{1:d}"
-		"chi"		"等待重新收容的 SCP 数目为: {red}{1} {default}."
+		"chi"		"等待重新收容的 SCP 数目为: {red}{1} {default}。"
 	}
 	"mtf_spawn_scp_over"	// Chat
 	{
-		"chi"		"等待重新收容的 SCP 数目为: {red}未知{default}."
+		"chi"		"等待重新收容的 SCP 数目为: {red}未知{default}。"
 	}
 	"spawn_ranout"	// Chat
 	{
-		"chi"		"没有足够的票数复活本团队的所有玩家."
+		"chi"		"没有足够的票数复活本团队的所有玩家。"
 	}
 	"time_remaining"	// Game
 	{
-		"#format"	"{1:d},{2:s}"
+		"#format"	"{1:d}，{2:s}"
 		"chi"		"剩余时间: {1}:{2}"
 	}
 	"inv_full"	// Game
@@ -1192,22 +1192,22 @@
 	}
 	"kill_counter"	// HUD
 	{
-		"#format"	"{1:d},{2:d}"
+		"#format"	"{1:d}，{2:d}"
 		"chi"		"击杀: {1}\n剩余人类: {2}"
 	}	
 	"end_screen"	// HUD
 	{
-		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d}"
+		"#format"	"{1:t}，{2:d}，{3:d}，{4:d}，{5:d}，{6:d}，{7:d}"
 		"chi"		"{1}\n \n已逃离的 D 级人员: {2} / {3}\n存活的科学家: {4} / {5}\n无效化的 SCP: {6} / {7}"
 	}
 	"end_screen_vip" // HUD
 	{
-		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d},{8:d},{9:d}"
+		"#format"	"{1:t}，{2:d}，{3:d}，{4:d}，{5:d}，{6:d}，{7:d}，{8:d}，{9:d}"
 		"chi"		"{1}\n \n已逃离的 D 级人员: {2} / {3} ({4} 被俘)\n已逃离的科学家: {5} / {6} ({7} 被俘)\n已失效的 SCP: {8} / {9}"
 	}	
 	"end_screen_boss"	// HUD
 	{
-		"#format"	"{1:t},{2:d},{3:d}"
+		"#format"	"{1:t}，{2:d}，{3:d}"
 		"chi"		"{1}\n \n存活的玩家: {2} / {3}"
 	}
 	"tesla_gate"	// Chat
@@ -1226,7 +1226,7 @@
 	{
 		"chi"		"Light Decontamination"
 	}
-	"redacted"	// Chat, Hint
+	"redacted"	// Chat， Hint
 	{
 		"chi"		"[被编辑]"
 	}
@@ -1240,7 +1240,7 @@
 	}
 	"106_create"	// Hint
 	{
-		"chi"		"传送门已建好, 使用 %%+attack3%% 传送"
+		"chi"		"传送门已建好， 使用 %%+attack3%% 传送"
 	}
 	"106_create_deny"	// Hint
 	{
@@ -1261,7 +1261,7 @@
 	}
 	"download_cvar"	// Chat
 	{
-		"#format"	"{1:s},{2:s}"
+		"#format"	"{1:s}，{2:s}"
 		"chi"		"{gray}{1} 被禁用。你将看不到任何自定义内容。如果你想开启此项，设置 {2} 为 1"
 	}
 	"download_filter"	// Chat
@@ -1310,11 +1310,11 @@
 	}
 	"desc_ikea3"
 	{
-		"chi"		"Search during the day. Survive during night.\nTry to find your escape.\nAssist in other survivors' escape."
+		"chi"		"Search during the day。 Survive during night。\nTry to find your escape。\nAssist in other survivors' escape。"
 	}
 	"train_ikea3"
 	{
-		"chi"		"Find weapons, ammo, and other supplies during the day.\nSurvive against Ikea Employees during the night.\nCooperate with other survivors.\nFind your escape when it's available.\nPress ATTACK2, USE or use VOICEMENU to interact with items."
+		"chi"		"Find weapons， ammo， and other supplies during the day。\nSurvive against Ikea Employees during the night。\nCooperate with other survivors。\nFind your escape when it's available。\nPress ATTACK2， USE or use VOICEMENU to interact with items。"
 	}
 	"class_scp3008"
 	{
@@ -1322,20 +1322,20 @@
 	}
 	"desc_scp3008"
 	{
-		"chi"		"Assist customers during the day.\nMake sure they leave during the night.\nCooperate with other SCPs."
+		"chi"		"Assist customers during the day。\nMake sure they leave during the night。\nCooperate with other SCPs。"
 	}
 	"train_scp3008"
 	{
-		"chi"		"Your harmless during the day unless attacked.\nDuring the night you can attack until day.\nKill survivor any classes when you can."
+		"chi"		"Your harmless during the day unless attacked。\nDuring the night you can attack until day。\nKill survivor any classes when you can。"
 	}
 	"ikea_win"
 	{
-		"#format"	"{1:d},{2:d},{3:s}"
+		"#format"	"{1:d}，{2:d}，{3:s}"
 		"chi"		"幸存者 胜利\n \n幸存者逃离： {1} / {2}\n生存时间： {3}"
 	}
 	"ikea_lose"
 	{
-		"#format"	"{1:d},{2:d},{3:s}"
+		"#format"	"{1:d}，{2:d}，{3:s}"
 		"chi"		"SCP-3008 胜利\n \n幸存者逃离： {1} / {2}\n生存时间： {3}"
 	}
 
@@ -1552,7 +1552,7 @@
 	}
 	"radio"	// HUD
 	{
-		"#format"	"{1:t},{2:d}"
+		"#format"	"{1:t}，{2:d}"
 		"chi"		"无线电：{1} ({2}%%) [ATTACK3]"
 		"ru"		"Радио: {1} ({2}%%) [СПЕЦ. АТАКА]"
 	}
