@@ -1,0 +1,1709 @@
+"Phrases"
+{
+	// Hint Phrases
+
+	"hint_1"
+	{
+		"chi"		"幽灵状态时你可以按“呼叫医生”键 \n来传送到活着的玩家身边。"
+	}
+	"hint_2"
+	{
+	 	"chi"		"SCP-939-89 和 SCP-939-53 只能看见\n当前正在移动或者攻击的玩家。\n如你还未被发现请不要移动。"
+	}
+	"hint_3"
+	{
+		"chi"		"SCP-079 可以通过开启\nA 门或者 B 门来帮助 D 级人员逃离，跟他说话就行了。"
+	}
+	"hint_4"
+	{
+		"chi"		"使用设施管理员以及 O5 钥匙卡允许\n你逃离设施，而不需要借助 MTF 或者混沌分裂者的帮助。"
+	}
+	"hint_5"
+	{
+		"chi"		"警卫和 MTF 可以使用刀来\n使 D 级人员或者混沌分裂者缴械而不用伤害他们。"
+	}
+	"hint_6"
+	{
+		"chi"		"SCP-173 只能在没人注视他时移动。如果某人眨眼了他也能移动。"
+	}
+	"hint_7"
+	{
+		"chi"		"大多数 SCP 可以一击制敌，无论其生命值多少。"
+	}
+	"hint_8"
+	{
+		"chi"		"蹲下可以帮助你面向其他人保持安静的移动。"
+	}
+	"hint_9"
+	{
+		"chi"		"MTF 和混沌每隔三分钟将会重生。"
+	}
+	"hint_10"
+	{
+		"chi"		"MTF 能通过将科学家带出\n其中一个大门来拯救他们。\n只有下士和队长有权限访问."
+	}
+	"hint_11"
+	{
+		"chi"		"混沌分裂者可以通过将 D 级人员带离某一扇门来解救他们."
+	}
+	"hint_12"
+	{
+		"chi"		"白给了？不要紧，你很快就会重生。"
+	}
+	"hint_13"
+	{
+		"chi"		"闪光弹可以致盲其他玩家，使你得以逃脱。"
+	}
+	"hint_14"
+	{
+		"chi"		"这里面可能会有没用的提示。"
+	}
+	"hint_15"
+	{
+		"chi"		"武器对敌人都有爆头伤害，但敌对 SCP 除外。"
+	}
+	"hint_16"
+	{
+		"chi"		"你可以使用 ATTACK1 、ATTACK2 键或“呼叫医生”键来捡起武器与钥匙卡等。"
+	}
+	"hint_17"
+	{
+		"chi"		"按住 ATTACK1 或 ATTACK2 键使用医疗包。"
+	}
+	"hint_18"
+	{
+		"chi"		"SCP-939-89 和 SCP-939-53 能够与人交流。"
+	}
+	"hint_19"
+	{
+		"chi"		"SCP 可以在任何距离与其他 SCP 进行沟通。"
+	}
+	"hint_20"
+	{
+		"chi"		"SCP-3008-2 只会在被攻击时或最终阶段攻击别人。"
+	}
+	"hint_21"
+	{
+		"chi"		"按住换弹键来查看你拿着的工具的详细描述。"
+	}
+
+	// SCP-3008-1 Phrases
+
+	"class_dboi_ikea"
+	{
+		"chi"		"SCP-3008-1 的受害者"
+	}
+	"desc_dboi_ikea"
+	{
+		"chi"		"逃离SCP-3008-1。\n与 MTF 合作。\n避开其他队伍."
+	}
+	"desc_mtf1_ikea"
+	{
+		"chi"		"帮助幸存者逃离。\n消灭其他目标。\n服从上级的安排。"
+	}
+	"desc_mtf2_ikea"
+	{
+		"chi"		"帮助幸存者逃离。\n消灭其他目标。\n领导你手下的士兵。\n服从上级的安排。"
+	}
+	"class_mtfs_ikea"
+	{
+		"chi"		"MTF 九尾狐幸存者"
+	}
+	"desc_mtfs_ikea"
+	{
+		"chi"		"帮助幸存者逃离。\n消灭其他目标。\n服从上级的安排。"
+	}
+	"desc_mtf3_ikea"
+	{
+		"chi"		"帮助幸存者逃离。\n消灭其他目标。\n领导你手下的士兵。"
+	}
+	"end_screen_ikea"
+	{
+		"#format"	"{1:t},{2:d},{3:d}"
+		"chi"		"{1}\n \n逃离的幸存者: {2} / {3}"
+	}
+
+	// Pandemic Phrases
+
+	"class_goc"
+	{
+		"chi"		"全球超自然联盟"
+	}
+	"desc_goc"
+	{
+		"chi"		"使用一切手段活过爆发。\n消灭 SCP 和 MTF。\n在地图上捡取物品。"
+	}
+	"train_goc"
+	{
+		"chi"		"SCP-5000，一个有关 SCP 基金会转而对抗人类的故事。\n你的小分队将帮助处理混沌分裂者。\n捡取武器和物品，使用一切手段穿过地图。\n SCP 和 MTF 将会重生为巨大威胁。"
+	}
+	"class_mtf5001"
+	{
+		"chi"		"MTF 九尾狐新兵"
+	}
+	"desc_mtf5001"
+	{
+		"chi"		"杀死所有全球超自然联盟人员.\n服从你长官的命令."
+	}
+	"train_mtf5001"
+	{
+		"chi"		"SCP-5000，一个有关 SCP 基金会转而对抗人类的故事。\n你的小分队将负责对抗全球超自然联盟。\n与 SCP 共同合作并在可以的情况下完成你的指令。"
+	}
+	"class_mtf5002"
+	{
+		"chi"		"MTF 九尾狐下士"
+	}
+	"desc_mtf5002"
+	{
+		"chi"		"杀死所有全球超自然联盟人员.\n命令你手下的士兵.\n服从你长官的命令。"
+	}
+	"train_mtf5002"
+	{
+		"chi"		"SCP-5000，一个有关 SCP 基金会转而对抗人类的故事。\n你的小分队将负责对抗全球超自然联盟。\n与 SCP 共同合作并在可以的情况下完成你的指令。"
+	}
+	"class_mtf5003"
+	{
+		"chi"		"MTF 九尾狐指挥官"
+	}
+	"desc_mtf5003"
+	{
+		"chi"		"杀死所有全球超自然联盟人员.\n命令你手下的士兵。"
+	}
+	"train_mtf5003"
+	{
+		"chi"		"SCP-5000，一个有关SCP基金会转而对抗人类的故事。\n你的小分队将负责对抗全球超自然联盟。\n与SCP共同合作并在可以的情况下完成你的指令。"
+	}
+	"class_scp610"
+	{
+		"chi"		"SCP-610"
+	}
+	"desc_scp610"
+	{
+		"chi"		"杀死全球超自然联盟人员.\n与其他 SCP 合作。"
+	}
+	"train_scp610"
+	{
+		"chi"		"SCP-5000，一个有关 SCP 基金会转而对抗人类的故事。\n防止全球超自然联盟阻止混沌分裂者。\n散布自身……"
+	}
+
+	// It Steals Phrases
+
+	"desc_spec_steals"
+	{
+		"chi"		"等待直到下一回合."
+	}
+	"class_dboi_steals"
+	{
+		"chi"		"幸存者"
+	}
+	"desc_dboi_steals"
+	{
+		"chi"		"收集球体来赢得胜利\n使用 MOUSE2 开关手电筒\n按住 JUMP 来冲刺\n远离其他实体"
+	}
+	"class_sci_steals"
+	{
+		"chi"		"幸存者"
+	}
+	"desc_sci_steals"
+	{
+		"chi"		"收集球体来赢得胜利\n使用 MOUSE2 开关手电筒\n按住 JUMP 来冲刺\n远离其他实体"
+	}
+	"team_1_steals"
+	{
+		"chi"		"幸存者胜利"
+	}
+	"team_2_steals"
+	{
+		"chi"		"幸存者撤离"
+	}
+	"team_3_steals"
+	{
+		"chi"		"幸存者失败"
+	}
+	"end_screen_steals"
+	{
+		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d}"
+		"chi"		"{1}\n \n存活的幸存者: {2} / {3}\n收集的球体: {4} / {5}\n \nCreature was triggered {6} time(s)."
+	}
+
+	// Class Phrases
+
+	"class_0"
+	{
+		"chi"		"无效"
+	}
+	"class_spec"
+	{
+		"chi"		"观察者"
+	}
+	"desc_spec"
+	{
+		"chi"		"你即将重生."
+	}
+	"train_spec"
+	{
+		"chi"		"你现在只能观察和与其他已死亡的玩家交流。\n不要担心过一会你将重生。\n你可以按下呼叫医生键来传送到其他活着的玩家身边。"
+	}
+	"class_dboi"
+	{
+		"chi"		"D 级人员"
+	}
+	"desc_dboi"
+	{
+		"chi"		"逃离这个设施。\n与混沌分裂者合作。\n避开其他团队."
+	}
+	"train_dboi"
+	{
+		"chi"		"你需要逃离这个设施。\n 按 ATTACK，ATTACK2，USE，或者使用 VOICEMENU 来跟按钮或者物品互动。\n小心其他队伍，他们会杀了或者制服你。"
+	}
+	"class_chaos"
+	{
+		"chi"		"混沌分裂者"
+	}
+	"desc_chaos"
+	{
+		"chi"		"帮助 D 级人员逃离.\n消灭其他目标。"
+	}
+	"train_chaos"
+	{
+		"chi"		"你需要从设施里解救 D 级人员。\n杀死其他队伍的成员来帮助 D 级人员逃离。\n按 ATTACK2、USE 或使用 VOICEMENU 来跟按钮和物品互动。"
+	}
+	"class_chaos1"
+	{
+		"chi"		"混沌分离者步枪手"
+	}
+	"desc_chaos1"
+	{
+		"chi"		"帮助 D 级人员逃离.\n无效化其他目标."
+	}
+	"train_chaos1"
+	{
+		"chi"		"你需要从设施里解救 D 级人员。\n杀死其他队伍的成员来帮助 D 级人员逃离。\n按 ATTACK2、USE 或使用 VOICEMENU 来跟按钮和物品互动。"
+	}
+	"class_chaosd"
+	{
+		"chi"		"混沌分裂者步枪手"
+	}
+	"desc_chaosd"
+	{
+		"chi"		"帮助 D 级人员逃离\n无效化其他目标"
+	}
+	"train_chaosd"
+	{
+		"chi"		"你需要从设施里解救 D 级人员。\n杀死其他队伍的成员来帮助 D 级人员逃离。\n按 ATTACK2、USE 或使用 VOICEMENU 来跟按钮和物品互动。"
+	}
+	"class_chaos2"
+	{
+		"chi"		"混沌分裂者镇压者"
+	}
+	"desc_chaos2"
+	{
+		"chi"		"帮助 D 级人员逃离\n无效化其他目标"
+	}
+	"train_chaos2"
+	{
+		"chi"		"你需要从设施里解救 D 级人员。\n杀死其他队伍的成员来帮助D级人员逃离。\n按 ATTACK2、USE 或使用 VOICEMENU 来跟按钮和物品互动。"
+	}
+	"class_chaos3"
+	{
+		"chi"		"混沌分裂者掠夺者"
+	}
+	"desc_chaos3"
+	{
+		"chi"		"帮助 D 级人员逃离\n无效化其他目标"
+	}
+	"train_chaos3"
+	{
+		"chi"		"你需要从设施里解救 D 级人员。\n杀死其他队伍的成员来帮助D级人员逃离。\n按 ATTACK2、USE 或使用 VOICEMENU 来跟按钮和物品互动。"
+	}
+	"class_sci"
+	{
+		"chi"		"科学家"
+	}
+	"desc_sci"
+	{
+		"chi"		"逃离设施.\n与 MTF 合作.\n避开其他团队."
+	}
+	"train_sci"
+	{
+		"chi"		"你需要逃离这座设施。\n按 ATTACK，USE，或使用 VOICEMENU 来跟按钮和物品互动。\n小心其他队伍，他们会杀了你。"
+	}
+	"class_guard"
+	{
+		"chi"		"设施警卫"
+	}
+	"desc_guard"
+	{
+		"chi"		"帮助科学家逃离设施.\n与 MTF 合作.\n无害化其他目标."
+	}
+	"train_guard"
+	{
+		"chi"		"你必须保护科学家免遭其他团队攻击.\n通过护送他们去他们需要的地方来帮助他们.\n你可以用近战武器来拷住 D 级人员"
+	}
+	"class_mtf1"
+	{
+		"chi"		"九尾狐新兵"
+	}
+	"desc_mtf1"
+	{
+		"chi"		"帮助科学家逃离.\n无害化其他目标,\n服从你长官的命令."
+	}
+	"train_mtf1"
+	{
+		"chi"		"你需要解救设施中的科学家.\n与你的下士和队长待在一起.\n通过无线电来互相联系.\n按 ATTACK2、USE 或使用 VOICEMENU 来跟物品，按钮互动."
+	}
+	"class_mtf2"
+	{
+		"chi"		"MTF 九尾狐下士"
+	}
+	"desc_mtf2"
+	{
+		"chi"		"帮助科学家逃离.\n消灭其他目标.\n领导你的士兵.\n服从上级指令."
+	}
+	"train_mtf2"
+	{
+		"chi"		"你需要解救设施中的科学家.\n支援你队伍中的新兵,遵从你的指挥官\n通过无线电来互相联系.\n按 ATTACK2, USE 或使用 VOICEMENU 来和物品，按钮互动."
+	}
+	"class_mtfs"
+	{
+		"chi"		"MTF 九尾狐特种部队"
+	}
+	"desc_mtfs"
+	{
+		"chi"		"帮助科学家逃离.\n消灭其他目标.\n领导你的士兵.\n服从指挥官的命令"
+	}
+	"train_mtfs"
+	{
+		"chi"		"你需要解救设施中的科学家.\n支援你队伍中的新兵,服从指挥官的命令\n通过无线电来互相联系.\n按 ATTACK2、USE 或使用 VOICEMENU 来和物品，按钮互动."
+	}
+	"class_mtf3"
+	{
+		"chi"		"MTF 九尾狐指挥官"
+	}
+	"desc_mtf3"
+	{
+		"chi"		"帮助科学家逃离.\n消灭其他目标.\n领导你手下的士兵."
+	}
+	"train_mtf3"
+	{
+		"chi"		"你需要解救设施中的科学家.\n指挥你的部队进入设施\n使用无线电命令你周围的部队\n按 ATTACK2、USE 或使用 VOICEMENU 来和物品，按钮互动."
+	}
+	"class_mtfe"
+	{
+		"chi3"	"MTF 九尾狐工程师"
+	}
+	"desc_mtfe"
+	{
+		"chi"		"帮助科学家逃离.\n消灭其他目标.\n服从上级的命令."
+	}
+	"train_mtfe"
+	{
+		"chi"		"你需要解救设施中的科学家.\n你可以建造一个步哨击退 SCP \n同时你可以为队友建造补给器\n按 ATTACK2、USE 或使用 VOICEMENU 来和物品，按钮互动。"
+	}
+	"class_scp049"
+	{
+		"chi"		"SCP-049"
+	}
+	"desc_scp049"
+	{
+		"chi"		"杀死所有人类.\n阻止人类逃离.\n与其他 SCP 合作.\n与一个死亡不久的人类交换你的近战武器使他们复活为你的队友。"
+	}
+	"train_scp049"
+	{
+		"chi"		"你可以迅速击杀人类。\n使用你的刀来复活死亡的玩家使其变成SCP-049-2。\n按 ATTACK2，ATTACK3，USE 或使用 VOICEMENU 来跟按钮和物品互动。"
+	}
+	"class_scp0492"
+	{
+		"chi"		"SCP-049-2"
+	}
+	"desc_scp0492"
+	{
+		"chi"		"杀死所有人类.\n阻止人类逃离.\n与其他 SCP 合作.\n服从 SCP-049 的命令."
+	}
+	"train_scp0492"
+	{
+		"chi"		"你已经被 SCP-049 复活.\n服从他的命令并攻击其他团队.\n阻止人类逃离.\n按 ATTACK2、USE 或使用 VOICEMENU 来跟按钮互动."
+	}
+	"class_scp076"
+	{
+		"chi"		"SCP-076-2"
+	}
+	"desc_scp076"
+	{
+		"chi"		"杀了所有人。\n阻止逃离。\n与其他 SCP 合作。\n杀害5个人来进入狂暴状态。"
+	}
+	"train_scp076"
+	{
+		"chi"		"你的目标是杀害任何设施警卫，MTF 或者混沌分裂者。\n当你杀害了5个人之后你会进入狂暴状态。\n按 ATTACK2、ATTACK3、USE 或使用 VOICEMENU 来跟按钮互动。"
+	}
+	"class_scp096"
+	{
+		"chi"		"SCP-096"
+	}
+	"desc_scp096"
+	{
+		"chi"		"杀死所有人类\n阻止人类逃离\n与其他 SCP 合作\n当你被人类注视时会狂暴"
+	}
+	"train_scp096"
+	{
+		"chi"		"你可以在狂怒状态下迅速击杀人类。\n如果有玩家在看你的脸或者攻击你，你可以将他们马上击杀。\n按 ATTACK2，ATTACK3，USE 或使用 VOICEMENU 按钮互动。"
+	}
+	"class_scp106"
+	{
+		"chi"		"SCP-106"
+	}
+	"desc_scp106"
+	{
+		"chi"		"杀死所有人类\n阻止人类逃离\n与其他 SCP 合作\n按 ATTACK2 创造一个传送门\n按 ATTACK3 使用该传送门传送"
+	}
+	"train_scp106"
+	{
+		"chi"		"你的攻击将会传送人类到一个口袋空间。\n你可以布置传送门并且在稍后传送他们。\nATTACK2 可以布置一个传送门，ATTACK3 将会使你传送到该传送门。"
+	}
+	"class_scp173"
+	{
+		"chi"		"SCP-173"
+	}
+	"desc_scp173"
+	{
+		"chi"		"杀死所有人类\n阻止人类逃离\n与其他 SCP 合作\n按 ATTACK2 来在准备好的时候瞬间移动\n 按 RELOAD 来布置一个水洼陷阱\n 按 ATTACK3 来疾跑。"
+	}
+	"train_scp173"
+	{
+		"chi"		"你可以迅速击杀人类。\n你只能在没有被看着的情况下移动。\n你可以按 RELOAD 来布置水洼陷阱和按 ATTACK3 来进行疾跑。\n按USE 或者使用 VOICEMENU 来跟按钮互动。"
+	}
+	"class_scp1732"
+	{
+		"chi"		"SCP-173"
+	}
+	"desc_scp1732"
+	{
+		"chi"		"杀死所有人类\n阻止人类逃离\n与其他 SCP 合作\n按 ATTACK2 在准备好的时候瞬间移动\n 按 RELOAD 来布置一个水洼陷阱\n 按 ATTACK3 来疾跑"
+	}
+	"train_scp1732"
+	{
+		"chi"		"你的攻击对人类可以一击制敌。\n你只能在不被看到的时候进行移动。\n你可以在不被看到的时候瞬间移动。\nYou can press traps using RELOAD and sprint using ATTACK3.\nPress USE or use VOICEMENU to interact with buttons."
+	}
+	"class_scp457"
+	{
+		"chi"		"SCP-457"
+	}
+	"desc_scp457"
+	{
+		"chi"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nKill players to maintain your fire."
+	}
+	"train_scp457"
+	{
+		"chi"		"Your attacks sets players on fire.\nYour able to split apart after gaining full health.\nWater hurts you the most.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
+	"class_scp939"
+	{
+		"chi"		"SCP-939-89"
+	}
+	"desc_scp939"
+	{
+		"chi"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can talk to other humans."
+	}
+	"train_scp939"
+	{
+		"chi"		"You can only see targets making noise.\nYou can trick players by talking to them.\nYou'll get faster with less health you have.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
+	"class_scp9392"
+	{
+		"chi"		"SCP-939-53"
+	}
+	"desc_scp9392"
+	{
+		"chi"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can talk to other humans."
+	}
+	"train_scp9392"
+	{
+		"chi"		"You can only see targets making noise.\nYou can trick players by talking to them.\nYou'll get faster with less health you have.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
+	"class_scp3008"
+	{
+		"chi"		"SCP-3008-2"
+	}
+	"desc_scp3008"
+	{
+		"chi"		"Kill everyone during the night.\nCooperate with other SCP-3008-2.\nYou can talk to other humans."
+	}
+	"train_scp3008"
+	{
+		"chi"		"Make sure your customers are enjoying themselves.\nAlso make sure they leave during closing hours.\nUse brute force if needed.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
+	"class_itsteals"
+	{
+		"chi"		"???"
+	}
+	"desc_itsteals"
+	{
+		"chi"		"Kill everyone.\nAttack from behind avoid being seen."
+	}
+	"train_itsteals"
+	{
+		"chi"		"Look around for players.\nMore times you get hit by a player, the more rage you gain.\nAfter a certain amount of times, you'll have enough."
+	}
+	"class_sjm08"
+	{
+		"chi"		"Specimen 8"
+	}
+	"desc_sjm08"
+	{
+		"chi"		"A tech demo character.\nYour not normally supposed to play this unless forced by an admin."
+	}
+
+	// Weapon Phrases
+
+	"weapon_0"
+	{
+		"chi"		"Unknown"
+	}
+	"weapon_5"
+	{
+		"chi"		"None"
+	}
+	"info_5"
+	{
+		"chi"		"It's your fists, they don't do much."
+	}
+	"weapon_192"
+	{
+		"chi"		"消防斧"
+	}
+	"info_192"
+	{
+		"chi"		"伤害可观，攻击速度较低"
+	}
+	"weapon_153"
+	{
+		"chi"		"爆破锤"
+	}
+	"info_152"
+	{
+		"chi"		"很适合用于摧毁物件与建筑。"
+	}
+	"weapon_30758"
+	{
+		"chi"		"砍刀"
+	}
+	"info_30758"
+	{
+		"chi"		"可以背刺其他玩家"
+	}
+	"weapon_325"
+	{
+		"chi"		"棒槌"
+	}
+	"info_325"
+	{
+		"chi"		"没打中的时候至少不会伤害到自己"
+	}
+	"weapon_1013"
+	{
+		"chi"		"肉"
+	}
+	"info_1013"
+	{
+		"chi"		"希望你喜欢提升随机暴击几率"
+	}
+	"weapon_197"
+	{
+		"chi"		"扳手"
+	}
+	"info_197"
+	{
+		"chi"		"击中建筑来维修或者建造它"
+	}
+	"weapon_264"
+	{
+		"chi"		"平底锅"
+	}
+	"info_264"
+	{
+		"chi"		"他们会听见有什么东西要来了"
+	}
+	"weapon_954"
+	{
+		"chi"		"除械工具"
+	}
+	"info_954"
+	{
+		"chi"		"可以除械其他玩家并使其不再拿着武器\n玩家到达逃离区域可以转化为你队伍的成员。"
+	}
+	"weapon_773"
+	{
+		"chi"		"COM-15 手枪"
+	}
+	"info_773"
+	{
+		"chi"		"你的随手口袋手枪。"
+	}
+	"weapon_209"
+	{
+		"chi"		"COM-18 手枪"
+	}
+	"info_209"
+	{
+		"chi"		"更慢，但有更多子弹并且比你的小手枪能够造成更多伤害。"
+	}
+	"weapon_751"
+	{
+		"chi"		"FSP-9"
+	}
+	"info_751"
+	{
+		"chi"		"Weaker then the bunch but saves you some bullets when your on a budget. "
+	}
+	"weapon_1150"	// Backwards Compatibility
+	{
+		"chi"		"Project 90"
+	}
+	"info_1150"
+	{
+		"chi"		"Your personal rifle when you need it in a punch."
+	}
+	"weapon_203"
+	{
+		"chi"		"Crossvec"
+	}
+	"info_203"
+	{
+		"chi"		"Your personal SMG when you need it in a punch."
+	}
+	"weapon_425"
+	{
+		"chi"		"MTF-E11-SR"
+	}
+	"info_425"
+	{
+		"chi"		"The rifle when you want to get rid of some nasty [REDACTED]."
+	}
+	"weapon_415"
+	{
+		"chi"		"Logicer"
+	}
+	"info_415"
+	{
+		"chi"		"该重型枪支可以造成更高的伤害，但在对付 SCP 的时候会有点吃力"
+	}
+	"weapon_1153"
+	{
+		"chi"		"AK"
+	}
+	"info_1153"
+	{
+		"chi"		"当你在需要拯救橙色连身衣小子的时候所需要的一款反人类枪械"
+	}
+	"weapon_199"
+	{
+		"chi"		"霰弹枪"
+	}
+	"info_199"
+	{
+		"chi"		"这个游戏里最好用的近战武器"
+	}
+	"weapon_200"
+	{
+		"chi"		"霰弹枪"
+	}
+	"info_200"
+	{
+		"chi"		"这个游戏里最好用的近战武器"
+	}
+	"weapon_61"
+	{
+		"chi"		".44 左轮手枪"
+	}
+	"info_61"
+	{
+		"chi"		"For when you need the distance and the precision."
+	}
+	"weapon_201"
+	{
+		"chi"		"狙击步枪"
+	}
+	"info_201"
+	{
+		"chi"		"When your tired being asked ''Do you need help?''."
+	}
+	"weapon_423"
+	{
+		"chi"		"The Saxxy"
+	}
+	"info_423"
+	{
+		"chi"		"The actual best melee in the game, just mind the loud noise."
+	}
+	"weapon_58"
+	{
+		"chi"		"闪光弹"
+	}
+	"info_58"
+	{
+		"chi"		"爆炸时没有伤害但能致盲玩家"
+	}
+	"weapon_1083"
+	{
+		"chi"		"高爆手雷"
+	}
+	"info_1083"
+	{
+		"chi"		"爆炸时造成大量伤害"
+	}
+	"weapon_1151"
+	{
+		"chi"		"闪光弹"
+	}
+	"info_1151"
+	{
+		"chi"		"爆炸时没有伤害但能致盲玩家"
+	}
+	"weapon_308"
+	{
+		"chi"		"高爆手雷"
+	}
+	"info_308"
+	{
+		"chi"		"爆炸时造成大量伤害."
+	}
+	"weapon_594"
+	{
+		"chi"		"高压电浆喷射器."
+	}
+	"info_594"
+	{
+		"chi"		"按住充能6秒后松开发射高伤害电浆\n值得一试的处理和无效化SCP的最好工具"
+	}
+	"weapon_205"
+	{
+		"chi"		"''Smoothy Maker""
+	}
+	"info_205"
+	{
+		"chi"		"发射缓慢，但威力巨大的火箭弹"
+	}
+	"weapon_15"
+	{
+		"chi"		"转轮机枪"
+	}
+	"info_15"
+	{
+		"chi"		"我是一个重机枪手，这，就是我的武器。"
+	}
+	"weapon_210"
+	{
+		"chi"		"GOC配备的左轮手枪"
+	}
+	"info_210"
+	{
+		"chi"		"当世界变得更黑暗时你唯一的朋友"
+	}
+	"weapon_25"
+	{
+		"chi"		"Construction PDA"
+	}
+	"info_25"
+	{
+		"chi"		"Anti-SCP Sentries, Dispensers, Two-Way Teleporters."
+	}
+	"weapon_26"
+	{
+		"chi"		"Destruction PDA"
+	}
+	"info_26"
+	{
+		"chi"		"You can't pick up buildings but you can use this."
+	}
+	"weapon_28"
+	{
+		"chi"		"Building"
+	}
+	"info_28"
+	{
+		"chi"		"%%+attack%% already"
+	}
+	"weapon_30001"
+	{
+		"chi"		"清洁工钥匙卡"
+	}
+	"info_30001"
+	{
+		"chi"		"允许你进入 SCP-914"
+	}
+	"weapon_30002"
+	{
+		"chi"		"科学家钥匙卡"
+	}
+	"info_30002"
+	{
+		"chi"		"允许你进入 SCP-914"
+	}
+	"weapon_30003"
+	{
+		"chi"		"区域总监钥匙卡"
+	}
+	"info_30003"
+	{
+		"chi"		"允许你进入 SCP-914 和检查点电梯"
+	}
+	"weapon_30004"
+	{
+		"chi"		"研究主管钥匙卡"
+	}
+	"info_30004"
+	{
+		"chi"		"允许你进入 SCP-914 和检查点电梯"
+	}
+	"weapon_30005"
+	{
+		"chi"		"设施警卫钥匙卡"
+	}
+	"info_30005"
+	{
+		"chi"		"允许你进入 SCP-914、检查点电梯和武器库"
+	}
+	"weapon_30006"
+	{
+		"chi"		"MTF 新兵钥匙卡"
+	}
+	"info_30006"
+	{
+		"chi"		"允许你进入 SCP-914、检查点电梯和武器库"
+	}
+	"weapon_30007"
+	{
+		"chi"		"MTF 士官钥匙卡"
+	}
+	"info_30007"
+	{
+		"chi"		"Go anywhere except SCP-106, Comms, Warhead, and the Micro H.I.D."
+	}
+	"weapon_30008"
+	{
+		"chi"		"MTF 指挥官钥匙卡"
+	}
+	"info_30008"
+	{
+		"chi"		"Go anywhere except SCP-106, Comms, and Warhead"
+	}
+	"weapon_30009"
+	{
+		"chi"		"收容工程师钥匙卡"
+	}
+	"info_30009"
+	{
+		"chi"		"Go anywhere except the gates and armory."
+	}
+	"weapon_30010"
+	{
+		"chi"		"设施总监钥匙卡"
+	}
+	"info_30010"
+	{
+		"chi"		"Go anywhere except the armory."
+	}
+	"weapon_30011"
+	{
+		"chi"		"混沌分离者权限装置"
+	}
+	"info_30011"
+	{
+		"chi"		"Go anywhere except the SCP-106 room."
+	}
+	"weapon_30012"
+	{
+		"chi"		"O5 钥匙卡"
+	}
+	"info_30012"
+	{
+		"chi+"		"可以进入所有房间!"
+	}
+	"weapon_30013"
+	{
+		"chi"		"止疼药"
+	}
+	"info_30013"
+	{
+		"chi"		"%%+attack%% to use and gain health regeneration."
+	}
+	"weapon_30014"
+	{
+		"chi"		"医疗包"
+	}
+	"info_30014"
+	{
+		"chi"		"%%+attack%% to use and gain back half your max health."
+	}
+	"weapon_30015"
+	{
+		"chi"		"肾上腺素"
+	}
+	"info_30015"
+	{
+		"chi"		"%%+attack%% to use and gain unlimited sprint and health regeneration."
+	}
+	"weapon_30016"
+	{
+		"chi"		"无线电"
+	}
+	"info_30016"
+	{
+		"chi"		"This allows you to speak to others at a longer range.\nPressing will toggle it's range and power consumption.\nYou only need to pull it out when you need to change the range."
+	}
+	"weapon_30017"
+	{
+		"chi"		"SCP-500"
+	}
+	"info_30017"
+	{
+		"chi"		"%%+attack%% to use restore health and gain health regneration."
+	}
+	"weapon_46"
+	{
+		"chi"		"SCP-207"
+	}
+	"info_46"
+	{
+		"chi"		"%%+attack%% to use restore health and increase your movement speed.\nYou passively lose health over time until you take SCP-500."
+	}
+	"weapon_30018"
+	{
+		"chi"		"SCP-018"
+	}
+	"info_30018"
+	{
+		"chi"		"%%+attack%% to break down a door in front of you."
+	}
+	"weapon_107"
+	{
+		"chi"		"SCP-268"
+	}
+	"info_107"
+	{
+		"chi"		"%%+attack%% to become invisible for 15 seconds."
+	}
+	"weapon_30019"
+	{
+		"chi"		"轻型护甲"
+	}
+	"info_30019"
+	{
+		"chi"		"最低的伤害减免，不会减慢移动"
+	}
+	"weapon_30020"
+	{
+		"chi"		"战斗护甲"
+	}
+	"info_30020"
+	{
+		"chi"		"优秀的伤害减免，额外的弹药储备，增加体力消耗"
+	}
+	"weapon_30021"
+	{
+		"chi"		"重型护甲"
+	}
+	"info_30021"
+	{
+		"chi"		"最高的伤害减免，额外的弹药储备，降低移动速度"
+	}
+
+
+	// Team Phrases
+
+	"team_0"
+	{
+		"chi"		"平局"
+	}
+	"team_1"
+	{
+		"chi"		"D 级人员胜利"
+	}
+	"team_2"
+	{
+		"chi"		"MTF 九尾狐胜利"
+	}
+	"team_3"
+	{
+		"chi"		"SCP 胜利"
+	}
+
+	// SCP-914 Phrases
+
+	"914_very"
+	{
+		"chi"		"超精加工"
+	}
+	"914_fine"
+	{
+		"chi"		"精加工"
+	}
+	"914_onetoone"
+	{
+		"chi"		"1:1"
+	}
+	"914_coarse"
+	{
+		"chi"		"粗加工"
+	}
+	"914_rough"
+	{
+		"chi"		"超粗加工"
+	}
+	"914_copy"
+	{
+		"chi"		"复制工具"
+	}
+	"in_cooldown"
+	{
+		"chi"		"冷却中..."
+	}
+	"914_noeffect"
+	{
+		"chi"		"什么也没有发生..."
+	}
+	"914_delet"
+	{
+		"chi"		"物品消失了！"
+	}
+	"914_gained"
+	{
+		"#format"	"{1:t}"
+		"chi"		"它变成了 {red}{1}"
+	}
+	"914_nowork"
+	{
+		"chi"		"无法与这个工具一起使用"
+	}
+
+
+	// Menu Phrases
+
+	"menu_helpclass"
+	{
+		"chi"		"Class Info"
+	}
+	"menu_preference"
+	{
+		"chi"		"SCP Preference"
+	}
+	"menu_colorblind"
+	{
+		"chi"		"Color Blind Mode"
+	}
+	"Red"
+	{
+		"chi"		"红色"
+	}
+	"Green"
+	{
+		"chi"		"绿色"
+	}
+	"Blue"
+	{
+		"chi"		"蓝色"
+	}
+	"Reset"
+	{
+		"chi"		"重置"
+	}
+	"Off"
+	{
+		"chi"		"关闭"
+	}
+
+
+	// Other Phrases
+
+	"you_are"	// HUD
+	{
+		"#format"	"{1:t}"
+		"chi"		"你是 {1}"
+	}
+	"scp_killed"	// Chat
+	{
+		"#format"	"{1:s},{2:t},{3:s},{4:t}"
+		"chi"		"{{1}}{2} {default} 已被 {{3}}{4} 收容"
+	}
+	"scp_killed_duo"	// Chat
+	{
+		"#format"	"{1:s},{2:t},{3:s},{4:t},{5:s},{6:t}"
+		"chi"		"{{1}}{2} {default} 已被 {{3}}{4} {default} 和 {{5}}{6} 收容"
+	}
+	"mtf_spawn"	// Chat
+	{
+		"chi"		"{mediumblue} MTF 机动特遣队, Epsilon-11{default}已经进入了设施."
+	}
+	"mtf_spawn_scp"	// Chat
+	{
+		"#format"	"{1:d}"
+		"chi"		"等待重新收容的 SCP 数目为: {red}{1} {default}."
+	}
+	"mtf_spawn_scp_over"	// Chat
+	{
+		"chi"		"等待重新收容的 SCP 数目为: {red}未知{default}."
+	}
+	"spawn_ranout"	// Chat
+	{
+		"chi"		"没有足够的票数复活本团队的所有玩家."
+	}
+	"time_remaining"	// Game
+	{
+		"#format"	"{1:d},{2:s}"
+		"chi"		"剩余时间: {1}:{2}"
+	}
+	"inv_full"	// Game
+	{
+		"chi"		"装备栏已满！"
+	}
+	"type_full"	// Game
+	{
+		"chi"		"类似的物品太多"
+	}
+	"disarmed_by"	// HUD
+	{
+		"#format"	"{1:N}"
+		"chi"		"你已经被 {1} 拷住"
+	}
+	"disarmed"	// Game
+	{
+		"chi"		"你被拷住了！"
+	}
+	"badkill"	// Game
+	{
+		"en"		"滥杀无辜，你的道德值降低了 "
+	}
+	"goodkarma"	// Game
+	{
+		"en"		"干得漂亮，你的道德值提高了"
+	}	
+	"radar"	// HUD
+	{
+		"chi"		"雷达就绪 [RELOAD]"
+	}
+	"sprint"	// HUD
+	{
+		"#format"	"{1:s}"
+		"chi"		"体力: {1}"
+	}
+	"help_sprint"	// Hint
+	{
+		"chi"		"%%+attack3%% 按住奔跑"
+	}
+	"kill_counter"	// HUD
+	{
+		"#format"	"{1:d},{2:d}"
+		"chi"		"击杀: {1}\n剩余人类: {2}"
+	}	
+	"end_screen"	// HUD
+	{
+		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d}"
+		"chi"		"{1}\n \n已逃离的 D 级人员: {2} / {3}\n存活的科学家: {4} / {5}\n无效化的 SCP: {6} / {7}"
+	}
+	"end_screen_vip" // HUD
+	{
+		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d},{8:d},{9:d}"
+		"chi"		"{1}\n \n已逃离的 D 级人员: {2} / {3} ({4} 被俘)\n已逃离的科学家: {5} / {6} ({7} 被俘)\n已失效的 SCP: {8} / {9}"
+	}	
+	"end_screen_boss"	// HUD
+	{
+		"#format"	"{1:t},{2:d},{3:d}"
+		"chi"		"{1}\n \n存活的玩家: {2} / {3}"
+	}
+	"tesla_gate"	// Chat
+	{
+		"chi"		"特斯拉电门"
+	}
+	"femur_breaker"	// Chat
+	{
+		"chi"		"Femur Breaker"
+	}
+	"alpha_warhead"	// Chat
+	{
+		"chi"		"阿尔法核弹头"
+	}
+	"light_decontamination"	// Chat
+	{
+		"chi"		"Light Decontamination"
+	}
+	"redacted"	// Chat, Hint
+	{
+		"chi"		"[被编辑]"
+	}
+	"data_expunged"	// Hint
+	{
+		"chi"		"[数据删除]"
+	}
+	"106_portal"	// Annotation
+	{
+		"chi"		"传送门"
+	}
+	"106_create"	// Hint
+	{
+		"chi"		"传送门已建好, 使用 %%+attack3%% 传送"
+	}
+	"106_create_deny"	// Hint
+	{
+		"chi"		"现在不能建立传送门"
+	}
+	"106_create_none"	// Hint
+	{
+		"chi"		"没有建好的传送门，使用 %%+attack2%% 建造一个"
+	}
+	"106_tele_deny"	// Hint
+	{
+		"chi"		"无法传送"
+	}
+	"download_error"	// Chat
+	{
+		"#format"	"{1:s}"
+		"chi"		"{gray}我们无法检查你是否启用了 {1}。如果你看到任何错误，请确保你允许所有自定义内容并且重新加入游戏。"
+	}
+	"download_cvar"	// Chat
+	{
+		"#format"	"{1:s},{2:s}"
+		"chi"		"{gray}{1} 被禁用。你将看不到任何自定义内容。如果你想开启此项，设置 {2} 为 1"
+	}
+	"download_filter"	// Chat
+	{
+		"#format"	"{1:s}"
+		"chi"		"{gray}当前 cl_downloadfilter设置为 {1}。你将看不到任何自定义内容。如果你想开启此项，设置 cl_downloadfilter 为 all"
+	}
+	"download_filter_sound"	// Chat
+	{
+		"chi"		"{gray}当前 cl_downloadfilter 设置为“不下载声音文件”。你将听不到任何音乐。如果你想开启此项，设置 cl_downloadfilter 为 all"
+	}
+	"gameover_stuck"	// HUD
+	{
+		"chi"		"任务：中止\n目标：MTF 行动 E11\n原因：判断力严重不足"
+	}
+
+	// Ikea
+
+	"class_ikea1"
+	{
+		"chi"		"幸存者"
+	}
+	"desc_ikea1"
+	{
+		"chi"		"日间的时候搜索。晚上的时候生存。\n尝试找到你的出路。"
+	}
+	"train_ikea1"
+	{
+		"chi"		"在日间的时候找到武器，弹药和其他补给。\n在夜间的时候来对抗宜家雇员。\n在可以的时候寻找你的出路。\n按 ATTACK，ATTACK2，ATTACK3，USE 或使用 VOICEMENU 来跟物品互动。"
+	}
+	"class_ikea2"
+	{
+		"chi"		"老手幸存者"
+	}
+	"desc_ikea2"
+	{
+		"chi"		"日间搜寻。晚上生存。\n尝试找到你的出路。\n帮助其他幸存者逃离。"
+	}
+	"train_ikea2"
+	{
+		"chi"		"在日间的时候找到武器，弹药和其他补给。\n在夜间的时候来对抗宜家雇员。\n在可以的时候寻找你的出路。\n按 ATTACK2，USE 或使用 VOICEMENU 来跟物品互动。"
+	}
+	"class_ikea3"
+	{
+		"chi"		"Camp Leader Survivor"
+	}
+	"desc_ikea3"
+	{
+		"chi"		"Search during the day. Survive during night.\nTry to find your escape.\nAssist in other survivors' escape."
+	}
+	"train_ikea3"
+	{
+		"chi"		"Find weapons, ammo, and other supplies during the day.\nSurvive against Ikea Employees during the night.\nCooperate with other survivors.\nFind your escape when it's available.\nPress ATTACK2, USE or use VOICEMENU to interact with items."
+	}
+	"class_scp3008"
+	{
+		"chi"		"SCP-3008-2"
+	}
+	"desc_scp3008"
+	{
+		"chi"		"Assist customers during the day.\nMake sure they leave during the night.\nCooperate with other SCPs."
+	}
+	"train_scp3008"
+	{
+		"chi"		"Your harmless during the day unless attacked.\nDuring the night you can attack until day.\nKill survivor any classes when you can."
+	}
+	"ikea_win"
+	{
+		"#format"	"{1:d},{2:d},{3:s}"
+		"chi"		"幸存者 胜利\n \n幸存者逃离： {1} / {2}\n生存时间： {3}"
+	}
+	"ikea_lose"
+	{
+		"#format"	"{1:d},{2:d},{3:s}"
+		"chi"		"SCP-3008 胜利\n \n幸存者逃离： {1} / {2}\n生存时间： {3}"
+	}
+
+
+	// Frostbite
+
+	"class_seeman"
+	{
+		"chi"		"Seeman"
+	}
+	"desc_seeman"
+	{
+		"chi"		"杀死所有人。\n阻止逃离。\n与其他怪胎合作。\n一定数量击杀时会对每个玩家爆炸。"
+	}
+	"train_seeman"
+	{
+		"chi"		"每次攻击击中时产生爆炸。\n在到达一定数量的击杀数时，你的攻击将会立刻击杀所有玩家。\n按 ATTACK2，ATTACK3，USE 或使用 VOICEMENU 来跟按钮互动。"
+	}
+	"class_seeldier"
+	{
+		"chi"		"Seeldier"
+	}
+	"desc_seeldier"
+	{
+		"chi"		"杀死所有人。\n阻止逃离。\n与其他怪胎合作。\n每次击杀召唤一个 Seeman 奴隶。"
+	}
+	"train_seeldier"
+	{
+		"chi"		"每次击杀召唤一个 200HP 的克隆。\n按 ATTACK2，ATTACK3，USE 或使用 VOICEMENU 来跟按钮互动。"
+	}
+	"class_seeldier2"
+	{
+		"chi"		"Seeldier Clone"
+	}
+	"desc_seeldier2"
+	{
+		"chi"		"杀死所有人。\n阻止逃离。\n与其他怪胎合作。\n服从 Seeldier 的指令。"
+	}
+	"train_seeldier2"
+	{
+		"chi"		" 你已被 Seeldier 克隆。\n服从他的指令并攻击其他队伍。\n阻止逃离。\n按 ATTACK2，ATTACK3，USE 或使用 VOICEMENU 跟按钮互动。"
+	}
+	"class_pootisblu"
+	{
+		"chi"		"Booty Executioner"
+	}
+	"desc_pootisblu"
+	{
+		"chi"		"杀死所有人。\n阻止逃离。\n与其他怪胎合作。\n被看或受到更多伤害来变得更强大。"
+	}
+	"train_pootisblu"
+	{
+		"chi"		"你可以在没被看着或者愤怒状态下进行移动。\n你可以通过被看或者受到伤害来积攒愤怒值。\n按 ATTACK3，USE 或使用 VOICEMENU来跟按钮互动。"
+	}
+	"class_pootisred"
+	{
+		"chi"		"Sandvich Slayer"
+	}
+	"desc_pootisred"
+	{
+		"chi"		"杀死所有人。\n阻止逃离。\n与其他怪胎合作。\n受到更多伤害来变得更强大。"
+	}
+	"train_pootisred"
+	{
+		"chi"		" 你越愤怒你就能造成越多伤害并且你的移动速度也会越快。\n持续受到伤害来积攒你的愤怒值\n按 ATTACK3，USE 或使用 VOICEMENU 来跟按钮互动。"
+	}
+	"class_saxtron"
+	{
+		"chi"		"Saxtron H4le"
+	}
+	"desc_saxtron"
+	{
+		"chi"		"杀死所有人\n阻止逃离\n你不是任何人的队友。"
+	}
+	"train_saxtron"
+	{
+		"chi"		"正在启动……\n正在执行……\n消灭所有嬉皮士……\n出发……"
+	}
+	"class_chaos4"
+	{
+		"chi"		"混沌分裂者特工"
+	}
+	"desc_chaos4"
+	{
+		"chi"		"帮助 D 级人员逃离。\n消灭其他目标。\n你身上装备了机枪。"
+	}
+	"train_chaos4"
+	{
+		"chi"		"\n杀死其他队伍的成员来帮助 D 级人员逃离。\n按 USE 或使用 VOICEMENU 来与按钮和物品互动。"
+	}
+	"class_mtf4"
+	{
+		"chi"		"MTF 九尾狐精英"
+	}
+	"desc_mtf4"
+	{
+		"chi"		"帮助科学家逃离。\n无害化其他目标。\n指示你手下的士兵。\n服从上级的指令。"
+	}
+	"train_mtf4"
+	{
+		"chi"		"你需要解救设施里的科学家。\n支援你的精英小队，跟随你的指挥官 SCP-076-2。\n使用你的对讲机。\n按 ATTACK2，USE 或使用 VOICEMENU 来对按钮和物品进行互动。"
+	}
+	"class_mtf076"
+	{
+		"chi"		"SCP-076-2"
+	}
+	"desc_mtf076"
+	{
+		"chi"		"帮助科学家逃离。\n消灭其他目标。\n指示你手下的士兵。"
+	}
+	"train_mtf076"
+	{
+		"chi"		"你需要解救设施里的科学家。\n指挥你的部队深入设施。\n按 ATTACK2，ATTACK3，USE 或使用 VOICEMENU 来对按钮和物品进行互动。"
+	}
+	"class_mtf105"
+	{
+		"chi"		"SCP-105"
+	}
+	"desc_mtf105"
+	{
+		"chi"		"帮助科学家逃离。\n消灭其他目标。\n指示你手下的士兵。\n服从你上级的指令。"
+	}
+	"train_mtf105"
+	{
+		"chi"		"你需要解救设施里的科学家。\n支援你的精英小队，跟随你的指挥官 SCP-076-2。\n使用你的对讲机。\n按 ATTACK2，USE 或使用 VOICEMENU 来对按钮和物品进行互动。"
+	}
+	"seeman_5"
+	{
+		"chi"		"{darkred}Seeman{default} 再击杀 5 人就会爆炸！"
+	}
+	"seeman_3"
+	{
+		"chi"		"{darkred}Seeman{default} 再击杀 3 人就会爆炸！"
+	}
+	"seeman_2"
+	{
+		"chi"		"{darkred}Seeman{default} 再击杀 2 人就会爆炸！ "
+	}
+	"seeman_1"
+	{
+		"chi"		"{darkred}Seeman{default} 再击杀 1 人就会爆炸！"
+	}
+	"mtf_spawn_pandora"
+	{
+		"chi"		"{mediumblue}MTF 单位，Omega-7{default}已进入设施。"
+	}
+
+	// Unused
+
+	"welcome"
+	{
+		"chi"		"欢迎来到 SCP：秘密要塞！"
+	}
+	"train_mtf_title"
+	{
+		"chi"		"准备好，大兵们！"
+	}
+	"train_mtf_msg"
+	{
+		"chi"		"九尾狐已重生。他们将会拯救科学家并且和设施警卫合作，他们还会杀死所有SCP和尽量除械 D 级人员，重生时拥有一个可以与其他成员沟通的无线电和有不同的军衔。"
+	}
+	"train_chaos_title"
+	{
+		"chi"		"混沌————！"
+	}
+	"train_chaos_msg"
+	{
+		"chi"		"混沌分裂者已经重生。他们将会拯救 D 级人员，并杀死所有科学家和警卫，重生时拥有同样的武器和一个医疗包。"
+	}
+	"camera"	// HUD
+	{
+		"#format"	"{1:d}"
+		"chi"		"摄像机：{1}%% [ATTACK2]"
+		"ru"		"Camera: {1}%% [ДОП. АТАКА]"
+	}
+	"sprint_ready"	// HUD
+	{
+		"#format"	"{1:d}"
+		"chi"		"疾跑：{1}%% [JUMP]"
+		"ru"		"Sprint: {1}%% [JUMP]"
+	}
+	"sprint_not"	// HUD
+	{
+		"#format"	"{1:d}"
+		"chi"		"疾跑：{1}%%"
+		"ru"		"Sprint: {1}%%"
+	}
+	"now_playing"	// Chat
+	{
+		"#format"	"{1:s}"
+		"chi"		"正在游玩：{1}"
+		"ru"		"Сейчас играет: {1}"
+	}
+	"health_kit"	// HUD
+	{
+		"chi"		"准备医疗包 [ATTACK2]"
+		"ru"		"Аптечка готова [ДОП. АТАКА]"
+	}
+	"pain_killers"	// HUD
+	{
+		"chi"		"准备止痛药 [ATTACK2]"
+		"ru"		"Обезболивающее готово [ДОП. АТАКА]"
+	}
+	"scp_500"	// HUD
+	{
+		"chi"		"SCP-500 [ATTACK2]"
+		"ru"		"SCP-500 [ДОП. АТАКА]"
+	}
+	"keycard"	// HUD
+	{
+		"#format"	"{1:t}"
+		"chi"		"钥匙卡：{1}"
+		"ru"		"Ключ-Карта: {1}"
+	}
+	"radio"	// HUD
+	{
+		"#format"	"{1:t},{2:d}"
+		"chi"		"无线电：{1} ({2}%%) [ATTACK3]"
+		"ru"		"Радио: {1} ({2}%%) [СПЕЦ. АТАКА]"
+	}
+	"keycard_rough"
+	{
+		"chi"		"钥匙卡 | 非常粗糙"
+		"ru"		"Карта | О. Грубо"
+	}
+	"keycard_coarse"
+	{
+		"chi"		"钥匙卡 | 粗糙"
+		"ru"		"Карта | Грубо"
+	}
+	"keycard_even"
+	{
+		"chi"		"钥匙卡 | 1：1"
+		"ru"		"Карта | 1:1"
+	}
+	"keycard_fine"
+	{
+		"chi"		"钥匙卡 | 好"
+		"ru"		"Карта | Тонко"
+	}
+	"keycard_very"
+	{
+		"chi"		"钥匙卡 | 非常好"
+		"ru"		"Карта | О. Тонко"
+	}
+	"weapon_rough"
+	{
+		"chi"		"武器 | 非常粗糙"
+		"ru"		"Оружие | О. Грубо"
+	}
+	"weapon_coarse"
+	{
+		"chi"		"武器 | 粗糙"
+		"ru"		"Оружие | Грубо"
+	}
+	"weapon_even"
+	{
+		"chi"		"武器 | 1：1"
+		"ru"		"Оружие | 1:1"
+	}
+	"weapon_fine"
+	{
+		"chi"		"武器 | 好"
+		"ru"		"Оружие | Тонко"
+	}
+	"weapon_very"
+	{
+		"chi"		"武器 | 非常好"
+		"ru"		"Оружие | О. Тонко"
+	}
+	"scp_914"
+	{
+		"chi"		"SCP-914\n "
+	}
+	"keycard_0"
+	{
+		"chi"		"无"
+		"ru"		"Нет"
+	}
+	"keycard_1"
+	{
+		"chi"		"管理员"
+		"ru"		"Уборщик"
+	}
+	"keycard_2"
+	{
+		"chi"		"科学家"
+		"ru"		"Учёный"
+	}
+	"keycard_3"
+	{
+		"chi"		"区域管理员"
+		"ru"		"Менеджер Зоны"
+	}
+	"keycard_4"
+	{
+		"chi"		"研究主管"
+		"ru"		"Руководитель Исследований"
+	}
+	"keycard_5"
+	{
+		"chi"		"设施警卫"
+		"ru"		"Охранник Комплекса"
+	}
+	"keycard_6"
+	{
+		"chi"		"MTF 新兵钥匙卡"
+		"ru"		"Кадет МОГ"
+	}
+	"keycard_7"
+	{
+		"chi"		"MTF 下士钥匙卡"
+		"ru"		"Лейтенант МОГ"
+	}
+	"keycard_8"
+	{
+		"chi"		"MTF 指挥官钥匙卡"
+		"ru"		"Командир МОГ"
+	}
+	"keycard_9"
+	{
+		"chi"		"收容工程师钥匙卡"
+		"ru"		"Инженер Содержания"
+	}
+	"keycard_10"
+	{
+		"chi"		"设施管理员钥匙卡"
+		"ru"		"Менеджер Комплекса"
+	}
+	"keycard_11"
+	{
+		"chi"		"混沌分裂者访问设备"
+		"ru"		"Устройство Доступа Повстанца Хаоса"
+	}
+	"keycard_12"
+	{
+		"chi"		"O5 钥匙卡"
+	}
+	"radio_0"
+	{
+		"chi"		"--"
+	}
+	"radio_1"
+	{
+		"chi"		"SR"
+		"ru"		"КД"
+	}
+	"radio_2"
+	{
+		"chi"		"MR"
+		"ru"		"СД"
+	}
+	"radio_3"
+	{
+		"chi"		"LR"
+		"ru"		"ДД"
+	}
+	"radio_4"
+	{
+		"chi"		"UR"
+		"ru"		"УД"
+	}
+	"help_switch"
+	{
+		"chi"		"按下 %%+attack3%% 来切换物品"
+	}
+	"switch"
+	{
+		"chi"		"按 ATTACK3 来切换物品"
+	}
+}

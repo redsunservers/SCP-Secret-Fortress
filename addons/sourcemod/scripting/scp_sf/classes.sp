@@ -1577,8 +1577,6 @@ public void Classes_ApplyKarmaDamage(int client, int damage)
 	float loss = CvarKarmaRatio.FloatValue * (float(damage) / float(maxhealth));
 	karma -= loss;
 	
-	LogMessage("new karma %f (lost %f)", karma, loss);
-	
 	float MinKarma = CvarKarmaMin.FloatValue;
 	if (karma < MinKarma)
 		karma = MinKarma;
