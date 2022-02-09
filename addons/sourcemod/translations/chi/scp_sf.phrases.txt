@@ -223,7 +223,7 @@
 	"end_screen_steals"
 	{
 		"#format"	"{1:t}，{2:d}，{3:d}，{4:d}，{5:d}，{6:d}"
-		"chi"		"{1}\n \n存活的幸存者: {2} / {3}\n收集的球体: {4} / {5}\n \nCreature was triggered {6} time(s)。"
+		"chi"		"{1}\n \n存活的幸存者: {2} / {3}\n收集的球体: {4} / {5}\n \n生物被激活了 {6} 次(s)。"
 	}
 
 	// Class Phrases
@@ -466,7 +466,7 @@
 	}
 	"desc_scp173"
 	{
-		"chi"		"杀死所有人类\n阻止人类逃离\n与其他 SCP 合作\n按 ATTACK2 来在准备好的时候瞬间移动\n 按 RELOAD 来布置一个水洼陷阱\n 按 ATTACK3 来疾跑。"
+		"chi"		"杀死所有人类\n阻止人类逃离\n与其他 SCP 合作\n按 ATTACK2 来在准备好的时候瞬间移动\n 按 RELOAD 来布置一个水洼陷阱\n 按 ATTACK3 来疾跑"
 	}
 	"train_scp173"
 	{
@@ -482,7 +482,7 @@
 	}
 	"train_scp1732"
 	{
-		"chi"		"你的攻击对人类可以一击制敌。\n你只能在不被看到的时候进行移动。\n你可以在不被看到的时候瞬间移动。\nYou can press traps using RELOAD and sprint using ATTACK3。\nPress USE or use VOICEMENU to interact with buttons。"
+		"chi"		"你的攻击对人类可以一击制敌。\n你只能在不被看到的时候进行移动。\n你可以在不被看到的时候瞬间移动。\n俺可以按 RELOAD 来布置一个水洼陷阱并且按 ATTACK3 来疾跑。\n按 USE 或使用 VOICEMENU 来跟按钮互动。"
 	}
 	"class_scp457"
 	{
@@ -490,11 +490,11 @@
 	}
 	"desc_scp457"
 	{
-		"chi"		"Kill everyone。\nPrevent escape。\nCooperate with other SCPs。\nKill players to maintain your fire。"
+		"chi"		"杀死所有人类\n阻止人类逃离\n与其他 SCP 合作\n杀死人类来维持你的火焰。"
 	}
 	"train_scp457"
 	{
-		"chi"		"Your attacks sets players on fire。\nYour able to split apart after gaining full health。\nWater hurts you the most。\nPress ATTACK2， ATTACK3， USE or use VOICEMENU to interact with buttons。"
+		"chi"		"你的攻击使人类着火。\n在满血时你可以分裂。\n水对你有极大的伤害。\n按 ATTACK2，ATTACK3，USE 或使用 VOICEMENU 来跟按钮互动"
 	}
 	"class_scp939"
 	{
@@ -502,11 +502,11 @@
 	}
 	"desc_scp939"
 	{
-		"chi"		"Kill everyone。\nPrevent escape。\nCooperate with other SCPs。\nYou can talk to other humans。"
+		"chi"		"杀死所有人类\n阻止人类逃离\n与其他 SCP 合作\n你可以与人类进行对话"
 	}
 	"train_scp939"
 	{
-		"chi"		"You can only see targets making noise。\nYou can trick players by talking to them。\nYou'll get faster with less health you have。\nPress ATTACK2， ATTACK3， USE or use VOICEMENU to interact with buttons。"
+		"chi"		"你只能看见正在制造噪音的目标。\n你可以通过与人类对话来迷惑他们。\n在低血量时你的移动速度会变快\n按 ATTACK2，ATTACK3，USE 或使用 VOICEMENU 来跟按钮互动"
 	}
 	"class_scp9392"
 	{
@@ -514,11 +514,11 @@
 	}
 	"desc_scp9392"
 	{
-		"chi"		"Kill everyone。\nPrevent escape。\nCooperate with other SCPs。\nYou can talk to other humans。"
+		"chi"		"杀死所有人类\n阻止人类逃离\n与其他 SCP 合作\n你可以与人类进行对话"
 	}
 	"train_scp9392"
 	{
-		"chi"		"You can only see targets making noise。\nYou can trick players by talking to them。\nYou'll get faster with less health you have。\nPress ATTACK2， ATTACK3， USE or use VOICEMENU to interact with buttons。"
+		"chi"		"你只能看见正在制造噪音的目标。\n你可以通过与人类对话来迷惑他们。\n在低血量时你的移动速度会变快\n按 ATTACK2，ATTACK3，USE 或使用 VOICEMENU 来跟按钮互动"
 	}
 	"class_scp3008"
 	{
@@ -526,7 +526,7 @@
 	}
 	"desc_scp3008"
 	{
-		"chi"		"Kill everyone during the night。\nCooperate with other SCP-3008-2。\nYou can talk to other humans。"
+		"chi"		"在夜间击杀所有人类\n与其他 SCP-3008-2 合作\n你可以与人类进行对话"
 	}
 	"train_scp3008"
 	{
@@ -557,15 +557,15 @@
 
 	"weapon_0"
 	{
-		"chi"		"Unknown"
+		"chi"		"不明"
 	}
 	"weapon_5"
 	{
-		"chi"		"None"
+		"chi"		"无"
 	}
 	"info_5"
 	{
-		"chi"		"It's your fists， they don't do much。"
+		"chi"		"这是你的拳头，没啥作用。"
 	}
 	"weapon_192"
 	{
@@ -653,7 +653,7 @@
 	}
 	"info_751"
 	{
-		"chi"		"Weaker then the bunch but saves you some bullets when your on a budget。 "
+		"chi"		"比较弱，但在你预算不足的时候能帮你省点预算。"
 	}
 	"weapon_1150"	// Backwards Compatibility
 	{
@@ -661,7 +661,7 @@
 	}
 	"info_1150"
 	{
-		"chi"		"Your personal rifle when you need it in a punch。"
+		"chi"		"在你需要时可靠的私人步枪。"
 	}
 	"weapon_203"
 	{
@@ -669,7 +669,7 @@
 	}
 	"info_203"
 	{
-		"chi"		"Your personal SMG when you need it in a punch。"
+		"chi"		"在你需要时可靠的私人冲锋枪。"
 	}
 	"weapon_425"
 	{
@@ -677,7 +677,7 @@
 	}
 	"info_425"
 	{
-		"chi"		"The rifle when you want to get rid of some nasty [REDACTED]。"
+		"chi"		"一把专门用来对付讨厌的 [已编辑] 的步枪。"
 	}
 	"weapon_415"
 	{
@@ -717,7 +717,7 @@
 	}
 	"info_61"
 	{
-		"chi"		"For when you need the distance and the precision。"
+		"chi"		"当你需要一定距离和精度时的最佳搭档。"
 	}
 	"weapon_201"
 	{
@@ -829,7 +829,7 @@
 	}
 	"info_30001"
 	{
-		"chi"		"允许你进入 SCP-914"
+		"chi"		"允许你进入 SCP-914 收容室"
 	}
 	"weapon_30002"
 	{
@@ -837,7 +837,7 @@
 	}
 	"info_30002"
 	{
-		"chi"		"允许你进入 SCP-914"
+		"chi"		"允许你进入 SCP-914 收容室"
 	}
 	"weapon_30003"
 	{
@@ -845,7 +845,7 @@
 	}
 	"info_30003"
 	{
-		"chi"		"允许你进入 SCP-914 和检查点电梯"
+		"chi"		"允许你进入 SCP-914 收容室和检查点电梯"
 	}
 	"weapon_30004"
 	{
@@ -853,7 +853,7 @@
 	}
 	"info_30004"
 	{
-		"chi"		"允许你进入 SCP-914 和检查点电梯"
+		"chi"		"允许你进入 SCP-914 收容室和检查点电梯"
 	}
 	"weapon_30005"
 	{
@@ -861,7 +861,7 @@
 	}
 	"info_30005"
 	{
-		"chi"		"允许你进入 SCP-914、检查点电梯和武器库"
+		"chi"		"允许你进入 SCP-914 收容室、检查点电梯和武器库"
 	}
 	"weapon_30006"
 	{
@@ -869,7 +869,7 @@
 	}
 	"info_30006"
 	{
-		"chi"		"允许你进入 SCP-914、检查点电梯和武器库"
+		"chi"		"允许你进入 SCP-914 收容室、检查点电梯和武器库"
 	}
 	"weapon_30007"
 	{
@@ -877,7 +877,7 @@
 	}
 	"info_30007"
 	{
-		"chi"		"Go anywhere except SCP-106， Comms， Warhead， and the Micro H.I.D."
+		"chi"		"允许你进入除了 SCP-106 收容室，通讯中心，弹头发射中心和微型 H.I.D之外的所有地方。"
 	}
 	"weapon_30008"
 	{
@@ -885,7 +885,7 @@
 	}
 	"info_30008"
 	{
-		"chi"		"Go anywhere except SCP-106， Comms， and Warhead"
+		"chi"		"允许你进入除了 SCP-106 收容室，通讯中心和弹头发射中心之外的所有地方。"
 	}
 	"weapon_30009"
 	{
@@ -893,7 +893,7 @@
 	}
 	"info_30009"
 	{
-		"chi"		"Go anywhere except the gates and armory。"
+		"chi"		"允许你进入除了大门和武器库之外的所有地方。"
 	}
 	"weapon_30010"
 	{
@@ -901,7 +901,7 @@
 	}
 	"info_30010"
 	{
-		"chi"		"Go anywhere except the armory。"
+		"chi"		"允许你进入除了武器库之外的所有地方。"
 	}
 	"weapon_30011"
 	{
@@ -909,7 +909,7 @@
 	}
 	"info_30011"
 	{
-		"chi"		"Go anywhere except the SCP-106 room。"
+		"chi"		"Go anywhere except the SCP-106 room。允许你进入除了 SCP-106 收容室之外的所有地方。"
 	}
 	"weapon_30012"
 	{
@@ -925,7 +925,7 @@
 	}
 	"info_30013"
 	{
-		"chi"		"%%+attack%% to use and gain health regeneration。"
+		"chi"		"按 %%+attack%% 来使用并且缓慢回复你的HP。"
 	}
 	"weapon_30014"
 	{
@@ -933,7 +933,7 @@
 	}
 	"info_30014"
 	{
-		"chi"		"%%+attack%% to use and gain back half your max health。"
+		"chi"		"按 %%+attack%% 来使用并且回复你一半血量。"
 	}
 	"weapon_30015"
 	{
@@ -941,7 +941,7 @@
 	}
 	"info_30015"
 	{
-		"chi"		"%%+attack%% to use and gain unlimited sprint and health regeneration。"
+		"chi"		"按 %%+attack%% 来使用并且获取无限疾跑和血量回复。"
 	}
 	"weapon_30016"
 	{
@@ -957,7 +957,7 @@
 	}
 	"info_30017"
 	{
-		"chi"		"%%+attack%% to use restore health and gain health regneration。"
+		"chi"		"按 %%+attack%% 来使用并且回复一定血量和缓慢回复血量。"
 	}
 	"weapon_46"
 	{
@@ -965,7 +965,7 @@
 	}
 	"info_46"
 	{
-		"chi"		"%%+attack%% to use restore health and increase your movement speed。\nYou passively lose health over time until you take SCP-500。"
+		"chi"		"按 %%+attack%% 来使用并且回复一定血量和增加你的移动速度。\n你将会持续的失血直到你服用了 SCP-500。"
 	}
 	"weapon_30018"
 	{
@@ -973,7 +973,7 @@
 	}
 	"info_30018"
 	{
-		"chi"		"%%+attack%% to break down a door in front of you。"
+		"chi"		"按 %%+attack%% 来破坏你面前的门。"
 	}
 	"weapon_107"
 	{
@@ -981,7 +981,7 @@
 	}
 	"info_107"
 	{
-		"chi"		"%%+attack%% to become invisible for 15 seconds。"
+		"chi"		"按 %%+attack%% 隐形15秒。"
 	}
 	"weapon_30019"
 	{
@@ -1081,15 +1081,15 @@
 
 	"menu_helpclass"
 	{
-		"chi"		"Class Info"
+		"chi"		"职介详情"
 	}
 	"menu_preference"
 	{
-		"chi"		"SCP Preference"
+		"chi"		"SCP 偏好设置"
 	}
 	"menu_colorblind"
 	{
-		"chi"		"Color Blind Mode"
+		"chi"		"色盲模式"
 	}
 	"Red"
 	{
@@ -1216,7 +1216,7 @@
 	}
 	"femur_breaker"	// Chat
 	{
-		"chi"		"Femur Breaker"
+		"chi"		"股骨破坏者"
 	}
 	"alpha_warhead"	// Chat
 	{
@@ -1224,7 +1224,7 @@
 	}
 	"light_decontamination"	// Chat
 	{
-		"chi"		"Light Decontamination"
+		"chi"		"轻度去污"
 	}
 	"redacted"	// Chat， Hint
 	{
