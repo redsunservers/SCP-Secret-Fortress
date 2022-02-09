@@ -256,6 +256,54 @@
 	{
 		"en"		"You need to escape the facility.\nPress ATTACK, ATTACK2, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll either kill you or capture you."
 	}
+	"class_dboi1"
+	{
+		"en"		"Class-D Personnel"
+	}
+	"desc_dboi1"
+	{
+		"en"		"Escape from the facility.\nCooperate with the Chaos Insurgency.\nAvoid other teams."
+	}
+	"train_dboi1"
+	{
+		"en"		"You need to escape the facility.\nPress ATTACK, ATTACK2, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll either kill you or capture you."
+	}
+	"class_dboi2"
+	{
+		"en"		"Class-D Personnel"
+	}
+	"desc_dboi2"
+	{
+		"en"		"Escape from the facility.\nCooperate with the Chaos Insurgency.\nAvoid other teams."
+	}
+	"train_dboi2"
+	{
+		"en"		"You need to escape the facility.\nPress ATTACK, ATTACK2, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll either kill you or capture you."
+	}
+	"class_dboi3"
+	{
+		"en"		"Class-D Personnel"
+	}
+	"desc_dboi3"
+	{
+		"en"		"Escape from the facility.\nCooperate with the Chaos Insurgency.\nAvoid other teams."
+	}
+	"train_dboi3"
+	{
+		"en"		"You need to escape the facility.\nPress ATTACK, ATTACK2, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll either kill you or capture you."
+	}
+	"class_dboi4"
+	{
+		"en"		"Class-D Personnel"
+	}
+	"desc_dboi4"
+	{
+		"en"		"Escape from the facility.\nCooperate with the Chaos Insurgency.\nAvoid other teams."
+	}
+	"train_dboi4"
+	{
+		"en"		"You need to escape the facility.\nPress ATTACK, ATTACK2, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll either kill you or capture you."
+	}
 	"class_chaos"
 	{
 		"en"		"Chaos Insurgency Agent"
