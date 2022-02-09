@@ -16,11 +16,11 @@
 	}
 	"hint_4"
 	{
-		"chi"		"使用设施管理员以及 O5 钥匙卡允许\n你逃离设施，而不需要借助 MTF 或者混沌分裂者的帮助。"
+		"chi"		"使用设施管理员以及 O5 门禁卡允许\n你逃离设施，而不需要借助 机动特遣队MTF 或者混沌分裂者的帮助。"
 	}
 	"hint_5"
 	{
-		"chi"		"警卫和 MTF 可以使用刀来\n使 D 级人员或者混沌分裂者缴械而不用伤害他们。"
+		"chi"		"警卫和 机动特遣队MTF 可以使用刀来\n使 D 级人员或者混沌分裂者缴械而不用伤害他们。"
 	}
 	"hint_6"
 	{
@@ -36,11 +36,11 @@
 	}
 	"hint_9"
 	{
-		"chi"		"MTF 和混沌每隔三分钟将会重生。"
+		"chi"		"机动特遣队MTF 和混沌每隔三分钟将会重生。"
 	}
 	"hint_10"
 	{
-		"chi"		"MTF 能通过将科学家带出\n其中一个大门来拯救他们。\n只有下士和队长有权限访问。"
+		"chi"		"机动特遣队MTF 能通过将科学家带出\n其中一个大门来拯救他们。\n只有下士和队长有权限访问。"
 	}
 	"hint_11"
 	{
@@ -64,7 +64,7 @@
 	}
 	"hint_16"
 	{
-		"chi"		"你可以使用 ATTACK1 、ATTACK2 键或“呼叫医生”键来捡起武器与钥匙卡等。"
+		"chi"		"你可以使用 ATTACK1 、ATTACK2 键或“呼叫医生”键来捡起武器与门禁卡等。"
 	}
 	"hint_17"
 	{
@@ -95,7 +95,7 @@
 	}
 	"desc_dboi_ikea"
 	{
-		"chi"		"逃离SCP-3008-1。\n与 MTF 合作。\n避开其他队伍。"
+		"chi"		"逃离SCP-3008-1。\n与 机动特遣队MTF 合作。\n避开其他队伍。"
 	}
 	"desc_mtf1_ikea"
 	{
@@ -107,7 +107,7 @@
 	}
 	"class_mtfs_ikea"
 	{
-		"chi"		"MTF 九尾狐幸存者"
+		"chi"		"机动特遣队MTF 九尾狐幸存者"
 	}
 	"desc_mtfs_ikea"
 	{
@@ -131,15 +131,15 @@
 	}
 	"desc_goc"
 	{
-		"chi"		"使用一切手段活过爆发。\n消灭 SCP 和 MTF。\n在地图上捡取物品。"
+		"chi"		"使用一切手段活过爆发。\n消灭 SCP 和 机动特遣队MTF。\n在地图上捡取物品。"
 	}
 	"train_goc"
 	{
-		"chi"		"SCP-5000，一个有关 SCP 基金会转而对抗人类的故事。\n你的小分队将帮助处理混沌分裂者。\n捡取武器和物品，使用一切手段穿过地图。\n SCP 和 MTF 将会重生为巨大威胁。"
+		"chi"		"SCP-5000，一个有关 SCP 基金会转而对抗人类的故事。\n你的小分队将帮助处理混沌分裂者。\n捡取武器和物品，使用一切手段穿过地图。\n SCP 和 机动特遣队MTF 将会重生为巨大威胁。"
 	}
 	"class_mtf5001"
 	{
-		"chi"		"MTF 九尾狐新兵"
+		"chi"		"机动特遣队MTF 九尾狐新兵"
 	}
 	"desc_mtf5001"
 	{
@@ -151,7 +151,7 @@
 	}
 	"class_mtf5002"
 	{
-		"chi"		"MTF 九尾狐下士"
+		"chi"		"机动特遣队MTF 九尾狐下士"
 	}
 	"desc_mtf5002"
 	{
@@ -163,7 +163,7 @@
 	}
 	"class_mtf5003"
 	{
-		"chi"		"MTF 九尾狐指挥官"
+		"chi"		"机动特遣队MTF 九尾狐指挥官"
 	}
 	"desc_mtf5003"
 	{
@@ -322,7 +322,7 @@
 	}
 	"desc_sci"
 	{
-		"chi"		"逃离设施。\n与 MTF 合作。\n避开其他团队。"
+		"chi"		"逃离设施。\n与 机动特遣队MTF 合作。\n避开其他团队。"
 	}
 	"train_sci"
 	{
@@ -334,7 +334,7 @@
 	}
 	"desc_guard"
 	{
-		"chi"		"帮助科学家逃离设施。\n与 MTF 合作。\n无害化其他目标。"
+		"chi"		"帮助科学家逃离设施。\n与 机动特遣队MTF 合作。\n无害化其他目标。"
 	}
 	"train_guard"
 	{
@@ -354,7 +354,7 @@
 	}
 	"class_mtf2"
 	{
-		"chi"		"MTF 九尾狐下士"
+		"chi"		"机动特遣队MTF 九尾狐下士"
 	}
 	"desc_mtf2"
 	{
@@ -366,7 +366,7 @@
 	}
 	"class_mtfs"
 	{
-		"chi"		"MTF 九尾狐特种部队"
+		"chi"		"机动特遣队MTF 九尾狐特种部队"
 	}
 	"desc_mtfs"
 	{
@@ -378,7 +378,7 @@
 	}
 	"class_mtf3"
 	{
-		"chi"		"MTF 九尾狐指挥官"
+		"chi"		"机动特遣队MTF 九尾狐指挥官"
 	}
 	"desc_mtf3"
 	{
@@ -390,7 +390,7 @@
 	}
 	"class_mtfe"
 	{
-		"chi3"	"MTF 九尾狐工程师"
+		"chi3"	"机动特遣队MTF 九尾狐工程师"
 	}
 	"desc_mtfe"
 	{
@@ -434,7 +434,7 @@
 	}
 	"train_scp076"
 	{
-		"chi"		"你的目标是杀害任何设施警卫，MTF 或者混沌分裂者。\n当你杀害了5个人之后你会进入狂暴状态。\n按 ATTACK2、ATTACK3、USE 或使用 VOICEMENU 来跟按钮互动。"
+		"chi"		"你的目标是杀害任何设施警卫，机动特遣队MTF 或者混沌分裂者。\n当你杀害了5个人之后你会进入狂暴状态。\n按 ATTACK2、ATTACK3、USE 或使用 VOICEMENU 来跟按钮互动。"
 	}
 	"class_scp096"
 	{
@@ -482,7 +482,7 @@
 	}
 	"train_scp1732"
 	{
-		"chi"		"你的攻击对人类可以一击制敌。\n你只能在不被看到的时候进行移动。\n你可以在不被看到的时候瞬间移动。\n俺可以按 RELOAD 来布置一个水洼陷阱并且按 ATTACK3 来疾跑。\n按 USE 或使用 VOICEMENU 来跟按钮互动。"
+		"chi"		"你的攻击对人类可以一击制敌。\n你只能在不被看到的时候进行移动。\n你可以在不被看到的时候高速移动。\n可以按 RELOAD 来布置一个水洼陷阱并且按 ATTACK3 来疾跑。\n按 USE 或使用 VOICEMENU 来跟按钮互动。"
 	}
 	"class_scp457"
 	{
@@ -530,7 +530,7 @@
 	}
 	"train_scp3008"
 	{
-		"chi"		"Make sure your customers are enjoying themselves。\nAlso make sure they leave during closing hours。\nUse brute force if needed。\nPress ATTACK2， ATTACK3， USE or use VOICEMENU to interact with buttons。"
+		"chi"		"Make sure your customers are enjoying themselves。\nAlso make sure they leave during closing hours。\n如果需要，使用蛮力。\n按 ATTACK2， ATTACK3， 使用或使用VOICEMENU按钮进行交互。"
 	}
 	"class_itsteals"
 	{
@@ -538,11 +538,11 @@
 	}
 	"desc_itsteals"
 	{
-		"chi"		"Kill everyone。\nAttack from behind avoid being seen。"
+		"chi"		"杀了所有人。\n从后面攻击，避免被发现。"
 	}
 	"train_itsteals"
 	{
-		"chi"		"Look around for players。\nMore times you get hit by a player， the more rage you gain。\nAfter a certain amount of times， you'll have enough。"
+		"chi"		"四处寻找玩家。\n你被玩家多次击中， 你获得的愤怒越多。\n经过一段的时间， 你就有足够的怒气。"
 	}
 	"class_sjm08"
 	{
@@ -550,7 +550,7 @@
 	}
 	"desc_sjm08"
 	{
-		"chi"		"A tech demo character。\nYour not normally supposed to play this unless forced by an admin。"
+		"chi"		"训练人员(好像是叫这个或者叫 技术演示人员)。\n你通常不应该玩这个，除非管理员或者被迫。\n你的任务 听从管理员安排。"
 	}
 
 	// Weapon Phrases
@@ -673,7 +673,7 @@
 	}
 	"weapon_425"
 	{
-		"chi"		"MTF-E11-SR"
+		"chi"		"机动特遣队MTF-E11-SR"
 	}
 	"info_425"
 	{
@@ -821,11 +821,11 @@
 	}
 	"info_28"
 	{
-		"chi"		"%%+attack%% already"
+		"chi"		"%%+attack%% 已经"
 	}
 	"weapon_30001"
 	{
-		"chi"		"清洁工钥匙卡"
+		"chi"		"清洁工门禁卡"
 	}
 	"info_30001"
 	{
@@ -833,7 +833,7 @@
 	}
 	"weapon_30002"
 	{
-		"chi"		"科学家钥匙卡"
+		"chi"		"科学家门禁卡"
 	}
 	"info_30002"
 	{
@@ -841,7 +841,7 @@
 	}
 	"weapon_30003"
 	{
-		"chi"		"区域总监钥匙卡"
+		"chi"		"区域总监门禁卡"
 	}
 	"info_30003"
 	{
@@ -849,7 +849,7 @@
 	}
 	"weapon_30004"
 	{
-		"chi"		"研究主管钥匙卡"
+		"chi"		"研究主管门禁卡"
 	}
 	"info_30004"
 	{
@@ -857,7 +857,7 @@
 	}
 	"weapon_30005"
 	{
-		"chi"		"设施警卫钥匙卡"
+		"chi"		"设施警卫门禁卡"
 	}
 	"info_30005"
 	{
@@ -865,7 +865,7 @@
 	}
 	"weapon_30006"
 	{
-		"chi"		"MTF 新兵钥匙卡"
+		"chi"		"机动特遣队MTF 新兵门禁卡"
 	}
 	"info_30006"
 	{
@@ -873,7 +873,7 @@
 	}
 	"weapon_30007"
 	{
-		"chi"		"MTF 士官钥匙卡"
+		"chi"		"机动特遣队MTF 士官门禁卡"
 	}
 	"info_30007"
 	{
@@ -881,7 +881,7 @@
 	}
 	"weapon_30008"
 	{
-		"chi"		"MTF 指挥官钥匙卡"
+		"chi"		"机动特遣队MTF 指挥官门禁卡"
 	}
 	"info_30008"
 	{
@@ -889,7 +889,7 @@
 	}
 	"weapon_30009"
 	{
-		"chi"		"收容工程师钥匙卡"
+		"chi"		"收容工程师门禁卡"
 	}
 	"info_30009"
 	{
@@ -897,7 +897,7 @@
 	}
 	"weapon_30010"
 	{
-		"chi"		"设施总监钥匙卡"
+		"chi"		"设施总监门禁卡"
 	}
 	"info_30010"
 	{
@@ -913,7 +913,7 @@
 	}
 	"weapon_30012"
 	{
-		"chi"		"O5 钥匙卡"
+		"chi"		"O5议会门禁卡"
 	}
 	"info_30012"
 	{
@@ -949,7 +949,7 @@
 	}
 	"info_30016"
 	{
-		"chi"		"This allows you to speak to others at a longer range。\nPressing will toggle it's range and power consumption。\nYou only need to pull it out when you need to change the range。"
+		"chi"		"这允许你跟别人说话在一个较长的距离。\nPressing 切换范围和功耗。\nYou only need to pull it out when you need to change the range。"
 	}
 	"weapon_30017"
 	{
@@ -1021,7 +1021,7 @@
 	}
 	"team_2"
 	{
-		"chi"		"MTF 九尾狐胜利"
+		"chi"		"机动特遣队MTF 九尾狐胜利"
 	}
 	"team_3"
 	{
@@ -1275,7 +1275,7 @@
 	}
 	"gameover_stuck"	// HUD
 	{
-		"chi"		"任务：中止\n目标：MTF 行动 E11\n原因：判断力严重不足"
+		"chi"		"任务：中止\n目标：机动特遣队MTF 行动 E11\n原因：判断力严重不足"
 	}
 
 	// Ikea
@@ -1298,23 +1298,23 @@
 	}
 	"desc_ikea2"
 	{
-		"chi"		"日间搜寻。晚上生存。\n尝试找到你的出路。\n帮助其他幸存者逃离。"
+		"chi"		"白天搜寻。晚上生存。\n尝试找到你的出路。\n帮助其他幸存者逃离。"
 	}
 	"train_ikea2"
 	{
-		"chi"		"在日间的时候找到武器，弹药和其他补给。\n在夜间的时候来对抗宜家雇员。\n在可以的时候寻找你的出路。\n按 ATTACK2，USE 或使用 VOICEMENU 来跟物品互动。"
+		"chi"		"在白天的时候找到武器，弹药和其他补给。\n在夜间的时候来对抗宜家雇员。\n在可以的时候寻找你的出路。\n按 ATTACK2，USE 或使用 VOICEMENU 来跟物品互动。"
 	}
 	"class_ikea3"
 	{
-		"chi"		"Camp Leader Survivor"
+		"chi"		"营地幸存者"
 	}
 	"desc_ikea3"
 	{
-		"chi"		"Search during the day。 Survive during night。\nTry to find your escape。\nAssist in other survivors' escape。"
+		"chi"		"白天搜索。 在夜间生存。\n设法逃生。\n协助其他幸存者逃生。"
 	}
 	"train_ikea3"
 	{
-		"chi"		"Find weapons， ammo， and other supplies during the day。\nSurvive against Ikea Employees during the night。\nCooperate with other survivors。\nFind your escape when it's available。\nPress ATTACK2， USE or use VOICEMENU to interact with items。"
+		"chi"		"寻找武器， 弹药， 以及白天其他补给品。\nSurvive against Ikea Employees during the night。\nCooperate with other survivors。\nFind your escape when it's available。\nPress ATTACK2， USE or use VOICEMENU to interact with items。"
 	}
 	"class_scp3008"
 	{
@@ -1372,7 +1372,7 @@
 	}
 	"desc_seeldier2"
 	{
-		"chi"		"杀死所有人。\n阻止逃离。\n与其他怪胎合作。\n服从 Seeldier 的指令。"
+		"chi"		"杀死所有人。\n阻止逃离。\n与其他SCP合作。\n服从 Seeldier 的指令。"
 	}
 	"train_seeldier2"
 	{
@@ -1380,7 +1380,7 @@
 	}
 	"class_pootisblu"
 	{
-		"chi"		"Booty Executioner"
+		"chi"		"金字塔头"
 	}
 	"desc_pootisblu"
 	{
@@ -1388,7 +1388,7 @@
 	}
 	"train_pootisblu"
 	{
-		"chi"		"你可以在没被看着或者愤怒状态下进行移动。\n你可以通过被看或者受到伤害来积攒愤怒值。\n按 ATTACK3，USE 或使用 VOICEMENU来跟按钮互动。"
+		"chi"		"你可以在没被看着或者愤怒状态下进行高速移动。\n你可以通过被看或者受到伤害来积攒愤怒值。\n按 ATTACK3，USE 或使用 VOICEMENU来跟按钮互动。"
 	}
 	"class_pootisred"
 	{
@@ -1416,7 +1416,7 @@
 	}
 	"class_chaos4"
 	{
-		"chi"		"混沌分裂者特工"
+		"chi"		"混沌分裂者"
 	}
 	"desc_chaos4"
 	{
@@ -1428,7 +1428,7 @@
 	}
 	"class_mtf4"
 	{
-		"chi"		"MTF 九尾狐精英"
+		"chi"		"机动特遣队MTF 九尾狐"
 	}
 	"desc_mtf4"
 	{
@@ -1480,7 +1480,7 @@
 	}
 	"mtf_spawn_pandora"
 	{
-		"chi"		"{mediumblue}MTF 单位，Omega-7{default}已进入设施。"
+		"chi"		"{mediumblue}机动特遣队MTF 单位，Omega-7{default}已进入设施。"
 	}
 
 	// Unused
@@ -1547,7 +1547,7 @@
 	"keycard"	// HUD
 	{
 		"#format"	"{1:t}"
-		"chi"		"钥匙卡：{1}"
+		"chi"		"门禁卡：{1}"
 		"ru"		"Ключ-Карта: {1}"
 	}
 	"radio"	// HUD
@@ -1558,27 +1558,27 @@
 	}
 	"keycard_rough"
 	{
-		"chi"		"钥匙卡 | 非常粗糙"
+		"chi"		"门禁卡 | 非常粗糙"
 		"ru"		"Карта | О. Грубо"
 	}
 	"keycard_coarse"
 	{
-		"chi"		"钥匙卡 | 粗糙"
+		"chi"		"门禁卡 | 粗糙"
 		"ru"		"Карта | Грубо"
 	}
 	"keycard_even"
 	{
-		"chi"		"钥匙卡 | 1：1"
+		"chi"		"门禁卡 | 1：1"
 		"ru"		"Карта | 1:1"
 	}
 	"keycard_fine"
 	{
-		"chi"		"钥匙卡 | 好"
+		"chi"		"门禁卡 | 好"
 		"ru"		"Карта | Тонко"
 	}
 	"keycard_very"
 	{
-		"chi"		"钥匙卡 | 非常好"
+		"chi"		"门禁卡 | 非常好"
 		"ru"		"Карта | О. Тонко"
 	}
 	"weapon_rough"
@@ -1642,27 +1642,27 @@
 	}
 	"keycard_6"
 	{
-		"chi"		"MTF 新兵钥匙卡"
+		"chi"		"机动特遣队MTF 新兵门禁卡"
 		"ru"		"Кадет МОГ"
 	}
 	"keycard_7"
 	{
-		"chi"		"MTF 下士钥匙卡"
+		"chi"		"机动特遣队MTF 下士门禁卡"
 		"ru"		"Лейтенант МОГ"
 	}
 	"keycard_8"
 	{
-		"chi"		"MTF 指挥官钥匙卡"
+		"chi"		"机动特遣队MTF 指挥官门禁卡"
 		"ru"		"Командир МОГ"
 	}
 	"keycard_9"
 	{
-		"chi"		"收容工程师钥匙卡"
+		"chi"		"收容工程师门禁卡"
 		"ru"		"Инженер Содержания"
 	}
 	"keycard_10"
 	{
-		"chi"		"设施管理员钥匙卡"
+		"chi"		"设施管理员门禁卡"
 		"ru"		"Менеджер Комплекса"
 	}
 	"keycard_11"
@@ -1672,7 +1672,7 @@
 	}
 	"keycard_12"
 	{
-		"chi"		"O5 钥匙卡"
+		"chi"		"O5 门禁卡"
 	}
 	"radio_0"
 	{
