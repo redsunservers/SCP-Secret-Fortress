@@ -1,0 +1,1668 @@
+heh6"Phrases"
+{
+	// HintPhrases
+
+	"hint_1"
+	{
+		"es"		"Como un fantasma, puedes avisar al Médico\nparateletransportarte hacia un jugador vivo"
+	}
+	"hint_2"
+	{
+		"es"		"El SCP-939-89 y SCP-939-53 sólo pueden ver\njugadores si se han movido o si han atacado recientemente.\nIntenta quedarte quieto si no te han encontrado."
+	}
+	"hint_3"
+	{
+		"es"		"El SCP-079 puede ayudar a los Clase-D a escapar abriendo\nlaCompuerta A o la Compuerta B, habla con éste."
+	}
+	"hint_4"
+	{
+		"es"		"Las tarjetas de acceso del Encargado de las Instalaciones y del O5 te permiten\nescapar sin ayuda de los MTF ni de la Insurgencia."
+	}
+	"hint_5"
+	{
+		"es"		"Los Guardias y los MTF pueden usar su arma de cuerpo a cuerpo para\ndesarmar a los Clase-D o a la Insurgencia en vez de causarles daño."
+	}
+	"hint_6"
+	{
+		"es"		"El SCP-173 sólo puede moverse mientras nadie le\nestá mirando. Sólo puede moverse si alguien parpadea."
+	}
+	"hint_7"
+	{
+		"es"		"La mayoria de los SCP pueden acabar con alguien de un\nsólo golpe, ignorando la salud."
+	}
+	"hint_8"
+	{
+		"es"		"Agacharte te ayuda a que no te oigan los demás."
+	}
+	"hint_9"
+	{
+		"es"		"Los MTF, o los Insurgentes aparecerán cada 3 minutos."
+	}
+	"hint_10"
+	{
+		"es"		"Los MTF pueden salvar a los Científicos llevándolos\na una de las compuertas y dejándoles que las atraviesen.\nSin embargo, sólo los Sargentos y los Capitanes tienen acceso."
+	}
+	"hint_11"
+	{
+		"es"		"Los Insurgentes pueden salvar a los Clase-D llevándolos \nhacia una de las compuertas y dejándoles pasar."
+	}
+	"hint_12"
+	{
+		"es"		"¿Has muerto? No te preocupes, reaparecerás pronto."
+	}
+	"hint_13"
+	{
+		"es"		"Las Granadas Cegadoras se pueden usar para escapar de otros jugadores."
+	}
+	"hint_14"
+	{
+		"es"		"Puede que hayan consejos inútiles."
+	}
+	"hint_15"
+	{
+		"es"		"Todas las armas de fuego pueden realizar disparos a la cabeza excepto contra los SCP."
+	}
+	"hint_16"
+	{
+		"es"		"Puedes presionar ATTACK1, ATTACK2, o Llamar al Médico\npara recoger armas y tarjetas de acceso."
+	}
+	"hint_17"
+	{
+		"es"		"Para usar un botiquín, mantén pulsado ATTACK1 oATTACK2 hasta que recuperes tu salud."
+	}
+	"hint_18"
+	{
+		"es"		"Los SCP-939-89 y SCP-939-53 pueden hablar con humanos."
+	}
+	"hint_19"
+	{
+		"es"		"Los SCP pueden hablar los unos con los otros sin importar la distancia entre ellos."
+	}
+	"hint_20"
+	{
+		"es"		"El SCP-3008-2 tan sólo atacará si se le ataca o durante la hora del cierre ."
+	}
+	"hint_21"
+	{
+		"es"		"Mantén presionado RELOAD para ver la descripción del objeto que estás sujetando."
+	}
+
+	// SCP-3008-1 Phrases
+
+	"class_dboi_ikea"
+	{
+		"es"		"Víctima de SCP-3008-1"
+	}
+	"desc_dboi_ikea"
+	{
+		"es"		"Escapa del SCP-3008-1.\nCoopera con los MTF.\nEvita a los otros equipos."
+	}
+	"desc_mtf1_ikea"
+	{
+		"es"		"Ayuda a los Supervivientes a escapar.\nNeutraliza a los demás sujetos.\nSigue las órdenes de tus superiores."
+	}
+	"desc_mtf2_ikea"
+	{
+		"es"		"Ayuda a los Supervivientes a escapar.\nNeutraliza a los demás sujetos.\nDale órdenes a tus soldados.\nSigue las órdenes de tus superiores."
+	}
+	"class_mtfs_ikea"
+	{
+		"es"		"Superviviente de los Nine-Tailed Fox"
+	}
+	"desc_mtfs_ikea"
+	{
+		"es"		"Ayuda a los Supervivientes a escapar.\nNeutraliza a los demás sujetos.\nSigue las órdenes de tus superiores."
+	}
+	}
+	"desc_mtf3_ikea"
+	{
+		"es"		"Ayuda a los Supervivientes a escapar.\nNeutraliza a los demás sujetos.\nDale órdenes a tus soldados.	}
+	"end_screen_ikea"
+	{
+		"#format"	"{1:t},{2:d},{3:d}"
+		"es"		"{1}\n \nSupervivientesque Escaparon: {2} / {3}"
+	}
+
+	// PandemicPhrases
+
+	"class_goc"
+	{
+		"es"		"Coalición Global Oculta"
+	}
+	"desc_goc"
+	{
+		"es"		"Avanza a través de la epidemia.\nNeutraliza a los SCP y a los MTF.\nRecoge objetos de alrededor del mapa."
+	}
+	"train_goc"
+	{
+		"es"		"SCP-5000, una historia sobre cómo la Fundación SCP se volvió en contra de la humanidad.\nEres parte de un escuadrón cuyo objetivo es encargarse del caos.\nAvanzapor el mapa, recoge armas y objetos.\nLos SCP y los MTF aparecen en este mapa, y son una gran amenaza."
+	}
+	"class_mtf5001"
+	{
+		"es"		"Soldado Raso de los Nine-Tailed Fox"
+	}
+	"desc_mtf5001"
+	{
+		"es"		"Mata a los componentes de la Coalición Global Oculta\nSigue las órdenes de tus superiores."
+	}
+	"train_mtf5001"
+	{
+		"es"		"SCP-5000, una historia sobre cómo la Fundación SCP se volvió en contra de la humanidad.\nEres parte de un escuadrón cuyo objetivo es combatir contra la Coalición Global Oculta.\nSi es posible, colabora con los SCP para completar tus órdenes."
+	}
+	"class_mtf5002"
+	{
+		"es"		"Sargento de losNine-Tailed Fox"
+	}
+	"desc_mtf5002"
+	{
+		"es"		"Acaba con la Coalición Global Oculta.\nDale órdenes a tus soldados.\nSigue las órdenes de tus superiores."
+	}
+	"train_mtf5002"
+	{
+		"es"		"SCP-5000, una historia sobre cómo la Fundación SCP se volvió en contra de la humanidad.\nEres parte de un escuadrón cuyo objetivo es combatir contra la Coalición Global Oculta.\nSi es posible, colabora con los SCP para completar tus órdenes."
+	}
+	"class_mtf5003"
+	{
+		"es"		"Capitán de los Nine-Tailed Fox "
+	}
+	"desc_mtf5003"
+	{
+		"es"		"Acaba con la Coalición Global Oculta.\n Da órdenes a tus soldados."
+	}
+	"train_mtf5003"
+	{
+		"es"		"SCP-5000, una historia sobre cómo la Fundación SCP se volvió en contra de la humanidad.\nEres parte de un escuadrón cuyo objetivo es combatir contra la Coalición Global Oculta.\nSi es posible, colabora con los SCP para completar tus órdenes."
+	}
+	"class_scp610"
+	{
+		"es"		"SCP-610"
+	}
+	"desc_scp610"
+	{
+		"es"		"Acaba con la Coalición Global Oculta.\nCoopera con los otros SCP."
+	}
+	"train_scp610"
+	{
+		"es"		"SCP-5000, una historia sobre cómo la Fundación SCP se volvió en contra de la humanidad.\nImpide que la Coalición Global Oculta consiga prevenir el caos. \nPropágate..."
+	}
+
+	// ItStealsPhrases
+
+	"desc_spec_steals"
+	{
+		"es"		"Espera hasta la próxima ronda"
+	}
+	"class_dboi_steals"
+	{
+		"es"		"Superviviente"
+	}
+	"desc_dboi_steals"
+	{
+		"es"		"Recoge todos los orbes para ganar.\nActiva/Desactiva la linterna pulsando MOUSE2.\nPara correr, mantén la tecla JUMP pulsada.\nEvita a otras entidades."
+	}
+	"class_sci_steals"
+	{
+		"es"		"Superviviente"
+	}
+	"desc_sci_steals"
+	{
+		"es"		"Recoge todos los orbes para ganar.\nActiva/Desactiva la linterna pulsando MOUSE2.\nPara correr, mantén la tecla JUMP pulsada.\nEvita a otras entidades."
+
+	}
+	"team_1_steals"
+	{
+		"es"		"Los Supervivientes han ganado"
+	}
+	"team_2_steals"
+	{
+		"es"		"A los Supervivientes se les ha perdonado la vida"
+	}
+	"team_3_steals"
+	{
+		"es"		"Los Supervivientes han perdido"
+	}
+	"end_screen_steals"
+	{
+		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d}"
+		"es"		"{1}\n \nSupervivientes Vivos: {2} / {3}\nOrbes recogidos: {4} / {5}\n \nLa criatura fue alertada: {6} veces."
+	}
+
+	// ClassPhrases
+
+	"class_0"
+	{
+		"es"		"Clase no Válida"
+	}
+	"class_spec"
+	{
+		"es"		"Espectador"
+	}
+	"desc_spec"
+	{
+		"es"		"Reaparecerás pronto"
+	}
+	"train_spec"
+	{
+		"es"		"Sólo puedes ver y hablar con otros jugadores muertos por ahora.\nNo te preocupes, pronto reaparecerás.\nPuedes llamar a un Médico para teletransportarte hacia un jugador vivo."
+	}
+	"class_dboi"
+	{
+		"es"		"Personal de Clase D"
+	}
+	"desc_dboi"
+	{
+		"es"		"Escapa de las instalaciones.\nCoopera con los Insurgentes del Caos.\nEvita a los otros equipos."
+	}
+	"train_dboi"
+	{
+		"es"		"Tienes que huir de las instalaciones.\nPulsaATTACK, ATTACK2, USE, o usa VOICEMENU para interactuar con botones y objetos.\nÁndate con ojo con los otros equipos, ya que intentarán o matarte o capturarte."
+	}
+	"class_chaos"
+	{
+		"es"		"Agente de los Insurgentes del Caos"
+	}
+	"desc_chaos"
+	{
+		"es"		"Ayuda al personal de Clase D a escapar.\nNeutraliza a los otros sujetos."
+	}
+	"train_chaos"
+	{
+		"es"		"Tienes que liberar al personal de Clase D de las instalaciones.\nAcaba con los otros equipos para ayudar al personal de Clase D a escapar.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con botones y objetos."
+	}
+	"class_chaos1"
+	{
+		"es"		"Fusilero de los Insurgentes del Caos"
+	}	
+	"desc_chaos1"
+	{
+		"es"		"Ayuda al personal de Clase D a escapar.\nNeutraliza a los otros sujetos."
+	}
+	"train_chaos1"
+	{
+		"es"		"Tienes que liberar al personal de Clase D de las instalaciones.\nAcaba con los otros equipos para ayudar al personal de Clase D a escapar.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con botones y objetos."
+	}
+	"class_chaosd"
+	{
+		"es"		"Fusilero de los Insurgentes del Caos"
+	}
+	"desc_chaosd"
+	{
+		"es"		"Ayuda al personal de Clase D a escapar.\nNeutraliza a los otros sujetos."
+	}
+	"train_chaosd"
+	{
+		"es"		"Tienes que liberar al personal de Clase D de las instalaciones.\nAcaba con los otros equipos para ayudar al personal de Clase D a escapar.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con botones y objetos."
+	}
+	"class_chaos2"
+	{
+		"es"		"Represor de los Insurgentes del Caos"
+	}
+	"desc_chaos2"
+	{
+		"es"		"Ayuda al personal de Clase D a escapar.\nNeutraliza a los otros sujetos."
+	}
+	"train_chaos2"
+	{
+		"es"		"Tienes que liberar al personal de Clase D de las instalaciones.\nAcaba con los otros equipos para ayudar al personal de Clase D a escapar.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con botones y objetos."
+	}
+	"class_chaos3"
+	{
+		"es"		"Intruso de los Insurgentes del Caos "
+	}
+	"desc_chaos3"
+	{
+		"es"		"Ayuda al personal de Clase D a escapar.\nNeutraliza a los otros sujetos."
+	}
+	"train_chaos3"
+	{
+		"es"		"Tienes que liberar al personal de Clase D de las instalaciones.\nAcaba con los otros equipos para ayudar al personal de Clase D a escapar.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con botones y objetos."
+	}
+	"class_sci"
+	{
+		"es"		"Científico"
+	}
+	"desc_sci"
+	{
+		"es"		"Escapa de las instalaciones.\nCoopera con los MTF.\nEvita a los demás equipos."
+	}
+	"train_sci"
+	{
+		"es"		"Tienes que escapar de las instalaciones.\nPulsa ATTACK, USE, o usa VOICEMENU para interactuar con objetos y botones.\nTen cuidado con los otros equipos porque irán a acabar contigo."
+	}
+	"class_guard"
+	{
+		"es"		"Guardia de las instalaciones"
+	}
+	"desc_guard"
+	{
+		"es"		"Ayuda a los científicos a escapar.\nCoopera con los MTF.\nNeutraliza a los demás sujetos."
+	}
+	"train_guard"
+	{
+		"es"		"Tienes que proteger a los científicos de los otros equipos.\nEscolta a donde ellos necesiten ir para ayudarles.\nPuedes desarmar al Personal de Clase D con tu arma de cuerpo a cuerpo.\n También tienes una Granada cegadora"
+	}
+	"class_mtf1"
+	{
+		"es"		"Soldado raso de los Nine-Tailed Fox"
+	}
+	"desc_mtf1"
+	{
+		"es"		"Ayuda a los científicos a huir .\nNeutraliza a los demás sujetos.\nSigue las órdenes de tus superiores."
+	}
+	"train_mtf1"
+	{
+		"es"		"Tienes que liberar a los científicos de las instalaciones.\nQuédate junto a tus Sargentos y Capitanes.\nMantente comunicado/a con la radio.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones."
+	}
+	"class_mtf2"
+	{
+		"es"		"Sargento de los Nine-Tailed Fox"
+	}
+	"desc_mtf2"
+	{
+		"es"		"Ayuda a los científicos a huir.\nNeutraliza a los demás sujetos.\nDale órdenes a tus soldados.\nSigue las órdenes de tus superiores."
+	}
+	"train_mtf2"
+	{
+		"es"		"Tienes que liberar a los Científicos de las instalaciones.\nApoya tu grupo de soldados rasos, sigue a tu capitán.\nNo olvides usar tu radio.\n Pulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones."
+	}
+	"class_mtfs"
+	{
+		"es"		"Especialista de los Nine-Tailed Fox"
+	}
+	"desc_mtfs"
+	{
+		"es"		"Ayuda a los científicos a huir.\nNeutraliza a los demás sujetos.\nDale órdenes a tus soldados.\nSigue las órdenes de tu capitán."
+	}
+	"train_mtfs"
+	{
+		"es"		"Tienes que liberar a los Científicos de las instalaciones.\nApoya tu grupo de soldados rasos, sigue a tu capitán.\nNo olvides usar tu radio.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones."
+	}
+	"class_mtf3"
+	{
+		"es"		"Capitán de los Nine-Tailed Fox"
+	}
+	"desc_mtf3"
+	{
+		"es"		"Ayuda a los científicos a huir.\nNeutraliza a los demás sujetos.\nDale órdenes a tus soldados."
+	}
+	"train_mtf3"
+	{
+		"es"		"Tienes que liberar a los científicos de las instalaciones.\nLidera a tus tropas dentro de las instalaciones.\nUsa tu radio para guiar a tus tropas.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones."
+	}
+	"class_mtfe"
+	{
+		"es"		"Ingeniero de los Nine-Tailed Fox"
+	}
+	"desc_mtfe"
+	{
+		"es"		"Ayuda a los científicos a huír.\nNeutraliza a los demás sujetos.\nSigue las órdenes de tus superiores."
+	}
+	"train_mtfe"
+	{
+		"es"		"Tienes que liberar a los científicos de las instalaciones.\nPuedes construir armas centinela para combater a los SCP.\nTambien puedes construir dispensadores para tus aliados.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones."
+	}
+	"class_scp049"
+	{
+		"es"		"SCP-049"
+	}
+	"desc_scp049"
+	{
+		"es"		"Mata a todos.\nImpídeles huir.\nCoopera con los otros SCP.\nUsa tu cuchillo en un humano recién muerto para revivirlo como un aliado tuyo."
+	}
+	"train_scp049"
+	{
+		"es"		"Tus ataques matan a los humanos de un golpe.\nUsa tu cuchillo para reviver a jugadores muertos y convertirlos en SCP-049-2.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones."	
+	"class_scp0492"
+	{
+		"es"		"SCP-049-2"
+	}
+	"desc_scp0492"
+	{
+		"es"		"Pulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones\nSigue las órdenes del SCP-049"
+	}
+	"train_scp0492"
+	{
+		"es"		"Has sido revivido/a por el SCP-049.\nSigue sus órdenes y ataca a los otro equipos.\nImpide que huyan.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones."
+	}
+	"class_scp076"
+	{
+		"es"		"SCP-076-2"
+	}
+	"desc_scp076"
+	{
+		"es"		"Mata a todos.\nImpídeles huir.\nCoopera con los otros SCP.\nConsigue 5 cabezas para entrar en el modo Furia."
+	}
+	"train_scp076"
+	{
+		"es"		"Tu objetivo principal es matar a cualquier Guardia, MTF o Insurgente que encuentres.\n Una vez consigas 5 cabezas, entras en un estado de furia.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones."
+	}
+	"class_scp096"
+	{
+		"es"		"SCP-096"
+	}
+	"desc_scp096"
+	{
+		"es"		"Mata a todos.\nImpídeles huir.\nCoopera con los otros SCP.\nEntras en un estado de ira cuanto de miran los demás jugadores."
+	}
+	"train_scp096"
+	{
+		"es"		"Tus ataques matan de un golpe a los humanos, pero debe de haberte provocado un jugador.\nSi los jugadores ven tu cara o te atacan, cargarás contra ellos/as.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones."
+	}
+	"class_scp106"
+	{
+		"es"		"SCP-106"
+	}
+	"desc_scp106"
+	{
+		"es"		"Mata a todos.\n Impídeles huir.\nCoopera con los otros SCP.\nATTACK2 para crear un portal.\nATTACK3 para teletransportarse a dicho portal."
+	}
+	"train_scp106"
+	{
+		"es"		"Tus ataques enviarán a los humanos a una dimension de bolsillo.\n Puedes colocar portales y teletransportarte a ellos más adelante.\nATTACK2 coloca un portal y ATTACK3 te teletransporta a ese portal."
+	}
+	"class_scp173"
+	{
+		"es"		"SCP-173"
+	}
+	"desc_scp173"
+	{
+		"es"		"Mata a todos.\nImpídeles huir.\nCoopera con los otros SCP.\nATTACK2 para parpadear cuando esté preparado.\nRELOAD para colocar una charco que funciona como una trampa \nATTACK3 para correr."
+	}
+	"train_scp173"
+	{
+		"es"		"Tus ataques acaban con los humanos de un golpe.\nSólo puedes moverte mientras nadie te está mirando.\nPuedes parpadear mientras te miran.\n Puedes pulsar RELOAD para colocar trampas y correr usando ATTACK3.\n Pulsa USE o usa VOICEMENU para interactuar con botones."
+	}
+	"class_scp1732"
+	{
+		"es"		"SCP-173"
+	}
+	"desc_scp1732"
+	{
+		"es"		"Mata a todos.\nImpídeles huir.\nCoopera con los otros SCP.\nATTACK2 para parpadear cuando esté preparado.\nRELOAD para colocar una charco que funciona como una trampa \nATTACK3 para correr."
+
+	}
+	"train_scp1732"
+	{
+		"es"		"Tus ataques acaban con los humanos de un golpe.\nSólo puedes moverte mientras nadie te está mirando.\nPuedes parpadear mientras te miran.\nPuedes pulsar RELOAD para colocar trampas y correr usando ATTACK3.\nPulsa USE o usa VOICEMENU para interactuar con botones."
+	}
+	"class_scp457"
+	{
+		"es"		"SCP-457"
+	}
+	"desc_scp457"
+	{
+		"es"		"Mata a todos.\nImpídeles huir.\nCoopera con los otros SCP.\nMata jugadores para mantener tu fuego vivo."
+	}
+	"train_scp457"
+	{
+		"es"		"Tus ataques prenden fuego a los jugadores.\nTe puedes dividir cuando tu vida llega al máximo.\nEl agua te hace mucho daño.\n Pulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones."
+	}
+	"class_scp939"
+	{
+		"es"		"SCP-939-89"
+	}
+	"desc_scp939"
+	{
+		"es"		"Mata a todos.\nImpídeles huir.\nCoopera con los otros SCP.\nPuedes comunicarte con los humanos."
+	}
+	"train_scp939"
+	{
+		"es"		"Solo puedes ver a los objetivos que hacen ruido.\nPuedes engañar a los jugadores hablando con ellos.\nCuanta menos vida tengas, más rápido te moverás.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones."
+	}
+	"class_scp9392"
+	{
+		"es"		"SCP-939-53"
+	}
+	"desc_scp9392"
+	{
+		"es"		"Mata a todos.\nImpídeles huir.\nCoopera con los otros SCP.\nPuedes comunicarte con los humanos."
+	}
+	"train_scp9392"
+	{
+		"es"		"Solo puedes ver a los objetivos que hacen ruido.\nPuedes engañar a los jugadores hablando con ellos.\nCuanta menos vida tengas, más rápido te moverás.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones."
+	}
+	"class_scp3008"
+	{
+		"es"		"SCP-3008-2"
+	}
+	"desc_scp3008"
+	{
+		"es"		"Mata a todos durante la noche.\nCoopera con los otros SCP-3008-2.\nPuedes comunicarte con los humanos."
+	}
+	"train_scp3008"
+	{
+		"es"		"Asegúrate de que tus clientes estén pasando un buen rato.\nAsegúrate también de que se van a la hora del cierre.\nÉchalos a la fuerza si hace falta.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones."
+	}
+	"class_itsteals"
+	{
+		"es"		"???"
+	}
+	"desc_itsteals"
+	{
+		"es"		"Mata a todos.\nAtaca por la espalda, evita que te vean."
+	}
+	"train_itsteals"
+	{
+		"es"		"Mira alrededor para encontrar jugadores.\nCuanto más te golpee un jugador, más rabia acumulas.\nDespués de un cierto número de veces, tendrás bastante para ello."
+	}
+	"class_sjm08"
+	{
+		"es"		"Espécimen 8"
+	}
+	"desc_sjm08"
+	{
+		"es"		"Un personaje de demo técnica.\nNo puedes jugar con este personaje a menos que un administrador te fuerze a hacerlo."
+	}
+
+	// WeaponPhrases
+
+	"weapon_0"
+	{
+		"es"		"Desconocido"
+	}
+	"weapon_5"
+	{
+		"es"		"Ninguna"
+	}
+	"info_5"
+	{
+		"es"		"Son tus puños, no hacen la gran cosa."
+	}
+	"weapon_192"
+	{
+		"es"		"Hacha de bombero"
+	}
+	"info_192"
+	{
+		"es"		"Daño alto, velocidad de ataque lenta."
+	}
+	"weapon_153"
+	{
+		"es"		"Maza de obra"
+	}
+	"info_152"
+	{
+		"es"		"Genial para destrozar objetos y edificios."
+	}
+	"weapon_30758"
+	{
+		"es"		"Machete"
+	}
+	"info_30758"
+	{
+		"es"		"Puede apuñalar por la espalda."
+	}
+	"weapon_325"
+	{
+		"es"		"Porra de madera"
+	}
+	"info_325"
+	{
+		"es"		"No te harás daño si fallas."
+	}
+	"weapon_1013"
+	{
+		"es"		"Carne"
+	}
+	"info_1013"
+	{
+		"es"		"Espero que te guste la probabilidad de crítico aumentada.
+	}
+	"weapon_197"
+	{
+		"es"		"Llave Inglesa"
+	}
+	"info_197"
+	{
+		"es"		"Golpea una construcción para repararla o para construirla."
+	}
+	"weapon_264"
+	{
+		"es"		"Sartén"
+	}
+	"info_264"
+	{
+		"es"		"La oirán venir."
+	}
+	"weapon_954"
+	{
+		"es"		"Desarmador"
+	}
+	"info_954"
+	{	"es"		"Capaz de desarmar a jugadores que no lleven un arma equipada, lleva a\nlos jugadores desarmados a la zona de huída para que se unan a tu equipo."
+
+
+	}
+	"weapon_773"
+	{
+		"es"		"Pistola COM-15"
+	}
+	"info_773"
+	{
+		"es"		"Tu útil pistola de bolsillo."
+	}
+	"weapon_209"
+	{
+		"es"		"Pistola COM-18"
+	}
+	"info_209"
+	{
+		"es"		"Más lenta disparando, pero tiene más balas y hace más daño que una pistola corriente."
+	}
+	"weapon_751"
+	{
+		"es"		"FSP-9"
+	}
+	"info_751"
+	{
+		"es"		"Más débil que la mayoría de armas, pero no gasta muchas balas."
+	}
+	"weapon_1150"	// BackwardsCompatibility
+	{
+		"es"		"Proyecto  90"
+	}
+	"info_1150"
+	{
+		"es"		"Tu rifle para cuando lo necesites."
+	}
+	"weapon_203"
+	{
+		"es"		"Crossvec"
+	}
+	"info_203"
+	{
+		"es"		"Tu metralleta para cuando la necesites."
+	}
+	"weapon_425"
+	{
+		"es"		"MTF-E11-SR"
+	}
+	"info_425"
+	{
+		"es"		"El tipo de rifle que buscas para cargarte unos malditos [REDACTADO]."
+	}
+	"weapon_415"
+	{
+		"es"		"Logicer"
+	}
+	"info_415"
+	{
+		"es"		"Arma de calibre pesado para realizar una gran cantidad de daño. Es menos efectiva contra los SCP."
+	}
+	"weapon_1153"
+	{
+		"es"		"AK"
+	}
+	"info_1153"
+	{
+		"es"		"El rifle para humanos cuando necesitas salvar a los chicos con el mono naranja."
+	}
+	"weapon_199"
+	{
+		"es"		"Escopeta"
+	}
+	"info_199"
+	{
+		"es"		"La mejor arma cuerpo a cuerpo del juego."
+	}
+	"weapon_200"
+	{
+		"es"		"Escopeta"
+	}
+	"info_200"
+	{
+		"es"		"La mejor arma cuerpo a cuerpo del juego."
+	}
+	"weapon_61"
+	{
+		"es"		"Revólver cal. 44"
+	}
+	"info_61"
+	{
+		"es"		"Cuando necesitas la distancia y la precisión."
+	}
+	"weapon_201"
+	{
+		"es"		"Rifle de Francotirador"
+	}
+	"info_201"
+	{
+		"es"		"Para cuando te cansas de que te pregunten: ''¿Te echo una mano?''."
+	}
+	"weapon_423"
+	{
+		"es"		"El Saxxy"
+	}
+	"info_423"
+	{
+		"es"		"La mejor arma de cuerpo a cuerpo del juego, de verdad, tan sólo ten cuidado con el jaleo que monta."
+	}
+	"weapon_58"
+	{
+		"es"		"Granada Cegadora"
+	}
+	"info_58"
+	{
+		"es"		"No hace daño, pero ciega a los jugadores cuando explota."
+	}
+	"weapon_1083"
+	{
+		"es"		"Granada de gran potencia."
+	}
+	"info_1083"
+	{
+		"es"		"Alto daño cuando llega a explotar."
+	}
+	"weapon_1151"
+	{
+		"es"		"Granada Cegadora"
+	}
+	"info_1151"
+	{
+		"es"		"No hace daño, pero ciega a los jugadores cuando explota."
+	}
+	"weapon_308"
+	{
+		"es"		"Granada de gran potencia."
+	}
+	"info_308"
+	{
+		"es"		"Alto daño cuando llega a explotar."
+	}
+	"weapon_594"
+	{
+		"es"		"Micro H.I.D."
+	}
+	"info_594"
+	{
+		"es"		"Mantén pulsado para cargar y después de 6 segundos, suelta para disparar un láser que realiza una gran cantidad de daño.\nLa mejor arma para lidiar con los SCP, merece la pena usarla."
+	}
+	"weapon_205"
+	{
+		"es"		"''Batidora''"
+	}
+	"info_205"
+	{
+		"es"		"Lanza cohetes que son muy lentos pero potentes..."
+	}
+	"weapon_15"
+	{
+		"es"		"Ametralladora"
+	}
+	"info_15"
+	{
+		"es"		"Soy el tío de las armas pesadas, y ésta es mi arma."
+	}
+	"weapon_210"
+	{
+		"es"		"Revólver Regulado por la GOC."
+	}
+	"info_210"
+	{
+		"es"		"Tu única amiga cuando la oscuridad cae sobre el mundo."
+	}
+	"weapon_25"
+	{
+		"es"		"PDA de Construcción"
+	}
+	"info_25"
+	{
+		"es"		"Centinelas Anti SCPs, Dispensadores, y Teleportadores Bidireccionales."
+	}
+	"weapon_26"
+	{
+		"es"		"PDA de Destrucción"
+	}
+	"info_26"
+	{
+		"es"		"No puedes recoger tus construcciones, pero puedes usar esto."
+	}
+	"weapon_28"
+	{
+		"es"		"Construcción"
+	}
+	"info_28"
+	{
+		"es"		"Ataca ya"
+	}
+	"weapon_30001"
+	{
+		"es"		"Tarjeta de acceso del Encargado de Mantenimiento."
+	}
+	"info_30001"
+	{
+		"es"		"Te permite entrar en la sala del SCP-914"
+	}
+	"weapon_30002"
+	{
+		"es"		"Tarjeta dde acceso del Científico"
+	}
+	"info_30002"
+	{
+		"es"		"Te permite entrar en la sala del SCP-914"
+	}
+	"weapon_30003"
+	{
+		"es"		"Tarjeta de acceso del Gerente"
+	}
+	"info_30003"
+	{
+		"es"		"Te permite entrar en la sala del SCP-914 y en los ascensores de los puntos de control."
+	}
+	"weapon_30004"
+	{
+		"es"		"Tarjeta de acceso del Supervisor de Investigaciones"
+	}
+	"info_30004"
+	{
+		"es"		"Te permite entrar en la sala del SCP-914 y en los ascensores de los puntos de control."
+	}
+	"weapon_30005"
+	{
+		"es"		"Tarjeta de acceso del Guardia de las Instalaciones."
+	}
+	"info_30005"
+	{
+		"es"		"Te permite entrar en la sala del SCP-914, en los ascensores de los puntos de control, y en la armería"
+	}
+	"weapon_30006"
+	{
+		"es"		"Tarjeta de acceso del Soldado Raso de los MTF"
+	}
+	"info_30006"
+	{
+		"es"		"Te permite entrar en la sala del SCP-914, en los ascensores de los puntos de control, y en la armería"
+	}
+	"weapon_30007"
+	{
+		"es"		"Tarjeta de acceso del Sargento de los MTF"
+	}
+	"info_30007"
+	{
+		"es"		"Ve a cualquier parte menos al SCP-106, a Megafonía, a la Bomba Nuclear, y al Micro H.I.D."
+	}
+	"weapon_30008"
+	{
+		"es"		"Tarjeta de acceso del Capitán de los MTF"
+	}
+	"info_30008"
+	{
+		"es"		"Ve a cualquier parte menos al SCP-106, a Megafonía ya la Bomba Nuclear."
+	}
+	"weapon_30009"
+	{
+		"es"		"Tarjeta de acceso del Ingeniero de Contención."
+	}
+	"info_30009"
+	{
+		"es"		"Ve a cualquier parte menos a través de las compuertas y a la armería."
+	}
+	"weapon_30010"
+	{
+		"es"		"Tarjeta de acceso del Encargado de las Instalaciones."
+	}
+	"info_30010"
+	{
+		"es"		"Ve a cualquier parte menos a la armería."
+	}
+	"weapon_30011"
+	{
+		"es"		"Dispositivo de Acceso de los Insurgentes del Caos."
+	}
+	"info_30011"
+	{
+		"es"		"Ve a cualquier parte except a la sala del SCP-106."
+	}
+	"weapon_30012"
+	{
+		"es"		"Tarjeta de Acceso del O5"
+	}
+	"info_30012"
+	{
+		"es"		"¡Acceso completo a cualquier habitación!"
+	}
+	"weapon_30013"
+	{
+		"es"		"Analgésico"
+	}
+	"info_30013"
+	{
+		"es"		"%%+attack%% para usarlo y regenerar vida."
+	}
+	"weapon_30014"
+	{
+		"es"		"Botiquín"
+	}
+	"info_30014"
+	{
+		"es"		"%%+attack%% para usarlo y recuperar la mitad de tu vida máxima."
+	}
+	"weapon_30015"
+	{
+		"es"		"Adrenalina"
+	}
+	"info_30015"
+	{
+		"es"		"%%+attack%% para usarla y que tu medidor de correr no se agote, y regenerar vida"
+	}
+	"weapon_30016"
+	{
+		"es"		"Radio"
+	}
+	"info_30016"
+	{
+		"es"		"Esto te permite hablar con los demás en un radio más amplio. \nPulsarla cambiará su alcance y su consumo de energía. \nSolo necesitas sacarla cuando necesites cambiar el alcance."
+	}
+	"weapon_30017"
+	{
+		"es"		"SCP-500"
+	}
+	"info_30017"
+	{
+		"es"		"%%+attack%% para usarlo, recuperar salud y ganar regeneración de salud."
+	}
+	"weapon_46"
+	{
+		"es"		"SCP-207"
+	}
+	"info_46"
+	{
+		"en"		"%%+attack%% para usarlo, recuperar salud y aumentar tu velocidad de movimiento.\nPierdes salud de forma pasiva, a medida que pasa el tiempo, hasta que consumes un SCP-500."
+	}
+	"weapon_30018"
+	{
+		"es"		"SCP-018"
+	}
+	"info_30018"
+	{
+		"es"		"%%+attack%% para echar una puerta abajo enfrente tuya."
+	}
+	"weapon_107"
+	{
+		"es"		"SCP-268"
+	}
+	"info_107"
+	{
+		"es"		"%%+attack%% para volverte invisible durante 15 segundos."
+	}
+	"weapon_30019"
+	{
+		"es"		"Chaleco Ligero"
+	}
+	"info_30019"
+	{
+		"es"		"Ligera resistencia al daño sin pérdida de movimiento."
+	}
+	"weapon_30020"
+	{
+		"es"		"Chaleco de Combate"
+	}
+	"info_30020"
+	{
+		"es"		"Buena resistencia al daño, munición de reserva extra, con algo de pérdida de carrera."
+	}
+	"weapon_30021"
+	{
+		"es"		"Chaleco Pesado"
+	}
+	"info_30021"
+	{
+		"es"		"Alta resistencia al daño, munición de reserva extra, con algo de pérdida de velocidad."
+	}
+
+
+	// TeamPhrases
+
+	"team_0"
+	{
+		"es"		"Empate"
+	}
+	"team_1"
+	{
+		"ea"		"Los Clase D han ganado"
+	}
+	"team_2"
+	{
+		"es"		"Los MTF han ganado"
+	}
+	"team_3"
+	{
+		"es"		"Los SCP han ganado"
+	}
+
+	// SCP-914 Phrases
+
+	"914_very"
+	{
+		"es"		"Muy Refinado"
+	}
+	"914_fine"
+	{
+		"es"		"Refinado"
+	}
+	"914_onetoone"
+	{
+		"es"		"1:1"
+	}
+	"914_coarse"
+	{
+		"es"		"Basto"
+	}
+	"914_rough"
+	{
+		"es"		"Tosco"
+	}
+	"914_copy"
+	{
+		"es"		"Copia de Objeto"
+	}
+	"in_cooldown"
+	{
+		"es"		"Enfriandose..."
+	}
+	"914_noeffect"
+	{
+		"es"		"No ha ocurrido nada..."
+	}
+	"914_delet"
+	{
+		"es"		"¡El objeto ha desaparecido!"
+	}
+	"914_gained"
+	{
+		"#format"	"{1:t}"
+		"es"		"Se ha transformado en {red}{1}"
+	}
+	"914_nowork"
+	{
+		"es"		"No se puede usar con este objeto."
+	}
+
+
+	// MenuPhrases
+
+	"menu_helpclass"
+	{
+		"es"		"Informacion de Clase"
+	}
+	"menu_preference"
+	{
+		"es"		"Preferencia para los SCP"
+	}
+	"menu_colorblind"
+	{
+		"es"		"Modo para Daltónicos"
+	}
+	"Red"
+	{
+		"es"		"Rojo"
+	}
+	"Green"
+	{
+		"es"		"Verde"
+	}
+	"Blue"
+	{
+		"es"		"Azul"
+	}
+	"Reset"
+	{
+		"es"		"Reiniciar"
+	}
+	"Off"
+	{
+		"es"		"Apagado"
+	}
+
+
+	// OtherPhrases
+
+	"you_are"	// HUD
+	{
+		"#format"	"{1:t}"
+		"es"		"Eres un {1}"
+	}
+	"scp_killed"	// Chat
+	{
+		"#format"	"{1:s},{2:t},{3:s},{4:t}"
+		"es"		"{{1}}{2} {default}ha sido contenido por {{3}}{4}"
+	}
+	"scp_killed_duo"	// Chat
+	{
+		"#format"	"{1:s},{2:t},{3:s},{4:t},{5:s},{6:t}"
+		"es"		"{{1}}{2} {default}hasido contenido por {{3}}{4} {default}y {{5}}{6}"
+	}
+	"mtf_spawn"	// Chat
+	{
+		"es"		"{mediumblue}Las Fuerzas Especiales Epsilon-11{default} han entrado en las instalaciones."
+	}
+	"mtf_spawn_scp"	// Chat
+	{
+		"#format"	"{1:d}"
+		"es"		"A la espera de volver a contener:{red}{1}  sujeto(s) SCP{default}."
+	}
+	"mtf_spawn_scp_over"	// Chat
+	{
+		"es"		"Esperando volver a contener: {red}Un número incontable de sujetos SCP{default}."
+	}
+	"spawn_ranout"	// Chat
+	{
+		"es"		"Este equipo no tiene suficientes entradas de reaparición para todos los jugadores."
+	}
+	"time_remaining"	// Game
+	{
+		"#format"	"{1:d},{2:s}"
+		"es"		"Tiempo restante: {1}:{2}"
+	}
+	"inv_full"	// Game
+	{
+		"es"		"Tu inventario está lleno"
+	}
+	"type_full"	// Game
+	{
+		"es"		"Demasiados objetos similares"
+	}
+	"disarmed_by"	// HUD
+	{
+		"#format"	"{1:N}"
+		"es"		"Has sido desarmado/a por {1}"
+	}
+	"disarmed"	// Game
+	{
+		"es"		"¡Te han desarmado!"
+	}
+	"radar"	// HUD
+	{
+		"es"		"Radar Listo [RECARGA]"
+	}
+	"sprint"	// HUD
+	{
+		"#format"	"{1:s}"
+		"es"		"Carrera: {1}"
+	}
+	"help_sprint"	// Hint
+	{
+		"es"		"%%+attack3%% Mantén pulsado para correr"
+	}
+	"kill_counter"	// HUD
+	{
+		"#format"	"{1:d},{2:d}"
+		"es"		"Bajas: {1}\nHumanos vivos: {2}"
+	}	
+	"end_screen"	// HUD
+	{
+		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d}"
+		"es"		"{1}\n \nClase D libres: {2} / {3}\n Científico(s) Vivos: {4} / {5}\nSCP Ejecutados: {6} / {7}"
+	}
+	"end_screen_vip" // HUD
+	{
+		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d},{8:d},{9:d}"
+	
+	"es"		"{1}\n \nClase D libres: {2} / {3}\n Científico(s) Vivos: {4} / {5}\nSCP Ejecutados: {6} / {7}"		
+	"end_screen_boss"	// HUD
+	{
+		"#format"	"{1:t},{2:d},{3:d}"
+		"es"		"{1}\n \n Jugadores Vivos:  {2} / {3}"
+	}
+	"tesla_gate"	// Chat
+	{
+		"es"		"Barrera Tesla"
+	}
+	"femur_breaker"	// Chat
+	{
+		"es"		"Rompefémures"
+	}
+	"alpha_warhead"	// Chat
+	{
+		"es"		"Misil Nuclear Alfa"
+	}
+	"light_decontamination"	// Chat
+	{
+		"es"		"Descontaminación en la Ligera"
+	}
+	"redacted"	// Chat, Hint
+	{
+		"es"		"[ELIMINADO]"
+	}
+	"data_expunged"	// Hint
+	{
+		"es"		"[DATOS SUPRIMIDOS]"
+	}
+	"106_portal"	// Annotation
+	{
+		"es"		"Portal de Teletransporte"
+	}
+	"106_create"	// Hint
+	{
+		"es"		"Portal creado, usa %%+attack3%% para teletransportarte."
+	}
+	"106_create_deny"	// Hint
+	{
+		"es"		"No se puede crear un portal ahora."
+	}
+	"106_create_none"	// Hint
+	{
+		"es"		"No hay ningún portal, usa %%+attack2%% para crear uno"
+	}
+	"106_tele_deny"	// Hint
+	{
+		"es"		"No puedes teletransportarte ahora mismo"
+	}
+	"download_error"	// Chat
+	{
+		"#format"	"{1:s}"
+		"es"		"{gray}No podemos comprobar si tienes {1} activado. Si ves errores, asegurate de que permites todo el contenido personalizado en tu configuración y vuelve a entrar."
+	}
+	"download_cvar"	// Chat
+	{
+		"#format"	"{1:s},{2:s}"
+		"es"		"{gray}{1} está desactivado.No verás ningun contenido personalizado. Si quieres activarlo, cambia {2} a 1"
+	}
+	"download_filter"	// Chat
+	{
+		"#format"	"{1:s}"
+		"es"		"{gray}cl_downloadfilter estápuesto en {1}. No podrás ver ningún contenido personalizado. Si quieres activarlo, cambia cl_downloadfilter a all"
+	}
+	"download_filter_sound"	// Chat
+	{
+		"es"		"{gray}cl_downloadfilter está puesto en configuración sin sonido. No podrás oír la música.Si quieres activarlo, cambia cl_downloadfilter a all"
+	}
+	"gameover_stuck"	// HUD
+	{
+		"es"		"TRABAJO: FINALIZADO \n SUJETO:OPERATIVO MTF E11\n MOTIVO:DEMUESTRA UN JUICIO EXCESIVAMENTE MALO"
+	}
+
+	// Ikea
+
+	"class_ikea1"
+	{
+		"es"		"Superviviente"
+	}
+	"desc_ikea1"
+	{
+		"es"		"Busca durante el día. Sobrevive durante la noche.\n Intenta encontrar el modo de escapar."
+	}
+	"train_ikea1"
+	{
+		"es"		"Encuentra armas, munición y otros suministros durante el día.\nSobrevive contra los empleados del Ikea durante la noche.\nCoopera con los demás supervivientes.\nEncuentra el modo de escapar cuando puedas hacerlo. \n Presiona ATTACK, ATTACK2, ATTACK3, USE o usa VOICEMENU para interactuar con objetos."
+	}
+	"class_ikea2"
+	{
+		"es"		"Superviviente Veterano"
+	}
+	"desc_ikea2"
+	{
+		"es"		"Busca durante el día. Sobrevive durante la noche.\n Intenta encontrar el modo de escapar.\n Ayuda a los otros supervivientes a escapar."
+	}
+	"train_ikea2"
+	{
+		"es"		"Encuentra armas, munición y otros suministros durante el día.\n Sobrevive contra los empleados del Ikea durante la noche.\nCoopera con los demás supervivientes.\nEncuentra el modo de escapar cuando puedas hacerlo. \n Presiona ATTACK, ATTACK2, ATTACK3, USE o usa VOICEMENU para interactuar con objetos."
+	}
+	"class_ikea3"
+	{
+		"es"		"Superviviente Líder del Campamento"
+	}
+	"desc_ikea3"
+	{
+		"es"		"Busca durante el día. Sobrevive durante la noche.\n Intenta encontrar el modo de escapar.\n Ayuda a los otros supervivientes a escapar."
+	}
+	"train_ikea3"
+	{
+		"es"		"Encuentra armas, munición y otros suministros durante el día.\n Sobrevive contra los empleados del Ikea durante la noche.\nCoopera con los demás supervivientes.\nEncuentra el modo de escapar cuando puedas hacerlo. \n Presiona ATTACK, ATTACK2, ATTACK3, USE o usa VOICEMENU para interactuar con objetos."
+	}
+	"class_scp3008"
+	{
+		"es"		"SCP-3008-2"
+	}
+	"desc_scp3008"
+	{
+		"es"		"Ayuda a los clientes durante el día.\nAsegúrate de que se vayan durante la noche.\nCoopera con los demás SCP."
+	}
+	"train_scp3008"
+	{
+		"es"		"Eres inofensivo durante el día a menos que te ataquen.\n Puedes atacar por la noche, hasta el día siguiente.\n Mata a los supervivientes cuando puedas."
+	}
+	"ikea_win"
+	{
+		"#format"	"{1:d},{2:d},{3:s}"
+		"es"		"Los Supervivientes ganan\n \nSupervivientes Libres: {1} / {2}\nTiempo Sobrevivido: {3}"
+	}
+	"ikea_lose"
+	{
+		"#format"	"{1:d},{2:d},{3:s}"
+		"es"		"ElSCP-3008 ha ganado\n Supervivientes Libres: {1} / {2}\n Tiempo Sobrevivido: {3}"
+	}
+
+
+	// Frostbite
+
+	"class_seeman"
+	{
+		"es"		"Seeman"
+	}
+	"desc_seeman"
+	{
+		"es"		"Mata a todos.\n Evita que huyan.\n Coopera con los demás bichos raros. \nHaz explotar a todos los jugadores cuando acumules suficientes bajas."
+	}
+	"train_seeman"
+	{
+		"es"		"Cada golpe provoca una explosión.\nCuando consigas las suficientes bajas, puedes matar instantáneamente a todos los jugadores. \n Presiona ATTACK, ATTACK2, ATTACK3, USE o usa VOICEMENU para interactuar con objetos."
+	}
+	"class_seeldier"
+	{
+		"es"		"Seeldier"
+	}
+	"desc_seeldier"
+	{
+		"es"		"Mata a todos.\n Evita que huyan.\n Coopera con los demás bichos raros.\nTrae an un Súbdito Seeman con cada baja."
+	}
+	"train_seeldier"
+	{
+		"es"		"Cada baja hace aparecer un clon con 200 puntos de salud. \n Presiona ATTACK, ATTACK2, ATTACK3, USE o usa VOICEMENU para interactuar con objetos."
+	}
+	"class_seeldier2"
+	{
+		"es"		"Clon de Seeldier"
+	}
+	"desc_seeldier2"
+	{
+		"es"                     "Mata a todos.\n Evita que huyan.\n Coopera con los demás bichos raros.\n Sigue las órdenes del Seeldier."
+	}
+	"train_seeldier2"
+	{
+		"es"		"Has sido clonado por el Seeldier.\n Sigue sus órdenes y ataca a los demás equipos.\n Evita que escapen.\n Presiona ATTACK2, ATTACK3, USE o usa VOICEMENU para interactuar con botones."
+	}
+	"class_pootisblu"
+	{
+		"es"		"Verdugo a Sueldo"
+	}
+	"desc_pootisblu"
+	{
+		"es"		  "Mata a todos.\n Evita que huyan.\n Coopera con los demás bichos raros.\nEntras en un estado de ira cuando te miran o te hacen daño."
+	}
+	"train_pootisblu"
+	{
+		"es"		"Te puedes mover mientras no te miran o mientras estás en un estado de ira.\nGana ira cuando te miran o te hacen daño.\nPresiona ATTACK2, ATTACK3, USE o usa VOICEMENU para interactuar con botones."
+	}
+	"class_pootisred"
+	{
+		"es"		"El Asesino del Focata"
+	}
+	"desc_pootisred"
+	{
+		"es"		  "Mata a todos.\n Evita que huyan.\n Coopera con los demás bichos raros.\n Cuanto más daño recibas, más fuerte te volverás."
+	}
+	"train_pootisred"
+	{
+		"es"		"Haces más daño y te mueves más rápido ca medida que acumulas ira.\nGanas ira cuando recibes daño de los ataques.\n Pulsa Press ATTACK3, USE o usa VOICEMENU para interactuar con l9s botones."
+	}
+	"class_saxtron"
+	{
+		"es"		"Saxtron H4le"
+	}
+	"desc_saxtron"
+	{
+		"es"		"Mata a todos.\nbImpídeles escapar.\nNo estás de lado de nadie."
+	}
+	"train_saxtron"
+	{
+		"es"		"Encendiendo...\nEjecutando...\n Elimina a todos los hippies...\nVamos..."
+	}
+	"class_chaos4"
+	{
+		"es"		"Agente de los Insurgentes del Caos"
+	}
+	"desc_chaos4"
+	{
+		"es"		"Ayuda al Personal de Clase D a huir.\nNeutraliza a los demás sujetos.\nTienes una Ametralladora en tu equipamiento."
+	}
+	"train_chaos4"
+	{
+		"es"		"Tienes que liberar al Personal de Clase D de las instalaciones.\nAcaba con los demás equipos para ayudar al Personal de Clase D a huír.\nPulsa USE o usa VOICEMENU para interactuar con los botones."
+	}
+	"class_mtf4"
+	{
+		"es"		"Soldado de Élite de los Nine-Tailed Fox"
+	}
+	"desc_mtf4"
+	{
+		"es"		"Ayuda a los Científicos a huír.\nNeutraliza a los demás sujetos.\nDa órdenes a tus soldados.\nSigue las órdenes de tus superiores."
+	}
+	"train_mtf4"
+	{
+		"es"		"Tienes queliberar a los Científicos de las instalaciones.\nApoya a tu grupo de élites, sigue a tu comandante SCP-076-2.\nTambién usa tu radio.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con botones y objetos."
+	}
+	"class_mtf076"
+	{
+		"es"		"SCP-076-2"
+	}
+	"desc_mtf076"
+	{
+		"es"		"Ayuda a los Científicos a huir.\n Neutraliza a los demás sujetos.\nDa órdenes a tus soldados."
+	}
+	"train_mtf076"
+	{
+		"es"		"Tienes que liberar a los Científicos de las instalaciones.\nLidera a tus tropas hacia el interior de las instalaciones.\nPulsa ATTACK2, ATTACK3, USE o usa VOICEMENU para interactuar con botones y objetos."
+	}
+	"class_mtf105"
+	{
+		"es"		"SCP-105"
+	}
+	"desc_mtf105"
+	{
+		"es"		"Ayuda a los Científicos a huir.\nNeutraliza a los demás sujetos.\nDa órdenes a tus soldados.\nSigue las órdenes de tus superiores."
+	}
+	"train_mtf105"
+	{
+		"es"		"Tienes que liberar a los Científicos de las instalaciones.\nApoya a tu grupo de élites, sigue a tu comandante SCP-076-2.\nTambién usa tu radio.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con botones y objetos."
+	}
+	"seeman_5"
+	{
+		"es"		"{darkred}¡Seeman{default} necesita 5 bajas mas para que explote!"
+	}
+	"seeman_3"
+	{
+		"es"		"{darkred}¡Seeman{default} necesita3 bajas mas para que explote!"
+	}
+	"seeman_2"
+	{
+		"es"		"{darkred}¡Seeman{default} necesita2 bajas mas para que explote!"
+	}
+	"seeman_1"
+	{
+		"es"		"{darkred}¡Seeman{default} necesita1baja mas para que explote!"
+	}
+	"mtf_spawn_pandora"
+	{
+		"es"		"{mediumblue}La Unidad de Fuerzas Móviles, Omega7{default} ha entrado en las instalaciones."
+	}
+
+	// Unused
+
+	"welcome"
+	{
+		"es"		“¡Bienvenido/a a SCP: SecretFortress!"
+	}
+	"train_mtf_title"
+	{
+		"es"		"¡Preparáos!"
+	}
+	"train_mtf_msg"
+	{
+		"es"		"Los Nine-Tailed Fox han aparecido. Salvarán a los Científicos y trabajarán con los Guardias. Matarán a los SCP e intentarán desarmar al Personal de Clase D. Tienen radios para hablar entre ellos y tienen diferentes rangos."
+	}
+	"train_chaos_title"
+	{
+		"es"		"¡CAAOOOOS!"
+	}
+	"train_chaos_msg"
+	{
+		"es"		"Los Insurgentes del Caos han aparecido. Salvarán al Personal de Clase D. Matarán a los Científicos y a los Guardias.Todos tienen las mismas armas y aparecen con un botiquín."
+	}
+	"camera"	// HUD
+	{
+		"#format"	"{1:d}"
+		"es"		"Cámara: {1}%% [ATTACK2]"
+	}
+	"sprint_ready"	// HUD
+	{
+		"#format"	"{1:d}"
+		"es"		"Carrera: {1}%% [JUMP]"
+	}
+	"sprint_not"	// HUD
+	{
+		"#format"	"{1:d}"
+		"es"		"Carrera: {1}%%"
+	}
+	"now_playing"	// Chat
+	{
+		"#format"	"{1:s}"
+		"es"		"Jugando ahora mismo: {1}"
+	}
+	"health_kit"	// HUD
+	{
+		"es"		"Botiquín preparado [ATTACK2]"
+	}
+	"pain_killers"	// HUD
+	{
+		"es"		"Analgésicos Listos. [ATTACK2]"
+	}
+	"scp_500"	// HUD
+	{
+		"es"		"SCP-500 [ATTACK2]"
+	}
+	"keycard"	// HUD
+	{
+		"#format"	"{1:t}"
+		"es"		"Tarjeta de acceso: {1}"
+	}
+	"radio"	// HUD
+	{
+		"#format"	"{1:t},{2:d}"
+		"es"		"Radio: {1} ({2}%%) [ATTACK3]"
+	}
+	"keycard_rough"
+	{
+		"es"		"Tarjeta de acceso | Rough"
+	}
+	"keycard_coarse"
+	{
+		"es"		"Tarjeta de acceso | Basto"
+	}
+	"keycard_even"
+	{
+		"es"		"Tarjeta de acceso | 1:1"
+	}
+	"keycard_fine"
+	{
+		"es"		"Tarjeta de acceso | Refinado"
+	}
+	"keycard_very"
+	{
+		"es"		"Tarjeta de acceso | Muy Refinado"
+	}
+	"weapon_rough"
+	{
+		"es"		"Arma | Tosco"
+	}
+	"weapon_coarse"
+	{
+		"es"		"Arma | Basto"
+	}
+	"weapon_even"
+	{
+		"es"		"Arma | 1:1"
+	}
+	"weapon_fine"
+	{
+		"es"		"Arma | Refinado"
+	}
+	"weapon_very"
+	{
+		"es"		"Arma | Muy Refinado"
+	}
+	"scp_914"
+	{
+		"es"		"SCP-914\n "
+	}
+	"keycard_0"
+	{
+		"es"		"Nada"
+	}
+	"keycard_1"
+	{
+		"es"		"Gerente"
+	}
+	"keycard_2"
+	{
+		"es"		"Científico"
+	}
+	"keycard_3"
+	{
+		"es"		"Encargado de la Zona"
+	}
+	"keycard_4"
+	{
+		"es"		"Supervisor de Investigación"
+	}
+	"keycard_5"
+	{
+		"es"		"Guardia de las Instalaciones"
+	}
+	"keycard_6"
+	{
+		"es"		"Cadete MTF"
+	}
+	"keycard_7"
+	{
+		"es"		"Teniente MTF"
+	}
+	"keycard_8"
+	{
+		"es"		"Comandante MTF"
+	}
+	"keycard_9"
+	{
+		"es"		"Ingeniero de Contención"
+	}
+	"keycard_10"
+	{
+		"es"		"Encargado de las Instalaciones"
+	}
+	"keycard_11"
+	{
+		"es"		"Dispositivo de Acceso de los Insurgentes del Caos"
+	}
+	"keycard_12"
+	{
+		"es"		"O5"
+	}
+	"radio_0"
+	{
+		"es"		"--"
+	}
+	"radio_1"
+	{
+		"es"		"SR"
+	}
+	"radio_2"
+	{
+		"es"		"MR"
+	}
+	"radio_3"
+	{
+		"es"		"LR"
+	}
+	"radio_4"
+	{
+		"es"		"UR"
+	}
+	"help_switch"
+	{
+		"es"		"%%+attack3%% Pulsa para cambiar de objeto."
+	}
+	"switch"
+	{
+		"es"		"ATTACK3 para pasar entre tus objetos"
+	}
+}
