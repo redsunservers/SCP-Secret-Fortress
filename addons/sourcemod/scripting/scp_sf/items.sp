@@ -2135,8 +2135,25 @@ public bool Items_RadioRadio(int client, int entity, float &multi)
 
 public void Items_LightAmmo(int client, int type, int &ammo)
 {
-	if(ammo == 2)	// 9mm
-		ammo *= 2;
+    switch(type)
+    {
+        case 2:    // 9mm
+        {
+            ammo *= 3;
+        }
+        case 6, 7:    // 7mm, 5mm
+        {
+            ammo *= 2;
+        }
+        case 10:    // 4mag
+        {
+            ammo = RoundFloat(ammo * 2.0);
+        }
+        case 11:    // 12ga
+        {
+            ammo = RoundFloat(ammo * 2.0);
+        }
+    }
 }
 
 public void Items_LightItem(int client, int type, int &amount)
