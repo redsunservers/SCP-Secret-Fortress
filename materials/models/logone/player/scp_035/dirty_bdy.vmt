@@ -1,0 +1,29 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "models\logone\player\scp_035\dirty_bdy"
+	"$model" "1"
+	"$surfaceprop" "flesh"
+	"$nocull" 1
+
+// -- From here down is new stuff which will only be applied if $phong is set to 1 --
+	"$phong" "1"
+	"$phongexponenttexture" "models/humans/male_exponent"
+	"$phongboost"	".25"
+	"$phongfresnelranges"	"[0.05 0.5 1]"
+
+// Rim lighting parameters
+	"$rimlight" "1"				
+	"$rimlightexponent" "80"            
+	"$rimlightboost" ".4"	              
+
+	$detail "decals/bms_bloodsplatterFloor_001.vtf"
+	$detailscale 5
+	$detailblendfactor 0.0
+	$detailblendmode 0
+	Proxies
+	{
+		ModelDetailFx
+		{
+		}
+	}
+}

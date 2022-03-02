@@ -316,7 +316,7 @@
 	}
 	"kill_counter"	// HUD
 	{
-		"ru"		"Убийства: {1}\nЛюдей в живых: {2}"
+		"ru"		"Kills: {1}\n[Humans left]\nVIP : {2} / MTF's : {3} / Chaos : {4}"
 	}
 	"end_screen"	// HUD
 	{

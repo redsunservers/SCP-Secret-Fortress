@@ -1324,8 +1324,10 @@ public bool Classes_PickupStandard(int client, int entity)
 					switch(class.Group)
 					{
 						case 0:
-							AcceptEntityInput(entity, "FireUser1", client, client);
-
+						{
+							if(!StrEqual(class.Name, "scp035", false)) AcceptEntityInput(entity, "FireUser1", client, client);
+							else AcceptEntityInput(entity, "FireUser2", client, client);
+						}
 						case 1:
 							AcceptEntityInput(entity, "FireUser2", client, client);
 
@@ -1381,8 +1383,10 @@ public bool Classes_PickupScp(int client, int entity)
 					switch(class.Group)
 					{
 						case 0:
-							AcceptEntityInput(entity, "FireUser1", client, client);
-
+						{
+							if(!StrEqual(class.Name, "scp035", false)) AcceptEntityInput(entity, "FireUser1", client, client);
+							else AcceptEntityInput(entity, "FireUser2", client, client);
+						}
 						case 1:
 							AcceptEntityInput(entity, "FireUser2", client, client);
 

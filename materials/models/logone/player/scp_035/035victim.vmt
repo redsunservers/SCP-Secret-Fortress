@@ -1,0 +1,7 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/logone/player/scp_035/035victim"
+                "$model" "1"
+	"$surfaceprop" "flesh"
+	"$nocull" 1
+}

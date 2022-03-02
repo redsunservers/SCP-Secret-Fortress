@@ -1192,8 +1192,8 @@
 	}
 	"kill_counter"	// HUD
 	{
-		"#format"	"{1:d},{2:d}"
-		"chi"		"击杀: {1}\n剩余人类: {2}"
+		"#format"	"{1:d},{2:d},{3:d},{4:d}"
+		"chi"		"Kills: {1}\n[Humans left]\nVIP : {2} / MTF's : {3} / Chaos : {4}"
 	}	
 	"end_screen"	// HUD
 	{

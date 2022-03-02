@@ -568,6 +568,18 @@
 	{
 		"en"		"You can only see targets making noise.\nYou can trick players by talking to them.\nYou'll get faster with less health you have.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
+	"class_scp035"
+	{
+		"en"		"SCP-035"
+	}
+	"desc_scp035"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can talk to other humans."
+	}
+	"train_scp035"
+	{
+		"en"		"You can pickup the item.\nYou can trick players by talking to them.\nPress ATTACK2, ATTACK3, USE to interact with buttons."
+	}
 	"class_scp3008"
 	{
 		"en"		"SCP-3008-2"
@@ -1245,11 +1257,11 @@
 	{
 		"en"		"%%+attack3%% Press and hold to use sprint"
 	}
-	"kill_counter"	// HUD
-	{
-		"#format"	"{1:d},{2:d}"
-		"en"		"Kills: {1}\nHumans left: {2}"
-	}		
+    "kill_counter"    // HUD
+    {
+        "#format"    "{1:d},{2:d},{3:d},{4:d}"
+        "en"        "Kills: {1}\n[Humans left]\nVIP : {2} / MTF's : {3} / Chaos : {4}"
+    }    	
 	"end_screen"	// HUD
 	{
 		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d},{8:d},{9:d}"

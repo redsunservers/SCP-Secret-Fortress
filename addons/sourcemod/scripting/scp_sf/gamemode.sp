@@ -67,6 +67,8 @@ static SoundEnum MusicAlone;
 static SoundEnum MusicFloors[10];
 
 int VIPsAlive;
+int MTFsAlive;
+int ChaosAlive;
 bool DebugPreventRoundWin;
 
 ArrayList Gamemode_Setup(KeyValues main, KeyValues map)
@@ -1037,14 +1039,27 @@ public bool Gamecode_CountVIPs()
 	bool salive;
 	
 	VIPsAlive = 0;
+	ChaosAlive = 0;
+	MTFsAlive = 0;
+	
 	for(int i=1; i<=MaxClients; i++)
 	{
 		if(!IsValidClient(i) || IsSpec(i) || !Classes_GetByIndex(Client[i].Class, class))
 			continue;
 
-		if(class.Vip)	// Class-D and Scientists
+		if(class.Vip)		// Class-D and Scientists
+		{
 			VIPsAlive++;
-
+		}
+		else if(class.Group == 1) // Chaos
+		{
+			ChaosAlive++;
+		}
+		else if(class.Group > 1) // Guards and MTF Squads
+		{
+			MTFsAlive++;
+		}
+		
 		if(!class.Group)	// SCPs
 			salive = true;
 	}
