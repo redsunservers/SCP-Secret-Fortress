@@ -364,6 +364,18 @@
 	{
 		"en"		"You need to free Class-D Personnel from the facility.\nKill other teams to help Class-D Personnel escape.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
+	"class_chaos5"
+	{
+		"en"		"Chaos Insurgency Agent"
+	}
+	"desc_chaos5"
+	{
+		"en"		"You're disguised as MTF.\nHelp Class-D Personnel escape.\nNeutralize other subjects."
+	}
+	"train_chaos5"
+	{
+		"en"		"You need to free Class-D Personnel from the facility.\nKill other teams to help Class-D Personnel escape.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
+	}
 	"class_sci"
 	{
 		"en"		"Scientist"
@@ -447,6 +459,18 @@
 	"train_mtfe"
 	{
 		"en"		"You need to free Scientists from the facility.\nYou can build sentries to fight off SCPs.\nYou can also build dispensers for allies.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
+	}
+	"class_scp035"
+	{
+		"en"		"SCP-035"
+	}
+	"desc_scp035"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nATTACK3 to sprint.\nPickup the item."
+	}
+	"train_scp035"
+	{
+		"en"		"You can pickup the item.\nYou can trick players by talking to them.\nPress ATTACK2, ATTACK3, USE to interact with buttons."
 	}
 	"class_scp049"
 	{
@@ -567,18 +591,6 @@
 	"train_scp9392"
 	{
 		"en"		"You can only see targets making noise.\nYou can trick players by talking to them.\nYou'll get faster with less health you have.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
-	}
-	"class_scp035"
-	{
-		"en"		"SCP-035"
-	}
-	"desc_scp035"
-	{
-		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nYou can talk to other humans."
-	}
-	"train_scp035"
-	{
-		"en"		"You can pickup the item.\nYou can trick players by talking to them.\nPress ATTACK2, ATTACK3, USE to interact with buttons."
 	}
 	"class_scp3008"
 	{
