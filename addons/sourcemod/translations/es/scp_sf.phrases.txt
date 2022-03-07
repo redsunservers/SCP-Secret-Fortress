@@ -113,10 +113,10 @@
 	{
 		"es"		"Ayuda a los Supervivientes a escapar.\nNeutraliza a los demás sujetos.\nSigue las órdenes de tus superiores."
 	}
-	}
 	"desc_mtf3_ikea"
 	{
-		"es"		"Ayuda a los Supervivientes a escapar.\nNeutraliza a los demás sujetos.\nDale órdenes a tus soldados.	}
+		"es"		"Ayuda a los Supervivientes a escapar.\nNeutraliza a los demás sujetos.\nDale órdenes a tus soldados."
+	}
 	"end_screen_ikea"
 	{
 		"#format"	"{1:t},{2:d},{3:d}"
@@ -272,7 +272,7 @@
 	"class_chaos1"
 	{
 		"es"		"Fusilero de los Insurgentes del Caos"
-	}	
+	}
 	"desc_chaos1"
 	{
 		"es"		"Ayuda al personal de Clase D a escapar.\nNeutraliza a los otros sujetos."
@@ -412,6 +412,7 @@
 	"train_scp049"
 	{
 		"es"		"Tus ataques matan a los humanos de un golpe.\nUsa tu cuchillo para reviver a jugadores muertos y convertirlos en SCP-049-2.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones."	
+	}
 	"class_scp0492"
 	{
 		"es"		"SCP-049-2"
@@ -606,7 +607,7 @@
 	}
 	"info_1013"
 	{
-		"es"		"Espero que te guste la probabilidad de crítico aumentada.
+		"es"		"Espero que te guste la probabilidad de crítico aumentada."
 	}
 	"weapon_197"
 	{
@@ -1188,7 +1189,7 @@
 	{
 		"#format"	"{1:d},{2:d}"
 		"es"		"Bajas: {1}\nHumanos vivos: {2}"
-	}	
+	}
 	"end_screen"	// HUD
 	{
 		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d}"
@@ -1197,8 +1198,8 @@
 	"end_screen_vip" // HUD
 	{
 		"#format"	"{1:t},{2:d},{3:d},{4:d},{5:d},{6:d},{7:d},{8:d},{9:d}"
-	
-	"es"		"{1}\n \nClase D libres: {2} / {3}\n Científico(s) Vivos: {4} / {5}\nSCP Ejecutados: {6} / {7}"		
+		"es"		"{1}\n \nClase D libres: {2} / {3}\n Científico(s) Vivos: {4} / {5}\nSCP Ejecutados: {6} / {7}"
+	}
 	"end_screen_boss"	// HUD
 	{
 		"#format"	"{1:t},{2:d},{3:d}"
@@ -1481,7 +1482,7 @@
 
 	"welcome"
 	{
-		"es"		“¡Bienvenido/a a SCP: SecretFortress!"
+		"es"		"¡Bienvenido/a a SCP: SecretFortress!"
 	}
 	"train_mtf_title"
 	{
