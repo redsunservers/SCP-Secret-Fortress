@@ -54,6 +54,9 @@ static ArrayList Weapons;
 // TODO: shouldn't this be in the class struct?
 static Handle Item_DelayedAction[MAXTF2PLAYERS] = {INVALID_HANDLE, ...};
 
+// Micro H.I.D. Charging gage
+float charge[MAXTF2PLAYERS];
+
 void Items_Setup(KeyValues main, KeyValues map)
 {
 	if(Weapons != INVALID_HANDLE)
@@ -1569,7 +1572,6 @@ public bool Items_MicroButton(int client, int weapon, int &buttons, int &holding
 {
 	int type = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
 	int ammo = GetAmmo(client, type);
-	static float charge[MAXTF2PLAYERS];
 	if(ammo<2 || !(buttons & IN_ATTACK))
 	{
 		if (charge[client])

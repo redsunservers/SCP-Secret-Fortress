@@ -448,6 +448,18 @@
 	{
 		"en"		"You need to free Scientists from the facility.\nCommand your troops down the facility.\nUse your radio to help order your troops around.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
+	"class_mtf5"
+	{
+		"en"		"Nine-Tailed Fox Cadet"
+	}
+	"desc_mtf5"
+	{
+		"en"		"Help Scientists escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
+	}
+	"train_mtf5"
+	{
+		"en"		"You need to free Scientists from the facility.\nStay with your sergeants and captain.\nKeep in touch using the radio.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
+	}
 	"class_mtfe"
 	{
 		"en"		"Nine-Tailed Fox Engineer"
@@ -769,7 +781,7 @@
 	}
 	"weapon_199"
 	{
-		"en"		"Shotgun"
+		"en"		"MTF-E11-SG"
 	}
 	"info_199"
 	{
