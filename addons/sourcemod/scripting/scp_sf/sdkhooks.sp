@@ -581,16 +581,7 @@ public Action OnGetMaxHealth(int client, int &health)
 }
 
 public void OnWeaponSwitch(int client, int entity)
-{
-	if(entity <= MaxClients || !IsValidEntity(entity)) return;
-	
-	if(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex") == 594)
-	{
-		charge[client] = 0.0;
-		SetEntPropFloat(client, Prop_Send, "m_flRageMeter", 99.0);
-		TF2Attrib_SetByDefIndex(entity, 821, 1.0);
-	}
-	
+{	
 	Classes_OnWeaponSwitch(client, entity);
 	RequestFrame(OnWeaponSwitchFrame, GetClientUserId(client));
 }

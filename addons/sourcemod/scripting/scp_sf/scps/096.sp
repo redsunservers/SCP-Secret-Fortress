@@ -3,16 +3,16 @@ static const char SoundPassive[] = "freak_fortress_2/scp096/bgm.mp3";
 static const char SoundEnrage[] = "freak_fortress_2/scp096/fullrage.mp3";
 static const char SoundDeath[] = "freak_fortress_2/scp096/096_death.mp3";
 
-static const int HealthMax = 2500;	// Max standard health
-static const int HealthExtra = 700;	// Max regenerable health
+static const int HealthMax = 1700;	// Max standard health
+static const int HealthExtra = 1500;	// Max regenerable health
 
 static const float SpeedRage = 2.1;
 
 static const float RageWarmup = 6.0;	// Rage warmup time
 static const float RageDuration = 12.0;	// Rage initial duration
 static const float RageExtra = 3.0;	// Rage duration per target
-static const float RageWinddown = 12.0;	// After rage stun
-static const float RageCooldown = 30.0;	// After rage cooldown
+static const float RageWinddown = 18.0;	// After rage stun
+static const float RageCooldown = 24.0;	// After rage cooldown
 
 static int Triggered[MAXTF2PLAYERS];
 

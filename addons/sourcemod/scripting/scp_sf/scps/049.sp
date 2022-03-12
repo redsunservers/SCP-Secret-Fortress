@@ -31,7 +31,7 @@ public bool SCP049_Create(int client)
 
 	GiveMelee(client, account);
 
-	int weapon = SpawnWeapon(client, "tf_weapon_medigun", 211, 5, 13, "7 ; 0.65 ; 9 ; 0 ; 18 ; 1 ; 252 ; 0.95 ; 292 ; 2 ; 412 ; 0.8", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_medigun", 211, 5, 13, "7 ; 0.65 ; 9 ; 0 ; 18 ; 1 ; 252 ; 0.95 ; 292 ; 2", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 11);

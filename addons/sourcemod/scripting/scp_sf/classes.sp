@@ -809,9 +809,20 @@ float Classes_OnTheme(int client, char path[PLATFORM_MAX_PATH])
 void Classes_OnWeaponSwitch(int client, int entity)
 {
 	ClassEnum class;
-	if(!Classes_GetByIndex(Client[client].Class, class) || class.OnWeaponSwitch==INVALID_FUNCTION)
-		return;
+	if(!Classes_GetByIndex(Client[client].Class, class)) return;
 
+	if(!StrEqual(class.Name, "scp173", false))
+	{
+		if(entity>MaxClients && GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex")==ITEM_INDEX_MICROHID)
+		{
+			charge[client] = 0.0;
+			SetEntPropFloat(client, Prop_Send, "m_flRageMeter", 99.0);
+			TF2Attrib_SetByDefIndex(entity, 821, 1.0);
+		}
+	}
+
+	if(class.OnWeaponSwitch==INVALID_FUNCTION) return;
+	
 	Call_StartFunction(null, class.OnWeaponSwitch);
 	Call_PushCell(client);
 	Call_PushCell(entity);

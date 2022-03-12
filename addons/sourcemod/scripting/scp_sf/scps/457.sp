@@ -12,7 +12,7 @@ public bool SCP457_Create(int client)
 {
 	Classes_VipSpawn(client);
 
-	int weapon = SpawnWeapon(client, "tf_weapon_fireaxe", 649, 50, 13, "1 ; 0.061538 ; 28 ; 0.5 ; 60 ; 0.3 ; 138 ; 2.5 ; 208 ; 1 ; 219 ; 1 ; 252 ; 0.65 ; 412 ; 0.8", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_fireaxe", 649, 50, 13, "1 ; 0.061538 ; 28 ; 0.5 ; 60 ; 0.3 ; 138 ; 2.5 ; 208 ; 1 ; 219 ; 1 ; 252 ; 0.65", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 14);

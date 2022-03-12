@@ -54,9 +54,6 @@ static ArrayList Weapons;
 // TODO: shouldn't this be in the class struct?
 static Handle Item_DelayedAction[MAXTF2PLAYERS] = {INVALID_HANDLE, ...};
 
-// Micro H.I.D. Charging gage
-float charge[MAXTF2PLAYERS];
-
 void Items_Setup(KeyValues main, KeyValues map)
 {
 	if(Weapons != INVALID_HANDLE)
@@ -1583,7 +1580,7 @@ public bool Items_MicroButton(int client, int weapon, int &buttons, int &holding
 		return false;
 	}
 
-	buttons &= ~IN_JUMP|IN_SPEED;
+	//buttons &= ~IN_JUMP|IN_SPEED;
 
 	if(charge[client])
 	{
@@ -1591,6 +1588,7 @@ public bool Items_MicroButton(int client, int weapon, int &buttons, int &holding
 		if(charge[client] == FAR_FUTURE)
 		{
 			SetEntPropFloat(client, Prop_Send, "m_flRageMeter", 0.0);
+			StopSound(client, SNDCHAN_AUTO, MicroChargeSound);
 		}
 		else if(charge[client] < engineTime)
 		{
@@ -1600,7 +1598,7 @@ public bool Items_MicroButton(int client, int weapon, int &buttons, int &holding
 		else
 		{
 			TF2Attrib_SetByDefIndex(weapon, 821, 1.0);
-			SetEntPropFloat(client, Prop_Send, "m_flRageMeter", (charge[client]-engineTime)*16.5);
+			SetEntPropFloat(client, Prop_Send, "m_flRageMeter", (charge[client]-engineTime)*21.945);
 
 			static float time[MAXTF2PLAYERS];
 			if(time[client] < engineTime)
@@ -1613,7 +1611,7 @@ public bool Items_MicroButton(int client, int weapon, int &buttons, int &holding
 	}
 	else
 	{
-		charge[client] = GetGameTime()+6.0;
+		charge[client] = GetGameTime()+4.0;
 		EmitSoundToAll2(MicroChargeSound, client, SNDCHAN_AUTO, SNDLEVEL_CAR, _, _, 67);
 	}
 	return true;
@@ -2070,7 +2068,7 @@ public bool Items_268Button(int client, int weapon, int &buttons, int &holding)
 			return false;
 		}
 
-		delay[client] = engineTime+90.0;
+		delay[client] = engineTime+60.0;
 		TF2_AddCondition(client, TFCond_Stealthed, 15.0);
 		ClientCommand(client, "playgamesound misc/halloween/spell_stealth.wav");
 	}

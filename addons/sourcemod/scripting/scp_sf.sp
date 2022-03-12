@@ -185,6 +185,9 @@ enum struct ClientEnum
 
 ClientEnum Client[MAXTF2PLAYERS];
 
+// Micro H.I.D. Charging gage
+float charge[MAXTF2PLAYERS];
+
 #include "scp_sf/stocks.sp"
 #include "scp_sf/achievements.sp"
 #include "scp_sf/classes.sp"

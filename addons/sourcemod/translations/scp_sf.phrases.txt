@@ -366,11 +366,11 @@
 	}
 	"class_chaos5"
 	{
-		"en"		"Chaos Insurgency Agent"
+		"en"		"Chaos Insurgency Sniper"
 	}
 	"desc_chaos5"
 	{
-		"en"		"You're disguised as MTF.\nHelp Class-D Personnel escape.\nNeutralize other subjects."
+		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects."
 	}
 	"train_chaos5"
 	{
@@ -1098,6 +1098,14 @@
 	"info_1098"
 	{
 		"en"		"Survival, Concealment, Protection."
+	}
+	"weapon_30474"
+	{
+		"en"		"Micro H.I.D. TEST"
+	}
+	"info_30474"
+	{
+		"en"		"Wrong number."
 	}
 	
 	// Team Phrases
