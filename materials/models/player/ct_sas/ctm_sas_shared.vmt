@@ -1,0 +1,55 @@
+"VertexLitGeneric"
+{
+	"$phong" "1"
+	"$phongBoost" "4"
+	"$phongTint" "[1 1 1]"
+	"$phongFresnelRanges" "[.3 .3 1]"
+	"$phongdisablehalflambert" "1"
+
+	"$detail" "effects/tiledfire/fireLayeredSlowTiled512.vtf"	
+	"$detailscale" "5"
+	"$detailblendfactor" .01
+	"$detailblendmode" 6
+	
+	"$lightwarptexture" "models/player/pyro/pyro_lightwarp"
+
+	"$halflambert"  "1"
+	
+	"$yellow" "0"
+	"$one" "1"
+	
+	// Rim lighting parameters
+	"$rimlight" "1"												// To enable rim lighting (requires phong)
+	"$rimlightexponent" "200"										// Exponent for phong component of rim lighting	
+	"$rimlightboost" "1"	
+
+	// Cloaking
+	"$cloakPassEnabled" "1"
+
+	"Proxies"
+	{
+		"spy_invis"
+		{
+		}
+		"AnimatedTexture"
+		{
+			"animatedtexturevar" "$detail"
+			"animatedtextureframenumvar" "$detailframe"
+			"animatedtextureframerate" 30
+		}
+		"BurnLevel"
+		{
+			"resultVar" "$detailblendfactor"
+		}
+		"YellowLevel"
+		{
+			"resultVar" "$yellow"
+		}
+		"Equals"
+		{
+			"srcVar1"  "$yellow"
+			"resultVar" "$color2"
+		}
+
+	}
+}

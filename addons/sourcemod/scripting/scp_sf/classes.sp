@@ -1061,6 +1061,16 @@ public void Classes_KillMtf(int client, int victim)
 	}
 }
 
+public void Classes_KillSnake(int client, int victim)
+{
+    if ((Classes_GetByName("sci") != Client[victim].Class) && !GetRandomInt(0, 3))
+    {
+        ClassEnum class;
+        if(Classes_GetByIndex(Client[victim].Class, class) && class.Group==2 && Classes_GetByIndex(Client[client].Class, class))
+            Gamemode_GiveTicket(class.Group, 3);
+    }
+}
+
 public Action Classes_TakeDamageHuman(int client, int attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
 	if(attacker<1 || attacker>MaxClients)

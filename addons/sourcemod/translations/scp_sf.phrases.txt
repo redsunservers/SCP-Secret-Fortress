@@ -414,7 +414,7 @@
 	}
 	"class_mtf2"
 	{
-		"en"		"Nine-Tailed Fox Sergeant"
+		"en"		"Nine-Tailed Fox Lieutenant"
 	}
 	"desc_mtf2"
 	{
@@ -459,6 +459,18 @@
 	"train_mtf5"
 	{
 		"en"		"You need to free Scientists from the facility.\nStay with your sergeants and captain.\nKeep in touch using the radio.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
+	}
+	"class_mtf6"
+	{
+		"en"		"Nine-Tailed Fox Sergeant"
+	}
+	"desc_mtf6"
+	{
+		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your superiors."
+	}
+	"train_mtf6"
+	{
+		"en"		"You need to free Scientists from the facility.\nSupport your group of privates, follow your captain.\nUse your radio too.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_mtfe"
 	{
@@ -603,6 +615,30 @@
 	"train_scp9392"
 	{
 		"en"		"You can only see targets making noise.\nYou can trick players by talking to them.\nYou'll get faster with less health you have.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
+	"class_snakky1"
+	{
+		"en"		"Serpent's Hand Agent"
+	}
+	"desc_snakky1"
+	{
+		"en"		"You're disguised as MTF.\nKill everyone.\nCooperate with other SCPs."
+	}
+	"train_snakky1"
+	{
+		"en"		"You're disguised as MTF.\nCooperate with other SCPs.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
+	}
+	"class_snakky2"
+	{
+		"en"		"Serpent's Hand Agent"
+	}
+	"desc_snakky2"
+	{
+		"en"		"You're disguised as MTF.\nKill everyone.\nCooperate with other SCPs."
+	}
+	"train_snakky2"
+	{
+		"en"		"You're disguised as MTF.\nCooperate with other SCPs.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
 	"class_scp3008"
 	{
@@ -810,6 +846,14 @@
 	"info_201"
 	{
 		"en"		"When your tired being asked ''Do you need help?''."
+	}
+	"weapon_851"
+	{
+		"en"		"AWP"
+	}
+	"info_851"
+	{
+		"en"		"Skill."
 	}
 	"weapon_423"
 	{

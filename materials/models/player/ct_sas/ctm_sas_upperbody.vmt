@@ -1,0 +1,22 @@
+"patch"
+{
+	"include" "materials/models/player/ct_sas/ctm_sas_shared.vmt"
+	"insert"
+	{	
+	"$baseTexture" "models\player\ct_sas\ctm_sas_upperbody_varb"
+	"$bumpmap" "models\player\ct_sas\ctm_sas_upperbody_normal"
+	
+	"$phongexponenttexture" "models\player\ct_sas\ctm_sas_upperbody_exponent"
+//	"$rimmask" "1"
+
+	//$selfillum 1
+	//$selfillumfresnel 1
+	//$SELFILLUMFRESNELMINMAXEXP "[ 0 20 8 ]" // scale max with distance in shader 1-x
+	//$SELFILLUMTINT "[ .30 .52 .85 ]"
+	//$SELFILLUMMASK "models/player/ct_sas/ctm_sas_upperbody_selfillummask"
+
+// Proxies
+//"$SelfIllumFresnelEnabledThisFrame" "0"
+
+	}	
+}

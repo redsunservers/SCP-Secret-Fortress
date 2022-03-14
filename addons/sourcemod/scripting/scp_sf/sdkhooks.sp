@@ -11,6 +11,7 @@ void SDKHook_HookClient(int client)
 	SDKHook(client, SDKHook_OnTakeDamageAlivePost, OnTakeDamageAlivePost);	
 	SDKHook(client, SDKHook_SetTransmit, OnTransmit);
 	SDKHook(client, SDKHook_WeaponSwitchPost, OnWeaponSwitch);
+	SDKHook(client, SDKHook_WeaponEquipPost, OnWeaponEquipPost);
 	SDKHook(client, SDKHook_PostThink, OnPostThink);
 	SDKHook(client, SDKHook_PostThinkPost, OnPostThinkPost);
 }
@@ -614,6 +615,13 @@ static void OnWeaponSwitchFrame(int userid)
 		
 		//ViewChange_Switch(client);
 	}
+}
+
+public void OnWeaponEquipPost(int client, int weapon)
+{
+	if (!IsValidClient(client) || !IsClientInGame(client) || !IsValidEdict(weapon)) return;
+	
+	DHook_HookWeapon(weapon);
 }
 
 static const float ViewHeights[] =

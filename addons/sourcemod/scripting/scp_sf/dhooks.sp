@@ -3,6 +3,7 @@ static DynamicHook RoundRespawn;
 static DynamicHook ShouldCollide;
 static DynamicHook ForceRespawn;
 static DynamicHook WantsLagCompensationOnEntity;
+static DynamicHook WeaponGetCustomDamageType;
 static int ShouldCollidePreHook[MAXTF2PLAYERS];
 static int ForceRespawnPreHook[MAXTF2PLAYERS];
 static int ForceRespawnPostHook[MAXTF2PLAYERS];
@@ -64,7 +65,11 @@ void DHook_Setup(GameData gamedata)
 
 	StudioHdrOffset = GameConfGetOffset(gamedata, "CBaseAnimating::m_pStudioHdr");
 	if (StudioHdrOffset == -1)
-		LogError("[Gamedata] Failed to get offset for CBaseAnimating::m_pStudioHdr");		
+		LogError("[Gamedata] Failed to get offset for CBaseAnimating::m_pStudioHdr");
+
+	WeaponGetCustomDamageType = DynamicHook.FromConf(gamedata, "CTFWeaponBase::GetCustomDamageType");
+	if (!WeaponGetCustomDamageType)
+		LogError("[Gamedata] Could not find CTFWeaponBase::GetCustomDamageType");
 }
 
 static void DHook_CreateDetour(GameData gamedata, const char[] name, DHookCallback preCallback = INVALID_FUNCTION, DHookCallback postCallback = INVALID_FUNCTION)
@@ -113,6 +118,13 @@ void DHook_UnhookClient(int client)
 	DynamicHook.RemoveHook(ForceRespawnPostHook[client]);
 	DynamicHook.RemoveHook(WantsLagCompensationOnEntityPreHook[client]);
 	DynamicHook.RemoveHook(WantsLagCompensationOnEntityPostHook[client]);
+}
+
+void DHook_HookWeapon(int weapon)
+{
+	if(!IsValidEdict(weapon)) return;
+	
+	WeaponGetCustomDamageType.HookEntity(Hook_Pre, weapon, DHook_WeaponGetCustomDamageTypePre);
 }
 
 void DHook_MapStart()
@@ -412,4 +424,78 @@ public MRESReturn DHook_TauntPost(int client)
 	ClassEnum class;
 	if(Classes_GetByIndex(Client[client].Class, class))
 		TF2_SetPlayerClass(client, class.Class, false, false);
+}
+
+public MRESReturn DHook_WeaponGetCustomDamageTypePre(int weapon, Handle hReturn, Handle hParams)
+{
+	int ownerEntity = GetEntPropEnt(weapon, Prop_Data, "m_hOwnerEntity");
+	if (IsValidClient(ownerEntity) && IsValidEntity(weapon) && ownerEntity)
+	{
+		int customDamageType = DHookGetReturn(hReturn);
+		if (customDamageType != -1)
+		{
+			MRESReturn hookResult = GetWeaponCustomDamageType(weapon, ownerEntity, customDamageType);
+			if (hookResult != MRES_Ignored)
+			{
+				DHookSetReturn(hReturn, customDamageType);
+				return hookResult;
+			}
+		}
+		else return MRES_Ignored;
+	}
+	else
+	{
+		return MRES_Ignored;
+	}
+	
+	return MRES_Ignored;
+}
+
+
+MRESReturn GetWeaponCustomDamageType(int weapon, int client, int &customDamageType)
+{
+	if (IsValidClient(client) && IsValidEntity(weapon) && IsValidEdict(weapon) && IsValidEntity(client))
+	{
+		static const char fixWeaponPenetrationClasses[][] = 
+		{
+			"tf_weapon_sniperrifle",
+			"tf_weapon_sniperrifle_decap",
+			"tf_weapon_sniperrifle_classic"
+		};
+
+		char sWeaponName[256];
+		GetEntityClassname(weapon, sWeaponName, sizeof(sWeaponName));
+
+		/*
+		 * Fixes the sniper rifle not damaging teammates.
+		 * 
+		 * WHY? For every other hitscan weapon in the game, simply enforcing lag compensation in CTFPlayer::WantsLagCompensationOnEntity()
+		 * works. However, when it comes to weapons that penetrate teammates, the bullet trace will not iterate through teammates. This is
+		 * the case with all sniper rifles, and is the reason why damage is never normally dealt to teammates despite having friendly fire 
+		 * on and lag compensation.
+		 *
+		 * In this case, the type of penetration is determined by CTFWeaponBase::GetCustomDamageType(). For Snipers, default value is 
+		 * TF_DMG_CUSTOM_PENETRATE_MY_TEAM (11) (piss rifle is TF_DMG_CUSTOM_PENETRATE_NONBURNING_TEAMMATE (14)). This value specifies 
+		 * penetration of the bullet through teammates without damaging them. The damage type is switched to 0, and for the Machina at 
+		 * full charge, TF_DMG_CUSTOM_PENETRATE_ALL_PLAYERS (12).
+		 *
+		 */
+		for (int i = 0; i < sizeof(fixWeaponPenetrationClasses); i++)
+		{
+			if (strcmp(sWeaponName, fixWeaponPenetrationClasses[i], false) == 0)
+			{
+				customDamageType = 12; // TF_DMG_CUSTOM_PENETRATE_ALL_PLAYERS
+				int itemDefIndex = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
+
+				if ((itemDefIndex == 526 || itemDefIndex == 30665) && GetEntPropFloat(weapon, Prop_Send, "m_flChargedDamage") >= 150.0 )  // The Machina, Shooting Star
+					customDamageType = 12; // TF_DMG_CUSTOM_PENETRATE_ALL_PLAYERS
+				else
+					customDamageType = 0; // no penetration behavior.
+
+				return MRES_Supercede;
+			}
+		}
+	}
+
+	return MRES_Ignored;
 }

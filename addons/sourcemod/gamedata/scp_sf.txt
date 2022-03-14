@@ -342,6 +342,13 @@
 					}
 				}
 			}
+			"CTFWeaponBase::GetCustomDamageType"
+			{
+				"offset"	"CTFWeaponBase::GetCustomDamageType"
+				"hooktype"	"entity"
+				"return"	"int"
+				"this"		"entity"
+			}
 		}
 		"Offsets"
 		{
@@ -394,6 +401,11 @@
 			{
 				"linux"		"207"
 				"windows"	"206"
+			}
+			"CTFWeaponBase::GetCustomDamageType"
+			{
+				"windows"	"377"
+				"linux"		"383"	
 			}
 		}
 		"Addresses"

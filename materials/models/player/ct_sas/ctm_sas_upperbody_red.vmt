@@ -1,0 +1,13 @@
+"patch"
+{
+	"include" "materials/models/player/ct_sas/ctm_sas_shared.vmt"
+	"insert"
+	{	
+	"$baseTexture" "models\player\ct_sas\ctm_sas_upperbody_vara"
+	"$bumpmap" "models\player\ct_sas\ctm_sas_upperbody_normal"
+	
+	"$phongexponenttexture" "models\player\ct_sas\ctm_sas_upperbody_exponent"
+//	"$rimmask" "1"
+
+	}	
+}
