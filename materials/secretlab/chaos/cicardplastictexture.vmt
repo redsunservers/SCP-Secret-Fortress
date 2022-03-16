@@ -1,0 +1,7 @@
+"vertexlitgeneric"
+{
+	"$baseTexture" "secretlab/chaos/CICardPlasticTexture"
+	"$envmap" "env_cubemap"
+	"$bumpmap" "secretlab/chaos/CICardPlasticBump"
+	"$normalmapalphaenvmapmask" "1"
+}
