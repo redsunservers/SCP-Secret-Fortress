@@ -1652,102 +1652,83 @@
 	{
 		"#format"	"{1:d}"
 		"en"		"Camera: {1}%% [ATTACK2]"
-		"ru"		"Camera: {1}%% [ДОП. АТАКА]"
 	}
 	"sprint_ready"	// HUD
 	{
 		"#format"	"{1:d}"
 		"en"		"Sprint: {1}%% [JUMP]"
-		"ru"		"Sprint: {1}%% [JUMP]"
 	}
 	"sprint_not"	// HUD
 	{
 		"#format"	"{1:d}"
 		"en"		"Sprint: {1}%%"
-		"ru"		"Sprint: {1}%%"
 	}
 	"now_playing"	// Chat
 	{
 		"#format"	"{1:s}"
 		"en"		"Now Playing: {1}"
-		"ru"		"Сейчас играет: {1}"
 	}
 	"health_kit"	// HUD
 	{
 		"en"		"Health Kit Ready [ATTACK2]"
-		"ru"		"Аптечка готова [ДОП. АТАКА]"
 	}
 	"pain_killers"	// HUD
 	{
 		"en"		"Pain Killers Ready [ATTACK2]"
-		"ru"		"Обезболивающее готово [ДОП. АТАКА]"
 	}
 	"scp_500"	// HUD
 	{
 		"en"		"SCP-500 [ATTACK2]"
-		"ru"		"SCP-500 [ДОП. АТАКА]"
 	}
 	"keycard"	// HUD
 	{
 		"#format"	"{1:t}"
 		"en"		"Keycard: {1}"
-		"ru"		"Ключ-Карта: {1}"
 	}
 	"radio"	// HUD
 	{
 		"#format"	"{1:t},{2:d}"
 		"en"		"Radio: {1} ({2}%%) [ATTACK3]"
-		"ru"		"Радио: {1} ({2}%%) [СПЕЦ. АТАКА]"
 	}
 	"keycard_rough"
 	{
 		"en"		"Keycard | Rough"
-		"ru"		"Карта | О. Грубо"
 	}
 	"keycard_coarse"
 	{
 		"en"		"Keycard | Coarse"
-		"ru"		"Карта | Грубо"
 	}
 	"keycard_even"
 	{
 		"en"		"Keycard | 1:1"
-		"ru"		"Карта | 1:1"
 	}
 	"keycard_fine"
 	{
 		"en"		"Keycard | Fine"
-		"ru"		"Карта | Тонко"
 	}
 	"keycard_very"
 	{
 		"en"		"Keycard | Very Fine"
-		"ru"		"Карта | О. Тонко"
 	}
 	"weapon_rough"
 	{
 		"en"		"Weapon | Rough"
-		"ru"		"Оружие | О. Грубо"
 	}
 	"weapon_coarse"
 	{
 		"en"		"Weapon | Coarse"
-		"ru"		"Оружие | Грубо"
 	}
 	"weapon_even"
 	{
 		"en"		"Weapon | 1:1"
-		"ru"		"Оружие | 1:1"
 	}
 	"weapon_fine"
 	{
 		"en"		"Weapon | Fine"
-		"ru"		"Оружие | Тонко"
 	}
 	"weapon_very"
 	{
 		"en"		"Weapon | Very Fine"
-		"ru"		"Оружие | О. Тонко"
 	}
 	"scp_914"
 	{
@@ -1756,62 +1737,50 @@
 	"keycard_0"
 	{
 		"en"		"None"
-		"ru"		"Нет"
 	}
 	"keycard_1"
 	{
 		"en"		"Janitor"
-		"ru"		"Уборщик"
 	}
 	"keycard_2"
 	{
 		"en"		"Scientist"
-		"ru"		"Учёный"
 	}
 	"keycard_3"
 	{
 		"en"		"Zone Manager"
-		"ru"		"Менеджер Зоны"
 	}
 	"keycard_4"
 	{
 		"en"		"Research Supervisor"
-		"ru"		"Руководитель Исследований"
 	}
 	"keycard_5"
 	{
 		"en"		"Facility Guard"
-		"ru"		"Охранник Комплекса"
 	}
 	"keycard_6"
 	{
 		"en"		"MTF Cadet"
-		"ru"		"Кадет МОГ"
 	}
 	"keycard_7"
 	{
 		"en"		"MTF Lieutenant"
-		"ru"		"Лейтенант МОГ"
 	}
 	"keycard_8"
 	{
 		"en"		"MTF Commander"
-		"ru"		"Командир МОГ"
 	}
 	"keycard_9"
 	{
 		"en"		"Containment Engineer"
-		"ru"		"Инженер Содержания"
 	}
 	"keycard_10"
 	{
 		"en"		"Facility Manager"
-		"ru"		"Менеджер Комплекса"
 	}
 	"keycard_11"
 	{
 		"en"		"Chaos Insurgency Access Device"
-		"ru"		"Устройство Доступа Повстанца Хаоса"
 	}
 	"keycard_12"
 	{
@@ -1824,22 +1793,18 @@
 	"radio_1"
 	{
 		"en"		"SR"
-		"ru"		"КД"
 	}
 	"radio_2"
 	{
 		"en"		"MR"
-		"ru"		"СД"
 	}
 	"radio_3"
 	{
 		"en"		"LR"
-		"ru"		"ДД"
 	}
 	"radio_4"
 	{
 		"en"		"UR"
-		"ru"		"УД"
 	}
 	"help_switch"
 	{
