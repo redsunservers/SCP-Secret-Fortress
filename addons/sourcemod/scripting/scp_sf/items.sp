@@ -1692,7 +1692,7 @@ public Action Items_FragTimer(Handle timer, int ref)
 				EmitGameSoundToAll("Weapon_Airstrike.Explosion", particle, entity, _, _, pos);
 			
 			AcceptEntityInput(explosion, "Explode");
-			AcceptEntityInput(explosion, "Kill");
+			CreateTimer(0.1, Timer_RemoveEntity, EntIndexToEntRef(explosion), TIMER_FLAG_NO_MAPCHANGE);
 		}
 
 		// push away all dropped stuff
@@ -1818,20 +1818,21 @@ public Action Items_FlashTimer(Handle timer, int ref)
 				EmitGameSoundToAll("Weapon_Detonator.Detonate", particle, entity, _, _, pos1);			
 
 			AcceptEntityInput(explosion, "Explode");
-			AcceptEntityInput(explosion, "Kill");
+			CreateTimer(0.1, Timer_RemoveEntity, EntIndexToEntRef(explosion), TIMER_FLAG_NO_MAPCHANGE);
 		}
 
 		int class = GetEntProp(entity, Prop_Data, "m_iHammerID");
 		for(int i=1; i<=MaxClients; i++)
 		{
-			if(IsClientInGame(i) && IsPlayerAlive(i) && !IsFriendly(class, Client[i].Class))
+			if(IsClientInGame(i) && IsPlayerAlive(i) && !IsFriendly(class, Client[i].Class) && !IsSpec(i))
 			{
 				static float pos2[3];
 				GetClientEyePosition(i, pos2);
 				// 1024 units
 				if(GetVectorDistance(pos1, pos2, true) < 1048576.0)
 				{
-					FadeMessage(i, 1000, 1000, 0x0001, 200, 200, 200, 255);
+					TF2_StunPlayer(i, 6.0, 0.5, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
+					FadeMessage(i, 2000, 3000, 0x0001, 300, 200, 200, 255);
 					ClientCommand(i, "dsp_player %d", GetRandomInt(35, 37));
 				}
 			}
