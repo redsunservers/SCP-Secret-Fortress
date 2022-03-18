@@ -118,7 +118,7 @@ public Action SCP173_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &ch
 		StopSound(client, SNDCHAN_AUTO, sample);
 		
 		if(!Frozen[client])
-			EmitSoundToAll(MoveSound, client, channel, level+30, flags, volume, pitch+10, _, _, _, _, 0.6);
+			EmitSoundToAll(MoveSound, client, channel, SNDLEVEL_CONVO, flags, volume, pitch+10, _, _, _, _, 0.6);
 
 		return Plugin_Changed;
 	}
@@ -127,7 +127,7 @@ public Action SCP173_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &ch
 
 public void SCP173_OnButton(int client, int button)
 {
-	static float pos1[3], ang1[3], pos2[3], ang2[3], ang3[3];
+	static float pos1[3], ang1[3], pos2[3], ang2[3], pos3[3], ang3[3];
 	float engineTime = GetGameTime();
 	static float delay[MAXTF2PLAYERS];
 
@@ -313,37 +313,29 @@ public void SCP173_OnButton(int client, int button)
 					if(target==client || IsInvuln(target) || IsFriendly(Client[client].Class, Client[target].Class))
 						continue;
 
-					GetClientEyePosition(target, pos1);
-					GetClientEyeAngles(target, ang2);
-					float dist = GetVectorDistance(pos1, pos2, true);
+					GetClientEyePosition(target, pos3);
+
+					float dist = GetVectorDistance(pos3, pos2, true);
 					if(dist < distance)
 					{
 						victim = target;
 						distance = dist;
 					}
 
-					GetVectorAnglesTwoPoints(pos1, pos2, ang3);
-
-					// fix all angles
-					ang2[0] = fixAngle(ang2[0]);
-					ang2[1] = fixAngle(ang2[1]);
-					ang3[0] = fixAngle(ang3[0]);
-					ang3[1] = fixAngle(ang3[1]);
-
-					// verify angle validity
-					if(!(fabs(ang2[0] - ang3[0]) <= MAXANGLEPITCH ||
-					(fabs(ang2[0] - ang3[0]) >= (360.0-MAXANGLEPITCH))))
-						continue;
-
-					if(!(fabs(ang2[1] - ang3[1]) <= MAXANGLEYAW ||
-					(fabs(ang2[1] - ang3[1]) >= (360.0-MAXANGLEYAW))))
-						continue;
-
 					// ensure no wall or door is obstructing
-					TR_TraceRayFilter(pos1, pos2, MASK_BLOCKLOS, RayType_EndPoint, Trace_WorldAndBrushes);
+					TR_TraceRayFilter(pos3, pos2, MASK_BLOCKLOS, RayType_EndPoint, Trace_WorldAndBrushes);
 					TR_GetEndPosition(ang3);
+					
 					if(ang3[0]!=pos2[0] || ang3[1]!=pos2[1] || ang3[2]!=pos2[2])
-						continue;
+					{
+						// try again but from the pre-teleport position
+						
+						TR_TraceRayFilter(pos3, pos1, MASK_BLOCKLOS, RayType_EndPoint, Trace_WorldAndBrushes);
+						TR_GetEndPosition(ang3);						
+						
+						if(ang3[0]!=pos1[0] || ang3[1]!=pos1[1] || ang3[2]!=pos1[2])
+							continue;
+					}
 
 					// success
 					FadeMessage(target, 52, 52, 0x0002, 0, 0, 0);
