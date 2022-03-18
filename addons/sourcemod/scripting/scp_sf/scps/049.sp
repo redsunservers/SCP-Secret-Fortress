@@ -341,10 +341,21 @@ public void SCP049_OnButton(int client, int button)
 public void SCP049_OnDeath(int client, Event event)
 {
 	Classes_DeathScp(client, event);
-	
+
 	char model[PLATFORM_MAX_PATH];
 	GetEntPropString(client, Prop_Data, "m_ModelName", model, sizeof(model));	
 	Classes_PlayDeathAnimation(client, model, "death_scp_049", "", 0.0);
+	
+	for(int i=1; i<=MaxClients; i++)
+	{
+		if(!IsValidClient(i))
+			continue;
+
+		for(int j=0; j<2; j++)
+		{
+			EmitSoundToClient(i, "scp_sf/terminate/scp049terminated.mp3", _, SNDCHAN_STATIC, SNDLEVEL_NONE);
+		}
+	}
 }
 
 public void SCP049_OnKill(int client, int victim)

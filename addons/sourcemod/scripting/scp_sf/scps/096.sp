@@ -75,6 +75,17 @@ public void SCP096_OnDeath(int client, Event event)
 	char model[PLATFORM_MAX_PATH];
 	GetEntPropString(client, Prop_Data, "m_ModelName", model, sizeof(model));	
 	Classes_PlayDeathAnimation(client, model, "death_scp_096", SoundDeath, 0.0);
+	
+	for(int i=1; i<=MaxClients; i++)
+	{
+		if(!IsValidClient(i))
+			continue;
+
+		for(int j=0; j<2; j++)
+		{
+			EmitSoundToClient(i, "scp_sf/terminate/scp096terminated.mp3", _, SNDCHAN_STATIC, SNDLEVEL_NONE);
+		}
+	}
 }
 
 public Action SCP096_OnTakeDamage(int client, int attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)

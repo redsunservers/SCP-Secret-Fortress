@@ -57,6 +57,17 @@ public void SCP106_OnDeath(int client, Event event)
 	char model[PLATFORM_MAX_PATH];
 	GetEntPropString(client, Prop_Data, "m_ModelName", model, sizeof(model));	
 	Classes_PlayDeathAnimation(client, model, "death_scp_106", "", 3.0);
+	
+	for(int i=1; i<=MaxClients; i++)
+	{
+		if(!IsValidClient(i))
+			continue;
+
+		for(int j=0; j<2; j++)
+		{
+			EmitSoundToClient(i, "scp_sf/terminate/scp106terminated.mp3", _, SNDCHAN_STATIC, SNDLEVEL_NONE);
+		}
+	}
 }
 
 public void SCP106_OnKill(int client, int victim)

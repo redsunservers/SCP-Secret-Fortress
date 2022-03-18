@@ -1143,14 +1143,6 @@
 	{
 		"en"		"Survival, Concealment, Protection."
 	}
-	"weapon_30474"
-	{
-		"en"		"Micro H.I.D. TEST"
-	}
-	"info_30474"
-	{
-		"en"		"Wrong number."
-	}
 	
 	// Team Phrases
 
@@ -1275,7 +1267,15 @@
 	}
 	"mtf_spawn"	// Chat
 	{
-		"en"		"{mediumblue}Mobile Task Force Unit, Epsilon-11{default} has entered the facility."
+		"en"		"{mediumblue}Mobile Task Force Unit, Epsilon-11{default} BRAVO-15 has entered the facility."
+	}
+	"mtf_spawn_2"	// Chat
+	{
+		"en"		"{mediumblue}Mobile Task Force Unit, Epsilon-11{default} Charlie-9 has entered the facility."
+	}
+	"snake_spawn"	// Chat
+	{
+		"en"		"{red}Serpent's Hand{default} has entered the facility."
 	}
 	"mtf_spawn_scp"	// Chat
 	{

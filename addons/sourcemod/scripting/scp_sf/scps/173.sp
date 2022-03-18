@@ -102,6 +102,33 @@ public void SCP173_OnDeath(int client, Event event)
 	Classes_DeathScp(client, event);
 
 	Classes_PlayDeathAnimation(client, DeathModel, "death", DeathSound, 0.0);
+	
+	for(int i=1; i<=MaxClients; i++)
+	{
+		if(!IsValidClient(i))
+			continue;
+
+		for(int j=0; j<2; j++)
+		{
+			EmitSoundToClient(i, "scp_sf/terminate/scp173terminated.mp3", _, SNDCHAN_STATIC, SNDLEVEL_NONE);
+		}
+	}
+}
+
+public void SCP173_2_OnDeath(int client, Event event)
+{
+	Classes_DeathScp(client, event);
+	
+	for(int i=1; i<=MaxClients; i++)
+	{
+		if(!IsValidClient(i))
+			continue;
+
+		for(int j=0; j<2; j++)
+		{
+			EmitSoundToClient(i, "scp_sf/terminate/scp173terminated.mp3", _, SNDCHAN_STATIC, SNDLEVEL_NONE);
+		}
+	}
 }
 
 public Action SCP173_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)

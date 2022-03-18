@@ -1143,15 +1143,6 @@
 	{
 		"ko"		"높은 피해 저항과 추가 탄약을 제공하고, 의약품을 하나 더 들 수 있으나, 스테미너가 더욱 많이 소모됩니다."
 	}
-	"weapon_30474"
-	{
-		"ko"		"마이크로 H.I.D."
-	}
-	"info_30474"
-	{
-		"ko"		"강력한 전기장을 발산합니다."
-	}
-
 
 	// Team Phrases
 
@@ -1276,7 +1267,15 @@
 	}
 	"mtf_spawn"	// Chat
 	{
-		"ko"		"{mediumblue}기동특무부대 앱실론-11{default}이 현장에 투입되었습니다."
+		"ko"		"{mediumblue}기동특무부대 앱실론-11{default} 브라보-15가 현장에 투입되었습니다."
+	}
+	"mtf_spawn_2"	// Chat
+	{
+		"ko"		"{mediumblue}기동특무부대 앱실론-11{default} 찰리-9이 현장에 투입되었습니다."
+	}
+	"snake_spawn"	// Chat
+	{
+		"ko"		"{red}뱀의 손{default}이 시설에 진입하였습니다."
 	}
 	"mtf_spawn_scp"	// Chat
 	{
@@ -1401,21 +1400,21 @@
 	"download_error"	// Chat
 	{
 		"#format"	"{1:s}"
-		"ko"		"{gray}We can't check if you have {1} enabled. If you see errors, make sure you allow all custom content in your settings and rejoin."
+		"ko"		"{gray}{1}이 활성화되었는지 확인할 수 없습니다. 만약 이걸 보고 있다면, 설정에서 모든 커스텀 콘텐츠 다운로드를 허용하고 재접속하세요."
 	}
 	"download_cvar"	// Chat
 	{
 		"#format"	"{1:s},{2:s}"
-		"ko"		"{gray}{1} is disabled. You won't see any custom content. If you want to enable, set {2} to 1"
+		"ko"		"{gray}{1}이 비활성화되어 커스텀 콘텐츠를 다운받지 못했습니다. 활성화하고 싶다면, {2} 를 1로 설정하십시오."
 	}
 	"download_filter"	// Chat
 	{
 		"#format"	"{1:s}"
-		"ko"		"{gray}cl_downloadfilter is set to {1}. You won't see any custom content. If you want to enable, set cl_downloadfilter to all"
+		"ko"		"{gray}cl_downloadfilter가 {1}로 설정되어 있어 커스텀 콘텐츠를 다운받지 못했습니다. 다운받고 싶다면, cl_downloadfilter를 all로 설정하십시오."
 	}
 	"download_filter_sound"	// Chat
 	{
-		"ko"		"{gray}cl_downloadfilter is set to nosounds. You won't hear any music. If you want to enable, set cl_downloadfilter to all"
+		"ko"		"{gray}cl_downloadfilter가 nosounds로 설정되어 있어 소리를 다운받지 못했습니다. 다운받고 싶다면, cl_downloadfilter를 all로 설정하십시오."
 	}
 	"gameover_stuck"	// HUD
 	{
@@ -1647,7 +1646,7 @@
 	}
 	"train_chaos_msg"
 	{
-		"ko"		"Chaos Insurgkocy가 스폰했습니다. 그들은 Class-D Personnel을 구출할것입니다. 이들은 과학자와 경비병들을 죽일것입니다. 또한 동일한 무기와 구급상자를 지니고 스폰합니다."
+		"ko"		"Chaos Insurgency가 스폰했습니다. 그들은 Class-D Personnel을 구출할것입니다. 이들은 과학자와 경비병들을 죽일것입니다. 또한 동일한 무기와 구급상자를 지니고 스폰합니다."
 	}
 	"camera"	// HUD
 	{

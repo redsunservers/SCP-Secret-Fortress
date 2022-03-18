@@ -38,6 +38,18 @@ public void SCP457_OnButton(int client, int button)
 public void SCP457_OnDeath(int client, Event event)
 {
 	Classes_DeathScp(client, event);
+	
+	for(int i=1; i<=MaxClients; i++)
+	{
+		if(!IsValidClient(i))
+			continue;
+
+		for(int j=0; j<2; j++)
+		{
+			EmitSoundToClient(i, "scp_sf/terminate/scp457terminated.mp3", _, SNDCHAN_STATIC, SNDLEVEL_NONE);
+		}
+	}
+	
 	CreateTimer(0.1, Timer_DissolveRagdoll, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 }
 

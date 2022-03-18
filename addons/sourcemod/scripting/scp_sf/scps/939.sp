@@ -88,6 +88,22 @@ public Action SCP939_OnDealDamage(int client, int victim, int &inflictor, float 
 	return Plugin_Changed;
 }
 
+public void SCP939_OnDeath(int client, Event event)
+{
+	Classes_DeathScp(client, event);
+	
+	for(int i=1; i<=MaxClients; i++)
+	{
+		if(!IsValidClient(i))
+			continue;
+
+		for(int j=0; j<2; j++)
+		{
+			EmitSoundToClient(i, "scp_sf/terminate/scp939terminated.mp3", _, SNDCHAN_STATIC, SNDLEVEL_NONE);
+		}
+	}
+}
+
 public Action SCP939_OnTakeDamage(int client, int attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
 	SDKCall_SetSpeed(client);
