@@ -1852,7 +1852,7 @@ public Action Items_FlashTimer(Handle timer, int ref)
 				if(GetVectorDistance(pos1, pos2, true) < 1048576.0)
 				{
 					TF2_StunPlayer(i, 6.0, 0.5, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
-					FadeMessage(i, 2000, 3000, 0x0001, 300, 200, 200, 255);
+					FadeMessage(i, 2000, 3000, 0x0001, 200, 200, 200, 255);
 					ClientCommand(i, "dsp_player %d", GetRandomInt(35, 37));
 				}
 			}
