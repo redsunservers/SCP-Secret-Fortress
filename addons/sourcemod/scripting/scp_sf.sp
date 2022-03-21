@@ -201,6 +201,7 @@ ClientEnum Client[MAXTF2PLAYERS];
 #include "scp_sf/viewchanges.sp"
 #include "scp_sf/viewmodels.sp"
 
+#include "scp_sf/scps/018.sp"
 #include "scp_sf/scps/049.sp"
 #include "scp_sf/scps/076.sp"
 #include "scp_sf/scps/096.sp"
@@ -569,12 +570,9 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 		if (!StrContains(buffer, "teleport") && ((StrContains(buffer, "light", false) != -1) || (StrContains(buffer, "gate", false) != -1)))
 		{
 			// fix up elevator teleports to allow physics objects (grenades) to teleport as well
-			// FIXME: this still doesn't teleport dropped weapons. they don't even touch the trigger
-			// might need to hook Enable input on trigger_teleport and just search for tf_dropped_weapon manually
 			SetEntProp(entity, Prop_Data, "m_spawnflags", 1033);
-
-			// TODO: hook trigger_teleport touch and place clients in relative position at the destination 
-			// rather than snapping to center of elevator
+			
+			// the dhook on the trigger's Enable input will take care of other objects (e.g. dropped weapons)
 		}
 	}	
 
@@ -610,8 +608,8 @@ public void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 			ChangeClientTeamEx(client, TFTeam_Red);
 
 		// Regenerate some karma at the end of the round
-		// Don't give anything if the player got more than 3 bad kills
-		if (Client[client].BadKills <= 3)
+		// Don't give anything if the player got more than 2 bad kills
+		if (Client[client].BadKills <= 2)
 		{
 			float KarmaBonus = 5.0;
 			if (Client[client].Kills != 0)		
@@ -2423,6 +2421,9 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 
 public void OnGameFrame()
 {
+	// physics simulation is run for this per tick
+	SCP18_Tick();
+
 	float engineTime = GetGameTime();
 	static float nextAt;
 	if(nextAt > engineTime)
@@ -2867,16 +2868,6 @@ bool IsBadKill(int victim, int attacker)
 
 void PlayFriendlyDeathReaction(int client, int attacker)
 {
-	if (client!=attacker && IsValidClient(attacker))
-	{
-		// don't give away players who die to the noise-sensitive creature
-		if ((Classes_GetByName("scp939") == Client[attacker].Class) || 
-			 (Classes_GetByName("scp9392") == Client[attacker].Class))
-		{
-			return;
-		}
-	}
-
 	float pos[3];
 	GetClientEyePosition(client, pos);
 	
@@ -2890,34 +2881,41 @@ void PlayFriendlyDeathReaction(int client, int attacker)
 	{
 		if (i == client)
 			continue;
+			
+		if (i == attacker)
+			continue;
 
 		if (!IsValidClient(i) || IsSpec(i) || IsSCP(i))
 			continue;	
+			
+		// ignore crouching players, as they are likely trying to be sneaky
+		if (GetEntityFlags(client) & FL_DUCKING)
+			continue;
 		
 		// can we play a react now?
 		if (Client[i].NextReactTime > Time)
 			continue;
 			
-		if (IsFriendly(Client[client].Class, Client[i].Class))
-		{
-			float pos2[3], ang2[3], fwd2[3];
-			GetClientEyePosition(i, pos2);	
+		if (!IsFriendly(Client[client].Class, Client[i].Class))
+			continue;
+			
+		float pos2[3], ang2[3], fwd2[3];
+		GetClientEyePosition(i, pos2);	
 	
-			float distsqr = GetVectorDistance(pos, pos2, true);	
-			if (distsqr > 1048576.0) // 1024 units - too far away to react
-				continue;
-			
-			GetClientEyeAngles(i, ang2);
-			GetAngleVectors(ang2, fwd2, NULL_VECTOR, NULL_VECTOR);
-			
-			// check if we can see the guy
-			TR_TraceRayFilter(pos, pos2, MASK_BLOCKLOS, RayType_EndPoint, Trace_WorldAndBrushes);			
-			if (TR_DidHit())
-				continue;
-			
-			// add him to target list
-			targetclients[targetcount++] = i;
-		}
+		float distsqr = GetVectorDistance(pos, pos2, true);	
+		if (distsqr > 1048576.0) // 1024 units - too far away to react
+			continue;
+		
+		GetClientEyeAngles(i, ang2);
+		GetAngleVectors(ang2, fwd2, NULL_VECTOR, NULL_VECTOR);
+		
+		// check if we can see the guy
+		TR_TraceRayFilter(pos, pos2, MASK_BLOCKLOS, RayType_EndPoint, Trace_WorldAndBrushes);			
+		if (TR_DidHit())
+			continue;
+		
+		// add him to target list
+		targetclients[targetcount++] = i;
 	}
 
 	for (int i = 0; i < targetcount; i++)

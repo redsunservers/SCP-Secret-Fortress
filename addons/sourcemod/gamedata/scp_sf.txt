@@ -10,6 +10,13 @@
 				"linux"		"@_ZNK11CBaseEntity10InSameTeamEPKS_"
 				"windows"	"\x55\x8B\xEC\x8B\x45\x08\x57\x8B\xF9\x85\xC0\x75\x2A"
 			}
+			"CBaseTrigger::InputEnable"
+			{
+				"library"	"server"
+				"linux"		"@_ZN12CBaseTrigger11InputEnableER11inputdata_t"
+				// oh lord...
+				"windows"	"\x56\x8B\xF1\x8B\x8E\xF4\x01\x00\x00\xC6\x86\xCC\x03\x00\x00\x00\x85\xC9\x74\x2A\x8B\x01\x6A\x01\xFF\x50\x30\x8A\x86\x98\x01\x00\x00\xC0\xE8\x03\xA8\x01\x75\x2A\x0F\xB7\x86\x98\x01\x00\x00\x8D\x8E\x5C\x01\x00\x00\x83\xC8\x08\x50\xE8\x2A\x2A\x2A\x2A\x6A\x00\x8B\xCE\xE8\x2A\x2A\x2A\x2A\x5E\xC2\x04\x00"
+			}			
 			"CBaseAnimating::GetBoneCache"
 			{
 				"library"	"server"
@@ -135,6 +142,22 @@
 					}
 				}
 			}
+			"CBaseTrigger::InputEnable"
+			{
+				"signature"	"CBaseTrigger::InputEnable"
+				"callconv"	"thiscall"
+				"hooktype"	"entity"
+				"return"	"void"
+				"this"		"entity"
+				"arguments"
+				{
+					"inputdata"
+					{
+						"type"	"objectptr"
+						"flags"	"byref"
+					}
+				}
+			}			
 			"CBaseAnimating::GetBoneCache"
 			{
 				"signature"	"CBaseAnimating::GetBoneCache"
@@ -354,7 +377,7 @@
 			{
 				"linux"		"17"
 				"windows"	"16"
-			}
+			}		
 			"CBaseAnimating::m_pStudioHdr"
 			{
 				"linux"		"288"

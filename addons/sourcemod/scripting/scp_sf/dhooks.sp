@@ -16,6 +16,7 @@ int StudioHdrOffset;
 void DHook_Setup(GameData gamedata)
 {
 	DHook_CreateDetour(gamedata, "CBaseEntity::InSameTeam", DHook_InSameTeamPre);
+	DHook_CreateDetour(gamedata, "CBaseTrigger::InputEnable", _, DHook_TriggerInputEnablePost);
 	DHook_CreateDetour(gamedata, "CBaseAnimating::GetBoneCache", DHook_GetBoneCache);	
 	DHook_CreateDetour(gamedata, "CTFGameMovement::ProcessMovement", DHook_ProcessMovementPre);
 	DHook_CreateDetour(gamedata, "CTFPlayer::CanPickupDroppedWeapon", DHook_CanPickupDroppedWeaponPre);
@@ -25,7 +26,7 @@ void DHook_Setup(GameData gamedata)
 	DHook_CreateDetour(gamedata, "CTFPlayer::RegenThink", DHook_RegenThinkPre, DHook_RegenThinkPost);
 	DHook_CreateDetour(gamedata, "CTFPlayer::Taunt", DHook_TauntPre, DHook_TauntPost);
 	DHook_CreateDetour(gamedata, "CTFPlayer::TeamFortress_CalculateMaxSpeed", DHook_CalculateMaxSpeedPre, DHook_CalculateMaxSpeedPost);
-
+	
 	// TODO: DHook_CreateDetour version of this
 	AllowedToHealTarget = new DynamicDetour(Address_Null, CallConv_THISCALL, ReturnType_Bool, ThisPointer_CBaseEntity);
 	if(AllowedToHealTarget)
@@ -61,7 +62,7 @@ void DHook_Setup(GameData gamedata)
 	WantsLagCompensationOnEntity = DynamicHook.FromConf(gamedata, "CBasePlayer::WantsLagCompensationOnEntity");
 	if(!WantsLagCompensationOnEntity)
 		LogError("[Gamedata] Could not find CBasePlayer::WantsLagCompensationOnEntity");
-
+	
 	StudioHdrOffset = GameConfGetOffset(gamedata, "CBaseAnimating::m_pStudioHdr");
 	if (StudioHdrOffset == -1)
 		LogError("[Gamedata] Failed to get offset for CBaseAnimating::m_pStudioHdr");		
@@ -409,4 +410,77 @@ public MRESReturn DHook_TauntPost(int client)
 	ClassEnum class;
 	if(Classes_GetByIndex(Client[client].Class, class))
 		TF2_SetPlayerClass(client, class.Class, false, false);
+}
+
+public MRESReturn DHook_TriggerInputEnablePost(int entity, DHookParam param)
+{	
+	char target[PLATFORM_MAX_PATH];
+	
+	GetEntityClassname(entity, target, sizeof(target));	
+	
+	// we only care about teleport triggers
+	if (!StrEqual("trigger_teleport", target, false))
+		return MRES_Ignored;
+
+	// find the destination entity
+	GetEntPropString(entity, Prop_Data, "m_target", target, sizeof(target));
+	if (target[0] == '\0')
+		return MRES_Ignored;
+	
+	int dest = MaxClients + 1;
+	while((dest = FindEntityByClassname(dest, "info_teleport_destination")) != -1)
+	{
+		char name[PLATFORM_MAX_PATH];
+		GetEntPropString(dest, Prop_Data, "m_iName", name, sizeof(name));
+		if (StrEqual(name, target, false))
+			break;
+	}
+	
+	if (dest != -1)
+	{
+		float testpos[3], destpos[3], origin[3], mins[3], maxs[3];
+		
+		GetEntPropVector(dest, Prop_Data, "m_vecAbsOrigin", destpos);
+			
+		GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin);			
+		GetEntPropVector(entity, Prop_Data, "m_vecMins", mins);
+		GetEntPropVector(entity, Prop_Data, "m_vecMaxs", maxs);	
+		AddVectors(mins, origin, mins);
+		AddVectors(maxs, origin, maxs);
+		
+		// TODO: relative offsets
+		
+		// search for stuff to teleport that normally doesn't collide with triggers
+
+		// dropped weapons
+		int candidate = MaxClients + 1;
+		while ((candidate = FindEntityByClassname(candidate, "tf_dropped_weapon")) != -1)
+		{
+			GetEntPropVector(candidate, Prop_Data, "m_vecOrigin", testpos);
+			
+			if (IsPointTouchingBox(testpos, mins, maxs))
+			{
+				TeleportEntity(candidate, destpos, NULL_VECTOR, NULL_VECTOR);
+			}
+		}
+		
+		// scp 18 projectiles handle this differently
+		SCP18_TryTouchTeleport(mins, maxs, destpos);
+	
+		// ghost players
+		for (int i = 1; i <= MaxClients; i++)
+		{
+			if (IsValidClient(i) && TF2_IsPlayerInCondition(i, TFCond_HalloweenGhostMode))
+			{
+				GetEntPropVector(i, Prop_Send, "m_vecOrigin", testpos);		
+
+				if (IsPointTouchingBox(testpos, mins, maxs))
+				{
+					TeleportEntity(i, destpos, NULL_VECTOR, NULL_VECTOR);
+				}
+			}
+		}
+	}
+	
+	return MRES_Ignored;
 }

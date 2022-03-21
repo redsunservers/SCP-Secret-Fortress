@@ -61,6 +61,8 @@ void Items_Setup(KeyValues main, KeyValues map)
 
 	Weapons = new ArrayList(sizeof(WeaponEnum));
 
+	Init_SCP18();
+	
 	main.Rewind();
 	KeyValues kv = main;
 	if(map)	// Check if the map has it's own gamemode config
@@ -881,7 +883,7 @@ void Items_PlayPickupReact(int client, int type, int index)
 	float Time = GetGameTime();
 	if (Client[client].NextPickupReactTime < Time)
 	{		
-		if (index == ITEM_INDEX_MICROHID)	
+		if ((index == ITEM_INDEX_MICROHID) || (index == ITEM_INDEX_SCP18))	
 			Config_DoReaction(client, "item_veryrare");
 		else if ((index == ITEM_INDEX_O5) || (type == ITEM_TYPE_WEAPON) || (type == ITEM_TYPE_GRENADE) || (type == ITEM_TYPE_SCP))		
 			Config_DoReaction(client, "item_rare");
@@ -1092,18 +1094,19 @@ bool Items_IsHoldingWeapon(int client)
 			return true;
 			
 		if ((weapon.Type == ITEM_TYPE_WEAPON) || (weapon.Type == ITEM_TYPE_GRENADE))
-			return true;		
+			return true;	
+
+		// HACK: there's currently a bug where map-spawned items can "attack"
+		// this is a temporary fix until the real cause is found
+		if ((weapon.Type == ITEM_TYPE_KEYCARD) || (weapon.Type == ITEM_TYPE_MEDICAL))
+			return false;		
 
 		// HACK: I'm afraid of breaking something, these weapons don't have types assigned in the config
-		if ((index == ITEM_INDEX_MICROHID) || (index == ITEM_INDEX_DISARMER))
+		if ((index == ITEM_INDEX_MICROHID) || (index == ITEM_INDEX_DISARMER) || (index == ITEM_INDEX_SCP18))
 			return true;
 			
 		if (weapon.Attack && !weapon.Hide)
-			return true;
-			
-		if (!weapon.Attack && (weapon.Type == 1) || (weapon.Type == 7))
-			return true;
-			
+			return true;		
 	}
 	return false;
 }
@@ -1610,6 +1613,13 @@ public Action Items_GrenadeAction(Handle timer, int client)
 	return Plugin_Stop;
 }
 
+public void Items_GrenadeTrajectory(float angles[3], float velocity[3], float scale)
+{
+	velocity[0] = Cosine(DegToRad(angles[0])) * Cosine(DegToRad(angles[1])) * scale;
+	velocity[1] = Cosine(DegToRad(angles[0])) * Sine(DegToRad(angles[1])) * scale;
+	velocity[2] = Sine(DegToRad(angles[0])) * -scale;
+}
+
 public bool Items_FragButton(int client, int weapon, int &buttons, int &holding)
 {
 	if(!holding && !Items_InDelayedAction(client))
@@ -1635,9 +1645,7 @@ public bool Items_FragButton(int client, int weapon, int &buttons, int &holding)
 				GetClientEyeAngles(client, ang);
 				pos[2] += 63.0;
 
-				vel[0] = Cosine(DegToRad(ang[0]))*Cosine(DegToRad(ang[1]))*1200.0;
-				vel[1] = Cosine(DegToRad(ang[0]))*Sine(DegToRad(ang[1]))*1200.0;
-				vel[2] = Sine(DegToRad(ang[0]))*-1200.0;
+				Items_GrenadeTrajectory(ang, vel, 1200.0);
 
 				if(short)
 					ScaleVector(vel, 0.5);
@@ -1767,9 +1775,7 @@ public bool Items_FlashButton(int client, int weapon, int &buttons, int &holding
 				GetClientEyeAngles(client, ang);
 				pos[2] += 63.0;
 
-				vel[0] = Cosine(DegToRad(ang[0]))*Cosine(DegToRad(ang[1]))*1200.0;
-				vel[1] = Cosine(DegToRad(ang[0]))*Sine(DegToRad(ang[1]))*1200.0;
-				vel[2] = Sine(DegToRad(ang[0]))*-1200.0;
+				Items_GrenadeTrajectory(ang, vel, 1200.0);
 
 				if(short)
 					ScaleVector(vel, 0.5);
@@ -1831,8 +1837,8 @@ public Action Items_FlashTimer(Handle timer, int ref)
 				// 1024 units
 				if(GetVectorDistance(pos1, pos2, true) < 1048576.0)
 				{
-					TF2_StunPlayer(i, 6.0, 0.5, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
-					FadeMessage(i, 2000, 3000, 0x0001, 300, 200, 200, 255);
+					TF2_StunPlayer(i, 5.0, 0.5, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
+					FadeMessage(i, 2000, 3000, 0x0001, 200, 200, 200, 255);
 					ClientCommand(i, "dsp_player %d", GetRandomInt(35, 37));
 				}
 			}
@@ -2022,16 +2028,28 @@ public bool Items_207Button(int client, int weapon, int &buttons, int &holding)
 	return false;
 }
 
-public bool Items_018Button(int client, int weapon, int &buttons, int &holding)
+static float SCP268Delay[MAXTF2PLAYERS];
+
+public Action Items_268Action(Handle timer, int client)
 {
-	if(!holding && (buttons & IN_ATTACK))
+	int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	if (IsValidEntity(weapon))
 	{
-		holding = IN_ATTACK;
-		RemoveAndSwitchItem(client, weapon);
-		TF2_AddCondition(client, TFCond_CritCola, 6.0);
-		TF2_AddCondition(client, TFCond_RestrictToMelee, 6.0);
+		if (!Items_IsDelayedActionCancelled(client))
+		{
+			RemoveAndSwitchItem(client, weapon);
+			
+			SCP268Delay[client] = GetGameTime() + 90.0;
+			TF2_AddCondition(client, TFCond_Stealthed, 15.0);
+			ClientCommand(client, "playgamesound misc/halloween/spell_stealth.wav");
+		}
+		else 
+		{
+			ViewModel_SetAnimation(client, "idle");
+		}
 	}
-	return false;
+
+	return Plugin_Continue;
 }
 
 public bool Items_268Button(int client, int weapon, int &buttons, int &holding)
@@ -2040,19 +2058,25 @@ public bool Items_268Button(int client, int weapon, int &buttons, int &holding)
 	{
 		holding = IN_ATTACK;
 
-		float engineTime = GetGameTime();
-		static float delay[MAXTF2PLAYERS];
-		if(delay[client] > engineTime)
+		if (!Items_InDelayedAction(client))
 		{
-			ClientCommand(client, "playgamesound items/medshotno1.wav");
-			PrintCenterText(client, "%T", "in_cooldown", client);
-			return false;
+			float engineTime = GetGameTime();
+			if(SCP268Delay[client] > engineTime)
+			{
+				ClientCommand(client, "playgamesound items/medshotno1.wav");
+				PrintCenterText(client, "%T", "in_cooldown", client);
+				return false;
+			}
+			
+			Items_StartDelayedAction(client, 1.5, Items_268Action, client);
+			ViewModel_SetAnimation(client, "use");			
 		}
-
-		delay[client] = engineTime+90.0;
-		TF2_AddCondition(client, TFCond_Stealthed, 15.0);
-		ClientCommand(client, "playgamesound misc/halloween/spell_stealth.wav");
 	}
+	else if (!(buttons & IN_ATTACK))
+	{
+		Items_CancelDelayedAction(client);
+	}
+	
 	return false;
 }
 

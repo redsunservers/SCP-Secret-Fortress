@@ -8,6 +8,7 @@ enum struct CvarInfo
 
 static ArrayList CvarList;
 static bool CvarEnabled;
+ConVar CvarGravity;
 
 void ConVar_Setup()
 {
@@ -29,7 +30,8 @@ void ConVar_Setup()
 	CvarVoiceHook.AddChangeHook(ConVar_OnVoiceHook);
 
 	FindConVar("mp_bonusroundtime").SetBounds(ConVarBound_Upper, true, 20.0);
-
+	CvarGravity = FindConVar("sv_gravity");
+	
 	if(CvarList != INVALID_HANDLE)
 		delete CvarList;
 

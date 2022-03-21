@@ -903,8 +903,8 @@ public bool Classes_DeathScp(int client, Event event)
 
 		Config_DoReaction(attacker, "killscp");
 
-		// 5% reward
-		Classes_ApplyKarmaBonus(attacker, 5.0, false);
+		// 10% reward
+		Classes_ApplyKarmaBonus(attacker, 10.0, false);
 
 		ClassEnum assisterClass;
 		int assister = GetClientOfUserId(event.GetInt("assister"));
@@ -915,8 +915,8 @@ public bool Classes_DeathScp(int client, Event event)
 
 			Config_DoReaction(assister, "killscp");
 
-			// 5% bonus for helping
-			Classes_ApplyKarmaBonus(assister, 5.0, false);
+			// 10% bonus for helping
+			Classes_ApplyKarmaBonus(assister, 10.0, false);
 
 			CPrintToChatAll("%s%t", PREFIX, "scp_killed_duo", clientClass.Color, clientClass.Display, attackerClass.Color, attackerClass.Display, assisterClass.Color, assisterClass.Display);
 		}
