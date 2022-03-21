@@ -476,7 +476,7 @@ public MRESReturn DHook_TriggerInputEnablePost(int entity, DHookParam param)
 
 				if (IsPointTouchingBox(testpos, mins, maxs))
 				{
-					TeleportEntity(candidate, destpos, NULL_VECTOR, NULL_VECTOR);
+					TeleportEntity(i, destpos, NULL_VECTOR, NULL_VECTOR);
 				}
 			}
 		}
