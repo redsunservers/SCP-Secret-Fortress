@@ -2057,7 +2057,7 @@ public Action Items_268Action(Handle timer, int client)
 	{
 		if (!Items_IsDelayedActionCancelled(client))
 		{
-			RemoveAndSwitchItem(client, weapon);
+			//RemoveAndSwitchItem(client, weapon);
 			
 			SCP268Delay[client] = GetGameTime() + 90.0;
 			TF2_AddCondition(client, TFCond_Stealthed, 15.0);
