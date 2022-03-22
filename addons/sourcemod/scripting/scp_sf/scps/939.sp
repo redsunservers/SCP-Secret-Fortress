@@ -1,7 +1,7 @@
 static const int HealthMax = 3300;	// Max standard health
 static const int HealthExtra = 1100;	// Max regenerable health
 
-static const float SpeedExtra = 30.0;	// Extra speed while low health
+static const float SpeedExtra = 50.0;	// Extra speed while low health
 static const float GlowRange = 1400.0;	// Max outline range
 
 static int Health[MAXTF2PLAYERS];
