@@ -477,6 +477,25 @@ float GetVectorAnglesTwoPoints(const float startPos[3], const float endPos[3], f
 	GetVectorAngles(tmpVec, angles);
 }
 
+void CopyVector(const float from[3], float out[3])
+{
+	out[0] = from[0];
+	out[1] = from[1];
+	out[2] = from[2];
+}
+
+// interpolate between 2 values as a percentage
+float LerpValue(float p, float a, float b)
+{
+	return a + (b - a) * p;
+}
+
+// remap from a->b to c->d
+//float RemapValueInRange(float v, float a, float b, float c, float d)
+//{
+//	return c + (d - c) * (v - a) / (b - a);
+//}
+
 bool IsValidClient(int client, bool replaycheck=true)
 {
 	if(client<=0 || client>MaxClients)
@@ -1619,5 +1638,15 @@ bool IsSpotSafe(int clientIdx, float playerPos[3], float sizeMultiplier)
 	if (!Resize_TestSquare(playerPos, mins[0] * 0.5, maxs[0] * 0.5, mins[1] * 0.5, maxs[1] * 0.5, maxs[2], team)) return false;
 	if (!Resize_TestSquare(playerPos, mins[0] * 0.25, maxs[0] * 0.25, mins[1] * 0.25, maxs[1] * 0.25, maxs[2], team)) return false;
 	
+	return true;
+}
+
+bool IsPointTouchingBox(float pos[3], float mins[3], float maxs[3])
+{
+	if ( pos[0] < mins[0] || pos[0] > maxs[0] ||
+		 pos[1] < mins[1] || pos[1] > maxs[1] ||
+		 pos[2] < mins[2] || pos[2] > maxs[2] )
+		return false;
+		
 	return true;
 }
