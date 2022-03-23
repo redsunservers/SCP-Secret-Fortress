@@ -1548,16 +1548,22 @@ public Action Items_P90Hit(int client, int victim, int &inflictor, float &damage
 
 public Action Items_Com18Hit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-    bool changed;
-    if((!isSCP || Client[victim].Class==Classes_GetByName("scp0492")) &&
-       GetEntProp(victim, Prop_Data, "m_LastHitGroup") == HITGROUP_HEAD)
-    {
-        damagetype |= DMG_CRIT;
-        damage *= 3.0;
-        changed = true;
-    }
-
-    return changed ? Plugin_Changed : Plugin_Continue;
+	bool changed;
+	bool isSCP = IsSCP(victim);
+	
+	if(!isSCP || Client[victim].Class==Classes_GetByName("scp0492"))
+	{
+		damage *= 3.0;
+		changed = true;
+	}
+	
+	if(GetEntProp(victim, Prop_Data, "m_LastHitGroup") == HITGROUP_HEAD)
+	{
+		damagetype |= DMG_CRIT;
+		changed = true;
+	}
+    
+	return changed ? Plugin_Changed : Plugin_Continue;
 }
 
 public void Items_ExplosiveHit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
