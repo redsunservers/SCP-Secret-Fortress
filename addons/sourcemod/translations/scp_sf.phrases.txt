@@ -831,11 +831,11 @@
 	{
 		"en"		"The best melee weapon in the game."
 	}
-	"weapon_61"
+	"weapon_210"
 	{
 		"en"		".44 Revolver"
 	}
-	"info_61"
+	"info_210"
 	{
 		"en"		"For when you need the distance and the precision."
 	}
@@ -919,11 +919,11 @@
 	{
 		"en"		"I am heavy weapons guy, and this, is my weapon."
 	}
-	"weapon_210"
+	"weapon_61"
 	{
 		"en"		"GOC Issued Revolver"
 	}
-	"info_210"
+	"info_61"
 	{
 		"en"		"Your only friend when the world grows darker."
 	}

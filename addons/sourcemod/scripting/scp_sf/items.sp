@@ -2074,14 +2074,14 @@ public Action Items_268Action(Handle timer, int client)
 {
 	int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 	if (IsValidEntity(weapon))
-	{
+	{	
 		if (!Items_IsDelayedActionCancelled(client))
 		{
-			//RemoveAndSwitchItem(client, weapon);
-			
 			SCP268Delay[client] = GetGameTime() + 90.0;
 			TF2_AddCondition(client, TFCond_Stealthed, 15.0);
 			ClientCommand(client, "playgamesound misc/halloween/spell_stealth.wav");
+			
+			Items_CancelDelayedAction(client);
 		}
 		else 
 		{
