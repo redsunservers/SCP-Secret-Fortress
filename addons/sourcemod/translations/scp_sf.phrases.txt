@@ -388,6 +388,42 @@
 	{
 		"en"		"You need to escape the facility.\nPress ATTACK, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll kill you."
 	}
+	"class_sci1"
+	{
+		"en"		"Scientist"
+	}
+	"desc_sci1"
+	{
+		"en"		"Escape from the facility.\nCooperate with the MTF.\nAvoid other teams."
+	}
+	"train_sci1"
+	{
+		"en"		"You need to escape the facility.\nPress ATTACK, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll kill you."
+	}
+	"class_sci2"
+	{
+		"en"		"Scientist"
+	}
+	"desc_sci2"
+	{
+		"en"		"Escape from the facility.\nCooperate with the MTF.\nAvoid other teams."
+	}
+	"train_sci2"
+	{
+		"en"		"You need to escape the facility.\nPress ATTACK, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll kill you."
+	}
+	"class_sci3"
+	{
+		"en"		"Scientist"
+	}
+	"desc_sci3"
+	{
+		"en"		"Escape from the facility.\nCooperate with the MTF.\nAvoid other teams."
+	}
+	"train_sci3"
+	{
+		"en"		"You need to escape the facility.\nPress ATTACK, USE, or use VOICEMENU to interact with buttons and items.\nWatch out for other teams as they'll kill you."
+	}
 	"class_guard"
 	{
 		"en"		"Facility Guard"

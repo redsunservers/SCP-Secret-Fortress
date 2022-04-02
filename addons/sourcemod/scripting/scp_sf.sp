@@ -674,13 +674,10 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 				value = Items_OnKeycard(client, access);
 				
 				if (value == 0)
-				{
-					ClassEnum class;
-					Classes_GetByIndex(Client[client].Class, class);
-					
+				{	
 					// failed to get access, play sound + reaction
 					float Time = GetGameTime();
-					if ((!IsSCP(client) || StrEqual(class.Name, "scp035", false)) && (Client[client].NextReactTime < Time))
+					if ((!IsSCP(client) || Classes_GetByName("scp035") == Client[client].Class) && (Client[client].NextReactTime < Time))
 					{
 						EmitSoundToClient(client, "replay/cameracontrolerror.wav");
 
@@ -1360,7 +1357,7 @@ public Action OnDropItem(int client, const char[] command, int args)
 	if(client && IsClientInGame(client) && !IsSpec(client))
 	{
 		ClassEnum class;
-		if(Classes_GetByIndex(Client[client].Class, class) && (class.Human || StrEqual(class.Name, "scp035", false)))
+		if(Classes_GetByIndex(Client[client].Class, class) && (class.Human || Classes_GetByName("scp035") == Client[client].Class))
 		{
 			int entity = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 			if(entity > MaxClients)
@@ -2160,7 +2157,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 
 	// Sprinting Related
 	ClassEnum class;
-	if(Classes_GetByIndex(Client[client].Class, class) && (class.Human || StrEqual(class.Name, "scp035", false)) && !Client[client].Disarmer)
+	if(Classes_GetByIndex(Client[client].Class, class) && (class.Human || Classes_GetByName("scp035") == Client[client].Class) && !Client[client].Disarmer)
 	{
 		if(((buttons & IN_ATTACK3) || (buttons & IN_SPEED)) && ((buttons & IN_FORWARD) || (buttons & IN_BACK) || (buttons & IN_MOVELEFT) || (buttons & IN_MOVERIGHT)) && GetEntPropEnt(client, Prop_Data, "m_hGroundEntity")!=-1)
 		{
@@ -2276,7 +2273,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 
 		if(!IsSpec(client))
 		{
-			if (class.Human || StrEqual(class.Name, "scp035", false))
+			if (class.Human || Classes_GetByName("scp035") == Client[client].Class)
 			{
 				if(DisarmCheck(client))
 				{
@@ -2381,7 +2378,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 				}
 
 				// What class am I again
-				if(showHud && !StrEqual(class.Name, "scp035", false))
+				if(showHud && Classes_GetByName("scp035") == Client[client].Class)
 				{
 					SetHudTextParamsEx(-1.0, 0.08, 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
 					ShowSyncHudText(client, HudClass, "%t", class.Display);

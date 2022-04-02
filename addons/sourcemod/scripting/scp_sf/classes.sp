@@ -1018,7 +1018,10 @@ public void Classes_PlayDeathAnimation(int client, const char[] modelname, const
 
 public void Classes_KillDBoi(int client, int victim)
 {
-	if(Classes_GetByName("sci") == Client[victim].Class)
+	if( Classes_GetByName("sci") == Client[victim].Class ||
+		Classes_GetByName("sci1") == Client[victim].Class ||
+		Classes_GetByName("sci2") == Client[victim].Class ||
+		Classes_GetByName("sci3") == Client[victim].Class)
 	{
 		if(Items_OnKeycard(victim, Access_Main))
 			GiveAchievement(Achievement_KillSci, client);
@@ -1047,8 +1050,14 @@ public void Classes_KillChaos(int client, int victim)
 
 public void Classes_KillSci(int client, int victim)
 {
-	if(Classes_GetByName("dboi") == Client[victim].Class)
+	if( Classes_GetByName("dboi") == Client[victim].Class ||
+		Classes_GetByName("dboi1") == Client[victim].Class ||
+		Classes_GetByName("dboi2") == Client[victim].Class ||
+		Classes_GetByName("dboi3") == Client[victim].Class ||
+		Classes_GetByName("dboi4") == Client[victim].Class)
+	{
 		GiveAchievement(Achievement_KillDClass, client);
+	}
 }
 
 public void Classes_KillMtf(int client, int victim)
@@ -1346,7 +1355,7 @@ public bool Classes_PickupStandard(int client, int entity)
 					{
 						case 0:
 						{
-							if(!StrEqual(class.Name, "scp035", false)) AcceptEntityInput(entity, "FireUser1", client, client);
+							if(Classes_GetByName("scp035") != Client[client].Class) AcceptEntityInput(entity, "FireUser1", client, client);
 							else AcceptEntityInput(entity, "FireUser2", client, client);
 						}
 						case 1:
@@ -1405,7 +1414,7 @@ public bool Classes_PickupScp(int client, int entity)
 					{
 						case 0:
 						{
-							if(!StrEqual(class.Name, "scp035", false)) AcceptEntityInput(entity, "FireUser1", client, client);
+							if(Classes_GetByName("scp035") != Client[client].Class) AcceptEntityInput(entity, "FireUser1", client, client);
 							else AcceptEntityInput(entity, "FireUser2", client, client);
 						}
 						case 1:

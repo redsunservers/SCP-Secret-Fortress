@@ -78,11 +78,8 @@ public Action OnSmallHealthPickup(int entity, int client)
 {
 	if(!Enabled || !IsValidClient(client))
 		return Plugin_Continue;
-
-	ClassEnum class;
-	Classes_GetByIndex(Client[client].Class, class);
-
-	if((!IsSCP(client) || StrEqual(class.Name, "scp035", false)) && !Client[client].Disarmer && Items_CanGiveItem(client, 3))
+	
+	if((!IsSCP(client) || Classes_GetByName("scp035") == Client[client].Class) && !Client[client].Disarmer && Items_CanGiveItem(client, 3))
 	{
 		Items_CreateWeapon(client, 30013, false, true, true);
 		AcceptEntityInput(entity, "Kill");
@@ -95,10 +92,7 @@ public Action OnMediumHealthPickup(int entity, int client)
 	if(!Enabled || !IsValidClient(client))
 		return Plugin_Continue;
 	
-	ClassEnum class;
-	Classes_GetByIndex(Client[client].Class, class);
-
-	if(!IsSCP(client) || StrEqual(class.Name, "scp035", false))
+	if(!IsSCP(client) || Classes_GetByName("scp035") == Client[client].Class)
 	{
 		if (GetEntPropEnt(entity, Prop_Data, "m_hOwnerEntity") == client)
 		{
@@ -132,11 +126,8 @@ public Action OnSmallAmmoPickup(int entity, int client)
 {
 	if(!Enabled || !IsValidClient(client))
 		return Plugin_Continue;
-
-	ClassEnum class;
-	Classes_GetByIndex(Client[client].Class, class);
-
-	if((!IsSCP(client) || StrEqual(class.Name, "scp035", false)) && !Client[client].Disarmer)
+	
+	if((!IsSCP(client) || Classes_GetByName("scp035") == Client[client].Class) && !Client[client].Disarmer)
 	{
 		int ammo = GetAmmo(client, 2);
 
@@ -159,11 +150,8 @@ public Action OnMediumAmmoPickup(int entity, int client)
 {
 	if(!Enabled || !IsValidClient(client))
 		return Plugin_Continue;
-
-	ClassEnum class;
-	Classes_GetByIndex(Client[client].Class, class);
-
-	if((!IsSCP(client) || StrEqual(class.Name, "scp035", false)) && !Client[client].Disarmer)
+	
+	if((!IsSCP(client) || Classes_GetByName("scp035") == Client[client].Class) && !Client[client].Disarmer)
 	{
 		bool found;
 		int ammo = GetAmmo(client, 2);
@@ -241,11 +229,8 @@ public Action OnFullAmmoPickup(int entity, int client)
 {
 	if(!Enabled || !IsValidClient(client))
 		return Plugin_Continue;
-
-	ClassEnum class;
-	Classes_GetByIndex(Client[client].Class, class);
-
-	if((!IsSCP(client) || StrEqual(class.Name, "scp035", false)) && !Client[client].Disarmer)
+	
+	if((!IsSCP(client) || Classes_GetByName("scp035") == Client[client].Class) && !Client[client].Disarmer)
 	{
 		bool found;
 		int ammo = GetAmmo(client, 2);

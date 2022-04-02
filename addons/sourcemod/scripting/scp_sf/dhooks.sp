@@ -243,7 +243,7 @@ public MRESReturn DHook_WantsLagCompensationOnEntityPost(int client, DHookReturn
 public MRESReturn DHook_CanPickupDroppedWeaponPre(int client, DHookReturn ret, DHookParam param)
 {
 	ClassEnum class;
-	if(Classes_GetByIndex(Client[client].Class, class) && !(Client[client].Disarmer && (class.Human || StrEqual(class.Name, "scp035", false))))
+	if(Classes_GetByIndex(Client[client].Class, class) && !(Client[client].Disarmer && (class.Human || Classes_GetByName("scp035") == Client[client].Class)))
 	{
 		int entity = param.Get(1);
 		Classes_OnPickup(client, entity);
@@ -275,10 +275,7 @@ public MRESReturn DHook_DoAnimationEventPre(int client, DHookParam param)
 public MRESReturn DHook_DropAmmoPackPre(int client, DHookParam param)
 {
 	//TODO: Remove this hook, move to OnEntityCreated and OnPlayerDeath
-	ClassEnum class;
-	Classes_GetByIndex(Client[client].Class, class);
-	
-	if(!param.Get(2) && !IsSpec(client) && (!IsSCP(client) || StrEqual(class.Name, "scp035", false)))
+	if(!param.Get(2) && !IsSpec(client) && (!IsSCP(client) || Classes_GetByName("scp035") == Client[client].Class))
 		Items_DropAllItems(client);
 
 	return MRES_Supercede;
