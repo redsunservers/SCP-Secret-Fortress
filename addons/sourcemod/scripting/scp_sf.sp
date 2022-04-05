@@ -3047,11 +3047,11 @@ public Action SendProp_OnAliveMulti(int entity, const char[] propname, int &valu
 	{
 		if(IsSpec(target))
 		{
-			if(!IsValidClient(client))
+			if(!IsValidClient(client) || !IsClientInGame(client))
 				return Plugin_Continue;
-		}
 
-		value = IsSpec(client) ? 0 : 1;
+			value = IsSpec(client) ? 0 : 1;
+		}
 	}
 	else if(Client[target].ThinkIsDead[client])
 	{
