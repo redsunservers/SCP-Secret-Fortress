@@ -3049,7 +3049,7 @@ public Action SendProp_OnAliveMulti(int entity, const char[] propname, int &valu
 		{
 			if(!IsValidClient(client) || !IsClientInGame(client))
 				return Plugin_Continue;
-
+        
 			value = IsSpec(client) ? 0 : 1;
 		}
 	}
