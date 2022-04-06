@@ -408,11 +408,11 @@ public void OnMapStart()
 		NoMusic = true;
 		break;
 	}
-	
+
 	while((entity=FindEntityByClassname(entity, "tf_player_manager")) != -1)
 	{
 		// Hook now rather than when spawned, incase the plugin is loaded in late
-		SDKHook(entity, SDKHook_ThinkPost, OnPlayerManagerThink);		
+		SDKHook(entity, SDKHook_ThinkPost, OnPlayerManagerThink);
 		break;
 	}
 
@@ -530,8 +530,8 @@ public void OnClientPostAdminCheck(int client)
 
 	char steamID[64];
 	GetClientAuthId(client, AuthId_SteamID64, steamID, sizeof(steamID));
-	
-	// initialize their karma level if its first time joining 
+
+	// initialize their karma level if its first time joining
 	float karma;
 	if (!GetTrieValue(PlayerKarmaMap, steamID, karma))
 		Classes_SetKarma(client, CvarKarmaMax.FloatValue);
@@ -565,7 +565,7 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 	{
 		AcceptEntityInput(entity, "Disable");
 	}
-	
+
 	entity = -1;
 	char buffer[32];
 	while ((entity = FindEntityByClassname(entity, "trigger_teleport")) != -1)
@@ -575,10 +575,10 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 		{
 			// fix up elevator teleports to allow physics objects (grenades) to teleport as well
 			SetEntProp(entity, Prop_Data, "m_spawnflags", 1033);
-			
+
 			// the dhook on the trigger's Enable input will take care of other objects (e.g. dropped weapons)
 		}
-	}	
+	}
 
 	Items_RoundStart();
 
@@ -616,7 +616,7 @@ public void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 		if (Client[client].BadKills <= 2)
 		{
 			float KarmaBonus = 5.0;
-			if (Client[client].Kills != 0)		
+			if (Client[client].Kills != 0)
 			{
 				// If the player got a kill (5 or more for SCPs) and no bad kills, always give additional bonus
 				// If the player had some bad kills but had more good kills (1:3 ratio), give a bonus too
@@ -672,7 +672,7 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 			if(!Classes_OnKeycard(client, access, value))
 			{
 				value = Items_OnKeycard(client, access);
-				
+
 				if (value == 0)
 				{	
 					// failed to get access, play sound + reaction
@@ -685,9 +685,9 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 						// 0.2 - 0.4 seconds
 						CreateTimer(float(GetRandomInt(20, 40)) / 100.0, Timer_AccessDeniedReaction, client, TIMER_FLAG_NO_MAPCHANGE);
 					}
-				}				
+				}
 			}
-						
+
 			switch(value)
 			{
 				case 1:
@@ -796,7 +796,7 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 		{
 			for(int target=1; target<=MaxClients; target++)
 			{
-				if(IsValidClient(target) && 
+				if(IsValidClient(target) &&
 				   Classes_GetByIndex(Client[target].Class, class) &&
 				   class.Group >= 0 &&
 				   class.Group != index)
@@ -1056,7 +1056,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 										break;
 									}
 								}
-								
+
 								Items_PlayPickupReact(client, weapon.Type, amount);
 
 								bool canGive = Items_CanGiveItem(client, weapon.Type);
@@ -1077,7 +1077,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 									FakeClientCommand(client, "use tf_weapon_fists");
 									Items_DropItem(client, entity, pos, ang, true);
 								}
-								
+
 								EmitSoundToClient(client, "ui/item_store_add_to_cart.wav");
 
 								static char buffer[64];
@@ -1181,8 +1181,8 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	if(!client || !IsPlayerAlive(client))
 		return;
-	
-	// this is terrible, we need a count of currently alive vips (for HUD) on round start 
+
+	// this is terrible, we need a count of currently alive vips (for HUD) on round start
 	// but we can't do it on round start because players aren't fully spawned yet
 	// so just do it here instead...
 	Gamecode_CountVIPs();
@@ -1197,10 +1197,10 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	Client[client].SprintPower = 100.0;
 	Client[client].Extra2 = 0;
 	Client[client].Extra3 = 0.0;
-	Client[client].NextReactTime = 0.0;	
-	Client[client].NextPickupReactTime = 0.0;	
-	Client[client].LastDisarmedTime = 0.0;	
-	Client[client].LastWeaponTime = 0.0;	
+	Client[client].NextReactTime = 0.0;
+	Client[client].NextPickupReactTime = 0.0;
+	Client[client].LastDisarmedTime = 0.0;
+	Client[client].LastWeaponTime = 0.0;
 	Client[client].WeaponClass = TFClass_Unknown;
 	Client[client].Kills = 0;
 	Client[client].GoodKills = 0;
@@ -1456,7 +1456,7 @@ public Action OnSayCommand(int client, const char[] command, int args)
 					Client[target].ThinkIsDead[client] = false;
 				}
 			}
-			
+
 			char tag[64];
 			GetClientChatTag(client, target, tag, sizeof(tag));
 			if (tag[0])
@@ -1807,7 +1807,7 @@ public Action Command_ForceItem(int client, int args)
 		if(!IsClientSourceTV(targets[target]) && !IsClientReplay(targets[target]))
 			Items_CreateWeapon(targets[target], index, true, true, true);
 	}
-	
+
 	Items_GetTranName(index, pattern, sizeof(pattern));
 
 	if(targetNounIsMultiLanguage)
@@ -1983,11 +1983,11 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	if(!client)
 		return Plugin_Continue;
-		
-	int attacker = GetClientOfUserId(event.GetInt("attacker"));		
+
+	int attacker = GetClientOfUserId(event.GetInt("attacker"));
 
 	Items_CancelDelayedAction(client);
-	
+
 	// do this before the team gets changed
 	PlayFriendlyDeathReaction(client, attacker);
 
@@ -2038,13 +2038,13 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 		{
 			int wep = EntRefToEntIndex(Client[client].PreDamageWeapon);
 			if(wep>MaxClients && GetEntProp(wep, Prop_Send, "m_iItemDefinitionIndex")==ITEM_INDEX_MICROHID)
-				GiveAchievement(Achievement_KillMirco, attacker);		
+				GiveAchievement(Achievement_KillMirco, attacker);
 		}
 
 		Classes_OnKill(attacker, client);
 
 		Client[attacker].Kills++;
-		
+
 		SDKCall_SetSpeed(attacker);
 
 		if(deadringer || !Classes_OnDeath(client, event))
@@ -2079,7 +2079,7 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 				GiveAchievement(Achievement_DeathTesla, client);
 				int wep = EntRefToEntIndex(Client[client].PreDamageWeapon);
 				if(wep>MaxClients && GetEntProp(wep, Prop_Send, "m_iItemDefinitionIndex")==ITEM_INDEX_MICROHID)
-					GiveAchievement(Achievement_DeathMicro, client);	
+					GiveAchievement(Achievement_DeathMicro, client);
 			}
 			else if(damage & DMG_FALL)
 			{
@@ -2849,7 +2849,7 @@ bool IsBadKill(int victim, int attacker)
 
 	// apply a kerma penalty for this damage if:
 	// -> scientist/mtf/guard kills an unarmed dboi, unless he was disarmed recently but is NOT disarmed at the moment
-	// -> dboi kills an unarmed scientist		
+	// -> dboi kills an unarmed scientist
 
 	if (Items_IsHoldingWeapon(victim) || Items_WasHoldingWeaponRecently(victim))
 		return false;
@@ -2875,56 +2875,56 @@ void PlayFriendlyDeathReaction(int client, int attacker)
 {
 	float pos[3];
 	GetClientEyePosition(client, pos);
-	
+
 	int targetclients[MAXPLAYERS];
 	int targetcount = 0;
 
 	float Time = GetGameTime();
-	
+
 	// when someone dies, check if any players nearby should react to this tragedy
 	for (int i=1; i<=MaxClients; i++)
 	{
 		if (i == client)
 			continue;
-			
+
 		if (i == attacker)
 			continue;
 
 		if (!IsValidClient(i) || IsSpec(i) || IsSCP(i))
-			continue;	
-			
+			continue;
+
 		// ignore crouching players, as they are likely trying to be sneaky
 		if (GetEntityFlags(client) & FL_DUCKING)
 			continue;
-		
+
 		// can we play a react now?
 		if (Client[i].NextReactTime > Time)
 			continue;
-			
+
 		if (!IsFriendly(Client[client].Class, Client[i].Class))
 			continue;
-			
+
 		float pos2[3], ang2[3], fwd2[3];
-		GetClientEyePosition(i, pos2);	
-	
-		float distsqr = GetVectorDistance(pos, pos2, true);	
+		GetClientEyePosition(i, pos2);
+
+		float distsqr = GetVectorDistance(pos, pos2, true);
 		if (distsqr > 1048576.0) // 1024 units - too far away to react
 			continue;
-		
+
 		GetClientEyeAngles(i, ang2);
 		GetAngleVectors(ang2, fwd2, NULL_VECTOR, NULL_VECTOR);
-		
+
 		// check if we can see the guy
-		TR_TraceRayFilter(pos, pos2, MASK_BLOCKLOS, RayType_EndPoint, Trace_WorldAndBrushes);			
+		TR_TraceRayFilter(pos, pos2, MASK_BLOCKLOS, RayType_EndPoint, Trace_WorldAndBrushes);
 		if (TR_DidHit())
 			continue;
-		
+
 		// add him to target list
 		targetclients[targetcount++] = i;
 	}
 
 	for (int i = 0; i < targetcount; i++)
-	{	
+	{
 		// scale the chance of the reaction playing depending on the amount of targets that saw this player die
 		// if only 1 or 2 players saw it then always play the react, otherwise diminish the chance to 1/3 and then 1/4
 		bool success;
@@ -2942,8 +2942,8 @@ void PlayFriendlyDeathReaction(int client, int attacker)
 		}
 		else
 		{
-			success = (GetRandomInt(0, 3) == 0);	
-			maxdelay = 130;		
+			success = (GetRandomInt(0, 3) == 0);
+			maxdelay = 130;
 		}
 
 		if (success)
@@ -3036,24 +3036,27 @@ public Action CH_ShouldCollide(int client, int entity, bool &result)
 }
 
 #if defined _SENDPROXYMANAGER_INC_
-public Action SendProp_OnAlive(int entity, const char[] propname, int &value, int client) 
+public Action SendProp_OnAlive(int entity, const char[] propname, int &value, int client)
 {
 	value = 1;
 	return Plugin_Changed;
 }
 
-public Action SendProp_OnAliveMulti(int entity, const char[] propname, int &value, int client, int target) 
+public Action SendProp_OnAliveMulti(int entity, const char[] propname, int &value, int client, int target)
 {
 	if(!Enabled)
 	{
 		value = 1;
 	}
-	else if(IsSpec(target))
+	else if(IsValidClient(target))
 	{
-		if(!IsValidClient(client))
-			return Plugin_Continue;
+		if(IsSpec(target))
+		{
+			if(!IsValidClient(client))
+				return Plugin_Continue;
 
-		value = IsSpec(client) ? 0 : 1;
+			value = IsSpec(client) ? 0 : 1;
+		}
 	}
 	else if(Client[target].ThinkIsDead[client])
 	{
@@ -3066,7 +3069,7 @@ public Action SendProp_OnAliveMulti(int entity, const char[] propname, int &valu
 	return Plugin_Changed;
 }
 
-public Action SendProp_OnTeam(int entity, const char[] propname, int &value, int client) 
+public Action SendProp_OnTeam(int entity, const char[] propname, int &value, int client)
 {
 	if(!IsValidClient(client) || (GetClientTeam(client)<2 && !IsPlayerAlive(client)))
 		return Plugin_Continue;
@@ -3075,7 +3078,7 @@ public Action SendProp_OnTeam(int entity, const char[] propname, int &value, int
 	return Plugin_Changed;
 }
 
-public Action SendProp_OnClass(int entity, const char[] propname, int &value, int client) 
+public Action SendProp_OnClass(int entity, const char[] propname, int &value, int client)
 {
 	if(!Enabled)
 		return Plugin_Continue;
