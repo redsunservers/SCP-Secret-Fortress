@@ -509,6 +509,10 @@ public void OnTakeDamageAlivePost(int victim, int attacker, int inflictor, float
 	if (!CvarKarma.BoolValue)
 		return;	
 
+	// SCP's shouldn't be affected by karma
+	if (IsSCP(attacker))
+		return;
+
 	if (Client[victim].PreDamageHealth <= health)
 		return; // no damage or healed
 
