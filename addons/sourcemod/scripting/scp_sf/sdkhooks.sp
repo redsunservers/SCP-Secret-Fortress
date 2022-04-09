@@ -347,6 +347,9 @@ public void OnPlayerManagerThink(int entity)
 	}
 }
 
+// prevent exploits if attacker dies and kills someone afterwards (e.g. grenade)
+int DamageSavedClass = -1;
+
 public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
 	if(!Enabled)
@@ -357,25 +360,40 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	int activeWeapon = GetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon");
 	if (activeWeapon>MaxClients)
 		Client[victim].PreDamageWeapon = EntIndexToEntRef(activeWeapon);
-
+	
 	bool validAttacker = IsValidClient(attacker);
-	int savedclass = -1;
-	if(!validAttacker && victim!=attacker)
+	DamageSavedClass = -1;
+	if(victim!=attacker)
 	{
-		static char classname[64];
-		if(inflictor>MaxClients && GetEntityClassname(inflictor, classname, sizeof(classname)) && StrEqual(classname, "env_explosion"))
+		char classname[16];
+		if(inflictor>MaxClients && GetEntityClassname(inflictor, classname, sizeof(classname)))
 		{
-			attacker = GetOwnerLoop(attacker);
-			validAttacker = IsValidClient(attacker);
-			// grenade owner might have died and have a different class, so make sure we are using the correct saved class
-			savedclass = GetEntProp(inflictor, Prop_Data, "m_iHammerID");
+			if (StrEqual(classname, "taunt_soldier")) // frag
+			{
+				if (!validAttacker)
+				{
+					attacker = GetOwnerLoop(attacker);
+					validAttacker = IsValidClient(attacker);
+				}
+				// grenade owner might have died and have a different class, so make sure we are using the correct saved class
+				DamageSavedClass = GetEntProp(inflictor, Prop_Data, "m_iHammerID");
+			}
+			else if (StrEqual(classname, "deflect_ball")) // scp18
+			{
+				// same reason as above
+				DamageSavedClass = GetEntProp(inflictor, Prop_Data, "m_iHammerID");
+			}
 		}
 	}
 
 	bool changed;
 	if(validAttacker && victim!=attacker)
 	{
-		if(IsFriendly(Client[victim].Class, (savedclass == -1) ? Client[attacker].Class : savedclass))
+		// if we have no saved class, grab our attacker's current class
+		if (DamageSavedClass == -1)
+			DamageSavedClass = Client[attacker].Class;
+		
+		if(IsFriendly(Client[victim].Class, DamageSavedClass))
 		{
 			if(!CvarFriendlyFire.BoolValue && !IsFakeClient(victim))
 				return Plugin_Handled;
@@ -478,7 +496,7 @@ public void OnTakeDamageAlivePost(int victim, int attacker, int inflictor, float
 	// this damage will cause the player to die
 	if (health <= 0)
 	{
-		if (IsBadKill(victim, attacker))
+		if (IsBadKill(victim, attacker, DamageSavedClass))
 		{
 			Client[attacker].BadKills++;
 
@@ -529,7 +547,7 @@ public void OnTakeDamageAlivePost(int victim, int attacker, int inflictor, float
 	float victimkarma = Classes_GetKarma(victim);
 	penaltyamount = RoundFloat(float(penaltyamount) * (victimkarma * 0.01));
 	
-	if ((checked == 2) || ((checked == 0) && IsBadKill(victim, attacker)))
+	if ((checked == 2) || ((checked == 0) && IsBadKill(victim, attacker, DamageSavedClass)))
 	{
 		// karma is applied per damage rather than per kill so players cant shoot others to lowest health possible and get away with it
 		Classes_ApplyKarmaDamage(attacker, penaltyamount);	

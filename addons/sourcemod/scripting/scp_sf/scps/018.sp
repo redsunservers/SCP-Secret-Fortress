@@ -9,7 +9,7 @@ static const float SCP18GravityFactor = 0.5;
 static const float SCP18GravityAccelTime = 3.0;
 static const float SCP18MaxVelocity = 10000.0;
 static const float SCP18MaxDamage = 1000.0;
-static const float SCP18Lifetime = 20.0;
+static const float SCP18Lifetime = 30.0;
 
 enum struct SCP18Enum
 {
@@ -49,6 +49,7 @@ SCP18Enum SCP18Trace;
 
 float SCP18Damage;
 float SCP18Volume;
+float SCP18Magnitude;
 int SCP18Pitch;
 
 public bool SCP18_Trace(int entity, int mask)
@@ -68,13 +69,40 @@ public bool SCP18_Trace(int entity, int mask)
 		}
 	}
 	
-	// TODO: door destruction logic
-	//char buffer[8];
-	//// anything prefixed with func_ can be safely regarded as a brush entity
-	//return (GetEntityClassname(entity, buffer, sizeof(buffer)) && (!strncmp(buffer, "func_", 5, false)));
-	
 	// keep going
 	return true;
+}
+
+public bool SCP18_TraceWorld(int entity, int mask)
+{
+	// world
+	if (!entity)
+		return true;
+	
+	// If its not a brush entity, just pass through it
+	char buffer[10];
+	if ((GetEntityClassname(entity, buffer, sizeof(buffer)) && (strncmp(buffer, "func_", 5, false)))) 
+		return false;
+	
+	if (SCP18Magnitude < 1000.0)
+	{
+		// Bounce off brush entities at low velocity
+		return true;
+	}
+
+	if (!strncmp(buffer, "func_door", 9, false))
+	{
+		// If we hit a door entity at high velocity, try destroy or force it open
+		if (!DestroyOrOpenDoor(entity))
+		{	
+			// *Don't* pass through if we couldn't destroy or force open
+			// This allows it to stay trapped in a elevator	
+			return true; 
+		}
+	}
+
+	// Pass through...
+	return false;
 }
 
 public void SCP18_TryTouchTeleport(float mins[3], float maxs[3], float dest[3])
@@ -156,9 +184,9 @@ public void SCP18_Tick()
 		AddVectors(position, velocity, nextposition);
 		
 		// trace from current position to next predicted position, ignore any players
-		TR_TraceRayFilter(position, nextposition, MASK_SOLID, RayType_EndPoint, Trace_WorldAndBrushes);
+		SCP18Magnitude = scp18.Magnitude; // store this for the trace
+		TR_TraceRayFilter(position, nextposition, MASK_SOLID, RayType_EndPoint, SCP18_TraceWorld);
 		
-		// TODO: don't bounce from doors?
 		if (TR_DidHit())
 		{
 			TR_GetEndPosition(hitposition);
@@ -260,6 +288,7 @@ public bool SCP18_Button(int client, int weapon, int &buttons, int &holding)
 
 				SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
 				SetEntProp(entity, Prop_Send, "m_iTeamNum", GetClientTeam(client));
+				SetEntProp(entity, Prop_Data, "m_iHammerID", Client[client].Class);		
 
 				SetEntityModel(entity, SCP18Model);
 

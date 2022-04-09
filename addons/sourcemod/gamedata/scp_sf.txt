@@ -107,6 +107,17 @@
 				"linux"		"@_ZN14CWeaponMedigun19AllowedToHealTargetEP11CBaseEntity"
 				"windows"	"\x55\x8B\xEC\x53\x8B\xD9\x56\x57\x8B\xB3\xE8\x01\x00\x00\x83\xFE\xFF\x0F\x84\x64\x01"
 			}
+			// FIXME: remove this when SM 1.11 is stable (TR_EnumerateEntitiesSphere can be used instead)
+			// thanks to nosoop for this sig
+			"CGlobalEntityList::FindEntityInSphere()"
+			{
+				// xref "NULL entity in global entity list!\n"
+				// process of elimination -- three arguments that branch to a mov+10004h
+				// two arguments is FindEntityByModel
+				"library"	"server"
+				"linux"		"@_ZN17CGlobalEntityList18FindEntityInSphereEP11CBaseEntityRK6Vectorf"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x0C\x53\x56\x57\x8B\xF9\x8B\x4D\x08"
+			}
 		}
 		"Functions"
 		{
