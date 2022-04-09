@@ -120,6 +120,9 @@ void Config_Setup()
 	PrecacheSound("common/wpn_denyselect.wav", true);
 	PrecacheSound("ui/item_light_gun_drop.wav", true);
 	PrecacheSound("ui/item_store_add_to_cart.wav", true);	
+	PrecacheSound("physics/metal/metal_grate_impact_hard1.wav", true);
+	PrecacheSound("physics/metal/metal_grate_impact_hard2.wav", true);
+	PrecacheSound("physics/metal/metal_grate_impact_hard3.wav", true);
 }
 
 void Config_PrecacheReactions(KeyValues kv)

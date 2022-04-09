@@ -1650,3 +1650,30 @@ bool IsPointTouchingBox(float pos[3], float mins[3], float maxs[3])
 		
 	return true;
 }
+
+int StringtToCharArray(Address stringt, char[] buffer, int maxlen)
+{
+	if (stringt == Address_Null)
+	{
+		buffer[0] = '\0';
+		return 0;
+	}
+
+	if (maxlen <= 0) 
+	{
+		ThrowError("Buffer size is negative or zero");
+	}
+
+	int max = maxlen-1;
+	int i = 0;
+	for (; i < max; i++) 
+	{
+		if ((buffer[i] = view_as<char>(LoadFromAddress(stringt + view_as<Address>(i), NumberType_Int8))) == '\0') 
+		{
+			return i;
+		}
+	}
+
+	buffer[i] = '\0';
+	return i;
+}

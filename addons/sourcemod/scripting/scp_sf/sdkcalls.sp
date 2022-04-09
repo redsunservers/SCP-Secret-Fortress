@@ -6,6 +6,7 @@ Handle SDKCreateWeapon;
 Handle SDKInitWeapon;
 static Handle SDKInitPickup;
 static Handle SDKSetSpeed;
+static Handle SDKFindEntityInSphere;
 
 void SDKCall_Setup(GameData gamedata)
 {
@@ -72,6 +73,14 @@ void SDKCall_Setup(GameData gamedata)
 	SDKSetSpeed = EndPrepSDKCall();
 	if(!SDKSetSpeed)
 		LogError("[Gamedata] Could not find CTFPlayer::TeamFortress_SetSpeed");
+		
+	StartPrepSDKCall(SDKCall_EntityList);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CGlobalEntityList::FindEntityInSphere()");
+	PrepSDKCall_SetReturnInfo(SDKType_CBaseEntity, SDKPass_Pointer);
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL | VDECODE_FLAG_ALLOWWORLD);
+	PrepSDKCall_AddParameter(SDKType_Vector, SDKPass_ByRef);
+	PrepSDKCall_AddParameter(SDKType_Float, SDKPass_Plain);
+	SDKFindEntityInSphere = EndPrepSDKCall();
 }
 
 void SDKCall_EquipWearable(int client, int entity)
@@ -142,4 +151,10 @@ void ChangeClientTeamEx(int client, any newTeam)
 		}
 	}
 	SetEntProp(client, Prop_Send, "m_iTeamNum", newTeam);
+}
+
+// FIXME: remove this when SM 1.11 is stable (TR_EnumerateEntitiesSphere can be used instead)
+int SDKCall_FindEntityInSphere(int startEntity, const float vecPosition[3], float flRadius) 
+{
+	return SDKCall(SDKFindEntityInSphere, startEntity, vecPosition, flRadius);
 }
