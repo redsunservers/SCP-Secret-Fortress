@@ -153,10 +153,13 @@ public bool SCP096_DoorWalk(int client, int entity)
 {
 	if(Client[client].Extra2 == 2)
 	{
-		static char buffer[16];
-		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
-		if(!StrContains(buffer, "scp", false))
-			AcceptEntityInput(entity, "FireUser1", client, client);
+		if (!DestroyOrOpenDoor(entity))
+		{
+			static char buffer[16];
+			GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
+			if(!StrContains(buffer, "scp", false))
+				AcceptEntityInput(entity, "FireUser1", client, client);
+		}
 	}
 	return true;
 }

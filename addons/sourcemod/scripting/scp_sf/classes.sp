@@ -1597,14 +1597,21 @@ public bool Classes_GhostVoiceAlt(int client)
 	return true;
 }
 
+public void Classes_ResetKillCounters(int client)
+{
+	Client[client].Kills = 0;
+	Client[client].GoodKills = 0;
+	Client[client].BadKills = 0;
+}
+
 public void Classes_ApplyKarmaDamage(int client, int damage)
 {
-	char steamID[64];
+	if (!AreClientCookiesCached(client))
+		return;
+	
 	float karma, oldkarma;
 
-	GetClientAuthId(client, AuthId_SteamID64, steamID, sizeof(steamID));
-	GetTrieValue(PlayerKarmaMap, steamID, karma);
-
+	karma = Classes_GetKarma(client);
 	// karma is a ratio to damage done vs the max health of the client
 	int maxhealth = Classes_GetMaxHealth(client);
 	oldkarma = karma;
@@ -1616,16 +1623,17 @@ public void Classes_ApplyKarmaDamage(int client, int damage)
 		karma = MinKarma;
 
 	if (karma != oldkarma)
-		SetTrieValue(PlayerKarmaMap, steamID, karma, true);		
+		Classes_SetKarma(client, karma);
 }
 
 public void Classes_ApplyKarmaBonus(int client, float amount, bool silent)
 {
-	char steamID[64];
+	if (!AreClientCookiesCached(client))
+		return;
+	
 	float karma, oldkarma;
 	
-	GetClientAuthId(client, AuthId_SteamID64, steamID, sizeof(steamID));
-	GetTrieValue(PlayerKarmaMap, steamID, karma);
+	karma = Classes_GetKarma(client);
 
 	oldkarma = karma;
 	karma += amount;
@@ -1634,7 +1642,7 @@ public void Classes_ApplyKarmaBonus(int client, float amount, bool silent)
 	if (karma > MaxKarma)
 		karma = MaxKarma;
 
-	SetTrieValue(PlayerKarmaMap, steamID, karma, true);	
+	Classes_SetKarma(client, karma);
 
 	if (!silent && (karma != oldkarma))
 	{
@@ -1653,16 +1661,34 @@ public void Classes_ApplyKarmaBonus(int client, float amount, bool silent)
 
 public float Classes_GetKarma(int client)
 {
+	if (!AreClientCookiesCached(client))
+		return CvarKarmaMax.FloatValue;
+	
 	float karma;
-	char steamID[64];
-	GetClientAuthId(client, AuthId_SteamID64, steamID, sizeof(steamID));
-	GetTrieValue(PlayerKarmaMap, steamID, karma);
+	
+	char value[64];
+	GetClientCookie(client, CookieKarma, value, sizeof(value));
+	if (!value[0])
+	{
+		// no karma value saved yet, initialize to max
+		karma = CvarKarmaMax.FloatValue;
+		FloatToString(karma, value, sizeof(value));
+		SetClientCookie(client, CookieKarma, value);
+	}
+	else
+	{
+		karma = StringToFloat(value);
+	}
+	
 	return karma;
 }
 
 public void Classes_SetKarma(int client, float karma)
 {
-	char steamID[64];
-	GetClientAuthId(client, AuthId_SteamID64, steamID, sizeof(steamID));
-	SetTrieValue(PlayerKarmaMap, steamID, karma, true);
+	if (!AreClientCookiesCached(client))
+		return;
+	
+	char value[64];
+	FloatToString(karma, value, sizeof(value));
+	SetClientCookie(client, CookieKarma, value);
 }

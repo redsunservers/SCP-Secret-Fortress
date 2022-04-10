@@ -1707,6 +1707,38 @@ public bool Items_FragButton(int client, int weapon, int &buttons, int &holding)
 	return false;
 }
 
+//float FragPos[3];
+bool Items_FragTrace(int entity)
+{
+	char buffer[10];
+	if (GetEntityClassname(entity, buffer, sizeof(buffer))) 
+	{
+		if (!strncmp(buffer, "func_door", 9, false))
+		{
+			DestroyOrOpenDoor(entity);
+		}
+		//else if (!strncmp(buffer, "tf_drop", 9, false))
+		//{
+			// try push away weapons
+			// TODO: this will need a vphysics extension, as the objects are asleep and hence can't be moved otherwise
+		
+			//float pos2[3], delta[3], dist;
+			//GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos2);
+			//SubtractVectors(pos2, FragPos, delta);
+			//dist = GetVectorLength(delta, false);		
+			// apply falloff depending on distance
+			//float falloff = (dist / 350.0);
+			//if (falloff != 0.0)
+			//{
+			//	ScaleVector(delta, 1.0 - falloff);
+			//	TeleportEntity(entity, NULL_VECTOR, NULL_VECTOR, delta);
+			//}			
+		//}
+	}
+	
+	return true;
+}
+
 public Action Items_FragTimer(Handle timer, int ref)
 {
 	int entity = EntRefToEntIndex(ref);
@@ -1738,48 +1770,23 @@ public Action Items_FragTimer(Handle timer, int ref)
 			int particle = AttachParticle(explosion, "asplode_hoodoo", false, 5.0);
 			if (particle)
 				EmitGameSoundToAll("Weapon_Airstrike.Explosion", particle, entity, _, _, pos);
-			
+				
 			AcceptEntityInput(explosion, "Explode");
 			CreateTimer(0.1, Timer_RemoveEntity, EntIndexToEntRef(explosion), TIMER_FLAG_NO_MAPCHANGE);
 		}
-
-		// push away all dropped stuff
-		// can't use env_physexplosion because it just skips over them
-
-		// TODO: this doesn't work because the objects are put into a sleep state
-		// gonna need the vphysics extension to Wake them up
-
-		/*		
-
-		// make stuff fly higher
-		pos[2] -= 32.0;
-
-		int weapon = 0;
-		while ((weapon = FindEntityByClassname(weapon, "tf_dropped_weapon")) > MaxClients)
+		
+		// find any doors nearby and try destroy or force them open
+		//CopyVector(pos, FragPos); // temporary for trace
+		
+		// FIXME: switch to this method when SM 1.11 is stablew
+		//TR_EnumerateEntitiesSphere(pos, 350.0, PARTITION_SOLID_EDICTS, Items_FragTrace);
+		
+		int entitytrace = -1;
+		while ((entitytrace = SDKCall_FindEntityInSphere(entitytrace, pos, 350.0)) != -1)
 		{
-			float pos2[3];
-			GetEntPropVector(weapon, Prop_Send, "m_vecOrigin", pos2);
-
-			float delta[3];
-			SubtractVectors(pos2, pos, delta);
-
-			float dist = GetVectorLength(delta, false);
-
-			// in range?
-			if (dist < 350.0)
-			{
-				// apply falloff depending on distance
-				float falloff = (dist / 350.0);
-				if (falloff != 0.0)
-				{
-					ScaleVector(delta, 1.0 - falloff);
-					TeleportEntity(entity, NULL_VECTOR, NULL_VECTOR, delta);
-				}
-			}
-		}		
-
-		*/
-
+			Items_FragTrace(entitytrace);
+		}
+		
 		AcceptEntityInput(entity, "Kill");
 	}
 }
