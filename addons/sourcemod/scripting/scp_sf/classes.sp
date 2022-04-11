@@ -1610,7 +1610,7 @@ public void Classes_ApplyKarmaBonus(int client, float amount, bool silent)
 
 	Classes_SetKarma(client, karma);
 
-	if (!silent && (karma != oldkarma))
+	if (!silent && CvarKarma.BoolValue && (karma != oldkarma))
 	{
 		BfWrite bf = view_as<BfWrite>(StartMessageOne("HudNotifyCustom", client));
 		if(bf)
