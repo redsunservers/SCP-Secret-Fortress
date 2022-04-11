@@ -399,7 +399,12 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 			if(!CvarFriendlyFire.BoolValue && !IsFakeClient(victim))
 				return Plugin_Handled;
 			
-			damage *= 0.4;
+			// do not allow friendlyfire between SCPs
+			if (IsSCP(victim) && IsSCP(attacker))
+				damage = 0.0;
+			else
+				damage *= 0.4;
+				
 			changed = true;
 		}
 
