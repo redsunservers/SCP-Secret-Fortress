@@ -1677,3 +1677,18 @@ int StringtToCharArray(Address stringt, char[] buffer, int maxlen)
 	buffer[i] = '\0';
 	return i;
 }
+
+void TriggerRelays(const char[] name)
+{
+	int entity = MaxClients+1;
+	while ((entity = FindEntityByClassname(entity, "logic_relay")) > MaxClients)
+	{
+		char entityname[32];
+		GetEntPropString(entity, Prop_Data, "m_iName", entityname, sizeof(entityname));
+		if (StrEqual(entityname, name, false))
+		{
+			AcceptEntityInput(entity, "Trigger");
+			break;
+		}
+	}
+}
