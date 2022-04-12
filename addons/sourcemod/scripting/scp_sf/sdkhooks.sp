@@ -408,7 +408,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 			changed = true;
 		}
 
-		if (CvarKarma.BoolValue)
+		if (CvarKarma.BoolValue && !IsSCP(attacker))
 		{
 			float karma = Classes_GetKarma(attacker) * 0.01;
 			if (karma < 1.0)
@@ -496,6 +496,7 @@ public void OnTakeDamageAlivePost(int victim, int attacker, int inflictor, float
 	if (!IsValidClient(attacker) || (victim == attacker))
 		return;	
 
+	bool karma_enabled = CvarKarma.BoolValue;
 	int health = GetClientHealth(victim);
 	int checked = 0;
 
@@ -506,15 +507,18 @@ public void OnTakeDamageAlivePost(int victim, int attacker, int inflictor, float
 		{
 			Client[attacker].BadKills++;
 
-			BfWrite bf = view_as<BfWrite>(StartMessageOne("HudNotifyCustom", attacker));
-			if(bf)
+			if (karma_enabled)
 			{
-				char buffer[64];
-				FormatEx(buffer, sizeof(buffer), "%T", "badkill", attacker);
-				bf.WriteString(buffer);
-				bf.WriteString("ico_demolish");
-				bf.WriteByte(0);
-				EndMessage();
+				BfWrite bf = view_as<BfWrite>(StartMessageOne("HudNotifyCustom", attacker));
+				if(bf)
+				{
+					char buffer[64];
+					FormatEx(buffer, sizeof(buffer), "%T", "badkill", attacker);
+					bf.WriteString(buffer);
+					bf.WriteString("ico_demolish");
+					bf.WriteByte(0);
+					EndMessage();
+				}
 			}
 
 			checked = 2;
@@ -528,13 +532,9 @@ public void OnTakeDamageAlivePost(int victim, int attacker, int inflictor, float
 		// don't mess up the calculations
 		health = 0;
 	}
-
-	// apply a karma penalty for this damage if possible
-	if (!CvarKarma.BoolValue)
-		return;	
-
-	// SCP's shouldn't be affected by karma
-	if (IsSCP(attacker))
+	
+	// If karma isn't enabled then we don't need to proceed further here
+	if (!karma_enabled)
 		return;
 
 	if (Client[victim].PreDamageHealth <= health)
