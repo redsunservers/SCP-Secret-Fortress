@@ -615,6 +615,7 @@ public Action Gamemode_WavePreTimer(Handle timer)
 		WaveList.GetArray(WaveIndex, wave);
 		TriggerRelays(wave.TriggerPre);
 	}
+
 	return Plugin_Continue;
 }
 
