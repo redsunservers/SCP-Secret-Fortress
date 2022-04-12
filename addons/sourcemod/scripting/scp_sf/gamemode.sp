@@ -21,6 +21,8 @@ enum struct WaveEnum
 
 	bool ShowSCPs;
 	char Message[32];
+	char Trigger[32];
+	char TriggerPre[32]; 
 
 	SoundEnum Sound;
 	SoundEnum SoundTeam;
@@ -45,7 +47,6 @@ static int TeamColors[][] =
 };
 
 static int PlayerArrayOffset = -1;
-static Handle WaveTimer;
 static Function GameCondition;
 static Function GameRoundStart;
 static StringMap GameInfo;
@@ -56,8 +57,12 @@ static int MaxQueueIndex;
 static ArrayList Presets;
 static ArrayList SetupList;
 
+static Handle WaveTimer;
+static Handle WavePreTimer;
+static int WaveIndex = -1;
 static Function WaveFunc;
 static float WaveTimes[2];
+static float WavePreTime;
 static ArrayList WaveList;
 
 static SoundEnum MusicJoin;
@@ -164,6 +169,8 @@ ArrayList Gamemode_Setup(KeyValues main, KeyValues map)
 				WaveTimes[0] = StringToFloat(preset.Name);
 				WaveTimes[1] = WaveTimes[0];
 			}
+			
+			WavePreTime = kv.GetFloat("pretime");
 
 			WaveList = new ArrayList(sizeof(WaveEnum));
 			if(kv.GotoFirstSubKey())
@@ -180,7 +187,9 @@ ArrayList Gamemode_Setup(KeyValues main, KeyValues map)
 					kv.GetString("message", wave.Message, sizeof(wave.Message));
 					if(!TranslationPhraseExists(wave.Message))
 						wave.Message[0] = 0;
-
+					kv.GetString("trigger", wave.Trigger, sizeof(wave.Trigger));
+					kv.GetString("trigger_pre", wave.TriggerPre, sizeof(wave.TriggerPre));
+					
 					KvGetSound(kv, "sound", wave.Sound);
 					KvGetSound(kv, "sound_team", wave.SoundTeam, wave.Sound);
 
@@ -492,7 +501,18 @@ bool Gamemode_RoundStart()
 			WaveList.SetArray(i, wave);
 		}
 
-		WaveTimer = CreateTimer(GetRandomFloat(WaveTimes[0], WaveTimes[1]), Gamemode_WaveTimer, _, TIMER_FLAG_NO_MAPCHANGE);
+		float WaveTime = GetRandomFloat(WaveTimes[0], WaveTimes[1]);
+		
+		// Send a notification to the map before the actual spawn happens
+		// allows the map to setup something like a helicopter animation beforehand
+		if ((WaveTime > 0.0) && (WavePreTime > 0.0))
+		{
+			// note: this will also chose the wave to spawn as it needs the correct team-specific trigger
+			// note2: the pre-timer system currently only works with the ticket system!
+			WavePreTimer = CreateTimer(WaveTime - WavePreTime, Gamemode_WavePreTimer, _, TIMER_FLAG_NO_MAPCHANGE);
+		}
+			
+		WaveTimer = CreateTimer(WaveTime, Gamemode_WaveTimer, _, TIMER_FLAG_NO_MAPCHANGE);
 	}
 	
 	return true;
@@ -525,6 +545,11 @@ void Gamemode_RoundEnd()
 	{
 		KillTimer(WaveTimer);
 		WaveTimer = null;
+	}
+	if(WavePreTimer)
+	{
+		KillTimer(WavePreTimer);
+		WavePreTimer = null;
 	}
 }
 
@@ -572,6 +597,23 @@ void Gamemode_UnassignQueueIndex(int client)
 			--MaxQueueIndex;
 
 		Client[client].QueueIndex = -1;
+	}
+}
+
+public Action Gamemode_WavePreTimer(Handle timer)
+{
+	// assumes ticket system!!
+	WaveIndex = -1;
+	
+	ArrayList players = DeadPlayersList();
+	Gamemode_ChooseWaveIndex(players);
+	delete players;
+	
+	if (WaveIndex != -1)
+	{
+		WaveEnum wave;
+		WaveList.GetArray(WaveIndex, wave);
+		TriggerRelays(wave.TriggerPre);
 	}
 }
 
@@ -691,10 +733,18 @@ public Action Gamemode_WaveTimer(Handle timer)
 	if(next > 0)
 	{
 		WaveTimer = CreateTimer(next, Gamemode_WaveTimer, _, TIMER_FLAG_NO_MAPCHANGE);
+	
+		// Send a notification to the map before the actual spawn happens
+		// allows the map to setup something like a helicopter animation beforehand
+		if ((next > 0.0) && (WavePreTime > 0.0))
+			WavePreTimer = CreateTimer(next - WavePreTime, Gamemode_WavePreTimer, _, TIMER_FLAG_NO_MAPCHANGE);	
+		else
+			WavePreTimer = null;
 	}
 	else
 	{
 		WaveTimer = null;
+		WavePreTimer = null;
 	}
 }
 
@@ -1170,35 +1220,53 @@ public float Gamemode_WaveStartCountdown(ArrayList &list, ArrayList &players)
 	return 0.0;
 }
 
-public float Gamemode_WaveRespawnTickets(ArrayList &list, ArrayList &players)
+public int Gamemode_ChooseWaveIndex(ArrayList &players)
 {
 	int length = players.Length;
-	if(length)
+	if (length)
 	{
-		list = new ArrayList();
-		int i = WaveList.Length;
 		WaveEnum wave;
-		for(int a; a<i; a++)
+		ArrayList list = new ArrayList();
+		int i = WaveList.Length;
+		for (int a; a < i; a++)
 		{
 			WaveList.GetArray(a, wave);
-			for(int b; b<wave.TicketsLeft; b++)
+			for (int b; b < wave.TicketsLeft; b++)
 			{
 				list.Push(a);
 			}
 		}
 
-		if(!list.Length)
+		if (!list.Length)
 		{
 			delete list;
 			list = null;
-			EndRoundIn = GetGameTime()+GetRandomFloat(WaveTimes[0], WaveTimes[1]);
-			return 0.0;
 		}
 
-		i = list.Get(GetRandomInt(0, list.Length-1));
-		delete list;
+		WaveIndex = list.Get(GetRandomInt(0, list.Length - 1));
+		delete list;	
+	}
+}
 
-		WaveList.GetArray(i, wave);
+public float Gamemode_WaveRespawnTickets(ArrayList &list, ArrayList &players)
+{	
+	int length = players.Length;
+	float wavetime = GetRandomFloat(WaveTimes[0], WaveTimes[1]);
+	if(length)
+	{
+		// if we have a pre-time trigger set, that will choose the wave for us beforehand
+		// otherwise we need to do it here
+		if (WaveIndex == -1)
+			Gamemode_ChooseWaveIndex(players);
+		
+		if (WaveIndex == -1)
+		{
+			EndRoundIn = GetGameTime()+GetRandomFloat(wavetime);
+			return 0.0;
+		}
+	
+		WaveEnum wave;
+		WaveList.GetArray(WaveIndex, wave);
 
 		if(length > wave.TicketsLeft)
 			length = wave.TicketsLeft;
@@ -1212,12 +1280,12 @@ public float Gamemode_WaveRespawnTickets(ArrayList &list, ArrayList &players)
 				wave.TicketsLeft = 0;
 		}
 
-		WaveList.SetArray(i, wave);
+		WaveList.SetArray(WaveIndex, wave);
 
 		int count;
 		float engineTime = GetGameTime();
 		ClassEnum class;
-		for(i=1; i<=MaxClients; i++)
+		for(int i=1; i<=MaxClients; i++)
 		{
 			if(!IsValidClient(i))
 				continue;
@@ -1268,10 +1336,17 @@ public float Gamemode_WaveRespawnTickets(ArrayList &list, ArrayList &players)
 				CPrintToChatAll("%s%t", PREFIX, "mtf_spawn_scp", count);
 			}
 		}
+		
+		if (wave.Trigger[0])
+		{
+			// Send a notification to the map that a spawn happened
+			TriggerRelays(wave.Trigger);
+		}			
 
 		list = Gamemode_MakeClassList(wave.Classes, length);
 	}
-	return GetRandomFloat(WaveTimes[0], WaveTimes[1]);
+	
+	return wavetime;
 }
 
 public int Gamemode_PresetRandom(ArrayList list, ArrayList current)

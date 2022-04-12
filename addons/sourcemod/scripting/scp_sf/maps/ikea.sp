@@ -91,17 +91,7 @@ public float Ikea_RespawnWave(ArrayList &list, ArrayList &players)
 		}
 	}
 
-	length = -1;
-	while((length=FindEntityByClassname(length, "logic_relay")) != -1)
-	{
-		static char name[32];
-		GetEntPropString(length, Prop_Data, "m_iName", name, sizeof(name));
-		if(StrEqual(name, Triggered[0] ? "scp_time_night" : "scp_time_day", false))
-		{
-			AcceptEntityInput(length, "Trigger");
-			break;
-		}
-	}
+	TriggerRelays(Triggered[0] ? "scp_time_night" : "scp_time_day");
 
 	float min, max;
 	Gamemode_GetWaveTimes(min, max);
