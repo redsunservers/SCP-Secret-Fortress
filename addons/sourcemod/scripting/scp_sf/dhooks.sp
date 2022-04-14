@@ -125,9 +125,10 @@ void DHook_MapStart()
 public MRESReturn DHook_RoundRespawn()
 {
 	if(Enabled || GameRules_GetProp("m_bInWaitingForPlayers"))
-		return;
+		return MRES_Ignored;
 
 	Enabled = Gamemode_RoundStart();
+	return MRES_Ignored;
 }
 
 public MRESReturn DHook_AllowedToHealTarget(int weapon, DHookReturn ret, DHookParam param)
@@ -204,6 +205,7 @@ public MRESReturn DHook_ForceRespawnPost(int client)
 {
 	if(Client[client].PrefClass != TFClass_Unknown)
 		SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", Client[client].PrefClass);
+	return MRES_Ignored;
 }
 
 public MRESReturn DHook_WantsLagCompensationOnEntityPre(int client, DHookReturn ret, DHookParam param)
@@ -215,6 +217,7 @@ public MRESReturn DHook_WantsLagCompensationOnEntityPre(int client, DHookReturn 
 	
 	ChangeClientTeamEx(client, TFTeam_Red);
 	ChangeClientTeamEx(player, TFTeam_Blue);
+	return MRES_Ignored;
 }
 
 public MRESReturn DHook_WantsLagCompensationOnEntityPost(int client, DHookReturn ret, DHookParam param)
@@ -312,6 +315,7 @@ public MRESReturn DHook_ProcessMovementPre(DHookParam param)
 public MRESReturn DHook_CalculateMaxSpeedPre(Address address, DHookReturn ret)
 {
 	CalculateSpeedClient = SDKCall_GetBaseEntity(address);
+	return MRES_Ignored;
 }
 
 public MRESReturn DHook_CalculateMaxSpeedPost(int clientwhen, DHookReturn ret)
@@ -410,6 +414,7 @@ public MRESReturn DHook_TauntPost(int client)
 	ClassEnum class;
 	if(Classes_GetByIndex(Client[client].Class, class))
 		TF2_SetPlayerClass(client, class.Class, false, false);
+	return MRES_Ignored;
 }
 
 public MRESReturn DHook_TriggerInputEnablePost(int entity, DHookParam param)

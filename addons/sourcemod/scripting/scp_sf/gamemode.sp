@@ -615,6 +615,7 @@ public Action Gamemode_WavePreTimer(Handle timer)
 		WaveList.GetArray(WaveIndex, wave);
 		TriggerRelays(wave.TriggerPre);
 	}
+	return Plugin_Continue;
 }
 
 public Action Gamemode_WaveTimer(Handle timer)
@@ -746,6 +747,7 @@ public Action Gamemode_WaveTimer(Handle timer)
 		WaveTimer = null;
 		WavePreTimer = null;
 	}
+	return Plugin_Continue;
 }
 
 float Gamemode_GetMusic(int client, int floor, char path[PLATFORM_MAX_PATH], int &volume)
@@ -953,7 +955,7 @@ static bool EndRoundRelay(int group)
 	return false;
 }
 
-static void KvGetSound(KeyValues kv, const char[] string, SoundEnum sound, const SoundEnum defaul=0)
+static void KvGetSound(KeyValues kv, const char[] string, SoundEnum sound, const SoundEnum defaul = {})
 {
 	static char buffers[3][PLATFORM_MAX_PATH];
 	kv.GetString(string, buffers[0], sizeof(buffers[]));
@@ -1220,7 +1222,7 @@ public float Gamemode_WaveStartCountdown(ArrayList &list, ArrayList &players)
 	return 0.0;
 }
 
-public int Gamemode_ChooseWaveIndex(ArrayList &players)
+public void Gamemode_ChooseWaveIndex(ArrayList &players)
 {
 	int length = players.Length;
 	if (length)

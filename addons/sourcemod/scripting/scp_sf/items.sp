@@ -1080,6 +1080,7 @@ public int Items_ShowItemMenuH(Menu menu, MenuAction action, int client, int cho
 			}
 		}
 	}
+	return 0;
 }
 
 bool Items_IsHoldingWeapon(int client)
@@ -1749,6 +1750,7 @@ public Action Items_FragTimer(Handle timer, int ref)
 		
 		AcceptEntityInput(entity, "Kill");
 	}
+	return Plugin_Continue;
 }
 
 public void Items_FragHook(const char[] output, int caller, int activator, float delay)
@@ -1853,6 +1855,7 @@ public Action Items_FlashTimer(Handle timer, int ref)
 
 		AcceptEntityInput(entity, "Kill");
 	}
+	return Plugin_Continue;
 }
 
 public bool Items_PainKillerButton(int client, int weapon, int &buttons, int &holding)

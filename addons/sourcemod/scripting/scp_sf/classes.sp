@@ -335,7 +335,7 @@ bool Classes_GetByIndex(int index, ClassEnum class)
 	return true;
 }
 
-int Classes_GetByName(const char[] name, ClassEnum class=0)
+int Classes_GetByName(const char[] name, ClassEnum class = {})
 {
 	int length = Classes.Length;
 	for(int i; i<length; i++)
@@ -1445,7 +1445,7 @@ public Action Classes_SoundScp(int client, char sample[PLATFORM_MAX_PATH], int &
 	return Plugin_Continue;
 }
 
-public float Classes_SpeedHuman(int client, float &speed)
+public void Classes_SpeedHuman(int client, float &speed)
 {
 	if(Client[client].Extra2)
 		speed *= 1.0+(Client[client].Extra2*0.125);
