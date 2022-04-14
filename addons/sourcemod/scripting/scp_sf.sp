@@ -962,6 +962,7 @@ public int Handler_None(Menu menu, MenuAction action, int param1, int param2)
 {
 	if(action == MenuAction_End)
 		delete menu;
+	return 0;
 }
 
 public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
@@ -1103,6 +1104,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 			}
 		}
 	}
+	return 0;
 }
 
 public int Handler_Printer(Menu menu, MenuAction action, int client, int choice)
@@ -1140,6 +1142,7 @@ public int Handler_Printer(Menu menu, MenuAction action, int client, int choice)
 			}
 		}
 	}
+	return 0;
 }
 
 public void TF2_OnConditionAdded(int client, TFCond cond)
@@ -1245,7 +1248,7 @@ public Action OnPlayerHurt(Event event, const char[] name, bool dontBroadcast)
 	event.SetInt("damageamount", 0);
 
 	int userid = event.GetInt("userid");
-	int client = GetClientOfUserId(client);
+	int client = GetClientOfUserId(userid);
 	if(client)
 	{
 		Event event2 = CreateEvent("npc_hurt", true);
@@ -1551,6 +1554,7 @@ public int Handler_MainMenu(Menu menu, MenuAction action, int client, int choice
 			}
 		}
 	}
+	return 0;
 }
 
 public Action Command_HelpClass(int client, int args)
@@ -1649,6 +1653,7 @@ public int Handler_ColorBlind(Menu menu, MenuAction action, int client, int choi
 			Command_ColorBlind(client, menu.ExitBackButton ? -1 : 0);
 		}
 	}
+	return 0;
 }
 
 public Action Command_ForceClass(int client, int args)
@@ -2220,11 +2225,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 	}
 
 	// Check if the player moved at all or is speaking
-	#if SOURCEMOD_V_MAJOR==1 && SOURCEMOD_V_MINOR<=10
 	if((buttons & IN_ATTACK) || (!(buttons & IN_DUCK) && ((buttons & IN_FORWARD) || (buttons & IN_BACK) || (buttons & IN_MOVELEFT) || (buttons & IN_MOVERIGHT))))
-	#else
-	if((buttons & IN_ATTACK) || (!(buttons & IN_DUCK) && ((buttons & IN_FORWARD) || (buttons & IN_BACK) || (buttons & IN_MOVELEFT) || (buttons & IN_MOVERIGHT)|| IsClientSpeaking(client))))
-	#endif
 		Client[client].IdleAt = engineTime+2.5;
 
 	// SCP-specific buttons
@@ -3225,7 +3226,7 @@ public Action Timer_FriendlyDeathReaction(Handle timer, int client)
 public int OnQueryFinished(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue, int userid)
 {
 	if(Client[client].DownloadMode==2 || GetClientOfUserId(userid)!=client || !IsClientInGame(client))
-		return;
+		return 0;
 
 	if(result != ConVarQuery_Okay)
 	{
@@ -3257,6 +3258,7 @@ public int OnQueryFinished(QueryCookie cookie, int client, ConVarQueryResult res
 			}
 		}
 	}
+	return 0;
 }
 
 // Thirdparty
