@@ -104,7 +104,7 @@ native void SCPSF_StopMusic(int client=0);
  */
 native bool SCPSF_CanTalkTo(int client, int target);
 
-**
+/**
  * Gets tag to display in client chat
  *
  * @param client 	Client index of speaker
