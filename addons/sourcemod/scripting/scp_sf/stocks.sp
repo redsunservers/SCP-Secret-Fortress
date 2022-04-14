@@ -1016,7 +1016,7 @@ stock int PrecacheModelEx(const char[] model, bool preload=false)
 
 stock int PrecacheSoundEx(const char[] sound, bool preload=false)
 {
-	static any soundchars[] = { '*', '#', '@', '>', '<', '^', ')', '}', '$' };
+	static int soundchars[] = { '*', '#', '@', '>', '<', '^', ')', '}', '$' };
 
 	char buffer[PLATFORM_MAX_PATH];
 	strcopy(buffer, sizeof(buffer), sound);
