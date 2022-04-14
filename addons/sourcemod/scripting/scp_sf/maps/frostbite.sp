@@ -492,6 +492,7 @@ public Action Seeman_NukeTimer(Handle timer, int userid)
 		FakeClientCommand(client, "+taunt");
 		SetEntityMoveType(client, MOVETYPE_WALK);
 	}
+	return Plugin_Continue;
 }
 
 public void Seeldier_Enable(int index)
