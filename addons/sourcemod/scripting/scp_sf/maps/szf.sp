@@ -21,9 +21,20 @@ static int Index0492;
 static int Carrying[MAXTF2PLAYERS] = {INVALID_ENT_REFERENCE, ...};
 static float Damage[MAXTF2PLAYERS];
 static bool TurnOn;
+static bool DoRoundStart;
 
 public void SZF_RoundStart()
 {
+	// actual functionality has now been moved to SZF_RoundStartDelayed, 
+	// because the items get converted too early in this hook and get re-spawned afterwards when the round really begins
+	DoRoundStart = true;
+}
+
+public void SZF_RoundStartDelayed()
+{
+	if (!DoRoundStart)
+		return;
+	
 	char buffer[PLATFORM_MAX_PATH];
 	int entity = -1;
 	float pos[3];
@@ -145,6 +156,8 @@ void SZF_RoundEnd()
 		TurnOn = false;
 		UnhookEvent("teamplay_point_captured", SZF_PointCaptured);
 	}
+	
+	DoRoundStart = false;
 }
 
 bool SZF_Enabled()
