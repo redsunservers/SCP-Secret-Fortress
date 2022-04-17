@@ -97,7 +97,8 @@ public Action SCP096_OnTakeDamage(int client, int attacker, int &inflictor, floa
 			return Plugin_Changed;
 		}
 	}
-	else if(Triggered[attacker]<2 && !TF2_IsPlayerInCondition(client, TFCond_Dazed))
+	// don't allow stunned players or SCPs to trigger shy guy, the latter can occur when friendlyfire is on
+	else if(Triggered[attacker]<2 && !TF2_IsPlayerInCondition(client, TFCond_Dazed) && !IsFriendly(Client[client].Class, Client[attacker].Class))
 	{
 		TriggerShyGuy(client, attacker, true);
 	}

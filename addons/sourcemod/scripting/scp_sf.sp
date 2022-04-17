@@ -89,8 +89,6 @@ bool SourceComms = false;		// SourceComms++
 bool BaseComm = false;		// BaseComm
 #endif
 
-MemoryPatch PatchProcessMovement;
-
 Handle HudPlayer;
 Handle HudClass;
 Handle HudGame;
@@ -144,6 +142,7 @@ enum struct ClientEnum
 	int Kills;
 	int GoodKills;
 	int BadKills;
+	
 	int PreDamageWeapon;
 	int PreDamageHealth;
 
@@ -163,6 +162,7 @@ enum struct ClientEnum
 	float NextPickupReactTime;
 	float LastDisarmedTime;
 	float LastWeaponTime;
+	float KarmaPoints[MAXTF2PLAYERS];
 
 	// Sprinting
 	bool Sprinting;
@@ -193,6 +193,7 @@ ClientEnum Client[MAXTF2PLAYERS];
 #include "scp_sf/forwards.sp"
 #include "scp_sf/gamemode.sp"
 #include "scp_sf/items.sp"
+#include "scp_sf/memorypatches.sp"
 #include "scp_sf/natives.sp"
 #include "scp_sf/sdkcalls.sp"
 #include "scp_sf/sdkhooks.sp"
@@ -323,18 +324,8 @@ public void OnPluginStart()
 	{
 		SDKCall_Setup(gamedata);
 		DHook_Setup(gamedata);
-
-		MemoryPatch.SetGameData(gamedata);
-		PatchProcessMovement = new MemoryPatch("Patch_ProcessMovement");
-		if(PatchProcessMovement)
-		{
-			PatchProcessMovement.Enable();
-		}
-		else
-		{
-			LogError("[Gamedata] Could not find Patch_ProcessMovement");
-		}
-
+		MemoryPatch_Setup(gamedata);
+		
 		delete gamedata;
 	}
 	else
@@ -474,9 +465,8 @@ public void OnPluginEnd()
 		if(IsClientInGame(i))
 			DHook_UnhookClient(i);
 	}
-
-	if(PatchProcessMovement)
-		PatchProcessMovement.Disable();
+	
+	MemoryPatch_Shutdown();
 
 	if(Enabled)
 		EndRound(0);
@@ -574,6 +564,8 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 	FixUpDoors();
 
 	Items_RoundStart();
+	// see comments in szf.sp for why this is here
+	SZF_RoundStartDelayed();
 	
 	// Reset kill counters on round start rather than on player spawn, allows karma bonus to work properly on round end
 	for (int client = 1; client <= MaxClients; client++)
@@ -1205,6 +1197,10 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	Client[client].LastDisarmedTime = 0.0;	
 	Client[client].LastWeaponTime = 0.0;	
 	Client[client].WeaponClass = TFClass_Unknown;
+	
+	float KarmaRatio = CvarKarmaRatio.FloatValue;
+	for (int i = 1; i < MAXTF2PLAYERS; i++)
+		Client[i].KarmaPoints[client] = KarmaRatio;
 
 	SetEntProp(client, Prop_Send, "m_bForcedSkin", false);
 	SetEntProp(client, Prop_Send, "m_nForcedSkin", 0);
