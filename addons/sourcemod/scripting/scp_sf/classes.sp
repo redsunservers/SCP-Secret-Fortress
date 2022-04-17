@@ -304,6 +304,11 @@ static void GrabKvValues(KeyValues kv, ClassEnum class, ClassEnum defaul, int in
 		kv.GoBack();
 	}
 	
+	// used to precache custom animations
+	kv.GetString("modelanim", class.Model, sizeof(class.Model));
+	if (class.Model[0]) 
+		PrecacheModel(class.Model, true);
+	
 	kv.GetString("modelalt", class.Model, sizeof(class.Model));
 	class.ModelAlt = class.Model[0] ? PrecacheModel(class.Model, true) : defaul.ModelAlt;	
 
@@ -1123,6 +1128,56 @@ public Action Classes_TakeDamageScp(int client, int attacker, int &inflictor, fl
 	return Plugin_Changed;
 }
 
+public void Classes_EscapeEscortBonus(int client)
+{
+	int dboi_index = Classes_GetByName("dboi");
+	int sci_index = Classes_GetByName("sci");
+	
+	float pos[3], pos2[3];
+	GetEntPropVector(client, Prop_Send, "m_vecOrigin", pos);
+	
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (client == i)
+			continue;
+		
+		if (!IsValidClient(i))
+			continue;
+		
+		if (!IsPlayerAlive(i))
+			continue;
+		
+		// the disarmer gets a different bonus
+		if (Client[client].Disarmer == i)
+			continue;
+			
+		// dboys and scientists should never get escort bonuses
+		if (Client[i].Class == dboi_index)
+			continue;
+		if (Client[i].Class == sci_index)
+			continue;
+			
+		ClassEnum class;
+		if (Client[client].Disarmer && Classes_GetByIndex(i, class) && (class.Group == 2))
+		{
+			// intentionally blank
+			// if we are disarmed, allow nearby guards/mtf to get the bonus as well
+		}			
+		else if (!IsFriendly(Client[client].Class, Client[i].Class))
+		{
+			continue;
+		}
+		
+		GetEntPropVector(i, Prop_Send, "m_vecOrigin", pos2);
+		
+		// 768 units
+		if (GetVectorDistance(pos, pos2, true) < 589824.0)
+		{
+			Classes_ApplyKarmaBonus(i, 5.0, false);			
+		}
+	}
+}
+
 public void Classes_CondDBoi(int client, TFCond cond)
 {
 	if(cond == TFCond_TeleportedGlow)
@@ -1155,7 +1210,10 @@ public void Classes_CondDBoi(int client, TFCond cond)
 				if(Items_GetItemsOfType(client, 5) > 1)
 					GiveAchievement(Achievement_FindSCP, client);
 			}
-
+			
+			// find nearby players and give them a bonus for escorting
+			Classes_EscapeEscortBonus(client);
+			
 			if(index == -1)
 			{
 				index = 0;
@@ -1209,6 +1267,9 @@ public void Classes_CondSci(int client, TFCond cond)
 				if(RoundStartAt > engineTime-180.0)
 					GiveAchievement(Achievement_EscapeSpeed, client);
 			}
+			
+			// find nearby players and give them a bonus for escorting
+			Classes_EscapeEscortBonus(client);			
 
 			if(index == -1)
 			{
@@ -1604,8 +1665,11 @@ public void Classes_ResetKillCounters(int client)
 	Client[client].BadKills = 0;
 }
 
-public void Classes_ApplyKarmaDamage(int client, int damage)
+public void Classes_ApplyKarmaDamage(int client, int victim, int damage)
 {
+	if (SZF_Enabled())
+		return;
+		
 	if (!AreClientCookiesCached(client))
 		return;
 	
@@ -1616,6 +1680,12 @@ public void Classes_ApplyKarmaDamage(int client, int damage)
 	int maxhealth = Classes_GetMaxHealth(client);
 	oldkarma = karma;
 	float loss = CvarKarmaRatio.FloatValue * (float(damage) / float(maxhealth));
+	
+	// KarmaPoints tracks how much total karma the player has lost from damaging this victim
+	// this prevents the player from losing too much karma from healing players
+	if (loss > Client[client].KarmaPoints[victim])
+		loss = Client[client].KarmaPoints[victim];
+	
 	karma -= loss;
 	
 	float MinKarma = CvarKarmaMin.FloatValue;
@@ -1623,11 +1693,17 @@ public void Classes_ApplyKarmaDamage(int client, int damage)
 		karma = MinKarma;
 
 	if (karma != oldkarma)
+	{
 		Classes_SetKarma(client, karma);
+		Client[client].KarmaPoints[victim] -= loss;
+	}
 }
 
 public void Classes_ApplyKarmaBonus(int client, float amount, bool silent)
 {
+	if (SZF_Enabled())
+		return;
+		
 	if (!AreClientCookiesCached(client))
 		return;
 	
