@@ -1176,6 +1176,118 @@ public bool Gamemode_ConditionVip(TFTeam &team)
 	return true;
 }
 
+public bool Gamemode_ConditionSlnew(TFTeam &team)
+{
+	ClassEnum class;
+	bool salive, ralive, balive;
+	for(int i=1; i<=MaxClients; i++)
+	{
+		if(!IsValidClient(i) || IsSpec(i) || !Classes_GetByIndex(Client[i].Class, class))
+			continue;
+
+		if(class.Vip)
+			return false;
+
+		if(class.Human && Client[i].Disarmer)
+			continue;
+
+		if(!class.Group)	// SCPs
+		{
+			salive = true;
+		}
+		else if(class.Group == 1)	// Chaos
+		{
+			ralive = true;
+		}
+		else if(class.Group > 1)	// Guards and MTF Squads
+		{
+			balive = true;
+		}
+	}
+
+	if(balive && (salive || ralive))
+		return false;
+	
+	int descape, dcapture, dtotal, sescape, scapture, stotal, pkill, ptotal;
+	GameInfo.GetValue("descape", descape);
+	GameInfo.GetValue("dcapture", dcapture);
+	GameInfo.GetValue("dtotal", dtotal);
+	GameInfo.GetValue("sescape", sescape);
+	GameInfo.GetValue("scapture", scapture);
+	GameInfo.GetValue("stotal", stotal);
+	GameInfo.GetValue("pkill", pkill);
+	GameInfo.GetValue("ptotal", ptotal);
+
+	int group;
+	if(ralive)	//  Only Class-D and Chaos
+	{
+		if(sescape - scapture > descape - dcapture)	// More Scientists and Capture Class-D than Class-D and Capture Scientists
+		{
+			team = TFTeam_Unassigned; // Stalemate
+			group = 0;
+		}
+		else
+		{
+			team = TFTeam_Red;	// Class-D win
+			group = 1;
+		}
+	}
+	else if(salive)	// SCP alive
+	{
+		if(ptotal - pkill > sescape - scapture && ptotal - pkill > descape - dcapture)
+		{
+			team = TFTeam_Red;	// SCPs win
+			group = 3;
+		}
+		else if(ptotal - pkill > sescape - scapture && ptotal - pkill < descape - dcapture)
+		{
+			team = TFTeam_Red;	// Class-D win
+			group = 1;
+		}
+		else
+		{
+			team = TFTeam_Unassigned; // Stalemate
+			group = 0;
+		}
+	}
+	else if(balive)	// Only MTF
+	{
+		if(sescape - scapture > descape - dcapture)
+		{
+			team = TFTeam_Blue;	// MTF win
+			group = 2;
+		}	
+		else
+		{
+			team = TFTeam_Unassigned; // Stalemate
+			group = 0;
+		}
+	}
+	else	// Nobody escaped, no SCPs alive
+	{
+		team = TFTeam_Unassigned;// Stalemate
+		group = 0;
+	}
+
+	EndRoundRelay(group);
+
+	int minutes, seconds;
+	TimeToMinutesSeconds(GetGameTime() - RoundStartAt, minutes, seconds);
+
+	char buffer[16];
+	FormatEx(buffer, sizeof(buffer), "team_%d", group);
+	SetHudTextParamsEx(-1.0, 0.3, 17.5, TeamColors[group], {255, 255, 255, 255}, 1, 2.0, 1.0, 1.0);
+	for(int client=1; client<=MaxClients; client++)
+	{
+		if(!IsValidClient(client))
+			continue;
+
+		SetGlobalTransTarget(client);
+		ShowSyncHudText(client, HudGame, "%t", "end_screen", buffer, descape, dtotal, sescape, stotal, pkill, ptotal, minutes, seconds);
+	}
+	return true;
+}
+
 public bool Gamemode_ConditionBoss(TFTeam &team)
 {
 	ClassEnum class;

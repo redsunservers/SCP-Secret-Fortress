@@ -1179,6 +1179,14 @@
 	{
 		"en"		"Survival, Concealment, Protection."
 	}
+	"weapon_442"
+	{
+		"en"		"S.F.G 1000"
+	}
+	"info_442"
+	{
+		"en"		"P E W!"
+	}
 	
 	// Team Phrases
 
