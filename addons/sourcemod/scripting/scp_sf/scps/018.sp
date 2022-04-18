@@ -8,7 +8,7 @@ static const float SCP18VelocityBoost = 40.0;
 static const float SCP18GravityFactor = 0.5;
 static const float SCP18GravityAccelTime = 3.0;
 static const float SCP18MaxVelocity = 10000.0;
-static const float SCP18MaxDamage = 1000.0;
+static const float SCP18MaxDamage = 1200.0;
 static const float SCP18Lifetime = 30.0;
 
 enum struct SCP18Enum
@@ -52,6 +52,21 @@ float SCP18Volume;
 float SCP18Magnitude;
 int SCP18Pitch;
 
+public Action Timer_SCP18Damage(Handle timer, DataPack pack)
+{
+	pack.Reset();
+	int client = GetClientOfUserId(pack.ReadCell());
+	int entindex = EntRefToEntIndex(pack.ReadCell());
+	if ((entindex > MaxClients) && IsValidClient(client) && IsClientInGame(client) && IsPlayerAlive(client))
+	{
+		int thrower = pack.ReadCell();
+		float damage = pack.ReadFloat();
+		SDKHook_DealDamage(client, entindex, thrower, damage, DMG_CLUB);
+	}
+
+	return Plugin_Continue;
+}
+
 public bool SCP18_Trace(int entity, int mask)
 {
 	if (entity > 0 && entity <= MaxClients)
@@ -60,11 +75,22 @@ public bool SCP18_Trace(int entity, int mask)
 		if (SCP18Trace.ClientHits[entity] != SCP18Trace.Bounces)
 		{
 			if ((entity == SCP18Trace.Thrower) || SCP18FriendlyFire || !IsFriendly(Client[entity].Class, SCP18Trace.Class) || IsFakeClient(entity))
-			{
-				SDKHooks_TakeDamage(entity, SCP18Trace.EntIndex, SCP18Trace.Thrower, SCP18Damage, DMG_CLUB);
+			{		
+				// NOTE: Killing players during OnGameTrace will cause a bizarre and misleading crash!
+				// Hence they are instead killed via a timer. This took HOURS to figure out
+				
+				//SDKHooks_TakeDamage(entity, SCP18Trace.EntIndex, SCP18Trace.Thrower, SCP18Damage, DMG_CLUB);
+				
+				DataPack pack;
+				CreateDataTimer(0.1, Timer_SCP18Damage, pack, TIMER_FLAG_NO_MAPCHANGE);
+				pack.WriteCell(GetClientUserId(entity));
+				pack.WriteCell(SCP18Trace.EntRef);
+				pack.WriteCell(SCP18Trace.Thrower);
+				pack.WriteFloat(SCP18Damage);
+				
 				SCP18Trace.ClientHits[entity] = SCP18Trace.Bounces;
 				
-				EmitSoundToAll(SCP18ClientHitSound, entity, SNDCHAN_BODY, SNDLEVEL_NORMAL, _, SCP18Volume, SCP18Pitch);				
+				EmitSoundToAll(SCP18ClientHitSound, entity, SNDCHAN_BODY, SNDLEVEL_NORMAL, _, SCP18Volume, SCP18Pitch);	
 			}
 		}
 	}
@@ -108,6 +134,7 @@ public bool SCP18_TraceWorld(int entity, int mask)
 public void SCP18_TryTouchTeleport(float mins[3], float maxs[3], float dest[3])
 {
 	int count = SCP18List.Length;
+	
 	for (int i = 0; i < count; i++)
 	{
 		SCP18Enum scp18;
@@ -115,8 +142,13 @@ public void SCP18_TryTouchTeleport(float mins[3], float maxs[3], float dest[3])
 		
 		if (IsPointTouchingBox(scp18.Position, mins, maxs))
 		{
-			CopyVector(dest, scp18.Position);
-			SCP18List.SetArray(i, scp18);
+			scp18.EntIndex = EntRefToEntIndex(scp18.EntRef);
+			if (scp18.EntIndex > MaxClients)
+			{
+				TeleportEntity(scp18.EntIndex, dest, NULL_VECTOR, NULL_VECTOR);
+				CopyVector(dest, scp18.Position);
+				SCP18List.SetArray(i, scp18);
+			}
 		}
 	}
 }
