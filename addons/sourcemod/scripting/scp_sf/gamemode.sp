@@ -1169,7 +1169,9 @@ public bool Gamemode_ConditionSlnew(TFTeam &team)
 	}
 	else
 	{
-		if(!balive && !ralive)
+		Gamecode_CountVIPs();
+		
+		if((VIPsAlive <= 0 && !sescape && !dcapture && !descape && !scapture) || (!balive && !ralive))
 		{
 			team = TFTeam_Red;    // SCPs win
 			group = 3;
