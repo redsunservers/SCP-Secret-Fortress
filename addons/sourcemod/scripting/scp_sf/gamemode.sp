@@ -1169,21 +1169,15 @@ public bool Gamemode_ConditionSlnew(TFTeam &team)
 	}
 	else
 	{
-        if(pscore > sscore && pscore > dscore)
-        {
-            team = TFTeam_Red;    // SCPs win
-            group = 3;
-        }
-        else if(pscore > sscore && pscore < dscore)
-        {
-            team = TFTeam_Red;    // Class-D win
-            group = 1;
-        }
-        else
-        {
-            team = TFTeam_Unassigned; // Stalemate
-            group = 0;
-        }
+		if(!balive && !ralive)
+		{
+			team = TFTeam_Red;    // SCPs win
+			group = 3;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	EndRoundRelay(group);
