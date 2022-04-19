@@ -1130,7 +1130,7 @@ public bool Gamemode_ConditionSlnew(TFTeam &team)
 	
 	int sscore = sescape - scapture;
 	int dscore = descape - dcapture;
-	int pscore = ptotal - pkill;
+	//int pscore = ptotal - pkill;
 	int group;
 	
 	if(!salive)
