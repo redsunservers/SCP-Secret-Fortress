@@ -1196,11 +1196,11 @@
 	}
 	"team_1"
 	{
-		"en"		"Class-D Won"
+		"en"		"Chaos Insurgency Won"//"Class-D Won"
 	}
 	"team_2"
 	{
-		"en"		"MTF Won"
+		"en"		"Foundation Won"
 	}
 	"team_3"
 	{
