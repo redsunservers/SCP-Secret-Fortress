@@ -1113,8 +1113,8 @@ public void Classes_EscapeEscortBonus(int client)
 		
 		if (!IsValidClient(i))
 			continue;
-		
-		if (!IsPlayerAlive(i))
+			
+		if (IsSpec(i))
 			continue;
 		
 		// the disarmer gets a different bonus
