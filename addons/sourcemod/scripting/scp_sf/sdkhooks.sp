@@ -575,13 +575,14 @@ public void OnTakeDamageAlivePost(int victim, int attacker, int inflictor, float
 
 	// compensate for the other player's karma
 	// don't apply this for friendlyfire damage though
+	// removed: this makes karma too lenient
 	float victimkarmaratio = 1.0;
-	if (!IsFriendly(Client[victim].Class, DamageSavedClass))
-	{
-		float victimkarma = Classes_GetKarma(victim);
-		victimkarmaratio = (victimkarma * 0.01);
-		penaltyamount = RoundFloat(float(penaltyamount) * victimkarmaratio);
-	}
+	//if (!IsFriendly(Client[victim].Class, DamageSavedClass))
+	//{
+	//	float victimkarma = Classes_GetKarma(victim);
+	//	victimkarmaratio = (victimkarma * 0.01);
+	//	penaltyamount = RoundFloat(float(penaltyamount) * victimkarmaratio);
+	//}
 	
 	if ((checked == 2) || ((checked == 0) && IsBadKill(victim, attacker, DamageSavedClass)))
 	{
@@ -600,10 +601,14 @@ public void OnTakeDamageAlivePost(int victim, int attacker, int inflictor, float
 			float karmaMin = CvarKarmaMin.FloatValue;
 			float prevkarma = karma;
 			
+			// lose 5 more karma for friendlyfire kills
+			if (IsFriendly(Client[victim].Class, DamageSavedClass))
+				karmaPoints += 5.0;
+				
 			// hack: this compensates for miniscule precision errors
 			if (karmaPoints > 0.01)
 			{
-				karma -= Client[attacker].KarmaPoints[victim] * victimkarmaratio;
+				karma -= karmaPoints * victimkarmaratio;
 				if (karma < karmaMin)
 					karma = karmaMin;
 
