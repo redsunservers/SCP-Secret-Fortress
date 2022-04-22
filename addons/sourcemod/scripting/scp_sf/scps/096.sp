@@ -3,16 +3,16 @@ static const char SoundPassive[] = "freak_fortress_2/scp096/bgm.mp3";
 static const char SoundEnrage[] = "freak_fortress_2/scp096/fullrage.mp3";
 static const char SoundDeath[] = "freak_fortress_2/scp096/096_death.mp3";
 
-static const int HealthMax = 1700;	// Max standard health
-static const int HealthExtra = 1500;	// Max regenerable health
+static const int HealthMax = 2700;	// Max standard health
+static const int HealthExtra = 500;	// Max regenerable health
 
 static const float SpeedRage = 2.1;
 
 static const float RageWarmup = 6.0;	// Rage warmup time
 static const float RageDuration = 12.0;	// Rage initial duration
-static const float RageExtra = 3.0;	// Rage duration per target
-static const float RageWinddown = 18.0;	// After rage stun
-static const float RageCooldown = 24.0;	// After rage cooldown
+static const float RageExtra = 1.5;	// Rage duration per target
+static const float RageWinddown = 6.0;	// After rage stun
+static const float RageCooldown = 15.0;	// After rage cooldown
 
 static int Triggered[MAXTF2PLAYERS];
 
@@ -42,7 +42,7 @@ public void SCP096_OnMaxHealth(int client, int &health)
 	{
 		SetEntityHealth(client, health);
 	}
-	else if(current < Client[client].Extra1-HealthExtra)
+	else if(current < Client[client].Extra1 - HealthExtra)
 	{
 		Client[client].Extra1 = current+HealthExtra;
 	}

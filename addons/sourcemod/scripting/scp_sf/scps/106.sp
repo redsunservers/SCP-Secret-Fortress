@@ -1,13 +1,7 @@
-static const int HealthMax = 1200;	// Max standard health
-
 static const char ModelMelee[] = "models/scp_sf/106/scp106_hands_1.mdl";
 static const float TeleFreeze = 8.0;	// Teleport freeze duration
 static const float TeleStun = 5.0;		// Teleport stun duration
 static const float TeleDelay = 4.0;		// Teleport delay
-
-static const float SpeedExtra = 40.0;	// Extra speed while low health
-
-static int Health[MAXTF2PLAYERS];
 
 public bool SCP106_Create(int client)
 {
@@ -18,9 +12,7 @@ public bool SCP106_Create(int client)
 	Client[client].Pos[2] = 0.0;
 	Client[client].Extra2 = 0;
 
-	Health[client] = HealthMax;
-
-	int weapon = SpawnWeapon(client, "tf_weapon_shovel", 649, 60, 13, "1 ; 0.769231 ; 28 ; 0 ; 66 ; 0.2 ; 252 ; 0.4", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_shovel", 649, 60, 13, "1 ; 0.769231 ; 28 ; 0 ; 66 ; 0.1 ; 252 ; 0.4", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 12);
@@ -73,17 +65,6 @@ public void SCP106_OnDeath(int client, Event event)
 public void SCP106_OnKill(int client, int victim)
 {
 	GiveAchievement(Achievement_Death106, victim);
-}
-
-public void SCP106_OnMaxHealth(int client, int &health)
-{
-	int current = GetClientHealth(client);
-	Health[client] = current;
-}
-
-public void SCP106_OnSpeed(int client, float &speed)
-{
-    speed += (1.0-(Health[client]/HealthMax))*SpeedExtra;
 }
 
 public Action SCP106_OnDealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)

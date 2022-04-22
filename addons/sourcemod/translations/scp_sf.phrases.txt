@@ -853,7 +853,7 @@
 	}
 	"weapon_199"
 	{
-		"en"		"MTF-E11-SG"
+		"en"		"Shotgun"
 	}
 	"info_199"
 	{
@@ -1192,19 +1192,19 @@
 
 	"team_0"
 	{
-		"en"		"Stalemate"
+		"en"		"STALEMATE"
 	}
 	"team_1"
 	{
-		"en"		"Chaos Insurgency Won"//"Class-D Won"
+		"en"		"INSERGENCY WINS"//"Class-D Won"
 	}
 	"team_2"
 	{
-		"en"		"Foundation Won"
+		"en"		"FOUNDATION WINS"
 	}
 	"team_3"
 	{
-		"en"		"SCPs Won"
+		"en"		"SCP WIN"
 	}
 
 	// SCP-914 Phrases
