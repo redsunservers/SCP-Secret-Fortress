@@ -480,7 +480,7 @@
 	}
 	"train_scp1732"
 	{
-		"chi"		"你的攻击对人类可以一击制敌。\n你只能在不被看到的时候进行移动。\n你可以在不被看到的时候瞬间移动。\nYou can press traps using RELOAD and sprint using ATTACK3。\nPress USE or use VOICEMENU to interact with buttons。"
+		"chi"		"你的攻击对人类可以一击制敌。\n你只能在不被看到的时候进行移动。\n你可以在不被看到的时候瞬间移动。\n你可以使用 RELOAD 放陷阱，使用 ATTACK3 冲刺。\n按 USE 或使用 VOICEMENU 与按钮互动。"
 	}
 	"class_scp457"
 	{
@@ -488,11 +488,11 @@
 	}
 	"desc_scp457"
 	{
-		"chi"		"Kill everyone。\nPrevent escape。\nCooperate with other SCPs。\nKill players to maintain your fire。"
+		"chi"		"杀死所有人类\n阻止人类逃离\n与其他 SCP 合作\n击杀玩家维持你的火焰"
 	}
 	"train_scp457"
 	{
-		"chi"		"Your attacks sets players on fire。\nYour able to split apart after gaining full health。\nWater hurts you the most。\nPress ATTACK2， ATTACK3， USE or use VOICEMENU to interact with buttons。"
+		"chi"		"你的攻击使玩家着火。\n你的身体在完全恢复健康后能够分裂。\n水对你伤害最大。\n按 ATTACK2，ATTACK3，USE 或使用 VOICEMENU 与按钮互动。"
 	}
 	"class_scp939"
 	{
@@ -500,11 +500,11 @@
 	}
 	"desc_scp939"
 	{
-		"chi"		"Kill everyone。\nPrevent escape。\nCooperate with other SCPs。\nYou can talk to other humans。"
+		"chi"		"杀死所有人类\n阻止人类逃离\n与其他 SCP 合作\n你可以与其他人类交谈"
 	}
 	"train_scp939"
 	{
-		"chi"		"You can only see targets making noise。\nYou can trick players by talking to them。\nYou'll get faster with less health you have。\nPress ATTACK2， ATTACK3， USE or use VOICEMENU to interact with buttons。"
+		"chi"		"你只能看到制造噪音的玩家。\n你可以说话来欺骗人类。\n你的生命值越差，你会变得越快。\n按 ATTACK2，ATTACK3，USE 或使用 VOICEMENU 与按钮互动。"
 	}
 	"class_scp9392"
 	{
@@ -512,11 +512,11 @@
 	}
 	"desc_scp9392"
 	{
-		"chi"		"Kill everyone。\nPrevent escape。\nCooperate with other SCPs。\nYou can talk to other humans。"
+		"chi"		"杀死所有人类\n阻止人类逃离\n与其他 SCP 合作\n你可以与其他人类交谈"
 	}
 	"train_scp9392"
 	{
-		"chi"		"You can only see targets making noise。\nYou can trick players by talking to them。\nYou'll get faster with less health you have。\nPress ATTACK2， ATTACK3， USE or use VOICEMENU to interact with buttons。"
+		"chi"		"你只能看到制造噪音的玩家。\n你可以说话来欺骗人类。\n你的生命值越差，你会变得越快。\n按 ATTACK2，ATTACK3，USE 或使用 VOICEMENU 与按钮互动。"
 	}
 	"class_scp3008"
 	{
@@ -524,11 +524,11 @@
 	}
 	"desc_scp3008"
 	{
-		"chi"		"Kill everyone during the night。\nCooperate with other SCP-3008-2。\nYou can talk to other humans。"
+		"chi"		"趁着黑夜杀死所有人\n与其他 SCP-3008-2 合作\n你可以与其他人类交谈"
 	}
 	"train_scp3008"
 	{
-		"chi"		"Make sure your customers are enjoying themselves。\nAlso make sure they leave during closing hours。\nUse brute force if needed。\nPress ATTACK2， ATTACK3， USE or use VOICEMENU to interact with buttons。"
+		"chi"		"确保你的顾客享受购物。\n并确保他们在关门时间离开商场。\n如有需要可使用强制力量。\n按 ATTACK2，ATTACK3，USE 或使用 VOICEMENU 与按钮互动。"
 	}
 	"class_itsteals"
 	{
@@ -536,11 +536,11 @@
 	}
 	"desc_itsteals"
 	{
-		"chi"		"Kill everyone。\nAttack from behind avoid being seen。"
+		"chi"		"杀死所有人\n从背后攻击来避免被看见"
 	}
 	"train_itsteals"
 	{
-		"chi"		"Look around for players。\nMore times you get hit by a player， the more rage you gain。\nAfter a certain amount of times， you'll have enough。"
+		"chi"		"在四处寻找玩家。\n你被玩家击中的次数越多，你获得的愤怒就越多。\n经过一定的时间，你就会受够了。"
 	}
 	"class_sjm08"
 	{
@@ -548,22 +548,22 @@
 	}
 	"desc_sjm08"
 	{
-		"chi"		"A tech demo character。\nYour not normally supposed to play this unless forced by an admin。"
+		"chi"		"技术演示角色\n除非管理员强制，否则你通常不应该玩这个角色"
 	}
 
 	// Weapon Phrases
 
 	"weapon_0"
 	{
-		"chi"		"Unknown"
+		"chi"		"未知"
 	}
 	"weapon_5"
 	{
-		"chi"		"None"
+		"chi"		"无"
 	}
 	"info_5"
 	{
-		"chi"		"It's your fists， they don't do much。"
+		"chi"		"是你的拳头，没什么作用"
 	}
 	"weapon_192"
 	{
@@ -651,7 +651,7 @@
 	}
 	"info_751"
 	{
-		"chi"		"Weaker then the bunch but saves you some bullets when your on a budget。 "
+		"chi"		"比那群人更弱，但在你有预算的时候可以省下一些子弹"
 	}
 	"weapon_1150"	// Backwards Compatibility
 	{
@@ -659,7 +659,7 @@
 	}
 	"info_1150"
 	{
-		"chi"		"Your personal rifle when you need it in a punch。"
+		"chi"		"当你需要打架时，你所需的私人步枪"
 	}
 	"weapon_203"
 	{
@@ -667,7 +667,7 @@
 	}
 	"info_203"
 	{
-		"chi"		"Your personal SMG when you need it in a punch。"
+		"chi"		"当你需要打架时，你所需的SMG"
 	}
 	"weapon_425"
 	{
@@ -675,7 +675,7 @@
 	}
 	"info_425"
 	{
-		"chi"		"The rifle when you want to get rid of some nasty [REDACTED]。"
+		"chi"		"当你想除掉一些讨厌的 [以编辑] 东西时，你可以用这个步枪"
 	}
 	"weapon_415"
 	{
@@ -715,7 +715,7 @@
 	}
 	"info_61"
 	{
-		"chi"		"For when you need the distance and the precision。"
+		"chi"		"当你需要距离和精度的时候"
 	}
 	"weapon_201"
 	{
@@ -723,15 +723,15 @@
 	}
 	"info_201"
 	{
-		"chi"		"When your tired being asked ''Do you need help?''。"
+		"chi"		"当被问烦“你需要帮助吗？”"
 	}
 	"weapon_423"
 	{
-		"chi"		"The Saxxy"
+		"chi"		"小金人"
 	}
 	"info_423"
 	{
-		"chi"		"The actual best melee in the game， just mind the loud noise。"
+		"chi"		"这是游戏中最棒的近战，注意噪音"
 	}
 	"weapon_58"
 	{
@@ -775,7 +775,7 @@
 	}
 	"weapon_205"
 	{
-		"chi"		"Smoothy Maker"
+		"chi"		"冰沙机"
 	}
 	"info_205"
 	{
@@ -799,27 +799,27 @@
 	}
 	"weapon_25"
 	{
-		"chi"		"Construction PDA"
+		"chi"		"建造工具"
 	}
 	"info_25"
 	{
-		"chi"		"Anti-SCP Sentries， Dispensers， Two-Way Teleporters。"
+		"chi"		"反SCP型步哨枪，补给器，双向传送装置。"
 	}
 	"weapon_26"
 	{
-		"chi"		"Destruction PDA"
+		"chi"		"拆除工具"
 	}
 	"info_26"
 	{
-		"chi"		"You can't pick up buildings but you can use this。"
+		"chi"		"你不能搬起建筑物但你可以用这个。"
 	}
 	"weapon_28"
 	{
-		"chi"		"Building"
+		"chi"		"建筑"
 	}
 	"info_28"
 	{
-		"chi"		"%%+attack%% already"
+		"chi"		"%%+attack%% 按下就行"
 	}
 	"weapon_30001"
 	{
@@ -875,7 +875,7 @@
 	}
 	"info_30007"
 	{
-		"chi"		"Go anywhere except SCP-106， Comms， Warhead， and the Micro H.I.D."
+		"chi"		"能去任何地方，除了 SCP-106、通讯、导弹和微型 H.I.D."
 	}
 	"weapon_30008"
 	{
@@ -883,7 +883,7 @@
 	}
 	"info_30008"
 	{
-		"chi"		"Go anywhere except SCP-106， Comms， and Warhead"
+		"chi"		"能去任何地方，除了 SCP-106、通讯和导弹"
 	}
 	"weapon_30009"
 	{
@@ -891,7 +891,7 @@
 	}
 	"info_30009"
 	{
-		"chi"		"Go anywhere except the gates and armory。"
+		"chi"		"能去任何地方，除了大门和武器库"
 	}
 	"weapon_30010"
 	{
@@ -899,7 +899,7 @@
 	}
 	"info_30010"
 	{
-		"chi"		"Go anywhere except the armory。"
+		"chi"		"能去任何地方，除了武器库"
 	}
 	"weapon_30011"
 	{
@@ -907,7 +907,7 @@
 	}
 	"info_30011"
 	{
-		"chi"		"Go anywhere except the SCP-106 room。"
+		"chi"		"能去任何地方，除了 SCP-106 房间。"
 	}
 	"weapon_30012"
 	{
@@ -923,7 +923,7 @@
 	}
 	"info_30013"
 	{
-		"chi"		"%%+attack%% to use and gain health regeneration。"
+		"chi"		"%%+attack%% 使用获得生命值再生"
 	}
 	"weapon_30014"
 	{
@@ -931,7 +931,7 @@
 	}
 	"info_30014"
 	{
-		"chi"		"%%+attack%% to use and gain back half your max health。"
+		"chi"		"%%+attack%% 使用获得恢复一半生命值"
 	}
 	"weapon_30015"
 	{
@@ -939,7 +939,7 @@
 	}
 	"info_30015"
 	{
-		"chi"		"%%+attack%% to use and gain unlimited sprint and health regeneration。"
+		"chi"		"%%+attack%% 使用获得无限冲刺和生命再生"
 	}
 	"weapon_30016"
 	{
@@ -947,7 +947,7 @@
 	}
 	"info_30016"
 	{
-		"chi"		"This allows you to speak to others at a longer range。\nPressing will toggle it's range and power consumption。\nYou only need to pull it out when you need to change the range。"
+		"chi"		"这使您可以在更远的范围内与他人交谈。\n按下将切换其范围和功耗。\n只有在需要更改范围时才需要将其拿出。"
 	}
 	"weapon_30017"
 	{
@@ -955,7 +955,7 @@
 	}
 	"info_30017"
 	{
-		"chi"		"%%+attack%% to use restore health and gain health regneration。"
+		"chi"		"%%+attack%% 使用恢复生命值和生命再生"
 	}
 	"weapon_46"
 	{
@@ -963,7 +963,7 @@
 	}
 	"info_46"
 	{
-		"chi"		"%%+attack%% to use restore health and increase your movement speed。\nYou passively lose health over time until you take SCP-500。"
+		"chi"		"%%+attack%% 使用来恢复生命值和增加移动速度\n你缓慢失去生命值直到你使用 SCP-500"
 	}
 	"weapon_30018"
 	{
@@ -971,7 +971,7 @@
 	}
 	"info_30018"
 	{
-		"chi"		"%%+attack%% to break down a door in front of you。"
+		"chi"		"%%+attack%% 使用来破坏你面前的门"
 	}
 	"weapon_107"
 	{
@@ -979,7 +979,7 @@
 	}
 	"info_107"
 	{
-		"chi"		"%%+attack%% to become invisible for 15 seconds。"
+		"chi"		"%%+attack%% 使用变得无敌15秒"
 	}
 	"weapon_30019"
 	{
@@ -1078,15 +1078,15 @@
 
 	"menu_helpclass"
 	{
-		"chi"		"Class Info"
+		"chi"		"职业信息"
 	}
 	"menu_preference"
 	{
-		"chi"		"SCP Preference"
+		"chi"		"SCP 偏好"
 	}
 	"menu_colorblind"
 	{
-		"chi"		"Color Blind Mode"
+		"chi"		"色盲模式"
 	}
 	"Red"
 	{
@@ -1167,7 +1167,7 @@
 	"goodkarma"	// Game
 	{
 		"chi"		"干得漂亮，你的道德值提高了"
-	}	
+	}
 	"radar"	// HUD
 	{
 		"chi"		"雷达就绪 [RELOAD]"
@@ -1183,7 +1183,7 @@
 	"kill_counter"	// HUD
 	{
 		"chi"		"击杀: {1}\n剩余人类: {2}"
-	}	
+	}
 	"end_screen"	// HUD
 	{
 		"chi"		"{1}\n \n已逃离的 D 级人员: {2} / {3}\n存活的科学家: {4} / {5}\n无效化的 SCP: {6} / {7}"
@@ -1191,7 +1191,7 @@
 	"end_screen_vip" // HUD
 	{
 		"chi"		"{1}\n \n已逃离的 D 级人员: {2} / {3} ({4} 被俘)\n已逃离的科学家: {5} / {6} ({7} 被俘)\n已失效的 SCP: {8} / {9}"
-	}	
+	}
 	"end_screen_boss"	// HUD
 	{
 		"chi"		"{1}\n \n存活的玩家: {2} / {3}"
@@ -1202,7 +1202,7 @@
 	}
 	"femur_breaker"	// Chat
 	{
-		"chi"		"Femur Breaker"
+		"chi"		"股骨断路器"
 	}
 	"alpha_warhead"	// Chat
 	{
@@ -1210,7 +1210,7 @@
 	}
 	"light_decontamination"	// Chat
 	{
-		"chi"		"Light Decontamination"
+		"chi"		"轻收容区净化器"
 	}
 	"redacted"	// Chat， Hint
 	{
@@ -1289,15 +1289,15 @@
 	}
 	"class_ikea3"
 	{
-		"chi"		"Camp Leader Survivor"
+		"chi"		"营地领袖幸存者"
 	}
 	"desc_ikea3"
 	{
-		"chi"		"Search during the day。 Survive during night。\nTry to find your escape。\nAssist in other survivors' escape。"
+		"chi"		"在白天搜索。并活过夜晚\n尝试找到出口\n协助其他幸存者逃出"
 	}
 	"train_ikea3"
 	{
-		"chi"		"Find weapons， ammo， and other supplies during the day。\nSurvive against Ikea Employees during the night。\nCooperate with other survivors。\nFind your escape when it's available。\nPress ATTACK2， USE or use VOICEMENU to interact with items。"
+		"chi"		"在白天找到武器，弹药，和其他补给品。\n在夜晚对抗宜家雇员中。\n与其他幸存者合作。\n可以的话找到出口。\n按 ATTACK2，USE 或使用 VOICEMENU 来跟物品互动。"
 	}
 	"class_scp3008"
 	{
@@ -1305,11 +1305,11 @@
 	}
 	"desc_scp3008"
 	{
-		"chi"		"Assist customers during the day。\nMake sure they leave during the night。\nCooperate with other SCPs。"
+		"chi"		"在白天帮助顾客\n确保他们在夜晚离开\n与其他 SCP 合作Cooperate with other SCPs。"
 	}
 	"train_scp3008"
 	{
-		"chi"		"Your harmless during the day unless attacked。\nDuring the night you can attack until day。\nKill survivor any classes when you can。"
+		"chi"		"你在白天无害，除非被攻击。\n在夜晚你可以攻击直到白天。\n尽可能杀死任何职业的幸存者。"
 	}
 	"ikea_win"
 	{

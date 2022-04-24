@@ -343,7 +343,7 @@ public Action Timer_DissolveRagdoll(Handle timer, any userid)
 	return Plugin_Continue;
 }
 
-int DissolveRagdoll(int ragdoll)
+void DissolveRagdoll(int ragdoll)
 {
 	int dissolver = CreateEntityByName("env_entity_dissolver");
 	if(dissolver == -1)
@@ -403,6 +403,7 @@ public Action Timer_RemoveEntity(Handle timer, any entid)
 		TeleportEntity(entity, OFF_THE_MAP, NULL_VECTOR, NULL_VECTOR); // send it away first in case it feels like dying dramatically
 		AcceptEntityInput(entity, "Kill");
 	}
+	return Plugin_Continue;
 }
 
 stock int CheckRoundState()
@@ -468,7 +469,7 @@ float fixAngle(float angle)
 	return angle;
 }
 
-float GetVectorAnglesTwoPoints(const float startPos[3], const float endPos[3], float angles[3])
+void GetVectorAnglesTwoPoints(const float startPos[3], const float endPos[3], float angles[3])
 {
 	static float tmpVec[3];
 	tmpVec[0] = endPos[0] - startPos[0];
@@ -584,35 +585,6 @@ stock int TF2_GetWeaponAmmo(int client, int weapon)
 		return GetEntProp(client, Prop_Send, "m_iAmmo", _, ammotype);
 	
 	return -1;
-}
-
-stock int TF2_GetItemSlot(int index, TFClassType class)
-{
-	int slot = TF2Econ_GetItemLoadoutSlot(index, class);
-	if(slot == 9)
-	{
-		slot = TFWeaponSlot_PDA;
-	}
-	else if(class == TFClass_Engineer)
-	{
-		switch(slot)
-		{
-			case 4: slot = TFWeaponSlot_PDA;		//Toolbox
-			case 5: slot = TFWeaponSlot_Grenade;	//Construction PDA
-			case 6: slot = TFWeaponSlot_Building;	//Destruction PDA
-		}
-	}
-	else if(class == TFClass_Spy)
-	{
-		switch(slot)
-		{
-			case 1: slot = TFWeaponSlot_Primary;	//Revolver
-			case 4: slot = TFWeaponSlot_Secondary;	//Sapper
-			case 5: slot = TFWeaponSlot_Grenade;	//Disguise Kit
-			case 6: slot = TFWeaponSlot_Building;	//Invis Watch
-		}
-	}
-	return slot;
 }
 
 stock int TF2_GetClassnameSlot(const char[] classname)
@@ -1044,7 +1016,7 @@ stock int PrecacheModelEx(const char[] model, bool preload=false)
 
 stock int PrecacheSoundEx(const char[] sound, bool preload=false)
 {
-	static const char soundchars[] = { '*', '#', '@', '>', '<', '^', ')', '}', '$' };
+	static int soundchars[] = { '*', '#', '@', '>', '<', '^', ')', '}', '$' };
 
 	char buffer[PLATFORM_MAX_PATH];
 	strcopy(buffer, sizeof(buffer), sound);
@@ -1649,4 +1621,46 @@ bool IsPointTouchingBox(float pos[3], float mins[3], float maxs[3])
 		return false;
 		
 	return true;
+}
+
+int StringtToCharArray(Address stringt, char[] buffer, int maxlen)
+{
+	if (stringt == Address_Null)
+	{
+		buffer[0] = '\0';
+		return 0;
+	}
+
+	if (maxlen <= 0) 
+	{
+		ThrowError("Buffer size is negative or zero");
+	}
+
+	int max = maxlen-1;
+	int i = 0;
+	for (; i < max; i++) 
+	{
+		if ((buffer[i] = view_as<char>(LoadFromAddress(stringt + view_as<Address>(i), NumberType_Int8))) == '\0') 
+		{
+			return i;
+		}
+	}
+
+	buffer[i] = '\0';
+	return i;
+}
+
+void TriggerRelays(const char[] name)
+{
+	int entity = MaxClients+1;
+	while ((entity = FindEntityByClassname(entity, "logic_relay")) > MaxClients)
+	{
+		char entityname[32];
+		GetEntPropString(entity, Prop_Data, "m_iName", entityname, sizeof(entityname));
+		if (StrEqual(entityname, name, false))
+		{
+			AcceptEntityInput(entity, "Trigger");
+			break;
+		}
+	}
 }

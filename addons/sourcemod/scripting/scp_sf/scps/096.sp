@@ -97,7 +97,8 @@ public Action SCP096_OnTakeDamage(int client, int attacker, int &inflictor, floa
 			return Plugin_Changed;
 		}
 	}
-	else if(Triggered[attacker]<2 && !TF2_IsPlayerInCondition(client, TFCond_Dazed))
+	// don't allow stunned players or SCPs to trigger shy guy, the latter can occur when friendlyfire is on
+	else if(Triggered[attacker]<2 && !TF2_IsPlayerInCondition(client, TFCond_Dazed) && !IsFriendly(Client[client].Class, Client[attacker].Class))
 	{
 		TriggerShyGuy(client, attacker, true);
 	}
@@ -142,10 +143,13 @@ public bool SCP096_DoorWalk(int client, int entity)
 {
 	if(Client[client].Extra2 == 2)
 	{
-		static char buffer[16];
-		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
-		if(!StrContains(buffer, "scp", false))
-			AcceptEntityInput(entity, "FireUser1", client, client);
+		if (!DestroyOrOpenDoor(entity))
+		{
+			static char buffer[16];
+			GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
+			if(!StrContains(buffer, "scp", false))
+				AcceptEntityInput(entity, "FireUser1", client, client);
+		}
 	}
 	return true;
 }
@@ -263,18 +267,27 @@ public void SCP096_OnButton(int client, int button)
 
 			static float pos2[3];
 			GetClientEyePosition(target, pos2);
-			if(GetVectorDistance(pos1, pos2, true) > 499999)
+			// 1024 units
+			if(GetVectorDistance(pos1, pos2, true) > 1048576.0)
 				continue;
-
+			
 			static float ang2[3], ang3[3];
 			GetClientEyeAngles(target, ang2);
-			GetVectorAnglesTwoPoints(pos2, pos1, ang3);
 
 			// fix all angles
 			ang2[0] = fixAngle(ang2[0]);
 			ang2[1] = fixAngle(ang2[1]);
+			
+			// check if we are looking at each other
+			float fwd1[3], fwd2[3];
+			GetAngleVectors(ang1, fwd1, NULL_VECTOR, NULL_VECTOR);
+			GetAngleVectors(ang2, fwd2, NULL_VECTOR, NULL_VECTOR);
+			if (GetVectorDotProduct(fwd1, fwd2) > -0.05)
+				continue;
+			
+			GetVectorAnglesTwoPoints(pos2, pos1, ang3);			
 			ang3[0] = fixAngle(ang3[0]);
-			ang3[1] = fixAngle(ang3[1]);
+			ang3[1] = fixAngle(ang3[1]);			
 
 			// verify angle validity
 			if(!(fabs(ang2[0] - ang3[0]) <= MAXANGLEPITCH ||

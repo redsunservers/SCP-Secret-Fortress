@@ -59,6 +59,10 @@ public void OnEntityCreated(int entity, const char[] classname)
 	{
 		SDKHook(entity, SDKHook_Spawn, OnPipeSpawned);
 	}
+	else if(StrEqual(classname, "func_door"))
+	{
+		SDKHook(entity, SDKHook_Spawn, OnDoorSpawned);
+	}	
 }
 
 public void OnSmallHealthSpawned(int entity)
@@ -315,13 +319,30 @@ public Action OnPipeTouch(int entity, int client)
 	return IsValidClient(client) ? Plugin_Handled : Plugin_Continue;
 }
 
+public Action OnDoorSpawned(int entity)
+{
+	SDKHook(entity, SDKHook_StartTouch, OnDoorTouch);
+	return Plugin_Continue;
+}
+
+public Action OnDoorTouch(int entity, int client)
+{
+	if (IsValidClient(client))
+	{
+		// ignore the result, this is only called so scps like 096 can destroy doors when touching them
+		Classes_OnDoorWalk(client, entity);	
+	}
+	
+	return Plugin_Continue;
+}
+
 public void OnPlayerManagerThink(int entity) 
 {
 	static int scoreOffset = -1;
 	if (scoreOffset == -1) 
 		scoreOffset = FindSendPropInfo("CTFPlayerResource", "m_iTotalScore");
 
-	if (CvarKarma.BoolValue)
+	if (CvarKarma.BoolValue && !SZF_Enabled())
 	{
 		static int scoreLevels[MAXPLAYERS+1];
 		int MinKarma = CvarKarmaMin.IntValue;
@@ -347,6 +368,9 @@ public void OnPlayerManagerThink(int entity)
 	}
 }
 
+// prevent exploits if attacker dies and kills someone afterwards (e.g. grenade)
+int DamageSavedClass = -1;
+
 public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
 	if(!Enabled)
@@ -357,34 +381,58 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	int activeWeapon = GetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon");
 	if (activeWeapon>MaxClients)
 		Client[victim].PreDamageWeapon = EntIndexToEntRef(activeWeapon);
-
+	
 	bool validAttacker = IsValidClient(attacker);
-	int savedclass = -1;
-	if(!validAttacker && victim!=attacker)
+	DamageSavedClass = -1;
+	if(victim!=attacker)
 	{
-		static char classname[64];
-		if(inflictor>MaxClients && GetEntityClassname(inflictor, classname, sizeof(classname)) && StrEqual(classname, "env_explosion"))
+		char classname[16];
+		if(inflictor>MaxClients && GetEntityClassname(inflictor, classname, sizeof(classname)))
 		{
-			attacker = GetOwnerLoop(attacker);
-			validAttacker = IsValidClient(attacker);
-			// grenade owner might have died and have a different class, so make sure we are using the correct saved class
-			savedclass = GetEntProp(inflictor, Prop_Data, "m_iHammerID");
+			if (StrEqual(classname, "taunt_soldier")) // frag
+			{
+				if (!validAttacker)
+				{
+					attacker = GetOwnerLoop(attacker);
+					validAttacker = IsValidClient(attacker);
+				}
+				// grenade owner might have died and have a different class, so make sure we are using the correct saved class
+				DamageSavedClass = GetEntProp(inflictor, Prop_Data, "m_iHammerID");
+			}
+			else if (StrEqual(classname, "deflect_ball")) // scp18
+			{
+				// same reason as above
+				DamageSavedClass = GetEntProp(inflictor, Prop_Data, "m_iHammerID");
+			}
 		}
 	}
 
 	bool changed;
 	if(validAttacker && victim!=attacker)
 	{
-		if(IsFriendly(Client[victim].Class, (savedclass == -1) ? Client[attacker].Class : savedclass))
+		// if we have no saved class, grab our attacker's current class
+		if (DamageSavedClass == -1)
+			DamageSavedClass = Client[attacker].Class;
+		
+		if(IsFriendly(Client[victim].Class, DamageSavedClass))
 		{
 			if(!CvarFriendlyFire.BoolValue && !IsFakeClient(victim))
 				return Plugin_Handled;
 			
-			damage *= 0.4;
+			// friendlyfire is pointless in SZF
+			if (SZF_Enabled())
+				return Plugin_Handled;
+			
+			// do not allow friendlyfire between SCPs
+			if (IsSCP(victim) && IsSCP(attacker))
+				damage = 0.0;
+			else
+				damage *= 0.4;
+				
 			changed = true;
 		}
 
-		if (CvarKarma.BoolValue)
+		if (CvarKarma.BoolValue && !SZF_Enabled() && !IsSCP(attacker))
 		{
 			float karma = Classes_GetKarma(attacker) * 0.01;
 			if (karma < 1.0)
@@ -472,25 +520,29 @@ public void OnTakeDamageAlivePost(int victim, int attacker, int inflictor, float
 	if (!IsValidClient(attacker) || (victim == attacker))
 		return;	
 
+	bool karma_enabled = CvarKarma.BoolValue && !SZF_Enabled();
 	int health = GetClientHealth(victim);
 	int checked = 0;
 
 	// this damage will cause the player to die
 	if (health <= 0)
 	{
-		if (IsBadKill(victim, attacker))
+		if (IsBadKill(victim, attacker, DamageSavedClass))
 		{
 			Client[attacker].BadKills++;
 
-			BfWrite bf = view_as<BfWrite>(StartMessageOne("HudNotifyCustom", attacker));
-			if(bf)
+			if (karma_enabled)
 			{
-				char buffer[64];
-				FormatEx(buffer, sizeof(buffer), "%T", "badkill", attacker);
-				bf.WriteString(buffer);
-				bf.WriteString("ico_demolish");
-				bf.WriteByte(0);
-				EndMessage();
+				BfWrite bf = view_as<BfWrite>(StartMessageOne("HudNotifyCustom", attacker));
+				if(bf)
+				{
+					char buffer[64];
+					FormatEx(buffer, sizeof(buffer), "%T", "badkill", attacker);
+					bf.WriteString(buffer);
+					bf.WriteString("ico_demolish");
+					bf.WriteByte(0);
+					EndMessage();
+				}
 			}
 
 			checked = 2;
@@ -504,10 +556,10 @@ public void OnTakeDamageAlivePost(int victim, int attacker, int inflictor, float
 		// don't mess up the calculations
 		health = 0;
 	}
-
-	// apply a karma penalty for this damage if possible
-	if (!CvarKarma.BoolValue)
-		return;	
+	
+	// If karma isn't enabled then we don't need to proceed further here
+	if (!karma_enabled)
+		return;
 
 	if (Client[victim].PreDamageHealth <= health)
 		return; // no damage or healed
@@ -522,13 +574,50 @@ public void OnTakeDamageAlivePost(int victim, int attacker, int inflictor, float
 		return;	
 
 	// compensate for the other player's karma
-	float victimkarma = Classes_GetKarma(victim);
-	penaltyamount = RoundFloat(float(penaltyamount) * (victimkarma * 0.01));
+	// don't apply this for friendlyfire damage though
+	// removed: this makes karma too lenient
+	float victimkarmaratio = 1.0;
+	//if (!IsFriendly(Client[victim].Class, DamageSavedClass))
+	//{
+	//	float victimkarma = Classes_GetKarma(victim);
+	//	victimkarmaratio = (victimkarma * 0.01);
+	//	penaltyamount = RoundFloat(float(penaltyamount) * victimkarmaratio);
+	//}
 	
-	if ((checked == 2) || ((checked == 0) && IsBadKill(victim, attacker)))
+	if ((checked == 2) || ((checked == 0) && IsBadKill(victim, attacker, DamageSavedClass)))
 	{
 		// karma is applied per damage rather than per kill so players cant shoot others to lowest health possible and get away with it
-		Classes_ApplyKarmaDamage(attacker, penaltyamount);	
+		Classes_ApplyKarmaDamage(attacker, victim, penaltyamount);	
+		
+		if (health == 0)
+		{
+			// on kill, apply any karma deduction that wasn't added previously from damage
+			// this ensures the killer is given a full karma penalty 
+			// this prevents exploiting the system by killing a player already at low HP
+			// as you would technically deal little damage and hence get little penalty
+		
+			float karma = Classes_GetKarma(attacker);
+			float karmaPoints = Client[attacker].KarmaPoints[victim];
+			float karmaMin = CvarKarmaMin.FloatValue;
+			float prevkarma = karma;
+			
+			// lose 5 more karma for friendlyfire kills
+			if (IsFriendly(Client[victim].Class, DamageSavedClass))
+				karmaPoints += 5.0;
+				
+			// hack: this compensates for miniscule precision errors
+			if (karmaPoints > 0.01)
+			{
+				karma -= karmaPoints * victimkarmaratio;
+				if (karma < karmaMin)
+					karma = karmaMin;
+
+				if (prevkarma != karma)
+					Classes_SetKarma(attacker, karma);
+			}
+			
+			Client[attacker].KarmaPoints[victim] = 0.0;
+		}
 	}
 }
 

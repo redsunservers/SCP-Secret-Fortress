@@ -32,6 +32,9 @@ This plugin uses different features which may cause some other plugins to misbeh
 [Goomba Stomp](https://github.com/Flyflo/SM-Goomba-Stomp "Flyflo/SM-Goomba-Stomp") (Restricted to SCP classes)
 
 ## Credits:
+ficool2 - Custom viewmodels / gibs, karma system, SCP-18, gameplay changes/bugfixes
+[GitHub Profile](https://github.com/ficool2 "ficool2")
+
 Mikusch - Many many related DHooks and SDKCalls  
 [GitHub Profile](https://github.com/Mikusch "Mikusch") - [Fortress Royale](https://github.com/Mikusch/fortress-royale "Team Fortress 2 battle royale gamemode")
 

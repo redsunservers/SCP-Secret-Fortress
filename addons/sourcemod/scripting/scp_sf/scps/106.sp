@@ -58,37 +58,42 @@ public void SCP106_OnKill(int client, int victim)
 
 public Action SCP106_OnDealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	SetEntPropFloat(client, Prop_Send, "m_flNextAttack", GetGameTime()+2.0);
-
-	int entity = -1;
-	ArrayList spawns = new ArrayList();
-	while((entity=FindEntityByClassname(entity, "info_target")) != -1)
+	// don't teleport other scps, this can happen with friendlyfire is on
+	if (!IsFriendly(Client[client].Class, Client[victim].Class))
 	{
-		static char name[16];
-		GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
-		if(!StrContains(name, "scp_pocket", false))
-			spawns.Push(entity);
-	}
+		SetEntPropFloat(client, Prop_Send, "m_flNextAttack", GetGameTime()+2.0);
 
-	int length = spawns.Length;
-	if(length)
-		entity = spawns.Get(GetRandomInt(0, length-1));
+		int entity = -1;
+		ArrayList spawns = new ArrayList();
+		while((entity=FindEntityByClassname(entity, "info_target")) != -1)
+		{
+			static char name[16];
+			GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
+			if(!StrContains(name, "scp_pocket", false))
+				spawns.Push(entity);
+		}
 
-	delete spawns;
+		int length = spawns.Length;
+		if(length)
+			entity = spawns.Get(GetRandomInt(0, length-1));
 
-	if(entity != -1)
-	{
-		static float pos[3];
-		GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
-		TeleportEntity(victim, pos, NULL_VECTOR, TRIPLE_D);
-		Client[client].ThinkIsDead[victim] = true;
+		delete spawns;
+
+		if(entity != -1)
+		{
+			static float pos[3];
+			GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
+			TeleportEntity(victim, pos, NULL_VECTOR, TRIPLE_D);
+			Client[client].ThinkIsDead[victim] = true;
+		}
+		else if(GetRandomInt(0, 2))
+		{
+			damage *= 2.0;
+			damagetype |= DMG_CRIT;
+			return Plugin_Changed;
+		}
 	}
-	else if(GetRandomInt(0, 2))
-	{
-		damage *= 2.0;
-		damagetype |= DMG_CRIT;
-		return Plugin_Changed;
-	}
+	
 	return Plugin_Continue;
 }
 

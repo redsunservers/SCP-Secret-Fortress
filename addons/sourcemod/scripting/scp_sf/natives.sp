@@ -51,6 +51,7 @@ public any Native_StartMusic(Handle plugin, int numParams)
 	}
 
 	NoMusicRound = false;
+	return 0;
 }
 
 public any Native_StopMusic(Handle plugin, int numParams)
@@ -80,6 +81,7 @@ public any Native_StopMusic(Handle plugin, int numParams)
 		}
 		NoMusicRound = false;
 	}
+	return 0;
 }
 
 public any Native_CanTalkTo(Handle plugin, int numParams)
@@ -99,14 +101,15 @@ public any Native_GetChatTag(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
 	if(client<0 || client>=MAXTF2PLAYERS)
-		return;
+		return 0;
 
 	int target = GetNativeCell(2);
 	if(target<0 || target>=MAXTF2PLAYERS)
-		return;
+		return 0;
 
 	int length = GetNativeCell(4);
 	char[] buffer = new char[length];
 	GetClientChatTag(client, target, buffer, length);
 	SetNativeString(3, buffer, length);
+	return 0;
 }

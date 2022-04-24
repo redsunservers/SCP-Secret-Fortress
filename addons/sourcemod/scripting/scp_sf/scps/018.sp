@@ -8,8 +8,8 @@ static const float SCP18VelocityBoost = 40.0;
 static const float SCP18GravityFactor = 0.5;
 static const float SCP18GravityAccelTime = 3.0;
 static const float SCP18MaxVelocity = 10000.0;
-static const float SCP18MaxDamage = 1000.0;
-static const float SCP18Lifetime = 20.0;
+static const float SCP18MaxDamage = 1200.0;
+static const float SCP18Lifetime = 30.0;
 
 enum struct SCP18Enum
 {
@@ -22,7 +22,7 @@ enum struct SCP18Enum
 	float Magnitude;
 	float Position[3];
 	float Velocity[3];
-	int ClientHits[MAXPLAYERS];
+	int ClientHits[MAXTF2PLAYERS];
 }
 
 // list of all scp 18 entities
@@ -49,7 +49,23 @@ SCP18Enum SCP18Trace;
 
 float SCP18Damage;
 float SCP18Volume;
+float SCP18Magnitude;
 int SCP18Pitch;
+
+public Action Timer_SCP18Damage(Handle timer, DataPack pack)
+{
+	pack.Reset();
+	int client = GetClientOfUserId(pack.ReadCell());
+	int entindex = EntRefToEntIndex(pack.ReadCell());
+	if ((entindex > MaxClients) && IsValidClient(client) && IsClientInGame(client) && IsPlayerAlive(client))
+	{
+		int thrower = pack.ReadCell();
+		float damage = pack.ReadFloat();
+		SDKHook_DealDamage(client, entindex, thrower, damage, DMG_CLUB);
+	}
+
+	return Plugin_Continue;
+}
 
 public bool SCP18_Trace(int entity, int mask)
 {
@@ -59,27 +75,66 @@ public bool SCP18_Trace(int entity, int mask)
 		if (SCP18Trace.ClientHits[entity] != SCP18Trace.Bounces)
 		{
 			if ((entity == SCP18Trace.Thrower) || SCP18FriendlyFire || !IsFriendly(Client[entity].Class, SCP18Trace.Class) || IsFakeClient(entity))
-			{
-				SDKHooks_TakeDamage(entity, SCP18Trace.EntIndex, SCP18Trace.Thrower, SCP18Damage, DMG_CLUB);
+			{		
+				// NOTE: Killing players during OnGameTrace will cause a bizarre and misleading crash!
+				// Hence they are instead killed via a timer. This took HOURS to figure out
+				
+				//SDKHooks_TakeDamage(entity, SCP18Trace.EntIndex, SCP18Trace.Thrower, SCP18Damage, DMG_CLUB);
+				
+				DataPack pack;
+				CreateDataTimer(0.1, Timer_SCP18Damage, pack, TIMER_FLAG_NO_MAPCHANGE);
+				pack.WriteCell(GetClientUserId(entity));
+				pack.WriteCell(SCP18Trace.EntRef);
+				pack.WriteCell(SCP18Trace.Thrower);
+				pack.WriteFloat(SCP18Damage);
+				
 				SCP18Trace.ClientHits[entity] = SCP18Trace.Bounces;
 				
-				EmitSoundToAll(SCP18ClientHitSound, entity, SNDCHAN_BODY, SNDLEVEL_NORMAL, _, SCP18Volume, SCP18Pitch);				
+				EmitSoundToAll(SCP18ClientHitSound, entity, SNDCHAN_BODY, SNDLEVEL_NORMAL, _, SCP18Volume, SCP18Pitch);	
 			}
 		}
 	}
-	
-	// TODO: door destruction logic
-	//char buffer[8];
-	//// anything prefixed with func_ can be safely regarded as a brush entity
-	//return (GetEntityClassname(entity, buffer, sizeof(buffer)) && (!strncmp(buffer, "func_", 5, false)));
 	
 	// keep going
 	return true;
 }
 
+public bool SCP18_TraceWorld(int entity, int mask)
+{
+	// world
+	if (!entity)
+		return true;
+	
+	// If its not a brush entity, just pass through it
+	char buffer[10];
+	if ((GetEntityClassname(entity, buffer, sizeof(buffer)) && (strncmp(buffer, "func_", 5, false)))) 
+		return false;
+	
+	if (SCP18Magnitude < 1000.0)
+	{
+		// Bounce off brush entities at low velocity
+		return true;
+	}
+
+	if (!strncmp(buffer, "func_door", 9, false))
+	{
+		// If we hit a door entity at high velocity, try destroy or force it open
+		if (!DestroyOrOpenDoor(entity))
+		{	
+			// *Don't* pass through if we couldn't destroy or force open
+			// This allows it to stay trapped in a elevator	
+			return true; 
+		}
+	}
+
+	// Pass through...
+	return false;
+}
+
 public void SCP18_TryTouchTeleport(float mins[3], float maxs[3], float dest[3])
 {
 	int count = SCP18List.Length;
+	
 	for (int i = 0; i < count; i++)
 	{
 		SCP18Enum scp18;
@@ -87,8 +142,13 @@ public void SCP18_TryTouchTeleport(float mins[3], float maxs[3], float dest[3])
 		
 		if (IsPointTouchingBox(scp18.Position, mins, maxs))
 		{
-			CopyVector(dest, scp18.Position);
-			SCP18List.SetArray(i, scp18);
+			scp18.EntIndex = EntRefToEntIndex(scp18.EntRef);
+			if (scp18.EntIndex > MaxClients)
+			{
+				TeleportEntity(scp18.EntIndex, dest, NULL_VECTOR, NULL_VECTOR);
+				CopyVector(dest, scp18.Position);
+				SCP18List.SetArray(i, scp18);
+			}
 		}
 	}
 }
@@ -156,9 +216,9 @@ public void SCP18_Tick()
 		AddVectors(position, velocity, nextposition);
 		
 		// trace from current position to next predicted position, ignore any players
-		TR_TraceRayFilter(position, nextposition, MASK_SOLID, RayType_EndPoint, Trace_WorldAndBrushes);
+		SCP18Magnitude = scp18.Magnitude; // store this for the trace
+		TR_TraceRayFilter(position, nextposition, MASK_SOLID, RayType_EndPoint, SCP18_TraceWorld);
 		
-		// TODO: don't bounce from doors?
 		if (TR_DidHit())
 		{
 			TR_GetEndPosition(hitposition);
@@ -260,6 +320,7 @@ public bool SCP18_Button(int client, int weapon, int &buttons, int &holding)
 
 				SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
 				SetEntProp(entity, Prop_Send, "m_iTeamNum", GetClientTeam(client));
+				SetEntProp(entity, Prop_Data, "m_iHammerID", Client[client].Class);		
 
 				SetEntityModel(entity, SCP18Model);
 

@@ -89,17 +89,14 @@ bool SourceComms = false;		// SourceComms++
 bool BaseComm = false;		// BaseComm
 #endif
 
-MemoryPatch PatchProcessMovement;
-
 Handle HudPlayer;
 Handle HudClass;
 Handle HudGame;
 
-Handle PlayerKarmaMap;
-
 Cookie CookieTraining;
 Cookie CookieColor;
 Cookie CookieDClass;
+Cookie CookieKarma;
 
 ConVar CvarFriendlyFire;
 ConVar CvarSpeedMulti;
@@ -145,6 +142,7 @@ enum struct ClientEnum
 	int Kills;
 	int GoodKills;
 	int BadKills;
+	
 	int PreDamageWeapon;
 	int PreDamageHealth;
 
@@ -164,6 +162,7 @@ enum struct ClientEnum
 	float NextPickupReactTime;
 	float LastDisarmedTime;
 	float LastWeaponTime;
+	float KarmaPoints[MAXTF2PLAYERS];
 
 	// Sprinting
 	bool Sprinting;
@@ -194,6 +193,7 @@ ClientEnum Client[MAXTF2PLAYERS];
 #include "scp_sf/forwards.sp"
 #include "scp_sf/gamemode.sp"
 #include "scp_sf/items.sp"
+#include "scp_sf/memorypatches.sp"
 #include "scp_sf/natives.sp"
 #include "scp_sf/sdkcalls.sp"
 #include "scp_sf/sdkhooks.sp"
@@ -317,32 +317,21 @@ public void OnPluginStart()
 	CookieTraining = new Cookie("scp_cookie_training", "Status on learning the SCP gamemode", CookieAccess_Public);
 	CookieColor = new Cookie("scp_cookie_colorblind", "Color blind mode settings", CookieAccess_Protected);
 	CookieDClass = new Cookie("scp_cookie_dboimurder", "Achievement Status", CookieAccess_Protected);
+	CookieKarma = new Cookie("scp_cookie_karma", "Karma level", CookieAccess_Protected);
 
 	GameData gamedata = LoadGameConfigFile("scp_sf");
 	if(gamedata)
 	{
 		SDKCall_Setup(gamedata);
 		DHook_Setup(gamedata);
-
-		MemoryPatch.SetGameData(gamedata);
-		PatchProcessMovement = new MemoryPatch("Patch_ProcessMovement");
-		if(PatchProcessMovement)
-		{
-			PatchProcessMovement.Enable();
-		}
-		else
-		{
-			LogError("[Gamedata] Could not find Patch_ProcessMovement");
-		}
-
+		MemoryPatch_Setup(gamedata);
+		
 		delete gamedata;
 	}
 	else
 	{
 		LogError("[Gamedata] Could not find scp_sf.txt");
 	}
-
-	PlayerKarmaMap = CreateTrie();
 
 	for(int i=1; i<=MaxClients; i++)
 	{
@@ -476,9 +465,8 @@ public void OnPluginEnd()
 		if(IsClientInGame(i))
 			DHook_UnhookClient(i);
 	}
-
-	if(PatchProcessMovement)
-		PatchProcessMovement.Disable();
+	
+	MemoryPatch_Shutdown();
 
 	if(Enabled)
 		EndRound(0);
@@ -491,6 +479,8 @@ public void OnPluginEnd()
 public void OnClientPutInServer(int client)
 {
 	Client[client] = Client[0];
+	Classes_ResetKillCounters(client);
+	
 	if(AreClientCookiesCached(client))
 		OnClientCookiesCached(client);
 
@@ -526,11 +516,6 @@ public void OnClientPostAdminCheck(int client)
 
 	char steamID[64];
 	GetClientAuthId(client, AuthId_SteamID64, steamID, sizeof(steamID));
-	
-	// initialize their karma level if its first time joining 
-	float karma;
-	if (!GetTrieValue(PlayerKarmaMap, steamID, karma))
-		Classes_SetKarma(client, CvarKarmaMax.FloatValue);
 }
 
 public void OnRebuildAdminCache(AdminCachePart part)
@@ -550,21 +535,21 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 	RoundStartAt = GetGameTime();
 	NextHintAt = RoundStartAt+60.0;
 
-	int entity = -1;
-	while ((entity = FindEntityByClassname(entity, "func_regenerate")) != -1)
+	int entity = MaxClients+1;
+	while ((entity = FindEntityByClassname(entity, "func_regenerate")) > MaxClients)
 	{
 		AcceptEntityInput(entity, "Disable");
 	}
 
-	entity = -1;
-	while ((entity = FindEntityByClassname(entity, "func_respawnroomvisualizer")) != -1)
+	entity = MaxClients+1;
+	while ((entity = FindEntityByClassname(entity, "func_respawnroomvisualizer")) > MaxClients)
 	{
 		AcceptEntityInput(entity, "Disable");
 	}
 	
-	entity = -1;
-	char buffer[32];
-	while ((entity = FindEntityByClassname(entity, "trigger_teleport")) != -1)
+	entity = MaxClients+1;
+	char buffer[64];
+	while ((entity = FindEntityByClassname(entity, "trigger_teleport")) > MaxClients)
 	{
 		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
 		if (!StrContains(buffer, "teleport") && ((StrContains(buffer, "light", false) != -1) || (StrContains(buffer, "gate", false) != -1)))
@@ -574,9 +559,20 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 			
 			// the dhook on the trigger's Enable input will take care of other objects (e.g. dropped weapons)
 		}
-	}	
+	}
+	
+	FixUpDoors();
 
 	Items_RoundStart();
+	// see comments in szf.sp for why this is here
+	SZF_RoundStartDelayed();
+	
+	// Reset kill counters on round start rather than on player spawn, allows karma bonus to work properly on round end
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (IsValidClient(client))
+			Classes_ResetKillCounters(client);
+	}
 
 	NoAchieve = false;
 	GiveAchievement(Achievement_Halloween, 0);
@@ -954,6 +950,7 @@ public int Handler_None(Menu menu, MenuAction action, int param1, int param2)
 {
 	if(action == MenuAction_End)
 		delete menu;
+	return 0;
 }
 
 public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
@@ -1095,6 +1092,7 @@ public int Handler_Upgrade(Menu menu, MenuAction action, int client, int choice)
 			}
 		}
 	}
+	return 0;
 }
 
 public int Handler_Printer(Menu menu, MenuAction action, int client, int choice)
@@ -1132,6 +1130,7 @@ public int Handler_Printer(Menu menu, MenuAction action, int client, int choice)
 			}
 		}
 	}
+	return 0;
 }
 
 public void TF2_OnConditionAdded(int client, TFCond cond)
@@ -1198,9 +1197,10 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	Client[client].LastDisarmedTime = 0.0;	
 	Client[client].LastWeaponTime = 0.0;	
 	Client[client].WeaponClass = TFClass_Unknown;
-	Client[client].Kills = 0;
-	Client[client].GoodKills = 0;
-	Client[client].BadKills = 0;
+	
+	float KarmaRatio = CvarKarmaRatio.FloatValue;
+	for (int i = 1; i < MAXTF2PLAYERS; i++)
+		Client[i].KarmaPoints[client] = KarmaRatio;
 
 	SetEntProp(client, Prop_Send, "m_bForcedSkin", false);
 	SetEntProp(client, Prop_Send, "m_nForcedSkin", 0);
@@ -1240,7 +1240,7 @@ public Action OnPlayerHurt(Event event, const char[] name, bool dontBroadcast)
 	event.SetInt("damageamount", 0);
 
 	int userid = event.GetInt("userid");
-	int client = GetClientOfUserId(client);
+	int client = GetClientOfUserId(userid);
 	if(client)
 	{
 		Event event2 = CreateEvent("npc_hurt", true);
@@ -1546,6 +1546,7 @@ public int Handler_MainMenu(Menu menu, MenuAction action, int client, int choice
 			}
 		}
 	}
+	return 0;
 }
 
 public Action Command_HelpClass(int client, int args)
@@ -1644,6 +1645,7 @@ public int Handler_ColorBlind(Menu menu, MenuAction action, int client, int choi
 			Command_ColorBlind(client, menu.ExitBackButton ? -1 : 0);
 		}
 	}
+	return 0;
 }
 
 public Action Command_ForceClass(int client, int args)
@@ -2215,11 +2217,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 	}
 
 	// Check if the player moved at all or is speaking
-	#if SOURCEMOD_V_MAJOR==1 && SOURCEMOD_V_MINOR<=10
 	if((buttons & IN_ATTACK) || (!(buttons & IN_DUCK) && ((buttons & IN_FORWARD) || (buttons & IN_BACK) || (buttons & IN_MOVELEFT) || (buttons & IN_MOVERIGHT))))
-	#else
-	if((buttons & IN_ATTACK) || (!(buttons & IN_DUCK) && ((buttons & IN_FORWARD) || (buttons & IN_BACK) || (buttons & IN_MOVELEFT) || (buttons & IN_MOVERIGHT)|| IsClientSpeaking(client))))
-	#endif
 		Client[client].IdleAt = engineTime+2.5;
 
 	// SCP-specific buttons
@@ -2828,10 +2826,10 @@ bool IsFriendly(int index1, int index2)
 	return true;
 }
 
-bool IsBadKill(int victim, int attacker)
+bool IsBadKill(int victim, int attacker, int savedattackerclass)
 {
 	ClassEnum victimclass, attackerclass;
-	if (!Classes_GetByIndex(Client[victim].Class, victimclass) || !Classes_GetByIndex(Client[attacker].Class, attackerclass) )
+	if (!Classes_GetByIndex(Client[victim].Class, victimclass) || !Classes_GetByIndex(savedattackerclass, attackerclass))
 		return false;
 
 	if (victimclass.Group < 0)
@@ -2889,7 +2887,7 @@ void PlayFriendlyDeathReaction(int client, int attacker)
 			continue;	
 			
 		// ignore crouching players, as they are likely trying to be sneaky
-		if (GetEntityFlags(client) & FL_DUCKING)
+		if (GetEntityFlags(i) & FL_DUCKING)
 			continue;
 		
 		// can we play a react now?
@@ -2951,6 +2949,263 @@ void PlayFriendlyDeathReaction(int client, int attacker)
 	}
 }
 
+// thanks to dysphie for the I/O offsets
+public void FixUpDoors()
+{
+	// workaround for horrible door logic
+	// there is no direct way to tell apart what is a "checkpoint" and normal door in the scp maps
+	// this is needed for frag grenade/scp18/096 door destruction logic
+	// however, the maps have a whacky manual setup for 096, which we will abuse to find what is a "checkpoint" door
+	
+	// - iterate all triggers and see if they use the 096 rage filter entity
+	// - if so, check the outputs
+	// -- if it has a OnTrigger Kill output, then its a normal door
+	// -- if it has a OnTrigger Open output, then its a checkpoint door
+	// -- if it has a OnTrigger FireUser1 output, then its a door that needs special logic executed (914)
+	// - iterate all doors with the built list of doors and flag them accordingly
+
+	#define DOOR_NAME_LENGTH 32
+	
+	int entity = MaxClients+1;
+	char name[64], target[DOOR_NAME_LENGTH], targetinput[32], temp[DOOR_NAME_LENGTH];
+		
+	ArrayList doorlist_normal = new ArrayList(DOOR_NAME_LENGTH);
+	ArrayList doorlist_checkpoint = new ArrayList(DOOR_NAME_LENGTH);	
+	ArrayList doorlist_trigger = new ArrayList(DOOR_NAME_LENGTH);
+	ArrayList relaylist_trigger = new ArrayList(DOOR_NAME_LENGTH);
+	ArrayList relayentlist_trigger = new ArrayList();
+
+	while ((entity = FindEntityByClassname(entity, "trigger_*")) > MaxClients)
+	{
+		GetEntPropString(entity, Prop_Data, "m_iFilterName", name, sizeof(name));
+		if (StrContains(name, "096rage") != -1)
+		{
+			// this trigger belongs to a door, now check the outputs
+			// get the offsets to the OnTrigger outputs
+			int offset = FindDataMapInfo(entity, "m_OnTrigger");
+			if (offset == -1)
+				continue;
+			
+			Address output = GetEntityAddress(entity) + view_as<Address>(offset);
+			Address actionlist = view_as<Address>(LoadFromAddress(output + view_as<Address>(0x14), NumberType_Int32));
+			
+			// note: there can be multiple different doors being killed/opened in the outputs
+			while (actionlist)
+			{
+				// these are the only 2 parts of the output we care about
+				Address iTarget = view_as<Address>(LoadFromAddress(actionlist, NumberType_Int32));
+				StringtToCharArray(iTarget, target, sizeof(target));		
+				
+				// ignore !self outputs
+				if (target[0] != '!')
+				{	
+					Address iTargetInput = view_as<Address>(LoadFromAddress(actionlist + view_as<Address>(0x4), NumberType_Int32));
+					StringtToCharArray(iTargetInput, targetinput, sizeof(targetinput));				
+					
+					if (StrEqual(targetinput, "Kill", true))
+					{
+						// we are killing a door, which implies its a normal door
+						doorlist_normal.PushString(target);
+					}
+					else if (StrEqual(targetinput, "Open", true))
+					{
+						// we are simply opening the door, which implies its a checkpoint door
+						// becareful, this output is also used for areaportals, so we gotta ensure thats not the case
+						if (StrContains(target, "areaportal") == -1)
+						{
+							doorlist_checkpoint.PushString(target);
+						}
+					}
+					// TODO: I'm not sure about this, it needs more testing across different maps
+					// for now just ignore special doors
+					//else if (StrEqual(targetinput, "FireUser1", true))
+					//{
+					//	// this is a special door that needs specific logic to run (914)
+					//	if (StrContains(target, "scp_access") != -1)
+					//	{
+					//		relaylist_trigger.PushString(target);
+					//	}
+					//}			
+				}
+
+				// go to the next output
+				actionlist = view_as<Address>(LoadFromAddress(actionlist + view_as<Address>(0x18), NumberType_Int32));						
+			}		
+			
+			// get rid of the trigger, since we will handle it's logic now
+			AcceptEntityInput(entity, "Kill");
+		}
+	}		
+
+	// deal with any relays first
+	if (relaylist_trigger.Length)
+	{
+		entity = -1;
+		while ((entity = FindEntityByClassname(entity, "logic_relay")) != -1)
+		{
+			GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
+							
+			int offset = FindDataMapInfo(entity, "m_OnTrigger");
+			if (offset == -1)
+				continue;
+					
+			for (int i = relaylist_trigger.Length - 1; i >= 0; i--)
+			{
+				relaylist_trigger.GetString(i, temp, sizeof(temp));
+				if (StrEqual(temp, name, false))
+				{
+					// go through it's outputs and find the "Toggle" one, that is the door
+					Address output = GetEntityAddress(entity) + view_as<Address>(offset);
+					Address actionlist = view_as<Address>(LoadFromAddress(output + view_as<Address>(0x14), NumberType_Int32));
+					
+					while (actionlist)	
+					{
+						Address iTargetInput = view_as<Address>(LoadFromAddress(actionlist + view_as<Address>(0x4), NumberType_Int32));
+						StringtToCharArray(iTargetInput, targetinput, sizeof(targetinput));
+						
+						if (StrEqual(targetinput, "Toggle", true))
+						{						
+							// this is the door!
+							Address iTarget = view_as<Address>(LoadFromAddress(actionlist, NumberType_Int32));
+							StringtToCharArray(iTarget, target, sizeof(target));					
+							
+							doorlist_trigger.PushString(target);
+							// store off our relay's entref, we will store that in the door later
+							relayentlist_trigger.Push(EntIndexToEntRef(entity));
+				
+							break;
+						}
+												
+						// go to the next output
+						actionlist = view_as<Address>(LoadFromAddress(actionlist + view_as<Address>(0x18), NumberType_Int32));						
+					}		
+								
+					relaylist_trigger.Erase(i);
+				}
+			}
+			
+			// Nothing left to do?
+			if (!relaylist_trigger.Length)
+				break;
+		}
+	}
+	
+	// no doors found? bail
+	if (!doorlist_normal.Length && !doorlist_checkpoint.Length && !doorlist_trigger.Length)
+	{
+		delete doorlist_normal;
+		delete doorlist_checkpoint;	
+		delete doorlist_trigger;
+		delete relaylist_trigger;
+		delete relayentlist_trigger;
+		return;
+	}
+	
+	// go through all doors, compare the name against the list, then flag it accordingly
+	entity = MaxClients+1;
+	while ((entity = FindEntityByClassname(entity, "func_door")) > MaxClients)
+	{
+		GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
+		
+		// go backwards the list since we can remove elements, we don't need to test a name again if we found that door already
+		// go through normal doors first, they are the most likely ones to be found first
+		bool found_door = false;
+		for (int i = doorlist_normal.Length - 1; i >= 0; i--)
+		{
+			doorlist_normal.GetString(i, temp, sizeof(temp));
+			if (StrEqual(temp, name, false))
+			{
+				SetEntProp(entity, Prop_Data, DOOR_ID_PROP, DOOR_ID_NORMAL);
+				doorlist_normal.Erase(i);
+				found_door = true;
+				break;
+			}
+		}
+		
+		if (found_door)
+			continue;
+		
+		// checkpoint doors...
+		for (int i = doorlist_checkpoint.Length - 1; i >= 0; i--)
+		{
+			doorlist_checkpoint.GetString(i, temp, sizeof(temp));
+			if (StrEqual(temp, name, false))
+			{
+				SetEntProp(entity, Prop_Data, DOOR_ID_PROP, DOOR_ID_CHECKPOINT);
+				doorlist_checkpoint.Erase(i);
+				found_door = true;
+				break;
+			}
+		}			
+		
+		if (found_door)
+			continue;	
+
+		// special trigger doors
+		for (int i = doorlist_trigger.Length - 1; i >= 0; i--)
+		{
+			doorlist_trigger.GetString(i, temp, sizeof(temp));
+			if (StrEqual(temp, name, false))
+			{
+				SetEntProp(entity, Prop_Data, DOOR_ID_PROP, DOOR_ID_TRIGGER);
+				// store the relay so we can trigger it later
+				SetEntProp(entity, Prop_Send, DOOR_ENTREF_PROP, relayentlist_trigger.Get(i));
+				
+				doorlist_trigger.Erase(i);
+				relayentlist_trigger.Erase(i);
+				//found_door = true;
+				break;
+			}
+		}			
+		
+		//if (found_door)
+		//	continue;
+	}
+			
+	delete doorlist_normal;
+	delete doorlist_checkpoint;	
+	delete doorlist_trigger;
+	delete relaylist_trigger;
+	delete relayentlist_trigger;
+}
+
+// attempt to destroy a given door, if it can't be destroyed then it will be opened/triggered instead
+// returns false if the door couldn't be destroyed nor opened
+public bool DestroyOrOpenDoor(int door)
+{
+	int doorState = GetEntProp(door, Prop_Data, "m_toggle_state");	
+	int doorID = GetEntProp(door, Prop_Data, DOOR_ID_PROP);
+	
+	// only attempt to destroy fully closed doorss
+	if (doorState != 1)
+		return false;		
+
+	switch (doorID)
+	{
+		case DOOR_ID_NORMAL:
+		{
+			EmitSoundToAll("physics/metal/metal_grate_impact_hard2.wav", door, SNDCHAN_AUTO, SNDLEVEL_TRAIN);
+			AcceptEntityInput(door, "Kill");
+			return true;
+		}
+		case DOOR_ID_CHECKPOINT:
+		{
+			EmitSoundToAll("physics/metal/metal_grate_impact_hard1.wav", door, SNDCHAN_AUTO, SNDLEVEL_TRAIN);
+			AcceptEntityInput(door, "Open");
+			return true;
+		}
+		case DOOR_ID_TRIGGER:
+		{
+			EmitSoundToAll("physics/metal/metal_grate_impact_hard3.wav", door, SNDCHAN_AUTO, SNDLEVEL_TRAIN);			
+			int doorRelay = EntRefToEntIndex(GetEntProp(door, Prop_Send, DOOR_ENTREF_PROP));
+			AcceptEntityInput(doorRelay, "FireUser1");
+			return true;
+		}
+	}
+	
+	return false;
+}
+
 public Action Timer_FriendlyDeathReaction(Handle timer, int client)
 {
 	if (IsValidClient(client))
@@ -2962,7 +3217,7 @@ public Action Timer_FriendlyDeathReaction(Handle timer, int client)
 public int OnQueryFinished(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue, int userid)
 {
 	if(Client[client].DownloadMode==2 || GetClientOfUserId(userid)!=client || !IsClientInGame(client))
-		return;
+		return 0;
 
 	if(result != ConVarQuery_Okay)
 	{
@@ -2994,6 +3249,7 @@ public int OnQueryFinished(QueryCookie cookie, int client, ConVarQueryResult res
 			}
 		}
 	}
+	return 0;
 }
 
 // Thirdparty
@@ -3043,12 +3299,15 @@ public Action SendProp_OnAliveMulti(int entity, const char[] propname, int &valu
 	{
 		value = 1;
 	}
-	else if(IsSpec(target))
+	else if(IsValidClient(target))
 	{
-		if(!IsValidClient(client))
-			return Plugin_Continue;
+		if(IsSpec(target))
+		{
+			if(!IsValidClient(client))
+				return Plugin_Continue;
 
-		value = IsSpec(client) ? 0 : 1;
+			value = IsSpec(client) ? 0 : 1;
+		}
 	}
 	else if(Client[target].ThinkIsDead[client])
 	{
