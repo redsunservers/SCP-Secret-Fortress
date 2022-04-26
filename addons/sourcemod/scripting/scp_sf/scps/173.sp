@@ -9,8 +9,8 @@ static const int HealthMax = 6000;	// Max standard health
 static const int HealthExtra = 3000;	// Max regenerable health
 static const int HealthKill = 500;	// Health gain on stunned kill
 
-static const float DistanceMax = 1000.0;	// Teleport distance while in speed
-static const float DistanceMin = 650.0;	// Teleport distance
+static const float DistanceMax = 1250.0;	// Teleport distance while in speed
+static const float DistanceMin = 750.0;	// Teleport distance
 
 static int Health[MAXTF2PLAYERS];
 static int ModelRef[MAXTF2PLAYERS] = {INVALID_ENT_REFERENCE, ...};

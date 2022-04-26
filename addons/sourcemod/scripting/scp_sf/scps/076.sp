@@ -1,4 +1,4 @@
-static const float Speeds[] = {260.0, 265.0, 267.5, 270.0, 272.5, 275.0};
+static const float Speeds[] = {240.0, 246.0, 252.0, 258.0, 264.0, 276.0};
 static const int MaxHeads = 5;
 static const int HealthKill = 50;
 static const int HealthRage = 300;

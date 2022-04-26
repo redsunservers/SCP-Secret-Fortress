@@ -1527,46 +1527,6 @@ public void Items_ChaosSprint(int client, float &drain)
 	drain *= 1.02;
 }
 
-public Action Items_P90Hit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
-{
-    bool changed;
-    bool isSCP = IsSCP(victim);
-    if(isSCP)
-    {
-        damage *= 2.0;
-        changed = true;
-    }
-
-    if((!isSCP || Client[victim].Class==Classes_GetByName("scp0492")) &&
-       GetEntProp(victim, Prop_Data, "m_LastHitGroup") == HITGROUP_HEAD)
-    {
-        damagetype |= DMG_CRIT;
-        changed = true;
-    }
-
-    return changed ? Plugin_Changed : Plugin_Continue;
-}
-
-public Action Items_Com18Hit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
-{
-	bool changed;
-	bool isSCP = IsSCP(victim);
-	
-	if(!isSCP || Client[victim].Class==Classes_GetByName("scp0492"))
-	{
-		damage *= 3.0;
-		changed = true;
-	}
-	
-	if(GetEntProp(victim, Prop_Data, "m_LastHitGroup") == HITGROUP_HEAD)
-	{
-		damagetype |= DMG_CRIT;
-		changed = true;
-	}
-    
-	return changed ? Plugin_Changed : Plugin_Continue;
-}
-
 public void Items_ExplosiveHit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
 	ClientCommand(victim, "dsp_player %d", GetRandomInt(32, 34));
@@ -2194,19 +2154,7 @@ public void Items_LightAmmo(int client, int type, int &ammo)
     {
         case 2:    // 9mm
         {
-            ammo *= 3;
-        }
-        case 6, 7:    // 7mm, 5mm
-        {
             ammo *= 2;
-        }
-        case 10:    // 4mag
-        {
-            ammo = RoundFloat(ammo * 2.0);
-        }
-        case 11:    // 12ga
-        {
-            ammo = RoundFloat(ammo * 2.0);
         }
     }
 }
@@ -2291,7 +2239,7 @@ public void Items_HeavyItem(int client, int type, int &amount)
 			amount++;
 
 		case 7:	// Grenades
-			amount++;
+			amount += 2;
 	}
 }
 
@@ -2303,6 +2251,43 @@ public void Items_HeavySpeed(int client, float &speed)
 public void Items_HeavySprint(int client, float &drain)
 {
 	drain *= 1.2;
+}
+
+public void Items_FastAmmo(int client, int type, int &ammo)
+{
+	switch(type)
+	{
+		case 2:	// 9mm
+		{
+			ammo *= 3;
+		}
+		case 6, 7:	// 7mm, 5mm
+		{
+			ammo *= 2;
+		}
+	}
+}
+
+public void Items_FastItem(int client, int type, int &amount)
+{
+	switch(type)
+	{
+		case 1:	// Weapons
+			amount += 1;
+
+		case 3:	// Medical
+			amount--;
+	}
+}
+
+public void Items_FastSpeed(int client, float &speed)
+{
+	speed *= 1.05;
+}
+
+public void Items_FastSprint(int client, float &drain)
+{
+	drain *= 0.8;
 }
 
 public int Items_KeycardJan(int client, AccessEnum access)

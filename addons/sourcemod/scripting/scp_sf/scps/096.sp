@@ -10,9 +10,9 @@ static const float SpeedRage = 2.1;
 
 static const float RageWarmup = 6.0;	// Rage warmup time
 static const float RageDuration = 12.0;	// Rage initial duration
-static const float RageExtra = 1.5;	// Rage duration per target
-static const float RageWinddown = 6.0;	// After rage stun
-static const float RageCooldown = 15.0;	// After rage cooldown
+static const float RageExtra = 2.0;	// Rage duration per target
+static const float RageWinddown = 10.0;	// After rage stun
+static const float RageCooldown = 18.0;	// After rage cooldown
 
 static int Triggered[MAXTF2PLAYERS];
 

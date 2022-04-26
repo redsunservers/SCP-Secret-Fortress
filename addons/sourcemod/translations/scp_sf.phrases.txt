@@ -330,11 +330,11 @@
 	}
 	"class_chaosd"
 	{
-		"en"		"Chaos Insurgency Engineer"
+		"en"		"Chaos Insurgency Conscript"
 	}
 	"desc_chaosd"
 	{
-		"en"		"You succeeded in escaping and joined the Chaos Insurgency.\nHelp Class-D Personnel escape.\nNeutralize other subjects."
+		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects."
 	}
 	"train_chaosd"
 	{
@@ -342,7 +342,7 @@
 	}
 	"class_chaos2"
 	{
-		"en"		"Chaos Insurgency Repressor"
+		"en"		"Chaos Insurgency Marauder"
 	}
 	"desc_chaos2"
 	{
@@ -354,7 +354,7 @@
 	}
 	"class_chaos3"
 	{
-		"en"		"Chaos Insurgency Marauder"
+		"en"		"Chaos Insurgency Repressor"
 	}
 	"desc_chaos3"
 	{
@@ -366,11 +366,11 @@
 	}
 	"class_chaos5"
 	{
-		"en"		"Chaos Insurgency Sniper"
+		"en"		"Chaos Insurgency Recon"
 	}
 	"desc_chaos5"
 	{
-		"en"		"Help Class-D Personnel escape.\nNeutralize other subjects."
+		"en"		"Help Class-D Personnel escape.\nAvoid other teams."
 	}
 	"train_chaos5"
 	{
@@ -483,30 +483,6 @@
 	"train_mtf3"
 	{
 		"en"		"You need to free Scientists from the facility.\nCommand your troops down the facility.\nUse your radio to help order your troops around.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
-	}
-	"class_mtf5"
-	{
-		"en"		"Nine-Tailed Fox Cadet"
-	}
-	"desc_mtf5"
-	{
-		"en"		"Help Scientists escape.\nNeutralize other subjects.\nFollow the orders of your superiors."
-	}
-	"train_mtf5"
-	{
-		"en"		"You need to free Scientists from the facility.\nStay with your sergeants and captain.\nKeep in touch using the radio.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
-	}
-	"class_mtf6"
-	{
-		"en"		"Nine-Tailed Fox Sergeant"
-	}
-	"desc_mtf6"
-	{
-		"en"		"Help Scientists escape.\nNeutralize other subjects.\nInstruct your soldiers.\nFollow the orders of your superiors."
-	}
-	"train_mtf6"
-	{
-		"en"		"You need to free Scientists from the facility.\nSupport your group of privates, follow your captain.\nUse your radio too.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_mtfe"
 	{
@@ -651,30 +627,6 @@
 	"train_scp9392"
 	{
 		"en"		"You can only see targets making noise.\nYou can trick players by talking to them.\nYou'll get faster with less health you have.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
-	}
-	"class_snakky1"
-	{
-		"en"		"Serpent's Hand Agent"
-	}
-	"desc_snakky1"
-	{
-		"en"		"You're disguised as MTF.\nKill everyone.\nCooperate with other SCPs."
-	}
-	"train_snakky1"
-	{
-		"en"		"You're disguised as MTF.\nCooperate with other SCPs.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
-	}
-	"class_snakky2"
-	{
-		"en"		"Serpent's Hand Agent"
-	}
-	"desc_snakky2"
-	{
-		"en"		"You're disguised as MTF.\nKill everyone.\nCooperate with other SCPs."
-	}
-	"train_snakky2"
-	{
-		"en"		"You're disguised as MTF.\nCooperate with other SCPs.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons."
 	}
 	"class_scp3008"
 	{
@@ -1169,23 +1121,15 @@
 	}
 	"info_30021"
 	{
-		"en"		"High damage resistance, extra reserve ammo, with more sprint loss"
+		"en"		"High damage resistance, extra reserve ammo, with some speed loss"
 	}
-	"weapon_1098"
+	"weapon_30022"
 	{
-		"en"		"Mk.18 'Fixer' CQBR"
+		"en"		"FAST™ device"
 	}
-	"info_1098"
+	"info_30022"
 	{
-		"en"		"Survival, Concealment, Protection."
-	}
-	"weapon_442"
-	{
-		"en"		"S.F.G 1000"
-	}
-	"info_442"
-	{
-		"en"		"P E W!"
+		"en"		"Expands sprint, extra speed and ammo, with low damage resistance"
 	}
 	
 	// Team Phrases
