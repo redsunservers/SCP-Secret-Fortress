@@ -1664,3 +1664,22 @@ void TriggerRelays(const char[] name)
 		}
 	}
 }
+
+stock int GiveWearable(int client, int index)
+{
+    int entity = CreateEntityByName("tf_wearable");
+    if(IsValidEntity(entity))
+    {
+        SetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex", index);
+        SetEntProp(entity, Prop_Send, "m_bInitialized", true);
+        SetEntProp(entity, Prop_Send, "m_iEntityQuality", 14);
+        SetEntProp(entity, Prop_Send, "m_iEntityLevel", 8);
+
+        DispatchSpawn(entity);
+
+        SDKCall_EquipWearable(client, entity);
+
+        SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", true);
+    }
+    return entity;
+}

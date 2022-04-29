@@ -888,6 +888,21 @@ public bool Classes_VipSpawn(int client)
 	return false;
 }
 
+public bool Dclass_Create(int client)
+{
+    Classes_VipSpawn(client);
+
+    switch(GetRandomInt(0, 3))
+    {
+        case 0 : GiveWearable(client, 150);
+        case 1 : GiveWearable(client, 30479);
+        case 2 : GiveWearable(client, 111);
+        case 3 : GiveWearable(client, 30413);
+    }
+    
+    return false;
+}
+
 public void Classes_MoveToSpec(int client, Event event)
 {
 	char buffer[16] = "spec";

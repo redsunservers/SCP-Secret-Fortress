@@ -1904,7 +1904,7 @@ public Action Items_HealthKitAction(Handle timer, int client)
 			// revert to idle animation
 			ViewModel_SetAnimation(client, "idle");
 			// allow movement again
-			TF2_RemoveCondition(client, TFCond_Dazed);
+			//TF2_RemoveCondition(client, TFCond_Dazed);
 		}
 	}
 
