@@ -6,6 +6,9 @@ static const char SoundDeath[] = "freak_fortress_2/scp096/096_death.mp3";
 static const int HealthMax = 2700;	// Max standard health
 static const int HealthExtra = 500;	// Max regenerable health
 
+static const int HealthMaxSZF = 800;	// Max standard health in SZF
+static const int HealthExtraSZF = 585;	// Max regenerable health in SZF
+
 static const float SpeedRage = 2.1;
 
 static const float RageWarmup = 6.0;	// Rage warmup time
@@ -414,5 +417,39 @@ static void GiveMelee(int client)
 		SetEntityRenderColor(weapon, 255, 255, 255, 0);
 		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
+	}
+}
+
+// SZF only
+
+public bool SZF096_Create(int client)
+{
+	Classes_VipSpawn(client);
+
+	Client[client].Pos[0] = 0.0;
+	Client[client].Extra1 = HealthMaxSZF;
+	Client[client].Extra2 = 0;
+
+	for(int i; i<MAXTF2PLAYERS; i++)
+	{
+		Triggered[i] = 0;
+	}
+
+	GiveMelee(client);
+	return false;
+}
+
+public void SZF096_OnMaxHealth(int client, int &health)
+{
+	health = Client[client].Extra1 + HealthExtraSZF;
+
+	int current = GetClientHealth(client);
+	if(current > health)
+	{
+		SetEntityHealth(client, health);
+	}
+	else if(current < Client[client].Extra1 - HealthExtraSZF)
+	{
+		Client[client].Extra1 = current+HealthExtraSZF;
 	}
 }

@@ -1,6 +1,9 @@
 static const int HealthKill = 450;
 static const int HealthSplit = 2500;
 
+static const int HealthKillSZF = 200;		// Gain health on kill in SZF
+static const int HealthSplitSZF = 1000;		// Needed health to split in SZF
+
 static int Index457;
 
 public void SCP457_Enable(int index)
@@ -164,4 +167,30 @@ public Action SCP457_Timer(Handle timer, DataPack pack)
 		}
 	}
 	return Plugin_Continue;
+}
+
+// SZF only
+
+public void SZF457_OnKill(int client, int victim)
+{
+	int health = GetClientHealth(client);
+	int newHealth = health+HealthKillSZF;
+	if(newHealth >= HealthSplitSZF)
+	{
+		newHealth -= 500;
+
+		DataPack pack;
+		CreateDataTimer(0.5, SCP457_Timer, pack, TIMER_FLAG_NO_MAPCHANGE);
+		pack.WriteCell(GetClientUserId(client));
+		pack.WriteCell(GetClientUserId(victim));
+		pack.WriteCell(newHealth);
+	}
+
+	ApplyHealEvent(client, newHealth-health);
+	SetEntityHealth(client, newHealth);
+}
+
+public void SZF457_OnMaxHealth(int client, int &health)
+{
+	health = HealthSplitSZF;
 }

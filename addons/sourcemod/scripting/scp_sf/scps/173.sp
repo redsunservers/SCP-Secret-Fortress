@@ -7,7 +7,10 @@ static const char MoveSound[] = "physics/concrete/concrete_scrape_smooth_loop1.w
 
 static const int HealthMax = 6000;	// Max standard health
 static const int HealthExtra = 3000;	// Max regenerable health
-static const int HealthKill = 500;	// Health gain on stunned kill
+static const int HealthKill = 300;	// Health gain on stunned kill
+
+static const int HealthMaxSZF = 2000;	// Max standard health in SZF
+static const int HealthExtraSZF = 1500;	// Max regenerable health in SZF
 
 static const float DistanceMax = 1250.0;	// Teleport distance while in speed
 static const float DistanceMin = 750.0;	// Teleport distance
@@ -569,4 +572,65 @@ static bool DPT_TryTeleport(int clientIdx, float maxDistance, const float startP
 		return false;
 	
 	return true;
+}
+
+// SZF only
+
+public bool SZF173_Create(int client)
+{
+	Classes_VipSpawn(client);
+
+	Health[client] = HealthMaxSZF;
+	BlinkExpire[client] = 0.0;
+	BlinkCharge[client] = 0.0;
+	Frozen[client] = false;
+
+	SetEntProp(client, Prop_Send, "m_bForcedSkin", true);
+	SetEntProp(client, Prop_Send, "m_nForcedSkin", (client % 11));	// Skin 0 to 10
+	SetEntProp(client, Prop_Send, "m_iPlayerSkinOverride", true);
+
+	int weapon = SpawnWeapon(client, "tf_weapon_flamethrower", ITEM_INDEX_MICROHID, 90, 13, "", 1, true);
+	if(weapon > MaxClients)
+	{
+		ApplyStrangeRank(weapon, 17);
+		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
+		SetEntPropFloat(client, Prop_Send, "m_flRageMeter", 50.0);
+	}
+
+	weapon = SpawnWeapon(client, "tf_weapon_jar_gas", 1180, 90, 13, "874 ; 0.5 ; 2059 ; 9000", 1, true);
+	if(weapon > MaxClients)
+	{
+		ApplyStrangeRank(weapon, 17);
+		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
+	}
+
+	weapon = SpawnWeapon(client, "tf_weapon_fists", 593, 90, 13, "6 ; 0.4 ; 15 ; 0 ; 138 ; 11 ; 236 ; 1 ; 252 ; 0 ; 275 ; 1 ; 362 ; 1; 698 ; 1", false);
+	if(weapon > MaxClients)
+	{
+		ApplyStrangeRank(weapon, 17);
+		SetEntityRenderMode(weapon, RENDER_TRANSCOLOR);
+		SetEntityRenderColor(weapon, 255, 255, 255, 0);
+		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
+		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
+		// no crouching
+		TF2Attrib_SetByDefIndex(weapon, 820, 1.0);		
+	}
+
+	CreateTimer(15.0, Timer_UpdateClientHud, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
+	return false;
+}
+
+public void SZF173_OnMaxHealth(int client, int &health)
+{
+	health = Health[client] + HealthExtraSZF;
+
+	int current = GetClientHealth(client);
+	if(current > health)
+	{
+		SetEntityHealth(client, health);
+	}
+	else if(current < Health[client]-HealthExtraSZF)
+	{
+		Health[client] = current+HealthExtraSZF;
+	}
 }

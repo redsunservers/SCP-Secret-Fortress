@@ -1,6 +1,9 @@
 static const int HealthMax = 3300;	// Max standard health
 static const int HealthExtra = 1100;	// Max regenerable health
 
+static const int HealthMaxSZF = 1000;	// Max standard health in SZF
+static const int HealthExtraSZF = 650;	// Max regenerable health in SZF
+
 static const float SpeedExtra = 50.0;	// Extra speed while low health
 static const float GlowRange = 1400.0;	// Max outline range
 
@@ -132,4 +135,47 @@ public bool SCP939_OnGlowPlayer(int client, int victim)
 			return true;
 	}
 	return false;
+}
+
+// SZF only
+
+public bool SZF939_Create(int client)
+{
+	Classes_VipSpawn(client);
+
+	Health[client] = HealthMaxSZF;
+	
+	int account = GetSteamAccountID(client, false);
+
+	int weapon = SpawnWeapon(client, "tf_weapon_knife", 461, 70, 13, "2 ; 1.625 ; 15 ; 0 ; 252 ; 0.3; 4328 ; 1", false);
+	if(weapon > MaxClients)
+	{
+		ApplyStrangeRank(weapon, 10);
+		SetEntProp(weapon, Prop_Send, "m_iAccountID", account);
+		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
+	}
+
+	weapon = SpawnWeapon(client, "tf_weapon_pda_spy", 27, 70, 13, "", false);
+	if(weapon > MaxClients)
+	{
+		TF2Attrib_SetByDefIndex(weapon, 214, view_as<float>(GetRandomInt(250, 374))); // Sharp
+		TF2Attrib_SetByDefIndex(weapon, 292, view_as<float>(64));
+		SetEntProp(weapon, Prop_Send, "m_iAccountID", account);
+	}
+	return false;
+}
+
+public void SZF939_OnMaxHealth(int client, int &health)
+{
+	health = Health[client] + HealthExtraSZF;
+
+	int current = GetClientHealth(client);
+	if(current > health)
+	{
+		SetEntityHealth(client, health);
+	}
+	else if(current < Health[client]-HealthExtraSZF)
+	{
+		Health[client] = current+HealthExtraSZF;
+	}
 }
