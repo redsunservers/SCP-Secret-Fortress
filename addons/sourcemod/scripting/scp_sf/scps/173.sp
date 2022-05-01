@@ -449,7 +449,7 @@ public Action SCP173_PuddleTimer(Handle timer, DataPack pack)
 				static float pos2[3];
 				GetClientAbsOrigin(target, pos2);
 				if(GetVectorDistance(pos1, pos2, true) < 2300.0)
-					TF2_StunPlayer(target, 3.0, 0.2, TF_STUNFLAG_SLOWDOWN);
+					TF2_StunPlayer(target, 5.0, 0.4, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
 			}
 		}
 

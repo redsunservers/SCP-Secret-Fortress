@@ -7,6 +7,8 @@ static const int HealthExtraSZF = 650;	// Max regenerable health in SZF
 static const float SpeedExtra = 50.0;	// Extra speed while low health
 static const float GlowRange = 1400.0;	// Max outline range
 
+static const float SpeedExtraSZF = 75.0;	// Extra speed while low health in SZF
+
 static int Health[MAXTF2PLAYERS];
 
 public bool SCP939_Create(int client)
@@ -17,7 +19,7 @@ public bool SCP939_Create(int client)
 	
 	int account = GetSteamAccountID(client, false);
 
-	int weapon = SpawnWeapon(client, "tf_weapon_knife", 461, 70, 13, "2 ; 1.625 ; 15 ; 0 ; 252 ; 0.3; 4328 ; 1", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_knife", 461, 70, 13, "2 ; 1.625 ; 15 ; 0 ; 252 ; 0.3 ; 4328 ; 1", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 10);
@@ -147,7 +149,7 @@ public bool SZF939_Create(int client)
 	
 	int account = GetSteamAccountID(client, false);
 
-	int weapon = SpawnWeapon(client, "tf_weapon_knife", 461, 70, 13, "2 ; 1.625 ; 15 ; 0 ; 252 ; 0.3; 4328 ; 1", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_knife", 461, 70, 13, "2 ; 1.625 ; 15 ; 0 ; 252 ; 0.3 ; 4328 ; 1", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 10);
@@ -178,4 +180,9 @@ public void SZF939_OnMaxHealth(int client, int &health)
 	{
 		Health[client] = current+HealthExtraSZF;
 	}
+}
+
+public void SZF939_OnSpeed(int client, float &speed)
+{
+	speed += (1.0-(Health[client]/HealthMaxSZF))*SpeedExtraSZF;
 }

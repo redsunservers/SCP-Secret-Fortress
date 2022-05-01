@@ -96,13 +96,10 @@ public Action OnMediumHealthPickup(int entity, int client)
 	if(!Enabled || !IsValidClient(client))
 		return Plugin_Continue;
 	
-	if(!IsSCP(client) || Classes_GetByName("scp035") == Client[client].Class)
+	if((!IsSCP(client) || Classes_GetByName("scp035") == Client[client].Class) && !Client[client].Disarmer && Items_CanGiveItem(client, 3))
 	{
-		if (GetEntPropEnt(entity, Prop_Data, "m_hOwnerEntity") == client)
-		{
-			SDKUnhook(entity, SDKHook_Touch, OnMediumHealthPickup);
-			return Plugin_Continue;
-		}
+		Items_CreateWeapon(client, 30014, false, true, true);
+		AcceptEntityInput(entity, "Kill");
 	}
 	
 	return Plugin_Handled;
