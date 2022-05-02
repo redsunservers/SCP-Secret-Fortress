@@ -1652,8 +1652,8 @@ int StringtToCharArray(Address stringt, char[] buffer, int maxlen)
 
 void TriggerRelays(const char[] name)
 {
-	int entity = MaxClients+1;
-	while ((entity = FindEntityByClassname(entity, "logic_relay")) > MaxClients)
+	int entity = -1;
+	while ((entity = FindEntityByClassname(entity, "logic_relay")) != -1)
 	{
 		char entityname[32];
 		GetEntPropString(entity, Prop_Data, "m_iName", entityname, sizeof(entityname));
