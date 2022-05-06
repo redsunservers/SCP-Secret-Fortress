@@ -1408,6 +1408,26 @@
 	{
 		"en"		"ASSIGNMENT: TERMINATED\nSUBJECT: MTF OPERATIVE E11\nREASON: DEMONSTRATION OF EXCEEDINGLY POOR JUDGMENT"
 	}
+	"disarming_me"    // HUD
+    {
+        "#format"    "{1:N},{2:.0f}"
+        "en"        "Cuffing {1}... {2}%"
+    }
+    "disarming_other"    // HUD
+    {
+        "#format"    "{1:N},{2:.0f}"
+        "en"        "Cuffing {1}... {2}%"
+    }
+    "arming_me" // HUD
+    {
+        "#format"    "{1:N},{2:.0f}"
+        "en"        "Uncuffing {1}... {2}%"
+    }
+    "arming_other" // HUD
+    {
+        "#format"    "{1:N},{2:.0f}"
+        "en"        "Uncuffing {1}... {2}%"
+    }
 
 	// Ikea
 
