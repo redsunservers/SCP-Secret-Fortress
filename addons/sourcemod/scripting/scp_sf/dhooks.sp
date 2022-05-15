@@ -454,19 +454,46 @@ public MRESReturn DHook_TriggerInputEnablePost(int entity, DHookParam param)
 	}
 	
 	if (dest != -1)
-	{
-		float testpos[3], destpos[3], origin[3], mins[3], maxs[3];
+	{	
+		float testpos[3], destpos[3], landmarkpos[3], deltapos[3], finalpos[3], origin[3], mins[3], maxs[3];
 		
 		GetEntPropVector(dest, Prop_Data, "m_vecAbsOrigin", destpos);
-			
+		
 		GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin);			
 		GetEntPropVector(entity, Prop_Data, "m_vecMins", mins);
 		GetEntPropVector(entity, Prop_Data, "m_vecMaxs", maxs);	
 		AddVectors(mins, origin, mins);
 		AddVectors(maxs, origin, maxs);
-		
-		// TODO: relative offsets
-		
+
+		// if the teleport has a landmark, we will offset the entities relative to the landmark
+		char landmark[PLATFORM_MAX_PATH];
+		bool landmarkvalid = false;
+		GetEntPropString(entity, Prop_Data, "m_iLandmark", landmark, sizeof(landmark));	
+		if (landmark[0])
+		{
+			if (StrEqual(landmark, "!self", false))
+			{
+				// use the trigger's origin
+				CopyVector(origin, landmarkpos);
+				landmarkvalid = true;
+			}
+			else
+			{
+				int mark = MaxClients + 1;
+				while((mark = FindEntityByClassname(mark, "info_*")) != -1)
+				{
+					char name[PLATFORM_MAX_PATH];
+					GetEntPropString(mark, Prop_Data, "m_iName", name, sizeof(name));
+					if (StrEqual(name, landmark, false))
+					{
+						GetEntPropVector(mark, Prop_Data, "m_vecAbsOrigin", landmarkpos);
+						landmarkvalid = true;
+						break;
+					}
+				}	
+			}			
+		}
+
 		// search for stuff to teleport that normally doesn't collide with triggers
 
 		// dropped weapons
@@ -477,7 +504,17 @@ public MRESReturn DHook_TriggerInputEnablePost(int entity, DHookParam param)
 			
 			if (IsPointTouchingBox(testpos, mins, maxs))
 			{
-				TeleportEntity(candidate, destpos, NULL_VECTOR, NULL_VECTOR);
+				if (landmarkvalid)
+				{
+					SubtractVectors(testpos, landmarkpos, deltapos);
+					AddVectors(destpos, deltapos, finalpos);
+				}
+				else
+				{
+					CopyVector(destpos, finalpos);
+				}
+				
+				TeleportEntity(candidate, finalpos, NULL_VECTOR, NULL_VECTOR);
 			}
 		}
 		
@@ -493,7 +530,17 @@ public MRESReturn DHook_TriggerInputEnablePost(int entity, DHookParam param)
 
 				if (IsPointTouchingBox(testpos, mins, maxs))
 				{
-					TeleportEntity(i, destpos, NULL_VECTOR, NULL_VECTOR);
+					if (landmarkvalid)
+					{
+						SubtractVectors(testpos, landmarkpos, deltapos);
+						AddVectors(destpos, deltapos, finalpos);
+					}
+					else
+					{
+						CopyVector(destpos, finalpos);
+					}
+				
+					TeleportEntity(i, finalpos, NULL_VECTOR, NULL_VECTOR);
 				}
 			}
 		}
