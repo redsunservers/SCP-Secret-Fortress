@@ -1205,7 +1205,7 @@ public void Classes_CondDBoi(int client, TFCond cond)
 			if(Client[client].Disarmer)
 			{
 				Gamemode_AddValue("dcapture");
-				index = Classes_GetByName("mtfs", class);
+				index = Classes_GetByName("mtf1", class);
 
 				// reward the disarmer with 15% karma
 				Classes_ApplyKarmaBonus(Client[client].Disarmer, 15.0, false);

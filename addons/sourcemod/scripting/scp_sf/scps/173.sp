@@ -5,9 +5,9 @@ static const char SnapSound[] = "freak_fortress_2/scp173/scp173_kill2.mp3";
 static const char DeathSound[] = "freak_fortress_2/scp173/173_death.wav";
 static const char MoveSound[] = "physics/concrete/concrete_scrape_smooth_loop1.wav";
 
-static const int HealthMax = 6000;	// Max standard health
+static const int HealthMax = 4000;	// Max standard health
 static const int HealthExtra = 3000;	// Max regenerable health
-static const int HealthKill = 300;	// Health gain on stunned kill
+static const int HealthKill = 500;	// Health gain on stunned kill
 
 static const int HealthMaxSZF = 2000;	// Max standard health in SZF
 static const int HealthExtraSZF = 1500;	// Max regenerable health in SZF
@@ -49,7 +49,7 @@ public bool SCP173_Create(int client)
 		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
 	}
 
-	weapon = SpawnWeapon(client, "tf_weapon_fists", 593, 90, 13, "6 ; 0.4 ; 15 ; 0 ; 138 ; 11 ; 236 ; 1 ; 252 ; 0 ; 275 ; 1 ; 362 ; 1; 698 ; 1 ; 60 ; 0.8", false);
+	weapon = SpawnWeapon(client, "tf_weapon_fists", 593, 90, 13, "6 ; 0.4 ; 15 ; 0 ; 138 ; 11 ; 236 ; 1 ; 252 ; 0 ; 275 ; 1 ; 362 ; 1 ; 698 ; 1 ; 60 ; 0.8", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 17);
@@ -449,7 +449,7 @@ public Action SCP173_PuddleTimer(Handle timer, DataPack pack)
 				static float pos2[3];
 				GetClientAbsOrigin(target, pos2);
 				if(GetVectorDistance(pos1, pos2, true) < 2300.0)
-					TF2_StunPlayer(target, 5.0, 0.4, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
+					TF2_StunPlayer(target, 3.5, 0.7, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
 			}
 		}
 
@@ -604,7 +604,7 @@ public bool SZF173_Create(int client)
 		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
 	}
 
-	weapon = SpawnWeapon(client, "tf_weapon_fists", 593, 90, 13, "6 ; 0.4 ; 15 ; 0 ; 138 ; 11 ; 236 ; 1 ; 252 ; 0 ; 275 ; 1 ; 362 ; 1; 698 ; 1", false);
+	weapon = SpawnWeapon(client, "tf_weapon_fists", 593, 90, 13, "6 ; 0.4 ; 15 ; 0 ; 138 ; 11 ; 236 ; 1 ; 252 ; 0 ; 275 ; 1 ; 362 ; 1 ; 698 ; 1", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 17);
