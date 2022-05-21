@@ -1431,8 +1431,9 @@ public bool Classes_PickupStandard(int client, int entity)
 					{
 						case 0:
 						{
-							if(Classes_GetByName("scp035") != Client[client].Class) AcceptEntityInput(entity, "FireUser1", client, client);
-							else AcceptEntityInput(entity, "FireUser2", client, client);
+							//if(Classes_GetByName("scp035") != Client[client].Class) AcceptEntityInput(entity, "FireUser1", client, client);
+							//else AcceptEntityInput(entity, "FireUser2", client, client);
+							AcceptEntityInput(entity, "FireUser1", client, client);
 						}
 						case 1:
 							AcceptEntityInput(entity, "FireUser2", client, client);

@@ -2616,3 +2616,46 @@ public bool Items_DisarmerButton(int client, int weapon, int &buttons, int &hold
 	
 	return true;
 }
+
+static const char RailgunChargeSound[] = "weapons/stickybomblauncher_charge_up.wav";
+
+public bool Items_RailgunButton(int client, int weapon, int &buttons, int &holding)
+{
+	int type = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
+	int ammo = GetAmmo(client, type);
+	if(ammo<2 || !(buttons & IN_ATTACK))
+	{
+		if (charge[client])
+			StopSound(client, SNDCHAN_AUTO, MicroChargeSound);
+			
+		charge[client] = 0.0;
+		TF2Attrib_SetByDefIndex(weapon, 821, 1.0);
+		return false;
+	}
+
+	//buttons &= ~IN_JUMP|IN_SPEED;
+
+	if(charge[client])
+	{
+		float engineTime = GetGameTime();
+		if(charge[client] == FAR_FUTURE)
+		{
+			StopSound(client, SNDCHAN_AUTO, RailgunChargeSound);
+		}
+		else if(charge[client] < engineTime)
+		{
+			charge[client] = FAR_FUTURE;
+			TF2Attrib_SetByDefIndex(weapon, 821, 0.0);
+		}
+		else
+		{
+			TF2Attrib_SetByDefIndex(weapon, 821, 1.0);
+		}
+	}
+	else
+	{
+		charge[client] = GetGameTime()+4.0;
+		EmitSoundToAll2(RailgunChargeSound, client, SNDCHAN_AUTO, SNDLEVEL_CAR, _, _, 67);
+	}
+	return true;
+}

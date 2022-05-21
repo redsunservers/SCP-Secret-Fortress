@@ -1,4 +1,5 @@
-static const int HealthKill = 50;
+static const int HealthKill = 25;
+static const char SoundDeath[] = "freak_fortress_2/scp035/death1.wav";
 
 public bool SCP035_Create(int client)
 {
@@ -6,7 +7,7 @@ public bool SCP035_Create(int client)
 
 	Client[client].Extra2 = 0;
 	
-	TF2Attrib_SetByDefIndex(client, 490, -3.0);
+	//TF2Attrib_SetByDefIndex(client, 490, -3.0);
 
 	return false;
 }
@@ -19,6 +20,10 @@ public void SCP035_OnKill(int client, int victim)
 public void SCP035_OnDeath(int client, Event event)
 {
 	Classes_DeathScp(client, event);
+	
+	char model[PLATFORM_MAX_PATH];
+	GetEntPropString(client, Prop_Data, "m_ModelName", model, sizeof(model));	
+	Classes_PlayDeathAnimation(client, model, "primary_death_burning", SoundDeath, 0.0);
 	
 	for(int i=1; i<=MaxClients; i++)
 	{
@@ -46,37 +51,32 @@ public Action SCP035_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &ch
 		if(StrContains(sample, "autodejectedtie", false) != -1)
 		{
 			delay[client] = engineTime+19.0;
-			strcopy(sample, PLATFORM_MAX_PATH, "scp_sf/035/035closet3.mp3");
+			strcopy(sample, PLATFORM_MAX_PATH, "scp_sf/035/035idle7.mp3");
 		}
 		else if(StrContains(sample, "battlecry", false) != -1)
 		{
 			delay[client] = engineTime+2.0;
 			strcopy(sample, PLATFORM_MAX_PATH, "scp_sf/035/035idle4.mp3");
 		}
-		else if(StrContains(sample, "cheers", false) != -1)
+		else if(StrContains(sample, "cheers", false) != -1 || StrContains(sample, "niceshot", false)!=-1)
 		{
 			delay[client] = engineTime+2.0;
 			strcopy(sample, PLATFORM_MAX_PATH, "scp_sf/035/035idle1.mp3");
 		}
-		else if(StrContains(sample, "cloakedspy", false) != -1)
-		{
-			delay[client] = engineTime+4.0;
-			strcopy(sample, PLATFORM_MAX_PATH, "scp_sf/035/035idle2.mp3");
-		}
-		else if(StrContains(sample, "goodjob", false)!=-1 || StrContains(sample, "incoming", false)!=-1 || StrContains(sample, "need", false)!=-1 || StrContains(sample, "niceshot", false)!=-1 || StrContains(sample, "sentry", false)!=-1)
-		{
-			delay[client] = engineTime+5.0;
-			strcopy(sample, PLATFORM_MAX_PATH, "scp_sf/035/035idle6.mp3");
-		}
-		else if(StrContains(sample, "helpme", false) != -1)
+		else if(StrContains(sample, "cloakedspy", false) != -1 || StrContains(sample, "incoming", false)!=-1)
 		{
 			delay[client] = engineTime+6.0;
-			strcopy(sample, PLATFORM_MAX_PATH, "scp_sf/035/035closet2.mp3");
+			strcopy(sample, PLATFORM_MAX_PATH, "freak_fortress_2/scp035/intro1.wav");
 		}
-		else if(StrContains(sample, "jeers", false) != -1)
+		else if(StrContains(sample, "goodjob", false)!=-1 || StrContains(sample, "sentry", false)!=-1 || StrContains(sample, "need", false)!=-1)
 		{
-			delay[client] = engineTime+2.0;
-			strcopy(sample, PLATFORM_MAX_PATH, "scp_sf/035/035idle7.mp3");
+			delay[client] = engineTime+4.0;
+			strcopy(sample, PLATFORM_MAX_PATH, "scp_sf/035/035idle6.mp3");
+		}
+		else if(StrContains(sample, "jeers", false) != -1 || StrContains(sample, "helpme", false) != -1)
+		{
+			delay[client] = engineTime+5.0;
+			strcopy(sample, PLATFORM_MAX_PATH, "scp_sf/035/035closet2.mp3");
 		}
 		else if(StrContains(sample, "negative", false) != -1)
 		{
