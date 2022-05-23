@@ -1317,7 +1317,7 @@ public bool Classes_GlowHuman(int client, int victim)
 
 public bool Classes_SeeHuman(int client, int victim)
 {
-	return (victim<1 || victim>MaxClients || (IsFriendly(Client[client].Class, Client[victim].Class) || (!TF2_IsPlayerInCondition(victim, TFCond_Stealthed) && !TF2_IsPlayerInCondition(victim, TFCond_StealthedUserBuffFade))));
+	return (victim<1 || victim>MaxClients || (IsFriendly(Client[client].Class, Client[victim].Class) || (!TF2_IsPlayerInCondition(victim, TFCond_Stealthed) && !TF2_IsPlayerInCondition(victim, TFCond_StealthedUserBuffFade) && !TF2_IsPlayerInCondition(victim, TFCond_Cloaked))));
 }
 
 public bool Classes_PickupStandard(int client, int entity)

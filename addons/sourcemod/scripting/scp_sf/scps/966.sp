@@ -7,16 +7,15 @@ public bool SCP966_Create(int client)
 	Client[client].Extra2 = 0;
 
 	int account = GetSteamAccountID(client, false);
-
-	int weapon = SpawnWeapon(client, "tf_weapon_knife", 225, 70, 13, "2 ; 1.2 ; 6 ; 0.75 ; 15 ; 0 ; 182 ; 2 ; 252 ; 0.5 ; 4328 ; 1", false);
+	
+	int weapon = SpawnWeapon(client, "tf_weapon_invis", 212, 12, 13, "35 ; 1.5 ; 50 ; 1.2 ; 85 ; 0.5 ; 160 ; 1", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 10);
 		SetEntProp(weapon, Prop_Send, "m_iAccountID", account);
-		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 	}
 	
-	weapon = SpawnWeapon(client, "tf_weapon_invis", 212, 12, 13, "35 ; 1.5 ; 50 ; 1.2 ; 85 ; 0.5 ; 160 ; 1", false);
+	weapon = SpawnWeapon(client, "tf_weapon_knife", 225, 70, 13, "2 ; 1.2 ; 6 ; 0.75 ; 15 ; 0 ; 182 ; 2 ; 252 ; 0.5 ; 4328 ; 1", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 10);
