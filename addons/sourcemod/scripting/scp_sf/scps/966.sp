@@ -8,7 +8,7 @@ public bool SCP966_Create(int client)
 
 	int account = GetSteamAccountID(client, false);
 
-	int weapon = SpawnWeapon(client, "tf_weapon_knife", 225, 70, 13, "2 ; 1.2 ; 15 ; 0 ; 182 ; 2 ; 252 ; 0.5 ; 4328 ; 1", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_knife", 225, 70, 13, "2 ; 1.2 ; 6 ; 0.75 ; 15 ; 0 ; 182 ; 2 ; 252 ; 0.5 ; 4328 ; 1", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 10);
