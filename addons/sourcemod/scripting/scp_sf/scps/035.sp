@@ -35,8 +35,6 @@ public void SCP035_OnDeath(int client, Event event)
 			EmitSoundToClient(i, "scp_sf/terminate/scp035terminated.mp3", _, SNDCHAN_STATIC, SNDLEVEL_NONE);
 		}
 	}
-
-	CreateTimer(5.0, Timer_DissolveRagdoll, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 }
 
 public Action SCP035_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)

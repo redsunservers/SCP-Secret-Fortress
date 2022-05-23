@@ -1,0 +1,5 @@
+"VertexLitGeneric"
+{
+	$basetexture "freak_fortress_2\new966\scp966"
+	$bumpmap "freak_fortress_2\new966\scp966_n"
+}

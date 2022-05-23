@@ -213,6 +213,7 @@ float charge[MAXTF2PLAYERS];
 #include "scp_sf/scps/457.sp"
 #include "scp_sf/scps/939.sp"
 #include "scp_sf/scps/035.sp"
+#include "scp_sf/scps/966.sp"
 //#include "scp_sf/scps/sjm08.sp"
 
 #include "scp_sf/maps/crypto_forest.sp"
