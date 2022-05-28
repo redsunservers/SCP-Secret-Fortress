@@ -1260,6 +1260,26 @@
 	{
 		"chi"		"任务：中止\n目标：MTF 行动 E11\n原因：判断力严重不足"
 	}
+	"disarming_other"    // HUD
+    {
+        "#format"    "{1:N},{2:.0f}"
+        "chi"        "解除武装 {1}... {2}%"
+    }
+	"disarming_me"    // HUD
+    {
+        "#format"    "{1:N},{2:.0f}"
+        "chi"        "{1} 解除你的武装... {2}%"
+    }
+	"arming_other" // HUD
+    {
+        "#format"    "{1:N},{2:.0f}"
+        "chi"        "解开手铐 {1}... {2}%"
+    }
+    "arming_me" // HUD
+    {
+        "#format"    "{1:N},{2:.0f}"
+        "chi"        "{1} 正在解开手铐... {2}%"
+    }
 
 	// Ikea
 
