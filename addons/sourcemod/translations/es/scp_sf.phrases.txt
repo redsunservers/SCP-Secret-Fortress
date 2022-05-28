@@ -1272,6 +1272,26 @@
 	{
 		"es"		"TRABAJO: FINALIZADO \n SUJETO:OPERATIVO MTF E11\n MOTIVO:DEMUESTRA UN JUICIO EXCESIVAMENTE MALO"
 	}
+	"disarming_other"    // HUD
+    {
+        "#format"    "{1:N},{2:.0f}"
+        "es"        "Desarmando {1}... {2}%"
+    }
+	"disarming_me"    // HUD
+    {
+        "#format"    "{1:N},{2:.0f}"
+        "es"        "{1} es desarmarlos... {2}%"
+    }
+    "arming_other" // HUD
+    {
+        "#format"    "{1:N},{2:.0f}"
+        "es"        "Desnudo {1}... {2}%"
+    }
+	"arming_me" // HUD
+    {
+        "#format"    "{1:N},{2:.0f}"
+        "es"        "{1} es desbaratarlos... {2}%"
+    }
 
 	// Ikea
 

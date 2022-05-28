@@ -1277,6 +1277,26 @@
 	{
 		"it"		"INCARICO: TERMINATO\nSOGGETTO:OPERATIVO MTF E11\nRAGIONE: DIMOSTRA ECCESSIVA SCARSA CAPACITÀ DI GIUDIZIO."
 	}
+	"disarming_other"    // HUD
+    {
+        "#format"    "{1:N},{2:.0f}"
+        "it"        "Disarmo {1}... {2}%"
+    }
+	"disarming_me"    // HUD
+    {
+        "#format"    "{1:N},{2:.0f}"
+        "it"        "{1} è il disarmo di tutti... {2}%"
+    }
+    "arming_other" // HUD
+    {
+        "#format"    "{1:N},{2:.0f}"
+        "it"        "Smaltire il tappo {1}... {2}%"
+    }
+	"arming_me" // HUD
+    {
+        "#format"    "{1:N},{2:.0f}"
+        "it"        "{1} è stato sborgolato... {2}%"
+    }
 
 	// Ikea
 

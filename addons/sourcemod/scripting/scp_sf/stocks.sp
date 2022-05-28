@@ -1664,3 +1664,34 @@ void TriggerRelays(const char[] name)
 		}
 	}
 }
+
+stock int TraceClientViewEntity(int client)
+{
+	float m_vecOrigin[3];
+	float m_angRotation[3];
+
+	GetClientEyePosition(client, m_vecOrigin);
+	GetClientEyeAngles(client, m_angRotation);
+
+	Handle trace = TR_TraceRayFilterEx(m_vecOrigin, m_angRotation, MASK_VISIBLE, RayType_Infinite, TRDontHitSelf, client);
+	int pEntity = -1;
+
+	if (TR_DidHit(trace))
+	{
+		pEntity = TR_GetEntityIndex(trace);
+		CloseHandle(trace);
+		return pEntity;
+	}
+
+	if(trace != INVALID_HANDLE)
+	{
+		CloseHandle(trace);
+	}
+	
+	return -1;
+}
+
+public bool TRDontHitSelf(int entity, int mask, any data)
+{
+	return (1 <= entity <= MaxClients) && (entity != data);
+}
