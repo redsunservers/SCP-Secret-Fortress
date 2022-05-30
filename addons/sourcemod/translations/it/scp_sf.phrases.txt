@@ -155,7 +155,7 @@
 	}
 	"desc_mtf5002"
 	{
-		"it"		"Termina la Coalizione Globale Nascosta: "Date ordini ai vostri soldati."
+		"it"		"Termina la Coalizione Globale Nascosta: Date ordini ai vostri soldati."
 	}
 	"train_mtf5002"
 	{
@@ -725,7 +725,7 @@
 	}
 	"info_201"
 	{
-		"it"		"Per quando sarai stanco di sentirti chiedere: "Posso darti una mano?"
+		"it"		"Per quando sarai stanco di sentirti chiedere: Posso darti una mano?"
 	}
 	"weapon_423"
 	{
@@ -889,7 +889,7 @@
 	}
 	"weapon_30009"
 	{
-		"it"		"Tessera dell'Ingegnere del contenimento 
+		"it"		"Tessera dell'Ingegnere del contenimento"
 	}
 	"info_30009"
 	{
