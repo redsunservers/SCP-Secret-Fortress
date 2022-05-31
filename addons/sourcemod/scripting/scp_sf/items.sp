@@ -2509,8 +2509,8 @@ public bool Items_DisarmerButton(int client, int weapon, int &buttons, int &hold
 	
 	if(delay[client] < engineTime)
 	{
-		delay[client] = engineTime + 0.2;
-		DisarmerCharge[client] += 20.0;
+		delay[client] = engineTime + 0.1;
+		DisarmerCharge[client] += 10.0;
 		
 		SetHudTextParamsEx(-1.0, 0.6, 0.35, Client[client].Colors, Client[client].Colors, 0, 1.0, 0.01, 0.5);
 		if(!Client[target].Disarmer)
