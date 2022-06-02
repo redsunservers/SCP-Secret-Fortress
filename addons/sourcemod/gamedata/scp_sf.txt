@@ -165,7 +165,6 @@
 					"inputdata"
 					{
 						"type"	"objectptr"
-						"flags"	"byref"
 					}
 				}
 			}			
@@ -307,7 +306,6 @@
 					"info"
 					{
 						"type"	"objectptr"
-						"flags"	"byref"
 					}
 					"bEmpty"
 					{

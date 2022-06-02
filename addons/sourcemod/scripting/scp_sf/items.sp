@@ -2550,19 +2550,19 @@ public bool Items_DisarmerButton(int client, int weapon, int &buttons, int &hold
 	
 	if(delay[client] < engineTime)
 	{
-		delay[client] = engineTime + 0.2;
+		delay[client] = engineTime + 0.1;
 		DisarmerCharge[client] += 10.0;
 		
 		SetHudTextParamsEx(-1.0, 0.6, 0.35, Client[client].Colors, Client[client].Colors, 0, 1.0, 0.01, 0.5);
 		if(!Client[target].Disarmer)
 		{
-			ShowSyncHudText(client, HudPlayer, "%t", "disarming_me", target, DisarmerCharge[client]);
-			ShowSyncHudText(target, HudPlayer, "%t", "disarming_other", client, DisarmerCharge[client]);
+			ShowSyncHudText(client, HudPlayer, "%t", "disarming_other", target, DisarmerCharge[client]);
+			ShowSyncHudText(target, HudPlayer, "%t", "disarming_me", client, DisarmerCharge[client]);
 		}
 		else
 		{
-			ShowSyncHudText(client, HudPlayer, "%t", "arming_me", target, DisarmerCharge[client]);
-			ShowSyncHudText(target, HudPlayer, "%t", "arming_other", client, DisarmerCharge[client]);
+			ShowSyncHudText(client, HudPlayer, "%t", "arming_other", target, DisarmerCharge[client]);
+			ShowSyncHudText(target, HudPlayer, "%t", "arming_me", client, DisarmerCharge[client]);
 		}
 	
 		if(DisarmerCharge[client] >= 100.0)
