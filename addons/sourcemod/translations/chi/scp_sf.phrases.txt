@@ -292,7 +292,7 @@
 	}
 	"class_chaos2"
 	{
-		"chi"		"混沌分裂者镇压者"
+		"chi"		"混沌分裂者掠夺者"
 	}
 	"desc_chaos2"
 	{
@@ -304,7 +304,7 @@
 	}
 	"class_chaos3"
 	{
-		"chi"		"混沌分裂者掠夺者"
+		"chi"		"混沌分裂者镇压者"
 	}
 	"desc_chaos3"
 	{
@@ -397,6 +397,18 @@
 	"train_mtfe"
 	{
 		"chi"		"你需要解救设施中的科学家。\n你可以建造一个步哨击退 SCP \n同时你可以为队友建造补给器\n按 ATTACK2、USE 或使用 VOICEMENU 来和物品，按钮互动。"
+	}
+	"class_scp035"
+	{
+		"chi"		"SCP-035"
+	}
+	"desc_scp035"
+	{
+		"chi"		"杀死所有人类。\n阻止人类逃离。\n与其他 SCP 合作。"
+	}
+	"train_scp035"
+	{
+		"chi"		"阻止人类逃离。\n按 ATTACK2，ATTACK3，USE 或使用 VOICEMENU 来跟按钮和物品互动。"
 	}
 	"class_scp049"
 	{

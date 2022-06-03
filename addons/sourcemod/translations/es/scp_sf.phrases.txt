@@ -295,7 +295,7 @@
 	}
 	"class_chaos2"
 	{
-		"es"		"Represor de los Insurgentes del Caos"
+		"es"		"Intruso de los Insurgentes del Caos"
 	}
 	"desc_chaos2"
 	{
@@ -307,7 +307,7 @@
 	}
 	"class_chaos3"
 	{
-		"es"		"Intruso de los Insurgentes del Caos "
+		"es"		"Represor de los Insurgentes del Caos"
 	}
 	"desc_chaos3"
 	{
@@ -400,6 +400,18 @@
 	"train_mtfe"
 	{
 		"es"		"Tienes que liberar a los científicos de las instalaciones.\nPuedes construir armas centinela para combater a los SCP.\nTambien puedes construir dispensadores para tus aliados.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones."
+	}
+	"class_scp035"
+	{
+		"es"		"SCP-035"
+	}
+	"desc_scp035"
+	{
+		"es"		"Mata a todos.\nImpídeles huir.\nCoopera con los otros SCP."
+	}
+	"train_scp035"
+	{
+		"es"		"Impide que huyan.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones."	
 	}
 	"class_scp049"
 	{
