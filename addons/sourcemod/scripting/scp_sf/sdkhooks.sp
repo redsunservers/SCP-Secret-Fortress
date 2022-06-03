@@ -82,7 +82,7 @@ public Action OnSmallHealthPickup(int entity, int client)
 	if(!Enabled || !IsValidClient(client))
 		return Plugin_Continue;
 
-	if(!IsSCP(client) && !Client[client].Disarmer && Items_CanGiveItem(client, 3))
+	if(IsCanPickup(client) && !Client[client].Disarmer && Items_CanGiveItem(client, 3))
 	{
 		Items_CreateWeapon(client, 30013, false, true, true);
 		AcceptEntityInput(entity, "Kill");
@@ -95,7 +95,7 @@ public Action OnMediumHealthPickup(int entity, int client)
 	if(!Enabled || !IsValidClient(client))
 		return Plugin_Continue;
 
-	if(!IsSCP(client))
+	if(IsCanPickup(client))
 	{
 		if (GetEntPropEnt(entity, Prop_Data, "m_hOwnerEntity") == client)
 		{
@@ -130,7 +130,7 @@ public Action OnSmallAmmoPickup(int entity, int client)
 	if(!Enabled || !IsValidClient(client))
 		return Plugin_Continue;
 
-	if(!IsSCP(client) && !Client[client].Disarmer)
+	if(IsCanPickup(client) && !Client[client].Disarmer)
 	{
 		int ammo = GetAmmo(client, 2);
 
@@ -154,7 +154,7 @@ public Action OnMediumAmmoPickup(int entity, int client)
 	if(!Enabled || !IsValidClient(client))
 		return Plugin_Continue;
 
-	if(!IsSCP(client) && !Client[client].Disarmer)
+	if(IsCanPickup(client) && !Client[client].Disarmer)
 	{
 		bool found;
 		int ammo = GetAmmo(client, 2);
@@ -233,7 +233,7 @@ public Action OnFullAmmoPickup(int entity, int client)
 	if(!Enabled || !IsValidClient(client))
 		return Plugin_Continue;
 
-	if(!IsSCP(client) && !Client[client].Disarmer)
+	if(IsCanPickup(client) && !Client[client].Disarmer)
 	{
 		bool found;
 		int ammo = GetAmmo(client, 2);
