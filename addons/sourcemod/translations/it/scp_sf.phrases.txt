@@ -294,7 +294,7 @@
 	}
 	"class_chaos2"
 	{
-		"it"		"Repressore dell'Insorgenza del Caos."
+		"it"		"Predone dell'Insorgenza del Caos."
 	}
 	"desc_chaos2"
 	{
@@ -306,7 +306,7 @@
 	}
 	"class_chaos3"
 	{
-		"it"		"Predone dell'Insorgenza del Caos."
+		"it"		"Repressore dell'Insorgenza del Caos."
 	}
 	"desc_chaos3"
 	{
@@ -399,6 +399,18 @@
 	"train_mtfe"
 	{
 		"it"		"Devi liberare gli scienziati della struttura.\nPuoi costruire armi da sentinella per combattere gli SCP.\nPuoi anche costruire distributori per i tuoi alleati.\nPremi ATTACK2, USE o usa VOICEMENU per interagire con gli oggetti e i pulsanti."
+	}
+	"class_scp035"
+	{
+		"it"		"SCP-035"
+	}
+	"desc_scp035"
+	{
+		"it"		"Uccidili tutti.\nImpedisci loro di fuggire. Collabora con gli altri SCP."
+	}
+	"train_scp035"
+	{
+		"it"		"Impedisci loro di scappare.\nPremi ATTACK2, USE o usa VOICEMENU per interagire con gli oggetti e i pulsanti."
 	}
 	"class_scp049"
 	{

@@ -292,7 +292,7 @@
 	}
 	"class_chaos2"
 	{
-		"chi"		"混沌分裂者镇压者"
+		"chi"		"混沌分裂者掠夺者"
 	}
 	"desc_chaos2"
 	{
@@ -304,7 +304,7 @@
 	}
 	"class_chaos3"
 	{
-		"chi"		"混沌分裂者掠夺者"
+		"chi"		"混沌分裂者镇压者"
 	}
 	"desc_chaos3"
 	{
@@ -313,18 +313,6 @@
 	"train_chaos3"
 	{
 		"chi"		"你需要从设施里解救 D 级人员。\n杀死其他队伍的成员来帮助D级人员逃离。\n按 ATTACK2、USE 或使用 VOICEMENU 来跟按钮和物品互动。"
-	}
-	"class_chaos5"
-	{
-		"chi"		"混沌分裂者步枪手"
-	}
-	"desc_chaos5"
-	{
-		"chi"		"帮助 D 级人员逃离\n无效化其他目标"
-	}
-	"train_chaos5"
-	{
-		"chi"		"你需要从设施里解救 D 级人员。\n杀死其他队伍的成员来帮助 D 级人员逃离。\n按 ATTACK2、USE 或使用 VOICEMENU 来跟按钮和物品互动。"
 	}
 	"class_sci"
 	{
@@ -416,11 +404,11 @@
 	}
 	"desc_scp035"
 	{
-		"chi"		"杀死所有人类。\n阻止人类逃离。\n与其他 SCP 合作。\n冲刺 ATTACK3。\n把东西捡起来。"
+		"chi"		"杀死所有人类。\n阻止人类逃离。\n与其他 SCP 合作。"
 	}
 	"train_scp035"
 	{
-		"chi"		"你可以拿东西。\n你可以说话来欺骗人类。\n按 ATTACK2，ATTACK3，USE 或使用 VOICEMENU 来跟按钮和物品互动。"
+		"chi"		"阻止人类逃离。\n按 ATTACK2，ATTACK3，USE 或使用 VOICEMENU 来跟按钮和物品互动。"
 	}
 	"class_scp049"
 	{
@@ -541,18 +529,6 @@
 	"train_scp9392"
 	{
 		"chi"		"你只能看到制造噪音的玩家。\n你可以说话来欺骗人类。\n你的生命值越差，你会变得越快。\n按 ATTACK2，ATTACK3，USE 或使用 VOICEMENU 与按钮互动。"
-	}
-	"class_scp966"
-	{
-		"chi"		"SCP-966"
-	}
-	"desc_scp966"
-	{
-		"chi"		"杀死所有人类\n阻止人类逃离\n与其他 SCP 合作\n你可以披上斗篷"
-	}
-	"train_scp966"
-	{
-		"chi"		"按 ATTACK2 隐藏。\n避免正面交锋。\n你的生命值越差，你会变得越快。\n按 ATTACK2，ATTACK3，USE 或使用 VOICEMENU 与按钮互动。"
 	}
 	"class_scp3008"
 	{

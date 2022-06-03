@@ -11,6 +11,8 @@ enum struct ClassEnum
 	int ModelIndex;
 	int ModelAlt;
 	bool Human;
+	bool CanSprint;
+	bool CanPickup;
 	bool Vip;
 	bool Driver;
 
@@ -153,6 +155,8 @@ static void GrabKvValues(KeyValues kv, ClassEnum class, ClassEnum defaul, int in
 	class.Human = view_as<bool>(kv.GetNum("human", defaul.Human ? 1 : 0));
 	class.Vip = view_as<bool>(kv.GetNum("vip", defaul.Vip ? 1 : 0));
 	class.Driver = view_as<bool>(kv.GetNum("driver", defaul.Driver ? 1 : 0));
+	class.CanSprint = view_as<bool>(kv.GetNum("cansprint", defaul.CanSprint ? 1 : 0));
+	class.CanPickup = view_as<bool>(kv.GetNum("canpickup", defaul.CanPickup ? 1 : 0));
 
 	class.Color4 = defaul.Color4;
 	kv.GetColor4("color4", class.Color4);
@@ -575,6 +579,16 @@ stock bool IsSCP(int client)
 	ClassEnum class;
 	Classes_GetByIndex(Client[client].Class, class);
 	return !class.Human;
+}
+
+stock bool IsCanPickup(int client)
+{
+	ClassEnum class;
+	Classes_GetByIndex(Client[client].Class, class); 
+	if(class.CanPickup)
+		return true;
+
+	return false;
 }
 
 Action Classes_OnAnimation(int client, PlayerAnimEvent_t &anim, int &data)

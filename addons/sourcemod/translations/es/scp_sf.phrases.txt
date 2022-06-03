@@ -295,7 +295,7 @@
 	}
 	"class_chaos2"
 	{
-		"es"		"Represor de los Insurgentes del Caos"
+		"es"		"Intruso de los Insurgentes del Caos"
 	}
 	"desc_chaos2"
 	{
@@ -307,25 +307,13 @@
 	}
 	"class_chaos3"
 	{
-		"es"		"Intruso de los Insurgentes del Caos "
+		"es"		"Represor de los Insurgentes del Caos"
 	}
 	"desc_chaos3"
 	{
 		"es"		"Ayuda al personal de Clase D a escapar.\nNeutraliza a los otros sujetos."
 	}
 	"train_chaos3"
-	{
-		"es"		"Tienes que liberar al personal de Clase D de las instalaciones.\nAcaba con los otros equipos para ayudar al personal de Clase D a escapar.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con botones y objetos."
-	}
-	"class_chaos5"
-	{
-		"es"		"Fusilero de los Insurgentes del Caos"
-	}
-	"desc_chaos5"
-	{
-		"es"		"Ayuda al personal de Clase D a escapar.\nNeutraliza a los otros sujetos."
-	}
-	"train_chaos5"
 	{
 		"es"		"Tienes que liberar al personal de Clase D de las instalaciones.\nAcaba con los otros equipos para ayudar al personal de Clase D a escapar.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con botones y objetos."
 	}
@@ -419,11 +407,11 @@
 	}
 	"desc_scp035"
 	{
-		"es"		"Mata a todos.\nImpídeles huir.\nCoopera con los otros SCP.\nPuedes comunicarte con los humanos.\nRaccogliere l'articolo."
+		"es"		"Mata a todos.\nImpídeles huir.\nCoopera con los otros SCP."
 	}
 	"train_scp035"
 	{
-		"es"		"Può prendere l'argomento.\nPuedes engañar a los jugadores hablando con ellos.\nCuanta menos vida tengas, más rápido te moverás.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones."
+		"es"		"Impide que huyan.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones."	
 	}
 	"class_scp049"
 	{
@@ -545,18 +533,6 @@
 	"train_scp9392"
 	{
 		"es"		"Solo puedes ver a los objetivos que hacen ruido.\nPuedes engañar a los jugadores hablando con ellos.\nCuanta menos vida tengas, más rápido te moverás.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones."
-	}
-	"class_scp966"
-	{
-		"es"		"SCP-966"
-	}
-	"desc_scp966"
-	{
-		"es"		"Mata a todos.\nImpídeles huir.\nCoopera con los otros SCP.\nPuò nascondere."
-	}
-	"train_scp966"
-	{
-		"es"		"Appuyare su ATTACK2 per mascherare.\nEvitare le battaglie di testa a testa.\nCuanta menos vida tengas, más rápido te moverás.\nPulsa ATTACK2, USE o usa VOICEMENU para interactuar con objetos y botones."
 	}
 	"class_scp3008"
 	{
