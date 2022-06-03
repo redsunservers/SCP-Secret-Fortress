@@ -669,7 +669,7 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 				{
 					// failed to get access, play sound + reaction
 					float Time = GetGameTime();
-					if (!IsSCP(client) && (Client[client].NextReactTime < Time))
+					if (IsCanPickup(client) && (Client[client].NextReactTime < Time))
 					{
 						EmitSoundToClient(client, "replay/cameracontrolerror.wav");
 
@@ -1353,7 +1353,7 @@ public Action OnDropItem(int client, const char[] command, int args)
 	if(client && IsClientInGame(client) && !IsSpec(client))
 	{
 		ClassEnum class;
-		if(Classes_GetByIndex(Client[client].Class, class) && class.Human)
+		if(Classes_GetByIndex(Client[client].Class, class) && class.CanPickup)
 		{
 			int entity = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 			if(entity > MaxClients)
@@ -2155,7 +2155,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 
 	// Sprinting Related
 	ClassEnum class;
-	if(Classes_GetByIndex(Client[client].Class, class) && class.Human && !Client[client].Disarmer)
+	if(Classes_GetByIndex(Client[client].Class, class) && class.CanSprint && !Client[client].Disarmer)
 	{
 		if(((buttons & IN_ATTACK3) || (buttons & IN_SPEED)) && ((buttons & IN_FORWARD) || (buttons & IN_BACK) || (buttons & IN_MOVELEFT) || (buttons & IN_MOVERIGHT)) && GetEntPropEnt(client, Prop_Data, "m_hGroundEntity")!=-1)
 		{
@@ -2267,7 +2267,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 
 		if(!IsSpec(client))
 		{
-			if (class.Human)
+			if (class.Human || class.CanSprint)
 			{
 				if(DisarmCheck(client))
 				{
@@ -2370,15 +2370,16 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 						ShowSyncHudText(client, HudGame, "%t", "sprint", buffer);
 					}
 				}
-
-				// What class am I again
-				if(showHud)
-				{
-					SetHudTextParamsEx(-1.0, 0.08, 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
-					ShowSyncHudText(client, HudClass, "%t", class.Display);
-				}
 			}
-			else if (IsSCP(client) && !IsSpec(client) && showHud)
+
+			// What class am I again
+			if(class.Human && showHud)
+			{
+				SetHudTextParamsEx(-1.0, 0.08, 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
+				ShowSyncHudText(client, HudClass, "%t", class.Display);
+			}
+			
+			if (IsSCP(client) && !IsSpec(client) && showHud)
 			{
 				// kill counter + how many dbois/scientists left
 				SetHudTextParamsEx(-1.0, 0.1, 0.35, Client[client].Colors, Client[client].Colors, 0, 0.1, 0.05, 0.05);
@@ -2781,7 +2782,7 @@ void ShowClassInfo(int client, bool help=false)
 bool AttemptGrabItem(int client)
 {
 	ClassEnum class;
-	if(Classes_GetByIndex(Client[client].Class, class) && !(Client[client].Disarmer && class.Human))
+	if(Classes_GetByIndex(Client[client].Class, class) && !(Client[client].Disarmer && class.CanPickup))
 	{
 		int entity = GetClientPointVisible(client);
 		if(entity > MaxClients)

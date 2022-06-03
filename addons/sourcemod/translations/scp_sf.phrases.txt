@@ -294,7 +294,7 @@
 	}
 	"class_chaos2"
 	{
-		"en"		"Chaos Insurgency Repressor"
+		"en"		"Chaos Insurgency Marauder"
 	}
 	"desc_chaos2"
 	{
@@ -306,7 +306,7 @@
 	}
 	"class_chaos3"
 	{
-		"en"		"Chaos Insurgency Marauder"
+		"en"		"Chaos Insurgency Repressor"
 	}
 	"desc_chaos3"
 	{
@@ -399,6 +399,18 @@
 	"train_mtfe"
 	{
 		"en"		"You need to free Scientists from the facility.\nYou can build sentries to fight off SCPs.\nYou can also build dispensers for allies.\nPress ATTACK2, USE or use VOICEMENU to interact with buttons and items."
+	}
+	"class_scp035"
+	{
+		"en"		"SCP-035"
+	}
+	"desc_scp035"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nPick up the item and kill them all."
+	}
+	"train_scp035"
+	{
+		"en"		"Prevent escape.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_scp049"
 	{
