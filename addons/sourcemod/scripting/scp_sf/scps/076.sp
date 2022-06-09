@@ -103,6 +103,21 @@ public bool SCP076_DoorWalk(int client, int entity)
 	return true;
 }
 
+public Action SCP076_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
+{
+    if(!StrContains(sample, "vo", false))
+    {
+        return Plugin_Handled;
+    }
+
+    if(StrContains(sample, "demo_charge_windup", false) != -1)
+    {
+        return Plugin_Handled;
+    }
+    
+    return Plugin_Continue;
+}
+
 public int SCP076_OnKeycard(int client, AccessEnum access)
 {
 	if(access == Access_Checkpoint)
