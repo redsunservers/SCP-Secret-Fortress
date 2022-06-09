@@ -339,6 +339,9 @@ public MRESReturn DHook_CalculateMaxSpeedPost(int clientwhen, DHookReturn ret)
 	float speed = 300.0;
 	if(Client[client].InvisFor != FAR_FUTURE)
 	{
+		if(TF2_IsPlayerInCondition(client, TFCond_Charging))
+			return MRES_Ignored;
+	
 		if(TF2_IsPlayerInCondition(client, TFCond_Dazed))
 			return MRES_Ignored;
 

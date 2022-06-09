@@ -9,7 +9,7 @@ public bool SCP076_Create(int client)
 
 	Client[client].Extra2 = 0;
 
-	int weapon = SpawnWeapon(client, "tf_weapon_sword", 195, 1, 13, "2 ; 1.5 ; 28 ; 0.5 ; 219 ; 1 ; 252 ; 0.8", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_sword", 195, 1, 13, "2 ; 1.5 ; 28 ; 0.5 ; 219 ; 1 ; 252 ; 0.8 ; 412 ; 0.8 ; 2034 ; 0.2", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 11);
@@ -17,6 +17,19 @@ public bool SCP076_Create(int client)
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 		CreateTimer(15.0, Timer_UpdateClientHud, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 	}
+	
+	weapon = GiveWearable(client, 131, "tf_wearable_demoshield");
+	
+	SetEntProp(weapon, Prop_Send, "m_nRenderFX", 6);
+	
+	if(weapon > MaxClients)
+	{
+		TF2Attrib_SetByDefIndex(weapon, 1030, 1.0);
+		TF2Attrib_SetByDefIndex(weapon, 246, 1.5);
+		TF2Attrib_SetByDefIndex(weapon, 247, 1.0);
+		TF2Attrib_SetByDefIndex(weapon, 248, 1.3);
+	}
+	
 	return false;
 }
 
@@ -41,7 +54,7 @@ public void SCP076_OnKill(int client, int victim)
 		TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 		SetEntityHealth(client, GetClientHealth(client)+HealthRage);
 
-		int weapon = SpawnWeapon(client, "tf_weapon_sword", 266, 90, 13, "2 ; 11 ; 5 ; 1.15 ; 252 ; 0 ; 326 ; 1.67", 2, true);
+		int weapon = SpawnWeapon(client, "tf_weapon_sword", 266, 90, 13, "2 ; 11 ; 5 ; 1.15 ; 252 ; 0 ; 326 ; 1.67 ; 412 ; 0.8 ; 2034 ; 0.5", 2, true);
 		if(weapon > MaxClients)
 		{
 			ApplyStrangeRank(weapon, 18);
@@ -60,7 +73,7 @@ public void SCP076_OnKill(int client, int victim)
 public void SCP076_OnDeath(int client, Event event)
 {
 	Classes_DeathScp(client, event);
-	
+		
 	for(int i=1; i<=MaxClients; i++)
 	{
 		if(!IsValidClient(i))
@@ -68,7 +81,7 @@ public void SCP076_OnDeath(int client, Event event)
 
 		for(int j=0; j<2; j++)
 		{
-			EmitSoundToClient(i, "scp_sf/terminate/scp076terminated.mp3", _, SNDCHAN_STATIC, SNDLEVEL_NONE);
+			EmitSoundToClient(i, "scp_sf/terminate/scp0762terminated.mp3", _, SNDCHAN_STATIC, SNDLEVEL_NONE);
 		}
 	}
 	

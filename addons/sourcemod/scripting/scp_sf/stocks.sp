@@ -1665,9 +1665,9 @@ void TriggerRelays(const char[] name)
 	}
 }
 
-stock int GiveWearable(int client, int index)
+stock int GiveWearable(int client, int index, char[] classname = "tf_wearable")
 {
-    int entity = CreateEntityByName("tf_wearable");
+    int entity = CreateEntityByName(classname);
     if(IsValidEntity(entity))
     {
         SetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex", index);
