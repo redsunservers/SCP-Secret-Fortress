@@ -1703,4 +1703,86 @@
 	{
 		"en"		"ATTACK3 to switch items"
 	}
-}
+
+	// Turtle Support
+
+	"weapon_30666"
+	{
+		"en"		"Blaster Pistol"
+	}
+	"info_300666"
+	{
+		"en"		"Futuristic weapon with infinite penetration. Fast reload"
+	}
+	"weapon_30665"
+	{
+		"en"		"Blaster Rifle"
+	}
+	"info_30665"
+	{
+		"en"		"Very accurate rifle with infinite penetration. Slow reload."
+	}
+	"weapon_30088"
+	{
+		"en"		"Shell Armor"
+	}
+	"info_30088"
+	{
+		"en"		"Low damage resistance, extra reserve ammo, no helmet."
+	}
+	"weapon_30089"
+	{
+		"en"		"Red Metal"
+	}
+	"info_30089"
+	{
+		"en"		"Holding this artifact makes you super strong, but at what cost?"
+	}
+	"class_ht1"
+	{
+		"en"		"HatTurtle Drone (Defender)"
+	}
+	"desc_ht1"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with SCPs."
+	}	
+	"train_ht1"
+	{
+		"en"		"You are the strongest but also the slowest unit\nSlow down the progress of the MTF and Chaos Insurgency\nYou have a lot of health but you are not invincible."
+	}
+	"train_ht2"
+	{
+		"en"		"You are equipped with deadly weapons\nUse hit and run tactics to mow down groups of enemies\nYour rifle takes a very long time to reload."
+	}
+	"class_ht2"
+	{
+		"en"		"HatTurtle Drone (Assault)"
+	}
+	"desc_ht2"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with SCPs."
+	}	
+	"class_ht3"
+	{
+		"en"		"HatTurtle Drone (Scout)"
+	}
+	"desc_ht3"
+	{
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with SCPs."
+	}	
+	"train_ht3"
+	{
+		"en"		"You are the fastest but also the weakest unit\nYou can easily catch objective classes off-guard\nAvoid prolonged engagements with armed hostiles."
+	}
+	"class_janitor"
+	{
+		"en"		"Janitor"
+	}
+	"desc_janitor"
+	{
+		"en"		"Help Class-D Personnel escape.\nCooperate with the Chaos Insurgency.\nNeutralize other subjects."
+	}
+	"train_janitor"
+	{
+		"en"		"You need to protect D-classes from other teams.\nHelp them by escorting them where they need to go.\nYou are also disguised as a facility guard."
+	}
