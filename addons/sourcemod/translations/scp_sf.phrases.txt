@@ -1706,7 +1706,6 @@
 
 	// Turtle Support
 
-	//Shell Armor
 	"weapon_30666"
 	{
 		"en"		"Blaster Pistol"
