@@ -205,7 +205,6 @@ float charge[MAXTF2PLAYERS];
 #include "scp_sf/viewmodels.sp"
 
 #include "scp_sf/scps/018.sp"
-#include "scp_sf/scps/035.sp"
 #include "scp_sf/scps/049.sp"
 #include "scp_sf/scps/076.sp"
 #include "scp_sf/scps/096.sp"
