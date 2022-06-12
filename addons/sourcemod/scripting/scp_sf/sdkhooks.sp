@@ -83,6 +83,7 @@ public Action OnSmallHealthPickup(int entity, int client)
 	if(!Enabled || !IsValidClient(client))
 		return Plugin_Continue;
 	
+	
 	if(IsCanPickup(client) && !Client[client].Disarmer && Items_CanGiveItem(client, 3))
 	{
 		Items_CreateWeapon(client, 30013, false, true, true);

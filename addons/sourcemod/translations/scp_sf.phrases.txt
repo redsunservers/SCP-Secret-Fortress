@@ -502,11 +502,11 @@
 	}
 	"desc_scp035"
 	{
-		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nATTACK3 to sprint.\nPickup the item."
+		"en"		"Kill everyone.\nPrevent escape.\nCooperate with other SCPs.\nPick up the item and kill them all."
 	}
 	"train_scp035"
 	{
-		"en"		"You can pickup the item.\nYou can trick players by talking to them.\nPress ATTACK2, ATTACK3, USE to interact with buttons."
+		"en"		"Prevent escape.\nPress ATTACK2, ATTACK3, USE or use VOICEMENU to interact with buttons and items."
 	}
 	"class_scp049"
 	{
