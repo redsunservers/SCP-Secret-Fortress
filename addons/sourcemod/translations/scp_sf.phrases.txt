@@ -1786,3 +1786,4 @@
 	{
 		"en"		"You need to protect D-classes from other teams.\nHelp them by escorting them where they need to go.\nYou are also disguised as a facility guard."
 	}
+}
