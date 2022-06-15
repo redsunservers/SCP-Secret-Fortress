@@ -1703,4 +1703,87 @@
 	{
 		"it"		"ATTACK3 per cambiare armi"
 	}
+
+	// Turtle Support
+
+	"weapon_30666"
+	{
+		"it"		"Pistola Folgoratrice"
+	}
+	"info_300666"
+	{
+		"it"		"Arma futuristica a penetrazione infinita. Ricarica veloce"
+	}
+	"weapon_30665"
+	{
+		"it"		"Fucile Folgoratore"
+	}
+	"info_30665"
+	{
+		"it"		"Fucile molto preciso con penetrazione infinita. Ricarica lenta."
+	}
+	"weapon_30088"
+	{
+		"it"		"Corazza a guscio"
+	}
+	"info_30088"
+	{
+		"it"		"Bassa resistenza ai danni, munizioni di riserva extra, niente elmetto."
+	}
+	"weapon_30089"
+	{
+		"it"		"Metallo Rosso"
+	}
+	"info_30089"
+	{
+		"it"		"Detenere questo artefatto ti rende super forte, ma a quale costo?"
+	}
+	"class_ht1"
+	{
+		"it"		"Drone HatTurtle (Difensore)"
+	}
+	"desc_ht1"
+	{
+		"it"		"Uccidi tutti.\nImpedisci la fuga.\nCollabora con gli SCP."
+	}	
+	"train_ht1"
+	{
+		"it"		"Sei l'unità più forte ma anche la più lenta\nRallenta i progressi dell'MTF e dell'Insurrezione del Caos\nHai molta salute, ma non sei invincibile."
+	}
+	"train_ht2"
+	{
+		"it"		"Sei equipaggiato con armi letali\nUsa tattiche "mordi e fuggi" per abbattere gruppi di nemici\nIl tuo fucile impiega molto tempo a ricaricarsi."
+	}
+	"class_ht2"
+	{
+		"it"		"Drone HatTurtle (Assalto)"
+	}
+	"desc_ht2"
+	{
+		"it"		"Uccidi tutti.\nImpedisci la fuga.\nCoopera con gli SCP."
+	}	
+	"class_ht3"
+	{
+		"it"		"Drone HatTurtle (Esploratore)"
+	}
+	"desc_ht3"
+	{
+		"it"		"Uccidi tutti.\nImpedisci la fuga.\nCoopera con gli SCP."
+	}	
+	"train_ht3"
+	{
+		"it"		"Sei l'unità più veloce ma anche la più debole\nPuoi prendere facilmente alla sprovvista le classi obiettivo\nEvita gli scontri prolungati con nemici armati."
+	}
+	"class_janitor"
+	{
+		"it"		"Inserviente"
+	}
+	"desc_janitor"
+	{
+		"it"		"Aiuta il personale di Classe D a fuggire.\nCoopera con l'Insurrezione del Caos.\nNeutralizza altri soggetti."
+	}
+	"train_janitor"
+	{
+		"it"		"Devi proteggere la classe D dalle altre squadre.\bAiutali scortandoli dove devono andare.\nSei anche travestito da guardia della struttura."
+	}
 }
