@@ -938,6 +938,7 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 				if(GetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex") == index)
 				{
 					TF2_RemoveItem(client, ent);
+					AcceptEntityInput(entity, "FireUser1", client, client);
 					if(ent == active)
 						Items_SwitchItem(client, ent);
 				}
