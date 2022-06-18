@@ -1712,7 +1712,7 @@
 	}
 	"info_300666"
 	{
-		"it"		"Arma futuristica a penetrazione infinita. Ricarica veloce"
+		"it"		"Arma futuristica a penetrazione infinita. Ricarica veloce."
 	}
 	"weapon_30665"
 	{

@@ -1706,13 +1706,21 @@
 
 	// Turtle Support
 
+	"weapon_636"
+	{
+		"en"		"Coin"
+	}
+	"info_636"
+	{
+		"en"		"Worth 25 cents."
+	}
 	"weapon_30666"
 	{
 		"en"		"Blaster Pistol"
 	}
 	"info_300666"
 	{
-		"en"		"Futuristic weapon with infinite penetration. Fast reload"
+		"en"		"Futuristic weapon with infinite penetration. Fast reload."
 	}
 	"weapon_30665"
 	{
