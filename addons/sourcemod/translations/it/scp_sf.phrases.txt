@@ -250,7 +250,7 @@
 	}
 	"desc_dboi"
 	{
-		"it"		"Fuggi dalla struttura. Coopera con i ribelli del Caos. Evita le altre squadre."
+		"it"		"Fuggi dalla struttura.\nCoopera con i ribelli del Caos.\nEvita le altre squadre."
 	}
 	"train_dboi"
 	{
@@ -1780,10 +1780,10 @@
 	}
 	"desc_janitor"
 	{
-		"it"		"Aiuta il personale di Classe D a fuggire.\nCoopera con l'Insurrezione del Caos.\nNeutralizza altri soggetti."
+		"it"		Fuggi dalla struttura.\nCoopera con i ribelli del Caos.\nEvita le altre squadre."
 	}
 	"train_janitor"
 	{
-		"it"		"Devi proteggere la classe D dalle altre squadre.\bAiutali scortandoli dove devono andare.\nSei anche travestito da guardia della struttura."
+		"it"		"Devi fuggire dalla struttura.\nPremi ATTACK, ATTACK2, USE o usa VOICEMENU per interagire con i pulsanti e gli oggetti.\nSei anche travestito da guardia della struttura."
 	}
 }
