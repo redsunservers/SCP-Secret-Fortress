@@ -1752,7 +1752,7 @@
 	}
 	"train_ht2"
 	{
-		"it"		"Sei equipaggiato con armi letali\nUsa tattiche "mordi e fuggi" per abbattere gruppi di nemici\nIl tuo fucile impiega molto tempo a ricaricarsi."
+		"it"		"Sei equipaggiato con armi letali\nUsa tattiche mordi e fuggi per abbattere gruppi di nemici\nIl tuo fucile impiega molto tempo a ricaricarsi."
 	}
 	"class_ht2"
 	{
