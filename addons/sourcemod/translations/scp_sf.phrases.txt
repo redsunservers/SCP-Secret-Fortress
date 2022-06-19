@@ -1706,13 +1706,21 @@
 
 	// Turtle Support
 
+	"weapon_636"
+	{
+		"en"		"Coin"
+	}
+	"info_636"
+	{
+		"en"		"Worth 25 cents."
+	}
 	"weapon_30666"
 	{
 		"en"		"Blaster Pistol"
 	}
 	"info_300666"
 	{
-		"en"		"Futuristic weapon with infinite penetration. Fast reload"
+		"en"		"Futuristic weapon with infinite penetration. Fast reload."
 	}
 	"weapon_30665"
 	{
@@ -1780,10 +1788,10 @@
 	}
 	"desc_janitor"
 	{
-		"en"		"Help Class-D Personnel escape.\nCooperate with the Chaos Insurgency.\nNeutralize other subjects."
+		"en"		"Escape from the facility.\nCooperate with the Chaos Insurgency.\nAvoid other teams."
 	}
 	"train_janitor"
 	{
-		"en"		"You need to protect D-classes from other teams.\nHelp them by escorting them where they need to go.\nYou are also disguised as a facility guard."
+		"en"		"You need to escape the facility.\nPress ATTACK, ATTACK2, USE, or use VOICEMENU to interact with buttons and items.\nYou are also disguised as a facility guard."
 	}
 }
