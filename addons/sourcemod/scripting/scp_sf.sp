@@ -938,9 +938,32 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 				if(GetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex") == index)
 				{
 					TF2_RemoveItem(client, ent);
+					AcceptEntityInput(entity, "FireUser1", client, client);
 					if(ent == active)
 						Items_SwitchItem(client, ent);
 				}
+			}
+		}
+	}
+	else if(!StrContains(name, "scp_insertitem_", false))
+	{
+		if(IsValidClient(client))
+		{
+			char buffers[4][6];
+			ExplodeString(name, "_", buffers, sizeof(buffers), sizeof(buffers[]));
+
+			int index = StringToInt(buffers[2]);
+			int active = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+			
+			if(GetEntProp(active, Prop_Send, "m_iItemDefinitionIndex") == index)
+			{
+				TF2_RemoveItem(client, active);
+				AcceptEntityInput(entity, "FireUser1", client, client);
+				Items_SwitchItem(client, active);
+			}
+			else
+			{
+				AcceptEntityInput(entity, "FireUser2", client, client);
 			}
 		}
 	}
