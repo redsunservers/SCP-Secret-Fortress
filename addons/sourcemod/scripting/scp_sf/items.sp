@@ -2480,13 +2480,6 @@ public bool Items_DisarmerButton(int client, int weapon, int &buttons, int &hold
 		return false;
 	}
 	
-	if(IsFriendly(Client[target].Class, Client[client].Class))
-	{
-		previousTarget[client] = -1;
-		DisarmerCharge[client] = 0.0;
-		return false;
-	}
-	
 	bool cancel;
 	cancel = Items_IsHoldingWeapon(target);
 	
@@ -2505,19 +2498,25 @@ public bool Items_DisarmerButton(int client, int weapon, int &buttons, int &hold
 	
 	float engineTime = GetGameTime();
 	static float delay[MAXTF2PLAYERS];
+
+	bool isTargetTeammate = IsFriendly(Client[target].Class, Client[client].Class);
+	bool canDisarm = Client[target].Disarmer == 0 && !isTargetTeammate;
+
+	// Only allow the disarmer and disarmed player's team to undisarm (to prevent griefing and accidents)
+	bool canUndisarm = Client[target].Disarmer > 0 && (client == Client[target].Disarmer || isTargetTeammate);
 	
-	if(delay[client] < engineTime)
+	if((canDisarm || canUndisarm) && delay[client] < engineTime)
 	{
 		delay[client] = engineTime + 0.1;
 		DisarmerCharge[client] += 10.0;
 		
 		SetHudTextParamsEx(-1.0, 0.6, 0.35, Client[client].Colors, Client[client].Colors, 0, 1.0, 0.01, 0.5);
-		if(!Client[target].Disarmer)
+		if(canDisarm)
 		{
 			ShowSyncHudText(client, HudPlayer, "%t", "disarming_other", target, DisarmerCharge[client]);
 			ShowSyncHudText(target, HudPlayer, "%t", "disarming_me", client, DisarmerCharge[client]);
 		}
-		else
+		else if (canUndisarm)
 		{
 			ShowSyncHudText(client, HudPlayer, "%t", "arming_other", target, DisarmerCharge[client]);
 			ShowSyncHudText(target, HudPlayer, "%t", "arming_me", client, DisarmerCharge[client]);
@@ -2525,7 +2524,7 @@ public bool Items_DisarmerButton(int client, int weapon, int &buttons, int &hold
 	
 		if(DisarmerCharge[client] >= 100.0)
 		{
-			if(!Client[target].Disarmer)
+			if(canDisarm)
 			{
 				TF2_AddCondition(target, TFCond_PasstimePenaltyDebuff);
 				BfWrite bf = view_as<BfWrite>(StartMessageOne("HudNotifyCustom", target));
@@ -2558,7 +2557,7 @@ public bool Items_DisarmerButton(int client, int weapon, int &buttons, int &hold
 				Client[target].Disarmer = client;
 				SDKCall_SetSpeed(target);
 			}
-			else
+			else if (canUndisarm)
 			{
 				TF2_RemoveCondition(target, TFCond_PasstimePenaltyDebuff);
 				Client[target].Disarmer = 0;
