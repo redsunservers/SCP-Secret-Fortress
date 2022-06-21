@@ -2501,23 +2501,21 @@ public bool Items_DisarmerButton(int client, int weapon, int &buttons, int &hold
 	static float delay[MAXTF2PLAYERS];
 
 	bool isTargetTeammate = IsFriendly(Client[target].Class, Client[client].Class);
+	bool canDisarm = Client[target].Disarmer == 0 && !isTargetTeammate;
 
 	// Only allow the disarmer and disarmed player's team to undisarm (to prevent griefing and accidents)
-	bool canUndisarm = client == Client[target].Disarmer || isTargetTeammate;
+	bool canUndisarm = Client[target].Disarmer > 0 && (client == Client[target].Disarmer || isTargetTeammate);
 	
-	if(delay[client] < engineTime)
+	if((canDisarm || canUndisarm) && delay[client] < engineTime)
 	{
 		delay[client] = engineTime + 0.1;
 		DisarmerCharge[client] += 10.0;
 		
 		SetHudTextParamsEx(-1.0, 0.6, 0.35, Client[client].Colors, Client[client].Colors, 0, 1.0, 0.01, 0.5);
-		if(!Client[target].Disarmer)
+		if(canDisarm)
 		{
-			if (!isTargetTeammate)
-			{
-				ShowSyncHudText(client, HudPlayer, "%t", "disarming_other", target, DisarmerCharge[client]);
-				ShowSyncHudText(target, HudPlayer, "%t", "disarming_me", client, DisarmerCharge[client]);
-			}
+			ShowSyncHudText(client, HudPlayer, "%t", "disarming_other", target, DisarmerCharge[client]);
+			ShowSyncHudText(target, HudPlayer, "%t", "disarming_me", client, DisarmerCharge[client]);
 		}
 		else if (canUndisarm)
 		{
@@ -2527,41 +2525,38 @@ public bool Items_DisarmerButton(int client, int weapon, int &buttons, int &hold
 	
 		if(DisarmerCharge[client] >= 100.0)
 		{
-			if(!Client[target].Disarmer)
+			if(canDisarm)
 			{
-				if (!isTargetTeammate)
+				TF2_AddCondition(target, TFCond_PasstimePenaltyDebuff);
+				BfWrite bf = view_as<BfWrite>(StartMessageOne("HudNotifyCustom", target));
+				if(bf)
 				{
-					TF2_AddCondition(target, TFCond_PasstimePenaltyDebuff);
-					BfWrite bf = view_as<BfWrite>(StartMessageOne("HudNotifyCustom", target));
-					if(bf)
-					{
-						char buffer[64];
-						FormatEx(buffer, sizeof(buffer), "%T", "disarmed", client);
-						bf.WriteString(buffer);
-						bf.WriteString("ico_notify_flag_moving_alt");
-						bf.WriteByte(view_as<int>(TFTeam_Red));
-						EndMessage();
-					}
-					
-					SZF_DropItem(target);
-					Items_DropAllItems(target);
-					for(int i; i<AMMO_MAX; i++)
-					{
-						SetEntProp(target, Prop_Data, "m_iAmmo", 0, _, i);
-					}
-					Items_SetEmptyWeapon(target);
-					
-					ClassEnum class;
-					if(Classes_GetByIndex(Client[target].Class, class) && class.Group==2 && !class.Vip)
-						GiveAchievement(Achievement_DisarmMTF, client);
-					
-					// all weapons are gone, so reset the time		
-					Client[target].LastWeaponTime = 0.0;
-					
-					CreateTimer(1.0, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
-					Client[target].Disarmer = client;
-					SDKCall_SetSpeed(target);
+					char buffer[64];
+					FormatEx(buffer, sizeof(buffer), "%T", "disarmed", client);
+					bf.WriteString(buffer);
+					bf.WriteString("ico_notify_flag_moving_alt");
+					bf.WriteByte(view_as<int>(TFTeam_Red));
+					EndMessage();
 				}
+				
+				SZF_DropItem(target);
+				Items_DropAllItems(target);
+				for(int i; i<AMMO_MAX; i++)
+				{
+					SetEntProp(target, Prop_Data, "m_iAmmo", 0, _, i);
+				}
+				Items_SetEmptyWeapon(target);
+				
+				ClassEnum class;
+				if(Classes_GetByIndex(Client[target].Class, class) && class.Group==2 && !class.Vip)
+					GiveAchievement(Achievement_DisarmMTF, client);
+				
+				// all weapons are gone, so reset the time		
+				Client[target].LastWeaponTime = 0.0;
+				
+				CreateTimer(1.0, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
+				Client[target].Disarmer = client;
+				SDKCall_SetSpeed(target);
 			}
 			else if (canUndisarm)
 			{
