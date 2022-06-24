@@ -53,6 +53,10 @@ public void SCP076_OnKill(int client, int victim)
 	{
 		SetEntityHealth(client, GetClientHealth(client)+HealthKill);
 	}
+	else
+	{
+		SetEntityHealth(client, GetClientHealth(client)+HealthRage);
+	}
 
 	SDKCall_SetSpeed(client);
 }
