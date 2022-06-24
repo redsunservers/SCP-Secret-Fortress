@@ -1843,8 +1843,8 @@ public Action Items_FlashTimer(Handle timer, int ref)
 			{
 				static float pos2[3];
 				GetClientEyePosition(i, pos2);
-				// 1024 units
-				if(GetVectorDistance(pos1, pos2, true) < 1048576.0)
+				// 512 units
+				if(GetVectorDistance(pos1, pos2, true) < 524288.0)
 				{
 					FadeMessage(i, 1000, 1000, 0x0001, 200, 200, 200, 255);
 					ClientCommand(i, "dsp_player %d", GetRandomInt(35, 37));
