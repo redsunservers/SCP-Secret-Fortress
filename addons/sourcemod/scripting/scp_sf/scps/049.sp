@@ -1,6 +1,8 @@
 static const char ModelMedi[] = "models/scp_sf/049/c_arms_scp049_knife_1.mdl";
 static const char ModelMelee[] = "models/scp_sf/049/c_arms_scp049_4.mdl";
 
+static const float SpeedFound = 1.18;
+
 enum struct SCP049Enum
 {
 	int Index;	// Revive Marker Index / SCP-049 Revive Count
@@ -39,6 +41,8 @@ public bool SCP049_Create(int client)
 		SetEntProp(weapon, Prop_Send, "m_iAccountID", account);
 	}
 
+	Client[client].Extra1 = 0;
+	
 	Revive[client].Index = 0;
 	Revive[client].GoneAt = GetGameTime()+20.0;
 	Revive[client].MoveAt = FAR_FUTURE;
@@ -47,13 +51,15 @@ public bool SCP049_Create(int client)
 
 public bool SCP0492_Create(int client)
 {
-	int weapon = SpawnWeapon(client, "tf_weapon_bat", 572, 50, 13, "2 ; 1.25 ; 5 ; 1.3 ; 28 ; 0.5 ; 252 ; 0.5", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_bat", 572, 50, 13, "2 ; 1.25 ; 5 ; 1.3 ; 28 ; 0.5 ; 252 ; 0.5 ; 264 ; 0.6", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 4);
 		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 	}
+	
+	SetEntProp(weapon, Prop_Send, "m_nRenderFX", 6);
 
 	ClassEnum class;
 	Classes_GetByIndex(Index0492, class);
@@ -79,6 +85,12 @@ public bool SCP0492_Create(int client)
 	TF2_AddCondition(client, TFCond_NoHealingDamageBuff, 1.0);
 	TF2Attrib_SetByDefIndex(client, 49, 1.0);
 	return true;
+}
+
+public void SCP049_OnSpeed(int client, float &speed)
+{
+	if(Client[client].Extra1 == 1)
+		speed *= SpeedFound;
 }
 
 public Action SCP049_OnAnimation(int client, PlayerAnimEvent_t &anim, int &data)
@@ -315,6 +327,8 @@ public void SCP049_OnButton(int client, int button)
 				SetEntProp(target, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
 				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", target);
 			}
+			
+			Client[client].Extra1 = 1;
 
 			FakeClientCommandEx(client, "voicemenu 1 6");	// Activate charge
 
@@ -333,6 +347,7 @@ public void SCP049_OnButton(int client, int button)
 		ViewModel_Destroy(client);
 		TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 		GiveMelee(client, GetSteamAccountID(client, false));
+		Client[client].Extra1 = 0;
 		Revive[client].MoveAt = FAR_FUTURE;
 		Revive[client].GoneAt = engineTime+2.0;
 	}

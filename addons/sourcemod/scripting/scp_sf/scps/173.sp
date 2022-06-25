@@ -231,7 +231,7 @@ public void SCP173_OnButton(int client, int button)
 			players += 1.0;
 		}
 
-		if(players)
+		if(players || IsEntityStuck(client))
 		{
 			GetEntPropVector(client, Prop_Data, "m_vecVelocity", pos1);
 			pos1[0] = 0.0;
