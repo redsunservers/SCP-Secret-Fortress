@@ -231,7 +231,7 @@ public void SCP173_OnButton(int client, int button)
 			players += 1.0;
 		}
 
-		if(players || IsEntityStuck(client))
+		if(players || IsSCP173Stuck(client))
 		{
 			GetEntPropVector(client, Prop_Data, "m_vecVelocity", pos1);
 			pos1[0] = 0.0;
@@ -633,4 +633,27 @@ public void SZF173_OnMaxHealth(int client, int &health)
 	{
 		Health[client] = current+HealthExtraSZF;
 	}
+}
+
+bool IsSCP173Stuck(int client)
+{
+	static float min[3], max[3], pos[3];
+	GetEntPropVector(client, Prop_Send, "m_vecMins", min);
+	GetEntPropVector(client, Prop_Send, "m_vecMaxs", max);
+	GetEntPropVector(client, Prop_Send, "m_vecOrigin", pos);
+	
+	TR_TraceHullFilter(pos, pos, min, max, MASK_SOLID, Trace_DontHitPlayerAndDropWeapon, client);
+	return (TR_DidHit());
+}
+
+public bool Trace_DontHitPlayerAndDropWeapon(int client, int mask, any data)
+{
+	if(IsValidClient(data)) return false;
+	
+	char buffer[64];
+	GetEntityClassname(data, buffer, sizeof(buffer));
+	
+	if(StrEqual(buffer, "tf_dropped_weapon")) return false;
+	
+	return true;
 }
