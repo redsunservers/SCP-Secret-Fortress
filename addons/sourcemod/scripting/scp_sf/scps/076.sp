@@ -1,7 +1,7 @@
 static const float Speeds[] = {240.0, 246.0, 252.0, 258.0, 264.0, 276.0};
 static const int MaxHeads = 5;
-static const int HealthKill = 50;
-static const int HealthRage = 300;
+static const int HealthKill = 30;
+static const int HealthRage = 250;
 
 public bool SCP076_Create(int client)
 {
@@ -24,12 +24,11 @@ public bool SCP076_Create(int client)
 	
 	if(weapon > MaxClients)
 	{
+		TF2Attrib_SetByDefIndex(weapon, 61, 1.5);
+		TF2Attrib_SetByDefIndex(weapon, 65, 1.3);
 		TF2Attrib_SetByDefIndex(weapon, 1030, 1.0);
 		TF2Attrib_SetByDefIndex(weapon, 676, 1.0);
-		TF2Attrib_SetByDefIndex(weapon, 246, 2.0);
-		TF2Attrib_SetByDefIndex(weapon, 247, 1.0);
-		TF2Attrib_SetByDefIndex(weapon, 248, 1.3);
-		TF2Attrib_SetByDefIndex(weapon, 249, 1.25);
+		TF2Attrib_SetByDefIndex(weapon, 246, 1.5);
 	}
 	
 	return false;
@@ -50,13 +49,13 @@ public void SCP076_OnKill(int client, int victim)
 	if(Client[client].Extra2 == MaxHeads)
 	{
 		TF2_AddCondition(client, TFCond_CritCola);
-		TF2_StunPlayer(client, 2.0, 0.5, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
+		TF2_StunPlayer(client, 10.0, 0.8, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
 		ClientCommand(client, "playgamesound items/powerup_pickup_knockback.wav");
 
 		TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 		SetEntityHealth(client, GetClientHealth(client)+HealthRage);
 
-		int weapon = SpawnWeapon(client, "tf_weapon_sword", 266, 90, 13, "2 ; 11 ; 5 ; 1.15 ; 252 ; 0 ; 326 ; 1.67 ; 412 ; 0.6 ; 2034 ; 0.2", 2, true);
+		int weapon = SpawnWeapon(client, "tf_weapon_sword", 266, 90, 13, "2 ; 11 ; 5 ; 1.65 ; 252 ; 0 ; 326 ; 1.67 ; 412 ; 1.4", 2, true);
 		if(weapon > MaxClients)
 		{
 			ApplyStrangeRank(weapon, 18);
