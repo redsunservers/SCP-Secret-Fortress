@@ -40,6 +40,8 @@ public bool SCP049_Create(int client)
 		TF2Attrib_SetByDefIndex(weapon, 454, view_as<float>(1));
 		SetEntProp(weapon, Prop_Send, "m_iAccountID", account);
 	}
+	
+	Client[client].Extra1 = 0;
 
 	Client[client].Extra1 = 0;
 	
