@@ -245,12 +245,12 @@ public Action SCP106_TakeDamage(int client, int attacker, int &inflictor, float 
 		
 	if(damagetype & DMG_BULLET)
 	{
-		damage *= 0.15
+		damage *= 0.15;
 		return Plugin_Changed;
 	}
 	else if(damagetype & DMG_FALL)
 	{
-		damage *= 0.02
+		damage *= 0.02;
 		return Plugin_Changed;
 	}
 	
