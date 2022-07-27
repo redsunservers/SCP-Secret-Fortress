@@ -969,6 +969,15 @@ public bool Classes_DeathScp(int client, Event event)
 		{
 			CPrintToChatAll("%s%t", PREFIX, "scp_killed", clientClass.Color, clientClass.Display, attackerClass.Color, attackerClass.Display);
 		}
+		
+		switch(attackerClass.Group)
+		{
+			case 1:
+				Gamemode_AddValue("dpkill");
+
+			case 2:
+				Gamemode_AddValue("spkill");
+		}
 
 		if(attackerClass.Group==2 || assisterClass.Group==2)
 			Gamemode_GiveTicket(2, 5);
@@ -1052,10 +1061,7 @@ public void Classes_PlayDeathAnimation(int client, const char[] modelname, const
 
 public void Classes_KillDBoi(int client, int victim)
 {
-	if( Classes_GetByName("sci") == Client[victim].Class ||
-		Classes_GetByName("sci1") == Client[victim].Class ||
-		Classes_GetByName("sci2") == Client[victim].Class ||
-		Classes_GetByName("sci3") == Client[victim].Class)
+	if(Classes_GetByName("sci") == Client[victim].Class)
 	{
 		if(Items_OnKeycard(victim, Access_Main))
 			GiveAchievement(Achievement_KillSci, client);
@@ -1084,11 +1090,7 @@ public void Classes_KillChaos(int client, int victim)
 
 public void Classes_KillSci(int client, int victim)
 {
-	if( Classes_GetByName("dboi") == Client[victim].Class ||
-		Classes_GetByName("dboi1") == Client[victim].Class ||
-		Classes_GetByName("dboi2") == Client[victim].Class ||
-		Classes_GetByName("dboi3") == Client[victim].Class ||
-		Classes_GetByName("dboi4") == Client[victim].Class)
+	if(Classes_GetByName("dboi") == Client[victim].Class)
 	{
 		GiveAchievement(Achievement_KillDClass, client);
 	}
@@ -1237,7 +1239,10 @@ public void Classes_CondDBoi(int client, TFCond cond)
 					GiveAchievement(Achievement_EscapeSpeed, client);
 
 				if(Items_GetItemsOfType(client, 5) > 1)
+				{
 					GiveAchievement(Achievement_FindSCP, client);
+					Gamemode_GiveTicket(1, 1);
+				}
 			}
 			
 			// find nearby players and give them a bonus for escorting
@@ -1797,4 +1802,18 @@ public void Classes_SetKarma(int client, float karma)
 	char value[64];
 	FloatToString(karma, value, sizeof(value));
 	SetClientCookie(client, CookieKarma, value);
+}
+
+public Action Classes_OnAnimationWeapon(int client, PlayerAnimEvent_t &anim, int &data)
+{
+	if(anim==PLAYERANIMEVENT_ATTACK_PRIMARY)
+	{
+		ViewModel_SetAnimation(client, "fire");
+	}
+	else if(anim==PLAYERANIMEVENT_RELOAD)
+	{
+		ViewModel_SetAnimation(client, "reload");
+	}
+	
+	return Plugin_Continue;
 }

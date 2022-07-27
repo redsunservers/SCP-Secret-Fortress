@@ -1,0 +1,8 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "models/player/Zombies/Charple1_sheet"
+	"$bumpmap" "models/player/Zombies/Charple1_normal"
+	"$model" 1
+}
+
+

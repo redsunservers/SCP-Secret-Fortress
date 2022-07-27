@@ -1487,6 +1487,55 @@ public Action Items_HeadshotHit(int client, int victim, int &inflictor, float &d
 	return Plugin_Changed;
 }
 
+public Action Items_5mmHit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	if(GetEntProp(victim, Prop_Data, "m_LastHitGroup") == HITGROUP_HEAD && (!IsSCP(victim) || Client[victim].Class==Classes_GetByName("scp0492")))
+	{
+		damagetype |= DMG_CRIT;
+		return Plugin_Changed;
+	}
+	else if(GetEntProp(victim, Prop_Data, "m_LastHitGroup") == HITGROUP_LEFTLEG || GetEntProp(victim, Prop_Data, "m_LastHitGroup") == HITGROUP_RIGHTLEG)
+	{
+		TF2_StunPlayer(victim, 0.4, 0.25, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
+		return Plugin_Changed;
+	}
+	
+	return Plugin_Continue;
+}
+
+public Action Items_7mmHit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	if(GetEntProp(victim, Prop_Data, "m_LastHitGroup") == HITGROUP_HEAD && (!IsSCP(victim) || Client[victim].Class==Classes_GetByName("scp0492")))
+	{
+		damagetype |= DMG_CRIT;
+		return Plugin_Changed;
+	}
+	else if(GetEntProp(victim, Prop_Data, "m_LastHitGroup") == HITGROUP_LEFTLEG || GetEntProp(victim, Prop_Data, "m_LastHitGroup") == HITGROUP_RIGHTLEG)
+	{
+		TF2_StunPlayer(victim, 0.4, 0.5, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
+		return Plugin_Changed;
+	}
+	
+	return Plugin_Continue;
+}
+
+public Action Items_44magHit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	if(GetEntProp(victim, Prop_Data, "m_LastHitGroup") == HITGROUP_HEAD && (!IsSCP(victim) || Client[victim].Class==Classes_GetByName("scp0492")))
+	{
+		damagetype |= DMG_CRIT;
+		TF2_StunPlayer(victim, 5.0, 0.5, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
+		return Plugin_Changed;
+	}
+	else if(GetEntProp(victim, Prop_Data, "m_LastHitGroup") == HITGROUP_LEFTLEG || GetEntProp(victim, Prop_Data, "m_LastHitGroup") == HITGROUP_RIGHTLEG)
+	{
+		TF2_StunPlayer(victim, 0.4, 0.5, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
+		return Plugin_Changed;
+	}
+	
+	return Plugin_Continue;
+}
+
 public Action Items_LogicerHit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
 	bool changed;
@@ -1501,6 +1550,11 @@ public Action Items_LogicerHit(int client, int victim, int &inflictor, float &da
 	   GetEntProp(victim, Prop_Data, "m_LastHitGroup") == HITGROUP_HEAD)
 	{
 		damagetype |= DMG_CRIT;
+		changed = true;
+	}
+	else if(GetEntProp(victim, Prop_Data, "m_LastHitGroup") == HITGROUP_LEFTLEG || GetEntProp(victim, Prop_Data, "m_LastHitGroup") == HITGROUP_RIGHTLEG)
+	{
+		TF2_StunPlayer(victim, 0.2, 0.5, TF_STUNFLAG_SLOWDOWN|TF_STUNFLAG_NOSOUNDOREFFECT);
 		changed = true;
 	}
 
@@ -1659,6 +1713,7 @@ public bool Items_FragButton(int client, int weapon, int &buttons, int &holding)
 				SetEntityModel(entity, "models/scp_fixed/frag/w_frag.mdl");
 
 				DispatchSpawn(entity);
+				AcceptEntityInput(entity, "DisableDamageForces");
 				TeleportEntity(entity, pos, ang, vel);
 
 				CreateTimer(5.0, Items_FragTimer, EntIndexToEntRef(entity), TIMER_FLAG_NO_MAPCHANGE);

@@ -1118,7 +1118,7 @@ public bool Gamemode_ConditionSlnew(TFTeam &team)
 	if(balive && (salive || ralive))
 		return false;
 	
-	int descape, dcapture, dtotal, sescape, scapture, stotal, pkill, ptotal;
+	int descape, dcapture, dtotal, sescape, scapture, stotal, pkill, ptotal, dpkill, spkill;
 	GameInfo.GetValue("descape", descape);
 	GameInfo.GetValue("dcapture", dcapture);
 	GameInfo.GetValue("dtotal", dtotal);
@@ -1127,9 +1127,13 @@ public bool Gamemode_ConditionSlnew(TFTeam &team)
 	GameInfo.GetValue("stotal", stotal);
 	GameInfo.GetValue("pkill", pkill);
 	GameInfo.GetValue("ptotal", ptotal);
+	GameInfo.GetValue("dpkill", dpkill);
+	GameInfo.GetValue("spkill", spkill);
 	
-	int sscore = sescape - scapture;
-	int dscore = descape - dcapture;
+	int dtkill = 3 * dpkill;
+	int stkill = 3 * spkill;
+	int sscore = sescape + stkill - scapture;
+	int dscore = descape + dtkill - dcapture;
 	//int pscore = ptotal - pkill;
 	int group;
 	
@@ -1137,7 +1141,7 @@ public bool Gamemode_ConditionSlnew(TFTeam &team)
 	{
 		if(ralive)	//  Only Class-D and Chaos
 		{
-			if(sscore > dscore)	// More Scientists and Capture Class-D than Class-D and Capture Scientists
+			if(sscore > dscore)	// Foundation score more than Chaos Insurgency score
 			{
 				team = TFTeam_Unassigned; // Stalemate
 				group = 0;
@@ -1150,7 +1154,7 @@ public bool Gamemode_ConditionSlnew(TFTeam &team)
 		}
 		else if(balive)	// Only MTF
 		{
-			if(sscore > dscore)
+			if(sscore > dscore) // Foundation score more than Chaos Insurgency score
 			{
 				team = TFTeam_Blue;	// MTF win
 				group = 2;
@@ -1196,7 +1200,7 @@ public bool Gamemode_ConditionSlnew(TFTeam &team)
 			continue;
 
 		SetGlobalTransTarget(client);
-		ShowSyncHudText(client, HudGame, "%t", "end_screen", buffer, descape, dtotal, sescape, stotal, pkill, ptotal, minutes, seconds);
+		ShowSyncHudText(client, HudGame, "%t", "end_screen_vip", buffer, descape, dtotal, dcapture, sescape, stotal, scapture, pkill, ptotal, minutes, seconds);
 	}
 	return true;
 }
