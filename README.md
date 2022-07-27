@@ -32,7 +32,10 @@ This plugin uses different features which may cause some other plugins to misbeh
 [Goomba Stomp](https://github.com/Flyflo/SM-Goomba-Stomp "Flyflo/SM-Goomba-Stomp") (Restricted to SCP classes)
 
 ## Credits:
-ficool2 - Custom viewmodels / gibs, karma system, SCP-18, gameplay changes/bugfixes
+Batfoxkid - Original gamemode creator  
+[GitHub Profile](https://github.com/Batfoxkid "Batfoxkid")
+
+ficool2 - Custom viewmodels / gibs, karma system, SCP-18, gameplay changes/bugfixes  
 [GitHub Profile](https://github.com/ficool2 "ficool2")
 
 Mikusch - Many many related DHooks and SDKCalls  
@@ -80,4 +83,4 @@ Marxvee - Special thanks
 SCP: Secret Labortory - Game assets  
 [Steam Game](https://store.steampowered.com/app/700330/SCP_Secret_Laboratory/ "SCP: Secret: Laboratory on Steam")
 
-And [GitHub Contributors](https://github.com/Batfoxkid/SCP-Secret-Fortress/graphs/contributors "Contributors to Batfoxkid/SCP-Secret-Fortress")
+And [GitHub Contributors](https://github.com/redsunservers/SCP-Secret-Fortress/graphs/contributors "Contributors to redsunservers/SCP-Secret-Fortress")
