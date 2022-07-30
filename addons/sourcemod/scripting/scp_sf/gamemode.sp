@@ -1122,22 +1122,19 @@ public bool Gamemode_ConditionVip(TFTeam &team)
 	GameInfo.GetValue("ptotal", ptotal);
 
 	int group;
-	if(sescape > descape)	// More Scientists than Class-D
+	int sscore = sescape + dcapture;
+	int dscore = descape + scapture;
+	if(sscore > dscore)	// More Scientists than Class-D
 	{
 		team = TFTeam_Blue;
 		group = 2;
 	}
-	else if(sescape<descape || scapture>dcapture)	// More Class-D than Scientists || More Scientists than Class-D
+	else if(sscore < dscore)	// More Class-D than Scientists
 	{
 		team = TFTeam_Red;
 		group = 1;
 	}
-	else if(scapture < dcapture)	// More Class-D than Scientists
-	{
-		team = TFTeam_Blue;
-		group = 2;
-	}
-	else if(salive && !sescape)	// SCP alive and none escaped
+	else if(salive && !sescape && !dcapture && !descape && !scapture)	// SCP alive and none escaped
 	{
 		team = TFTeam_Red;
 		group = 3;
