@@ -1819,20 +1819,22 @@ public Action Items_FlashTimer(Handle timer, int ref)
 		{
 			DispatchKeyValueVector(explosion, "origin", pos1);
 			DispatchKeyValue(explosion, "iMagnitude", "0");
-			// don't want particles, we create them seperately
-			DispatchKeyValue(explosion, "spawnflags", "916");
-
+			// don't want particles and sound, we create them seperately
+			DispatchKeyValue(explosion, "spawnflags", "978");
+			
 			SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"));
 			// pass the original class of the thrower
 			SetEntProp(explosion, Prop_Data, "m_iHammerID", GetEntProp(entity, Prop_Data, "m_iHammerID"));
-		
-			DispatchSpawn(explosion);
 			
-			int particle = AttachParticle(explosion, "drg_cow_explosioncore_normal_blue", false, 5.0);
-			if (particle)
-				EmitGameSoundToAll("Weapon_Detonator.Detonate", particle, entity, _, _, pos1);			
-
-			AcceptEntityInput(explosion, "Explode");
+			DispatchSpawn(explosion);
+			AttachParticle(explosion, "drg_cow_explosioncore_normal_blue", false, 5.0);
+			EmitGameSoundToAll("Weapon_Detonator.Detonate", entity);	
+			
+			int light = TF2_CreateLightEntity(512.0, { 255, 255, 255, 255 }, 5, 0.2);
+			if (light > MaxClients)
+				TeleportEntity(light, pos1, view_as<float>({ 90.0, 0.0, 0.0 }), NULL_VECTOR);
+			
+			AcceptEntityInput(explosion, "Detonate");
 			CreateTimer(0.1, Timer_RemoveEntity, EntIndexToEntRef(explosion), TIMER_FLAG_NO_MAPCHANGE);
 		}
 
@@ -1843,8 +1845,12 @@ public Action Items_FlashTimer(Handle timer, int ref)
 			{
 				static float pos2[3];
 				GetClientEyePosition(i, pos2);
+				
+				// check if we're not hitting a wall
+				TR_TraceRayFilter(pos1, pos2, MASK_BLOCKLOS, RayType_EndPoint, Trace_WorldAndBrushes);
+				
 				// 512 units
-				if(GetVectorDistance(pos1, pos2, true) < 524288.0)
+				if(GetVectorDistance(pos1, pos2, true) < 524288.0 && !TR_DidHit())
 				{
 					FadeMessage(i, 1000, 1000, 0x0001, 200, 200, 200, 255);
 					ClientCommand(i, "dsp_player %d", GetRandomInt(35, 37));

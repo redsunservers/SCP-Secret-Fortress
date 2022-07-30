@@ -1695,3 +1695,63 @@ public bool TRDontHitSelf(int entity, int mask, any data)
 {
 	return (1 <= entity <= MaxClients) && (entity != data);
 }
+
+stock int TF2_CreateLightEntity(float radius, int color[4], int brightness, float lifetime)
+{
+	int entity = CreateEntityByName("light_dynamic");
+	if (entity != -1)
+	{			
+		char lightcolor[32];
+		Format(lightcolor, sizeof(lightcolor), "%i %i %i", color[0], color[1], color[2]);
+		DispatchKeyValue(entity, "rendercolor", lightcolor);
+		
+		SetVariantFloat(radius);
+		AcceptEntityInput(entity, "spotlight_radius");
+		
+		SetVariantFloat(radius);
+		AcceptEntityInput(entity, "distance");
+		
+		SetVariantInt(brightness);
+		AcceptEntityInput(entity, "brightness");
+		
+		SetVariantInt(1);
+		AcceptEntityInput(entity, "cone");
+		
+		DispatchSpawn(entity);
+		
+		ActivateEntity(entity);
+		AcceptEntityInput(entity, "TurnOn");
+		SetEntityRenderFx(entity, RENDERFX_SOLID_SLOW);
+		SetEntityRenderColor(entity, color[0], color[1], color[2], color[3]);
+		
+		int flags = GetEdictFlags(entity);
+		if (!(flags & FL_EDICT_ALWAYS))
+		{
+			flags |= FL_EDICT_ALWAYS;
+			SetEdictFlags(entity, flags);
+		}
+		
+		CreateTimer(lifetime, Timer_DestroyLight, EntIndexToEntRef(entity), TIMER_FLAG_NO_MAPCHANGE);	
+	}
+	
+	return entity;
+}
+
+public Action Timer_DestroyLight(Handle timer, int ref)
+{
+	int entity = EntRefToEntIndex(ref);
+	if (entity > MaxClients)
+	{
+		AcceptEntityInput(entity, "TurnOff");
+		RequestFrame(Frame_KillLight, ref);
+	}
+	
+	return Plugin_Continue;
+}
+
+void Frame_KillLight(int ref)
+{
+	int entity = EntRefToEntIndex(ref);
+	if (entity > MaxClients)
+		AcceptEntityInput(entity, "Kill");
+}
