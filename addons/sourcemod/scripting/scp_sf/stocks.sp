@@ -1701,9 +1701,9 @@ stock int TF2_CreateLightEntity(float radius, int color[4], int brightness, floa
 	int entity = CreateEntityByName("light_dynamic");
 	if (entity != -1)
 	{			
-		char lightcolor[32];
-		Format(lightcolor, sizeof(lightcolor), "%i %i %i", color[0], color[1], color[2]);
-		DispatchKeyValue(entity, "rendercolor", lightcolor);
+		char lightColor[32];
+		Format(lightColor, sizeof(lightColor), "%d %d %d", color[0], color[1], color[2]);
+		DispatchKeyValue(entity, "rendercolor", lightColor);
 		
 		SetVariantFloat(radius);
 		AcceptEntityInput(entity, "spotlight_radius");
