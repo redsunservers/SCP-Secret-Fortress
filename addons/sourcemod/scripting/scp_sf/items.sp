@@ -1830,7 +1830,8 @@ public Action Items_FlashTimer(Handle timer, int ref)
 			AttachParticle(explosion, "drg_cow_explosioncore_normal_blue", false, 5.0);
 			EmitGameSoundToAll("Weapon_Detonator.Detonate", entity);	
 			
-			int light = TF2_CreateLightEntity(512.0, { 255, 255, 255, 255 }, 5, 0.2);
+			// create a short light effect, clientside duration can increase slightly depending on ping
+			int light = TF2_CreateLightEntity(1024.0, { 255, 255, 255, 255 }, 5, 0.1);
 			if (light > MaxClients)
 				TeleportEntity(light, pos1, view_as<float>({ 90.0, 0.0, 0.0 }), NULL_VECTOR);
 			
