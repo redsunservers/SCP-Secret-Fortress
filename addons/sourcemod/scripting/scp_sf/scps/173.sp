@@ -413,7 +413,7 @@ public Action SCP173_PuddleTimer(Handle timer, DataPack pack)
 		int class = pack.ReadCell();
 		for(int target=1; target<=MaxClients; target++)
 		{
-			if(IsClientInGame(target) && !IsFriendly(class, Client[target].Class) && !IsSpec)
+			if(IsClientInGame(target) && !IsFriendly(class, Client[target].Class) && !IsSpec(class, Client[target].Class))
 			{
 				static float pos2[3];
 				GetClientAbsOrigin(target, pos2);
