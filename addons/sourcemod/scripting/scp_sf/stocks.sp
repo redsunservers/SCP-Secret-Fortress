@@ -401,7 +401,7 @@ public Action Timer_RemoveEntity(Handle timer, any entid)
 	if(IsValidEdict(entity) && entity>MaxClients)
 	{
 		TeleportEntity(entity, OFF_THE_MAP, NULL_VECTOR, NULL_VECTOR); // send it away first in case it feels like dying dramatically
-		AcceptEntityInput(entity, "Kill");
+		RemoveEntity(entity);
 	}
 	return Plugin_Continue;
 }
@@ -1731,27 +1731,8 @@ stock int TF2_CreateLightEntity(float radius, int color[4], int brightness, floa
 			SetEdictFlags(entity, flags);
 		}
 		
-		CreateTimer(lifetime, Timer_DestroyLight, EntIndexToEntRef(entity), TIMER_FLAG_NO_MAPCHANGE);	
+		CreateTimer(lifetime, Timer_RemoveEntity, EntIndexToEntRef(entity), TIMER_FLAG_NO_MAPCHANGE);
 	}
 	
 	return entity;
-}
-
-public Action Timer_DestroyLight(Handle timer, int ref)
-{
-	int entity = EntRefToEntIndex(ref);
-	if (entity > MaxClients)
-	{
-		AcceptEntityInput(entity, "TurnOff");
-		RequestFrame(Frame_KillLight, ref);
-	}
-	
-	return Plugin_Continue;
-}
-
-void Frame_KillLight(int ref)
-{
-	int entity = EntRefToEntIndex(ref);
-	if (entity > MaxClients)
-		AcceptEntityInput(entity, "Kill");
 }
