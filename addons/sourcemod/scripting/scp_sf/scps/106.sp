@@ -12,7 +12,7 @@ public bool SCP106_Create(int client)
 	Client[client].Pos[2] = 0.0;
 	Client[client].Extra2 = 0;
 
-	int weapon = SpawnWeapon(client, "tf_weapon_shovel", 649, 60, 13, "1 ; 0.769231 ; 28 ; 0 ; 252 ; 0 ; 412 ; 0.8", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_shovel", 649, 60, 13, "1 ; 0.769231 ; 28 ; 0 ; 66 ; 0.15 ; 252 ; 0 ; 412 ; 0.8", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 12);
@@ -243,17 +243,6 @@ public Action SCP106_TakeDamage(int client, int attacker, int &inflictor, float 
 	if(Client[client].ChargeIn < GetGameTime())
 		return Plugin_Continue;
 		
-	if(damagetype & DMG_BULLET)
-	{
-		damage *= 0.15;
-		return Plugin_Changed;
-	}
-	else if(damagetype & DMG_FALL)
-	{
-		damage *= 0.02;
-		return Plugin_Changed;
-	}
-	
 	damagetype |= DMG_PREVENT_PHYSICS_FORCE;
 	return Plugin_Changed;
 }
