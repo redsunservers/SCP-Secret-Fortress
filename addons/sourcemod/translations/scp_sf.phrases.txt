@@ -1440,6 +1440,42 @@
 		"#format"	"{1:N},{2:.0f}"
 		"en"		"{1} is uncuffing you... {2}%"
 	}
+	"killedby049"	//
+	{
+		"en"		"SCP-049 get speed boost when he detected patient."
+	}
+	"killedby076"	//
+	{
+		"en"		"SCP-076-2 has charge ability."
+	}
+	"killedby096"	//
+	{
+		"en"		"Don't look SCP-096's face."
+	}
+	"killedby173"	//
+	{
+		"en"		"SCP-173 can only move while nobody is looking."
+	}
+	"killedby939"	//
+	{
+		"en"		"Crouching helps you stay silent towards SCP-939."
+	}
+	"killedbyfrag"	//
+	{
+		"en"		"Frag grenade's explosion radius is big."
+	}
+	"killedbytesla"	//
+	{
+		"en"		"Need to develop patience."
+	}
+	"killedbyalpha"	//
+	{
+		"en"		"You must escape before the alpha warhead explodes.."
+	}
+	"killedbydecon"	//
+	{
+		"en"		"Listen decontamination process warning carefully."
+	}
 
 	// Ikea
 

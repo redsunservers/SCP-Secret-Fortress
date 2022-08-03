@@ -1,0 +1,15 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "models/scp/106/unity/unity_scp_106_sheet"
+	"$bumpmap" "models/scp/106/unity/unity_scp_106_normal"
+	"$alphatest" 1
+	"$surfaceprop" "flesh"
+	"$model" "1"
+	"$halflambert" "1"
+	"$phong" "1"
+	"$phongboost" "1"
+	"$phongexponent" "500"
+	"$phongexponenttexture" "models/scp/106/unity/unity_scp_106_phong"
+	"$phongalbedotint" "1"										
+	"$phongfresnelranges"	"[.2 .6 1]"
+}

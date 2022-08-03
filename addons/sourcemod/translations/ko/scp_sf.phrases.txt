@@ -1368,6 +1368,42 @@
         "#format"    "{1:N},{2:.0f}"
         "en"        "{1}이(가) 수갑을 풀어주는 중... {2}%"
     }
+	"killedby049"	// Game
+	{
+		"ko"		"SCP-049는 환자를 마주하면 빨라집니다."
+	}
+	"killedby076"	// Game
+	{
+		"ko"		"SCP-076-2는 돌격할 수 있습니다."
+	}
+	"killedby096"	// Game
+	{
+		"ko"		"SCP-096의 얼굴을 보지 마십시오."
+	}
+	"killedby173"	// Game
+	{
+		"ko"		"SCP-173은 아무도 보지 않을 때만 움직일 수 있습니다."
+	}
+	"killedby939"	// Game
+	{
+		"ko"		"앉아 있으면 SCP-939한테 보이지 않습니다."
+	}
+	"killedbyfrag"	//
+	{
+		"ko"		"파편 수류탄의 폭발 범위는 넓습니다."
+	}
+	"killedbytesla"	//
+	{
+		"ko"		"인내심을 기를 필요가 있습니다."
+	}
+	"killedbyalpha"	//
+	{
+		"ko"		"알파 핵탄두가 터지기 전에 탈출해야 합니다.."
+	}
+	"killedbydecon"	//
+	{
+		"ko"		"저위험군 폐쇄 방송을 주의깊게 들으십시오."
+	}
 
 	// Ikea
 

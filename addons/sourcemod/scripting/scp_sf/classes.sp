@@ -926,6 +926,60 @@ public void Classes_MoveToSpec(int client, Event event)
 		Client[client].Class = index;
 		Classes_AssignClassPost(client, ClassSpawn_Death);
 	}
+
+	ClassEnum attackerClass;
+	int attacker = GetClientOfUserId(event.GetInt("attacker"));
+	int damage = event.GetInt("damagebits");
+	if(attacker!=client && IsValidClient(attacker) && Classes_GetByIndex(Client[attacker].Class, attackerClass))
+	{
+		int weapon = event.GetInt("weaponid");
+
+		if(weapon>MaxClients && HasEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")==ITEM_INDEX_SCP18)
+			PrintHintText(client, "%T", "killedby018", client);
+
+		if(StrEqual(attackerClass.Name, "scp049"))
+		{
+			PrintHintText(client, "%T", "killedby049", client);
+		}
+		else if(StrEqual(attackerClass.Name, "scp076"))
+		{
+			PrintHintText(client, "%T", "killedby076", client);
+		}
+		else if(StrEqual(attackerClass.Name, "scp096"))
+		{
+			PrintHintText(client, "%T", "killedby096", client);
+		}
+		else if(StrEqual(attackerClass.Name, "scp173"))
+		{
+			PrintHintText(client, "%T", "killedby173", client);
+		}
+		else if(StrEqual(attackerClass.Name, "scp939"))
+		{
+			PrintHintText(client, "%T", "killedby939", client);
+		}
+	}
+	else if(attacker==client && IsValidClient(attacker) && Classes_GetByIndex(Client[attacker].Class, attackerClass))
+	{
+		if(damage & DMG_BLAST)
+		{
+			PrintHintText(client, "%T", "killedbyfrag", client);
+		}
+	}
+	else
+	{
+		if(damage & DMG_SHOCK)
+		{
+			PrintHintText(client, "%T", "killedbytesla", client);
+		}
+		else if(damage & DMG_BLAST)
+		{
+			PrintHintText(client, "%T", "killedbyalpha", client);
+		}
+		else if(damage & DMG_POISON)
+		{
+			PrintHintText(client, "%T", "killedbydecon", client);
+		}
+	}
 }
 
 public bool Classes_DeathScp(int client, Event event)
@@ -1313,6 +1367,38 @@ public void Classes_CondSci(int client, TFCond cond)
 			else
 			{
 				Gamemode_GiveTicket(class.Group, Client[client].Disarmer ? 2 : 1);
+			}
+
+			Items_DropAllItems(client);
+			Forward_OnEscape(client, Client[client].Disarmer);
+
+			if(Classes_AssignClass(client, ClassSpawn_Escape, index))
+			{
+				Client[client].Class = index;
+				TF2_RespawnPlayer(client);
+				Classes_AssignClassPost(client, ClassSpawn_Escape);
+				CreateTimer(0.3, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
+			}
+		}
+	}
+}
+
+public void Classes_CondGuard(int client, TFCond cond)
+{
+	if(cond == TFCond_TeleportedGlow)
+	{
+		float engineTime = GetGameTime();
+		if(Client[client].IgnoreTeleFor < engineTime)
+		{
+			int index;
+			ClassEnum class;
+			if(Client[client].Disarmer)
+			{
+				index = Classes_GetByName("chaosd", class);
+			}
+			else
+			{
+				index = Classes_GetByName("mtfs", class);
 			}
 
 			Items_DropAllItems(client);

@@ -1,0 +1,6 @@
+"UnlitGeneric"
+{
+"$basetexture" "models/scp/106/unity/unity_scp_106_eyemask"
+$nocull 1
+$translucent 1
+}
