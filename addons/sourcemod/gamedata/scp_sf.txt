@@ -107,6 +107,16 @@
 				"linux"		"@_ZN14CWeaponMedigun19AllowedToHealTargetEP11CBaseEntity"
 				"windows"	"\x55\x8B\xEC\x53\x8B\xD9\x56\x57\x8B\xB3\xE8\x01\x00\x00\x83\xFE\xFF\x0F\x84\x64\x01"
 			}
+			"AI_CriteriaSet::FindCriterionIndex"
+			{
+				"linux"		"@_ZNK14AI_CriteriaSet18FindCriterionIndexEPKc"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x48\x56\xFF\x75\x08"
+			}
+			"AI_CriteriaSet::RemoveCriteria"
+			{
+				"linux"		"@_ZN14AI_CriteriaSet14RemoveCriteriaEPKc"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x48\x56\x57\xFF\x75\x08"
+			}
 			// FIXME: remove this when SM 1.11 is stable (TR_EnumerateEntitiesSphere can be used instead)
 			// thanks to nosoop for this sig
 			"CGlobalEntityList::FindEntityInSphere()"
@@ -374,6 +384,20 @@
 					}
 				}
 			}
+			"CBaseEntity::ModifyOrAppendCriteria"
+			{
+				"offset"	"CBaseEntity::ModifyOrAppendCriteria"
+				"hooktype"	"entity"
+				"return"	"void"
+				"this"		"entity"
+				"arguments"
+				{
+					"criteriaSet"
+					{
+						"type"	"int"
+					}
+				}
+			}
 		}
 		"Offsets"
 		{
@@ -426,6 +450,11 @@
 			{
 				"linux"		"207"
 				"windows"	"206"
+			}
+			"CBaseEntity::ModifyOrAppendCriteria"
+			{
+				"linux"		"122"
+				"windows"	"121"
 			}
 		}
 		"Addresses"

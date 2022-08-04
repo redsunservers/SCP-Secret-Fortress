@@ -326,6 +326,24 @@ int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, 
 		bool wearable = view_as<bool>(StrContains(weapon.Classname, "tf_weap", false));
 		if(wearable)
 		{
+			int newItemRegionMask = TF2Econ_GetItemEquipRegionMask(index);
+
+			// Do not create this wearable if it would conflict with existing items
+			for (int wbl = 0; wbl < TF2Util_GetPlayerWearableCount(client); wbl++)
+			{
+				int wearableEnt = TF2Util_GetPlayerWearable(client, wbl);
+				if (wearableEnt == -1)
+					continue;
+
+				int wearableDefindex = GetEntProp(wearableEnt, Prop_Send, "m_iItemDefinitionIndex");
+				if (wearableDefindex == DEFINDEX_UNDEFINED)
+					continue;
+
+				int wearableRegionMask = TF2Econ_GetItemEquipRegionMask(wearableDefindex);
+				if (wearableRegionMask & newItemRegionMask)
+					return -1;
+			}
+
 			entity = CreateEntityByName(weapon.Classname);
 			if(IsValidEntity(entity))
 			{
