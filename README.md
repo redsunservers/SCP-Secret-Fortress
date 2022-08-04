@@ -16,8 +16,9 @@ This plugin uses different features which may cause some other plugins to misbeh
 
 ## Required Dependencies:
 [TF2Attributes](https://github.com/FlaminSarge/tf2attributes "FlaminSarge/tf2attributes: TF2Attributes SourceMod plugin")  
-[TF2Items](https://github.com/asherkin/TF2Items "asherkin/TF2Items: Items with custom attributes.")  
-[DHooks 2](https://github.com/peace-maker/DHooks2 "peace-maker/DHooks: Dynamic detouring support for the DHooks 2 SourceMod extension")  
+[TF2Items](https://github.com/asherkin/TF2Items "asherkin/TF2Items: Items with custom attributes.")   
+[TF2 Econ Data](https://github.com/nosoop/SM-TFEconData "nosoop/SM-TFEconData: A library to get TF2 item data from game memory.")   
+[TF2 Utils](https://github.com/nosoop/SM-TFUtils "nosoop/SM-TFUtils: SourceMod utility natives for Team Fortress 2.")   
 [MemoryPatch](https://github.com/Kenzzer/MemoryPatch "Kenzzer/MemoryPatch: A simple .inc file to patch memory efficiently.") (Compiling)  
 [More Colors](https://forums.alliedmods.net/showthread.php?t=185016 "[INC] More Colors (1.9.1) - AlliedModders") (Compiling)
 
