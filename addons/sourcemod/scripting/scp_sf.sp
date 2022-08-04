@@ -2007,7 +2007,11 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] classname, int index, 
 			{
 				// Disallow shirts and pants to avoid obscuring the D-Class colors
 				if (StrEqual(buffer, "shirt") || StrEqual(buffer, "pants"))
+				{
+					delete snapshot;
+					delete regions;
 					return Plugin_Handled;
+				}
 			}
 		}
 		delete snapshot;
