@@ -1477,7 +1477,7 @@ public bool Classes_PickupScp(int client, int entity)
 
 public Action Classes_SoundHuman(int client, char sample[PLATFORM_MAX_PATH], int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
 {
-	if(!StrContains(sample, "vo", false))
+	if(!StrContains(sample, "vo/", false))
 	{
 		if(IsSpec(client))
 			return Plugin_Handled;
@@ -1485,12 +1485,11 @@ public Action Classes_SoundHuman(int client, char sample[PLATFORM_MAX_PATH], int
 		level = RoundFloat(level / 1.2);
 		return Plugin_Changed;
 	}
-	else if(StrContains(sample, "footsteps", false) != -1)
+	else if(StrContains(sample, "footsteps/", false) != -1)
 	{
 		if(Client[client].Sprinting)
 		{
 			level += 20;
-			volume *= 2.0;
 			return Plugin_Changed;
 		}
 
@@ -1506,15 +1505,14 @@ public Action Classes_SoundHuman(int client, char sample[PLATFORM_MAX_PATH], int
 
 public Action Classes_SoundScp(int client, char sample[PLATFORM_MAX_PATH], int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
 {
-	if(!StrContains(sample, "vo", false))
+	if(!StrContains(sample, "vo/", false))
 	{
 		if(!TF2_IsPlayerInCondition(client, TFCond_Disguised))
 			return Plugin_Handled;
 	}
-	else if(StrContains(sample, "footsteps", false) != -1)
+	else if(StrContains(sample, "footsteps/", false) != -1)
 	{
 		level += 20;
-		volume *= 2.0;
 		return Plugin_Changed;
 	}
 	return Plugin_Continue;
