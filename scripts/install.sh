@@ -15,4 +15,4 @@ wget "https://raw.githubusercontent.com/nosoop/SM-TFUtils/master/scripting/inclu
 wget "https://raw.githubusercontent.com/Kenzzer/MemoryPatch/master/addons/sourcemod/scripting/include/memorypatch.inc" -O include/memorypatch.inc
 wget "https://raw.githubusercontent.com/Flyflo/SM-Goomba-Stomp/master/addons/sourcemod/scripting/include/goomba.inc" -O include/goomba.inc
 wget "https://raw.githubusercontent.com/sbpp/sourcebans-pp/v1.x/game/addons/sourcemod/scripting/include/sourcecomms.inc" -O include/sourcecomms.inc
-wget "https://raw.githubusercontent.com/TheByKotik/sendproxy/master/addons/sourcemod/scripting/include/sendproxy.inc" -O include/sendproxy.inc
+wget "https://raw.githubusercontent.com/SlidyBat/sendproxy/master/addons/sourcemod/scripting/include/sendproxy.inc" -O include/sendproxy.inc
