@@ -23,6 +23,7 @@ void ConVar_Setup()
 	CvarKarmaRatio = CreateConVar("scp_karmaratio", "20.0", "Maximum karma penalty, as a ratio of max health of client", _, true, 0.0, true, 100.0);
 	CvarKarmaMin = CreateConVar("scp_karmamin", "0.0", "Minimum karma level", _, true, 0.0, true, 100.0);
 	CvarKarmaMax = CreateConVar("scp_karmamax", "100.0", "Maximum karma level", _, true, 0.0, true, 100.0);
+	CvarAllowCosmetics = CreateConVar("scp_allowcosmetics", "1", "Whether to allow certain classes to equip cosmetics", _, true, 0.0, true, 1.0);
 	
 	AutoExecConfig(true, "SCPSecretFortress");
 
