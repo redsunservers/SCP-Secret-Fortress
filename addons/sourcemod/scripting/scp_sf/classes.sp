@@ -1552,9 +1552,14 @@ public bool Classes_DefaultVoice(int client)
 	GetCmdArgString(buffer, sizeof(buffer));
 	if(StrContains(buffer, "0 0"))
 		return false;
-
-	Client[client].UseBuffer = true;
-	return AttemptGrabItem(client);
+	
+	if (!Client[client].UseBuffer)
+	{
+		Client[client].UseBuffer = true;
+		return AttemptGrabItem(client);
+	}
+	
+	return true;
 }
 
 public bool Classes_GhostVoice(int client)

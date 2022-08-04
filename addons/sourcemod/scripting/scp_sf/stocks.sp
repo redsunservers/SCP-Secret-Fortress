@@ -401,7 +401,7 @@ public Action Timer_RemoveEntity(Handle timer, any entid)
 	if(IsValidEdict(entity) && entity>MaxClients)
 	{
 		TeleportEntity(entity, OFF_THE_MAP, NULL_VECTOR, NULL_VECTOR); // send it away first in case it feels like dying dramatically
-		AcceptEntityInput(entity, "Kill");
+		RemoveEntity(entity);
 	}
 	return Plugin_Continue;
 }
@@ -1162,7 +1162,7 @@ public Action Timer_Stun(Handle timer, DataPack pack)
 public Action Timer_MyBlood(Handle timer, int userid)
 {
 	int client = GetClientOfUserId(userid);
-	if(client && IsClientInGame(client) && !IsSpec(client) && GetClientHealth(client)<26)
+	if(client && IsClientInGame(client) && !IsSpec(client) && GetClientHealth(client)<26 && !(GetEntityFlags(client) & FL_DUCKING))
 		Config_DoReaction(client, "lowhealth");
 
 	return Plugin_Continue;
@@ -1694,4 +1694,45 @@ stock int TraceClientViewEntity(int client)
 public bool TRDontHitSelf(int entity, int mask, any data)
 {
 	return (1 <= entity <= MaxClients) && (entity != data);
+}
+
+stock int TF2_CreateLightEntity(float radius, int color[4], int brightness, float lifetime)
+{
+	int entity = CreateEntityByName("light_dynamic");
+	if (entity != -1)
+	{			
+		char lightColor[32];
+		Format(lightColor, sizeof(lightColor), "%d %d %d", color[0], color[1], color[2]);
+		DispatchKeyValue(entity, "rendercolor", lightColor);
+		
+		SetVariantFloat(radius);
+		AcceptEntityInput(entity, "spotlight_radius");
+		
+		SetVariantFloat(radius);
+		AcceptEntityInput(entity, "distance");
+		
+		SetVariantInt(brightness);
+		AcceptEntityInput(entity, "brightness");
+		
+		SetVariantInt(1);
+		AcceptEntityInput(entity, "cone");
+		
+		DispatchSpawn(entity);
+		
+		ActivateEntity(entity);
+		AcceptEntityInput(entity, "TurnOn");
+		SetEntityRenderFx(entity, RENDERFX_SOLID_SLOW);
+		SetEntityRenderColor(entity, color[0], color[1], color[2], color[3]);
+		
+		int flags = GetEdictFlags(entity);
+		if (!(flags & FL_EDICT_ALWAYS))
+		{
+			flags |= FL_EDICT_ALWAYS;
+			SetEdictFlags(entity, flags);
+		}
+		
+		CreateTimer(lifetime, Timer_RemoveEntity, EntIndexToEntRef(entity), TIMER_FLAG_NO_MAPCHANGE);
+	}
+	
+	return entity;
 }
