@@ -1162,7 +1162,7 @@ public Action Timer_Stun(Handle timer, DataPack pack)
 public Action Timer_MyBlood(Handle timer, int userid)
 {
 	int client = GetClientOfUserId(userid);
-	if(client && IsClientInGame(client) && !IsSpec(client) && GetClientHealth(client)<26)
+	if(client && IsClientInGame(client) && !IsSpec(client) && GetClientHealth(client)<26 && !(GetEntityFlags(client) & FL_DUCKING))
 		Config_DoReaction(client, "lowhealth");
 
 	return Plugin_Continue;
