@@ -1986,6 +1986,10 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] classname, int index, 
 
 	if (Client[client].Class == Classes_GetByName("dboi") && StrContains(classname, "tf_wearable") != -1 && CvarAllowCosmetics.BoolValue)
 	{
+		// The ConTracker is a bit special
+		if (StrEqual(classname, "tf_wearable_campaign_item"))
+			return Plugin_Handled;
+		
 		int newItemRegionMask = TF2Econ_GetItemEquipRegionMask(index);
 		int newItemRegionGroupBits = TF2Econ_GetItemEquipRegionGroupBits(index);
 
