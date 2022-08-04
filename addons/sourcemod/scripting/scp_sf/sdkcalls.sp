@@ -7,6 +7,8 @@ Handle SDKInitWeapon;
 static Handle SDKInitPickup;
 static Handle SDKSetSpeed;
 static Handle SDKFindEntityInSphere;
+static Handle SDKFindCriterionIndex;
+static Handle SDKRemoveCriteria;
 
 void SDKCall_Setup(GameData gamedata)
 {
@@ -81,6 +83,21 @@ void SDKCall_Setup(GameData gamedata)
 	PrepSDKCall_AddParameter(SDKType_Vector, SDKPass_ByRef);
 	PrepSDKCall_AddParameter(SDKType_Float, SDKPass_Plain);
 	SDKFindEntityInSphere = EndPrepSDKCall();
+	
+	StartPrepSDKCall(SDKCall_Raw);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "AI_CriteriaSet::FindCriterionIndex");
+	PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+	SDKFindCriterionIndex = EndPrepSDKCall();
+	if (!SDKFindCriterionIndex)
+		LogMessage("Failed to create SDKCall: AI_CriteriaSet::FindCriterionIndex");
+	
+	StartPrepSDKCall(SDKCall_Raw);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "AI_CriteriaSet::RemoveCriteria");
+	PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
+	SDKRemoveCriteria = EndPrepSDKCall();
+	if (!SDKRemoveCriteria)
+		LogMessage("Failed to create SDKCall: AI_CriteriaSet::RemoveCriteria");
 }
 
 void SDKCall_EquipWearable(int client, int entity)
@@ -151,6 +168,20 @@ void ChangeClientTeamEx(int client, any newTeam)
 		}
 	}
 	SetEntProp(client, Prop_Send, "m_iTeamNum", newTeam);
+}
+
+int SDKCall_FindCriterionIndex(int criteriaSet, const char[] criteria)
+{
+	if (SDKFindCriterionIndex)
+		return SDKCall(SDKFindCriterionIndex, criteriaSet, criteria);
+	else
+		return -1;
+}
+
+void SDKCall_RemoveCriteria(int criteriaSet, const char[] criteria)
+{
+	if (SDKRemoveCriteria)
+		SDKCall(SDKRemoveCriteria, criteriaSet, criteria);
 }
 
 // FIXME: remove this when SM 1.11 is stable (TR_EnumerateEntitiesSphere can be used instead)
