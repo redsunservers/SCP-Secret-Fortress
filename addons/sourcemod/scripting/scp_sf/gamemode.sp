@@ -958,7 +958,7 @@ static bool EndRoundRelay(int group)
 	return false;
 }
 
-static void KvGetSound(KeyValues kv, const char[] string, SoundEnum sound, const SoundEnum defaul = 0)
+static void KvGetSound(KeyValues kv, const char[] string, SoundEnum sound, const SoundEnum defaul = {})
 {
 	static char buffers[3][PLATFORM_MAX_PATH];
 	kv.GetString(string, buffers[0], sizeof(buffers[]));
