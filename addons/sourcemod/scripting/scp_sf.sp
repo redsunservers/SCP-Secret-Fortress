@@ -10,6 +10,8 @@
 #include <tf2attributes>
 #include <memorypatch>
 #include <dhooks>
+#include <tf_econ_data>
+#include <tf2utils>
 #undef REQUIRE_PLUGIN
 #tryinclude <goomba>
 #tryinclude <sourcecomms>
@@ -109,6 +111,7 @@ ConVar CvarKarma;
 ConVar CvarKarmaRatio;
 ConVar CvarKarmaMin;
 ConVar CvarKarmaMax;
+ConVar CvarAllowCosmetics;
 float NextHintAt = FAR_FUTURE;
 float RoundStartAt;
 float EndRoundIn;
@@ -1986,19 +1989,68 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] classname, int index, 
 			return Plugin_Continue;
 	}
 
-	switch(index)
+	if (Client[client].Class == Classes_GetByName("dboi") && StrContains(classname, "tf_wearable") != -1 && CvarAllowCosmetics.BoolValue)
 	{
-		case 493, 233, 234, 241, 280, 281, 282, 283, 284, 286, 288, 362, 364, 365, 536, 542, 577, 599, 673, 729, 791, 839, 5607:  //Action slot items
+		// The ConTracker is a bit special
+		if (StrEqual(classname, "tf_wearable_campaign_item"))
+			return Plugin_Handled;
+		
+		int newItemRegionMask = TF2Econ_GetItemEquipRegionMask(index);
+		int newItemRegionGroupBits = TF2Econ_GetItemEquipRegionGroupBits(index);
+
+		StringMap regions = TF2Econ_GetEquipRegionGroups();
+		StringMapSnapshot snapshot = regions.Snapshot();
+
+		// Multiple groups can share the same group bit, so test each group name
+		for (int i = 0; i < snapshot.Length; i++)
+		{
+			char buffer[16];
+			snapshot.GetKey(i, buffer, sizeof(buffer));
+
+			int bit;
+			if (regions.GetValue(buffer, bit) && (newItemRegionGroupBits >> bit) & 1)
+			{
+				// Disallow shirts and pants to avoid obscuring the D-Class colors
+				if (StrEqual(buffer, "shirt") || StrEqual(buffer, "pants"))
+				{
+					delete snapshot;
+					delete regions;
+					return Plugin_Handled;
+				}
+			}
+		}
+		delete snapshot;
+		delete regions;
+
+		// Remove any wearable that has a conflicting equip_region
+		for (int wbl = 0; wbl < TF2Util_GetPlayerWearableCount(client); wbl++)
+		{
+			int wearable = TF2Util_GetPlayerWearable(client, wbl);
+			if (wearable == -1)
+				continue;
+
+			int wearableDefindex = GetEntProp(wearable, Prop_Send, "m_iItemDefinitionIndex");
+			if (wearableDefindex == DEFINDEX_UNDEFINED)
+				continue;
+
+			int wearableRegionMask = TF2Econ_GetItemEquipRegionMask(wearableDefindex);
+			if (wearableRegionMask & newItemRegionMask)
+				TF2_RemoveWearable(client, wearable);
+		}
+
+		return Plugin_Continue;
+	}
+
+	// Allow action slot items
+	if (TF2Econ_GetItemLoadoutSlot(index, TF2_GetPlayerClass(client)) == LOADOUT_POSITION_ACTION)
+	{
+		// ...unless it's a spellbook or power up canteen
+		if (!StrEqual(classname, "tf_powerup_bottle") && !StrEqual(classname, "tf_weapon_spellbook"))
 		{
 			return Plugin_Continue;
 		}
-		case 125, 134, 136, 138, 260, 470, 640, 711, 712, 713, 1158:  //Special hats
-		{
-			ClassEnum class;
-			if(Classes_GetByIndex(Client[client].Class, class) && class.Human)
-				return Plugin_Continue;
-		}
 	}
+
 	return Plugin_Handled;
 }
 

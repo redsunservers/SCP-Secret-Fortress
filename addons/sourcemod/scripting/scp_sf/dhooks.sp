@@ -4,11 +4,13 @@ static DynamicHook ShouldCollide;
 static DynamicHook ForceRespawn;
 static DynamicHook WantsLagCompensationOnEntity;
 static DynamicHook WeaponGetCustomDamageType;
+static DynamicHook ModifyOrAppendCriteria;
 static int ShouldCollidePreHook[MAXTF2PLAYERS];
 static int ForceRespawnPreHook[MAXTF2PLAYERS];
 static int ForceRespawnPostHook[MAXTF2PLAYERS];
 static int WantsLagCompensationOnEntityPreHook[MAXTF2PLAYERS];
 static int WantsLagCompensationOnEntityPostHook[MAXTF2PLAYERS];
+static int ModifyOrAppendCriteriaPostHook[MAXTF2PLAYERS];
 static int CalculateSpeedClient;
 static int ClientTeam[MAXTF2PLAYERS];
 
@@ -64,6 +66,10 @@ void DHook_Setup(GameData gamedata)
 	if(!WantsLagCompensationOnEntity)
 		LogError("[Gamedata] Could not find CBasePlayer::WantsLagCompensationOnEntity");
 	
+	ModifyOrAppendCriteria = DynamicHook.FromConf(gamedata, "CBaseEntity::ModifyOrAppendCriteria");
+	if(!ModifyOrAppendCriteria)
+		LogError("[Gamedata] Could not find CBaseEntity::ModifyOrAppendCriteria");
+	
 	StudioHdrOffset = GameConfGetOffset(gamedata, "CBaseAnimating::m_pStudioHdr");
 	if (StudioHdrOffset == -1)
 		LogError("[Gamedata] Failed to get offset for CBaseAnimating::m_pStudioHdr");
@@ -110,6 +116,11 @@ void DHook_HookClient(int client)
 		WantsLagCompensationOnEntityPreHook[client] = WantsLagCompensationOnEntity.HookEntity(Hook_Pre, client, DHook_WantsLagCompensationOnEntityPre);
 		WantsLagCompensationOnEntityPostHook[client] = WantsLagCompensationOnEntity.HookEntity(Hook_Post, client, DHook_WantsLagCompensationOnEntityPost);
 	}
+	
+	if(ModifyOrAppendCriteria)
+	{
+		ModifyOrAppendCriteriaPostHook[client] = ModifyOrAppendCriteria.HookEntity(Hook_Post, client, DHook_ModifyOrAppendCriteriaPost);
+	}
 }
 
 void DHook_UnhookClient(int client)
@@ -119,6 +130,7 @@ void DHook_UnhookClient(int client)
 	DynamicHook.RemoveHook(ForceRespawnPostHook[client]);
 	DynamicHook.RemoveHook(WantsLagCompensationOnEntityPreHook[client]);
 	DynamicHook.RemoveHook(WantsLagCompensationOnEntityPostHook[client]);
+	DynamicHook.RemoveHook(ModifyOrAppendCriteriaPostHook[client]);
 }
 
 void DHook_HookWeapon(int weapon)
@@ -621,6 +633,23 @@ MRESReturn GetWeaponCustomDamageType(int weapon, int client, int &customDamageTy
 			}
 		}
 	}
+	
+	return MRES_Ignored;
+}
+
+public MRESReturn DHook_ModifyOrAppendCriteriaPost(int player, DHookParam params)
+{
+	if (!IsClientInGame(player) || !IsSCP(player) || !TF2_IsPlayerInCondition(player, TFCond_Disguised))
+		return MRES_Ignored;
+	
+	int criteriaSet = params.Get(1);
+	
+	if (SDKCall_FindCriterionIndex(criteriaSet, "crosshair_enemy") == -1)
+		return MRES_Ignored;
+	
+	// Prevent disguised SCP from calling people they may not be able to see out
+	SDKCall_RemoveCriteria(criteriaSet, "crosshair_on");
+	SDKCall_RemoveCriteria(criteriaSet, "crosshair_enemy");
 	
 	return MRES_Ignored;
 }
