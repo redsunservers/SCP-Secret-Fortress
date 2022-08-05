@@ -1440,6 +1440,10 @@
 		"#format"	"{1:N},{2:.0f}"
 		"en"		"{1} is uncuffing you... {2}%"
 	}
+	"killedby018"	//
+	{
+		"en"		"SCP-018 bounces for 30 seconds with instantaneous damage."
+	}
 	"killedby049"	//
 	{
 		"en"		"SCP-049 get speed boost when he detected patient."
