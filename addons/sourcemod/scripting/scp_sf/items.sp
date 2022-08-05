@@ -1689,6 +1689,9 @@ public bool Items_FragButton(int client, int weapon, int &buttons, int &holding)
 //float FragPos[3];
 bool Items_FragTrace(int entity)
 {
+	if (!IsValidEntity(entity))
+		return true;
+	
 	char buffer[10];
 	if (GetEntityClassname(entity, buffer, sizeof(buffer))) 
 	{
@@ -1734,7 +1737,7 @@ public Action Items_FragTimer(Handle timer, int ref)
 			DispatchKeyValue(explosion, "iMagnitude", "500");
 			DispatchKeyValue(explosion, "iRadiusOverride", "350");
 			// don't want particles or sound, we create them seperately
-			DispatchKeyValue(explosion, "spawnflags", "916");
+			DispatchKeyValue(explosion, "spawnflags", "978");
 			
 			SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", client);
 			// pass the original class of the thrower
@@ -1746,25 +1749,16 @@ public Action Items_FragTimer(Handle timer, int ref)
 			SetVariantString("classname taunt_soldier"); 
 			AcceptEntityInput(explosion, "AddOutput");
 			
-			int particle = AttachParticle(explosion, "asplode_hoodoo", false, 5.0);
-			if (particle)
-				EmitGameSoundToAll("Weapon_Airstrike.Explosion", particle, entity, _, _, pos);
-				
+			AttachParticle(explosion, "asplode_hoodoo", false, 5.0);
+			EmitGameSoundToAll("Weapon_Airstrike.Explosion", entity);
+			
 			AcceptEntityInput(explosion, "Explode");
 			CreateTimer(0.1, Timer_RemoveEntity, EntIndexToEntRef(explosion), TIMER_FLAG_NO_MAPCHANGE);
 		}
-		
+
 		// find any doors nearby and try destroy or force them open
 		//CopyVector(pos, FragPos); // temporary for trace
-		
-		// FIXME: switch to this method when SM 1.11 is stablew
-		//TR_EnumerateEntitiesSphere(pos, 350.0, PARTITION_SOLID_EDICTS, Items_FragTrace);
-		
-		int entitytrace = -1;
-		while ((entitytrace = SDKCall_FindEntityInSphere(entitytrace, pos, 350.0)) != -1)
-		{
-			Items_FragTrace(entitytrace);
-		}
+		TR_EnumerateEntitiesSphere(pos, 350.0, PARTITION_SOLID_EDICTS, Items_FragTrace);
 		
 		AcceptEntityInput(entity, "Kill");
 	}
@@ -1853,7 +1847,7 @@ public Action Items_FlashTimer(Handle timer, int ref)
 			if (light > MaxClients)
 				TeleportEntity(light, pos1, view_as<float>({ 90.0, 0.0, 0.0 }), NULL_VECTOR);
 			
-			AcceptEntityInput(explosion, "Detonate");
+			AcceptEntityInput(explosion, "Explode");
 			CreateTimer(0.1, Timer_RemoveEntity, EntIndexToEntRef(explosion), TIMER_FLAG_NO_MAPCHANGE);
 		}
 
