@@ -1689,6 +1689,7 @@ public bool Items_FragButton(int client, int weapon, int &buttons, int &holding)
 //float FragPos[3];
 bool Items_FragTrace(int entity)
 {
+	// things like static props do go through, ignore them
 	if (!IsValidEntity(entity))
 		return true;
 	
@@ -1757,7 +1758,7 @@ public Action Items_FragTimer(Handle timer, int ref)
 		}
 
 		// find any doors nearby and try destroy or force them open
-		//CopyVector(pos, FragPos); // temporary for trace
+		//CopyVector(pos, FragPos); // temporary for trace, used for pushing items away
 		TR_EnumerateEntitiesSphere(pos, 350.0, PARTITION_SOLID_EDICTS, Items_FragTrace);
 		
 		AcceptEntityInput(entity, "Kill");
