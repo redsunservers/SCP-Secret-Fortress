@@ -1731,37 +1731,25 @@ public Action Items_FragTimer(Handle timer, int ref)
 		GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
 
 		int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
-		int explosion = CreateEntityByName("env_explosion");
-		if(IsValidEntity(explosion))
+		int flags = (SF_ENVEXPLOSION_REPEATABLE|SF_ENVEXPLOSION_NODECAL|SF_ENVEXPLOSION_NOSOUND|SF_ENVEXPLOSION_RND_ORIENT|SF_ENVEXPLOSION_NOFIREBALLSMOKE|SF_ENVEXPLOSION_NOPARTICLES);
+		int explosion = CreateExplosion(client, 500, 350, pos, flags, "taunt_soldier", false);
+		
+		if (IsValidEntity(explosion))
 		{
-			DispatchKeyValueVector(explosion, "origin", pos);
-			DispatchKeyValue(explosion, "iMagnitude", "500");
-			DispatchKeyValue(explosion, "iRadiusOverride", "350");
-			// don't want particles or sound, we create them seperately
-			DispatchKeyValue(explosion, "spawnflags", "978");
-			
-			SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", client);
-			// pass the original class of the thrower
-			SetEntProp(explosion, Prop_Data, "m_iHammerID", GetEntProp(entity, Prop_Data, "m_iHammerID"));						
-			
-			DispatchSpawn(explosion);	
-			
-			// this will show the kill icon as a grenade
-			SetVariantString("classname taunt_soldier"); 
-			AcceptEntityInput(explosion, "AddOutput");
-			
 			AttachParticle(explosion, "asplode_hoodoo", false, 5.0);
-			EmitGameSoundToAll("Weapon_Airstrike.Explosion", entity);
+			EmitGameSoundToAll("Weapon_Airstrike.Explosion", explosion);
+			
+			// pass the original class of the thrower
+			SetEntProp(explosion, Prop_Data, "m_iHammerID", GetEntProp(entity, Prop_Data, "m_iHammerID"));	
 			
 			AcceptEntityInput(explosion, "Explode");
+			TR_EnumerateEntitiesSphere(pos, 350.0, PARTITION_SOLID_EDICTS, Items_FragTrace);
 			CreateTimer(0.1, Timer_RemoveEntity, EntIndexToEntRef(explosion), TIMER_FLAG_NO_MAPCHANGE);
 		}
-
+		
+		RemoveEntity(entity);
 		// find any doors nearby and try destroy or force them open
 		//CopyVector(pos, FragPos); // temporary for trace, used for pushing items away
-		TR_EnumerateEntitiesSphere(pos, 350.0, PARTITION_SOLID_EDICTS, Items_FragTrace);
-		
-		AcceptEntityInput(entity, "Kill");
 	}
 	return Plugin_Continue;
 }
@@ -1826,27 +1814,22 @@ public Action Items_FlashTimer(Handle timer, int ref)
 	{
 		static float pos1[3];
 		GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos1);
-
-		int explosion = CreateEntityByName("env_explosion");
-		if(IsValidEntity(explosion))
+		
+		int flags = (SF_ENVEXPLOSION_NODAMAGE|SF_ENVEXPLOSION_REPEATABLE|SF_ENVEXPLOSION_NODECAL|SF_ENVEXPLOSION_NOSOUND|SF_ENVEXPLOSION_RND_ORIENT|SF_ENVEXPLOSION_NOFIREBALLSMOKE|SF_ENVEXPLOSION_NOPARTICLES);
+		int explosion = CreateExplosion(_, _, _, pos1, flags, _, false);
+		
+		if (IsValidEntity(explosion))
 		{
-			DispatchKeyValueVector(explosion, "origin", pos1);
-			DispatchKeyValue(explosion, "iMagnitude", "0");
-			// don't want particles and sound, we create them seperately
-			DispatchKeyValue(explosion, "spawnflags", "978");
-			
-			SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"));
-			// pass the original class of the thrower
-			SetEntProp(explosion, Prop_Data, "m_iHammerID", GetEntProp(entity, Prop_Data, "m_iHammerID"));
-			
-			DispatchSpawn(explosion);
-			AttachParticle(explosion, "drg_cow_explosioncore_normal_blue", false, 5.0);
-			EmitGameSoundToAll("Weapon_Detonator.Detonate", entity);	
+			AttachParticle(explosion, "drg_cow_explosioncore_normal_blue", false, 1.0);
+			EmitGameSoundToAll("Weapon_Detonator.Detonate", explosion);
 			
 			// create a short light effect, clientside duration can increase slightly depending on ping
 			int light = TF2_CreateLightEntity(1024.0, { 255, 255, 255, 255 }, 5, 0.1);
 			if (light > MaxClients)
 				TeleportEntity(light, pos1, view_as<float>({ 90.0, 0.0, 0.0 }), NULL_VECTOR);
+			
+			// pass the original class of the thrower
+			SetEntProp(explosion, Prop_Data, "m_iHammerID", GetEntProp(entity, Prop_Data, "m_iHammerID"));	
 			
 			AcceptEntityInput(explosion, "Explode");
 			CreateTimer(0.1, Timer_RemoveEntity, EntIndexToEntRef(explosion), TIMER_FLAG_NO_MAPCHANGE);
@@ -1872,7 +1855,7 @@ public Action Items_FlashTimer(Handle timer, int ref)
 			}
 		}
 
-		AcceptEntityInput(entity, "Kill");
+		RemoveEntity(entity);
 	}
 	return Plugin_Continue;
 }

@@ -253,6 +253,23 @@ enum
 	TFSpell_SkeletonHorde
 }
 
+// env_explosion flags
+#define SF_ENVEXPLOSION_NODAMAGE	0x00000001 // when set, ENV_EXPLOSION will not actually inflict damage
+#define SF_ENVEXPLOSION_REPEATABLE	0x00000002 // can this entity be refired?
+#define SF_ENVEXPLOSION_NOFIREBALL	0x00000004 // don't draw the fireball
+#define SF_ENVEXPLOSION_NOSMOKE		0x00000008 // don't draw the smoke
+#define SF_ENVEXPLOSION_NODECAL		0x00000010 // don't make a scorch mark
+#define SF_ENVEXPLOSION_NOSPARKS	0x00000020 // don't make sparks
+#define SF_ENVEXPLOSION_NOSOUND		0x00000040 // don't play explosion sound.
+#define SF_ENVEXPLOSION_RND_ORIENT	0x00000080	// randomly oriented sprites
+#define SF_ENVEXPLOSION_NOFIREBALLSMOKE 0x0100
+#define SF_ENVEXPLOSION_NOPARTICLES 0x00000200
+#define SF_ENVEXPLOSION_NODLIGHTS	0x00000400
+#define SF_ENVEXPLOSION_NOCLAMPMIN	0x00000800 // don't clamp the minimum size of the fireball sprite
+#define SF_ENVEXPLOSION_NOCLAMPMAX	0x00001000 // don't clamp the maximum size of the fireball sprite
+#define SF_ENVEXPLOSION_SURFACEONLY	0x00002000 // don't damage the player if he's underwater.
+#define SF_ENVEXPLOSION_GENERIC_DAMAGE	0x00004000 // don't do BLAST damage
+
 // anything that blocks visibility
 #define MASK_BLOCKLOS (CONTENTS_SOLID|CONTENTS_MOVEABLE|CONTENTS_MIST)
 
@@ -1735,4 +1752,52 @@ stock int TF2_CreateLightEntity(float radius, int color[4], int brightness, floa
 	}
 	
 	return entity;
+}
+
+stock int CreateExplosion(int attacker = -1, int damage = 0, int radius = -1, float pos[3], int flags = 0, const char[] killIcon = "", bool immediate = true)
+{
+	int explosion = CreateEntityByName("env_explosion");
+	
+	if (!IsValidEntity(explosion))
+		return -1;
+	
+	char buffer[32];
+	
+	DispatchKeyValueVector(explosion, "origin", pos);
+	
+	Format(buffer, sizeof(buffer), "%d", damage);
+	DispatchKeyValue(explosion, "iMagnitude", buffer);
+	
+	// set radius override if specified
+	if (radius != -1)
+	{
+		Format(buffer, sizeof(buffer), "%d", radius);
+		DispatchKeyValue(explosion, "iRadiusOverride", buffer);
+	}
+	
+	Format(buffer, sizeof(buffer), "%d", flags);
+	DispatchKeyValue(explosion, "spawnflags", buffer);
+	
+	// set attacker if specified
+	if (attacker != -1)
+		SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", attacker);
+	
+	DispatchSpawn(explosion);
+	
+	// change the kill icon if specified
+	if (killIcon[0])
+	{
+		Format(buffer, sizeof(buffer), "classname %s", killIcon);
+		SetVariantString(buffer);
+		AcceptEntityInput(explosion, "AddOutput");
+	}
+	
+	// do the explosion and clean up right here if it's set to do immediately, or let the explosion be manipulated further if not
+	if (immediate)
+	{
+		AcceptEntityInput(explosion, "Explode");
+		CreateTimer(0.1, Timer_RemoveEntity, EntIndexToEntRef(explosion), TIMER_FLAG_NO_MAPCHANGE);
+	}
+	
+	return explosion;
 }
