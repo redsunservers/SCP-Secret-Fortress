@@ -1686,7 +1686,6 @@ public bool Items_FragButton(int client, int weapon, int &buttons, int &holding)
 	return false;
 }
 
-//float FragPos[3];
 bool Items_FragTrace(int entity)
 {
 	// things like static props do go through, ignore them
@@ -1697,26 +1696,7 @@ bool Items_FragTrace(int entity)
 	if (GetEntityClassname(entity, buffer, sizeof(buffer))) 
 	{
 		if (!strncmp(buffer, "func_door", 9, false))
-		{
 			DestroyOrOpenDoor(entity);
-		}
-		//else if (!strncmp(buffer, "tf_drop", 9, false))
-		//{
-			// try push away weapons
-			// TODO: this will need a vphysics extension, as the objects are asleep and hence can't be moved otherwise
-		
-			//float pos2[3], delta[3], dist;
-			//GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos2);
-			//SubtractVectors(pos2, FragPos, delta);
-			//dist = GetVectorLength(delta, false);		
-			// apply falloff depending on distance
-			//float falloff = (dist / 350.0);
-			//if (falloff != 0.0)
-			//{
-			//	ScaleVector(delta, 1.0 - falloff);
-			//	TeleportEntity(entity, NULL_VECTOR, NULL_VECTOR, delta);
-			//}			
-		//}
 	}
 	
 	return true;
@@ -1742,14 +1722,14 @@ public Action Items_FragTimer(Handle timer, int ref)
 			// pass the original class of the thrower
 			SetEntProp(explosion, Prop_Data, "m_iHammerID", GetEntProp(entity, Prop_Data, "m_iHammerID"));	
 			
-			AcceptEntityInput(explosion, "Explode");
+			// find any doors nearby and try destroy or force them open
 			TR_EnumerateEntitiesSphere(pos, 350.0, PARTITION_SOLID_EDICTS, Items_FragTrace);
+			
+			AcceptEntityInput(explosion, "Explode");
 			CreateTimer(0.1, Timer_RemoveEntity, EntIndexToEntRef(explosion), TIMER_FLAG_NO_MAPCHANGE);
 		}
 		
 		RemoveEntity(entity);
-		// find any doors nearby and try destroy or force them open
-		//CopyVector(pos, FragPos); // temporary for trace, used for pushing items away
 	}
 	return Plugin_Continue;
 }
