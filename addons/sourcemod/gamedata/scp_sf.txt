@@ -117,17 +117,6 @@
 				"linux"		"@_ZN14AI_CriteriaSet14RemoveCriteriaEPKc"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x48\x56\x57\xFF\x75\x08"
 			}
-			// FIXME: remove this when SM 1.11 is stable (TR_EnumerateEntitiesSphere can be used instead)
-			// thanks to nosoop for this sig
-			"CGlobalEntityList::FindEntityInSphere()"
-			{
-				// xref "NULL entity in global entity list!\n"
-				// process of elimination -- three arguments that branch to a mov+10004h
-				// two arguments is FindEntityByModel
-				"library"	"server"
-				"linux"		"@_ZN17CGlobalEntityList18FindEntityInSphereEP11CBaseEntityRK6Vectorf"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x0C\x53\x56\x57\x8B\xF9\x8B\x4D\x08"
-			}
 		}
 		"Functions"
 		{
