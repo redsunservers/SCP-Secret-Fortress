@@ -745,7 +745,7 @@ bool Items_CanGiveItem(int client, int type, bool &full=false)
 	return true;
 }
 
-bool Items_DropItem(int client, int helditem, const float origin[3], const float angles[3], bool swap=true, int dropType = ItemDrop_Drop)
+bool Items_DropItem(int client, int helditem, const float origin[3], const float angles[3], bool swap = true, int dropType = ItemDrop_Drop)
 {
 	static char buffer[PLATFORM_MAX_PATH];
 	GetEntityNetClass(helditem, buffer, sizeof(buffer));
