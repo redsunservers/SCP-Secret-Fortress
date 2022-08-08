@@ -1387,11 +1387,13 @@ public Action OnDropItem(int client, const char[] command, int args)
 			{
 				WeaponEnum weapon;
 				bool big = (Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) && weapon.Type==ITEM_TYPE_WEAPON);
-
+				int dropType = GetEntityFlags(client) & FL_DUCKING ? ItemDrop_Drop : ItemDrop_Throw;
+				
 				static float pos[3], ang[3];
 				GetClientEyePosition(client, pos);
 				GetClientEyeAngles(client, ang);
-				if(Items_DropItem(client, entity, pos, ang, true))
+				
+				if(Items_DropItem(client, entity, pos, ang, true, dropType))
 				{
 					if(big)
 					{
