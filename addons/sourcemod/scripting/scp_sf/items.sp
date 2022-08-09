@@ -900,8 +900,8 @@ bool Items_DropItem(int client, int helditem, const float origin[3], const float
 				
 				case ItemDrop_Scatter:	// throw in a random-ish direction
 				{
-					vel[0] = float(GetRandomInt(-150, 150));
-					vel[1] = float(GetRandomInt(-150, 150));
+					vel[0] = float(GetRandomInt(-100, 100));
+					vel[1] = float(GetRandomInt(-100, 100));
 					vel[2] = float(GetRandomInt(25, 100));
 				}
 			}
