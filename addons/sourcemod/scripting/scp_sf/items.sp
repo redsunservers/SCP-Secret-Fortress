@@ -884,14 +884,18 @@ bool Items_DropItem(int client, int helditem, const float origin[3], const float
 			{
 				case ItemDrop_Throw:	// throw in the direction the player is looking at
 				{
-					// check if we're too close to a wall, just drop it if so
+					// check if we're too close to a wall
 					float posFinal[3];
 					TR_TraceRayFilter(origin, angles, MASK_SOLID, RayType_Infinite, Trace_WorldAndBrushes);
 					TR_GetEndPosition(posFinal);
-				
-					// 48 units
-					if (GetVectorDistance(origin, posFinal, true) > 2304.0)
-						Items_GrenadeTrajectory(angles, vel, 300.0);	// just reuse this, I guess
+					
+					// if we are too close, weaken the throw
+					float distance = GetVectorDistance(origin, posFinal, false);
+					
+					if (distance > 200.0)
+						distance = 200.0
+					
+					Items_GrenadeTrajectory(angles, vel, (distance * 1.5));	// just reuse this, I guess
 				}
 				
 				case ItemDrop_Scatter:	// throw in a random-ish direction
