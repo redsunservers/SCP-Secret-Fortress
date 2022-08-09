@@ -1397,7 +1397,7 @@ public Action OnDropItem(int client, const char[] command, int args)
 				{
 					if(big)
 					{
-						ClientCommand(client, "playgamesound BaseCombatWeapon.WeaponDrop");
+						ClientCommand(client, "playgamesound ui/item_bag_drop.wav");	// No accompanying GameSound, but this works
 					}
 					else
 					{
