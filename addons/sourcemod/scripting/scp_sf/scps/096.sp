@@ -3,8 +3,8 @@ static const char SoundPassive[] = "freak_fortress_2/scp096/bgm.mp3";
 static const char SoundEnrage[] = "freak_fortress_2/scp096/fullrage.mp3";
 static const char SoundDeath[] = "freak_fortress_2/scp096/096_death.mp3";
 
-static const int HealthMax = 1500;	// Max standard health
-static const int HealthExtra = 750;	// Max regenerable health
+static const int HealthMax = 2000;	// Max standard health
+static const int HealthExtra = 1000;	// Max regenerable health
 
 static const int HealthMaxSZF = 800;	// Max standard health in SZF
 static const int HealthExtraSZF = 585;	// Max regenerable health in SZF
@@ -178,8 +178,8 @@ public void SCP096_OnButton(int client, int button)
 			if(Client[client].Extra3 < engineTime)
 			{
 				float duration = (Client[client].Disarmer*RageExtra)+RageDuration;
-				if(duration > 30)
-					duration = 30.0;
+				if(duration > 20)
+					duration = 20.0;
 
 				Client[client].Extra3 = engineTime+duration;
 				Client[client].Extra2 = 2;
@@ -382,6 +382,7 @@ static void TriggerShyGuy(int client, int target, bool full)
 		case 1:
 		{
 			Client[client].Disarmer++;
+			
 			if(!full)
 				Config_DoReaction(target, "trigger096");
 		}

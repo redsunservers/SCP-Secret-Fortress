@@ -2239,7 +2239,15 @@ public void Items_CombatItem(int client, int type, int &amount)
 
 public void Items_CombatSprint(int client, float &drain)
 {
-	drain *= 1.1;
+	ClassEnum class;
+	if(Classes_GetByIndex(Client[client].Class, class) && class.Vip)
+	{
+		drain *= 1.2;
+	}
+	else
+	{
+		drain *= 1.1;
+	}
 }
 
 public void Items_HeavyAmmo(int client, int type, int &ammo)
@@ -2287,44 +2295,15 @@ public void Items_HeavySpeed(int client, float &speed)
 
 public void Items_HeavySprint(int client, float &drain)
 {
-	drain *= 1.2;
-}
-
-public void Items_FastAmmo(int client, int type, int &ammo)
-{
-	switch(type)
+	ClassEnum class;
+	if(Classes_GetByIndex(Client[client].Class, class) && class.Vip)
 	{
-		case 2:	// 9mm
-		{
-			ammo *= 3;
-		}
-		case 6, 7:	// 7mm, 5mm
-		{
-			ammo *= 2;
-		}
+		drain *= 1.3;
 	}
-}
-
-public void Items_FastItem(int client, int type, int &amount)
-{
-	switch(type)
+	else
 	{
-		case 1:	// Weapons
-			amount += 1;
-
-		case 3:	// Medical
-			amount--;
+		drain *= 1.15;
 	}
-}
-
-public void Items_FastSpeed(int client, float &speed)
-{
-	speed *= 1.05;
-}
-
-public void Items_FastSprint(int client, float &drain)
-{
-	drain *= 0.8;
 }
 
 public int Items_KeycardJan(int client, AccessEnum access)
@@ -2652,4 +2631,57 @@ public bool Items_DisarmerButton(int client, int weapon, int &buttons, int &hold
 	}
 	
 	return true;
+}
+
+public bool Items_FlashLightButton(int client, int weapon, int &buttons, int &holding)
+{
+	if(!holding)
+	{	
+		if(!holding && ((buttons & IN_ATTACK) || (buttons & IN_ATTACK2)))
+		{
+			holding = (buttons & IN_ATTACK) ? IN_ATTACK : IN_ATTACK2;
+			
+			if(Client[client].FlashLight)
+			{
+				TurnOffFlashlight(client);
+			}
+			else
+			{
+				static float pos[3];
+
+				// Spawn the light that only everyone else will see.
+				int ent = CreateEntityByName("point_spotlight");
+				if(ent > -1)
+				{
+					GetClientEyePosition(client, pos);
+					TeleportEntity(ent, pos, NULL_VECTOR, NULL_VECTOR);
+					DispatchKeyValue(ent, "spotlightlength", "1024");
+					DispatchKeyValue(ent, "spotlightwidth", "512");
+					DispatchKeyValue(ent, "rendercolor", "255 255 255");
+					DispatchSpawn(ent);
+					ActivateEntity(ent);
+					SetVariantString("!activator");
+					AcceptEntityInput(ent, "SetParent", client);
+					AcceptEntityInput(ent, "LightOn");
+
+					Client[client].FlashLight = EntIndexToEntRef(ent);
+				}
+				// ViewModel_SetAnimation(client, "use");
+			}	
+		}
+	}
+
+	return false;
+}
+
+public void TurnOffFlashlight(int client)
+{	
+	int entity = EntRefToEntIndex(Client[client].FlashLight);
+	if(entity>MaxClients && IsValidEntity(entity))
+	{
+		AcceptEntityInput(entity, "LightOff");
+		CreateTimer(0.1, Timer_RemoveEntity, Client[client].FlashLight, TIMER_FLAG_NO_MAPCHANGE);
+	}
+	
+	Client[client].FlashLight = 0;
 }

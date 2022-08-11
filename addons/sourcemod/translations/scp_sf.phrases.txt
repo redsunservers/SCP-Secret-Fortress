@@ -1137,11 +1137,11 @@
 	}
 	"weapon_30022"
 	{
-		"en"		"FAST™ device"
+		"en"		"Flashlight™"
 	}
 	"info_30022"
 	{
-		"en"		"Expands sprint, extra speed and ammo, with low damage resistance"
+		"en"		"Use MOUSE1 or MOUSE2 to toggle the light"
 	}
 	
 	// Team Phrases

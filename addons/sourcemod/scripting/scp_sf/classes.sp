@@ -840,6 +840,8 @@ void Classes_OnWeaponSwitch(int client, int entity)
 		}
 	}
 
+	TurnOffFlashlight(client);
+
 	if(class.OnWeaponSwitch==INVALID_FUNCTION) return;
 	
 	Call_StartFunction(null, class.OnWeaponSwitch);
@@ -911,6 +913,8 @@ public void Classes_MoveToSpec(int client, Event event)
 		Client[client].Class = index;
 		Classes_AssignClassPost(client, ClassSpawn_Death);
 	}
+
+	TurnOffFlashlight(client);
 
 	ClassEnum attackerClass;
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
