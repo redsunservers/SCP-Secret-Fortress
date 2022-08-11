@@ -2635,39 +2635,36 @@ public bool Items_DisarmerButton(int client, int weapon, int &buttons, int &hold
 
 public bool Items_FlashLightButton(int client, int weapon, int &buttons, int &holding)
 {
-	if(!holding)
-	{	
-		if(!holding && ((buttons & IN_ATTACK) || (buttons & IN_ATTACK2)))
+	if(!holding && ((buttons & IN_ATTACK) || (buttons & IN_ATTACK2)))
+	{
+		holding = (buttons & IN_ATTACK) ? IN_ATTACK : IN_ATTACK2;
+		
+		if(Client[client].FlashLight)
 		{
-			holding = (buttons & IN_ATTACK) ? IN_ATTACK : IN_ATTACK2;
-			
-			if(Client[client].FlashLight)
+			TurnOffFlashlight(client);
+		}
+		else
+		{
+			static float pos[3];
+
+			// Spawn the light that only everyone else will see.
+			int ent = CreateEntityByName("point_spotlight");
+			if(ent > -1)
 			{
-				TurnOffFlashlight(client);
+				GetClientEyePosition(client, pos);
+				TeleportEntity(ent, pos, NULL_VECTOR, NULL_VECTOR);
+				DispatchKeyValue(ent, "spotlightlength", "1024");
+				DispatchKeyValue(ent, "spotlightwidth", "512");
+				DispatchKeyValue(ent, "rendercolor", "255 255 255");
+				DispatchSpawn(ent);
+				ActivateEntity(ent);
+				SetVariantString("!activator");
+				AcceptEntityInput(ent, "SetParent", client);
+				AcceptEntityInput(ent, "LightOn");
+
+				Client[client].FlashLight = EntIndexToEntRef(ent);
 			}
-			else
-			{
-				static float pos[3];
-
-				// Spawn the light that only everyone else will see.
-				int ent = CreateEntityByName("point_spotlight");
-				if(ent > -1)
-				{
-					GetClientEyePosition(client, pos);
-					TeleportEntity(ent, pos, NULL_VECTOR, NULL_VECTOR);
-					DispatchKeyValue(ent, "spotlightlength", "1024");
-					DispatchKeyValue(ent, "spotlightwidth", "512");
-					DispatchKeyValue(ent, "rendercolor", "255 255 255");
-					DispatchSpawn(ent);
-					ActivateEntity(ent);
-					SetVariantString("!activator");
-					AcceptEntityInput(ent, "SetParent", client);
-					AcceptEntityInput(ent, "LightOn");
-
-					Client[client].FlashLight = EntIndexToEntRef(ent);
-				}
-				// ViewModel_SetAnimation(client, "use");
-			}	
+			// ViewModel_SetAnimation(client, "use");
 		}
 	}
 
