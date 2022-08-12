@@ -176,9 +176,6 @@ enum struct ClientEnum
 	int CurrentVolume;
 	char CurrentSong[PLATFORM_MAX_PATH];
 
-	// Flashlight
-	int FlashLight;
-
 	void ResetThinkIsDead()
 	{
 		for(int i=1; i<=MaxClients; i++)
@@ -605,9 +602,6 @@ public void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 	{
 		if(!IsValidClient(client))
 			continue;
-
-		// Reset all flashlight..
-		TurnOffFlashlight(client);
 
 		// just to be safe...
 		Items_CancelDelayedAction(client);
