@@ -190,6 +190,9 @@ ClientEnum Client[MAXTF2PLAYERS];
 // Micro H.I.D. Charging gage
 float charge[MAXTF2PLAYERS];
 
+// SCP-106 Pass through door
+char PassThroughDoorName[MAXTF2PLAYERS][64];
+
 #include "scp_sf/stocks.sp"
 #include "scp_sf/achievements.sp"
 #include "scp_sf/classes.sp"

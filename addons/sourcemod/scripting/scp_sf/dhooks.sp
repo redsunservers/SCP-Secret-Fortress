@@ -98,6 +98,14 @@ static void DHook_CreateDetour(GameData gamedata, const char[] name, DHookCallba
 	}
 }
 
+void DHook_OnEntityCreated(int entity, const char[] classname)
+{
+	if (!StrContains(classname, "func_door"))
+	{
+		ShouldCollide.HookEntity(Hook_Pre, entity, DHook_DoorShouldCollidePre);
+	}
+}
+
 void DHook_HookClient(int client)
 {
 	if(ShouldCollide)
@@ -177,8 +185,29 @@ public MRESReturn DHook_ShouldCollidePre(int client, DHookReturn ret, DHookParam
 		ret.Value = false;
 		return MRES_Supercede;
 	}
-
+	
 	return MRES_Ignored;
+}
+
+public MRESReturn DHook_DoorShouldCollidePre(int entity, DHookReturn ret, DHookParam param)
+{	
+	char name[64];
+	GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
+	
+	for(int client = 1; client <= MaxClients; client++)
+	{
+		if(strlen(PassThroughDoorName[client]) <= 0) continue;
+	
+		if(!StrContains(name, PassThroughDoorName[client]) || !StrContains(PassThroughDoorName[client], name))
+		{
+			ret.Value = false;
+			return MRES_Supercede;
+		}
+	}
+	
+	ret.Value = true;
+	
+	return MRES_Supercede;
 }
 
 public MRESReturn DHook_ForceRespawnPre(int client)
