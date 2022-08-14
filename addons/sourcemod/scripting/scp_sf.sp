@@ -1386,16 +1386,19 @@ public Action OnDropItem(int client, const char[] command, int args)
 			if(entity > MaxClients)
 			{
 				WeaponEnum weapon;
-				bool big = (Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) && weapon.Type==ITEM_TYPE_WEAPON);
-
+				int index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
+				int dropType = GetEntityFlags(client) & FL_DUCKING ? ItemDrop_Drop : ItemDrop_Throw;
+				bool big = ((Items_GetWeaponByIndex(index, weapon) && weapon.Type==ITEM_TYPE_WEAPON) || index == ITEM_INDEX_MICROHID);
+				
 				static float pos[3], ang[3];
 				GetClientEyePosition(client, pos);
 				GetClientEyeAngles(client, ang);
-				if(Items_DropItem(client, entity, pos, ang, true))
+				
+				if(Items_DropItem(client, entity, pos, ang, true, dropType))
 				{
 					if(big)
 					{
-						ClientCommand(client, "playgamesound BaseCombatWeapon.WeaponDrop");
+						ClientCommand(client, "playgamesound ui/item_bag_drop.wav");	// No accompanying GameSound, but this works
 					}
 					else
 					{
