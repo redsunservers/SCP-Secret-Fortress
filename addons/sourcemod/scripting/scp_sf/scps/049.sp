@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 static const char ModelMedi[] = "models/scp_sf/049/c_arms_scp049_knife_1.mdl";
 static const char ModelMelee[] = "models/scp_sf/049/c_arms_scp049_4.mdl";
 

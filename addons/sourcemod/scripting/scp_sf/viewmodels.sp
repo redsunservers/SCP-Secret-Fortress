@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 // Yes, taken from Super Zombie Fortress.
 
 static int ViewmodelRef[MAXTF2PLAYERS] = {INVALID_ENT_REFERENCE, ...};

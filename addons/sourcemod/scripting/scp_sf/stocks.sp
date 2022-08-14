@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 enum // Collision_Group_t in const.h - m_CollisionGroup
 {
 	COLLISION_GROUP_NONE  = 0,

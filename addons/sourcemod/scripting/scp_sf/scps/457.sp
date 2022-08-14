@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 static const int HealthKill = 450;
 static const int HealthSplit = 3000;
 

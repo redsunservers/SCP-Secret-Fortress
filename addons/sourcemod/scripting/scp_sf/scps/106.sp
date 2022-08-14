@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 static const char ModelMelee[] = "models/scp_sf/106/scp106_hands_1.mdl";
 static const float TeleFreeze = 8.0;	// Teleport freeze duration
 static const float TeleStun = 5.0;		// Teleport stun duration

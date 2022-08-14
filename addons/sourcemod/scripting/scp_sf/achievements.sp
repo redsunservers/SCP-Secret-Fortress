@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 enum Achievements
 {
 	Achievement_MTFSpawn = 0,
