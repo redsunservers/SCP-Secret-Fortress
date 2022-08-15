@@ -1,5 +1,5 @@
-static const int HealthMax = 1800;	// Max standard health
-static const int HealthExtra = 600;	// Max regenerable health
+static const int HealthMax = 2700;	// Max standard health
+static const int HealthExtra = 900;	// Max regenerable health
 
 static const int HealthMaxSZF = 1000;	// Max standard health in SZF
 static const int HealthExtraSZF = 650;	// Max regenerable health in SZF

@@ -5,7 +5,7 @@ static const char SnapSound[] = "freak_fortress_2/scp173/scp173_kill2.mp3";
 static const char DeathSound[] = "freak_fortress_2/scp173/173_death.wav";
 static const char MoveSound[] = "physics/concrete/concrete_scrape_smooth_loop1.wav";
 
-static const int HealthMax = 2000;	// Max standard health
+static const int HealthMax = 3000;	// Max standard health
 static const int HealthExtra = 1500;	// Max regenerable health
 static const int HealthKill = 300;	// Health gain on stunned kill
 
@@ -49,7 +49,7 @@ public bool SCP173_Create(int client)
 		SetEntProp(weapon, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
 	}
 
-	weapon = SpawnWeapon(client, "tf_weapon_fists", 593, 90, 13, "6 ; 0.4 ; 15 ; 0 ; 138 ; 11 ; 236 ; 1 ; 252 ; 0 ; 275 ; 1 ; 362 ; 1 ; 412 ; 0.6 ; 698 ; 1", false);
+	weapon = SpawnWeapon(client, "tf_weapon_fists", 593, 90, 13, "6 ; 0.4 ; 15 ; 0 ; 138 ; 11 ; 236 ; 1 ; 252 ; 0 ; 275 ; 1 ; 362 ; 1 ; 412 ; 0.8 ; 698 ; 1", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 17);
