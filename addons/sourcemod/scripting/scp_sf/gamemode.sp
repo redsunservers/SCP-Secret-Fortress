@@ -1296,6 +1296,184 @@ public bool Gamemode_ConditionVip(TFTeam &team)
 	return true;
 }
 
+public bool Gamemode_ConditionVipAlt(TFTeam &team)	// Alternate vip mode, disarmed/captured escapes count as one score just like normal escapes.
+{
+	bool salive = Gamecode_CountVIPs();
+	if (VIPsAlive > 0)
+		return false;
+
+	int descape, dcapture, dtotal, sescape, scapture, stotal, pkill, ptotal;
+	GameInfo.GetValue("descape", descape);
+	GameInfo.GetValue("dcapture", dcapture);
+	GameInfo.GetValue("dtotal", dtotal);
+	GameInfo.GetValue("sescape", sescape);
+	GameInfo.GetValue("scapture", scapture);
+	GameInfo.GetValue("stotal", stotal);
+	GameInfo.GetValue("pkill", pkill);
+	GameInfo.GetValue("ptotal", ptotal);
+
+	int group;
+	int sscore = sescape + dcapture;
+	int dscore = descape + scapture;
+	if(sscore > dscore)	// More Scientists(and Captured dboi) than Class-D
+	{
+		team = TFTeam_Blue;
+		group = 2;
+	}
+	else if(sscore < dscore)	// More Class-D(and Captured sci) than Scientists
+	{
+		team = TFTeam_Red;
+		group = 1;
+	}
+	else if(salive && !sescape && !dcapture && !descape && !scapture)	// SCP alive and none escaped
+	{
+		team = TFTeam_Red;
+		group = 3;
+	}
+	else	// Tied escapes & captures
+	{
+		team = TFTeam_Unassigned;
+		group = 0;
+	}
+
+	EndRoundRelay(group);
+
+	int minutes, seconds;
+	TimeToMinutesSeconds(GetGameTime() - RoundStartAt, minutes, seconds);	
+
+	char buffer[16];
+	FormatEx(buffer, sizeof(buffer), "team_%d", group);
+	SetHudTextParamsEx(-1.0, 0.3, 17.5, TeamColors[group], {255, 255, 255, 255}, 1, 2.0, 1.0, 1.0);
+	for(int client=1; client<=MaxClients; client++)
+	{
+		if(!IsValidClient(client))
+			continue;
+
+		SetGlobalTransTarget(client);
+		ShowSyncHudText(client, HudGame, "%t", "end_screen_vip", buffer, descape, dtotal, dcapture, sescape, stotal, scapture, pkill, ptotal, minutes, seconds);
+	}
+	return true;
+}
+
+public bool Gamemode_ConditionSlNew(TFTeam &team)	// Tweaked version of scp-sl's game rule. It is recommended to use this with the addition of an auto-nuke.
+{
+	ClassEnum class;
+	bool salive, ralive, balive;
+	for(int i=1; i<=MaxClients; i++)
+	{
+		if(!IsValidClient(i) || IsSpec(i) || !Classes_GetByIndex(Client[i].Class, class))
+			continue;
+
+		if(class.Vip)
+			return false;
+
+		if(class.Human && Client[i].Disarmer)
+			continue;
+
+		if(!class.Group)	// SCPs
+		{
+			salive = true;
+		}
+		else if(class.Group == 1)// Chaos
+		{
+			ralive = true;
+		}
+		else if(class.Group > 1)	// Guards and MTF Squads
+		{
+			balive = true;
+		}
+	}
+
+	if(balive && (salive || ralive))
+		return false;
+	
+	int descape, dcapture, dtotal, sescape, scapture, stotal, pkill, ptotal, dpkill, spkill;
+	GameInfo.GetValue("descape", descape);
+	GameInfo.GetValue("dcapture", dcapture);
+	GameInfo.GetValue("dtotal", dtotal);
+	GameInfo.GetValue("sescape", sescape);
+	GameInfo.GetValue("scapture", scapture);
+	GameInfo.GetValue("stotal", stotal);
+	GameInfo.GetValue("pkill", pkill);
+	GameInfo.GetValue("ptotal", ptotal);
+	GameInfo.GetValue("dpkill", dpkill);
+	GameInfo.GetValue("spkill", spkill);
+	
+	int dtkill = 3 * dpkill;
+	int stkill = 3 * spkill;
+	int sscore = sescape + stkill - scapture;
+	int dscore = descape + dtkill - dcapture;
+	//int pscore = ptotal - pkill;
+	int group;
+	
+	if(!salive)
+	{
+		if(ralive)	//  Only Class-D and Chaos
+		{
+			if(sscore > dscore)	// Foundation score more than Chaos Insurgency score
+			{
+				team = TFTeam_Unassigned; // Stalemate
+				group = 0;
+			}
+			else
+			{
+				team = TFTeam_Red;	// Class-D win
+				group = 1;
+			}
+		}
+		else if(balive)	// Only MTF
+		{
+			if(sscore > dscore) // Foundation score more than Chaos Insurgency score
+			{
+				team = TFTeam_Blue;	// MTF win
+				group = 2;
+			}	
+			else
+			{
+				team = TFTeam_Unassigned; // Stalemate
+				group = 0;
+			}
+		}
+		else	// Nobody escaped, no SCPs alive
+		{
+			team = TFTeam_Unassigned;// Stalemate
+			group = 0;
+		}
+	}
+	else
+	{
+		Gamecode_CountVIPs();
+		
+		if((VIPsAlive <= 0 && !sescape && !dcapture && !descape && !scapture) || (!balive && !ralive))
+		{
+			team = TFTeam_Red;    // SCPs win
+			group = 3;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	EndRoundRelay(group);
+
+	int minutes, seconds;
+	TimeToMinutesSeconds(GetGameTime() - RoundStartAt, minutes, seconds);
+	
+	char buffer[16];
+	FormatEx(buffer, sizeof(buffer), "team_%d", group);
+	SetHudTextParamsEx(-1.0, 0.3, 17.5, TeamColors[group], {255, 255, 255, 255}, 1, 2.0, 1.0, 1.0);
+	for(int client=1; client<=MaxClients; client++)
+	{
+		if(!IsValidClient(client))
+			continue;
+
+		SetGlobalTransTarget(client);
+		ShowSyncHudText(client, HudGame, "%t", "end_screen_vip", buffer, descape, dtotal, dcapture, sescape, stotal, scapture, pkill, ptotal, minutes, seconds);
+	}
+	return true;
+}
+
 public bool Gamemode_ConditionBoss(TFTeam &team)
 {
 	ClassEnum class;

@@ -42,6 +42,13 @@ enum struct WeaponEnum
 	Function OnSprint;	// void(int client, float &drain)
 }
 
+enum
+{
+	ItemDrop_Drop,
+	ItemDrop_Throw,
+	ItemDrop_Scatter,
+}
+
 static ArrayList Weapons;
 
 // Some items like healthkit or grenades have actions that will be executed while holding them
@@ -738,7 +745,7 @@ bool Items_CanGiveItem(int client, int type, bool &full=false)
 	return true;
 }
 
-bool Items_DropItem(int client, int helditem, const float origin[3], const float angles[3], bool swap=true)
+bool Items_DropItem(int client, int helditem, const float origin[3], const float angles[3], bool swap = true, int dropType = ItemDrop_Drop)
 {
 	static char buffer[PLATFORM_MAX_PATH];
 	GetEntityNetClass(helditem, buffer, sizeof(buffer));
@@ -870,7 +877,36 @@ bool Items_DropItem(int client, int helditem, const float origin[3], const float
 				SetEntityMaterialData(entity, weapon.Skin);
 			}
 
-			TeleportEntity(entity, origin, NULL_VECTOR, NULL_VECTOR);
+			// throw the item, if specified
+			float vel[3];
+			
+			switch(dropType)
+			{
+				case ItemDrop_Throw:	// throw in the direction the player is looking at
+				{
+					// check if we're too close to a wall
+					float posFinal[3];
+					TR_TraceRayFilter(origin, angles, MASK_SOLID, RayType_Infinite, Trace_WorldAndBrushes);
+					TR_GetEndPosition(posFinal);
+					
+					// if we are too close, weaken the throw
+					float distance = GetVectorDistance(origin, posFinal, false);
+					
+					if (distance > 200.0)
+						distance = 200.0
+					
+					Items_GrenadeTrajectory(angles, vel, (distance * 1.5));	// just reuse this, I guess
+				}
+				
+				case ItemDrop_Scatter:	// throw in a random-ish direction
+				{
+					vel[0] = float(GetRandomInt(-100, 100));
+					vel[1] = float(GetRandomInt(-100, 100));
+					vel[2] = float(GetRandomInt(25, 100));
+				}
+			}
+
+			TeleportEntity(entity, origin, NULL_VECTOR, vel);
 			result = true;
 		}
 	}
@@ -892,7 +928,7 @@ void Items_DropAllItems(int client)
 	int i, entity;
 	while((entity=Items_Iterator(client, i, true)) != -1)
 	{
-		Items_DropItem(client, entity, pos, ang, false);
+		Items_DropItem(client, entity, pos, ang, false, ItemDrop_Scatter);
 	}
 }
 
@@ -1686,7 +1722,7 @@ public Action Items_GrenadeAction(Handle timer, int client)
 	return Plugin_Stop;
 }
 
-public void Items_GrenadeTrajectory(float angles[3], float velocity[3], float scale)
+public void Items_GrenadeTrajectory(const float angles[3], float velocity[3], float scale)
 {
 	velocity[0] = Cosine(DegToRad(angles[0])) * Cosine(DegToRad(angles[1])) * scale;
 	velocity[1] = Cosine(DegToRad(angles[0])) * Sine(DegToRad(angles[1])) * scale;
