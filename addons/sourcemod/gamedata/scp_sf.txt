@@ -117,6 +117,12 @@
 				"linux"		"@_ZN14AI_CriteriaSet14RemoveCriteriaEPKc"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x48\x56\x57\xFF\x75\x08"
 			}
+			"PassServerEntityFilter"
+			{
+				"library"	"server"
+				"windows"   "\x55\x8B\xEC\x56\x8B\x75\x0C\x85\xF6\x75\x2A\xB0\x01"
+				"linux"		"@_Z22PassServerEntityFilterPK13IHandleEntityS1_"
+			}
 		}
 		"Functions"
 		{
@@ -391,6 +397,24 @@
 					"criteriaSet"
 					{
 						"type"	"int"
+					}
+				}
+			}
+			"PassServerEntityFilter"
+			{
+				// bool PassServerEntityFilter( const IHandleEntity *pTouch, const IHandleEntity *pPass )
+				"signature" "PassServerEntityFilter"
+				"callconv" "cdecl"
+				"return" "bool"
+				"arguments"
+				{
+					"touch"
+					{
+						"type" "cbaseentity"
+					}
+					"pass"
+					{
+						"type" "cbaseentity"
 					}
 				}
 			}

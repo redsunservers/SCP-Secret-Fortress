@@ -64,8 +64,6 @@ public void OnEntityCreated(int entity, const char[] classname)
 	{
 		SDKHook(entity, SDKHook_Spawn, OnDoorSpawned);
 	}
-	
-	DHook_OnEntityCreated(entity, classname);
 }
 
 public void OnSmallHealthSpawned(int entity)
@@ -326,7 +324,6 @@ public Action OnPipeTouch(int entity, int client)
 public Action OnDoorSpawned(int entity)
 {
 	SDKHook(entity, SDKHook_StartTouch, OnDoorTouch);
-	SDKHook(entity, SDKHook_EndTouchPost, OnDoorTouchEndPost);
 	return Plugin_Continue;
 }
 
@@ -336,16 +333,6 @@ public Action OnDoorTouch(int entity, int client)
 	{
 		// ignore the result, this is only called so scps like 096 can destroy doors when touching them
 		Classes_OnDoorWalk(client, entity);
-	}
-	
-	return Plugin_Continue;
-}
-
-public Action OnDoorTouchEndPost(int entity, int client)
-{
-	if (IsValidClient(client))
-	{
-		CreateTimer(0.35, Timer_ClearPassThroughDoorName, client);
 	}
 	
 	return Plugin_Continue;

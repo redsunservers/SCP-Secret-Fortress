@@ -249,14 +249,7 @@ public Action SCP106_TakeDamage(int client, int attacker, int &inflictor, float 
 
 public bool SCP106_DoorWalk(int client, int entity)
 {
-	GetEntPropString(entity, Prop_Data, "m_iName", PassThroughDoorName[client], sizeof(PassThroughDoorName[]));
-	return !StrContains(PassThroughDoorName[client], "scpdoor", false);
-}
-
-public Action Timer_ClearPassThroughDoorName(Handle timer, int client)
-{
-	PassThroughDoorName[client] = "";
-	return Plugin_Continue;
+	return false;
 }
 
 static void ShowAnnotation(int client)
