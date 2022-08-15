@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 public void CryptoForest_RoundStart()
 {
 	HookEntityOutput("game_end", "EndGame", CryptoForest_GameOver);

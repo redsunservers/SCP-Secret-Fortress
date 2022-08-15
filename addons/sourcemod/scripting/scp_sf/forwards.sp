@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 static GlobalForward OnAchievement;
 static GlobalForward OnClass;
 static GlobalForward OnClassPre;
