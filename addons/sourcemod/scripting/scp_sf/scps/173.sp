@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 static const char PuddleModel[] = "models/props_farm/haypile001.mdl";
 static const char DeathModel[] = "models/scp_new/173/scp_173new_death.mdl";
 

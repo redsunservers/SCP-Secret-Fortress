@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 enum struct WeaponEnum
 {
 	char Display[16];
@@ -893,7 +896,7 @@ bool Items_DropItem(int client, int helditem, const float origin[3], const float
 					float distance = GetVectorDistance(origin, posFinal, false);
 					
 					if (distance > 200.0)
-						distance = 200.0
+						distance = 200.0;
 					
 					Items_GrenadeTrajectory(angles, vel, (distance * 1.5));	// just reuse this, I guess
 				}

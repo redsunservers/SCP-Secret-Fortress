@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 #define _included_smjm08
 
 static const float NoclipAccel = 10.0;

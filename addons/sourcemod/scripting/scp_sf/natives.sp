@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 void Native_Setup()
 {
 	CreateNative("SCPSF_GetClientClass", Native_GetClientClass);

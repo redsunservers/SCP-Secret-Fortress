@@ -1,4 +1,5 @@
 #pragma semicolon 1
+#pragma newdecls required
 
 #include <sourcemod>
 #include <clientprefs>
@@ -20,8 +21,6 @@
 #undef REQUIRE_EXTENSIONS
 #tryinclude <sendproxy>
 #define REQUIRE_EXTENSIONS
-
-#pragma newdecls required
 
 void DisplayCredits(int i)
 {
