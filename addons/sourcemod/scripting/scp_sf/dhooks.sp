@@ -686,7 +686,11 @@ public MRESReturn Detour_PassServerEntityFilterPost(DHookReturn ret, DHookParam 
 	char classname[64];
 	GetEntityClassname(entity, classname, sizeof(classname));
 	
-	if (strncmp(classname, "func_door", sizeof(classname)) != 0 || strncmp(classname, "func_door_rotating", sizeof(classname)) != 0)
+	if (strncmp(classname, "func_door", sizeof(classname)) != 0)
+	{
+		return MRES_Ignored;
+	}
+	else if(strncmp(classname, "func_door_rotating", sizeof(classname)) != 0)
 	{
 		return MRES_Ignored;
 	}
