@@ -690,10 +690,6 @@ public MRESReturn Detour_PassServerEntityFilterPost(DHookReturn ret, DHookParam 
 	{
 		return MRES_Ignored;
 	}
-	else if(strncmp(classname, "func_door_rotating", sizeof(classname)) != 0)
-	{
-		return MRES_Ignored;
-	}
 	
 	int client = touch_is_player ? touch_ent : pass_ent;
 	

@@ -3410,7 +3410,8 @@ public Action SendProp_OnTeam(int entity, const char[] propname, int &value, int
 	if(!IsValidClient(client) || (GetClientTeam(client)<2 && !IsPlayerAlive(client)))
 		return Plugin_Continue;
 
-	value = Client[client].IsVip ? view_as<int>(TFTeam_Blue) : view_as<int>(TFTeam_Red);
+	// value = Client[client].IsVip ? view_as<int>(TFTeam_Blue) : view_as<int>(TFTeam_Red);
+	value = view_as<int>(TFTeam_Red);
 	return Plugin_Changed;
 }
 
