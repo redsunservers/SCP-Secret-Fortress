@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 void Target_Setup()
 {
 	AddMultiTargetFilter("@random", Target_Random, "[REDACTED] players", false);

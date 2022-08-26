@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 static const int HealthMax = 1800;	// Max standard health
 static const int HealthExtra = 600;	// Max regenerable health
 

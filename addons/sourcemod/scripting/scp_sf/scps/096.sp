@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 static const char ModelMelee[] = "models/scp_sf/096/scp096_hands_7.mdl";
 static const char SoundPassive[] = "freak_fortress_2/scp096/bgm.mp3";
 static const char SoundEnrage[] = "freak_fortress_2/scp096/fullrage.mp3";

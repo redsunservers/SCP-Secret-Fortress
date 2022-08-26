@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 static const char PuddleModel[] = "models/props_farm/haypile001.mdl";
 static const char DeathModel[] = "models/scp_new/173/scp_173new_death.mdl";
 
@@ -413,7 +416,7 @@ public Action SCP173_PuddleTimer(Handle timer, DataPack pack)
 		int class = pack.ReadCell();
 		for(int target=1; target<=MaxClients; target++)
 		{
-			if(IsClientInGame(target) && !IsFriendly(class, Client[target].Class))
+			if(IsClientInGame(target) && !IsFriendly(class, Client[target].Class) && !IsSpec(target))
 			{
 				static float pos2[3];
 				GetClientAbsOrigin(target, pos2);

@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 #define ITEMS_MAX	8
 #define AMMO_MAX		16
 

@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 void Function_OnKill(int client, int victim)
 {
 	if(Client[client].OnKill == INVALID_FUNCTION)

@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 static DynamicDetour AllowedToHealTarget;
 static DynamicHook RoundRespawn;
 static DynamicHook ShouldCollide;

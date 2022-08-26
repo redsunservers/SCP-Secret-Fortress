@@ -1,4 +1,5 @@
 #pragma semicolon 1
+#pragma newdecls required
 
 #include <sourcemod>
 #include <clientprefs>
@@ -20,8 +21,6 @@
 #undef REQUIRE_EXTENSIONS
 #tryinclude <sendproxy>
 #define REQUIRE_EXTENSIONS
-
-#pragma newdecls required
 
 void DisplayCredits(int i)
 {
@@ -1386,16 +1385,19 @@ public Action OnDropItem(int client, const char[] command, int args)
 			if(entity > MaxClients)
 			{
 				WeaponEnum weapon;
-				bool big = (Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) && weapon.Type==ITEM_TYPE_WEAPON);
-
+				int index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
+				int dropType = GetEntityFlags(client) & FL_DUCKING ? ItemDrop_Drop : ItemDrop_Throw;
+				bool big = ((Items_GetWeaponByIndex(index, weapon) && weapon.Type==ITEM_TYPE_WEAPON) || index == ITEM_INDEX_MICROHID);
+				
 				static float pos[3], ang[3];
 				GetClientEyePosition(client, pos);
 				GetClientEyeAngles(client, ang);
-				if(Items_DropItem(client, entity, pos, ang, true))
+				
+				if(Items_DropItem(client, entity, pos, ang, true, dropType))
 				{
 					if(big)
 					{
-						ClientCommand(client, "playgamesound BaseCombatWeapon.WeaponDrop");
+						ClientCommand(client, "playgamesound ui/item_bag_drop.wav");	// No accompanying GameSound, but this works
 					}
 					else
 					{
@@ -1978,70 +1980,71 @@ public void OnClientDisconnect(int client)
 
 public Action TF2Items_OnGiveNamedItem(int client, char[] classname, int index, Handle &item)
 {
-	if(item)
+	if (item)
 	{
-		if(TF2Items_GetLevel(item) == 101)
+		if (TF2Items_GetLevel(item) == 101)
 			return Plugin_Continue;
 	}
 
-	if (Client[client].Class == Classes_GetByName("dboi") && StrContains(classname, "tf_wearable") != -1 && CvarAllowCosmetics.BoolValue)
-	{
-		// The ConTracker is a bit special
-		if (StrEqual(classname, "tf_wearable_campaign_item"))
-			return Plugin_Handled;
-		
-		int newItemRegionMask = TF2Econ_GetItemEquipRegionMask(index);
-		int newItemRegionGroupBits = TF2Econ_GetItemEquipRegionGroupBits(index);
-
-		StringMap regions = TF2Econ_GetEquipRegionGroups();
-		StringMapSnapshot snapshot = regions.Snapshot();
-
-		// Multiple groups can share the same group bit, so test each group name
-		for (int i = 0; i < snapshot.Length; i++)
-		{
-			char buffer[16];
-			snapshot.GetKey(i, buffer, sizeof(buffer));
-
-			int bit;
-			if (regions.GetValue(buffer, bit) && (newItemRegionGroupBits >> bit) & 1)
-			{
-				// Disallow shirts and pants to avoid obscuring the D-Class colors
-				if (StrEqual(buffer, "shirt") || StrEqual(buffer, "pants"))
-				{
-					delete snapshot;
-					delete regions;
-					return Plugin_Handled;
-				}
-			}
-		}
-		delete snapshot;
-		delete regions;
-
-		// Remove any wearable that has a conflicting equip_region
-		for (int wbl = 0; wbl < TF2Util_GetPlayerWearableCount(client); wbl++)
-		{
-			int wearable = TF2Util_GetPlayerWearable(client, wbl);
-			if (wearable == -1)
-				continue;
-
-			int wearableDefindex = GetEntProp(wearable, Prop_Send, "m_iItemDefinitionIndex");
-			if (wearableDefindex == DEFINDEX_UNDEFINED)
-				continue;
-
-			int wearableRegionMask = TF2Econ_GetItemEquipRegionMask(wearableDefindex);
-			if (wearableRegionMask & newItemRegionMask)
-				TF2_RemoveWearable(client, wearable);
-		}
-
-		return Plugin_Continue;
-	}
-
-	// Allow action slot items
+	// Handle action slot items
 	if (TF2Econ_GetItemLoadoutSlot(index, TF2_GetPlayerClass(client)) == LOADOUT_POSITION_ACTION)
 	{
-		// ...unless it's a spellbook or power up canteen
-		if (!StrEqual(classname, "tf_powerup_bottle") && !StrEqual(classname, "tf_weapon_spellbook"))
+		// Disallow anything that could clip into playermodels
+		if (!StrEqual(classname, "tf_powerup_bottle") &&
+			!StrEqual(classname, "tf_weapon_spellbook") &&
+			!StrEqual(classname, "tf_wearable_campaign_item"))
 		{
+			return Plugin_Continue;
+		}
+	}
+	// Handle D-Class cosmetics
+	else if (CvarAllowCosmetics.BoolValue)
+	{
+		if (Client[client].Class == Classes_GetByName("dboi") && StrContains(classname, "tf_wearable") != -1)
+		{
+			int newItemRegionMask = TF2Econ_GetItemEquipRegionMask(index);
+			int newItemRegionGroupBits = TF2Econ_GetItemEquipRegionGroupBits(index);
+
+			StringMap regions = TF2Econ_GetEquipRegionGroups();
+			StringMapSnapshot snapshot = regions.Snapshot();
+
+			// Multiple groups can share the same group bit, so test each group name
+			for (int i = 0; i < snapshot.Length; i++)
+			{
+				char buffer[16];
+				snapshot.GetKey(i, buffer, sizeof(buffer));
+
+				int bit;
+				if (regions.GetValue(buffer, bit) && (newItemRegionGroupBits >> bit) & 1)
+				{
+					// Disallow shirts and pants to avoid obscuring the D-Class colors
+					if (StrEqual(buffer, "shirt") || StrEqual(buffer, "pants"))
+					{
+						delete snapshot;
+						delete regions;
+						return Plugin_Handled;
+					}
+				}
+			}
+			delete snapshot;
+			delete regions;
+
+			// Remove any wearable that has a conflicting equip_region
+			for (int wbl = 0; wbl < TF2Util_GetPlayerWearableCount(client); wbl++)
+			{
+				int wearable = TF2Util_GetPlayerWearable(client, wbl);
+				if (wearable == -1)
+					continue;
+
+				int wearableDefindex = GetEntProp(wearable, Prop_Send, "m_iItemDefinitionIndex");
+				if (wearableDefindex == DEFINDEX_UNDEFINED)
+					continue;
+
+				int wearableRegionMask = TF2Econ_GetItemEquipRegionMask(wearableDefindex);
+				if (wearableRegionMask & newItemRegionMask)
+					TF2_RemoveWearable(client, wearable);
+			}
+
 			return Plugin_Continue;
 		}
 	}

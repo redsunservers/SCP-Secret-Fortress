@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 static const int HealthKill = 25;
 static const char SoundDeath[] = "freak_fortress_2/scp035/death1.wav";
 

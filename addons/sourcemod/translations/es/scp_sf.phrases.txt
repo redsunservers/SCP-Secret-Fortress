@@ -980,7 +980,7 @@
 	}
 	"info_46"
 	{
-		"en"		"%%+attack%% para usarlo, recuperar salud y aumentar tu velocidad de movimiento.\nPierdes salud de forma pasiva, a medida que pasa el tiempo, hasta que consumes un SCP-500."
+		"es"		"%%+attack%% para usarlo, recuperar salud y aumentar tu velocidad de movimiento.\nPierdes salud de forma pasiva, a medida que pasa el tiempo, hasta que consumes un SCP-500."
 	}
 	"weapon_30018"
 	{

@@ -1,3 +1,6 @@
+#pragma semicolon 1
+#pragma newdecls required
+
 static const char SCP18Model[] = "models/scp_fixed/scp18/w_scp18.mdl";
 static const char SCP18HitSound[] = "weapons/samurai/tf_marked_for_death_impact_01.wav";
 static const char SCP18ClientHitSound[] = "weapons/grappling_hook_impact_flesh.wav";
