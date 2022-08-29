@@ -30,7 +30,6 @@ public bool SCP076_Create(int client)
 		TF2Attrib_SetByDefIndex(weapon, 61, 1.5);
 		TF2Attrib_SetByDefIndex(weapon, 65, 1.3);
 		TF2Attrib_SetByDefIndex(weapon, 1030, 1.0);
-		TF2Attrib_SetByDefIndex(weapon, 676, 1.0);
 		TF2Attrib_SetByDefIndex(weapon, 246, 1.5);
 	}
 	
