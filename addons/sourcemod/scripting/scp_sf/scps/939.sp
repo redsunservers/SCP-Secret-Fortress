@@ -8,7 +8,7 @@ static const int HealthMaxSZF = 1000;	// Max standard health in SZF
 static const int HealthExtraSZF = 650;	// Max regenerable health in SZF
 
 static const float SpeedExtra = 50.0;	// Extra speed while low health
-static const float GlowRange = 1200.0;	// Max outline range
+static const float GlowRange = 800.0;	// Max outline range
 
 static const float SpeedExtraSZF = 75.0;	// Extra speed while low health in SZF
 
@@ -22,7 +22,7 @@ public bool SCP939_Create(int client)
 	
 	int account = GetSteamAccountID(client, false);
 
-	int weapon = SpawnWeapon(client, "tf_weapon_knife", 461, 70, 13, "2 ; 1.625 ; 15 ; 0 ; 252 ; 0.3 ; 412 ; 0.8 ; 4328 ; 1", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_knife", 461, 70, 13, "2 ; 1.625 ; 15 ; 0 ; 252 ; 0.3 ; 412 ; 0.8 ; 651 ; 0.6 ; 4328 ; 1", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 10);
