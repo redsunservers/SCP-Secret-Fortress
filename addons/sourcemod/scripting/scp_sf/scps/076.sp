@@ -12,7 +12,7 @@ public bool SCP076_Create(int client)
 
 	Client[client].Extra2 = 0;
 
-	int weapon = SpawnWeapon(client, "tf_weapon_sword", 195, 1, 13, "2 ; 1.5 ; 28 ; 0.5 ; 219 ; 1 ; 252 ; 0.8 ; 412 ; 0.8", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_sword", 195, 1, 13, "2 ; 1.5 ; 5 ; 0.75 ; 28 ; 0.5 ; 219 ; 1 ; 252 ; 0.65 ; 412 ; 0.8", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 11);
@@ -29,7 +29,6 @@ public bool SCP076_Create(int client)
 	{
 		TF2Attrib_SetByDefIndex(weapon, 61, 1.5);
 		TF2Attrib_SetByDefIndex(weapon, 65, 1.3);
-		TF2Attrib_SetByDefIndex(weapon, 1030, 1.0);
 		TF2Attrib_SetByDefIndex(weapon, 246, 1.5);
 	}
 	
