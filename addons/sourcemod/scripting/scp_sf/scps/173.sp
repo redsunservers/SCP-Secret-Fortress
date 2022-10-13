@@ -107,36 +107,25 @@ public void SCP173_OnDeath(int client, Event event)
 	Classes_PlayDeathAnimation(client, DeathModel, "death", DeathSound, 0.0);
 }
 
-// there appears to be an issue where this function gets into an infinite occursion due to EmitSoundToAll
-// even though that shouldn't ever happen, as "MoveSound" does not contain "footsteps" substring
-// this might be a bug with SM1.11, this failsafe flag will prevent the recursion from happening
-static bool SoundFailsafe = false;
-
 public Action SCP173_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
 {
-	if (!SoundFailsafe)
+	if(!StrContains(sample, "vo", false))
 	{
-		if(!StrContains(sample, "vo", false))
-		{
-			return Plugin_Handled;
-		}
-		else if(StrContains(sample, "footsteps", false) != -1)
-		{
-			// need to stop sound twice here on different channels or it gets stuck looping
-			if (channel != SNDCHAN_AUTO)
-				StopSound(client, channel, sample);		
-			StopSound(client, SNDCHAN_AUTO, sample);
-			
-			if(!Frozen[client])
-			{
-				SoundFailsafe = true;
-				EmitSoundToAll(MoveSound, client, channel, level, flags, volume, pitch+10, _, _, _, _, 0.6);
-				SoundFailsafe = false;
-			}
-
-			return Plugin_Changed;
-		}
+		return Plugin_Handled;
 	}
+	else if(StrContains(sample, "footsteps", false) != -1)
+	{
+		// need to stop sound twice here on different channels or it gets stuck looping
+		if (channel != SNDCHAN_AUTO)
+			StopSound(client, channel, sample);		
+		StopSound(client, SNDCHAN_AUTO, sample);
+		
+		if(!Frozen[client])
+			EmitSoundToAll(MoveSound, client, channel);
+		
+		return Plugin_Handled;
+	}
+	
 	return Plugin_Continue;
 }
 
