@@ -416,15 +416,13 @@ public void OnMapStart()
 				{
 					#if defined SENDPROXY_LIB
 					SendProxy_HookArrayProp(entity, "m_bAlive", i, Prop_Int, SendProp_OnAliveMulti);
-					SendProxy_HookArrayProp(entity, "m_iTeam", i, Prop_Int, SendProp_OnTeamMulti);
-					SendProxy_HookArrayProp(entity, "m_iPlayerClass", i, Prop_Int, SendProp_OnClassMulti);
-					SendProxy_HookArrayProp(entity, "m_iPlayerClassWhenKilled", i, Prop_Int, SendProp_OnClassMulti);
 					#else
 					SendProxy_HookArrayProp(entity, "m_bAlive", i, Prop_Int, SendProp_OnAlive);
+					#endif
+					
 					SendProxy_HookArrayProp(entity, "m_iTeam", i, Prop_Int, SendProp_OnTeam);
 					SendProxy_HookArrayProp(entity, "m_iPlayerClass", i, Prop_Int, SendProp_OnClass);
 					SendProxy_HookArrayProp(entity, "m_iPlayerClassWhenKilled", i, Prop_Int, SendProp_OnClass);
-					#endif
 				}
 			}
 		}
@@ -488,11 +486,7 @@ public void OnClientPutInServer(int client)
 		#if defined _SENDPROXYMANAGER_INC_
 		if(GetFeatureStatus(FeatureType_Native, "SendProxy_HookArrayProp")==FeatureStatus_Available)
 		{
-			#if defined SENDPROXY_LIB
-			SendProxy_Hook(client, "m_iClass", Prop_Int, SendProp_OnClientClassMulti);
-			#else
 			SendProxy_Hook(client, "m_iClass", Prop_Int, SendProp_OnClientClass);
-			#endif
 		}
 		#endif
 	}
@@ -3404,7 +3398,7 @@ public Action SendProp_OnAliveMulti(const int entity, const char[] propname, int
 }
 
 #if defined SENDPROXY_LIB
-public Action SendProp_OnTeamMulti(const int entity, const char[] propname, int &value, const int element, const int client)
+public Action SendProp_OnTeam(const int entity, const char[] propname, int &value, const int element, const int client)
 #else
 public Action SendProp_OnTeam(int entity, const char[] propname, int &value, int client)
 #endif
@@ -3417,7 +3411,7 @@ public Action SendProp_OnTeam(int entity, const char[] propname, int &value, int
 }
 
 #if defined SENDPROXY_LIB
-public Action SendProp_OnClassMulti(const int entity, const char[] propname, int &value, const int element, const int client)
+public Action SendProp_OnClass(const int entity, const char[] propname, int &value, const int element, const int client)
 #else
 public Action SendProp_OnClass(int entity, const char[] propname, int &value, int client) 
 #endif
@@ -3430,7 +3424,7 @@ public Action SendProp_OnClass(int entity, const char[] propname, int &value, in
 }
 
 #if defined SENDPROXY_LIB
-public Action SendProp_OnClientClassMulti(const int entity, const char[] propname, int &value, const int element, const int client)
+public Action SendProp_OnClientClass(const int entity, const char[] propname, int &value, const int element, const int client)
 #else
 public Action SendProp_OnClientClass(int client, const char[] name, int &value, int element)
 #endif
