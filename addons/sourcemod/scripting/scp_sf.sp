@@ -3364,7 +3364,7 @@ public Action CH_ShouldCollide(int client, int entity, bool &result)
 }
 
 #if defined _SENDPROXYMANAGER_INC_
-public Action SendProp_OnAlive(int entity, const char[] propname, int &value, int client) 
+public Action SendProp_OnAlive(int entity, const char[] propname, int &value, int element) 
 {
 	value = 1;
 	return Plugin_Changed;
@@ -3400,20 +3400,20 @@ public Action SendProp_OnAliveMulti(const int entity, const char[] propname, int
 #if defined SENDPROXY_LIB
 public Action SendProp_OnTeam(const int entity, const char[] propname, int &value, const int element, const int client)
 #else
-public Action SendProp_OnTeam(int entity, const char[] propname, int &value, int client)
+public Action SendProp_OnTeam(int entity, const char[] propname, int &value, int element)
 #endif
 {
-	if(!IsValidClient(client) || (GetClientTeam(client)<2 && !IsPlayerAlive(client)))
+	if(!IsValidClient(element) || (GetClientTeam(element)<2 && !IsPlayerAlive(element)))
 		return Plugin_Continue;
 
-	value = Client[client].IsVip ? view_as<int>(TFTeam_Blue) : view_as<int>(TFTeam_Red);
+	value = Client[element].IsVip ? view_as<int>(TFTeam_Blue) : view_as<int>(TFTeam_Red);
 	return Plugin_Changed;
 }
 
 #if defined SENDPROXY_LIB
 public Action SendProp_OnClass(const int entity, const char[] propname, int &value, const int element, const int client)
 #else
-public Action SendProp_OnClass(int entity, const char[] propname, int &value, int client) 
+public Action SendProp_OnClass(int entity, const char[] propname, int &value, int element) 
 #endif
 {
 	if(!Enabled)
@@ -3426,13 +3426,13 @@ public Action SendProp_OnClass(int entity, const char[] propname, int &value, in
 #if defined SENDPROXY_LIB
 public Action SendProp_OnClientClass(const int entity, const char[] propname, int &value, const int element, const int client)
 #else
-public Action SendProp_OnClientClass(int client, const char[] name, int &value, int element)
+public Action SendProp_OnClientClass(int entity, const char[] propname, int &value, int element)
 #endif
 {
-	if(Client[client].WeaponClass == TFClass_Unknown)
+	if(Client[element].WeaponClass == TFClass_Unknown)
 		return Plugin_Continue;
 
-	value = view_as<int>(Client[client].WeaponClass);
+	value = view_as<int>(Client[element].WeaponClass);
 	return Plugin_Changed;
 }
 #endif
