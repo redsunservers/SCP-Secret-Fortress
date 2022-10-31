@@ -407,7 +407,7 @@ public void OnMapStart()
 	if(CvarSendProxy.BoolValue)
 	{
 		#if defined _SENDPROXYMANAGER_INC_
-		if (GetFeatureStatus(FeatureType_Native, "SendProxy_HookArrayProp")==FeatureStatus_Available)
+		if(GetFeatureStatus(FeatureType_Native, "SendProxy_HookArrayProp")==FeatureStatus_Available)
 		{
 			entity = FindEntityByClassname(-1, "tf_player_manager");
 			if(entity > MaxClients)
@@ -486,7 +486,7 @@ public void OnClientPutInServer(int client)
 	if(CvarSendProxy.BoolValue)
 	{
 		#if defined _SENDPROXYMANAGER_INC_
-		if (GetFeatureStatus(FeatureType_Native, "SendProxy_HookArrayProp")==FeatureStatus_Available)
+		if(GetFeatureStatus(FeatureType_Native, "SendProxy_HookArrayProp")==FeatureStatus_Available)
 		{
 			#if defined SENDPROXY_LIB
 			SendProxy_Hook(client, "m_iClass", Prop_Int, SendProp_OnClientClassMulti);
@@ -3405,15 +3405,15 @@ public Action SendProp_OnAliveMulti(int entity, const char[] propname, int &valu
 
 public Action SendProp_OnTeamMulti(int entity, const char[] propname, int &value, int client, int target)
 {
-	return OnTeamInternal(client, value);
+	return OnTeam_Internal(client, value);
 }
 
 public Action SendProp_OnTeam(int entity, const char[] propname, int &value, int client)
 {
-	return OnTeamInternal(client, value);
+	return OnTeam_Internal(client, value);
 }
 
-static Action OnTeamInternal(int client, int &value)
+static Action OnTeam_Internal(int client, int &value)
 {
 	if(!IsValidClient(client) || (GetClientTeam(client)<2 && !IsPlayerAlive(client)))
 		return Plugin_Continue;
@@ -3424,15 +3424,15 @@ static Action OnTeamInternal(int client, int &value)
 
 public Action SendProp_OnClassMulti(int entity, const char[] propname, int &value, int client, int target)
 {
-	return OnClassInternal(value);
+	return OnClass_Internal(value);
 }
 
 public Action SendProp_OnClass(int entity, const char[] propname, int &value, int client) 
 {
-	return OnClassInternal(value);
+	return OnClass_Internal(value);
 }
 
-static Action OnClassInternal(int &value)
+static Action OnClass_Internal(int &value)
 {
 	if(!Enabled)
 		return Plugin_Continue;
