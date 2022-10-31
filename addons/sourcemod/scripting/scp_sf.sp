@@ -3376,23 +3376,23 @@ public Action SendProp_OnAlive(int entity, const char[] propname, int &value, in
 	return Plugin_Changed;
 }
 
-public Action SendProp_OnAliveMulti(int entity, const char[] propname, int &value, int client, int target) 
+public Action SendProp_OnAliveMulti(const int entity, const char[] propname, int &value, const int element, const int client)
 {
 	if(!Enabled)
 	{
 		value = 1;
 	}
-	else if(IsValidClient(target))
+	else if(IsValidClient(client))
 	{
-		if(IsSpec(target))
+		if(IsSpec(client))
 		{
-			if(!IsValidClient(client))
+			if(!IsValidClient(element))
 				return Plugin_Continue;
 
-			value = IsSpec(client) ? 0 : 1;
+			value = IsSpec(element) ? 0 : 1;
 		}
 	}
-	else if(Client[target].ThinkIsDead[client])
+	else if(Client[client].ThinkIsDead[element])
 	{
 		value = 0;
 	}
@@ -3403,17 +3403,11 @@ public Action SendProp_OnAliveMulti(int entity, const char[] propname, int &valu
 	return Plugin_Changed;
 }
 
-public Action SendProp_OnTeamMulti(int entity, const char[] propname, int &value, int client, int target)
-{
-	return OnTeam_Internal(client, value);
-}
-
+#if defined SENDPROXY_LIB
+public Action SendProp_OnTeamMulti(const int entity, const char[] propname, int &value, const int element, const int client)
+#else
 public Action SendProp_OnTeam(int entity, const char[] propname, int &value, int client)
-{
-	return OnTeam_Internal(client, value);
-}
-
-static Action OnTeam_Internal(int client, int &value)
+#endif
 {
 	if(!IsValidClient(client) || (GetClientTeam(client)<2 && !IsPlayerAlive(client)))
 		return Plugin_Continue;
@@ -3422,17 +3416,11 @@ static Action OnTeam_Internal(int client, int &value)
 	return Plugin_Changed;
 }
 
-public Action SendProp_OnClassMulti(int entity, const char[] propname, int &value, int client, int target)
-{
-	return OnClass_Internal(value);
-}
-
+#if defined SENDPROXY_LIB
+public Action SendProp_OnClassMulti(const int entity, const char[] propname, int &value, const int element, const int client)
+#else
 public Action SendProp_OnClass(int entity, const char[] propname, int &value, int client) 
-{
-	return OnClass_Internal(value);
-}
-
-static Action OnClass_Internal(int &value)
+#endif
 {
 	if(!Enabled)
 		return Plugin_Continue;
@@ -3441,17 +3429,11 @@ static Action OnClass_Internal(int &value)
 	return Plugin_Changed;
 }
 
-public Action SendProp_OnClientClassMulti(int entity, const char[] propname, int &value, int client, int target)
-{
-	return OnClientClass_Internal(client, value);
-}
-
+#if defined SENDPROXY_LIB
+public Action SendProp_OnClientClassMulti(const int entity, const char[] propname, int &value, const int element, const int client)
+#else
 public Action SendProp_OnClientClass(int client, const char[] name, int &value, int element)
-{
-	return OnClientClass_Internal(client, value);
-}
-
-static Action OnClientClass_Internal(int client, int &value)
+#endif
 {
 	if(Client[client].WeaponClass == TFClass_Unknown)
 		return Plugin_Continue;
@@ -3459,5 +3441,4 @@ static Action OnClientClass_Internal(int client, int &value)
 	value = view_as<int>(Client[client].WeaponClass);
 	return Plugin_Changed;
 }
-
 #endif
