@@ -3438,10 +3438,10 @@ public Action SendProp_OnClientClass(const int entity, const char[] propname, in
 public Action SendProp_OnClientClass(int entity, const char[] propname, int &value, int element)
 #endif
 {
-	if(Client[element].WeaponClass == TFClass_Unknown)
+	if(Client[entity].WeaponClass == TFClass_Unknown)
 		return Plugin_Continue;
 
-	value = view_as<int>(Client[element].WeaponClass);
+	value = view_as<int>(Client[entity].WeaponClass);
 	return Plugin_Changed;
 }
 #endif
