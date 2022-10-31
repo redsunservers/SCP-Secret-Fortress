@@ -415,7 +415,11 @@ public void OnMapStart()
 				for(int i=1; i<=MaxClients; i++)
 				{
 					#if defined SENDPROXY_LIB
-					SendProxy_HookArrayProp(entity, "m_bAlive", i, Prop_Int, SendProp_OnAliveMulti);
+					//If sendproxy in server is not per-client, we'll just have to use basic way instead
+					if(GetFeatureStatus(FeatureType_Native, "SendProxy_HookPropChangeSafe")==FeatureStatus_Available)
+						SendProxy_HookArrayProp(entity, "m_bAlive", i, Prop_Int, SendProp_OnAliveMulti);
+					else
+						SendProxy_HookArrayProp(entity, "m_bAlive", i, Prop_Int, SendProp_OnAlive);
 					#else
 					SendProxy_HookArrayProp(entity, "m_bAlive", i, Prop_Int, SendProp_OnAlive);
 					#endif
@@ -3364,7 +3368,12 @@ public Action CH_ShouldCollide(int client, int entity, bool &result)
 }
 
 #if defined _SENDPROXYMANAGER_INC_
-public Action SendProp_OnAlive(int entity, const char[] propname, int &value, int element) 
+
+#if defined SENDPROXY_LIB
+public Action SendProp_OnAlive(const int entity, const char[] propname, int &value, const int element, const int client)
+#else
+public Action SendProp_OnAlive(int entity, const char[] propname, int &value, int element)
+#endif
 {
 	value = 1;
 	return Plugin_Changed;
