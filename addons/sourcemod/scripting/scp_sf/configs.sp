@@ -29,6 +29,7 @@ void Config_Setup()
 {
 	char mapname[64], buffer[PLATFORM_MAX_PATH];
 	GetCurrentMap(mapname, sizeof(mapname));
+	GetMapDisplayName(mapname, mapname, sizeof(mapname));
 	KeyValues map;
 
 	BuildPath(Path_SM, buffer, sizeof(buffer), "%s%s", FILE_PATH, FILE_MAPS);
