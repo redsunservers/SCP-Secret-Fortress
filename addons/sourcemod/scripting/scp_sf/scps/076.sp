@@ -3,8 +3,8 @@
 
 static const float Speeds[] = {240.0, 246.0, 252.0, 258.0, 264.0, 276.0};
 static const int MaxHeads = 5;
-static const int HealthKill = 30;
-static const int HealthRage = 150;
+static const int HealthKill = 100;
+static const int HealthRage = 175;
 
 public bool SCP076_Create(int client)
 {
