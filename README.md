@@ -24,8 +24,7 @@ This plugin uses different features which may cause some other plugins to misbeh
 
 ## Recommend Dependencies:
 [Basic SendProxy](https://github.com/SlidyBat/sendproxy "SlidyBat/sendproxy: Fork of Afronanny's SendProxy Manager extension.") **or**
-[Per-Client SendProxy](https://github.com/TheByKotik/sendproxy "TheByKotik/sendproxy: Fork of Afronanny's SendProxy Manager extension.") **or**
-[Linux-Only SendProxy](https://github.com/arthurdead/sendproxy "arthurdead/sendproxy")
+[Per-Client SendProxy](https://github.com/TheByKotik/sendproxy "TheByKotik/sendproxy: Fork of Afronanny's SendProxy Manager extension.")
 
 ## Supported Plugins:
 [Source Vehicles](https://github.com/Mikusch/source-vehicles "Mikusch/source-vehicles: Driveable vehicles for TF2, CS:S and Black Mesa") (Whitelist/Blacklist classes that can drive)  
