@@ -630,11 +630,21 @@ public Action HookSound(int clients[MAXPLAYERS], int &numClients, char sample[PL
 {
 	if(flags || !IsValidClient(entity))
 		return Plugin_Continue;
-
+	
+	static bool soundPlaying;
+	if (soundPlaying)
+		return Plugin_Continue;
+	
+	soundPlaying = true;
+	
 	Action action;
 	if(Classes_OnSound(action, entity, sample, channel, volume, level, pitch, flags, soundEntry, seed))
+	{
+		soundPlaying = false;
 		return action;
-
+	}
+	
+	soundPlaying = false;
 	return Plugin_Continue;
 }
 
