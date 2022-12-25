@@ -51,6 +51,7 @@ int ViewModel_Create(int iClient, const char[] sModel, const float vecAnglesOffs
 			DispatchKeyValue(iHands, "effects", "129");
 			DispatchKeyValue(iHands, "disableshadows", "1");
 
+			SetEntPropEnt(iHands, Prop_Send, "m_hOwnerEntity", iClient);
 			int skin = GetClientTeam(iClient) - 2;
 			if (skin < 0)
 				skin = 0;
@@ -65,7 +66,9 @@ int ViewModel_Create(int iClient, const char[] sModel, const float vecAnglesOffs
 			AcceptEntityInput(iHands, "SetParent", iViewModel, iViewModel);	
 	
 			SetVariantString("vm");
-			AcceptEntityInput(iHands, "SetParentAttachment", iViewModel, iViewModel);		
+			AcceptEntityInput(iHands, "SetParentAttachment", iViewModel, iViewModel);
+
+			SDKHook(iHands, SDKHook_SetTransmit, ArmModel_SetTransmit);
 		}
 	}
 
@@ -129,5 +132,35 @@ public Action ViewModel_SetTransmit(int iViewModel, int iClient)
 	if (TF2_IsPlayerInCondition(iClient, TFCond_Taunting) || GetEntProp(iClient, Prop_Send, "m_nForceTauntCam"))
 		return Plugin_Handled;
 	
+	return Plugin_Continue;
+}
+
+public Action ArmModel_SetTransmit(int iHands, int iClient)
+{	
+	int iOwner = GetEntPropEnt(iHands, Prop_Send, "m_hOwnerEntity");
+	if (!IsValidClient(iOwner) || !IsPlayerAlive(iOwner))
+	{
+		//Viewmodel entity no longer valid
+		ViewModel_Destroy(iOwner);
+		return Plugin_Handled;
+	}
+	
+	//Allow if spectating owner and in firstperson
+	if (iClient != iOwner)
+	{
+		if (GetEntPropEnt(iClient, Prop_Send, "m_hObserverTarget") == iOwner && GetEntProp(iClient, Prop_Send, "m_iObserverMode") == OBS_MODE_IN_EYE)
+		{
+			return Plugin_Continue;
+		}
+
+		return Plugin_Handled;
+	}
+	
+	//Allow if client itself and in firstperson
+	if (TF2_IsPlayerInCondition(iClient, TFCond_Taunting) || GetEntProp(iClient, Prop_Send, "m_nForceTauntCam"))
+	{
+		return Plugin_Handled;
+	}
+
 	return Plugin_Continue;
 }

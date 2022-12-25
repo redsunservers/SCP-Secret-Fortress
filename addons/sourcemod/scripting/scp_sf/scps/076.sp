@@ -1,7 +1,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static const float Speeds[] = {240.0, 246.0, 252.0, 258.0, 264.0, 276.0};
+static const float Speeds[6] = {240.0, 246.0, 252.0, 258.0, 264.0, 276.0};
 static const int MaxHeads = 5;
 static const int HealthKill = 100;
 static const int HealthRage = 175;
@@ -37,7 +37,7 @@ public bool SCP076_Create(int client)
 
 public void SCP076_OnSpeed(int client, float &speed)
 {
-	int value = Client[client].Extra2;
+	int value = GetEntProp(client, Prop_Send, "m_iDecapitations");
 	if(value >= sizeof(Speeds))
 		value = sizeof(Speeds)-1;
 
