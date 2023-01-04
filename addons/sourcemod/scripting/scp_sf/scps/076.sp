@@ -37,7 +37,7 @@ public bool SCP076_Create(int client)
 
 public void SCP076_OnSpeed(int client, float &speed)
 {
-	int value = GetEntProp(client, Prop_Send, "m_iDecapitations");
+	int value = Client[client].Extra2;
 	if(value >= sizeof(Speeds))
 		value = sizeof(Speeds)-1;
 

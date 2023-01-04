@@ -4,7 +4,7 @@
 static const char ModelMedi[] = "models/scp_sf/049/c_arms_scp049_knife_1.mdl";
 static const char ModelMelee[] = "models/scp_sf/049/c_arms_scp049_4.mdl";
 
-static const float SpeedFound = 1.18;
+static const float SpeedFound = 1.25;
 
 enum struct SCP049Enum
 {
@@ -36,15 +36,13 @@ public bool SCP049_Create(int client)
 
 	GiveMelee(client, account);
 
-	int weapon = SpawnWeapon(client, "tf_weapon_medigun", 211, 5, 13, "7 ; 0.65 ; 9 ; 0 ; 18 ; 1 ; 252 ; 0.95 ; 292 ; 2 ; 412 ; 0.8", false);
+	int weapon = SpawnWeapon(client, "tf_weapon_medigun", 211, 5, 13, "7 ; 0.95 ; 9 ; 0 ; 18 ; 1 ; 252 ; 0.95 ; 292 ; 2 ; 412 ; 0.8", false);
 	if(weapon > MaxClients)
 	{
 		ApplyStrangeRank(weapon, 11);
 		TF2Attrib_SetByDefIndex(weapon, 454, view_as<float>(1));
 		SetEntProp(weapon, Prop_Send, "m_iAccountID", account);
 	}
-	
-	Client[client].Extra1 = 0;
 
 	Client[client].Extra1 = 0;
 	

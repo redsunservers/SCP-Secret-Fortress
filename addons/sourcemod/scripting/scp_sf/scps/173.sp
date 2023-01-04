@@ -8,8 +8,8 @@ static const char SnapSound[] = "freak_fortress_2/scp173/scp173_kill2.mp3";
 static const char DeathSound[] = "freak_fortress_2/scp173/173_death.wav";
 static const char MoveSound[] = "physics/concrete/concrete_scrape_smooth_loop1.wav";
 
-static const int HealthMax = 3000;	// Max standard health
-static const int HealthExtra = 1500;	// Max regenerable health
+static const int HealthMax = 4500;	// Max standard health
+static const int HealthExtra = 2500;	// Max regenerable health
 static const int HealthKill = 300;	// Health gain on stunned kill
 
 static const int HealthMaxSZF = 2000;	// Max standard health in SZF

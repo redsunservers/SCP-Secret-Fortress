@@ -1,14 +1,14 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static const int HealthMax = 2700;	// Max standard health
-static const int HealthExtra = 900;	// Max regenerable health
+static const int HealthMax = 3300;	// Max standard health
+static const int HealthExtra = 1100;	// Max regenerable health
 
 static const int HealthMaxSZF = 1000;	// Max standard health in SZF
 static const int HealthExtraSZF = 650;	// Max regenerable health in SZF
 
 static const float SpeedExtra = 50.0;	// Extra speed while low health
-static const float GlowRange = 800.0;	// Max outline range
+static const float GlowRange = 1200.0;	// Max outline range
 
 static const float SpeedExtraSZF = 75.0;	// Extra speed while low health in SZF
 
