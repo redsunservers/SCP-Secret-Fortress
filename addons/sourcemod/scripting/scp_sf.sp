@@ -404,38 +404,34 @@ public void OnMapStart()
 		break;
 	}
 
-	#if defined _SENDPROXYMANAGER_INC_
-	if(CvarSendProxy.BoolValue && GetFeatureStatus(FeatureType_Native, "SendProxy_HookArrayProp")==FeatureStatus_Available)
+	if(CvarSendProxy.BoolValue)
 	{
-		entity = FindEntityByClassname(-1, "tf_player_manager");
-		if(entity > MaxClients)
+		#if defined _SENDPROXYMANAGER_INC_
+		if(GetFeatureStatus(FeatureType_Native, "SendProxy_HookArrayProp")==FeatureStatus_Available)
 		{
-			#if defined SENDPROXY_LIB
-			bool newer = GetFeatureStatus(FeatureType_Native, "SendProxy_IsHookedArrayProp")==FeatureStatus_Available;
-			#endif
-
-			for(int i=1; i<=MaxClients; i++)
+			entity = FindEntityByClassname(-1, "tf_player_manager");
+			if(entity > MaxClients)
 			{
-				#if defined SENDPROXY_LIB
-				if(newer)
+				for(int i=1; i<=MaxClients; i++)
 				{
-					SendProxy_HookArrayProp(entity, "m_bAlive", i, Prop_Int, SendProp_OnAliveMulti);
+					#if defined SENDPROXY_LIB
+					//If sendproxy in server is not per-client, we'll just have to use basic way instead
+					if(GetFeatureStatus(FeatureType_Native, "SendProxy_HookPropChangeSafe")==FeatureStatus_Available)
+						SendProxy_HookArrayProp(entity, "m_bAlive", i, Prop_Int, SendProp_OnAliveMulti);
+					else
+						SendProxy_HookArrayProp(entity, "m_bAlive", i, Prop_Int, SendProp_OnAlive);
+					#else
+					SendProxy_HookArrayProp(entity, "m_bAlive", i, Prop_Int, SendProp_OnAlive);
+					#endif
+					
+					SendProxy_HookArrayProp(entity, "m_iTeam", i, Prop_Int, SendProp_OnTeam);
+					SendProxy_HookArrayProp(entity, "m_iPlayerClass", i, Prop_Int, SendProp_OnClass);
+					SendProxy_HookArrayProp(entity, "m_iPlayerClassWhenKilled", i, Prop_Int, SendProp_OnClass);
 				}
-				else
-				{
-					SendProxy_HookArrayProp(entity, "m_bAlive", i, Prop_Int, view_as<SendProxyCallback>(SendProp_OnAlive));
-				}
-				#else
-				SendProxy_HookArrayProp(entity, "m_bAlive", i, Prop_Int, SendProp_OnAlive);
-				#endif
-
-				SendProxy_HookArrayProp(entity, "m_iTeam", i, Prop_Int, view_as<SendProxyCallback>(SendProp_OnTeam));
-				SendProxy_HookArrayProp(entity, "m_iPlayerClass", i, Prop_Int, view_as<SendProxyCallback>(SendProp_OnClass));
-				SendProxy_HookArrayProp(entity, "m_iPlayerClassWhenKilled", i, Prop_Int, view_as<SendProxyCallback>(SendProp_OnClass));
 			}
 		}
+		#endif
 	}
-	#endif
 
 	DHook_MapStart();
 	ViewChange_MapStart();
@@ -489,10 +485,15 @@ public void OnClientPutInServer(int client)
 
 	SDKHook_HookClient(client);
 	DHook_HookClient(client);
-	#if defined _SENDPROXYMANAGER_INC_
-	if(GetFeatureStatus(FeatureType_Native, "SendProxy_Hook") == FeatureStatus_Available)
-		SendProxy_Hook(client, "m_iClass", Prop_Int, view_as<SendProxyCallback>(SendProp_OnClientClass));
-	#endif
+	if(CvarSendProxy.BoolValue)
+	{
+		#if defined _SENDPROXYMANAGER_INC_
+		if(GetFeatureStatus(FeatureType_Native, "SendProxy_HookArrayProp")==FeatureStatus_Available)
+		{
+			SendProxy_Hook(client, "m_iClass", Prop_Int, SendProp_OnClientClass);
+		}
+		#endif
+	}
 }
 
 public void OnClientCookiesCached(int client)
@@ -3367,29 +3368,34 @@ public Action CH_ShouldCollide(int client, int entity, bool &result)
 }
 
 #if defined _SENDPROXYMANAGER_INC_
-public Action SendProp_OnAlive(int entity, const char[] propname, int &value, int client) 
+
+#if defined SENDPROXY_LIB
+public Action SendProp_OnAlive(const int entity, const char[] propname, int &value, const int element, const int client)
+#else
+public Action SendProp_OnAlive(int entity, const char[] propname, int &value, int element)
+#endif
 {
 	value = 1;
 	return Plugin_Changed;
 }
 
-public Action SendProp_OnAliveMulti(int entity, const char[] propname, int &value, int client, int target) 
+public Action SendProp_OnAliveMulti(const int entity, const char[] propname, int &value, const int element, const int client)
 {
 	if(!Enabled)
 	{
 		value = 1;
 	}
-	else if(IsValidClient(target))
+	else if(IsValidClient(client))
 	{
-		if(IsSpec(target))
+		if(IsSpec(client))
 		{
-			if(!IsValidClient(client))
+			if(!IsValidClient(element))
 				return Plugin_Continue;
 
-			value = IsSpec(client) ? 0 : 1;
+			value = IsSpec(element) ? 0 : 1;
 		}
 	}
-	else if(Client[target].ThinkIsDead[client])
+	else if(Client[client].ThinkIsDead[element])
 	{
 		value = 0;
 	}
@@ -3400,16 +3406,24 @@ public Action SendProp_OnAliveMulti(int entity, const char[] propname, int &valu
 	return Plugin_Changed;
 }
 
-public Action SendProp_OnTeam(int entity, const char[] propname, int &value, int client) 
+#if defined SENDPROXY_LIB
+public Action SendProp_OnTeam(const int entity, const char[] propname, int &value, const int element, const int client)
+#else
+public Action SendProp_OnTeam(int entity, const char[] propname, int &value, int element)
+#endif
 {
-	if(!IsValidClient(client) || (GetClientTeam(client)<2 && !IsPlayerAlive(client)))
+	if(!IsValidClient(element) || (GetClientTeam(element)<2 && !IsPlayerAlive(element)))
 		return Plugin_Continue;
 
-	value = Client[client].IsVip ? view_as<int>(TFTeam_Blue) : view_as<int>(TFTeam_Red);
+	value = Client[element].IsVip ? view_as<int>(TFTeam_Blue) : view_as<int>(TFTeam_Red);
 	return Plugin_Changed;
 }
 
-public Action SendProp_OnClass(int entity, const char[] propname, int &value, int client) 
+#if defined SENDPROXY_LIB
+public Action SendProp_OnClass(const int entity, const char[] propname, int &value, const int element, const int client)
+#else
+public Action SendProp_OnClass(int entity, const char[] propname, int &value, int element) 
+#endif
 {
 	if(!Enabled)
 		return Plugin_Continue;
@@ -3418,19 +3432,16 @@ public Action SendProp_OnClass(int entity, const char[] propname, int &value, in
 	return Plugin_Changed;
 }
 
-public Action SendProp_OnClientClass(int client, const char[] name, int &value, int element)
+#if defined SENDPROXY_LIB
+public Action SendProp_OnClientClass(const int entity, const char[] propname, int &value, const int element, const int client)
+#else
+public Action SendProp_OnClientClass(int entity, const char[] propname, int &value, int element)
+#endif
 {
-	if(Client[client].WeaponClass == TFClass_Unknown)
+	if(Client[entity].WeaponClass == TFClass_Unknown)
 		return Plugin_Continue;
 
-	value = view_as<int>(Client[client].WeaponClass);
+	value = view_as<int>(Client[entity].WeaponClass);
 	return Plugin_Changed;
 }
-
-#if defined SENDPROXY_LIB
-public void SendProxy_ForkOfAForkOfAFork()
-{
-	SendProxy_IsHookedArrayProp(0, "", 0);
-}
-#endif
 #endif
