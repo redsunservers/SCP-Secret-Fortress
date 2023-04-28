@@ -3197,7 +3197,6 @@ public void FixUpDoors()
 			if (StrEqual(temp, name, false))
 			{
 				SetEntProp(entity, Prop_Data, DOOR_ID_PROP, DOOR_ID_NORMAL);
-				doorlist_normal.Erase(i);
 				found_door = true;
 			}
 		}
@@ -3212,7 +3211,6 @@ public void FixUpDoors()
 			if (StrEqual(temp, name, false))
 			{
 				SetEntProp(entity, Prop_Data, DOOR_ID_PROP, DOOR_ID_CHECKPOINT);
-				doorlist_checkpoint.Erase(i);
 				found_door = true;
 			}
 		}			
