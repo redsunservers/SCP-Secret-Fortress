@@ -3199,7 +3199,6 @@ public void FixUpDoors()
 				SetEntProp(entity, Prop_Data, DOOR_ID_PROP, DOOR_ID_NORMAL);
 				doorlist_normal.Erase(i);
 				found_door = true;
-				break;
 			}
 		}
 		
@@ -3215,7 +3214,6 @@ public void FixUpDoors()
 				SetEntProp(entity, Prop_Data, DOOR_ID_PROP, DOOR_ID_CHECKPOINT);
 				doorlist_checkpoint.Erase(i);
 				found_door = true;
-				break;
 			}
 		}			
 		
@@ -3235,7 +3233,6 @@ public void FixUpDoors()
 				doorlist_trigger.Erase(i);
 				relayentlist_trigger.Erase(i);
 				//found_door = true;
-				break;
 			}
 		}			
 		
