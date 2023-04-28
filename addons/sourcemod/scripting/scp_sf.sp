@@ -3191,7 +3191,7 @@ public void FixUpDoors()
 		// go backwards the list since we can remove elements, we don't need to test a name again if we found that door already
 		// go through normal doors first, they are the most likely ones to be found first
 		bool found_door = false;
-		for (int i = doorlist_normal.Length - 1; i >= 0; i--)
+		for (int i = 0; i < doorlist_normal.Length; i++)
 		{
 			doorlist_normal.GetString(i, temp, sizeof(temp));
 			if (StrEqual(temp, name, false))
@@ -3201,7 +3201,7 @@ public void FixUpDoors()
 		}
 		
 		// checkpoint doors...
-		for (int i = doorlist_checkpoint.Length - 1; i >= 0; i--)
+		for (int i = 0; i < doorlist_normal.Length; i++)
 		{
 			doorlist_checkpoint.GetString(i, temp, sizeof(temp));
 			if (StrEqual(temp, name, false))
@@ -3211,7 +3211,7 @@ public void FixUpDoors()
 		}			
 
 		// special trigger doors
-		for (int i = doorlist_trigger.Length - 1; i >= 0; i--)
+		for (int i = 0; i < doorlist_normal.Length; i++)
 		{
 			doorlist_trigger.GetString(i, temp, sizeof(temp));
 			if (StrEqual(temp, name, false))
