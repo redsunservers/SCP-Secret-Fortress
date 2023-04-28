@@ -3190,7 +3190,6 @@ public void FixUpDoors()
 		
 		// go backwards the list since we can remove elements, we don't need to test a name again if we found that door already
 		// go through normal doors first, they are the most likely ones to be found first
-		bool found_door = false;
 		for (int i = 0; i < doorlist_normal.Length; i++)
 		{
 			doorlist_normal.GetString(i, temp, sizeof(temp));
