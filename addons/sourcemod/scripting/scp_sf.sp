@@ -3197,12 +3197,8 @@ public void FixUpDoors()
 			if (StrEqual(temp, name, false))
 			{
 				SetEntProp(entity, Prop_Data, DOOR_ID_PROP, DOOR_ID_NORMAL);
-				found_door = true;
 			}
 		}
-		
-		if (found_door)
-			continue;
 		
 		// checkpoint doors...
 		for (int i = doorlist_checkpoint.Length - 1; i >= 0; i--)
@@ -3211,12 +3207,8 @@ public void FixUpDoors()
 			if (StrEqual(temp, name, false))
 			{
 				SetEntProp(entity, Prop_Data, DOOR_ID_PROP, DOOR_ID_CHECKPOINT);
-				found_door = true;
 			}
 		}			
-		
-		if (found_door)
-			continue;	
 
 		// special trigger doors
 		for (int i = doorlist_trigger.Length - 1; i >= 0; i--)
@@ -3227,15 +3219,8 @@ public void FixUpDoors()
 				SetEntProp(entity, Prop_Data, DOOR_ID_PROP, DOOR_ID_TRIGGER);
 				// store the relay so we can trigger it later
 				SetEntProp(entity, Prop_Send, DOOR_ENTREF_PROP, relayentlist_trigger.Get(i));
-				
-				doorlist_trigger.Erase(i);
-				relayentlist_trigger.Erase(i);
-				//found_door = true;
 			}
 		}			
-		
-		//if (found_door)
-		//	continue;
 	}
 			
 	delete doorlist_normal;
