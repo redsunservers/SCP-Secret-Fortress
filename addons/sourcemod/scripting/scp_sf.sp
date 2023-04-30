@@ -3200,7 +3200,7 @@ public void FixUpDoors()
 		}
 		
 		// checkpoint doors...
-		for (int i = 0; i < doorlist_normal.Length; i++)
+		for (int i = 0; i < doorlist_checkpoint.Length; i++)
 		{
 			doorlist_checkpoint.GetString(i, temp, sizeof(temp));
 			if (StrEqual(temp, name, false))
@@ -3210,7 +3210,7 @@ public void FixUpDoors()
 		}			
 
 		// special trigger doors
-		for (int i = 0; i < doorlist_normal.Length; i++)
+		for (int i = 0; i < doorlist_trigger.Length; i++)
 		{
 			doorlist_trigger.GetString(i, temp, sizeof(temp));
 			if (StrEqual(temp, name, false))
