@@ -2,7 +2,7 @@ name: Compile
 
 on:
   pull_request:
-    branches: master
+    branches: master, resilient
 
 jobs:
   build:
