@@ -1,5 +1,5 @@
 # SCP: Secret Fortress
-
+ 
 SCP: Secret Fortress is a gamemode for Team Fortress 2 inspired by the game [SCP: Secret Labortory](https://store.steampowered.com/app/700330/SCP_Secret_Laboratory/ "SCP: Secret: Laboratory on Steam"). It contains many elements that differ from normal TF2 such as the ability to pick up serveral different items and weapons, using no weapon slots and custom ammo types.
 
 Alterative gamemodes can be created using the same plugin, some ones already made includes SCP-3008-1 survival game using a custom map and [SCP: Pandemic](https://store.steampowered.com/app/872670/SCP_Pandemic_Early_Access/ "SCP: Pandemic (Early Access) on Steam") using [Super Zombie Fortress](https://github.com/redsunservers/SuperZombieFortress "redsunservers/SuperZombieFortress: Custom Team Fortress 2 Gamemode, inspired from Left 4 Dead") (szf) maps.
