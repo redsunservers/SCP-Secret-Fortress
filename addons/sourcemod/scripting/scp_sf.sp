@@ -3195,40 +3195,27 @@ public void FixUpDoors()
 		
 		// go backwards the list since we can remove elements, we don't need to test a name again if we found that door already
 		// go through normal doors first, they are the most likely ones to be found first
-		bool found_door = false;
-		for (int i = doorlist_normal.Length - 1; i >= 0; i--)
+		for (int i = 0; i < doorlist_normal.Length; i++)
 		{
 			doorlist_normal.GetString(i, temp, sizeof(temp));
 			if (StrEqual(temp, name, false))
 			{
 				SetEntProp(entity, Prop_Data, DOOR_ID_PROP, DOOR_ID_NORMAL);
-				doorlist_normal.Erase(i);
-				found_door = true;
-				break;
 			}
 		}
 		
-		if (found_door)
-			continue;
-		
 		// checkpoint doors...
-		for (int i = doorlist_checkpoint.Length - 1; i >= 0; i--)
+		for (int i = 0; i < doorlist_checkpoint.Length; i++)
 		{
 			doorlist_checkpoint.GetString(i, temp, sizeof(temp));
 			if (StrEqual(temp, name, false))
 			{
 				SetEntProp(entity, Prop_Data, DOOR_ID_PROP, DOOR_ID_CHECKPOINT);
-				doorlist_checkpoint.Erase(i);
-				found_door = true;
-				break;
 			}
 		}			
-		
-		if (found_door)
-			continue;	
 
 		// special trigger doors
-		for (int i = doorlist_trigger.Length - 1; i >= 0; i--)
+		for (int i = 0; i < doorlist_trigger.Length; i++)
 		{
 			doorlist_trigger.GetString(i, temp, sizeof(temp));
 			if (StrEqual(temp, name, false))
@@ -3236,16 +3223,8 @@ public void FixUpDoors()
 				SetEntProp(entity, Prop_Data, DOOR_ID_PROP, DOOR_ID_TRIGGER);
 				// store the relay so we can trigger it later
 				SetEntProp(entity, Prop_Send, DOOR_ENTREF_PROP, relayentlist_trigger.Get(i));
-				
-				doorlist_trigger.Erase(i);
-				relayentlist_trigger.Erase(i);
-				//found_door = true;
-				break;
 			}
 		}			
-		
-		//if (found_door)
-		//	continue;
 	}
 			
 	delete doorlist_normal;

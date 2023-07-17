@@ -9,7 +9,7 @@ Alterative gamemodes can be created using the same plugin, some ones already mad
 This plugin uses different features which may cause some other plugins to misbehave:
 - Uses it's own chat processor for proximity chat which causes other chat processors to not function (See scp_sf.inc about SCPSF_CanTalkTo)
 - Team 0 (Unassigned) is used as a playable team (Check if a player is alive along with team check)
-- Pop up menus during gameplay can be neagtive to weapon switching
+- Pop up menus during gameplay can be negative to weapon switching
 - Player's class swap often for plugins that may check one time
 - Without SendProxy can cause trippy viewmodels
 - Custom model plugins may not function at all
