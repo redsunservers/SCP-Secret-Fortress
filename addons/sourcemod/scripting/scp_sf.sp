@@ -124,8 +124,8 @@ enum struct ClientEnum
 	int QueueIndex;
 
 	bool IsVip;
-	bool CanTalkTo[MAXTF2PLAYERS];
-	bool ThinkIsDead[MAXTF2PLAYERS];
+	bool CanTalkTo[MAXPLAYERS + 1];
+	bool ThinkIsDead[MAXPLAYERS + 1];
 
 	TFClassType PrefClass;
 	TFClassType CurrentClass;
@@ -164,7 +164,7 @@ enum struct ClientEnum
 	float NextPickupReactTime;
 	float LastDisarmedTime;
 	float LastWeaponTime;
-	float KarmaPoints[MAXTF2PLAYERS];
+	float KarmaPoints[MAXPLAYERS + 1];
 
 	// Sprinting
 	bool Sprinting;
@@ -184,7 +184,7 @@ enum struct ClientEnum
 	}
 }
 
-ClientEnum Client[MAXTF2PLAYERS];
+ClientEnum Client[MAXPLAYERS + 1];
 
 #include "scp_sf/stocks.sp"
 #include "scp_sf/achievements.sp"
@@ -1226,7 +1226,7 @@ public void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	Client[client].WeaponClass = TFClass_Unknown;
 	
 	float KarmaRatio = CvarKarmaRatio.FloatValue;
-	for (int i = 1; i < MAXTF2PLAYERS; i++)
+	for (int i = 1; i <= MaxClients; i++)
 		Client[i].KarmaPoints[client] = KarmaRatio;
 
 	SetEntProp(client, Prop_Send, "m_bForcedSkin", false);
@@ -1745,7 +1745,7 @@ public Action Command_ForceClass(int client, int args)
 		}
 	}
 
-	int targets[MAXPLAYERS], matches;
+	int targets[MAXPLAYERS + 1], matches;
 	bool targetNounIsMultiLanguage;
 
 	GetCmdArg(1, pattern, sizeof(pattern));
@@ -1820,7 +1820,7 @@ public Action Command_ForceItem(int client, int args)
 	static char pattern[PLATFORM_MAX_PATH];
 	GetCmdArg(1, pattern, sizeof(pattern));
 
-	int targets[MAXPLAYERS], matches;
+	int targets[MAXPLAYERS + 1], matches;
 	bool targetNounIsMultiLanguage;
 	if((matches=ProcessTargetString(pattern, client, targets, sizeof(targets), 0, targetName, sizeof(targetName), targetNounIsMultiLanguage)) < 1)
 	{
@@ -1876,7 +1876,7 @@ public Action Command_ForceAmmo(int client, int args)
 	static char pattern[PLATFORM_MAX_PATH];
 	GetCmdArg(1, pattern, sizeof(pattern));
 
-	int targets[MAXPLAYERS], matches;
+	int targets[MAXPLAYERS + 1], matches;
 	bool targetNounIsMultiLanguage;
 	if((matches=ProcessTargetString(pattern, client, targets, sizeof(targets), 0, targetName, sizeof(targetName), targetNounIsMultiLanguage)) < 1)
 	{
@@ -1923,7 +1923,7 @@ public Action Command_ForceKarma(int client, int args)
 	static char pattern[PLATFORM_MAX_PATH];
 	GetCmdArg(1, pattern, sizeof(pattern));
 
-	int targets[MAXPLAYERS], matches;
+	int targets[MAXPLAYERS + 1], matches;
 	bool targetNounIsMultiLanguage;
 	if((matches=ProcessTargetString(pattern, client, targets, sizeof(targets), 0, targetName, sizeof(targetName), targetNounIsMultiLanguage)) < 1)
 	{
@@ -2100,8 +2100,8 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 
 	if(client!=attacker && IsValidClient(attacker))
 	{
-		static int spree[MAXTF2PLAYERS];
-		static float spreeFor[MAXTF2PLAYERS];
+		static int spree[MAXPLAYERS + 1];
+		static float spreeFor[MAXPLAYERS + 1];
 		if(spreeFor[attacker] < engineTime)
 		{
 			spree[attacker] = 1;
@@ -2229,7 +2229,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 	}
 
 	// Item-Specific Buttons
-	static int holding[MAXTF2PLAYERS];
+	static int holding[MAXPLAYERS + 1];
 	bool wasHolding = view_as<bool>(holding[client]);
 	bool changed = Items_OnRunCmd(client, buttons, holding[client]);
 
@@ -2304,7 +2304,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 	Classes_OnButton(client, wasHolding ? 0 : holding[client]);
 
 	// HUD related things
-	static float specialTick[MAXTF2PLAYERS];
+	static float specialTick[MAXPLAYERS + 1];
 	if(specialTick[client] < engineTime)
 	{
 		bool showHud = (Client[client].HudIn<engineTime && !SZF_Enabled() && !(GetClientButtons(client) & IN_SCORE));
@@ -2408,7 +2408,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 						int active = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 						if(active>MaxClients && IsValidEntity(active) && GetEntityClassname(active, buffer, sizeof(buffer)))
 						{
-							static float time[MAXTF2PLAYERS];
+							static float time[MAXPLAYERS + 1];
 							if(holding[client] == IN_RELOAD)
 							{
 								if(time[client] == FAR_FUTURE)
@@ -2626,7 +2626,7 @@ public void UpdateListenOverrides(float engineTime)
 	bool[] spec = new bool[MaxClients];
 	bool[] admin = new bool[MaxClients];
 	float[] radio = new float[MaxClients];
-	static float pos[MAXTF2PLAYERS][3];
+	static float pos[MAXPLAYERS + 1][3];
 	for(int i=1; i<=MaxClients; i++)
 	{
 		if(!IsValidClient(i, false))
@@ -2950,7 +2950,7 @@ void PlayFriendlyDeathReaction(int client, int attacker)
 	float pos[3];
 	GetClientEyePosition(client, pos);
 	
-	int targetclients[MAXPLAYERS];
+	int targetclients[MAXPLAYERS + 1];
 	int targetcount = 0;
 
 	float Time = GetGameTime();

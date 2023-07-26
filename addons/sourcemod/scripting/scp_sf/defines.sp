@@ -2,7 +2,6 @@
 #pragma newdecls required
 
 #define FAR_FUTURE	100000000.0
-#define MAXTF2PLAYERS	36
 #define MAXENTITIES	2048
 
 #define MAXANGLEPITCH	45.0
