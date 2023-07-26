@@ -25,7 +25,7 @@ enum struct SCP18Enum
 	float Magnitude;
 	float Position[3];
 	float Velocity[3];
-	int ClientHits[MAXPLAYERS];
+	int ClientHits[MAXPLAYERS + 1];
 }
 
 // list of all scp 18 entities

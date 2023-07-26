@@ -17,7 +17,7 @@ static const float RageExtra = 3.0;	// Rage duration per target
 static const float RageWinddown = 6.0;	// After rage stun
 static const float RageCooldown = 15.0;	// After rage cooldown
 
-static int Triggered[MAXPLAYERS];
+static int Triggered[MAXPLAYERS + 1];
 
 public bool SCP096_Create(int client)
 {
@@ -227,7 +227,7 @@ public void SCP096_OnButton(int client, int button)
 			}
 			else
 			{
-				static float hudIn[MAXPLAYERS];
+				static float hudIn[MAXPLAYERS + 1];
 				if(hudIn[client]<engineTime && !(GetClientButtons(client) & IN_SCORE))
 				{
 					hudIn[client] = engineTime+0.25;

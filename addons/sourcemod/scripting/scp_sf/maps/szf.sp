@@ -21,8 +21,8 @@ static const char ModelMelee[] = "models/scp_sf/106/scp106_hands_1.mdl";
 static int Index610;
 static int Index049;
 static int Index0492;
-static int Carrying[MAXPLAYERS] = {INVALID_ENT_REFERENCE, ...};
-static float Damage[MAXPLAYERS];
+static int Carrying[MAXPLAYERS + 1] = {INVALID_ENT_REFERENCE, ...};
+static float Damage[MAXPLAYERS + 1];
 static bool TurnOn;
 static bool DoRoundStart;
 

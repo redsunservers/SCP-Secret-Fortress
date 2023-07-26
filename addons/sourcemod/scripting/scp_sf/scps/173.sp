@@ -15,11 +15,11 @@ static const int HealthKill = 150;	// Health gain on stunned kill
 static const float DistanceMax = 1250.0;	// Teleport distance while in speed
 static const float DistanceMin = 750.0;	// Teleport distance
 
-static int Health[MAXPLAYERS];
-static int ModelRef[MAXPLAYERS] = {INVALID_ENT_REFERENCE, ...};
-static float BlinkExpire[MAXPLAYERS];
-static float BlinkCharge[MAXPLAYERS];
-static bool Frozen[MAXPLAYERS];
+static int Health[MAXPLAYERS + 1];
+static int ModelRef[MAXPLAYERS + 1] = {INVALID_ENT_REFERENCE, ...};
+static float BlinkExpire[MAXPLAYERS + 1];
+static float BlinkCharge[MAXPLAYERS + 1];
+static bool Frozen[MAXPLAYERS + 1];
 
 public bool SCP173_Create(int client)
 {
@@ -133,7 +133,7 @@ public void SCP173_OnButton(int client, int button)
 {
 	static float pos1[3], ang1[3], pos2[3], ang2[3], pos3[3], ang3[3];
 	float engineTime = GetGameTime();
-	static float delay[MAXPLAYERS];
+	static float delay[MAXPLAYERS + 1];
 
 	if(delay[client] < engineTime)
 	{

@@ -1079,7 +1079,7 @@ public Action Classes_TakeDamageHuman(int client, int attacker, int &inflictor, 
 		if(damagetype & DMG_CRUSH)
 		{
 			float engineTime = GetGameTime();
-			static float delay[MAXPLAYERS];
+			static float delay[MAXPLAYERS + 1];
 			if(delay[client] > engineTime)
 				return Plugin_Handled;
 
@@ -1585,7 +1585,7 @@ public bool Classes_GhostVoice(int client)
 
 		if(i > MaxClients)
 			i = 1;
-	} while(attempts < MAXPLAYERS);
+	} while(attempts <= MaxClients);
 	return true;
 }
 
@@ -1640,7 +1640,7 @@ public bool Classes_GhostVoiceAlt(int client)
 			Client[client].NextSongAt = 0.0;
 			break;
 		}
-	} while(attempts < MAXPLAYERS);
+	} while(attempts <= MaxClients);
 	return true;
 }
 

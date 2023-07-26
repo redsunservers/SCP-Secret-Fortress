@@ -13,7 +13,7 @@ enum struct SCP049Enum
 	float GoneAt;	// Revive Marker Lifetime Timer / SCP-049 Tick Timer
 }
 
-static SCP049Enum Revive[MAXPLAYERS];
+static SCP049Enum Revive[MAXPLAYERS + 1];
 static int Index049;
 static int Index0492;
 
@@ -129,7 +129,7 @@ public Action SCP049_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &ch
 	if(!StrContains(sample, "vo", false))
 	{
 		float engineTime = GetGameTime();
-		static float delay[MAXPLAYERS];
+		static float delay[MAXPLAYERS + 1];
 		if(delay[client] > engineTime)
 			return Plugin_Handled;
 

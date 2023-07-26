@@ -16,8 +16,8 @@ static const char HandModels[][] =
 };
 
 static int HandIndex[10];
-static int HandRef[MAXPLAYERS];
-static int WeaponRef[MAXPLAYERS];
+static int HandRef[MAXPLAYERS + 1];
+static int WeaponRef[MAXPLAYERS + 1];
 
 void ViewChange_MapStart()
 {
