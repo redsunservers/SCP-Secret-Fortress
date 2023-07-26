@@ -7,7 +7,7 @@ static const int HealthExtra = 600;	// Max regenerable health
 static const float SpeedExtra = 50.0;	// Extra speed while low health
 static const float GlowRange = 800.0;	// Max outline range
 
-static int Health[MAXTF2PLAYERS];
+static int Health[MAXPLAYERS];
 
 public bool SCP939_Create(int client)
 {

@@ -6,10 +6,10 @@ static DynamicHook RoundRespawn;
 static DynamicHook ShouldCollide;
 static DynamicHook ForceRespawn;
 static DynamicHook ModifyOrAppendCriteria;
-static int ShouldCollidePreHook[MAXTF2PLAYERS];
-static int ForceRespawnPreHook[MAXTF2PLAYERS];
-static int ForceRespawnPostHook[MAXTF2PLAYERS];
-static int ModifyOrAppendCriteriaPostHook[MAXTF2PLAYERS];
+static int ShouldCollidePreHook[MAXPLAYERS];
+static int ForceRespawnPreHook[MAXPLAYERS];
+static int ForceRespawnPostHook[MAXPLAYERS];
+static int ModifyOrAppendCriteriaPostHook[MAXPLAYERS];
 static int CalculateSpeedClient;
 
 int StudioHdrOffset;

@@ -34,7 +34,7 @@ public Action SCP035_OnSound(int client, char sample[PLATFORM_MAX_PATH], int &ch
 	if(!StrContains(sample, "vo", false))
 	{
 		float engineTime = GetGameTime();
-		static float delay[MAXTF2PLAYERS];
+		static float delay[MAXPLAYERS];
 		if(delay[client] > engineTime)
 			return Plugin_Handled;
 

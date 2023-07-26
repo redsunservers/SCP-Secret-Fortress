@@ -54,7 +54,7 @@ static Function GameCondition;
 static Function GameRoundStart;
 static StringMap GameInfo;
 
-static int PlayerQueue[MAXTF2PLAYERS];
+static int PlayerQueue[MAXPLAYERS];
 static int MaxQueueIndex;
 
 static ArrayList Presets;
