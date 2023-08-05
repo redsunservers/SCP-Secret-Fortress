@@ -911,6 +911,33 @@ bool Items_DropItem(int client, int helditem, const float origin[3], const float
 
 			TeleportEntity(entity, origin, NULL_VECTOR, vel);
 			result = true;
+			
+			// Add dropped weapon to list, ordered by time created
+			static ArrayList droppedweapons;
+			if (!droppedweapons)
+				droppedweapons = new ArrayList();
+			
+			droppedweapons.Push(EntIndexToEntRef(entity));
+			int length = droppedweapons.Length;
+			for (int i = length - 1; i >= 0; i--)
+			{
+				// Clean up any ents that were already removed
+				if (!IsValidEntity(droppedweapons.Get(i)))
+					droppedweapons.Erase(i);
+			}
+			
+			int maxcount = CvarDroppedWeaponCount.IntValue;
+			if (maxcount != -1)
+			{
+				// If there are too many dropped weapon, remove some ordered by time created
+				length = droppedweapons.Length;
+				while (length > maxcount)
+				{
+					RemoveEntity(droppedweapons.Get(0));
+					droppedweapons.Erase(0);
+					length--;
+				}
+			}
 		}
 	}
 
