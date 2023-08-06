@@ -1533,7 +1533,7 @@ public float Gamemode_WaveRespawnTickets(ArrayList &list, ArrayList &players)
 	return wavetime;
 }
 
-public int Gamemode_PresentOrder(ArrayList list, ArrayList current)
+public int Gamemode_PresetOrdered(ArrayList list, ArrayList current)
 {
 	static int index;
 	static ArrayList previous;
@@ -1550,7 +1550,7 @@ public int Gamemode_PresentOrder(ArrayList list, ArrayList current)
 	do
 	{
 		if (index >= length)
-			index = 0;	// Reset back to loop though
+			index = 0;	// Reset back to loop it
 		
 		static char buffer[16];
 		list.GetString(index, buffer, sizeof(buffer));
