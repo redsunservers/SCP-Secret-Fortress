@@ -27,6 +27,7 @@ void ConVar_Setup()
 	CvarKarmaMin = CreateConVar("scp_karmamin", "0.0", "Minimum karma level", _, true, 0.0, true, 100.0);
 	CvarKarmaMax = CreateConVar("scp_karmamax", "100.0", "Maximum karma level", _, true, 0.0, true, 100.0);
 	CvarAllowCosmetics = CreateConVar("scp_allowcosmetics", "1", "Whether to allow certain classes to equip cosmetics", _, true, 0.0, true, 1.0);
+	CvarDroppedWeaponCount = CreateConVar("scp_droppedweaponcount", "-1", "How many dropped weapon to allow in map, -1 for no limit", _, true, -1.0);
 	
 	AutoExecConfig(true, "SCPSecretFortress");
 
