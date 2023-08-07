@@ -111,6 +111,7 @@ ConVar CvarKarmaRatio;
 ConVar CvarKarmaMin;
 ConVar CvarKarmaMax;
 ConVar CvarAllowCosmetics;
+ConVar CvarDroppedWeaponCount;
 float NextHintAt = FAR_FUTURE;
 float RoundStartAt;
 float EndRoundIn;
