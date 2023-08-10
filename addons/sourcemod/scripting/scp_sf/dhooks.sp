@@ -533,7 +533,7 @@ public MRESReturn DHook_ModifyOrAppendCriteriaPost(int player, DHookParam params
 
 public MRESReturn Detour_PassServerEntityFilterPost(DHookReturn ret, DHookParam param)
 {
-	if (!ret)
+	if (!ret || param.IsNull(1) || param.IsNull(2))
 	{
 		return MRES_Ignored;
 	}
