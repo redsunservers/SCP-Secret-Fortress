@@ -559,20 +559,13 @@ public MRESReturn Detour_PassServerEntityFilterPost(DHookReturn ret, DHookParam 
 	char classname[64];
 	GetEntityClassname(entity, classname, sizeof(classname));
 	
-	if (strncmp(classname, "func_door", sizeof(classname)) != 0)
+	if (strncmp(classname, "func_door", sizeof(classname)) != 0 && strncmp(classname, "func_movelinear", sizeof(classname)) != 0)
 	{
 		return MRES_Ignored;
 	}
 	
 	int client = touch_is_player ? touch_ent : pass_ent;
 	
-	ClassEnum clientClass;
-	Classes_GetByIndex(Client[client].Class, clientClass);
-	if(StrEqual(clientClass.Name, "scp106"))
-	{
-		ret.Value = false;
-		return MRES_Supercede;
-	}
-	
-	return MRES_Ignored;
+	ret.Value = Classes_OnDoorWalk(client, entity);
+	return MRES_Supercede;
 }
