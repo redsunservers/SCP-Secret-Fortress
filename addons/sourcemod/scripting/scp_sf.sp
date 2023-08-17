@@ -2032,7 +2032,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] classname, int index, 
 			delete regions;
 
 			// Remove any wearable that has a conflicting equip_region
-			for (int wbl = 0; wbl < TF2Util_GetPlayerWearableCount(client); wbl++)
+			for (int wbl = TF2Util_GetPlayerWearableCount(client) - 1; wbl >= 0; wbl--)
 			{
 				int wearable = TF2Util_GetPlayerWearable(client, wbl);
 				if (wearable == -1)
