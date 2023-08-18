@@ -54,7 +54,7 @@ static Function GameCondition;
 static Function GameRoundStart;
 static StringMap GameInfo;
 
-static int PlayerQueue[MAXTF2PLAYERS];
+static int PlayerQueue[MAXPLAYERS + 1];
 static int MaxQueueIndex;
 
 static ArrayList Presets;
@@ -1531,6 +1531,40 @@ public float Gamemode_WaveRespawnTickets(ArrayList &list, ArrayList &players)
 	}
 	
 	return wavetime;
+}
+
+public int Gamemode_PresetOrdered(ArrayList list, ArrayList current)
+{
+	static int index;
+	static ArrayList previous;
+	int length = list.Length;
+	int attempts;
+	
+	if (previous != current)
+	{
+		// New array, reset order index
+		index = 0;
+		previous = current;
+	}
+	
+	do
+	{
+		if (index >= length)
+			index = 0;	// Reset back to loop it
+		
+		static char buffer[16];
+		list.GetString(index, buffer, sizeof(buffer));
+		
+		index++;
+		attempts++;
+		
+		int class = PresetToClass(buffer, current);
+		if (class != -1)
+			return class;
+	}
+	while (attempts < length);
+	
+	return -1;
 }
 
 public int Gamemode_PresetRandom(ArrayList list, ArrayList current)

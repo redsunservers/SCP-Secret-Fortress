@@ -14,7 +14,7 @@ void Native_Setup()
 public any Native_GetClientClass(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	if(client<0 || client>=MAXTF2PLAYERS)
+	if(client<0 || client>MaxClients)
 		return 0;
 
 	ClassEnum class;
@@ -32,7 +32,7 @@ public any Native_GetClientClass(Handle plugin, int numParams)
 public any Native_IsSCP(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	if(client>=0 && client<MAXTF2PLAYERS)
+	if(client>=0 && client<=MaxClients)
 		return IsSCP(client);
 
 	return false;
@@ -41,7 +41,7 @@ public any Native_IsSCP(Handle plugin, int numParams)
 public any Native_StartMusic(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	if(client>0 && client<MAXTF2PLAYERS)
+	if(client>0 && client<=MaxClients)
 	{
 		Client[client].NextSongAt = 0.0;
 	}
@@ -60,7 +60,7 @@ public any Native_StartMusic(Handle plugin, int numParams)
 public any Native_StopMusic(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	if(client>0 && client<MAXTF2PLAYERS)
+	if(client>0 && client<=MaxClients)
 	{
 		Client[client].NextSongAt = FAR_FUTURE;
 		if(Client[client].CurrentSong[0])
@@ -90,11 +90,11 @@ public any Native_StopMusic(Handle plugin, int numParams)
 public any Native_CanTalkTo(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	if(client<0 || client>=MAXTF2PLAYERS)
+	if(client<0 || client>MaxClients)
 		return false;
 
 	int target = GetNativeCell(2);
-	if(target<0 || target>=MAXTF2PLAYERS)
+	if(target<0 || target>MaxClients)
 		return false;
 
 	return Client[client].CanTalkTo[target];
@@ -103,11 +103,11 @@ public any Native_CanTalkTo(Handle plugin, int numParams)
 public any Native_GetChatTag(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	if(client<0 || client>=MAXTF2PLAYERS)
+	if(client<0 || client>MaxClients)
 		return 0;
 
 	int target = GetNativeCell(2);
-	if(target<0 || target>=MAXTF2PLAYERS)
+	if(target<0 || target>MaxClients)
 		return 0;
 
 	int length = GetNativeCell(4);

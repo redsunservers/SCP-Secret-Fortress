@@ -1,7 +1,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static float Triggered[MAXTF2PLAYERS];
+static float Triggered[MAXPLAYERS + 1];
 static bool IsBackup;
 static int IkeaIndex;
 

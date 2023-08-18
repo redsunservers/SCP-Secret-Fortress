@@ -62,7 +62,7 @@ static ArrayList Weapons;
 // the action func can detect if it was called while cancelled using Items_IsDelayedActionCancelled
 
 // TODO: shouldn't this be in the class struct?
-static Handle Item_DelayedAction[MAXTF2PLAYERS] = {INVALID_HANDLE, ...};
+static Handle Item_DelayedAction[MAXPLAYERS + 1] = {INVALID_HANDLE, ...};
 
 void Items_Setup(KeyValues main, KeyValues map)
 {
@@ -911,6 +911,33 @@ bool Items_DropItem(int client, int helditem, const float origin[3], const float
 
 			TeleportEntity(entity, origin, NULL_VECTOR, vel);
 			result = true;
+			
+			// Add dropped weapon to list, ordered by time created
+			static ArrayList droppedweapons;
+			if (!droppedweapons)
+				droppedweapons = new ArrayList();
+			
+			droppedweapons.Push(EntIndexToEntRef(entity));
+			int length = droppedweapons.Length;
+			for (int i = length - 1; i >= 0; i--)
+			{
+				// Clean up any ents that were already removed
+				if (!IsValidEntity(droppedweapons.Get(i)))
+					droppedweapons.Erase(i);
+			}
+			
+			int maxcount = CvarDroppedWeaponCount.IntValue;
+			if (maxcount != -1)
+			{
+				// If there are too many dropped weapon, remove some ordered by time created
+				length = droppedweapons.Length;
+				while (length > maxcount)
+				{
+					RemoveEntity(droppedweapons.Get(0));
+					droppedweapons.Erase(0);
+					length--;
+				}
+			}
 		}
 	}
 
@@ -1610,7 +1637,7 @@ public bool Items_MicroButton(int client, int weapon, int &buttons, int &holding
 {
 	int type = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
 	int ammo = GetAmmo(client, type);
-	static float charge[MAXTF2PLAYERS];
+	static float charge[MAXPLAYERS + 1];
 	if(ammo<2 || !(buttons & IN_ATTACK))
 	{
 		if (charge[client])
@@ -1641,7 +1668,7 @@ public bool Items_MicroButton(int client, int weapon, int &buttons, int &holding
 			TF2Attrib_SetByDefIndex(weapon, 821, 1.0);
 			SetEntPropFloat(client, Prop_Send, "m_flRageMeter", (charge[client]-engineTime)*16.5);
 
-			static float time[MAXTF2PLAYERS];
+			static float time[MAXPLAYERS + 1];
 			if(time[client] < engineTime)
 			{
 				time[client] = engineTime+0.45;
@@ -2059,7 +2086,7 @@ public bool Items_207Button(int client, int weapon, int &buttons, int &holding)
 	return false;
 }
 
-static float SCP268Delay[MAXTF2PLAYERS];
+static float SCP268Delay[MAXPLAYERS + 1];
 
 public Action Items_268Action(Handle timer, int client)
 {
@@ -2113,7 +2140,7 @@ public bool Items_268Button(int client, int weapon, int &buttons, int &holding)
 
 public bool Items_RadioRadio(int client, int entity, float &multi)
 {
-	static float time[MAXTF2PLAYERS];
+	static float time[MAXPLAYERS + 1];
 	bool remove, off;
 	float engineTime = GetGameTime();
 	switch(GetEntProp(entity, Prop_Data, "m_iClip1"))
@@ -2470,8 +2497,8 @@ public void Items_ClearDelayedActions()
 
 public bool Items_DisarmerButton(int client, int weapon, int &buttons, int &holding)
 {
-	static int previousTarget[MAXTF2PLAYERS];
-	static float DisarmerCharge[MAXTF2PLAYERS];
+	static int previousTarget[MAXPLAYERS + 1];
+	static float DisarmerCharge[MAXPLAYERS + 1];
 
 	if(!(buttons & IN_ATTACK2))
 	{
@@ -2519,7 +2546,7 @@ public bool Items_DisarmerButton(int client, int weapon, int &buttons, int &hold
 	}
 	
 	float engineTime = GetGameTime();
-	static float delay[MAXTF2PLAYERS];
+	static float delay[MAXPLAYERS + 1];
 
 	bool isTargetTeammate = IsFriendly(Client[target].Class, Client[client].Class);
 	bool canDisarm = Client[target].Disarmer == 0 && !isTargetTeammate;
