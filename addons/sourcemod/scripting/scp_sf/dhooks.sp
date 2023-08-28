@@ -566,6 +566,6 @@ public MRESReturn Detour_PassServerEntityFilterPost(DHookReturn ret, DHookParam 
 	
 	int client = touch_is_player ? touch_ent : pass_ent;
 	
-	ret.Value = Classes_OnDoorWalk(client, entity);
+	ret.Value = !Classes_OnDoorWalk(client, entity);
 	return MRES_Supercede;
 }
