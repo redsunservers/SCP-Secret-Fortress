@@ -239,11 +239,14 @@ public Action SCP106_TakeDamage(int client, int attacker, int &inflictor, float 
 	return Plugin_Changed;
 }
 
-public bool SCP106_DoorWalk(int client, int entity)
+public bool SCP106_DoorWalk(int client, int door)
 {
-	static char buffer[16];
-	GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
-	return !StrContains(buffer, "scp", false);
+	// Allow pass through any doors thats not elevators
+	switch (GetDoorId(door))
+	{
+		case DOOR_ID_NORMAL, DOOR_ID_GATE: return true;
+		default: return false;
+	}
 }
 
 static void ShowAnnotation(int client)

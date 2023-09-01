@@ -128,33 +128,10 @@ public bool SCP096_OnGlowPlayer(int client, int victim)
 	return (Client[client].Extra2 && Triggered[victim]>1);
 }
 
-public int SCP096_OnKeycard(int client, AccessEnum access)
-{
-	if(access == Access_Checkpoint)
-		return 1;
-
-	if(Client[client].Extra2 < 2)
-		return 0;
-
-	if(access==Access_Main || access==Access_Armory)
-		return 3;
-
-	return 1;
-}
-
-public bool SCP096_DoorWalk(int client, int entity)
+public void SCP096_DoorTouch(int client, int door)
 {
 	if(Client[client].Extra2 == 2)
-	{
-		if (!DestroyOrOpenDoor(entity))
-		{
-			static char buffer[16];
-			GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
-			if(!StrContains(buffer, "scp", false))
-				AcceptEntityInput(entity, "FireUser1", client, client);
-		}
-	}
-	return true;
+		DestroyOrOpenDoor(door);
 }
 
 public void SCP096_OnButton(int client, int button)
