@@ -4,7 +4,7 @@
 static const int HealthMax = 1800;	// Max standard health
 static const int HealthExtra = 600;	// Max regenerable health
 
-static const float SpeedExtra = 50.0;	// Extra speed while low health
+static const float SpeedExtra = 80.0;	// Extra speed while low health
 static const float GlowRange = 800.0;	// Max outline range
 
 static int Health[MAXPLAYERS + 1];
@@ -66,7 +66,7 @@ public void SCP939_OnMaxHealth(int client, int &health)
 
 public void SCP939_OnSpeed(int client, float &speed)
 {
-	speed += (1.0-(Health[client]/HealthMax))*SpeedExtra;
+	speed += Pow((1.0-(Health[client]/HealthMax)), 2)*SpeedExtra;
 }
 
 public Action SCP939_OnDealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
