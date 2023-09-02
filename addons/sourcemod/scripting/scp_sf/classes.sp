@@ -1559,8 +1559,8 @@ public float Classes_GhostThemeAlt(int client, char path[PLATFORM_MAX_PATH])
 
 public bool Classes_GhostDoors(int client, int entity)
 {
-	// Allow walk though any doors
-	return true;
+	// Allow walk though any doors if ghost
+	return TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode);
 }
 
 public bool Classes_DefaultVoice(int client)
