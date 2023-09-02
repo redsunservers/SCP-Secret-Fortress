@@ -66,7 +66,7 @@ public void SCP939_OnMaxHealth(int client, int &health)
 
 public void SCP939_OnSpeed(int client, float &speed)
 {
-	speed += Pow((1.0-(Health[client]/HealthMax)), 2)*SpeedExtra;
+	speed += Pow((1.0-(Health[client]/HealthMax)), 2.0)*SpeedExtra;
 }
 
 public Action SCP939_OnDealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
