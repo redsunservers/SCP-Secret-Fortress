@@ -1759,7 +1759,7 @@
 	}
 	"class_janitor"
 	{
-		"chi"		"清道夫"
+		"chi"		"清洁工"
 	}
 	"desc_janitor"
 	{
