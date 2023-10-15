@@ -1510,7 +1510,7 @@ public bool Items_ArmorDrop(int client, int weapon, bool &swap)
 
 public Action Items_DisarmerHit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapo, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	if(!IsSCP(victim) && !IsFriendly(Client[victim].Class, Client[client].Class))
+	if(!IsSCP(client) && !IsSCP(victim) && !IsFriendly(Client[victim].Class, Client[client].Class))
 	{
 		bool cancel;
 		if(!Client[victim].Disarmer)
@@ -2500,7 +2500,7 @@ public bool Items_DisarmerButton(int client, int weapon, int &buttons, int &hold
 	static int previousTarget[MAXPLAYERS + 1];
 	static float DisarmerCharge[MAXPLAYERS + 1];
 
-	if(!(buttons & IN_ATTACK2))
+	if(!(buttons & IN_ATTACK2) || IsSCP(client))
 	{
 		previousTarget[client] = -1;
 		DisarmerCharge[client] = 0.0;
