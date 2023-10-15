@@ -1291,7 +1291,7 @@
 	}
     "disarming_other"    // HUD
     {
-        "#format"    "{1:N},{2:.0f}"
+        "#format"    "{1:t},{2:.0f}"
         "en"        "Disarming {1}... {2}%"
     }
 	"disarming_me"    // HUD
@@ -1301,7 +1301,7 @@
     }
     "arming_other" // HUD
     {
-        "#format"    "{1:N},{2:.0f}"
+        "#format"    "{1:t},{2:.0f}"
         "en"        "Uncuffing {1}... {2}%"
     }
 	"arming_me" // HUD

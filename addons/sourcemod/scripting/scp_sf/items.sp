@@ -2559,15 +2559,18 @@ public bool Items_DisarmerButton(int client, int weapon, int &buttons, int &hold
 		delay[client] = engineTime + 0.1;
 		DisarmerCharge[client] += 10.0;
 		
+		ClassEnum class;
+		Classes_GetByIndex(Client[target].Class, class);
+		
 		SetHudTextParamsEx(-1.0, 0.6, 0.35, Client[client].Colors, Client[client].Colors, 0, 1.0, 0.01, 0.5);
 		if(canDisarm)
 		{
-			ShowSyncHudText(client, HudPlayer, "%t", "disarming_other", target, DisarmerCharge[client]);
+			ShowSyncHudText(client, HudPlayer, "%t", "disarming_other", class.Display, DisarmerCharge[client]);
 			ShowSyncHudText(target, HudPlayer, "%t", "disarming_me", client, DisarmerCharge[client]);
 		}
 		else if (canUndisarm)
 		{
-			ShowSyncHudText(client, HudPlayer, "%t", "arming_other", target, DisarmerCharge[client]);
+			ShowSyncHudText(client, HudPlayer, "%t", "arming_other", class.Display, DisarmerCharge[client]);
 			ShowSyncHudText(target, HudPlayer, "%t", "arming_me", client, DisarmerCharge[client]);
 		}
 	
@@ -2595,8 +2598,7 @@ public bool Items_DisarmerButton(int client, int weapon, int &buttons, int &hold
 				}
 				Items_SetEmptyWeapon(target);
 				
-				ClassEnum class;
-				if(Classes_GetByIndex(Client[target].Class, class) && class.Group==2 && !class.Vip)
+				if(class.Group==2 && !class.Vip)
 					GiveAchievement(Achievement_DisarmMTF, client);
 				
 				// all weapons are gone, so reset the time		
