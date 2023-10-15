@@ -1286,7 +1286,7 @@
 	}
 	"disarming_other"    // HUD
     {
-        "#format"    "{1:N},{2:.0f}"
+        "#format"    "{1:t},{2:.0f}"
         "es"        "Desarmando {1}... {2}%"
     }
 	"disarming_me"    // HUD
@@ -1296,7 +1296,7 @@
     }
     "arming_other" // HUD
     {
-        "#format"    "{1:N},{2:.0f}"
+        "#format"    "{1:t},{2:.0f}"
         "es"        "Desnudo {1}... {2}%"
     }
 	"arming_me" // HUD

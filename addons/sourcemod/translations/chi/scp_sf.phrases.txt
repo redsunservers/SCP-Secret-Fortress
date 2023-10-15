@@ -1274,7 +1274,7 @@
 	}
 	"disarming_other"    // HUD
     {
-        "#format"    "{1:N},{2:.0f}"
+        "#format"    "{1:t},{2:.0f}"
         "chi"        "解除武装 {1}... {2}%"
     }
 	"disarming_me"    // HUD
@@ -1284,7 +1284,7 @@
     }
 	"arming_other" // HUD
     {
-        "#format"    "{1:N},{2:.0f}"
+        "#format"    "{1:t},{2:.0f}"
         "chi"        "解开手铐 {1}... {2}%"
     }
     "arming_me" // HUD
