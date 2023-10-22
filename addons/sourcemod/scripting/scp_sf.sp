@@ -3144,7 +3144,7 @@ void FindEntityInputs(int entity, const char[] prop, const char[] input, int doo
 			continue;
 		
 		StringtToCharArray(iTargetInput, targetinput, sizeof(targetinput));
-		if (!StrEqual(targetinput, input))
+		if (!StrEqual(targetinput, input, false))
 			continue;
 		
 		SetDoorsId("func_door", target, doorid, relay);
@@ -3160,7 +3160,7 @@ void SetDoorsId(const char[] classname, const char[] target, int doorid, int rel
 	{
 		char name[64];
 		GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
-		if (!StrEqual(target, name))
+		if (!StrEqual(target, name, false))
 			continue;
 		
 		SetEntProp(entity, Prop_Data, DOOR_ID_PROP, doorid);
