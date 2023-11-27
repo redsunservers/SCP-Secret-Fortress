@@ -65,7 +65,15 @@ public void OnEntityCreated(int entity, const char[] classname)
 	else if(StrContains(classname, "func_door") == 0 || StrEqual(classname, "func_movelinear"))
 	{
 		SDKHook(entity, SDKHook_StartTouch, OnDoorTouch);
-	}	
+	}
+	else if (StrEqual(classname, "func_button"))
+	{
+		RequestFrame(UpdateDoorsFromButton, EntIndexToEntRef(entity));
+	}
+	else if (StrEqual(classname, "logic_relay"))
+	{
+		RequestFrame(UpdateDoorsFromRelay, entity);
+	}
 }
 
 public void OnSmallHealthSpawned(int entity)

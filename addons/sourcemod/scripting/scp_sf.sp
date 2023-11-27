@@ -194,6 +194,7 @@ ClientEnum Client[MAXPLAYERS + 1];
 #include "scp_sf/configs.sp"
 #include "scp_sf/convars.sp"
 #include "scp_sf/dhooks.sp"
+#include "scp_sf/doors.sp"
 #include "scp_sf/forwards.sp"
 #include "scp_sf/gamemode.sp"
 #include "scp_sf/items.sp"
@@ -566,9 +567,8 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 			// the dhook on the trigger's Enable input will take care of other objects (e.g. dropped weapons)
 		}
 	}
-	
-	FixUpDoors();
 
+	Doors_RoundStart();
 	Items_RoundStart();
 	// see comments in szf.sp for why this is here
 	SZF_RoundStartDelayed();
@@ -3040,186 +3040,6 @@ void PlayFriendlyDeathReaction(int client, int attacker)
 			Client[targetclient].NextReactTime = Time + 5.0;
 		}
 	}
-}
-
-public void FixUpDoors()
-{
-	// workaround for horrible door logic
-	// there is no direct way to tell apart what is a "checkpoint" and normal door in the scp maps
-	// this is needed for frag grenade/scp18/096 door destruction logic
-	// however, maps use scp_access relays for checks, which we will abuse to find what is a "checkpoint" door
-	
-	#define DOOR_NAME_LENGTH 32
-	
-	int entity = INVALID_ENT_REFERENCE;
-	char name[64];
-		
-	ArrayList doorlist_normal = new ArrayList(DOOR_NAME_LENGTH);
-	ArrayList doorlist_gate = new ArrayList(DOOR_NAME_LENGTH);	
-	
-	// Kill all of legacy 096rage, don't need it anymore
-	while ((entity = FindEntityByClassname(entity, "trigger_*")) != INVALID_ENT_REFERENCE)
-	{
-		GetEntPropString(entity, Prop_Data, "m_iFilterName", name, sizeof(name));
-		if (StrContains(name, "096rage") != -1)
-			RemoveEntity(entity);
-	}
-	
-	// Find all buttons as normal door
-	while ((entity = FindEntityByClassname(entity, "func_button")) != INVALID_ENT_REFERENCE)
-	{
-		FindEntityInputs(entity, "m_OnPressed", "Toggle", DOOR_ID_NORMAL);
-	}
-	
-	// Check relays with access
-	while ((entity = FindEntityByClassname(entity, "logic_relay")) != INVALID_ENT_REFERENCE)
-	{
-		AccessEnum access = GetRelayAccess(entity);
-		if (access == Access_Unknown)
-			continue;
-		
-		if (access == Access_Main || access == Access_Checkpoint || access == Access_Exit)
-		{
-			FindEntityInputs(entity, "m_OnUser1", "Toggle", DOOR_ID_GATE, entity);
-			FindEntityInputs(entity, "m_OnUser2", "Toggle", DOOR_ID_GATE, entity);
-			FindEntityInputs(entity, "m_OnUser3", "Toggle", DOOR_ID_GATE, entity);
-			FindEntityInputs(entity, "m_OnUser1", "Open", DOOR_ID_GATE, entity);
-			FindEntityInputs(entity, "m_OnUser2", "Open", DOOR_ID_GATE, entity);
-			FindEntityInputs(entity, "m_OnUser3", "Open", DOOR_ID_GATE, entity);
-		}
-		else
-		{
-			FindEntityInputs(entity, "m_OnUser1", "Toggle", DOOR_ID_NORMAL);
-			FindEntityInputs(entity, "m_OnUser2", "Toggle", DOOR_ID_NORMAL);
-			FindEntityInputs(entity, "m_OnUser3", "Toggle", DOOR_ID_NORMAL);
-			FindEntityInputs(entity, "m_OnUser1", "Open", DOOR_ID_NORMAL);
-			FindEntityInputs(entity, "m_OnUser2", "Open", DOOR_ID_NORMAL);
-			FindEntityInputs(entity, "m_OnUser3", "Open", DOOR_ID_NORMAL);
-		}
-	}
-	
-	// no doors found? bail
-	if (!doorlist_normal.Length && !doorlist_gate.Length)
-	{
-		delete doorlist_normal;
-		delete doorlist_gate;
-		return;
-	}
-	
-	delete doorlist_normal;
-	delete doorlist_gate;
-}
-
-// thanks to dysphie for the I/O offsets
-void FindEntityInputs(int entity, const char[] prop, const char[] input, int doorid, int relay = INVALID_ENT_REFERENCE)
-{
-	// get the offsets to the outputs
-	int offset = FindDataMapInfo(entity, prop);
-	if (offset == -1)
-		return;
-	
-	char classname[64], name[64];
-	GetEntityClassname(entity, classname, sizeof(classname));
-	GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
-	
-	Address output = GetEntityAddress(entity) + view_as<Address>(offset);
-	Address actionlist = view_as<Address>(LoadFromAddress(output + view_as<Address>(0x14), NumberType_Int32));
-	
-	// note: there can be multiple different doors being killed/opened in the outputs
-	while (actionlist)
-	{
-		// these are the only 2 parts of the output we care about
-		Address iTarget = view_as<Address>(LoadFromAddress(actionlist, NumberType_Int32));
-		
-		Address iTargetInput = view_as<Address>(LoadFromAddress(actionlist + view_as<Address>(0x4), NumberType_Int32));
-		
-		// for the next output
-		actionlist = view_as<Address>(LoadFromAddress(actionlist + view_as<Address>(0x18), NumberType_Int32));	
-		
-		char target[DOOR_NAME_LENGTH], targetinput[32];
-		StringtToCharArray(iTarget, target, sizeof(target));
-		
-		// ignore !self outputs
-		if (target[0] == '!')
-			continue;
-		
-		StringtToCharArray(iTargetInput, targetinput, sizeof(targetinput));
-		if (!StrEqual(targetinput, input, false))
-			continue;
-		
-		SetDoorsId("func_door", target, doorid, relay);
-		SetDoorsId("func_movelinear", target, doorid, relay);
-	}
-}
-
-void SetDoorsId(const char[] classname, const char[] target, int doorid, int relay)
-{
-	// go through all doors, compare the name against the list, then flag it accordingly
-	int entity = INVALID_ENT_REFERENCE;
-	while ((entity = FindEntityByClassname(entity, classname)) != INVALID_ENT_REFERENCE)
-	{
-		char name[64];
-		GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
-		if (!StrEqual(target, name, false))
-			continue;
-		
-		SetEntProp(entity, Prop_Data, DOOR_ID_PROP, doorid);
-		if (relay != INVALID_ENT_REFERENCE)
-			SetEntProp(entity, Prop_Data, DOOR_ENTREF_PROP, relay);
-		
-		FindEntityInputs(entity, "m_OnOpen", "Open", doorid, relay);	// Look up any connected doors
-	}
-}
-
-int GetDoorId(int door)
-{
-	return GetEntProp(door, Prop_Data, DOOR_ID_PROP);
-}
-
-// attempt to destroy a given door, if it can't be destroyed then it will be opened/triggered instead
-// returns false if the door couldn't be destroyed nor opened
-public bool DestroyOrOpenDoor(int door)
-{
-	switch (GetDoorId(door))
-	{
-		case DOOR_ID_NORMAL:
-		{
-			EmitSoundToAll("physics/metal/metal_grate_impact_hard2.wav", door, SNDCHAN_AUTO, SNDLEVEL_TRAIN);
-			AcceptEntityInput(door, "Kill");
-			return true;
-		}
-		case DOOR_ID_GATE:
-		{
-			// only attempt to open fully closed doors
-			
-			char classname[64];
-			GetEntityClassname(door, classname, sizeof(classname));
-			if (StrEqual(classname, "func_movelinear"))
-			{
-				if (GetEntProp(door, Prop_Data, "m_movementType") != 0)
-					return false;
-			}
-			else
-			{
-				if (GetEntProp(door, Prop_Data, "m_toggle_state") != 1)
-					return false;
-			}
-			
-			// Call a relay that opens all of the door
-			int relay = GetEntProp(door, Prop_Data, DOOR_ENTREF_PROP);
-			
-			if (IsValidEntity(relay))
-			{
-				EmitSoundToAll("physics/metal/metal_grate_impact_hard1.wav", door, SNDCHAN_AUTO, SNDLEVEL_TRAIN);
-				
-				AcceptEntityInput(relay, "FireUser1");
-				AcceptEntityInput(relay, "FireUser2");
-				return true;
-			}
-		}
-	}
-	
-	return false;
 }
 
 public Action Timer_FriendlyDeathReaction(Handle timer, int client)

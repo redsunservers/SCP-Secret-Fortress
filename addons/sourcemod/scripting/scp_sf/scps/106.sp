@@ -242,11 +242,7 @@ public Action SCP106_TakeDamage(int client, int attacker, int &inflictor, float 
 public bool SCP106_DoorWalk(int client, int door)
 {
 	// Allow pass through any doors thats not elevators
-	switch (GetDoorId(door))
-	{
-		case DOOR_ID_NORMAL, DOOR_ID_GATE: return true;
-		default: return false;
-	}
+	return IsDoorNormal(door) || IsDoorGate(door);
 }
 
 static void ShowAnnotation(int client)
