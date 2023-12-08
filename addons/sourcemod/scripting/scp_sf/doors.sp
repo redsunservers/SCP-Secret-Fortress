@@ -55,7 +55,6 @@ void CollectDoorsFromInput(int entity, const char[] prop, const char[] input, in
 		
 		// Look up any connected doors
 		CollectDoorsFromName("func_door", name, activator);
-		CollectDoorsFromName("func_movelinear", name, activator);
 	}
 	
 	delete doors;
@@ -140,6 +139,8 @@ bool IsDoorNormal(int door)
 bool IsDoorGate(int door)
 {
 	int relay = GetActivatorFromDoor(door);
+	if (relay == INVALID_ENT_REFERENCE)
+		return false;
 	
 	char classname[256];
 	GetEntityClassname(relay, classname, sizeof(classname));
