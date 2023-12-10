@@ -5,7 +5,7 @@ StringMap DoorNameToActivator;
 // this is needed for frag grenade/scp18/096 door destruction logic
 // however, maps use scp_access relays for checks, which we will abuse to find what is a "checkpoint" door
 
-void Doors_RoundStart()
+void Doors_Clear()
 {
 	delete DoorNameToActivator;
 	DoorNameToActivator = new StringMap();
