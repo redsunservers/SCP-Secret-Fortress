@@ -262,6 +262,7 @@ public void OnPluginStart()
 
 	ConVar_Setup();
 	SDKHook_Setup();
+	Doors_Clear();
 
 	HookEvent("teamplay_round_start", OnRoundStart, EventHookMode_PostNoCopy);
 	HookEvent("teamplay_round_win", OnRoundEnd, EventHookMode_PostNoCopy);
@@ -568,7 +569,7 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 		}
 	}
 
-	Doors_RoundStart();
+	Doors_Clear();
 	Items_RoundStart();
 	// see comments in szf.sp for why this is here
 	SZF_RoundStartDelayed();
