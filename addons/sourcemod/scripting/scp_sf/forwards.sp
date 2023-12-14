@@ -9,7 +9,7 @@ static GlobalForward OnReactionPre;
 static GlobalForward OnWeapon;
 static GlobalForward OnWeaponPre;
 
-void Forward_Setup()
+void Forwards_PluginLoad()
 {
 	OnAchievement = new GlobalForward("SCPSF_OnAchievement", ET_Ignore, Param_Cell, Param_Cell);
 	OnClass = new GlobalForward("SCPSF_OnClass", ET_Ignore, Param_Cell, Param_String, Param_Cell);
@@ -19,16 +19,16 @@ void Forward_Setup()
 	OnWeapon = new GlobalForward("SCPSF_OnWeapon", ET_Ignore, Param_Cell, Param_Cell);
 	OnWeaponPre = new GlobalForward("SCPSF_OnWeaponPre", ET_Event, Param_Cell, Param_Cell, Param_CellByRef);
 }
-
-void Forward_OnAchievement(int client, Achievements achievement)
+/*
+void Forwards_OnAchievementPost(int client, Achievements achievement)
 {
 	Call_StartForward(OnAchievement);
 	Call_PushCell(client);
 	Call_PushCell(achievement);
 	Call_Finish();
 }
-
-void Forward_OnClass(int client, ClassSpawnEnum context, const char[] class)
+*/
+void Forwards_OnClassPost(int client, ClassSpawnEnum context, const char[] class)
 {
 	Call_StartForward(OnClass);
 	Call_PushCell(client);
@@ -37,7 +37,7 @@ void Forward_OnClass(int client, ClassSpawnEnum context, const char[] class)
 	Call_Finish();
 }
 
-Action Forward_OnClassPre(int client, ClassSpawnEnum context, char[] class, int length)
+Action Forwards_OnClassPre(int client, ClassSpawnEnum context, char[] class, int length)
 {
 	Action action;
 	Call_StartForward(OnClassPre);
@@ -48,7 +48,7 @@ Action Forward_OnClassPre(int client, ClassSpawnEnum context, char[] class, int 
 	return action;
 }
 
-void Forward_OnEscape(int client, int disarmer)
+void Forwards_OnEscapePost(int client, int disarmer)
 {
 	Call_StartForward(OnEscape);
 	Call_PushCell(client);
@@ -56,7 +56,7 @@ void Forward_OnEscape(int client, int disarmer)
 	Call_Finish();
 }
 
-Action Forward_OnReactionPre(int client, const char[] event, char sound[PLATFORM_MAX_PATH])
+Action Forwards_OnReactionPre(int client, const char[] event, char sound[PLATFORM_MAX_PATH])
 {
 	Action action;
 	Call_StartForward(OnReactionPre);
@@ -67,7 +67,7 @@ Action Forward_OnReactionPre(int client, const char[] event, char sound[PLATFORM
 	return action;
 }
 
-void Forward_OnWeapon(int client, int entity)
+void Forwards_OnWeaponPost(int client, int entity)
 {
 	Call_StartForward(OnWeapon);
 	Call_PushCell(client);
@@ -75,7 +75,7 @@ void Forward_OnWeapon(int client, int entity)
 	Call_Finish();
 }
 
-Action Forward_OnWeaponPre(int client, int entity, int &index)
+Action Forwards_OnWeaponPre(int client, int entity, int &index)
 {
 	Action action;
 	Call_StartForward(OnWeaponPre);
@@ -86,7 +86,7 @@ Action Forward_OnWeaponPre(int client, int entity, int &index)
 	return action;
 }
 
-void Forward_OnMessage(int client, char[] name, int nameL, char[] msg, int msgL)
+void Forwards_OnMessagePre(int client, char[] name, int nameL, char[] msg, int msgL)
 {
 	Handle iter = GetPluginIterator();
 	while(MorePlugins(iter))
@@ -102,5 +102,6 @@ void Forward_OnMessage(int client, char[] name, int nameL, char[] msg, int msgL)
 		Call_PushStringEx(msg, msgL, SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
 		Call_Finish();
 	}
+	
 	delete iter;
 }

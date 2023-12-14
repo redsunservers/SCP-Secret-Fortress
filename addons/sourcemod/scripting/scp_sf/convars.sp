@@ -4,78 +4,159 @@
 enum struct CvarInfo
 {
 	ConVar cvar;
-	float value;
-	float defaul;
+	char value[16];
+	char defaul[16];
 	bool enforce;
 }
 
 static ArrayList CvarList;
-static bool CvarEnabled;
-ConVar CvarGravity;
+static bool CvarHooked;
 
-void ConVar_Setup()
+void ConVar_PluginStart()
 {
-	CvarFriendlyFire = CreateConVar("scp_friendlyfire", "0", "If to enable friendly fire", _, true, 0.0, true, 1.0);
-	CvarSpeedMulti = CreateConVar("scp_speedmulti", "1.0", "Player movement speed multiplier", _, true, 0.004167);
-	CvarSpeedMax = CreateConVar("scp_speedmax", "3000.0", "Maximum player speed (SCP-173's blink speed)", _, true, 1.0);
-	CvarAchievement = CreateConVar("scp_achievements", "1", "If to call SCPSF_OnAchievement forward", _, true, 0.0, true, 1.0);
-	CvarChatHook = CreateConVar("scp_chathook", "1", "If to use it's own chat processor to manage chat messages", _, true, 0.0, true, 1.0);
-	CvarVoiceHook = CreateConVar("scp_voicehook", "1", "If to use it's own voice processor to manage voice chat", _, true, 0.0, true, 1.0);
-	CvarSendProxy = CreateConVar("scp_sendproxy", "1", "If to use SendProxy, if available", _, true, 0.0, true, 1.0);
-	CvarKarma = CreateConVar("scp_karma", "1", "If to use karma level for player damage", _, true, 0.0, true, 1.0);
-	CvarKarmaRatio = CreateConVar("scp_karmaratio", "20.0", "Maximum karma penalty, as a ratio of max health of client", _, true, 0.0, true, 100.0);
-	CvarKarmaMin = CreateConVar("scp_karmamin", "0.0", "Minimum karma level", _, true, 0.0, true, 100.0);
-	CvarKarmaMax = CreateConVar("scp_karmamax", "100.0", "Maximum karma level", _, true, 0.0, true, 100.0);
-	CvarAllowCosmetics = CreateConVar("scp_allowcosmetics", "1", "Whether to allow certain classes to equip cosmetics", _, true, 0.0, true, 1.0);
-	CvarDroppedWeaponCount = CreateConVar("scp_droppedweaponcount", "-1", "How many dropped weapon to allow in map, -1 for no limit", _, true, -1.0);
+	Cvar[Version] = CreateConVar("scp_version", PLUGIN_VERSION_FULL, "SCP: Secret Fortress Version", FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	
-	AutoExecConfig(true, "SCPSecretFortress");
+	Cvar[Achievements] = CreateConVar("scp_achievements", "1", "If to call SCPSF_OnAchievement forward", _, true, 0.0, true, 1.0);
+	Cvar[ChatHook] = CreateConVar("scp_chathook", "1", "If SCP runs internal chat processor to manage chat messages", _, true, 0.0, true, 1.0);
+	Cvar[VoiceHook] = CreateConVar("scp_voicehook", "1", "If SCP runs internal voice processor to manage voice chat", _, true, 0.0, true, 1.0);
+	Cvar[SendProxy]= CreateConVar("scp_sendproxy", "1", "If to use SendProxy, if available", _, true, 0.0, true, 1.0);
+	Cvar[DropItemLimit] = CreateConVar("scp_droppedweaponcount", "-1", "How many dropped weapon to allow in map, -1 for no limit", _, true, -1.0);
 
-	CvarChatHook.AddChangeHook(ConVar_OnChatHook);
-	CvarVoiceHook.AddChangeHook(ConVar_OnVoiceHook);
-
-	FindConVar("mp_bonusroundtime").SetBounds(ConVarBound_Upper, true, 20.0);
-	CvarGravity = FindConVar("sv_gravity");
+	AutoExecConfig(false, "SCPSecretFortress");
 	
-	if(CvarList != INVALID_HANDLE)
-		delete CvarList;
-
 	CvarList = new ArrayList(sizeof(CvarInfo));
-
-	ConVar_Add("mp_autoteambalance", 0.0);
-	ConVar_Add("mp_bonusroundtime", 20.0, false);
-	ConVar_Add("mp_disable_respawn_times", 1.0);
-	ConVar_Add("mp_forcecamera", 0.0, false);
-	ConVar_Add("mp_friendlyfire", 1.0);
-	ConVar_Add("mp_teams_unbalance_limit", 0.0);
-	ConVar_Add("mp_scrambleteams_auto", 0.0);
-	ConVar_Add("mp_waitingforplayers_time", 70.0);
-	ConVar_Add("tf_bot_join_after_player", 0.0, false);
-	ConVar_Add("tf_dropped_weapon_lifetime", 99999.0);
-	ConVar_Add("tf_ghost_xy_speed", 400.0, false);
-	ConVar_Add("tf_helpme_range", -1.0);
-	ConVar_Add("tf_spawn_glows_duration", 0.0);
-	ConVar_Add("tf_weapon_criticals_distance_falloff", 1.0);
+	
+	FindConVar("mp_bonusroundtime").SetBounds(ConVarBound_Upper, true, 20.0);
+	
+	ConVar_Add("mp_bonusroundtime", "20.0", false);
+	ConVar_Add("mp_disable_respawn_times", "1.0");
+	ConVar_Add("mp_waitingforplayers_time", "70.0", false);
+	ConVar_Add("tf_bot_join_after_player", "0.0", false);
+	ConVar_Add("tf_dropped_weapon_lifetime", "99999.0");
+	ConVar_Add("tf_helpme_range", "-1.0");
+	ConVar_Add("tf_spawn_glows_duration", "0.0");
 }
 
-void ConVar_Add(const char[] name, float value, bool enforce=true)
+void ConVar_ConfigsExecuted()
+{
+	bool generate = !FileExists("cfg/sourcemod/SCPSecretFortress.cfg");
+	
+	if(!generate)
+	{
+		char buffer[512];
+		Cvar[Version].GetString(buffer, sizeof(buffer));
+		if(!StrEqual(buffer, PLUGIN_VERSION_FULL))
+		{
+			if(buffer[0])
+				generate = true;
+			
+			Cvar[Version].SetString(PLUGIN_VERSION_FULL);
+		}
+	}
+	
+	if(generate)
+		GenerateConfig();
+	
+	ConVar_Enable();
+}
+
+static void GenerateConfig()
+{
+	File file = OpenFile("cfg/sourcemod/SCPSecretFortress.cfg", "wt");
+	if(file)
+	{
+		file.WriteLine("// Settings present are for SCP: Secret Fortress (" ... PLUGIN_VERSION ... "." ... PLUGIN_VERSION_REVISION ... ")");
+		file.WriteLine("// Updating the plugin version will generate new cvars and any non-SCP commands will be lost");
+		file.WriteLine("scp_version \"" ... PLUGIN_VERSION_FULL ... "\"");
+		file.WriteLine(NULL_STRING);
+		
+		char buffer1[512], buffer2[256];
+		for(int i; i < Cvar_MAX; i++)
+		{
+			if(Cvar[i].Flags & FCVAR_DONTRECORD)
+				continue;
+			
+			Cvar[i].GetDescription(buffer1, sizeof(buffer1));
+			
+			int current, split;
+			do
+			{
+				split = SplitString(buffer1[current], "\n", buffer2, sizeof(buffer2));
+				if(split == -1)
+				{
+					file.WriteLine("// %s", buffer1[current]);
+					break;
+				}
+				
+				file.WriteLine("// %s", buffer2);
+				current += split;
+			}
+			while(split != -1);
+			
+			file.WriteLine("// -");
+			
+			Cvar[i].GetDefault(buffer2, sizeof(buffer2));
+			file.WriteLine("// Default: \"%s\"", buffer2);
+			
+			float value;
+			if(Cvar[i].GetBounds(ConVarBound_Lower, value))
+				file.WriteLine("// Minimum: \"%.2f\"", value);
+			
+			if(Cvar[i].GetBounds(ConVarBound_Upper, value))
+				file.WriteLine("// Maximum: \"%.2f\"", value);
+			
+			Cvar[i].GetName(buffer2, sizeof(buffer2));
+			Cvar[i].GetString(buffer1, sizeof(buffer1));
+			file.WriteLine("%s \"%s\"", buffer2, buffer1);
+			file.WriteLine(NULL_STRING);
+		}
+		
+		delete file;
+	}
+}
+
+static void ConVar_Add(const char[] name, const char[] value, bool enforce = true)
 {
 	CvarInfo info;
 	info.cvar = FindConVar(name);
-	info.value = value;
+	strcopy(info.value, sizeof(info.value), value);
 	info.enforce = enforce;
 
-	if(CvarEnabled)
+	if(CvarHooked)
 	{
-		info.defaul = info.cvar.FloatValue;
-		info.cvar.SetFloat(info.value);
+		info.cvar.GetString(info.defaul, sizeof(info.defaul));
+
+		bool setValue = true;
+		if(!info.enforce)
+		{
+			char buffer[sizeof(info.defaul)];
+			info.cvar.GetDefault(buffer, sizeof(buffer));
+			if(!StrEqual(buffer, info.defaul))
+				setValue = false;
+		}
+
+		if(setValue)
+			info.cvar.SetString(info.value);
+		
 		info.cvar.AddChangeHook(ConVar_OnChanged);
 	}
 
 	CvarList.PushArray(info);
 }
 
-void ConVar_Remove(const char[] name)
+public void ConVar_OnlyChangeOnEmpty(ConVar cvar, const char[] oldValue, const char[] newValue)
+{
+	for(int client = 1; client <= MaxClients; client++)
+	{
+		if(IsClientInGame(client))
+		{
+			cvar.SetString(oldValue);
+			break;
+		}
+	}
+}
+
+stock void ConVar_Remove(const char[] name)
 {
 	ConVar cvar = FindConVar(name);
 	int index = CvarList.FindValue(cvar, CvarInfo::cvar);
@@ -85,58 +166,60 @@ void ConVar_Remove(const char[] name)
 		CvarList.GetArray(index, info);
 		CvarList.Erase(index);
 
-		if(CvarEnabled)
+		if(CvarHooked)
 		{
 			info.cvar.RemoveChangeHook(ConVar_OnChanged);
-			info.cvar.SetFloat(info.defaul);
+			info.cvar.SetString(info.defaul);
 		}
 	}
 }
 
 void ConVar_Enable()
 {
-	if(!CvarEnabled)
+	if(!CvarHooked)
 	{
-		if(Classes_AskForClass())
-		{
-			ConVar_Add("mp_forceautoteam", 1.0);
-		}
-		else
-		{
-			ConVar_Remove("mp_forceautoteam");
-		}
-
 		int length = CvarList.Length;
-		for(int i; i<length; i++)
+		for(int i; i < length; i++)
 		{
 			CvarInfo info;
 			CvarList.GetArray(i, info);
-			info.defaul = info.cvar.FloatValue;
+			info.cvar.GetString(info.defaul, sizeof(info.defaul));
 			CvarList.SetArray(i, info);
 
-			info.cvar.SetFloat(info.value);
+			bool setValue = true;
+			if(!info.enforce)
+			{
+				char buffer[sizeof(info.defaul)];
+				info.cvar.GetDefault(buffer, sizeof(buffer));
+				if(!StrEqual(buffer, info.defaul))
+					setValue = false;
+			}
+
+			if(setValue)
+				info.cvar.SetString(info.value);
+			
 			info.cvar.AddChangeHook(ConVar_OnChanged);
 		}
 
-		CvarEnabled = true;
+		CvarHooked = true;
 	}
 }
 
 void ConVar_Disable()
 {
-	if(CvarEnabled)
+	if(CvarHooked)
 	{
 		int length = CvarList.Length;
-		for(int i; i<length; i++)
+		for(int i; i < length; i++)
 		{
 			CvarInfo info;
 			CvarList.GetArray(i, info);
 
 			info.cvar.RemoveChangeHook(ConVar_OnChanged);
-			info.cvar.SetFloat(info.defaul);
+			info.cvar.SetString(info.defaul);
 		}
 
-		CvarEnabled = false;
+		CvarHooked = false;
 	}
 }
 
@@ -148,57 +231,13 @@ public void ConVar_OnChanged(ConVar cvar, const char[] oldValue, const char[] ne
 		CvarInfo info;
 		CvarList.GetArray(index, info);
 
-		float value = StringToFloat(newValue);
-		if(value != info.value)
+		if(!StrEqual(info.value, newValue))
 		{
+			strcopy(info.defaul, sizeof(info.defaul), newValue);
+			CvarList.SetArray(index, info);
+
 			if(info.enforce)
-			{
-				info.defaul = value;
-				CvarList.SetArray(index, info);
-				info.cvar.SetFloat(info.value);
-			}
-			else
-			{
-				info.cvar.RemoveChangeHook(ConVar_OnChanged);
-				CvarList.Erase(index);
-			}
-		}
-	}
-}
-
-public void ConVar_OnChatHook(ConVar cvar, const char[] oldValue, const char[] newValue)
-{
-	if(ChatHook)
-	{
-		if(!cvar.BoolValue)
-		{
-			ChatHook = false;
-			RemoveCommandListener(OnSayCommand, "say");
-			RemoveCommandListener(OnSayCommand, "say_team");
-		}
-	}
-	else if(cvar.BoolValue)
-	{
-		ChatHook = true;
-		AddCommandListener(OnSayCommand, "say");
-		AddCommandListener(OnSayCommand, "say_team");
-	}
-}
-
-public void ConVar_OnVoiceHook(ConVar cvar, const char[] oldValue, const char[] newValue)
-{
-	if(!cvar.BoolValue && StringToFloat(oldValue))
-	{
-		for(int client=1; client<=MaxClients; client++)
-		{
-			if(!IsValidClient(client, false))
-				continue;
-
-			for(int target=1; target<=MaxClients; target++)
-			{
-				if(client==target || IsValidClient(target))
-					SetListenOverride(client, target, Listen_Default);
-			}
+				info.cvar.SetString(info.value);
 		}
 	}
 }

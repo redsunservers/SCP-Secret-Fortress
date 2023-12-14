@@ -2,7 +2,8 @@
 *.exe
 *.smx
 *.inc
-[Cc]compiled/
+*.code-workspace
+.vscode/
 [Dd]esktop.ini
 [Tt]humbs.db
 !scp_sf.inc

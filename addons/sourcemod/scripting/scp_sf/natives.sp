@@ -1,24 +1,24 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-void Native_Setup()
+void Natives_PluginLoad()
 {
-	CreateNative("SCPSF_GetClientClass", Native_GetClientClass);
-	CreateNative("SCPSF_IsSCP", Native_IsSCP);
-	CreateNative("SCPSF_StartMusic", Native_StartMusic);
-	CreateNative("SCPSF_StopMusic", Native_StopMusic);
-	CreateNative("SCPSF_CanTalkTo", Native_CanTalkTo);
-	CreateNative("SCPSF_GetChatTag", Native_GetChatTag);
+	CreateNative("SCPSF_GetClientClass", GetClientClass);
+	CreateNative("SCPSF_IsSCP", IsSCP);
+	CreateNative("SCPSF_StartMusic", StartMusic);
+	CreateNative("SCPSF_StopMusic", StopMusic);
+	CreateNative("SCPSF_CanTalkTo", CanClientTalkTo);
+	CreateNative("SCPSF_GetChatTag", GetChatTag);
 }
 
-public any Native_GetClientClass(Handle plugin, int numParams)
+static any GetClientClass(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	if(client<0 || client>MaxClients)
-		return 0;
+	if(client < 0 || client > MaxClients)
+		return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", client);
 
 	ClassEnum class;
-	Classes_GetByIndex(Client[client].Class, class);
+	Classes_GetByIndex(Client(client).Class, class);
 
 	int length = GetNativeCell(3);
 	char[] buffer = new char[length];
@@ -29,90 +29,81 @@ public any Native_GetClientClass(Handle plugin, int numParams)
 	return bytes;
 }
 
-public any Native_IsSCP(Handle plugin, int numParams)
+static any IsSCP(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	if(client>=0 && client<=MaxClients)
-		return IsSCP(client);
-
-	return false;
+	if(client < 0 || client > MaxClients || !IsClientInGame(client))
+		return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", client);
+	
+	return (GetClientTeam(client) <= TFTeam_Spectator && IsPlayerAlive(client));
 }
 
-public any Native_StartMusic(Handle plugin, int numParams)
+static any StartMusic(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	if(client>0 && client<=MaxClients)
+	if(client > 0 && client <= MaxClients)
 	{
-		Client[client].NextSongAt = 0.0;
-	}
-	else if(!NoMusicRound)
-	{
-		for(int i=1; i<=MaxClients; i++)
-		{
-			Client[client].NextSongAt = 0.0;
-		}
-	}
-
-	NoMusicRound = false;
-	return 0;
-}
-
-public any Native_StopMusic(Handle plugin, int numParams)
-{
-	int client = GetNativeCell(1);
-	if(client>0 && client<=MaxClients)
-	{
-		Client[client].NextSongAt = FAR_FUTURE;
-		if(Client[client].CurrentSong[0])
-		{
-			StopSound(client, SNDCHAN_STATIC, Client[client].CurrentSong);
-			StopSound(client, SNDCHAN_STATIC, Client[client].CurrentSong);
-			Client[client].CurrentSong[0] = 0;
-		}
+		Music_PlayerSpawn(client);
 	}
 	else
 	{
-		for(int i=1; i<=MaxClients; i++)
+		for(client = 1; client <= MaxClients; client++)
 		{
-			Client[i].NextSongAt = FAR_FUTURE;
-			if(!Client[i].CurrentSong[0] || !IsValidClient(client))
-				continue;
-
-			StopSound(i, SNDCHAN_STATIC, Client[i].CurrentSong);
-			StopSound(i, SNDCHAN_STATIC, Client[i].CurrentSong);
-			Client[i].CurrentSong[0] = 0;
+			Music_PlayerSpawn(client);
 		}
-		NoMusicRound = false;
 	}
+
+	Music_SetMusicStatus(true);
 	return 0;
 }
 
-public any Native_CanTalkTo(Handle plugin, int numParams)
+static any StopMusic(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	if(client<0 || client>MaxClients)
-		return false;
+	if(client > 0 && client <= MaxClients)
+	{
+		Music_StopMusic(client);
+	}
+	else
+	{
+		for(client = 1; client <= MaxClients; client++)
+		{
+			Music_StopMusic(client);
+		}
 
-	int target = GetNativeCell(2);
-	if(target<0 || target>MaxClients)
-		return false;
-
-	return Client[client].CanTalkTo[target];
+		Music_SetMusicStatus(false);
+	}
+	
+	return 0;
 }
 
-public any Native_GetChatTag(Handle plugin, int numParams)
+static any CanClientTalkTo(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	if(client<0 || client>MaxClients)
-		return 0;
+	if(client < 0 || client > MaxClients)
+		return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", client);
 
 	int target = GetNativeCell(2);
-	if(target<0 || target>MaxClients)
-		return 0;
+	if(target < 0 || target > MaxClients)
+		return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", target);
 
+	return Client(client).CanTalkTo(target);
+}
+
+static any GetChatTag(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	if(client < 0 || client > MaxClients)
+		return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", client);
+
+	int target = GetNativeCell(2);
+	if(target < 0 || target > MaxClients)
+		return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", target);
+	
+	int bytes;
 	int length = GetNativeCell(4);
 	char[] buffer = new char[length];
-	GetClientChatTag(client, target, buffer, length);
-	SetNativeString(3, buffer, length);
-	return 0;
+	Proxy_GetChatTag(client, target, buffer, length);
+	SetNativeString(3, buffer, length, _, bytes);
+	return bytes;
 }

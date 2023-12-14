@@ -1,1772 +1,618 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define ITEMS_MAX	8
-#define AMMO_MAX		16
-
 enum struct ClassEnum
 {
-	char Name[16];
-	char Display[22];
+	char Name[32];
+	char Display[32];
+	char Model[PLATFORM_MAX_PATH];
+	char Spawn[32];
+
+	bool Regen;
+	bool DeadClass;
+	
+	int Health;
+	int MusicType;
+
+	float Speed;
+	float SpeakAllyDist;
+	float SpeakOtherDist;
 
 	TFClassType Class;
-	char Model[PLATFORM_MAX_PATH];
-	int ModelIndex;
-	int ModelAlt;
-	bool Human;
-	bool CanSprint;
-	bool CanPickup;
-	bool Vip;
-	bool Driver;
 
-	float Speak;
-	float Hear;
-	float SpeakTeam;
-	float HearTeam;
+	int StartAmmo[Ammo_MAX];
+	int MaxAmmo[Ammo_MAX];
+	int StartItems[10];
+	int MaxItems[Type_MAX];
 
-	int Health;
-	float Speed;
-	bool Regen;
+	Function FuncCanTalkTo;		// void(int client, int target, float &distance)
+	Function FuncCommand;		// bool(int client, const char[] command)
+	Function FuncMusic;			// void(int client, char filepath[PLATFORM_MAX_PATH], int &duration)
+	Function FuncPlayerRunCmd;	// Action(int client, int &buttons)
+	Function FuncPrecache;		// void(int index, ClassEnum class)
+	Function FuncSetClass;		// void(int client)
+	Function FuncTransmitSee;	// bool(int client, int target)
+	Function FuncTransmitSelf;	// bool(int client, int target)
+	Function FuncUpdateSpeed;	// void(int client, float &speed)
 
-	int Group;
-	TFTeam Team;
-
-	int Floor;
-	char Spawn[32];
-	char Color[16];
-	int Color4[4];
-
-	int Ammo[AMMO_MAX];
-	int MaxAmmo[AMMO_MAX];
-	int Items[12];
-	int MaxItems[ITEMS_MAX];
-
-	Function OnAnimation;	// Action(int client, PlayerAnimEvent_t &anim, int &data)
-	Function OnButton;	// void(int client, int button)
-	Function OnCanSpawn;	// bool(int client)
-	Function OnCondAdded;	// void(int client, TFCond cond)
-	Function OnCondRemoved;	// void(int client, TFCond cond)
-	Function OnDealDamage;	// Action(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
-	Function OnDeath;		// void(int client, int attacker)
-	Function OnDoorTouch;	// void(int client, int entity)
-	Function OnDoorWalk;	// bool(int client, int entity)
-	Function OnGlowPlayer;	// bool(int client, int victim)
-	Function OnKeycard;	// int(int client, AccessEnum access)
-	Function OnKill;		// void(int client, int victim)
-	Function OnMaxHealth;	// void(int client, int &health)
-	Function OnPickup;	// bool(int client, int entity)
-	Function OnSeePlayer;	// bool(int client, int victim)
-	Function OnSound;		// Action(int client, char sample[PLATFORM_MAX_PATH], int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
-	Function OnSpawn;		// void(int client)
-	Function OnSpeed;		// void(int client, float &speed)
-	Function OnTakeDamage;	// Action(int client, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
-	Function OnTheme;		// void(int client, char path[PLATFORM_MAX_PATH])
-	Function OnWeaponSwitch;	// void(int client, int entity)
-	Function OnVoiceCommand;	// bool(int client)
-
-	void SetDefaults()
+	int SetupEnum(KeyValues kv, ArrayList whitelist, const ClassEnum defaul)
 	{
-		this.OnAnimation = INVALID_FUNCTION;
-		this.OnButton = INVALID_FUNCTION;
-		this.OnCanSpawn = INVALID_FUNCTION;
-		this.OnCondAdded = INVALID_FUNCTION;
-		this.OnCondRemoved = INVALID_FUNCTION;
-		this.OnDealDamage = INVALID_FUNCTION;
-		this.OnDeath = INVALID_FUNCTION;
-		this.OnDoorTouch = INVALID_FUNCTION;
-		this.OnDoorWalk = INVALID_FUNCTION;
-		this.OnGlowPlayer = INVALID_FUNCTION;
-		this.OnKeycard = INVALID_FUNCTION;
-		this.OnKill = INVALID_FUNCTION;
-		this.OnMaxHealth = INVALID_FUNCTION;
-		this.OnPickup = INVALID_FUNCTION;
-		this.OnSeePlayer = INVALID_FUNCTION;
-		this.OnSound = INVALID_FUNCTION;
-		this.OnSpawn = INVALID_FUNCTION;
-		this.OnSpeed = INVALID_FUNCTION;
-		this.OnTakeDamage = INVALID_FUNCTION;
-		this.OnTheme = INVALID_FUNCTION;
-		this.OnWeaponSwitch = INVALID_FUNCTION;
-		this.OnVoiceCommand = INVALID_FUNCTION;
+		kv.GetSectionName(this.Name, sizeof(this.Name));
+
+		int pos = whitelist ? 0 : whitelist.FindString(this.Name);
+		if(pos == -1)
+			return -1;
+		
+		Format(this.Display, sizeof(this.Display), "class_%s", this.Name);
+		if(!TranslationPhraseExists(this.Display))
+			strcopy(this.Display, sizeof(this.Display), "class_0");
+
+		this.Regen = view_as<bool>(kv.GetNum("regen", defaul.Regen));
+		this.DeadClass = view_as<bool>(kv.GetNum("deadclass", defaul.DeadClass));
+		this.Health = kv.GetNum("health", defaul.Health);
+		this.MusicType = kv.GetNum("musicindex", defaul.MusicType);
+		this.Speed = kv.GetFloat("speed", defaul.Speed);
+		this.SpeakAllyDist = kv.GetFloat("speakallydist", defaul.SpeakAllyDist);
+		this.SpeakOtherDist = kv.GetFloat("speakotherdist", defaul.SpeakOtherDist);
+		this.Class = KvGetClass(kv, "class", defaul.Class);
+
+		if(kv.JumpToKey("StartAmmo"))
+		{
+			for(int i; i < sizeof(this.StartAmmo); i++)
+			{
+				IntToString(i, this.Spawn, sizeof(this.Spawn));
+				this.StartAmmo[i] = kv.GetNum(this.Spawn, -1);
+			}
+
+			kv.GoBack();
+		}
+		else
+		{
+			this.StartAmmo = defaul.StartAmmo;
+		}
+
+		if(kv.JumpToKey("MaxAmmo"))
+		{
+			for(int i; i < sizeof(this.MaxAmmo); i++)
+			{
+				IntToString(i, this.Spawn, sizeof(this.Spawn));
+				this.MaxAmmo[i] = kv.GetNum(this.Spawn, -1);
+			}
+
+			kv.GoBack();
+		}
+		else
+		{
+			this.MaxAmmo = defaul.MaxAmmo;
+		}
+
+		if(kv.JumpToKey("StartItems"))
+		{
+			for(int i; i < sizeof(this.StartItems); i++)
+			{
+				IntToString(i, this.Spawn, sizeof(this.Spawn));
+				this.StartItems[i] = kv.GetNum(this.Spawn);
+			}
+
+			kv.GoBack();
+		}
+		else
+		{
+			this.StartItems = defaul.StartItems;
+		}
+
+		if(kv.JumpToKey("MaxItems"))
+		{
+			for(int i; i < sizeof(this.MaxItems); i++)
+			{
+				IntToString(i, this.Spawn, sizeof(this.Spawn));
+				this.MaxItems[i] = kv.GetNum(this.Spawn);
+			}
+
+			kv.GoBack();
+		}
+		else
+		{
+			this.MaxItems = defaul.MaxItems;
+		}
+
+		if(kv.JumpToKey("Precache"))
+		{
+			if(kv.GotoFirstSubKey(false))
+			{
+				do
+				{
+					kv.GetSectionName(this.Model, sizeof(this.Model));
+					if(this.Model[0])
+					{
+						kv.GetString(NULL_STRING, this.Spawn, sizeof(this.Spawn));
+
+						if(this.Spawn[0] == 'm')	// mdl, model, mat, material
+						{
+							PrecacheModel(this.Model);
+						}
+						else if(this.Spawn[0] == 'g' || this.Spawn[2] == 'r')	// gs, gamesound, script
+						{
+							PrecacheScriptSound(this.Model);
+						}
+						else if(this.Spawn[0] == 's')
+						{
+							if(this.Spawn[1] == 'e')	// sentence
+							{
+								PrecacheSentenceFile(this.Model);
+							}
+							else	// snd, sound
+							{
+								PrecacheSound(this.Model);
+							}
+						}
+						else if(this.Spawn[0] == 'd')	// decal
+						{
+							PrecacheDecal(this.Model);
+						}
+						else if(this.Spawn[0])	// generic
+						{
+							PrecacheGeneric(this.Model);
+						}
+					}
+				}
+				while(kv.GotoNextKey(false));
+
+				kv.GoBack();
+			}
+
+			kv.GoBack();
+		}
+
+		if(kv.JumpToKey("Downloads"))
+		{
+			if(kv.GotoFirstSubKey(false))
+			{
+				int table = FindStringTable("downloadables");
+				bool save = LockStringTables(false);
+
+				do
+				{
+					kv.GetSectionName(this.Model, sizeof(this.Model));
+					if(!FileExists(this.Model, true))
+					{
+						LogError("[Config] '%s' has missing file '%s' in 'Downloads'", this.Name, this.Model);
+						continue;
+					}
+
+					AddToStringTable(table, this.Model);
+				}
+				while(kv.GotoNextKey(false));
+
+				LockStringTables(save);
+				kv.GoBack();
+			}
+
+			kv.GoBack();
+		}
+
+		kv.GetString("model", this.Model, sizeof(this.Model), defaul.Model);
+		if(this.Model[0])
+			PrecacheModel(this.Model);
+		
+		kv.GetString("spawn", this.Spawn, sizeof(this.Spawn), defaul.Spawn);
+
+		this.FuncCanTalkTo = KvGetFunction(kv, "func_cantalkto", defaul.FuncCanTalkTo);
+		this.FuncCommand = KvGetFunction(kv, "func_clientcommand", defaul.FuncCommand);
+		this.FuncMusic = KvGetFunction(kv, "func_music", defaul.FuncMusic);
+		this.FuncPlayerRunCmd = KvGetFunction(kv, "func_playerruncmd", defaul.FuncPlayerRunCmd);
+		this.FuncPrecache = KvGetFunction(kv, "func_precache", defaul.FuncPrecache);
+		this.FuncSetClass = KvGetFunction(kv, "func_setclass", defaul.FuncSetClass);
+		this.FuncTransmitSee = KvGetFunction(kv, "func_transmitsee", defaul.FuncTransmitSee);
+		this.FuncTransmitSelf = KvGetFunction(kv, "func_transmitself", defaul.FuncTransmitSelf);
+		this.FuncUpdateSpeed = KvGetFunction(kv, "func_updatespeed", defaul.FuncUpdateSpeed);
+		return pos;
+	}
+
+	void SetDefaultValues()
+	{
+		this.FuncCanTalkTo = INVALID_FUNCTION;
+		this.FuncCommand = INVALID_FUNCTION;
+		this.FuncMusic = INVALID_FUNCTION;
+		this.FuncPlayerRunCmd = INVALID_FUNCTION;
+		this.FuncPrecache = INVALID_FUNCTION;
+		this.FuncSetClass = INVALID_FUNCTION;
+		this.FuncTransmitSee = INVALID_FUNCTION;
+		this.FuncTransmitSelf = INVALID_FUNCTION;
+		this.FuncUpdateSpeed = INVALID_FUNCTION;
+	}
+
+	Function GetFuncOf(int pos)
+	{
+		return GetItemInArray(this, pos);
 	}
 }
 
-static ArrayList Classes;
-static bool AskClass;
+static ArrayList ClassList;
 
-void Classes_Setup(KeyValues main, KeyValues map, ArrayList whitelist)
+void Classes_PluginStart()
 {
-	AskClass = false;
-	if(Classes != INVALID_HANDLE)
-		delete Classes;
+	RegAdminCmd("scp_setclass", SetClassCommand, ADMFLAG_SLAY, "Sets a player's class");
+}
 
-	Classes = new ArrayList(sizeof(ClassEnum));
+static Action SetClassCommand(int client, int args)
+{
+	SetGlobalTransTarget(client);
 
-	KeyValues kv = main;
-	if(map)
+	if(!args)
 	{
-		map.Rewind();
-		if(map.JumpToKey("Classes"))
-			kv = map;
+		ClassEnum class;
+		for(int i; Classes_GetByIndex(i, class); i++)
+		{
+			ReplyToCommand(client, "%t | @%s", class.Display, class.Name);
+		}
+
+		if(GetCmdReplySource() == SM_REPLY_TO_CHAT)
+			ReplyToCommand(client, "[SM] %t", "See console for output");
+
+		return Plugin_Handled;
 	}
 
-	ClassEnum defaul;
-	defaul.SetDefaults();
+	if(args != 2)
+	{
+		ReplyToCommand(client, "[SM] Usage: scp_setclass [target] [class]");
+		return Plugin_Handled;
+	}
+
+	char pattern[PLATFORM_MAX_PATH];
+	GetCmdArg(2, pattern, sizeof(pattern));
+
+	char targetName[MAX_TARGET_LENGTH];
+
+	SetGlobalTransTarget(client);
+
+	int index;
+	bool found;
+	ClassEnum class;
+	while(Classes_GetByIndex(index, class))
+	{
+		FormatEx(targetName, sizeof(targetName), "%t", class.Display);
+		if(StrContains(targetName, pattern, false) != -1)
+		{
+			found = true;
+			break;
+		}
+
+		index++;
+	}
+
+	if(!found)
+	{
+		index = 0;
+		while(Classes_GetByIndex(index, class))
+		{
+			if(StrContains(class.Name, pattern, false) != -1)
+			{
+				found = true;
+				break;
+			}
+
+			index++;
+		}
+
+		if(!found)
+		{
+			ReplyToCommand(client, "[SM] Invalid class string");
+			return Plugin_Handled;
+		}
+	}
+
+	int targets[MAXPLAYERS+1], matches;
+	bool targetNounIsMultiLanguage;
+
+	GetCmdArg(1, pattern, sizeof(pattern));
+	if((matches=ProcessTargetString(pattern, client, targets, sizeof(targets), 0, targetName, sizeof(targetName), targetNounIsMultiLanguage)) < 1)
+	{
+		ReplyToTargetError(client, matches);
+		return Plugin_Handled;
+	}
+
+	for(int i; i < matches; i++)
+	{
+		Classes_SetClientClass(targets[i], index, ClassSpawn_Other);
+	}
+
+	if(targetNounIsMultiLanguage)
+	{
+		CShowActivity2(client, PREFIX, "Forced class %t to %t", class.Display, targetName);
+	}
+	else
+	{
+		CShowActivity2(client, PREFIX, "Forced class %t to %s", class.Display, targetName);
+	}
+
+	return Plugin_Handled;
+}
+
+void Classes_ConfigSetup(KeyValues map, ArrayList whitelist)
+{
+	delete ClassList;
+	ClassList = new ArrayList(sizeof(ClassEnum));
+
+	ClassEnum defaul, class;
+	BuildPath(Path_SM, class.Model, sizeof(class.Model), FOLDER_CONFIGS ... "/classes.cfg");
+
+	KeyValues kv = new KeyValues("Classes");
+	kv.ImportFromFile(class.Model);
+
+	defaul.SetDefaultValues();
+	
 	if(kv.JumpToKey("default"))
 	{
-		GrabKvValues(kv, defaul, defaul, -1);
-		kv.GoBack();
+		defaul.SetupEnum(kv, null, defaul);
+		kv.Rewind();
 	}
 
-	ClassEnum class;
-	if(kv.GotoFirstSubKey())
+	kv.GotoFirstSubKey();
+
+	if(map && map.JumpToKey("Classes"))
 	{
-		int count;
-		do
+		if(map.GotoFirstSubKey())
 		{
-			if(!kv.GetSectionName(class.Name, sizeof(class.Name)) || StrEqual(class.Name, "default"))
-				continue;
+			do
+			{
+				int pos = class.SetupEnum(kv, whitelist, defaul);
+				if(pos != -1)
+				{
+					ClassList.PushArray(class);
 
-			if(whitelist && whitelist.FindString(class.Name)==-1)
-				continue;
+					if(whitelist)	// Remove from whitelist to override default cfg
+						whitelist.Erase(pos);
+				}
+			}
+			while(map.GotoNextKey());
 
-			GrabKvValues(kv, class, defaul, count++);
-			Format(class.Display, sizeof(class.Display), "class_%s", class.Name);
-			if(!TranslationPhraseExists(class.Display))
-				strcopy(class.Display, sizeof(class.Display), "class_0");
+			map.GoBack();
+		}
 
-			Classes.PushArray(class);
-		} while(kv.GotoNextKey());
+		map.GoBack();
 	}
+
+	do
+	{
+		if(class.SetupEnum(kv, whitelist, defaul) != -1)
+			ClassList.PushArray(class);
+	}
+	while(kv.GotoNextKey());
+
+	int length = ClassList.Length;
+	for(int i; i < length; i++)
+	{
+		ClassList.GetArray(i, class);
+		if(class.FuncPrecache != INVALID_FUNCTION)
+		{
+			Call_StartFunction(null, class.FuncPrecache);
+			Call_PushCell(i);
+			Call_PushArrayEx(class, sizeof(class), SM_PARAM_COPYBACK);
+			Call_Finish();
+
+			ClassList.SetArray(i, class);
+		}
+	}
+
+	delete kv;
 }
 
-static void GrabKvValues(KeyValues kv, ClassEnum class, ClassEnum defaul, int index)
+static bool Call_StartClassFunc(int index, int pos)
 {
-	class.Class = KvGetClass(kv, "class", defaul.Class);
-	if(class.Class==TFClass_Unknown && index!=-1)
-		AskClass = true;
-
-	class.Speed = kv.GetFloat("speed", defaul.Speed);
-	class.Speak = kv.GetFloat("speak", defaul.Speak);
-	class.Hear = kv.GetFloat("hear", defaul.Hear);
-	class.SpeakTeam = kv.GetFloat("speak_team", defaul.SpeakTeam);
-	class.HearTeam = kv.GetFloat("hear_team", defaul.HearTeam);
-
-	class.Health = kv.GetNum("health", defaul.Health);
-	class.Group = kv.GetNum("group", defaul.Group);
-	class.Floor = kv.GetNum("floor", defaul.Floor);
-	class.Team = view_as<TFTeam>(kv.GetNum("team", view_as<int>(defaul.Team)));
-	class.Regen = view_as<bool>(kv.GetNum("regen", defaul.Regen ? 1 : 0));
-	class.Human = view_as<bool>(kv.GetNum("human", defaul.Human ? 1 : 0));
-	class.Vip = view_as<bool>(kv.GetNum("vip", defaul.Vip ? 1 : 0));
-	class.Driver = view_as<bool>(kv.GetNum("driver", defaul.Driver ? 1 : 0));
-	class.CanSprint = view_as<bool>(kv.GetNum("cansprint", defaul.CanSprint ? 1 : 0));
-	class.CanPickup = view_as<bool>(kv.GetNum("canpickup", defaul.CanPickup ? 1 : 0));
-
-	class.Color4 = defaul.Color4;
-	kv.GetColor4("color4", class.Color4);
-
-	class.OnAnimation = KvGetFunction(kv, "func_precache");
-	if(class.OnAnimation != INVALID_FUNCTION)
-	{
-		Call_StartFunction(null, class.OnAnimation);
-		Call_PushCell(index);
-		Call_Finish();
-	}
-
-	class.OnAnimation = KvGetFunction(kv, "func_animation", defaul.OnAnimation);
-	class.OnButton = KvGetFunction(kv, "func_button", defaul.OnButton);
-	class.OnCanSpawn = KvGetFunction(kv, "func_canspawn", defaul.OnCanSpawn);
-	class.OnCondAdded = KvGetFunction(kv, "func_condadded", defaul.OnCondAdded);
-	class.OnCondRemoved = KvGetFunction(kv, "func_condremove", defaul.OnCondRemoved);
-	class.OnDealDamage = KvGetFunction(kv, "func_dealdamage", defaul.OnDealDamage);
-	class.OnDeath = KvGetFunction(kv, "func_death", defaul.OnDeath);
-	class.OnDoorTouch = KvGetFunction(kv, "func_doortouch", defaul.OnDoorTouch);
-	class.OnDoorWalk = KvGetFunction(kv, "func_doorwalk", defaul.OnDoorWalk);
-	class.OnGlowPlayer = KvGetFunction(kv, "func_glow", defaul.OnGlowPlayer);
-	class.OnKeycard = KvGetFunction(kv, "func_keycard", defaul.OnKeycard);
-	class.OnKill = KvGetFunction(kv, "func_kill", defaul.OnKill);
-	class.OnMaxHealth = KvGetFunction(kv, "func_maxhealth", defaul.OnMaxHealth);
-	class.OnPickup = KvGetFunction(kv, "func_pickup", defaul.OnPickup);
-	class.OnSeePlayer = KvGetFunction(kv, "func_transmit", defaul.OnSeePlayer);
-	class.OnSound = KvGetFunction(kv, "func_sound", defaul.OnSound);
-	class.OnSpawn = KvGetFunction(kv, "func_spawn", defaul.OnSpawn);
-	class.OnSpeed = KvGetFunction(kv, "func_speed", defaul.OnSpeed);
-	class.OnTakeDamage = KvGetFunction(kv, "func_takedamage", defaul.OnTakeDamage);
-	class.OnTheme = KvGetFunction(kv, "func_theme", defaul.OnTheme);
-	class.OnWeaponSwitch = KvGetFunction(kv, "func_switch", defaul.OnWeaponSwitch);
-	class.OnVoiceCommand = KvGetFunction(kv, "func_voice", defaul.OnVoiceCommand);
+	static ClassEnum class;
+	if(!Classes_GetByIndex(index, class) || class.GetFuncOf(pos) == INVALID_FUNCTION)
+		return false;
 	
-	kv.GetString("spawn", class.Spawn, sizeof(class.Spawn), defaul.Spawn);
-	kv.GetString("color", class.Color, sizeof(class.Color), defaul.Color);
-
-	char num[6];
-	if(kv.JumpToKey("ammo"))
-	{
-		for(int i; i<sizeof(class.Ammo); i++)
-		{
-			IntToString(i, num, sizeof(num));
-			class.Ammo[i] = kv.GetNum(num, defaul.Ammo[i]);
-		}
-		kv.GoBack();
-	}
-	else
-	{
-		class.Ammo = defaul.Ammo;
-	}
-
-	if(kv.JumpToKey("maxammo"))
-	{
-		for(int i; i<sizeof(class.MaxAmmo); i++)
-		{
-			IntToString(i, num, sizeof(num));
-			class.MaxAmmo[i] = kv.GetNum(num, defaul.MaxAmmo[i]);
-		}
-		kv.GoBack();
-	}
-	else
-	{
-		class.MaxAmmo = defaul.MaxAmmo;
-	}
-
-	if(kv.JumpToKey("items"))
-	{
-		for(int i; i<sizeof(class.Items); i++)
-		{
-			IntToString(i+1, num, sizeof(num));
-			class.Items[i] = kv.GetNum(num, defaul.Items[i]);
-		}
-		kv.GoBack();
-	}
-	else
-	{
-		class.Items = defaul.Items;
-	}
-
-	if(kv.JumpToKey("maxitems"))
-	{
-		for(int i; i<sizeof(class.MaxItems); i++)
-		{
-			IntToString(i, num, sizeof(num));
-			class.MaxItems[i] = kv.GetNum(num, defaul.MaxItems[i]);
-		}
-		kv.GoBack();
-	}
-	else
-	{
-		class.MaxItems = defaul.MaxItems;
-	}
-
-	if(kv.JumpToKey("precache"))
-	{
-		for(int i=1; ; i++)
-		{
-			IntToString(i, num, sizeof(num));
-			kv.GetString(num, class.Model, sizeof(class.Model));
-			if(!class.Model[0])
-				break;
-
-			if(!FileExists(class.Model, true))
-			{
-				LogError("[Config] '%s' has missing file '%s' in 'precache'", class.Name, class.Model);
-				continue;
-			}
-
-			PrecacheModel(class.Model, true);
-		}
-		kv.GoBack();
-	}
-
-	if(kv.JumpToKey("precache_sound"))
-	{
-		for(int i=1; ; i++)
-		{
-			IntToString(i, num, sizeof(num));
-			kv.GetString(num, class.Model, sizeof(class.Model));
-			if(!class.Model[0])
-				break;
-
-			PrecacheSound(class.Model, true);
-		}
-		kv.GoBack();
-	}
-
-	if(kv.JumpToKey("downloads"))
-	{
-		int table = FindStringTable("downloadables");
-		bool save = LockStringTables(false);
-		for(int i=1; ; i++)
-		{
-			IntToString(i, num, sizeof(num));
-			kv.GetString(num, class.Model, sizeof(class.Model));
-			if(!class.Model[0])
-				break;
-
-			if(!FileExists(class.Model, true))
-			{
-				LogError("[Config] '%s' has missing file '%s' in 'downloads'", class.Name, class.Model);
-				continue;
-			}
-
-			AddToStringTable(table, class.Model);
-		}
-		LockStringTables(save);
-		kv.GoBack();
-	}
-	
-	// used to precache custom animations
-	kv.GetString("modelanim", class.Model, sizeof(class.Model));
-	if (class.Model[0]) 
-		PrecacheModel(class.Model, true);
-	
-	kv.GetString("modelalt", class.Model, sizeof(class.Model));
-	class.ModelAlt = class.Model[0] ? PrecacheModel(class.Model, true) : defaul.ModelAlt;	
-
-	kv.GetString("modelgibs", class.Model, sizeof(class.Model));
-	if (class.Model[0])
-	{
-		// max 8 gibs
-		// first one is relative path
-		char GibBuffers[8][PLATFORM_MAX_PATH];
-		int GibCount = ExplodeString(class.Model, ";", GibBuffers, sizeof(GibBuffers), sizeof(GibBuffers[]));
-		
-		for (int i = 1; i < GibCount; i++)
-		{
-			Format(class.Model, sizeof(class.Model), "%s%s.mdl", GibBuffers[0], GibBuffers[i]);
-			PrecacheModel(class.Model, true);
-		}
-	}
-
-	kv.GetString("model", class.Model, sizeof(class.Model), defaul.Model);
-	class.ModelIndex = class.Model[0] ? PrecacheModel(class.Model, true) : defaul.ModelIndex;
+	Call_StartFunction(null, class.FuncSetClass);
+	return true;
 }
 
 bool Classes_GetByIndex(int index, ClassEnum class)
 {
-	if(!Classes || index<0 || index>=Classes.Length)
+	if(index < 0 || index >= ClassList.Length)
 		return false;
 
-	Classes.GetArray(index, class);
+	ClassList.GetArray(index, class);
 	return true;
 }
 
 int Classes_GetByName(const char[] name, ClassEnum class = {})
 {
-	int length = Classes.Length;
-	for(int i; i<length; i++)
+	int length = ClassList.Length;
+	for(int i; i < length; i++)
 	{
-		Classes.GetArray(i, class);
+		ClassList.GetArray(i, class);
 		if(StrEqual(name, class.Name, false))
 			return i;
 	}
+
 	return -1;
 }
 
-bool Classes_AssignClass(int client, ClassSpawnEnum context, int &index)
+Action Classes_SetClientClass(int client, int index, ClassSpawnEnum context)
 {
 	ClassEnum class;
-	if(!Classes_GetByIndex(index, class))
+	Classes_GetByIndex(index, class);
+
+	Action action = Forwards_OnClassPre(client, context, class.Name, sizeof(class.Name));
+	switch(action)
 	{
-		index = 0;
-		Classes_GetByIndex(index, class);
+		case Plugin_Changed:
+		{
+			Client(client).Class = Classes_GetByName(class.Name, class);
+		}
+		case Plugin_Handled, Plugin_Stop:
+		{
+			return action;
+		}
+		default:
+		{
+			Client(client).Class = index;
+		}
 	}
 
-	switch(Forward_OnClassPre(client, context, class.Name, sizeof(class.Name)))
+	if(Call_StartClassFunc(Client(client).Class, ClassEnum::FuncSetClass))
 	{
-		case Plugin_Changed, Plugin_Handled:
+		Call_PushCell(client);
+		Call_Finish();
+	}
+
+	switch(context)
+	{
+		case ClassSpawn_Other:
 		{
-			index = Classes_GetByName(class.Name);
-			if(index == -1)
-				index = 0;
+			TF2_RegeneratePlayer(client);
 		}
-		case Plugin_Stop:
+		case ClassSpawn_WaveSystem, ClassSpawn_Escape, ClassSpawn_Revive:
 		{
-			return false;
+			TF2_RespawnPlayer(client);
 		}
 	}
-	return true;
+
+	Forwards_OnClassPost(client, context, class.Name);
+	
+	return action;
 }
 
-void Classes_AssignClassPost(int client, ClassSpawnEnum context)
+void Classes_UpdateSpeed(int client)
 {
-	ClassEnum class;
-	if(Classes_GetByIndex(Client[client].Class, class))
-		Forward_OnClass(client, context, class.Name);
-}
+	float multi = 1.0;
 
-void Classes_PlayerSpawn(int client)
-{
 	ClassEnum class;
-	if(Classes_GetByIndex(Client[client].Class, class))
+	if(Classes_GetByIndex(Client(client).Class, class))
 	{
-		Client[client].Colors = class.Color4;
-		for(int i; i<3; i++)
-		{
-			if(Client[client].ColorBlind[i] >= 0)
-				Client[client].Colors[i] = Client[client].ColorBlind[i];
-		}
+		float speed = class.Speed;
 
-		bool result;
-		if(class.OnSpawn != INVALID_FUNCTION)
+		if(Call_StartClassFunc(Client(client).Class, ClassEnum::FuncUpdateSpeed))
 		{
-			Call_StartFunction(null, class.OnSpawn);
 			Call_PushCell(client);
-			Call_Finish(result);
+			Call_PushFloatRef(speed);
+			Call_Finish();
 		}
 
-		if(!result)
+		if(speed > 0.0)
 		{
-			// Teleport to spawn point
-			ChangeClientTeamEx(client, class.Team);
-			Classes_SpawnPoint(client, Client[client].Class);
-
-			// Show class info
-			Client[client].HudIn = GetGameTime()+9.9;
-			CreateTimer(2.0, ShowClassInfoTimer, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
-
-			// Model stuff
-			SetVariantString(class.Model);
-			AcceptEntityInput(client, "SetCustomModel");
-			SetEntProp(client, Prop_Send, "m_bUseClassAnimations", true);
-			SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", class.ModelIndex, _, 0);
-			SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", class.ModelAlt, _, 3);
-			TF2_CreateGlow(client, class.Model);
-
-			// Reset health
-			SetEntityHealth(client, class.Health);
-
-			// Weapon stuff
-			int i;
-			for(; i<sizeof(class.Items); i++)
+			// Apply correct multipler per class
+			switch(TF2_GetPlayerClass(client))
 			{
-				if(!class.Items[i])
-					break;
-
-				Items_CreateWeapon(client, class.Items[i], !i, true);
+				case TFClass_Scout:
+					multi = speed / 400.0;
+				
+				case TFClass_Soldier:
+					multi = speed / 240.0;
+				
+				case TFClass_DemoMan:
+					multi = speed / 280.0;
+				
+				case TFClass_Heavy:
+					multi = speed / 230.0;
+				
+				case TFClass_Medic, TFClass_Spy:
+					multi = speed / 320.0;
+				
+				default:
+					multi = speed / 300.0;
 			}
-
-			if(i > 1)
-				Items_ShowItemMenu(client);
-
-			// Ammo stuff
-			for(i=0; i<AMMO_MAX; i++)
-			{
-				SetEntProp(client, Prop_Data, "m_iAmmo", class.Ammo[i], _, i);
-			}
-
-			// Other stuff
-			TF2_AddCondition(client, TFCond_NoHealingDamageBuff, 1.0);
-			TF2_AddCondition(client, TFCond_DodgeChance, 3.0);
-			TF2Attrib_SetByDefIndex(client, 49, 1.0);
 		}
 	}
-}
 
-void Classes_SpawnPoint(int client, int index)
-{
-	ClassEnum class;
-	if(Classes_GetByIndex(index, class) && class.Spawn[0])
-	{
-		ArrayList list = new ArrayList();
-		int entity = -1;
-		static char name[32];
-		while((entity=FindEntityByClassname(entity, "info_target")) != -1)
-		{
-			GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
-			if(!StrContains(name, class.Spawn, false))
-				list.Push(entity);
-		}
-
-		int length = list.Length;
-		if(!length && !class.Human)	// Temp backwards compability
-		{
-			entity = -1;
-			while((entity=FindEntityByClassname(entity, "info_target")) != -1)
-			{
-				GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
-				if(StrEqual(name, "scp_spawn_p", false))
-					list.Push(entity);
-			}
-
-			length = list.Length;
-			if(!length)
-			{
-				Client[client].InvisFor = GetGameTime()+30.0;
-
-				DataPack pack;
-				CreateDataTimer(1.0, Timer_Stun, pack, TIMER_FLAG_NO_MAPCHANGE);
-				pack.WriteCell(GetClientUserId(client));
-				pack.WriteFloat(29.0);
-				pack.WriteFloat(1.0);
-				pack.WriteCell(TF_STUNFLAGS_NORMALBONK|TF_STUNFLAG_NOSOUNDOREFFECT);
-				delete list;
-				return;
-			}
-		}
-
-		if(length)
-		{
-			entity = list.Get(GetRandomInt(0, length-1));
-
-			static float pos[3], ang[3];
-			GetEntPropVector(entity, Prop_Data, "m_vecAbsOrigin", pos);
-			GetEntPropVector(entity, Prop_Data, "m_vecAbsOrigin", ang);
-			ang[0] = 0.0;
-			ang[2] = 0.0;
-			TeleportEntity(client, pos, ang, NULL_VECTOR);
-		}
-
-		delete list;
-	}
+	TF2Attrib_SetByName(client, "move speed bonus", multi);
+	SDKCalls_SetSpeed(client);
 }
 
 int Classes_GetMaxAmmo(int client, int type)
 {
-	if(type>=0 && type<AMMO_MAX)
+	if(type >= 0 && type < Ammo_MAX)
 	{
 		ClassEnum class;
-		if(Classes_GetByIndex(Client[client].Class, class))
+		if(Classes_GetByIndex(Client(client).Class, class))
+			return class.MaxAmmo[type];
+	}
+	return -1;
+}
+
+bool Classes_IsDeadClass(int client)
+{
+	ClassEnum class;
+	Classes_GetByIndex(Client(client).Class, class);
+	return class.DeadClass;
+}
+
+void Classes_CanTalkTo(int client, int target, float &range, float &defaultRange)
+{
+	ClassEnum class;
+	if(Classes_GetByIndex(Client(client).Class, class))
+	{
+		defaultRange = GetClientTeam(client) == GetClientTeam(target) ? class.SpeakAllyDist : class.SpeakOtherDist;
+		range = defaultRange;
+
+		if(Call_StartClassFunc(Client(client).Class, ClassEnum::FuncCanTalkTo))
 		{
-			int ammo = class.MaxAmmo[type];
-			if(ammo > 0)
-				return ammo;
+			Call_PushCell(client);
+			Call_PushCell(target);
+			Call_PushFloatRef(range);
+			Call_Finish();
 		}
 	}
-	return 0;
 }
 
-void Classes_GetMaxAmmoList(int client, int ammo[AMMO_MAX])
+Action Classes_PlayerRunCmd(int client, int &button)
 {
-	ClassEnum class;
-	if(Classes_GetByIndex(Client[client].Class, class))
-	{
-		for(int i; i<AMMO_MAX; i++)
-		{
-			ammo[i] = class.MaxAmmo[i];
-		}
-	}
-}
+	Action action = Plugin_Continue;
 
-int Classes_GetMaxItems(int client, int type)
-{
-	if(type>=0 && type<ITEMS_MAX)
+	if(Call_StartClassFunc(Client(client).Class, ClassEnum::FuncPlayerRunCmd))
 	{
-		ClassEnum class;
-		if(Classes_GetByIndex(Client[client].Class, class))
-			return class.MaxItems[type];
-	}
-	return 0;
-}
-
-int Classes_GetMaxHealth(int client)
-{
-	ClassEnum class;
-	if(!Classes_GetByIndex(Client[client].Class, class))
-		return 125;
-
-	int health = class.Health;
-	if(class.OnMaxHealth != INVALID_FUNCTION)
-	{
-		Call_StartFunction(null, class.OnMaxHealth);
 		Call_PushCell(client);
-		Call_PushCellRef(health);
-		Call_Finish();
+		Call_PushCellRef(button);
+		Call_Finish(action);
 	}
-	return health;
+
+	return action;
 }
 
-bool Classes_AskForClass()
+bool Classes_ClientCommand(int client, const char[] command)
 {
-	return AskClass;
-}
+	bool block;
 
-stock bool IsSCP(int client)
-{
-	ClassEnum class;
-	Classes_GetByIndex(Client[client].Class, class);
-	return !class.Human;
-}
-
-stock bool IsCanPickup(int client)
-{
-	ClassEnum class;
-	Classes_GetByIndex(Client[client].Class, class); 
-	if(class.CanPickup)
-		return true;
-
-	return false;
-}
-
-Action Classes_OnAnimation(int client, PlayerAnimEvent_t &anim, int &data)
-{
-	Action result = Plugin_Continue;
-	ClassEnum class;
-	if(Classes_GetByIndex(Client[client].Class, class) && class.OnAnimation!=INVALID_FUNCTION)
+	if(Call_StartClassFunc(Client(client).Class, ClassEnum::FuncCommand))
 	{
-		Call_StartFunction(null, class.OnAnimation);
 		Call_PushCell(client);
-		Call_PushCellRef(anim);
-		Call_PushCellRef(data);
-		Call_Finish(result);
+		Call_PushString(command);
+		Call_Finish(block);
 	}
-	return result;
+
+	return block;
 }
 
-void Classes_OnButton(int client, int button)
+void Classes_PlayMusic(int client, char filepath[PLATFORM_MAX_PATH], int &length)
 {
-	ClassEnum class;
-	if(!Classes_GetByIndex(Client[client].Class, class) || class.OnButton==INVALID_FUNCTION)
-		return;
-
-	Call_StartFunction(null, class.OnButton);
-	Call_PushCell(client);
-	Call_PushCell(button);
-	Call_Finish();
-}
-
-void Classes_OnCondAdded(int client, TFCond cond)
-{
-	ClassEnum class;
-	if(!Classes_GetByIndex(Client[client].Class, class) || class.OnCondAdded==INVALID_FUNCTION)
-		return;
-
-	Call_StartFunction(null, class.OnCondAdded);
-	Call_PushCell(client);
-	Call_PushCell(cond);
-	Call_Finish();
-}
-
-void Classes_OnCondRemoved(int client, TFCond cond)
-{
-	ClassEnum class;
-	if(!Classes_GetByIndex(Client[client].Class, class) || class.OnCondRemoved==INVALID_FUNCTION)
-		return;
-
-	Call_StartFunction(null, class.OnCondRemoved);
-	Call_PushCell(client);
-	Call_PushCell(cond);
-	Call_Finish();
-}
-
-Action Classes_OnDealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
-{
-	Action result = Plugin_Continue;
-	ClassEnum class;
-	if(Classes_GetByIndex(Client[client].Class, class) && class.OnDealDamage!=INVALID_FUNCTION)
+	if(Call_StartClassFunc(Client(client).Class, ClassEnum::FuncMusic))
 	{
-		Call_StartFunction(null, class.OnDealDamage);
 		Call_PushCell(client);
-		Call_PushCell(victim);
-		Call_PushCellRef(inflictor);
-		Call_PushFloatRef(damage);
-		Call_PushCellRef(damagetype);
-		Call_PushCellRef(weapon);
-		Call_PushArrayEx(damageForce, 3, SM_PARAM_COPYBACK);
-		Call_PushArrayEx(damagePosition, 3, SM_PARAM_COPYBACK);
-		Call_PushCell(damagecustom);
-		Call_Finish(result);
-	}
-	return result;
-}
-
-bool Classes_OnDeath(int client, Event event)
-{
-	bool result;
-	ClassEnum class;
-	if(Classes_GetByIndex(Client[client].Class, class) && class.OnDeath!=INVALID_FUNCTION)
-	{
-		Call_StartFunction(null, class.OnDeath);
-		Call_PushCell(client);
-		Call_PushCell(event);
-		Call_Finish(result);
-	}
-	return result;
-}
-
-void Classes_OnDoorTouch(int client, int entity)
-{
-	ClassEnum class;
-	if(Classes_GetByIndex(Client[client].Class, class) && class.OnDoorTouch!=INVALID_FUNCTION)
-	{
-		Call_StartFunction(null, class.OnDoorTouch);
-		Call_PushCell(client);
-		Call_PushCell(entity);
+		Call_PushStringEx(filepath, sizeof(filepath), SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
+		Call_PushCellRef(length);
 		Call_Finish();
 	}
 }
 
-bool Classes_OnDoorWalk(int client, int entity)
+bool Classes_Transmit(int client, int target)
 {
-	bool result = false;
-	ClassEnum class;
-	if(Classes_GetByIndex(Client[client].Class, class) && class.OnDoorWalk!=INVALID_FUNCTION)
+	bool blocked;
+
+	if(Call_StartClassFunc(Client(client).Class, ClassEnum::FuncTransmitSee))
 	{
-		Call_StartFunction(null, class.OnDoorWalk);
 		Call_PushCell(client);
-		Call_PushCell(entity);
-		Call_Finish(result);
+		Call_PushCell(target);
+		Call_Finish(blocked);
 	}
-	return result;
-}
 
-bool Classes_OnGlowPlayer(int client, int victim)
-{
-	bool result;
-	ClassEnum class;
-	if(Classes_GetByIndex(Client[client].Class, class) && class.OnGlowPlayer!=INVALID_FUNCTION)
+	if(!blocked && Call_StartClassFunc(Client(target).Class, ClassEnum::FuncTransmitSelf))
 	{
-		Call_StartFunction(null, class.OnGlowPlayer);
+		Call_PushCell(target);
 		Call_PushCell(client);
-		Call_PushCell(victim);
-		Call_Finish(result);
-	}
-	return result;
-}
-
-bool Classes_OnKeycard(int client, any access, int &value)
-{
-	ClassEnum class;
-	if(!Classes_GetByIndex(Client[client].Class, class) || class.OnKeycard==INVALID_FUNCTION)
-		return false;
-
-	Call_StartFunction(null, class.OnKeycard);
-	Call_PushCell(client);
-	Call_PushCell(access);
-	Call_Finish(value);
-	return true;
-}
-
-void Classes_OnKill(int client, int victim)
-{
-	ClassEnum class;
-	if(!Classes_GetByIndex(Client[client].Class, class) || class.OnKill==INVALID_FUNCTION)
-		return;
-
-	Call_StartFunction(null, class.OnKill);
-	Call_PushCell(client);
-	Call_PushCell(victim);
-	Call_Finish();
-}
-
-bool Classes_OnPickup(int client, int entity)
-{
-	bool result;
-	ClassEnum class;
-	if(Classes_GetByIndex(Client[client].Class, class) && class.OnPickup!=INVALID_FUNCTION)
-	{
-		Call_StartFunction(null, class.OnPickup);
-		Call_PushCell(client);
-		Call_PushCell(entity);
-		Call_Finish(result);
-	}
-	return result;
-}
-
-bool Classes_OnSeePlayer(int client, int victim)
-{
-	bool result = true;
-	ClassEnum class;
-	if(Classes_GetByIndex(Client[client].Class, class) && class.OnSeePlayer!=INVALID_FUNCTION)
-	{
-		Call_StartFunction(null, class.OnSeePlayer);
-		Call_PushCell(client);
-		Call_PushCell(victim);
-		Call_Finish(result);
-	}
-	return result;
-}
-
-bool Classes_OnSound(Action &result, int client, char sample[PLATFORM_MAX_PATH], int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
-{
-	ClassEnum class;
-	if(!Classes_GetByIndex(Client[client].Class, class) || class.OnSound==INVALID_FUNCTION)
-		return false;
-
-	Call_StartFunction(null, class.OnSound);
-	Call_PushCell(client);
-	Call_PushStringEx(sample, PLATFORM_MAX_PATH, SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
-	Call_PushCellRef(channel);
-	Call_PushFloatRef(volume);
-	Call_PushCellRef(level);
-	Call_PushCellRef(pitch);
-	Call_PushCellRef(flags);
-	Call_PushStringEx(soundEntry, PLATFORM_MAX_PATH, SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
-	Call_PushCellRef(seed);
-	Call_Finish(result);
-	return true;
-}
-
-void Classes_OnSpeed(int client, float &speed)
-{
-	ClassEnum class;
-	if(!Classes_GetByIndex(Client[client].Class, class) || class.OnSpeed==INVALID_FUNCTION)
-		return;
-
-	Call_StartFunction(null, class.OnSpeed);
-	Call_PushCell(client);
-	Call_PushFloatRef(speed);
-	Call_Finish();
-}
-
-Action Classes_OnTakeDamage(int client, int attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
-{
-	Action result = Plugin_Continue;
-	ClassEnum class;
-	if(Classes_GetByIndex(Client[client].Class, class) && class.OnTakeDamage!=INVALID_FUNCTION)
-	{
-		Call_StartFunction(null, class.OnTakeDamage);
-		Call_PushCell(client);
-		Call_PushCell(attacker);
-		Call_PushCellRef(inflictor);
-		Call_PushFloatRef(damage);
-		Call_PushCellRef(damagetype);
-		Call_PushCellRef(weapon);
-		Call_PushArrayEx(damageForce, 3, SM_PARAM_COPYBACK);
-		Call_PushArrayEx(damagePosition, 3, SM_PARAM_COPYBACK);
-		Call_PushCell(damagecustom);
-		Call_Finish(result);
-	}
-	return result;
-}
-
-float Classes_OnTheme(int client, char path[PLATFORM_MAX_PATH])
-{
-	float result;
-	ClassEnum class;
-	if(Classes_GetByIndex(Client[client].Class, class) && class.OnTheme!=INVALID_FUNCTION)
-	{
-		Call_StartFunction(null, class.OnTheme);
-		Call_PushCell(client);
-		Call_PushStringEx(path, PLATFORM_MAX_PATH, SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
-		Call_Finish(result);
-	}
-	return result;
-}
-
-void Classes_OnWeaponSwitch(int client, int entity)
-{
-	ClassEnum class;
-	if(!Classes_GetByIndex(Client[client].Class, class) || class.OnWeaponSwitch==INVALID_FUNCTION)
-		return;
-
-	Call_StartFunction(null, class.OnWeaponSwitch);
-	Call_PushCell(client);
-	Call_PushCell(entity);
-	Call_Finish();
-}
-
-bool Classes_OnVoiceCommand(int client)
-{
-	bool result;
-	ClassEnum class;
-	if(Classes_GetByIndex(Client[client].Class, class) && class.OnVoiceCommand!=INVALID_FUNCTION)
-	{
-		Call_StartFunction(null, class.OnVoiceCommand);
-		Call_PushCell(client);
-		Call_Finish(result);
-	}
-	return result;
-}
-
-public bool Classes_GhostSpawn(int client)
-{
-	ClassEnum class;
-	if(!Classes_GetByIndex(Client[client].Class, class))
-		return false;
-
-	TF2_AddCondition(client, TFCond_HalloweenGhostMode);
-
-	SetVariantString(class.Model);
-	AcceptEntityInput(client, "SetCustomModel");
-	SetEntProp(client, Prop_Send, "m_bUseClassAnimations", true);
-
-	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", (Client[client].IsVip ? class.ModelAlt : class.ModelIndex), _, 0);
-	SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", (Client[client].IsVip ? class.ModelAlt : class.ModelIndex), _, 3);
-
-	if(IsFakeClient(client))
-		TeleportEntity(client, TRIPLE_D, NULL_VECTOR, NULL_VECTOR);
-
-	return true;
-}
-
-public bool Classes_VipSpawn(int client)
-{
-	ClassEnum class;
-	if(Classes_GetByIndex(Client[client].Class, class))
-	{
-		switch(class.Group)
-		{
-			case 0:
-				Gamemode_AddValue("ptotal");
-
-			case 1:
-				Gamemode_AddValue("dtotal");
-
-			default:
-				Gamemode_AddValue("stotal");
-		}
-	}
-	return false;
-}
-
-public void Classes_MoveToSpec(int client, Event event)
-{
-	char buffer[16] = "spec";
-	int index = Classes_GetByName(buffer);
-	if(Classes_AssignClass(client, ClassSpawn_Death, index))
-	{
-		Client[client].Class = index;
-		Classes_AssignClassPost(client, ClassSpawn_Death);
-	}
-}
-
-public bool Classes_DeathScp(int client, Event event)
-{
-	ClassEnum clientClass;
-	Classes_GetByIndex(Client[client].Class, clientClass);
-
-	Gamemode_AddValue("pkill");
-
-	ClassEnum attackerClass;
-	int attacker = GetClientOfUserId(event.GetInt("attacker"));
-	if(attacker!=client && IsValidClient(attacker) && Classes_GetByIndex(Client[attacker].Class, attackerClass))
-	{
-		int weapon = event.GetInt("weaponid");
-		if(weapon>MaxClients && HasEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")==ITEM_INDEX_MICROHID)
-			GiveAchievement(Achievement_KillSCPMirco, attacker);
-
-		if(StrEqual(attackerClass.Name, "sci"))
-			GiveAchievement(Achievement_KillSCPSci, attacker);
-
-		Config_DoReaction(attacker, "killscp");
-
-		// 10% reward
-		Classes_ApplyKarmaBonus(attacker, 10.0, false);
-
-		ClassEnum assisterClass;
-		int assister = GetClientOfUserId(event.GetInt("assister"));
-		if(assister!=client && IsValidClient(assister) && Classes_GetByIndex(Client[assister].Class, assisterClass))
-		{
-			if(StrEqual(assisterClass.Name, "sci"))
-				GiveAchievement(Achievement_KillSCPSci, assister);
-
-			Config_DoReaction(assister, "killscp");
-
-			// 10% bonus for helping
-			Classes_ApplyKarmaBonus(assister, 10.0, false);
-
-			CPrintToChatAll("%s%t", PREFIX, "scp_killed_duo", clientClass.Color, clientClass.Display, attackerClass.Color, attackerClass.Display, assisterClass.Color, assisterClass.Display);
-		}
-		else
-		{
-			CPrintToChatAll("%s%t", PREFIX, "scp_killed", clientClass.Color, clientClass.Display, attackerClass.Color, attackerClass.Display);
-		}
-
-		if(attackerClass.Group==2 || assisterClass.Group==2)
-			Gamemode_GiveTicket(2, 5);
-	}
-	else
-	{
-		int damage = event.GetInt("damagebits");
-		if(damage & DMG_SHOCK)
-		{
-			CPrintToChatAll("%s%t", PREFIX, "scp_killed", clientClass.Color, clientClass.Display, "gray", "tesla_gate");
-		}
-		else if(damage & DMG_NERVEGAS)
-		{
-			CPrintToChatAll("%s%t", PREFIX, "scp_killed", clientClass.Color, clientClass.Display, "gray", "femur_breaker");
-		}
-		else if(damage & DMG_BLAST)
-		{
-			CPrintToChatAll("%s%t", PREFIX, "scp_killed", clientClass.Color, clientClass.Display, "gray", "alpha_warhead");
-		}
-		else if(damage & DMG_POISON)
-		{
-			CPrintToChatAll("%s%t", PREFIX, "scp_killed", clientClass.Color, clientClass.Display, "gray", "light_decontamination");
-		}
-		else
-		{
-			CPrintToChatAll("%s%t", PREFIX, "scp_killed", clientClass.Color, clientClass.Display, "black", "redacted");
-		}
+		Call_Finish(blocked);
 	}
 
-	Classes_MoveToSpec(client, event);
-	return true;
-}
-
-public void Classes_PlayDeathAnimation(int client, const char[] modelname, const char[] animation, const char[] soundname, float removetime)
-{
-	float pos[3];
-	GetEntPropVector(client, Prop_Send, "m_vecOrigin", pos);
-		
-	if (!(GetEntityFlags(client) & FL_ONGROUND))
-	{
-		// try snap to floor if not on ground
-		TR_TraceRayFilter(pos, view_as<float>({90.0, 0.0, 0.0}), MASK_SOLID, RayType_Infinite, Trace_OnlyHitWorld);
-		if (!TR_DidHit())
-			return;
-		
-		TR_GetEndPosition(pos);
-	}	
-	
-	int entity = CreateEntityByName("prop_dynamic_override");
-	if (!IsValidEntity(entity))
-		return;
-
-	RequestFrame(RemoveRagdoll, GetClientUserId(client));
-	TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
-	
-	DispatchKeyValue(entity, "skin", "0");	
-	DispatchKeyValue(entity, "model", modelname);
-
-	float angles[3];
-	GetClientEyeAngles(client, angles);
-	angles[0] = 0.0;
-	angles[2] = 0.0;
-	DispatchKeyValueVector(entity, "angles", angles);
-	
-	DispatchSpawn(entity);
-
-	SetEntProp(entity, Prop_Send, "m_CollisionGroup", 2);
-	SetVariantString(animation);
-	AcceptEntityInput(entity, "SetAnimation");
-	
-	if (soundname[0])
-	{
-		EmitSoundToAll2(soundname, client, SNDCHAN_AUTO, SNDLEVEL_SCREAMING, _, _, _, client);
-	}
-	
-	if (removetime > 0.0)
-	{
-		CreateTimer(removetime, Timer_RemoveEntity, EntIndexToEntRef(entity));
-	}
-}
-
-public void Classes_KillDBoi(int client, int victim)
-{
-	if(Classes_GetByName("sci") == Client[victim].Class)
-	{
-		if(Items_OnKeycard(victim, Access_Main))
-			GiveAchievement(Achievement_KillSci, client);
-
-		ClassEnum class;
-		if(Classes_GetByIndex(Client[client].Class, class))
-			Gamemode_GiveTicket(class.Group, 1);
-	}
-}
-
-public void Classes_KillChaos(int client, int victim)
-{
-	if(Classes_GetByName("sci") == Client[victim].Class)
-	{
-		ClassEnum class;
-		if(Classes_GetByIndex(Client[client].Class, class))
-			Gamemode_GiveTicket(class.Group, 1);
-	}
-	else
-	{
-		ClassEnum class;
-		if(Classes_GetByIndex(Client[victim].Class, class) && class.Group==2 && Classes_GetByIndex(Client[client].Class, class))
-			Gamemode_GiveTicket(class.Group, 1);
-	}
-}
-
-public void Classes_KillSci(int client, int victim)
-{
-	if(Classes_GetByName("dboi") == Client[victim].Class)
-		GiveAchievement(Achievement_KillDClass, client);
-}
-
-public void Classes_KillMtf(int client, int victim)
-{
-	if ((Classes_GetByName("dboi") != Client[victim].Class) && !GetRandomInt(0, 3))
-	{
-		ClassEnum class;
-		if(Classes_GetByIndex(Client[victim].Class, class) && class.Group==1 && Classes_GetByIndex(Client[client].Class, class))
-			Gamemode_GiveTicket(class.Group, 1);
-	}
-}
-
-public Action Classes_TakeDamageHuman(int client, int attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
-{
-	if(attacker<1 || attacker>MaxClients)
-	{
-		if(damagetype & DMG_CRUSH)
-		{
-			float engineTime = GetGameTime();
-			static float delay[MAXPLAYERS + 1];
-			if(delay[client] > engineTime)
-				return Plugin_Handled;
-
-			delay[client] = engineTime+0.05;
-		}
-		else if(damagetype & DMG_FALL)
-		{
-			damage *= 5.0;
-			return Plugin_Changed;
-		}
-
-		if(TF2_IsPlayerInCondition(client, TFCond_DefenseBuffNoCritBlock))
-		{
-			int health = GetClientHealth(client);
-			if(damage >= health)
-				CreateTimer(0.5, Achievement_AdrenCheck, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
-		}
-	}
-	else if(!CvarFriendlyFire.BoolValue)
-	{
-		if(Client[client].Disarmer && Client[client].Disarmer!=attacker && IsFriendly(Client[Client[client].Disarmer].Class, Client[attacker].Class))
-			return Plugin_Handled;
-	}
-	return Plugin_Continue;
-}
-
-public Action Classes_TakeDamageScp(int client, int attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
-{
-	if(!(damagetype & DMG_FALL))
-		return Plugin_Continue;
-
-	damage *= 0.02;
-	return Plugin_Changed;
-}
-
-public void Classes_EscapeEscortBonus(int client)
-{
-	int dboi_index = Classes_GetByName("dboi");
-	int sci_index = Classes_GetByName("sci");
-	
-	float pos[3], pos2[3];
-	GetEntPropVector(client, Prop_Send, "m_vecOrigin", pos);
-	
-	for (int i = 1; i <= MaxClients; i++)
-	{
-		if (client == i)
-			continue;
-		
-		if (!IsValidClient(i))
-			continue;
-			
-		if (IsSpec(i))
-			continue;
-		
-		// the disarmer gets a different bonus
-		if (Client[client].Disarmer == i)
-			continue;
-			
-		// dboys and scientists should never get escort bonuses
-		if (Client[i].Class == dboi_index)
-			continue;
-		if (Client[i].Class == sci_index)
-			continue;
-			
-		ClassEnum class;
-		if (Client[client].Disarmer && Classes_GetByIndex(i, class) && (class.Group == 2))
-		{
-			// intentionally blank
-			// if we are disarmed, allow nearby guards/mtf to get the bonus as well
-		}			
-		else if (!IsFriendly(Client[client].Class, Client[i].Class))
-		{
-			continue;
-		}
-		
-		GetEntPropVector(i, Prop_Send, "m_vecOrigin", pos2);
-		
-		// 768 units
-		if (GetVectorDistance(pos, pos2, true) < 589824.0)
-		{
-			Classes_ApplyKarmaBonus(i, 5.0, false);			
-		}
-	}
-}
-
-public void Classes_CondDBoi(int client, TFCond cond)
-{
-	if(cond == TFCond_TeleportedGlow)
-	{
-		float engineTime = GetGameTime();
-		if(Client[client].IgnoreTeleFor < engineTime)
-		{
-			int index;
-			ClassEnum class;
-			if(Client[client].Disarmer)
-			{
-				Gamemode_AddValue("dcapture");
-				index = Classes_GetByName("mtfs", class);
-
-				// reward the disarmer with 15% karma
-				Classes_ApplyKarmaBonus(Client[client].Disarmer, 15.0, false);
-			}
-			else
-			{
-				Gamemode_AddValue("descape");
-				GiveAchievement(Achievement_EscapeDClass, client);
-				index = Classes_GetByName("chaosd", class);
-
-				if(Client[client].Extra2)
-					GiveAchievement(Achievement_Escape207, client);
-
-				if(RoundStartAt > engineTime-180.0)
-					GiveAchievement(Achievement_EscapeSpeed, client);
-
-				if(Items_GetItemsOfType(client, 5) > 1)
-					GiveAchievement(Achievement_FindSCP, client);
-			}
-			
-			// find nearby players and give them a bonus for escorting
-			Classes_EscapeEscortBonus(client);
-			
-			if(index == -1)
-			{
-				index = 0;
-				Classes_GetByIndex(0, class);
-			}
-			else
-			{
-				Gamemode_GiveTicket(class.Group, 1);
-			}
-
-			Items_DropAllItems(client);
-			Forward_OnEscape(client, Client[client].Disarmer);
-
-			if(Classes_AssignClass(client, ClassSpawn_Escape, index))
-			{
-				Client[client].Class = index;
-				TF2_RespawnPlayer(client);
-				Classes_AssignClassPost(client, ClassSpawn_Escape);
-				CreateTimer(0.3, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
-			}
-		}
-	}
-}
-
-public void Classes_CondSci(int client, TFCond cond)
-{
-	if(cond == TFCond_TeleportedGlow)
-	{
-		float engineTime = GetGameTime();
-		if(Client[client].IgnoreTeleFor < engineTime)
-		{
-			int index;
-			ClassEnum class;
-			if(Client[client].Disarmer)
-			{
-				Gamemode_AddValue("scapture");
-				index = Classes_GetByName("chaosd", class);
-
-				// reward the disarmer with 15% karma
-				Classes_ApplyKarmaBonus(Client[client].Disarmer, 15.0, false);				
-			}
-			else
-			{
-				Gamemode_AddValue("sescape");
-				GiveAchievement(Achievement_EscapeSci, client);
-				index = Classes_GetByName("mtfs", class);
-
-				if(Client[client].Extra2)
-					GiveAchievement(Achievement_Escape207, client);
-
-				if(RoundStartAt > engineTime-180.0)
-					GiveAchievement(Achievement_EscapeSpeed, client);
-			}
-			
-			// find nearby players and give them a bonus for escorting
-			Classes_EscapeEscortBonus(client);			
-
-			if(index == -1)
-			{
-				index = 0;
-				Classes_GetByIndex(0, class);
-			}
-			else
-			{
-				Gamemode_GiveTicket(class.Group, Client[client].Disarmer ? 2 : 1);
-			}
-
-			Items_DropAllItems(client);
-			Forward_OnEscape(client, Client[client].Disarmer);
-
-			if(Classes_AssignClass(client, ClassSpawn_Escape, index))
-			{
-				Client[client].Class = index;
-				TF2_RespawnPlayer(client);
-				Classes_AssignClassPost(client, ClassSpawn_Escape);
-				CreateTimer(0.3, CheckAlivePlayers, _, TIMER_FLAG_NO_MAPCHANGE);
-			}
-		}
-	}
-}
-
-public bool Classes_GlowHuman(int client, int victim)
-{
-	return Client[client].Disarmer==victim;
-}
-
-public bool Classes_SeeHuman(int client, int victim)
-{
-	return (victim<1 || victim>MaxClients || (IsFriendly(Client[client].Class, Client[victim].Class) || (!TF2_IsPlayerInCondition(victim, TFCond_Stealthed) && !TF2_IsPlayerInCondition(victim, TFCond_StealthedUserBuffFade))));
-}
-
-public bool Classes_PickupStandard(int client, int entity)
-{
-	if(Client[client].Disarmer)
-		return false;
-
-	char buffer[64];
-	GetEntityClassname(entity, buffer, sizeof(buffer));
-	if(StrEqual(buffer, "func_button"))
-	{
-		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
-		if(!StrContains(buffer, "scp_trigger", false))
-		{
-			// play animation if holding a keycard
-			if (Items_IsHoldingKeycard(client))
-				ViewModel_SetAnimation(client, "use");		
-				
-			TF2_RemoveCondition(client, TFCond_Stealthed);
-			AcceptEntityInput(entity, "Press", client, client);
-			return true;
-		}
-	}
-	else if(StrEqual(buffer, "prop_vehicle_driveable"))
-	{
-		Client[client].UseBuffer = true;
-		return true;
-	}
-	else
-	{
-		ClassEnum class;
-		if(Classes_GetByIndex(Client[client].Class, class))
-		{
-			if(StrEqual(buffer, "tf_dropped_weapon"))
-			{
-				if(Items_Pickup(client, GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), entity))
-				{
-					AcceptEntityInput(entity, "Kill");
-					TF2_RemoveCondition(client, TFCond_Stealthed);
-				}
-				return true;
-			}
-			else if(!StrContains(buffer, "prop_dynamic") || !StrContains(buffer, "prop_physics"))
-			{
-				GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
-				if(!StrContains(buffer, "scp_keycard_", false))	// Backwards compatibility
-				{
-					char buffers[3][4];
-					ExplodeString(buffer, "_", buffers, sizeof(buffers), sizeof(buffers[]));
-					if(Items_Pickup(client, StringToInt(buffers[2])+30000))
-					{
-						TF2_RemoveCondition(client, TFCond_Stealthed);
-						AcceptEntityInput(entity, "KillHierarchy");
-					}
-					return true;
-				}
-				else if(!StrContains(buffer, "scp_healthkit", false))	// Backwards compatibility
-				{
-					char buffers[3][4];
-					ExplodeString(buffer, "_", buffers, sizeof(buffers), sizeof(buffers[]));
-					int value = StringToInt(buffers[2]);
-					if(value > 3)
-					{
-						value = 30017;
-					}
-					else
-					{
-						value += 30012;
-					}
-
-					if(Items_Pickup(client, value))
-					{
-						TF2_RemoveCondition(client, TFCond_Stealthed);
-						AcceptEntityInput(entity, "KillHierarchy");
-					}
-					return true;
-				}
-				else if(!StrContains(buffer, "scp_weapon", false))	// Backwards compatibility
-				{
-					char buffers[3][4];
-					ExplodeString(buffer, "_", buffers, sizeof(buffers), sizeof(buffers[]));
-					int index = StringToInt(buffers[2]);
-					if(!index)
-						index = 773;
-
-					if(Items_Pickup(client, index))
-					{
-						TF2_RemoveCondition(client, TFCond_Stealthed);
-						AcceptEntityInput(entity, "KillHierarchy");
-					}
-					return true;
-				}
-				else if(!StrContains(buffer, "scp_item_", false) || !StrContains(buffer, "scp_rand_", false))
-				{
-					AcceptEntityInput(entity, "FireUser1", client, client);
-
-					char buffers[4][6];
-					ExplodeString(buffer, "_", buffers, sizeof(buffers), sizeof(buffers[]));
-					if(Items_Pickup(client, StringToInt(buffers[2])))
-					{
-						AcceptEntityInput(entity, "FireUser2", client, client);
-						TF2_RemoveCondition(client, TFCond_Stealthed);
-						AcceptEntityInput(entity, "KillHierarchy");
-					}
-					return true;
-				}
-				else if(!StrContains(buffer, "scp_trigger", false))
-				{
-					TF2_RemoveCondition(client, TFCond_Stealthed);
-					switch(class.Group)
-					{
-						case 0:
-							AcceptEntityInput(entity, "FireUser1", client, client);
-
-						case 1:
-							AcceptEntityInput(entity, "FireUser2", client, client);
-
-						case 2:
-							AcceptEntityInput(entity, "FireUser3", client, client);
-
-						default:
-							AcceptEntityInput(entity, "FireUser4", client, client);
-					}
-					return true;
-				}
-				else
-				{
-					return SZF_Pickup(client, entity, buffer);
-				}
-			}
-		}
-	}
-	return false;
-}
-
-public bool Classes_PickupScp(int client, int entity)
-{
-	if(TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode))
-		return false;
-
-	char buffer[64];
-	GetEntityClassname(entity, buffer, sizeof(buffer));
-	if(StrEqual(buffer, "func_button"))
-	{
-		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
-		if(!StrContains(buffer, "scp_trigger", false))
-		{
-			AcceptEntityInput(entity, "Press", client, client);
-			return true;
-		}
-	}
-	else if(StrEqual(buffer, "prop_vehicle_driveable"))
-	{
-		Client[client].UseBuffer = true;
-		return true;
-	}
-	else
-	{
-		ClassEnum class;
-		if(Classes_GetByIndex(Client[client].Class, class))
-		{
-			if(!StrContains(buffer, "prop_dynamic"))
-			{
-				GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
-				if(!StrContains(buffer, "scp_trigger", false))
-				{
-					switch(class.Group)
-					{
-						case 0:
-							AcceptEntityInput(entity, "FireUser1", client, client);
-
-						case 1:
-							AcceptEntityInput(entity, "FireUser2", client, client);
-
-						case 2:
-							AcceptEntityInput(entity, "FireUser3", client, client);
-
-						default:
-							AcceptEntityInput(entity, "FireUser4", client, client);
-					}
-					return true;
-				}
-			}
-		}
-	}
-	return false;
-}
-
-public Action Classes_SoundHuman(int client, char sample[PLATFORM_MAX_PATH], int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
-{
-	if(!StrContains(sample, "vo/", false))
-	{
-		if(IsSpec(client))
-			return Plugin_Handled;
-
-		level = RoundFloat(level / 1.2);
-		return Plugin_Changed;
-	}
-	else if(StrContains(sample, "footsteps/", false) != -1)
-	{
-		if(Client[client].Sprinting)
-		{
-			level += 20;
-			return Plugin_Changed;
-		}
-
-		int flag = GetEntityFlags(client);
-		if((flag & FL_DUCKING) && (flag & FL_ONGROUND))
-		{
-			StopSound(client, SNDCHAN_AUTO, sample);
-			return Plugin_Changed;
-		}
-	}
-	return Plugin_Continue;
-}
-
-public Action Classes_SoundScp(int client, char sample[PLATFORM_MAX_PATH], int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
-{
-	if(!StrContains(sample, "vo/", false))
-	{
-		if(!TF2_IsPlayerInCondition(client, TFCond_Disguised))
-			return Plugin_Handled;
-	}
-	else if(StrContains(sample, "footsteps/", false) != -1)
-	{
-		level += 20;
-		return Plugin_Changed;
-	}
-	return Plugin_Continue;
-}
-
-public void Classes_SpeedHuman(int client, float &speed)
-{
-	if(Client[client].Extra2)
-		speed *= 1.0+(Client[client].Extra2*0.125);
-}
-
-public float Classes_GhostTheme(int client, char path[PLATFORM_MAX_PATH])
-{
-	strcopy(path, PLATFORM_MAX_PATH, "#scp_sf/music/unexplainedbehaviors.mp3");
-	return 49.0;
-}
-
-public float Classes_GhostThemeAlt(int client, char path[PLATFORM_MAX_PATH])
-{
-	if(TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode))
-		return Classes_GhostTheme(client, path);
-
-	strcopy(path, PLATFORM_MAX_PATH, "#scp_containmentbreach/music/elevator.mp3");
-	return 84.0;
-}
-
-public bool Classes_GhostDoors(int client, int entity)
-{
-	// Allow walk though any doors if ghost
-	return TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode);
-}
-
-public bool Classes_DefaultVoice(int client)
-{
-	char buffer[8];
-	GetCmdArgString(buffer, sizeof(buffer));
-	if(StrContains(buffer, "0 0"))
-		return false;
-	
-	if (!Client[client].UseBuffer)
-	{
-		Client[client].UseBuffer = true;
-		return AttemptGrabItem(client);
-	}
-	
-	return true;
-}
-
-public bool Classes_GhostVoice(int client)
-{
-	int attempts;
-	int i = Client[client].Extra2+1;
-	do
-	{
-		if(Client[client].Class!=Client[i].Class && IsValidClient(i) && !IsSpec(i))
-		{
-			static float pos[3], ang[3];
-			GetEntPropVector(i, Prop_Send, "m_vecOrigin", pos);
-			GetClientEyeAngles(i, ang);
-			SetEntProp(client, Prop_Send, "m_bDucked", true);
-			SetEntityFlags(client, GetEntityFlags(client)|FL_DUCKING);
-			TeleportEntity(client, pos, ang, TRIPLE_D);
-			Client[client].Extra2 = i;
-			break;
-		}
-		i++;
-		attempts++;
-
-		if(i > MaxClients)
-			i = 1;
-	} while(attempts <= MaxClients);
-	return true;
-}
-
-public bool Classes_GhostVoiceAlt(int client)
-{
-	if(!TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode))
-	{
-		char buffer[8];
-		GetCmdArgString(buffer, sizeof(buffer));
-		if(StrContains(buffer, "0 0"))
-		{
-			AttemptGrabItem(client);
-			return false;
-		}
-	}
-
-	int attempts;
-	int i = Client[client].Extra2+1;
-	do
-	{
-		if(Client[client].Class!=Client[i].Class && IsValidClient(i) && !IsSpec(i))
-		{
-			if(!TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode))
-			{
-				TF2_AddCondition(client, TFCond_HalloweenGhostMode);
-				Client[client].NextSongAt = 0.0;
-
-				int model = PrecacheModel(Client[client].IsVip ? "models/props_halloween/ghost.mdl" : "models/props_halloween/ghost_no_hat.mdl");
-				SetVariantString(Client[client].IsVip ? "models/props_halloween/ghost.mdl" : "models/props_halloween/ghost_no_hat.mdl");
-				AcceptEntityInput(client, "SetCustomModel");
-				SetEntProp(client, Prop_Send, "m_bUseClassAnimations", true);
-				SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", model, _, 0);
-				SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", model, _, 3);
-			}
-
-			static float pos[3], ang[3];
-			GetEntPropVector(i, Prop_Send, "m_vecOrigin", pos);
-			GetClientEyeAngles(i, ang);
-			SetEntProp(client, Prop_Send, "m_bDucked", true);
-			SetEntityFlags(client, GetEntityFlags(client)|FL_DUCKING);
-			TeleportEntity(client, pos, ang, TRIPLE_D);
-			Client[client].Extra2 = i;
-			break;
-		}
-		i++;
-		attempts++;
-
-		if(i > MaxClients)
-		{
-			Client[client].Extra2 = 0;
-			TF2_RespawnPlayer(client);
-			Client[client].NextSongAt = 0.0;
-			break;
-		}
-	} while(attempts <= MaxClients);
-	return true;
-}
-
-public void Classes_ResetKillCounters(int client)
-{
-	Client[client].Kills = 0;
-	Client[client].GoodKills = 0;
-	Client[client].BadKills = 0;
-}
-
-public void Classes_ApplyKarmaDamage(int client, int victim, int damage)
-{
-	if (SZF_Enabled())
-		return;
-		
-	if (!AreClientCookiesCached(client))
-		return;
-	
-	float karma, oldkarma;
-
-	karma = Classes_GetKarma(client);
-	// karma is a ratio to damage done vs the max health of the client
-	int maxhealth = Classes_GetMaxHealth(client);
-	oldkarma = karma;
-	float loss = CvarKarmaRatio.FloatValue * (float(damage) / float(maxhealth));
-	
-	// KarmaPoints tracks how much total karma the player has lost from damaging this victim
-	// this prevents the player from losing too much karma from healing players
-	if (loss > Client[client].KarmaPoints[victim])
-		loss = Client[client].KarmaPoints[victim];
-	
-	karma -= loss;
-	
-	float MinKarma = CvarKarmaMin.FloatValue;
-	if (karma < MinKarma)
-		karma = MinKarma;
-
-	if (karma != oldkarma)
-	{
-		Classes_SetKarma(client, karma);
-		Client[client].KarmaPoints[victim] -= loss;
-	}
-}
-
-public void Classes_ApplyKarmaBonus(int client, float amount, bool silent)
-{
-	if (SZF_Enabled())
-		return;
-		
-	if (!AreClientCookiesCached(client))
-		return;
-	
-	float karma, oldkarma;
-	
-	karma = Classes_GetKarma(client);
-
-	oldkarma = karma;
-	karma += amount;
-	
-	float MaxKarma = CvarKarmaMax.FloatValue;
-	if (karma > MaxKarma)
-		karma = MaxKarma;
-
-	Classes_SetKarma(client, karma);
-
-	if (!silent && CvarKarma.BoolValue && (karma != oldkarma))
-	{
-		BfWrite bf = view_as<BfWrite>(StartMessageOne("HudNotifyCustom", client));
-		if(bf)
-		{
-			char buffer[64];
-			FormatEx(buffer, sizeof(buffer), "%T", "goodkarma", client);
-			bf.WriteString(buffer);
-			bf.WriteString("voice_self");
-			bf.WriteByte(0);
-			EndMessage();
-		}		
-	}
-}
-
-public float Classes_GetKarma(int client)
-{
-	if (!AreClientCookiesCached(client))
-		return CvarKarmaMax.FloatValue;
-	
-	float karma;
-	
-	char value[64];
-	GetClientCookie(client, CookieKarma, value, sizeof(value));
-	if (!value[0])
-	{
-		// no karma value saved yet, initialize to max
-		karma = CvarKarmaMax.FloatValue;
-		FloatToString(karma, value, sizeof(value));
-		SetClientCookie(client, CookieKarma, value);
-	}
-	else
-	{
-		karma = StringToFloat(value);
-	}
-	
-	return karma;
-}
-
-public void Classes_SetKarma(int client, float karma)
-{
-	if (!AreClientCookiesCached(client))
-		return;
-	
-	char value[64];
-	FloatToString(karma, value, sizeof(value));
-	SetClientCookie(client, CookieKarma, value);
+	return blocked;
 }
