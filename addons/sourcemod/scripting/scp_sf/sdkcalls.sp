@@ -1,7 +1,6 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static Handle SDKEquipWearable;
 static Handle SDKGetMaxHealth;
 static Handle SDKStartLagCompensation;
 static Handle SDKFinishLagCompensation;

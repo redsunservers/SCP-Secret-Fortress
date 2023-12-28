@@ -204,7 +204,7 @@ void ConVar_Enable()
 		CvarHooked = true;
 	}
 }
-
+/*
 void ConVar_Disable()
 {
 	if(CvarHooked)
@@ -222,7 +222,7 @@ void ConVar_Disable()
 		CvarHooked = false;
 	}
 }
-
+*/
 public void ConVar_OnChanged(ConVar cvar, const char[] oldValue, const char[] newValue)
 {
 	int index = CvarList.FindValue(cvar, CvarInfo::cvar);

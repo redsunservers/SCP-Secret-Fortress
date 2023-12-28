@@ -5,14 +5,17 @@ enum struct ClassEnum
 {
 	char Name[32];
 	char Display[32];
-	char Model[PLATFORM_MAX_PATH];
 	char Spawn[32];
 
 	bool Regen;
 	bool DeadClass;
+	bool Cosmetics;
 	
 	int Health;
 	int MusicType;
+	int HandModel;
+	int PlayerModel;
+	int ForceTeam;
 
 	float Speed;
 	float SpeakAllyDist;
@@ -23,39 +26,67 @@ enum struct ClassEnum
 	int StartAmmo[Ammo_MAX];
 	int MaxAmmo[Ammo_MAX];
 	int StartItems[10];
-	int MaxItems[Type_MAX];
+	int MaxItems[Type_MAX+1];
 
 	Function FuncCanTalkTo;		// void(int client, int target, float &distance)
+	Function FuncCardAccess;	// void(int client, int type, int &level) 
 	Function FuncCommand;		// bool(int client, const char[] command)
+	Function FuncDeath;			// void(int client, int attacker, Event event)
+	Function FuncDealDamage;	// void(int client, int victim, ...)
+	Function FuncDoAnimation;	// Action(int client, int anim, int data)
+	Function FuncDoorTouch;		// void(int client, int entity)
+	Function FuncDoorWalk;		// bool(int client, int entity)
+	Function FuncKill;			// void(int client, int victim, Event event)
 	Function FuncMusic;			// void(int client, char filepath[PLATFORM_MAX_PATH], int &duration)
 	Function FuncPlayerRunCmd;	// Action(int client, int &buttons)
 	Function FuncPrecache;		// void(int index, ClassEnum class)
 	Function FuncSetClass;		// void(int client)
+	Function FuncSound;			// Action(int client, int clients[MAXPLAYERS], ...)
+	Function FuncSpawn;			// void(int client)
+	Function FuncTakeDamage;	// void(int client, int &attacker, ...)
 	Function FuncTransmitSee;	// bool(int client, int target)
 	Function FuncTransmitSelf;	// bool(int client, int target)
 	Function FuncUpdateSpeed;	// void(int client, float &speed)
+	Function FuncViewmodel;		// void(int client, int entity, WeaponEnum weapon)
 
 	int SetupEnum(KeyValues kv, ArrayList whitelist, const ClassEnum defaul)
 	{
 		kv.GetSectionName(this.Name, sizeof(this.Name));
 
-		int pos = whitelist ? 0 : whitelist.FindString(this.Name);
+		// Check whitelist
+		int pos = whitelist ? whitelist.FindString(this.Name) : 0;
 		if(pos == -1)
 			return -1;
 		
+		char buffer[PLATFORM_MAX_PATH];
+
+		/*
+			Display Class Name
+		*/
 		Format(this.Display, sizeof(this.Display), "class_%s", this.Name);
 		if(!TranslationPhraseExists(this.Display))
 			strcopy(this.Display, sizeof(this.Display), "class_0");
 
+		/*
+			Generic Values
+		*/
 		this.Regen = view_as<bool>(kv.GetNum("regen", defaul.Regen));
 		this.DeadClass = view_as<bool>(kv.GetNum("deadclass", defaul.DeadClass));
+		this.Cosmetics = view_as<bool>(kv.GetNum("cosmetics", defaul.Cosmetics));
 		this.Health = kv.GetNum("health", defaul.Health);
 		this.MusicType = kv.GetNum("musicindex", defaul.MusicType);
+		this.ForceTeam = kv.GetNum("forceteam", defaul.ForceTeam);
 		this.Speed = kv.GetFloat("speed", defaul.Speed);
 		this.SpeakAllyDist = kv.GetFloat("speakallydist", defaul.SpeakAllyDist);
 		this.SpeakOtherDist = kv.GetFloat("speakotherdist", defaul.SpeakOtherDist);
 		this.Class = KvGetClass(kv, "class", defaul.Class);
+		this.PlayerModel = KvGetModelIndex(kv, "model", defaul.PlayerModel);
+		this.HandModel = KvGetModelIndex(kv, "hands", defaul.HandModel);
+		kv.GetString("spawn", this.Spawn, sizeof(this.Spawn), defaul.Spawn);
 
+		/*
+			Array Values
+		*/
 		if(kv.JumpToKey("StartAmmo"))
 		{
 			for(int i; i < sizeof(this.StartAmmo); i++)
@@ -90,8 +121,8 @@ enum struct ClassEnum
 		{
 			for(int i; i < sizeof(this.StartItems); i++)
 			{
-				IntToString(i, this.Spawn, sizeof(this.Spawn));
-				this.StartItems[i] = kv.GetNum(this.Spawn);
+				IntToString(i + 1, this.Spawn, sizeof(this.Spawn));
+				this.StartItems[i] = kv.GetNum(this.Spawn, -1);
 			}
 
 			kv.GoBack();
@@ -103,9 +134,11 @@ enum struct ClassEnum
 
 		if(kv.JumpToKey("MaxItems"))
 		{
-			for(int i; i < sizeof(this.MaxItems); i++)
+			this.MaxItems[0] = kv.GetNum("0", 31);
+
+			for(int i = 1; i < sizeof(this.MaxItems); i++)
 			{
-				IntToString(i, this.Spawn, sizeof(this.Spawn));
+				IntToString(i - 1, this.Spawn, sizeof(this.Spawn));
 				this.MaxItems[i] = kv.GetNum(this.Spawn);
 			}
 
@@ -116,43 +149,46 @@ enum struct ClassEnum
 			this.MaxItems = defaul.MaxItems;
 		}
 
+		/*
+			Precache List
+		*/
 		if(kv.JumpToKey("Precache"))
 		{
 			if(kv.GotoFirstSubKey(false))
 			{
 				do
 				{
-					kv.GetSectionName(this.Model, sizeof(this.Model));
-					if(this.Model[0])
+					kv.GetSectionName(buffer, sizeof(buffer));
+					if(buffer[0])
 					{
 						kv.GetString(NULL_STRING, this.Spawn, sizeof(this.Spawn));
 
 						if(this.Spawn[0] == 'm')	// mdl, model, mat, material
 						{
-							PrecacheModel(this.Model);
+							PrecacheModel(buffer);
 						}
 						else if(this.Spawn[0] == 'g' || this.Spawn[2] == 'r')	// gs, gamesound, script
 						{
-							PrecacheScriptSound(this.Model);
+							PrecacheScriptSound(buffer);
 						}
 						else if(this.Spawn[0] == 's')
 						{
 							if(this.Spawn[1] == 'e')	// sentence
 							{
-								PrecacheSentenceFile(this.Model);
+								PrecacheSentenceFile(buffer);
 							}
 							else	// snd, sound
 							{
-								PrecacheSound(this.Model);
+								PrecacheSound(buffer);
 							}
 						}
 						else if(this.Spawn[0] == 'd')	// decal
 						{
-							PrecacheDecal(this.Model);
+							PrecacheDecal(buffer);
 						}
 						else if(this.Spawn[0])	// generic
 						{
-							PrecacheGeneric(this.Model);
+							PrecacheGeneric(buffer);
 						}
 					}
 				}
@@ -164,6 +200,9 @@ enum struct ClassEnum
 			kv.GoBack();
 		}
 
+		/*
+			Download List
+		*/
 		if(kv.JumpToKey("Downloads"))
 		{
 			if(kv.GotoFirstSubKey(false))
@@ -173,14 +212,14 @@ enum struct ClassEnum
 
 				do
 				{
-					kv.GetSectionName(this.Model, sizeof(this.Model));
-					if(!FileExists(this.Model, true))
+					kv.GetSectionName(buffer, sizeof(buffer));
+					if(!FileExists(buffer, true))
 					{
-						LogError("[Config] '%s' has missing file '%s' in 'Downloads'", this.Name, this.Model);
+						LogError("[Config] '%s' has missing file '%s' in 'Downloads'", this.Name, buffer);
 						continue;
 					}
 
-					AddToStringTable(table, this.Model);
+					AddToStringTable(table, buffer);
 				}
 				while(kv.GotoNextKey(false));
 
@@ -191,35 +230,55 @@ enum struct ClassEnum
 			kv.GoBack();
 		}
 
-		kv.GetString("model", this.Model, sizeof(this.Model), defaul.Model);
-		if(this.Model[0])
-			PrecacheModel(this.Model);
-		
-		kv.GetString("spawn", this.Spawn, sizeof(this.Spawn), defaul.Spawn);
-
+		/*
+			Function Values
+		*/
 		this.FuncCanTalkTo = KvGetFunction(kv, "func_cantalkto", defaul.FuncCanTalkTo);
+		this.FuncCardAccess = KvGetFunction(kv, "func_cardaccess", defaul.FuncCardAccess);
 		this.FuncCommand = KvGetFunction(kv, "func_clientcommand", defaul.FuncCommand);
+		this.FuncDealDamage = KvGetFunction(kv, "func_dealdamage", defaul.FuncDealDamage);
+		this.FuncDeath = KvGetFunction(kv, "func_playerdeath", defaul.FuncDeath);
+		this.FuncDoAnimation = KvGetFunction(kv, "func_doanimation", defaul.FuncDoAnimation);
+		this.FuncDoorTouch = KvGetFunction(kv, "func_doortouch", defaul.FuncDoorTouch);
+		this.FuncDoorWalk = KvGetFunction(kv, "func_doorwalk", defaul.FuncDoorWalk);
+		this.FuncKill = KvGetFunction(kv, "func_playerkill", defaul.FuncKill);
 		this.FuncMusic = KvGetFunction(kv, "func_music", defaul.FuncMusic);
 		this.FuncPlayerRunCmd = KvGetFunction(kv, "func_playerruncmd", defaul.FuncPlayerRunCmd);
 		this.FuncPrecache = KvGetFunction(kv, "func_precache", defaul.FuncPrecache);
 		this.FuncSetClass = KvGetFunction(kv, "func_setclass", defaul.FuncSetClass);
+		this.FuncSound = KvGetFunction(kv, "func_sound", defaul.FuncSound);
+		this.FuncSpawn = KvGetFunction(kv, "func_playerspawn", defaul.FuncSpawn);
+		this.FuncTakeDamage = KvGetFunction(kv, "func_takedamage", defaul.FuncTakeDamage);
 		this.FuncTransmitSee = KvGetFunction(kv, "func_transmitsee", defaul.FuncTransmitSee);
 		this.FuncTransmitSelf = KvGetFunction(kv, "func_transmitself", defaul.FuncTransmitSelf);
 		this.FuncUpdateSpeed = KvGetFunction(kv, "func_updatespeed", defaul.FuncUpdateSpeed);
+		this.FuncViewmodel = KvGetFunction(kv, "func_viewmodel", defaul.FuncViewmodel);
+
 		return pos;
 	}
 
 	void SetDefaultValues()
 	{
 		this.FuncCanTalkTo = INVALID_FUNCTION;
+		this.FuncCardAccess = INVALID_FUNCTION;
 		this.FuncCommand = INVALID_FUNCTION;
+		this.FuncDealDamage = INVALID_FUNCTION;
+		this.FuncDeath = INVALID_FUNCTION;
+		this.FuncDoAnimation = INVALID_FUNCTION;
+		this.FuncDoorTouch = INVALID_FUNCTION;
+		this.FuncDoorWalk = INVALID_FUNCTION;
+		this.FuncKill = INVALID_FUNCTION;
 		this.FuncMusic = INVALID_FUNCTION;
 		this.FuncPlayerRunCmd = INVALID_FUNCTION;
 		this.FuncPrecache = INVALID_FUNCTION;
 		this.FuncSetClass = INVALID_FUNCTION;
+		this.FuncSound = INVALID_FUNCTION;
+		this.FuncSpawn = INVALID_FUNCTION;
+		this.FuncTakeDamage = INVALID_FUNCTION;
 		this.FuncTransmitSee = INVALID_FUNCTION;
 		this.FuncTransmitSelf = INVALID_FUNCTION;
 		this.FuncUpdateSpeed = INVALID_FUNCTION;
+		this.FuncViewmodel = INVALID_FUNCTION;
 	}
 
 	Function GetFuncOf(int pos)
@@ -334,12 +393,13 @@ void Classes_ConfigSetup(KeyValues map, ArrayList whitelist)
 	delete ClassList;
 	ClassList = new ArrayList(sizeof(ClassEnum));
 
-	ClassEnum defaul, class;
-	BuildPath(Path_SM, class.Model, sizeof(class.Model), FOLDER_CONFIGS ... "/classes.cfg");
+	char buffer[PLATFORM_MAX_PATH];
+	BuildPath(Path_SM, buffer, sizeof(buffer), FOLDER_CONFIGS ... "/classes.cfg");
 
 	KeyValues kv = new KeyValues("Classes");
-	kv.ImportFromFile(class.Model);
+	kv.ImportFromFile(buffer);
 
+	ClassEnum defaul, class;
 	defaul.SetDefaultValues();
 	
 	if(kv.JumpToKey("default"))
@@ -401,14 +461,18 @@ void Classes_ConfigSetup(KeyValues map, ArrayList whitelist)
 static bool Call_StartClassFunc(int index, int pos)
 {
 	static ClassEnum class;
-	if(!Classes_GetByIndex(index, class) || class.GetFuncOf(pos) == INVALID_FUNCTION)
+	if(!Classes_GetByIndex(index, class))
 		return false;
 	
-	Call_StartFunction(null, class.FuncSetClass);
+	Function func = class.GetFuncOf(pos);
+	if(func == INVALID_FUNCTION)
+		return false;
+	
+	Call_StartFunction(null, func);
 	return true;
 }
 
-bool Classes_GetByIndex(int index, ClassEnum class)
+bool Classes_GetByIndex(int index, ClassEnum class = {})
 {
 	if(index < 0 || index >= ClassList.Length)
 		return false;
@@ -430,7 +494,7 @@ int Classes_GetByName(const char[] name, ClassEnum class = {})
 	return -1;
 }
 
-Action Classes_SetClientClass(int client, int index, ClassSpawnEnum context)
+Action Classes_SetClientClass(int client, int index, int context)
 {
 	ClassEnum class;
 	Classes_GetByIndex(index, class);
@@ -473,6 +537,36 @@ Action Classes_SetClientClass(int client, int index, ClassSpawnEnum context)
 	Forwards_OnClassPost(client, context, class.Name);
 	
 	return action;
+}
+
+void Classes_UpdateHealth(int client)
+{
+	float amount = 0.0;
+
+	ClassEnum class;
+	if(Classes_GetByIndex(Client(client).Class, class) && class.Health > 0)
+	{
+		// Apply correct health per class
+		switch(TF2_GetPlayerClass(client))
+		{
+			case TFClass_Soldier:
+				amount = float(class.Health) - 200.0;
+			
+			case TFClass_Pyro, TFClass_DemoMan:
+				amount = float(class.Health) - 175.0;
+			
+			case TFClass_Heavy:
+				amount = float(class.Health) - 300.0;
+			
+			case TFClass_Medic:
+				amount = float(class.Health) - 150.0;
+			
+			default:
+				amount = float(class.Health) - 125.0;
+		}
+	}
+
+	TF2Attrib_SetByName(client, "max health additive bonus", amount);
 }
 
 void Classes_UpdateSpeed(int client)
@@ -521,6 +615,48 @@ void Classes_UpdateSpeed(int client)
 	SDKCalls_SetSpeed(client);
 }
 
+void Classes_TeleportToPoint(int client, const char[] spawn)
+{
+	ArrayList list = new ArrayList();
+
+	char name[32];
+	int entity = -1;
+	while((entity=FindEntityByClassname(entity, "info_target")) != -1)
+	{
+		GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
+		if(!StrContains(name, spawn, false))
+			list.Push(entity);
+	}
+
+	int length = list.Length;
+	if(!length && GetClientTeam(client) <= TFTeam_Spectator)
+	{
+		entity = -1;
+		while((entity=FindEntityByClassname(entity, "info_target")) != -1)
+		{
+			GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
+			if(StrEqual(name, "scp_spawn_p", false))
+				list.Push(entity);
+		}
+
+		length = list.Length;
+	}
+
+	if(length)
+	{
+		entity = list.Get(GetRandomInt(0, length-1));
+
+		static float pos[3], ang[3];
+		GetEntPropVector(entity, Prop_Data, "m_vecAbsOrigin", pos);
+		GetEntPropVector(entity, Prop_Data, "m_vecAbsOrigin", ang);
+		ang[0] = 0.0;
+		ang[2] = 0.0;
+		TeleportEntity(client, pos, ang, NULL_VECTOR);
+	}
+
+	delete list;
+}
+
 int Classes_GetMaxAmmo(int client, int type)
 {
 	if(type >= 0 && type < Ammo_MAX)
@@ -532,11 +668,120 @@ int Classes_GetMaxAmmo(int client, int type)
 	return -1;
 }
 
+int Classes_GetMaxItems(int client, int type)
+{
+	int index = type + 1;
+	if(index >= 0 && index <= Type_MAX)
+	{
+		ClassEnum class;
+		if(Classes_GetByIndex(Client(client).Class, class))
+			return class.MaxItems[index];
+	}
+	return -1;
+}
+
 bool Classes_IsDeadClass(int client)
 {
 	ClassEnum class;
 	Classes_GetByIndex(Client(client).Class, class);
 	return class.DeadClass;
+}
+
+void Classes_PlayerSpawn(int client)
+{
+/*	bool result = false;
+
+	if(Call_StartClassFunc(Client(client).Class, ClassEnum::FuncSpawn))
+	{
+		Call_PushCell(client);
+		Call_Finish(result);
+	}
+
+	if(!result)*/
+	{
+		ClassEnum class;
+		if(Classes_GetByIndex(Client(client).Class, class))
+		{
+			if(class.ForceTeam >= 0)
+				SDKCalls_ChangeClientTeam(client, class.ForceTeam);
+			
+			if(class.Spawn[0])
+				Classes_TeleportToPoint(client, class.Spawn);
+			
+			TF2_AddCondition(client, TFCond_DodgeChance, 5.0);
+		}
+	}
+}
+
+void Classes_PostInventoryApplication(int client)
+{
+	bool result = false;
+
+	if(Call_StartClassFunc(Client(client).Class, ClassEnum::FuncSpawn))
+	{
+		Call_PushCell(client);
+		Call_Finish(result);
+	}
+
+	if(!result)
+	{
+		ClassEnum class;
+		if(Classes_GetByIndex(Client(client).Class, class))
+		{
+			if(class.Cosmetics && class.ForceTeam != TFTeam_Unassigned && class.ForceTeam != TFTeam_Spectator)
+			{
+				for(int i = TF2Util_GetPlayerWearableCount(client) - 1; i >= 0; i--)
+				{
+					int entity = TF2Util_GetPlayerWearable(client, i);
+					if(entity != -1)
+					{
+						SetEntProp(entity, Prop_Send, "m_bOnlyIterateItemViewAttributes", true);	// Removes attributes
+						// TODO: Paint everything Orange or White :)
+					}
+				}
+			}
+			else
+			{
+				for(int i = TF2Util_GetPlayerWearableCount(client) - 1; i >= 0; i--)
+				{
+					int entity = TF2Util_GetPlayerWearable(client, i);
+					if(entity != -1)
+						TF2_RemoveWearable(client, entity);
+				}
+			}
+
+			char buffer[PLATFORM_MAX_PATH];
+			if(class.PlayerModel)
+				ModelIndexToString(class.PlayerModel, buffer, sizeof(buffer));
+			
+			SetVariantString(buffer);
+			AcceptEntityInput(client, "SetCustomModel");
+			SetEntProp(client, Prop_Send, "m_bUseClassAnimations", true);
+			
+			int length = GetMaxWeapons(client);
+			for(int i; i < length; i++)
+			{
+				int entity = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i);
+				if(entity != -1)
+					TF2_RemoveItem(client, entity);
+			}
+
+			Classes_UpdateHealth(client);
+
+			for(int i; i < sizeof(class.StartItems); i++)
+			{
+				if(class.StartItems[i] >= 0)
+					Items_GiveItem(client, class.StartItems[i]);
+			}
+
+			for(int i = 1; i < sizeof(class.StartAmmo); i++)
+			{
+				SetAmmo(client, class.StartAmmo[i], i);
+			}
+
+			TF2Attrib_SetByDefIndex(client, 49, 1.0);
+		}
+	}
 }
 
 void Classes_CanTalkTo(int client, int target, float &range, float &defaultRange)
@@ -615,4 +860,150 @@ bool Classes_Transmit(int client, int target)
 	}
 
 	return blocked;
+}
+
+void Classes_PlayerDeath(int victim, int attacker, Event event)
+{
+	if(Call_StartClassFunc(Client(victim).Class, ClassEnum::FuncDeath))
+	{
+		Call_PushCell(victim);
+		Call_PushCell(attacker);
+		Call_PushCell(event);
+		Call_Finish();
+	}
+
+	if(attacker && Call_StartClassFunc(Client(attacker).Class, ClassEnum::FuncKill))
+	{
+		Call_PushCell(attacker);
+		Call_PushCell(victim);
+		Call_PushCell(event);
+		Call_Finish();
+	}
+}
+
+void Classes_DoorTouch(int client, int entity)
+{
+	if(Call_StartClassFunc(Client(client).Class, ClassEnum::FuncDoorTouch))
+	{
+		Call_PushCell(client);
+		Call_PushCell(entity);
+		Call_Finish();
+	}
+}
+
+bool Classes_DoorWalk(int client, int entity)
+{
+	bool result = false;
+
+	if(Call_StartClassFunc(Client(client).Class, ClassEnum::FuncDoorWalk))
+	{
+		Call_PushCell(client);
+		Call_PushCell(entity);
+		Call_Finish(result);
+	}
+
+	return result;
+}
+
+Action Classes_TakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	Action result = Plugin_Continue;
+
+	if(Call_StartClassFunc(Client(victim).Class, ClassEnum::FuncTakeDamage))
+	{
+		Call_PushCell(victim);
+		Call_PushCellRef(attacker);
+		Call_PushCellRef(inflictor);
+		Call_PushFloatRef(damage);
+		Call_PushCellRef(damagetype);
+		Call_PushCellRef(weapon);
+		Call_PushArrayEx(damageForce, sizeof(damageForce), SM_PARAM_COPYBACK);
+		Call_PushArrayEx(damagePosition, sizeof(damagePosition), SM_PARAM_COPYBACK);
+		Call_PushCell(damagecustom);
+		Call_Finish(result);
+
+		if(result >= Plugin_Handled)
+			return result;
+	}
+
+	bool changed = result == Plugin_Changed;
+
+	if(attacker > 0 && attacker <= MaxClients && Call_StartClassFunc(Client(attacker).Class, ClassEnum::FuncDealDamage))
+	{
+		Call_PushCell(attacker);
+		Call_PushCell(victim);
+		Call_PushCellRef(inflictor);
+		Call_PushFloatRef(damage);
+		Call_PushCellRef(damagetype);
+		Call_PushCellRef(weapon);
+		Call_PushArrayEx(damageForce, sizeof(damageForce), SM_PARAM_COPYBACK);
+		Call_PushArrayEx(damagePosition, sizeof(damagePosition), SM_PARAM_COPYBACK);
+		Call_PushCell(damagecustom);
+		Call_Finish(result);
+
+		if(result == Plugin_Continue && changed)
+			result = Plugin_Changed;
+	}
+	
+	return result;
+}
+
+Action Classes_SoundHook(int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH], int entity, int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
+{
+	Action result = Plugin_Continue;
+
+	if(Call_StartClassFunc(Client(entity).Class, ClassEnum::FuncSound))
+	{
+		Call_PushCell(entity);
+		Call_PushArrayEx(clients, sizeof(clients), SM_PARAM_COPYBACK);
+		Call_PushCellRef(numClients);
+		Call_PushStringEx(sample, sizeof(sample), SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
+		Call_PushCellRef(channel);
+		Call_PushFloatRef(volume);
+		Call_PushCellRef(level);
+		Call_PushCellRef(pitch);
+		Call_PushCellRef(flags);
+		Call_PushStringEx(soundEntry, sizeof(soundEntry), SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
+		Call_PushCellRef(seed);
+		Call_Finish(result);
+	}
+
+	return result;
+}
+
+void Classes_SetViewmodel(int client, int entity, WeaponEnum weapon)
+{
+	if(Call_StartClassFunc(Client(client).Class, ClassEnum::FuncViewmodel))
+	{
+		Call_PushCell(client);
+		Call_PushCell(entity);
+		Call_PushArrayEx(weapon, sizeof(weapon), SM_PARAM_COPYBACK);
+		Call_Finish();
+	}
+}
+
+Action Classes_DoAnimationEvent(int client, int &anim, int &data)
+{
+	Action result = Plugin_Continue;
+
+	if(Call_StartClassFunc(Client(client).Class, ClassEnum::FuncDoAnimation))
+	{
+		Call_PushCell(client);
+		Call_PushCellRef(anim);
+		Call_PushCellRef(data);
+		Call_Finish(result);
+	}
+
+	return result;
+}
+
+void Classes_CardAccess(int client, int type, int &level)
+{
+	if(Call_StartClassFunc(Client(client).Class, ClassEnum::FuncCardAccess))
+	{
+		Call_PushCell(client);
+		Call_PushCell(type);
+		Call_PushCellRef(level);
+		Call_Finish();
+	}
 }

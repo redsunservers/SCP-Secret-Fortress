@@ -28,7 +28,7 @@ void Forwards_OnAchievementPost(int client, Achievements achievement)
 	Call_Finish();
 }
 */
-void Forwards_OnClassPost(int client, ClassSpawnEnum context, const char[] class)
+void Forwards_OnClassPost(int client, int context, const char[] class)
 {
 	Call_StartForward(OnClass);
 	Call_PushCell(client);
@@ -37,7 +37,7 @@ void Forwards_OnClassPost(int client, ClassSpawnEnum context, const char[] class
 	Call_Finish();
 }
 
-Action Forwards_OnClassPre(int client, ClassSpawnEnum context, char[] class, int length)
+Action Forwards_OnClassPre(int client, int context, char[] class, int length)
 {
 	Action action;
 	Call_StartForward(OnClassPre);

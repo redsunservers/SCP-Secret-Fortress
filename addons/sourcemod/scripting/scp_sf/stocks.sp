@@ -5,25 +5,26 @@ enum
 {
 	Ammo_Metal = 3,	// 3	Metal
 	Ammo_Jar = 6,	// 6	Jar
-	Ammo_Pistol,	// 7	Pistol
-	Ammo_Rocket,	// 8	Rocket Launchers
-	Ammo_Flame,		// 9	Flamethrowers
-	Ammo_Flare,		// 10	Flare Guns
-	Ammo_Grenade,	// 11	Grenade Launchers
-	Ammo_Sticky,	// 12	Stickybomb Launchers
-	Ammo_Minigun,	// 13	Miniguns
-	Ammo_Bolt,		// 14	Resuce Ranger, Cursader's Crossbow
-	Ammo_Syringe,	// 15	Needle Guns
-	Ammo_Sniper,	// 16	Sniper Rifles
-	Ammo_Arrow,		// 17	Huntsman
-	Ammo_SMG,		// 18	SMGs
-	Ammo_Revolver,	// 19	Revolvers
-	Ammo_Shotgun,	// 20	Shotgun, Shortstop, Force-A-Nature, Soda Popper
-	Ammo_MAX
+	Ammo_Shotgun,	// 7	Shotgun, Shortstop, Force-A-Nature, Soda Popper
+	Ammo_Pistol,	// 8	Pistol
+	Ammo_Rocket,	// 9	Rocket Launchers
+	Ammo_Flame,		// 10	Flamethrowers
+	Ammo_Flare,		// 11	Flare Guns
+	Ammo_Grenade,	// 12	Grenade Launchers
+	Ammo_Sticky,	// 13	Stickybomb Launchers
+	Ammo_Minigun,	// 14	Miniguns
+	Ammo_Bolt,		// 15	Resuce Ranger, Cursader's Crossbow
+	Ammo_Syringe,	// 16	Needle Guns
+	Ammo_Sniper,	// 17	Sniper Rifles
+	Ammo_Arrow,		// 18	Huntsman
+	Ammo_SMG,		// 19	SMGs
+	Ammo_Revolver,	// 20	Revolvers
+	Ammo_MAX = 31
 };
 
 enum
 {
+	Type_Any = -1,
 	Type_Misc = 0,
 	Type_Weapon,
 	Type_Keycard,
@@ -35,7 +36,7 @@ enum
 	Type_MAX
 };
 
-enum ClassSpawnEnum
+enum
 {
 	ClassSpawn_Other = 0,
 	ClassSpawn_RoundStart,
@@ -45,7 +46,18 @@ enum ClassSpawnEnum
 	ClassSpawn_Revive
 }
 
-enum PlayerAnimEvent_t
+enum
+{
+	Access_Unknown = -1,
+	Access_Main = 0,
+	Access_Armory,
+	Access_Exit,
+	Access_Warhead,
+	Access_Checkpoint,
+	Access_Intercom
+}
+
+enum
 {
 	PLAYERANIMEVENT_ATTACK_PRIMARY,
 	PLAYERANIMEVENT_ATTACK_SECONDARY,
@@ -208,6 +220,20 @@ enum
 	EFL_NO_DAMAGE_FORCES =		(1<<31),	// Doesn't accept forces from physics damage
 };
 
+enum
+{
+	OBS_MODE_NONE = 0,	// not in spectator mode
+	OBS_MODE_DEATHCAM,	// special mode for death cam animation
+	OBS_MODE_FREEZECAM,	// zooms to a target, and freeze-frames on them
+	OBS_MODE_FIXED,		// view from a fixed camera position
+	OBS_MODE_IN_EYE,	// follow a player in first person view
+	OBS_MODE_CHASE,		// follow a player in third person view
+	OBS_MODE_POI,		// PASSTIME point of interest - game objective, big fight, anything interesting; added in the middle of the enum due to tons of hard-coded "<ROAMING" enum compares
+	OBS_MODE_ROAMING,	// free roaming
+
+	NUM_OBSERVER_MODES,
+};
+
 int GetMaxWeapons(int client)
 {
 	static int maxweps;
@@ -265,15 +291,28 @@ void KvGetTranslation(KeyValues kv, const char[] string, char[] buffer, int leng
 	}
 }
 
+int KvGetModelIndex(KeyValues kv, const char[] string, int defaul = 0)
+{
+	char buffer[PLATFORM_MAX_PATH];
+	kv.GetString(string, buffer, sizeof(buffer), "X");
+	if(StrEqual(buffer, "X"))
+		return defaul;
+	
+	if(buffer[0])
+		return PrecacheModel(buffer);
+	
+	return 0;
+}
+
 void PrintKeyHintText(int client, const char[] format, any ...)
 {
+	char buffer[512];
+	SetGlobalTransTarget(client);
+	VFormat(buffer, sizeof(buffer), format, 3);
+	
 	BfWrite userMessage = view_as<BfWrite>(StartMessageOne("KeyHintText", client));
 	if(userMessage != INVALID_HANDLE)
 	{
-		char buffer[256];
-		SetGlobalTransTarget(client);
-		VFormat(buffer, sizeof(buffer), format, 3);
-
 		if(GetUserMessageType() == UM_Protobuf)
 		{
 			PbSetString(userMessage, "hints", buffer);

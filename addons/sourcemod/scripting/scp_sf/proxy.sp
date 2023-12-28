@@ -84,33 +84,12 @@ void Proxy_GameFrame()
 		Proxy_UpdateChatRules();
 }
 
-void Proxy_ClientPutInServer(int client)
-{
-	#if defined _SENDPROXYMANAGER_INC_
-	if(Cvar[SendProxy].BoolValue &&
-		GetFeatureStatus(FeatureType_Native, "SendProxy_HookArrayProp") == FeatureStatus_Available)
-	{
-		SendProxy_Hook(client, "m_iClass", Prop_Int, OnSendClientClass);
-	}
-	#endif
-}
-
 void Proxy_EntityCreated(int entity, const char[] classname)
 {
-	#if defined _SENDPROXYMANAGER_INC_
-	if(Cvar[SendProxy].BoolValue &&
-		GetFeatureStatus(FeatureType_Native, "SendProxy_HookArrayProp") == FeatureStatus_Available &&
-		StrEqual(classname, "tf_player_manager"))
+	if(StrEqual(classname, "tf_player_manager"))
 	{
-		for(int i = 1; i <= MaxClients; i++)
-		{
-			SendProxy_HookArrayProp(entity, "m_bAlive", i, Prop_Int, OnSendAlive);
-			SendProxy_HookArrayProp(entity, "m_iTeam", i, Prop_Int, OnSendTeam);
-			SendProxy_HookArrayProp(entity, "m_iPlayerClass", i, Prop_Int, OnSendPlayerClass);
-			SendProxy_HookArrayProp(entity, "m_iPlayerClassWhenKilled", i, Prop_Int, OnSendPlayerClass);
-		}
+		SDKHook(entity, SDKHook_ThinkPost, PlayerManagerThink);
 	}
-	#endif
 }
 
 int Proxy_GetDisplayTeam(int client)
@@ -313,14 +292,34 @@ void Proxy_UpdateChatRules()
 				for(int target = 1; target <= MaxClients; target++)
 				{
 					// Self, invalid, replay, TV, not muted
-					bool result = (client == target || !IsClientInGame(target) || IsClientReplay(target) || IsClientSourceTV(target) || !IsClientMuted(target, client));
+					bool valid = IsClientInGame(target);
+					bool result = (!valid || client == target || IsClientReplay(target) || IsClientSourceTV(target) || !IsClientMuted(target, client));
 
-					if(voiceManger)
+					if(voiceManger && valid)
 						OnPlayerAdjustVolume(target, client, VoiceManager_Normal);
 
 					Client(client).SetTalkTo(target, 0);
-					SetListenOverride(target, client, result ? Listen_Default : Listen_No);
+					
+					if(valid)
+						SetListenOverride(target, client, result ? Listen_Default : Listen_No);
 				}
+			}
+		}
+	}
+}
+
+static void PlayerManagerThink(int entity)
+{
+	if(IsActiveRound())
+	{
+		for(int client = 1; client <= MaxClients; client++)
+		{
+			if(IsClientInGame(client))
+			{
+				SetEntProp(entity, Prop_Send, "m_bAlive", true, _, client);
+				SetEntProp(entity, Prop_Send, "m_iTeam", Proxy_GetDisplayTeam(client), _, client);
+				SetEntProp(entity, Prop_Send, "m_iPlayerClass", TFClass_Unknown, _, client);
+				SetEntProp(entity, Prop_Send, "m_iPlayerClassWhenKilled", TFClass_Unknown, _, client);
 			}
 		}
 	}
@@ -339,52 +338,3 @@ static bool IsActiveRound()
 
 	return false;
 }
-
-#if defined _SENDPROXYMANAGER_INC_
-
-#if defined SENDPROXY_LIB
-static Action OnSendAlive(const int entity, const char[] propname, int &value, const int element, const int client)
-#else
-static Action OnSendAlive(int entity, const char[] propname, int &value, int element)
-#endif
-{
-	value = 1;
-	return Plugin_Changed;
-}
-
-#if defined SENDPROXY_LIB
-public Action OnSendTeam(const int entity, const char[] propname, int &value, const int element, const int client)
-#else
-public Action OnSendTeam(int entity, const char[] propname, int &value, int element)
-#endif
-{
-	if(!IsClientInGame(client))
-		return Plugin_Continue;
-	
-	value = Proxy_GetDisplayTeam(element);
-	return Plugin_Changed;
-}
-
-#if defined SENDPROXY_LIB
-public Action OnSendPlayerClass(const int entity, const char[] propname, int &value, const int element, const int client)
-#else
-public Action OnSendPlayerClass(int entity, const char[] propname, int &value, int element) 
-#endif
-{
-	value = view_as<int>(TFClass_Unknown);
-	return Plugin_Changed;
-}
-
-#if defined SENDPROXY_LIB
-public Action OnSendClientClass(const int entity, const char[] propname, int &value, const int element, const int client)
-#else
-public Action OnSendClientClass(int entity, const char[] propname, int &value, int element)
-#endif
-{
-	if(Client(entity).WeaponClass == TFClass_Unknown)
-		return Plugin_Continue;
-
-	value = view_as<int>(Client(entity).WeaponClass);
-	return Plugin_Changed;
-}
-#endif

@@ -16,7 +16,6 @@ static const char ListName[List_MAX][] =
 	"SCPs"
 };
 
-static bool Enabled;
 static float SCPRatio;
 static ArrayList StartClasses[List_MAX];
 static ArrayList RespawnClasses[List_MAX];
@@ -28,8 +27,6 @@ public void VIPEscape_OnConfigSetup(KeyValues kv)
 		delete StartClasses[i];
 		delete RespawnClasses[i];
 	}
-
-	Enabled = true;
 
 	SCPRatio = kv.GetFloat("humanstoscps", 8.0);
 
@@ -98,6 +95,9 @@ public void VIPEscape_OnConfigSetup(KeyValues kv)
 
 public void VIPEscape_OnRoundRespawn()
 {
+	if(GameRules_GetProp("m_bInWaitingForPlayers"))
+		return;
+	
 	ArrayList players = new ArrayList();
 
 	for(int client = 1; client <= MaxClients; client++)
@@ -114,26 +114,32 @@ public void VIPEscape_OnRoundRespawn()
 	
 	players.Sort(Sort_Random, Sort_Integer);
 
-	ArrayList classes = StartClasses[List_SCP].Clone();
-	int count = SCPRatio ? RoundToCeil(float(length - 3) / SCPRatio) : 1;
-	while(count > 0 && classes.Length && players.Length)
+	if(StartClasses[List_SCP])
 	{
-		int client = players.Get(0);
-		
-		int arrayIndex = GetURandomInt() % classes.Length;
-		int classIndex = classes.Get(arrayIndex);
-		
-		Classes_SetClientClass(client, classIndex, ClassSpawn_RoundStart);
-		players.Erase(0);
-		classes.Erase(arrayIndex);
-		count--;
-	}
+		ArrayList classes = StartClasses[List_SCP].Clone();
+		int count = SCPRatio ? RoundToCeil(float(length - 3) / SCPRatio) : 1;
+		while(count > 0 && classes.Length && players.Length)
+		{
+			int client = players.Get(0);
+			
+			int arrayIndex = GetURandomInt() % classes.Length;
+			int classIndex = classes.Get(arrayIndex);
+			
+			Classes_SetClientClass(client, classIndex, ClassSpawn_RoundStart);
+			players.Erase(0);
+			classes.Erase(arrayIndex);
+			count--;
+		}
 
-	delete classes;
+		delete classes;
+	}
 
 	for(int a = List_Red; a <= List_Blu; a++)
 	{
-		classes = StartClasses[a].Clone();
+		if(!StartClasses[a])
+			continue;
+		
+		ArrayList classes = StartClasses[a].Clone();
 
 		length = classes.Length;
 		int remove = -(3 - length);
@@ -144,7 +150,7 @@ public void VIPEscape_OnRoundRespawn()
 			classes.Erase(GetURandomInt() % length);
 		}
 
-		count = players.Length;
+		length = players.Length;
 		for(int b; b < length; b++)
 		{
 			int client = players.Get(b);
@@ -162,5 +168,4 @@ public void VIPEscape_OnRoundRespawn()
 
 public void VIPEscape_OnMapEnd()
 {
-	Enabled = false;
 }

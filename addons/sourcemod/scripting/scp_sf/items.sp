@@ -6,9 +6,26 @@ enum struct WeaponEnum
 	char Display[32];
 
 	char Classname[36];
-	char Attributes[256];
+	
+	int Attrib[20];
+	float Value[20];
+	int Attribs;
+
 	int Index;
+	int AmmoType;
+	int ItemType;
+	int Ammo;
+	int Clip;
+	int Weight;
+
 	bool Strip;
+	bool BlockAttack;
+
+	TFClassType Class;
+
+	char DisplayAttack[32];
+	char DisplayAltfire[32];
+	char DisplayReload[32];
 
 	char VeryFine[32];
 	char Fine[32];
@@ -16,37 +33,26 @@ enum struct WeaponEnum
 	char Coarse[32];
 	char Rough[32];
 
-	TFClassType Class;
-	int AmmoType;
-	int ItemType;
-	bool BlockAttack;
-	int Ammo;
-	int Clip;
-	int Weight;
-
-	char DisplayAttack[32];
-	char DisplayAltfire[32];
-	char DisplayReload[32];
-
 	bool HideModel;
-	char Worldmodel[PLATFORM_MAX_PATH];
-	char Viewmodel[PLATFORM_MAX_PATH];
-	int Viewindex;
+	int Worldmodel;
+	int Viewmodel;
 	int Skin;
 
 	//Function OnAmmo;		// void(int client, int type, int &ammo)
 	//Function OnButton;		// Action(int client, int weapon, int &buttons, int &holding)
-	// OnCard;		// int(int client, AccessEnum access)
-	//Function OnCreate;		// void(int client, int weapon)
-	//Function OnDamage;		// Action(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+	Function FuncCard;		// int(int client, int type)
+	Function FuncCreate;	// void(int client, int weapon)
+	Function FuncDamage;	// Action(int client, int victim, ...)
 	//Function OnDrop;		// bool(int client, int weapon, bool swap)
 	//Function OnItem;		// void(int client, int type, int &amount)
-	Function OnPrecache;	// void(WeaponEnum weapon)
+	Function FuncPrecache;	// void(WeaponEnum weapon)
 
 	void SetupEnum(KeyValues kv)
 	{
 		kv.GetSectionName(this.Display, sizeof(this.Display));
 		this.Index = StringToInt(this.Display);
+
+		char buffer[PLATFORM_MAX_PATH];
 
 		Format(this.Display, sizeof(this.Display), "weapon_%d", this.Index);
 		if(!TranslationPhraseExists(this.Display))
@@ -64,46 +70,10 @@ enum struct WeaponEnum
 		this.Class = KvGetClass(kv, "class");
 		this.Skin = kv.GetNum("skin", -1);
 
-		/*this.OnAmmo = KvGetFunction(kv, "func_ammo");
-		this.OnButton = KvGetFunction(kv, "func_button");
-		this.OnCard = KvGetFunction(kv, "func_card");
-		this.OnCreate = KvGetFunction(kv, "func_create");
-		this.OnDamage = KvGetFunction(kv, "func_damage");
-		this.OnDrop = KvGetFunction(kv, "func_drop");
-		this.OnItem = KvGetFunction(kv, "func_item");*/
-		this.OnPrecache = KvGetFunction(kv, "func_precache");
+		this.Viewmodel = KvGetModelIndex(kv, "viewmodel");
+		this.Worldmodel = KvGetModelIndex(kv, "model");
 
 		kv.GetString("classname", this.Classname, sizeof(this.Classname));
-		kv.GetString("attributes", this.Attributes, sizeof(this.Attributes));
-		
-		if(kv.JumpToKey("downloads"))
-		{
-			int table = FindStringTable("downloadables");
-			bool save = LockStringTables(false);
-
-			do
-			{
-				kv.GetSectionName(this.Worldmodel, sizeof(this.Worldmodel));
-				if(!FileExists(this.Worldmodel, true))
-				{
-					LogError("[Config] '%s' has missing file '%s'", this.Display, this.Worldmodel);
-					continue;
-				}
-
-				AddToStringTable(table, this.Worldmodel);
-			}
-			while(kv.GotoNextKey());
-
-			LockStringTables(save);
-			kv.GoBack();
-		}	
-
-		kv.GetString("viewmodel", this.Viewmodel, sizeof(this.Viewmodel));
-		this.Viewindex = this.Viewmodel[0] ? PrecacheModel(this.Viewmodel) : 0;		
-
-		kv.GetString("model", this.Worldmodel, sizeof(this.Worldmodel));
-		if(this.Worldmodel[0])
-			PrecacheModel(this.Worldmodel);	
 		
 		KvGetTranslation(kv, "displayattack", this.DisplayAttack, sizeof(this.DisplayAttack), "weapon_0");
 		KvGetTranslation(kv, "displayaltfire", this.DisplayAltfire, sizeof(this.DisplayAltfire), "weapon_0");
@@ -114,6 +84,82 @@ enum struct WeaponEnum
 		kv.GetString("914", this.OneToOne, sizeof(this.OneToOne));
 		kv.GetString("914-", this.Coarse, sizeof(this.Coarse));
 		kv.GetString("914--", this.Rough, sizeof(this.Rough));
+
+		/*this.OnAmmo = KvGetFunction(kv, "func_ammo");
+		this.OnButton = KvGetFunction(kv, "func_button");
+		this.OnDrop = KvGetFunction(kv, "func_drop");
+		this.OnItem = KvGetFunction(kv, "func_item");*/
+		this.FuncCard = KvGetFunction(kv, "func_card");
+		this.FuncCreate = KvGetFunction(kv, "func_create");
+		this.FuncDamage = KvGetFunction(kv, "func_damage");
+		this.FuncPrecache = KvGetFunction(kv, "func_precache");
+		
+		this.Attribs = 0;
+		if(kv.JumpToKey("attributes"))
+		{
+			if(kv.GotoFirstSubKey(false))
+			{
+				do
+				{
+					kv.GetSectionName(buffer, sizeof(buffer));
+					if(IsCharNumeric(buffer[0]))
+					{
+						this.Attrib[this.Attribs++] = StringToInt(buffer);
+					}
+					else
+					{
+						this.Attrib[this.Attribs++] = TF2Econ_TranslateAttributeNameToDefinitionIndex(buffer);
+					}
+
+					if(this.Attrib[this.Attribs] > 0)
+					{
+						this.Value[this.Attribs] = kv.GetFloat(NULL_STRING);
+					}
+					else
+					{
+						LogError("[Config] '%s' has invalid attribute '%s'", this.Display, buffer);
+						this.Attribs--;
+					}
+				}
+				while(kv.GotoNextKey(false));
+
+				kv.GoBack();
+			}
+
+			kv.GoBack();
+		}
+		
+		if(kv.JumpToKey("downloads"))
+		{
+			if(kv.GotoFirstSubKey(false))
+			{
+				int table = FindStringTable("downloadables");
+				bool save = LockStringTables(false);
+
+				do
+				{
+					kv.GetSectionName(buffer, sizeof(buffer));
+					if(!FileExists(buffer, true))
+					{
+						LogError("[Config] '%s' has missing file '%s'", this.Display, buffer);
+						continue;
+					}
+
+					AddToStringTable(table, buffer);
+				}
+				while(kv.GotoNextKey(false));
+
+				LockStringTables(save);
+				kv.GoBack();
+			}
+
+			kv.GoBack();
+		}
+	}
+
+	Function GetFuncOf(int pos)
+	{
+		return GetItemInArray(this, pos);
 	}
 }
 
@@ -122,6 +168,108 @@ static float NextHudIn[MAXPLAYERS+1];
 
 void Items_PluginStart()
 {
+	RegAdminCmd("scp_giveitem", GiveItemCommand, ADMFLAG_SLAY, "Gives a player an item");
+}
+
+static Action GiveItemCommand(int client, int args)
+{
+	SetGlobalTransTarget(client);
+
+	if(!args)
+	{
+		WeaponEnum weapon;
+
+		int length = WeaponList.Length;
+		for(int i; i < length; i++)
+		{
+			WeaponList.GetArray(i, weapon);
+			ReplyToCommand(client, "%t | #%d", weapon.Display, weapon.Index);
+		}
+
+		if(GetCmdReplySource() == SM_REPLY_TO_CHAT)
+			ReplyToCommand(client, "[SM] %t", "See console for output");
+
+		return Plugin_Handled;
+	}
+
+	if(args != 2)
+	{
+		ReplyToCommand(client, "[SM] Usage: scp_giveitem [target] [name]");
+		return Plugin_Handled;
+	}
+
+	char pattern[PLATFORM_MAX_PATH];
+	GetCmdArg(2, pattern, sizeof(pattern));
+
+	char targetName[MAX_TARGET_LENGTH];
+
+	SetGlobalTransTarget(client);
+
+	int index;
+	bool found;
+	WeaponEnum weapon;
+	int length = WeaponList.Length;
+	for(int i; i < length; i++)
+	{
+		WeaponList.GetArray(i, weapon);
+		FormatEx(targetName, sizeof(targetName), "%t", weapon.Display);
+		if(StrContains(targetName, pattern, false) != -1)
+		{
+			found = true;
+			break;
+		}
+
+		index++;
+	}
+
+	if(!found)
+	{
+		index = 0;
+		length = WeaponList.Length;
+		for(int i; i < length; i++)
+		{
+			WeaponList.GetArray(i, weapon);
+			if(StrContains(weapon.Display, pattern, false) != -1)
+			{
+				found = true;
+				break;
+			}
+
+			index++;
+		}
+
+		if(!found)
+		{
+			ReplyToCommand(client, "[SM] Invalid item string");
+			return Plugin_Handled;
+		}
+	}
+
+	int targets[MAXPLAYERS+1], matches;
+	bool targetNounIsMultiLanguage;
+
+	GetCmdArg(1, pattern, sizeof(pattern));
+	if((matches=ProcessTargetString(pattern, client, targets, sizeof(targets), 0, targetName, sizeof(targetName), targetNounIsMultiLanguage)) < 1)
+	{
+		ReplyToTargetError(client, matches);
+		return Plugin_Handled;
+	}
+
+	for(int i; i < matches; i++)
+	{
+		Items_GiveItem(targets[i], index);
+	}
+
+	if(targetNounIsMultiLanguage)
+	{
+		CShowActivity2(client, PREFIX, "Gave %t to %t", weapon.Display, targetName);
+	}
+	else
+	{
+		CShowActivity2(client, PREFIX, "Gave %t to %s", weapon.Display, targetName);
+	}
+
+	return Plugin_Handled;
 }
 
 void Items_ConfigSetup(KeyValues map)
@@ -129,11 +277,13 @@ void Items_ConfigSetup(KeyValues map)
 	delete WeaponList;
 	WeaponList = new ArrayList(sizeof(WeaponEnum));
 
-	WeaponEnum weapon;
-	BuildPath(Path_SM, weapon.Worldmodel, sizeof(weapon.Worldmodel), FOLDER_CONFIGS ... "/items.cfg");
+	char buffer[PLATFORM_MAX_PATH];
+	BuildPath(Path_SM, buffer, sizeof(buffer), FOLDER_CONFIGS ... "/items.cfg");
 
 	KeyValues kv = new KeyValues("Items");
-	kv.ImportFromFile(weapon.Worldmodel);
+	kv.ImportFromFile(buffer);
+
+	WeaponEnum weapon;
 
 	if(map && map.JumpToKey("Items"))
 	{
@@ -153,7 +303,6 @@ void Items_ConfigSetup(KeyValues map)
 	}
 
 	kv.GotoFirstSubKey();
-	char buffer[64];
 
 	do
 	{
@@ -173,9 +322,9 @@ void Items_ConfigSetup(KeyValues map)
 	for(int i; i < length; i++)
 	{
 		WeaponList.GetArray(i, weapon);
-		if(weapon.OnPrecache != INVALID_FUNCTION)
+		if(weapon.FuncPrecache != INVALID_FUNCTION)
 		{
-			Call_StartFunction(null, weapon.OnPrecache);
+			Call_StartFunction(null, weapon.FuncPrecache);
 			Call_PushArrayEx(weapon, sizeof(weapon), SM_PARAM_COPYBACK);
 			Call_Finish();
 
@@ -187,6 +336,26 @@ void Items_ConfigSetup(KeyValues map)
 void Items_ClientDisconnect(int client)
 {
 	NextHudIn[client] = 0.0;
+}
+
+static bool Call_StartItemIndexFunc(int index, int pos)
+{
+	static WeaponEnum class;
+	if(!Items_GetWeaponByIndex(index, class))
+		return false;
+	
+	Function func = class.GetFuncOf(pos);
+	if(func == INVALID_FUNCTION)
+		return false;
+	
+	Call_StartFunction(null, func);
+	return true;
+}
+
+static bool Call_StartItemEntityFunc(int entity, int pos)
+{
+	int index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
+	return Call_StartItemIndexFunc(index, pos);
 }
 
 bool Items_GetWeaponByIndex(int index, WeaponEnum weapon)
@@ -219,6 +388,16 @@ bool Items_HasMultiInSlot(int client, int slot)
 	}
 
 	return false;
+}
+
+void Items_SwapToBest(int client)
+{
+	if(!Items_SwapInSlot(client))
+	{
+		int entity = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+		if(entity != -1)
+			Items_SwapToItem(client, entity);
+	}
 }
 
 /*
@@ -330,23 +509,69 @@ void Items_SwapToItem(int client, int swap)
 	TF2Util_SetPlayerActiveWeapon(client, swap);
 }
 
+/*
+	Ground weapon is NOT deleted here
+*/
 bool Items_AttemptPickup(int client, int index, int entity = -1)
 {
 	WeaponEnum weapon;
 	if(Items_GetWeaponByIndex(index, weapon))
 	{
-		if(Items_CanPickupItem(client, index))
+		int failed;
+		int swap = -1;
+		if(weapon.ItemType >= 0)
 		{
-			Items_GiveItem(client, index, entity);
-			ClientCommand(client, "playgamesound AmmoPack.Touch");
-			return true;
+			int maxItems = Classes_GetMaxItems(client, weapon.ItemType);
+			if(maxItems < 1)
+			{
+				failed = 2;	// Can't pick up any
+			}
+			else
+			{
+				int items = GetItemTypeCount(client, weapon.ItemType, swap);
+				if(items < maxItems)
+					swap = -1;	// Will not swap items
+			}
 		}
 
-		if(Items_CanAttractAmmo(client, index))
+		if(!failed && swap == -1)
 		{
-			Items_AttractAmmo(client, index, entity);
-			ClientCommand(client, "playgamesound AmmoPack.Touch");
-			return true;
+			int items = GetItemCount(client);
+			int maxItems = Classes_GetMaxItems(client, Type_Any);
+			if(items < maxItems)
+				failed = 1;	// Inventory full
+		}
+
+		switch(failed)
+		{
+			case 1:
+			{
+				ClientCommand(client, "playgamesound Player.UseDeny");
+				ShowGameText(client, "obj_weapon_pickup", 0, "%t", "Inventory Full");
+			}
+			case 2:
+			{
+				ClientCommand(client, "playgamesound Player.UseDeny");
+				ShowGameText(client, "obj_weapon_pickup", 0, "%t", "Item Type Blocked");
+			}
+			default:
+			{
+				if(swap != -1 && !Items_DropItem(client, swap, false))
+				{
+					ClientCommand(client, "playgamesound Player.UseDeny");
+					ShowGameText(client, "obj_weapon_pickup", 0, "%t", "Item Type Blocked");
+				}
+				else
+				{
+					Items_GiveItem(client, index, entity);
+					ClientCommand(client, "playgamesound AmmoPack.Touch");
+					if(swap != -1)
+						ClientCommand(client, "playgamesound weapon.ImpactSoft");
+
+					ShowGameText(client, "obj_weapon_pickup", 0, "%t", "Picked Up Item", weapon.Display);
+					return true;
+				}
+			}
 		}
 	}
 
@@ -355,9 +580,72 @@ bool Items_AttemptPickup(int client, int index, int entity = -1)
 
 bool Items_CanPickupItem(int client, int index)
 {
-	return true;
+	WeaponEnum weapon;
+	if(Items_GetWeaponByIndex(index, weapon))
+	{
+		bool swap;
+		if(weapon.ItemType >= 0)
+		{
+			int maxItems = Classes_GetMaxItems(client, weapon.ItemType);
+			if(maxItems < 1)
+				return false;	// Can't pick up any
+			
+			int items = GetItemTypeCount(client, weapon.ItemType);
+			if(items >= maxItems)
+				swap = true;	// Will swap items
+		}
+
+		if(!swap)
+		{
+			int items = GetItemCount(client);
+			int maxItems = Classes_GetMaxItems(client, Type_Any);
+			if(items < maxItems)
+				return false;	// Inventory full
+		}
+
+		return true;
+	}
+
+	return false;
 }
 
+static int GetItemCount(int client)
+{
+	int count;
+	int length = GetMaxWeapons(client);
+	for(int i; i < length; i++)
+	{
+		if(GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i) != -1)
+			count++;
+	}
+
+	return count;
+}
+
+static int GetItemTypeCount(int client, int type, int &first = 0)
+{
+	int count;
+	WeaponEnum weapon;
+	int length = GetMaxWeapons(client);
+	for(int i; i < length; i++)
+	{
+		int entity = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i);
+		if(entity != -1 &&
+			Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) &&
+			weapon.ItemType == type)
+		{
+			count++;
+			if(first == -1)
+				first = entity;
+		}
+	}
+
+	return count;
+}
+
+/*
+	Ground weapon is NOT deleted here
+*/
 int Items_GiveItem(int client, int index, int ground = -1)
 {
 	int entity = index;
@@ -408,6 +696,11 @@ int Items_GiveItem(int client, int index, int ground = -1)
 
 					SetAmmo(client, ammo, weapon.AmmoType);
 				}
+
+				for(int i; i < weapon.Attribs; i++)
+				{
+					TF2Attrib_SetByDefIndex(entity, weapon.Attrib[i], weapon.Value[i]);
+				}
 			}
 			else	// Existing picked up weapon
 			{
@@ -425,18 +718,21 @@ int Items_GiveItem(int client, int index, int ground = -1)
 				SDKCalls_InitPickup(ground, client, entity);
 
 				// See where the ammo was sent to, add to our current ammo count
-				for(int i; i < Ammo_MAX; i++)
+				if(weapon.AmmoType >= 0)
 				{
-					int count = GetAmmo(client, i);
-					if(count)
+					for(int i; i < Ammo_MAX; i++)
 					{
-						ammo[weapon.AmmoType] += count;
+						int count = GetAmmo(client, i);
+						if(count)
+						{
+							ammo[weapon.AmmoType] += count;
 
-						count = Classes_GetMaxAmmo(client, weapon.AmmoType);
-						if(ammo[weapon.AmmoType] > count)
-							ammo[weapon.AmmoType] = count;
-						
-						break;
+							count = Classes_GetMaxAmmo(client, weapon.AmmoType);
+							if(ammo[weapon.AmmoType] > count)
+								ammo[weapon.AmmoType] = count;
+							
+							break;
+						}
 					}
 				}
 
@@ -449,8 +745,49 @@ int Items_GiveItem(int client, int index, int ground = -1)
 			}
 
 			EquipPlayerWeapon(client, entity);
-			Items_SwapToItem(client, entity);
 
+			if(weapon.HideModel)
+			{
+				SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", -1);
+				SetEntityRenderMode(entity, RENDER_TRANSCOLOR);
+				SetEntityRenderColor(entity, 255, 255, 255, 0);
+			}
+			else
+			{
+				if(weapon.Worldmodel)
+				{
+					for(int i; i < 4; i++)
+					{
+						SetEntProp(entity, Prop_Send, "m_nModelIndexOverrides", weapon.Worldmodel, _, i);
+					}
+				}
+
+				SetEntityMaterialData(entity, weapon.Skin);
+			}
+
+			if(weapon.BlockAttack)
+			{
+				if(weapon.HideModel)
+					SetEntPropFloat(entity, Prop_Send, "m_flModelScale", 0.001);
+				
+				SetEntPropFloat(entity, Prop_Send, "m_flNextPrimaryAttack", FAR_FUTURE);
+				SetEntPropFloat(entity, Prop_Send, "m_flNextSecondaryAttack", FAR_FUTURE);
+			}
+
+			if(weapon.Strip)
+				DHooks_HookStripWeapon(entity);
+
+			if(weapon.AmmoType >= 0)
+				SetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType", weapon.AmmoType);
+			
+			if(Call_StartItemIndexFunc(index, WeaponEnum::FuncCreate))
+			{
+				Call_PushCell(client);
+				Call_PushCell(entity);
+				Call_Finish();
+			}
+
+			Items_SwapToItem(client, entity);
 			Forwards_OnWeaponPost(client, entity);
 		}
 	}
@@ -458,112 +795,76 @@ int Items_GiveItem(int client, int index, int ground = -1)
 	return entity;
 }
 
-bool Items_CanAttractAmmo(int client, int index)
+/*
+	Held weapons is deleted here
+*/
+void Items_DropAllItems(int client)
 {
-	WeaponEnum weapon;
-	if(Items_GetWeaponByIndex(index, weapon) && weapon.AmmoType != -1)
+	int length = GetMaxWeapons(client);
+	for(int i; i < length; i++)
 	{
-		if(GetAmmo(client, weapon.AmmoType) < Classes_GetMaxAmmo(client, weapon.AmmoType))
-			return true;
+		int entity = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i);
+		if(entity != -1)
+			Items_DropItem(client, entity, true);
+	}
+}
+
+/*
+	Held weapons is deleted here
+*/
+bool Items_AttemptDropItem(int client, int entity)
+{
+	if(DropEmptyItems(client) || Items_DropItem(client, entity, false))
+	{
+		ClientCommand(client, "playgamesound weapon.ImpactSoft");
+		return true;
 	}
 
 	return false;
 }
 
-bool Items_AttractAmmo(int client, int index, int ground = -1)
+bool Items_CanDropItem(int client, int entity)
 {
 	WeaponEnum weapon;
-	if(Items_GetWeaponByIndex(index, weapon) && weapon.AmmoType != -1)
+	if(Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon) && !weapon.HideModel)
+		return true;
+	
+	int length = GetMaxWeapons(client);
+	for(int i; i < length; i++)
 	{
-		int currentAmmo = GetAmmo(client, weapon.AmmoType);
-		int maxAmmo = Classes_GetMaxAmmo(client, weapon.AmmoType);
-		if(currentAmmo < maxAmmo)
+		int other = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i);
+		if(other != -1)
 		{
-			if(ground == -1)
+			if(GetEntProp(other, Prop_Data, "m_iClip1") < 1)
 			{
-				int ammo;
-
-				if(weapon.Ammo > 0)
-					ammo += weapon.Ammo;
-				
-				if(weapon.Clip > 0)
-					ammo += weapon.Clip;
-				
-				if(ammo > 0)
-				{
-					ammo += currentAmmo;
-					if(ammo > maxAmmo)
-						ammo = maxAmmo;
-					
-					SetAmmo(client, ammo, weapon.AmmoType);
+				int type = GetEntProp(other, Prop_Send, "m_iPrimaryAmmoType");
+				if(type > 0 && GetAmmo(client, type) < 1)
 					return true;
-				}
 			}
-			else	// Find the ammo through this really hacky method
+		}
+	}
+
+	return false;
+}
+
+/*
+	Held weapons is deleted here
+*/
+static bool DropEmptyItems(int client)
+{
+	int length = GetMaxWeapons(client);
+	for(int i; i < length; i++)
+	{
+		int entity = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i);
+		if(entity != -1)
+		{
+			if(GetEntProp(entity, Prop_Data, "m_iClip1") < 1)
 			{
-				int entity = CreateEntityByName(weapon.Classname);
-				if(entity != -1)
+				int type = GetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType");
+				if(type > 0 && GetAmmo(client, type) < 1)
 				{
-					SetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex", 0);
-					SetEntProp(entity, Prop_Send, "m_bInitialized", 1);
-
-					DispatchSpawn(entity);
-
-					// Save our current ammo
-					int ammo[Ammo_MAX];
-					for(int i; i < Ammo_MAX; i++)
-					{
-						ammo[i] = GetAmmo(client, i);
-						SetAmmo(client, 0, i);
-					}
-
-					// Get the new weapon's ammo
-					SDKCalls_InitPickup(ground, client, entity);
-
-					bool wasChanged;
-
-					// Steal clip too
-					int count = GetEntProp(entity, Prop_Data, "m_iClip1");
-					if(count > 0)
-					{
-						ammo[weapon.AmmoType] += count;
-						wasChanged = true;
-					}
-
-					// See where the ammo was sent to, add to our current ammo count
-					for(int i; i < Ammo_MAX; i++)
-					{
-						count = GetAmmo(client, i);
-						if(count)
-						{
-							ammo[weapon.AmmoType] += count;
-							wasChanged = true;
-							break;
-						}
-					}
-
-					if(wasChanged && ammo[weapon.AmmoType] > maxAmmo)
-						ammo[weapon.AmmoType] = maxAmmo;
-
-					// Set our ammo back
-					for(int i; i < Ammo_MAX; i++)
-					{
-						if(ammo[i])
-							SetAmmo(client, ammo[i], i);
-					}
-
-					// Remove temp weapon
-					int wearable = GetEntPropEnt(entity, Prop_Send, "m_hExtraWearable");
-					if(wearable != -1)
-						RemoveEntity(wearable);
-
-					wearable = GetEntPropEnt(entity, Prop_Send, "m_hExtraWearableViewModel");
-					if(wearable != -1)
-						RemoveEntity(wearable);
-					
-					RemoveEntity(entity);
-					
-					return wasChanged;
+					Items_DropItem(client, entity, false);
+					return true;
 				}
 			}
 		}
@@ -572,6 +873,9 @@ bool Items_AttractAmmo(int client, int index, int ground = -1)
 	return false;
 }
 
+/*
+	Held weapons is deleted here
+*/
 bool Items_DropItem(int client, int weaponEntity, bool byForce)
 {
 	int index = GetEntProp(weaponEntity, Prop_Send, "m_iItemDefinitionIndex");
@@ -592,13 +896,17 @@ bool Items_DropItem(int client, int weaponEntity, bool byForce)
 			return false;
 		}
 
-		if(!weapon.Worldmodel[0])
+		if(weapon.Worldmodel)
+		{
+			ModelIndexToString(weapon.Worldmodel, buffer, sizeof(buffer));
+		}
+		else
 		{
 			index = GetEntProp(weaponEntity, Prop_Send, HasEntProp(weaponEntity, Prop_Send, "m_iWorldModelIndex") ? "m_iWorldModelIndex" : "m_nModelIndex");
 			if(index < 1)
 				return false;
 
-			ModelIndexToString(index, weapon.Worldmodel, sizeof(weapon.Worldmodel));
+			ModelIndexToString(index, buffer, sizeof(buffer));
 		}
 
 		Handle trace = TR_TraceRayFilterEx(pos, view_as<float>({90.0, 0.0, 0.0}), MASK_SOLID, RayType_Infinite, Trace_OnlyHitWorld);
@@ -612,6 +920,34 @@ bool Items_DropItem(int client, int weaponEntity, bool byForce)
 		TR_GetEndPosition(vec, trace);
 		delete trace;
 
+		int savedAmmo;
+		if(!byForce && weapon.AmmoType >= 0)
+		{
+			// Player keeps ammo and drops what ammo it has
+			savedAmmo = GetAmmo(client, weapon.AmmoType);
+			SetAmmo(client, 0, weapon.AmmoType);
+
+			// Steal leftover clip
+			int clip = GetEntProp(weaponEntity, Prop_Data, "m_iClip1");
+			if(clip > 0)
+			{
+				savedAmmo += clip;
+				int maxAmmo = Classes_GetMaxAmmo(client, weapon.AmmoType);
+
+				if(savedAmmo > maxAmmo)
+				{
+					clip = savedAmmo - maxAmmo;
+					savedAmmo = maxAmmo;
+				}
+				else
+				{
+					clip = 0;
+				}
+
+				SetEntProp(weaponEntity, Prop_Data, "m_iClip1", clip);
+			}
+		}
+		
 		// CTFDroppedWeapon::Create deletes tf_dropped_weapon if there too many in map, pretend entity is marking for deletion so it doesnt actually get deleted
 		ArrayList list = new ArrayList();
 		int other = MaxClients + 1;
@@ -626,7 +962,7 @@ bool Items_DropItem(int client, int weaponEntity, bool byForce)
 		}
 
 		//Pass client as NULL, only used for deleting existing dropped weapon which we do not want to happen
-		int droppedEntity = SDKCalls_CreateDroppedWeapon(-1, vec, ang, weapon.Worldmodel, GetEntityAddress(weaponEntity) + view_as<Address>(offset));
+		int droppedEntity = SDKCalls_CreateDroppedWeapon(-1, vec, ang, buffer, GetEntityAddress(weaponEntity) + view_as<Address>(offset));
 
 		offset = list.Length;
 		for(int i; i < offset; i++)
@@ -637,66 +973,120 @@ bool Items_DropItem(int client, int weaponEntity, bool byForce)
 
 		delete list;
 
-		if(droppedEntity == -1)
-			return false;
-		
-		DispatchSpawn(droppedEntity);
-
-		//Check if weapon is not marked for deletion after spawn, otherwise we may get bad physics model leading to a crash
-		if(GetEntProp(droppedEntity, Prop_Data, "m_iEFlags") & EFL_KILLME)
+		if(droppedEntity != -1)
 		{
-			LogError("Unable to create dropped weapon with model '%s'", weapon.Worldmodel);
-		}
-		else
-		{
-			SDKCalls_InitDroppedWeapon(droppedEntity, client, weaponEntity, byForce, false);
-			TF2_RemoveItem(client, weaponEntity);
+			DispatchSpawn(droppedEntity);
 
-			if(weapon.Skin >= 0)
+			//Check if weapon is not marked for deletion after spawn, otherwise we may get bad physics model leading to a crash
+			if(GetEntProp(droppedEntity, Prop_Data, "m_iEFlags") & EFL_KILLME)
 			{
-				SetVariantInt(weapon.Skin);
-				AcceptEntityInput(droppedEntity, "Skin");
-				SetEntityMaterialData(droppedEntity, weapon.Skin);
+				LogError("Unable to create dropped weapon with model '%s'", buffer);
 			}
+			else
+			{
+				SDKCalls_InitDroppedWeapon(droppedEntity, client, weaponEntity, byForce, false);
+				TF2_RemoveItem(client, weaponEntity);
 
-			float vel[3];
-			if(byForce)
-			{
-				vel[0] = float(GetRandomInt(-100, 100));
-				vel[1] = float(GetRandomInt(-100, 100));
-				vel[2] = float(GetRandomInt(25, 100));
-			}
-
-			TeleportEntity(droppedEntity, pos, NULL_VECTOR, vel);
-			
-			// Add dropped weapon to list, ordered by time created
-			static ArrayList droppedweapons;
-			if(!droppedweapons)
-				droppedweapons = new ArrayList();
-			
-			droppedweapons.Push(EntIndexToEntRef(droppedEntity));
-			int length = droppedweapons.Length;
-			for(int i = length - 1; i >= 0; i--)
-			{
-				// Clean up any ents that were already removed
-				if(!IsValidEntity(droppedweapons.Get(i)))
-					droppedweapons.Erase(i);
-			}
-			
-			int maxcount = 60;//CvarDroppedWeaponCount.IntValue;
-			if(maxcount != -1)
-			{
-				// If there are too many dropped weapon, remove some ordered by time created
-				length = droppedweapons.Length;
-				while(length > maxcount)
+				if(weapon.Skin >= 0)
 				{
-					RemoveEntity(droppedweapons.Get(0));
-					droppedweapons.Erase(0);
-					length--;
+					SetVariantInt(weapon.Skin);
+					AcceptEntityInput(droppedEntity, "Skin");
+					SetEntityMaterialData(droppedEntity, weapon.Skin);
+				}
+
+				float vel[3];
+				if(byForce)
+				{
+					vel[0] = float(GetRandomInt(-100, 100));
+					vel[1] = float(GetRandomInt(-100, 100));
+					vel[2] = float(GetRandomInt(25, 100));
+				}
+
+				TeleportEntity(droppedEntity, pos, NULL_VECTOR, vel);
+				
+				if(byForce && weapon.AmmoType >= 0)
+				{
+					// Remove ammo from player via force
+					SetAmmo(client, 0, weapon.AmmoType);
+				}
+				
+				// Add dropped weapon to list, ordered by time created
+				static ArrayList droppedweapons;
+				if(!droppedweapons)
+					droppedweapons = new ArrayList();
+				
+				droppedweapons.Push(EntIndexToEntRef(droppedEntity));
+				int length = droppedweapons.Length;
+				for(int i = length - 1; i >= 0; i--)
+				{
+					// Clean up any ents that were already removed
+					if(!IsValidEntity(droppedweapons.Get(i)))
+						droppedweapons.Erase(i);
+				}
+				
+				int maxcount = 60;//CvarDroppedWeaponCount.IntValue;
+				if(maxcount != -1)
+				{
+					// If there are too many dropped weapon, remove some ordered by time created
+					length = droppedweapons.Length;
+					while(length > maxcount)
+					{
+						RemoveEntity(droppedweapons.Get(0));
+						droppedweapons.Erase(0);
+						length--;
+					}
 				}
 			}
+		}
+
+		if(!byForce && weapon.AmmoType >= 0)
+		{
+			// Restore player ammo
+			SetAmmo(client, savedAmmo, weapon.AmmoType);
 		}
 	}
 
 	return true;
+}
+
+Action Items_TakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	Action result = Plugin_Continue;
+
+	if(attacker > 0 && attacker <= MaxClients && weapon > MaxClients)
+	{
+		if(Call_StartItemEntityFunc(weapon, WeaponEnum::FuncDamage))
+		{
+			Call_PushCell(attacker);
+			Call_PushCell(victim);
+			Call_PushCellRef(inflictor);
+			Call_PushFloatRef(damage);
+			Call_PushCellRef(damagetype);
+			Call_PushCellRef(weapon);
+			Call_PushArrayEx(damageForce, sizeof(damageForce), SM_PARAM_COPYBACK);
+			Call_PushArrayEx(damagePosition, sizeof(damagePosition), SM_PARAM_COPYBACK);
+			Call_PushCell(damagecustom);
+			Call_Finish(result);
+		}
+	}
+
+	return result;
+}
+
+int Items_CardAccess(int client, int type)
+{
+	int result = 0;
+
+	int entity = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	if(entity != -1)
+	{
+		if(Call_StartItemEntityFunc(entity, WeaponEnum::FuncCard))
+		{
+			Call_PushCell(client);
+			Call_PushCell(type);
+			Call_Finish(result);
+		}
+	}
+
+	return result;
 }

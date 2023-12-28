@@ -2,26 +2,74 @@
 {
 	"tf"
 	{
+		"Offsets"
+		{
+			"CBaseAnimating::m_pStudioHdr"
+			{
+				"linux"		"300"
+				"windows"	"294"
+			}
+			"CBaseEntity::ShouldCollide"
+			{
+				"linux"		"18"
+				"windows"	"17"
+			}
+			"CBasePlayer::ForceRespawn"
+			{
+				"linux"		"337"
+				"windows"	"336"
+			}
+			"CBasePlayer::m_pCurrentCommand"
+			{
+				"linux"		"3512"
+				"windows"	"3512"
+			}
+			"CEconItemView::IterateAttributes"
+			{
+				"linux"		"19"
+				"windows"	"18"
+			}
+			"CTeamplayRoundBasedRules::RoundRespawn"
+			{
+				"linux"		"231"
+				"windows"	"229"
+			}
+			"CTeamplayRules::SetWinningTeam"
+			{
+				"linux"		"165"
+				"windows"	"164"
+			}
+			"CTeam::AddPlayer"
+			{
+				"linux"		"209"
+				"windows"	"208"
+			}
+			"CTeam::RemovePlayer"
+			{
+				"linux"		"210"
+				"windows"	"209"
+			}
+		}
 		"Signatures"
 		{
-			"CBaseEntity::InSameTeam"
-			{
-				"library"	"server"
-				"linux"		"@_ZNK11CBaseEntity10InSameTeamEPKS_"
-				"windows"	"\x55\x8B\xEC\x8B\x45\x08\x57\x8B\xF9\x85\xC0\x75\x2A"
-			}
-			"CBaseTrigger::InputEnable"
-			{
-				"library"	"server"
-				"linux"		"@_ZN12CBaseTrigger11InputEnableER11inputdata_t"
-				"windows"	"\x56\x8B\xF1\xC6\x86\xAC\x04\x00\x00\x01"
-			}
 			"CBaseAnimating::GetBoneCache"
 			{
 				"library"	"server"
 				"linux"		"@_ZN14CBaseAnimating12GetBoneCacheEv"
 				"windows"	"\x55\x8B\xEC\xB8\x10\x18\x00\x00"
-			}			
+			}
+			"CLagCompensationManager::StartLagCompensation"
+			{
+				"library"	"server"
+				"linux"		"@_ZN23CLagCompensationManager20StartLagCompensationEP11CBasePlayerP8CUserCmd"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x24\x57\x8B\xF9\x89\x7D\xE8"
+			}
+			"CLagCompensationManager::FinishLagCompensation"
+			{
+				"library"	"server"
+				"linux"		"@_ZN23CLagCompensationManager21FinishLagCompensationEP11CBasePlayer"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x38\xA1\x2A\x2A\x2A\x2A\x53"
+			}		
 			"CTFDroppedWeapon::Create"
 			{
 				"library"	"server"
@@ -39,12 +87,6 @@
 				"library"	"server"
 				"linux"		"@_ZN16CTFDroppedWeapon18InitPickedUpWeaponEP9CTFPlayerP13CTFWeaponBase"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x08\xD9\xEE\x53\x56\x57"
-			}
-			"CTFGameMovement::ProcessMovement"
-			{
-				"library"	"server"
-				"linux"		"@_ZN15CTFGameMovement15ProcessMovementEP11CBasePlayerP9CMoveData"
-				"windows"	"\x55\x8B\xEC\x56\x57\x8B\x7D\x08\x8B\xF1\x85\xFF\x74\x2A\x53"
 			}
 			"CTFPlayer::CanPickupDroppedWeapon"
 			{
@@ -76,17 +118,17 @@
 				"linux"		"@_ZN9CTFPlayer10RegenThinkEv"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x74\x57\x8B\xF9\x8B\x07"
 			}
+			"CTFPlayer::SpeakConceptIfAllowed"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CTFPlayer21SpeakConceptIfAllowedEiPKcPcjP16IRecipientFilter"
+				"windows"	"\x55\x8B\xEC\x81\xEC\xE8\x00\x00\x00\x53\x8B\xD9\x89\x5D\xFC"
+			}
 			"CTFPlayer::Taunt"
 			{
 				"library"	"server"
 				"linux"		"@_ZN9CTFPlayer5TauntE8taunts_ti"
 				"windows"	"\x55\x8B\xEC\x81\xEC\xD4\x00\x00\x00\x53\x56\x57\x8B\xF9\xE8"
-			}
-			"CTFPlayer::TeamFortress_CalculateMaxSpeed"
-			{
-				"library"	"server"
-				"linux"		"@_ZNK9CTFPlayer30TeamFortress_CalculateMaxSpeedEb"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x18\x83\x3D\x2A\x2A\x2A\x2A\x00\x56\x8B\xF1\x75\x2A\xD9\xEE\x5E\x8B\xE5\x5D\xC2\x04\x00\x8B\x86"
 			}
 			"CTFPlayer::TeamFortress_SetSpeed"
 			{
@@ -94,51 +136,9 @@
 				"linux"		"@_ZN9CTFPlayer21TeamFortress_SetSpeedEv"
 				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x83\xEC\x1C\x53"
 			}
-			"CTFPlayer::TryToPickupDroppedWeapon"
-			{
-				"library"	"server"
-				"linux"		"@_ZN9CTFPlayer24TryToPickupDroppedWeaponEv"
-				"windows"	"\x56\x6A\x00\x8B\xF1\xE8\x2A\x2A\x2A\x2A\x84\xC0\x75\x2A\x32\xC0"
-			}
-			"CWeaponMedigun::AllowedToHealTarget"
-			{
-				"library"	"server"
-				"linux"		"@_ZN14CWeaponMedigun19AllowedToHealTargetEP11CBaseEntity"
-				"windows"	"\x55\x8B\xEC\x53\x8B\xD9\x57\x8B\x93\x10\x02\x00\x00\x85\xD2\x0F\x84\x2A\x2A\x2A\x2A\xB9\xFF\x1F\x00\x00\x83\xFA\xFF\x74\x2A\x0F\xB7\xCA\xA1\x2A\x2A\x2A\x2A\xC1\xE1\x04\x8D\x78\x04\x03\xF9\x0F\x84\x2A\x2A\x2A\x2A\xC1\xEA\x10\x39\x57\x04\x0F\x85\x2A\x2A\x2A\x2A\x8B\x3F\x85\xFF\x0F\x84\x2A\x2A\x2A\x2A\x8B\x07\x8B\xCF\x8B\x80\x48\x01\x00\x00\xFF\xD0\x84\xC0\x0F\x84\x2A\x2A\x2A\x2A\x56\x8B\x75\x08\x85\xF6\x0F\x84\x2A\x2A\x2A\x2A\x8B\x06"
-			}
-			"AI_CriteriaSet::FindCriterionIndex"
-			{
-				"linux"		"@_ZNK14AI_CriteriaSet18FindCriterionIndexEPKc"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x48\x56\xFF\x75\x08"
-			}
-			"AI_CriteriaSet::RemoveCriteria"
-			{
-				"linux"		"@_ZN14AI_CriteriaSet14RemoveCriteriaEPKc"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x48\x56\x57\xFF\x75\x08"
-			}
-			"PassServerEntityFilter"
-			{
-				"library"	"server"
-				"linux"		"@_Z22PassServerEntityFilterPK13IHandleEntityS1_"
-				"windows"   "\x55\x8B\xEC\x56\x8B\x75\x0C\x85\xF6\x75\x2A\xB0\x01"
-			}
 		}
 		"Functions"
 		{
-			"CBaseEntity::InSameTeam"
-			{
-				"signature"	"CBaseEntity::InSameTeam"
-				"callconv"	"thiscall"
-				"return"	"bool"
-				"this"		"entity"
-				"arguments"
-				{
-					"pEntity"
-					{
-						"type"	"cbaseentity"
-					}
-				}
-			}
 			"CBaseEntity::ShouldCollide"
 			{
 				"offset"	"CBaseEntity::ShouldCollide"
@@ -157,28 +157,13 @@
 					}
 				}
 			}
-			"CBaseTrigger::InputEnable"
-			{
-				"signature"	"CBaseTrigger::InputEnable"
-				"callconv"	"thiscall"
-				"hooktype"	"entity"
-				"return"	"void"
-				"this"		"entity"
-				"arguments"
-				{
-					"inputdata"
-					{
-						"type"	"objectptr"
-					}
-				}
-			}			
 			"CBaseAnimating::GetBoneCache"
 			{
 				"signature"	"CBaseAnimating::GetBoneCache"
 				"callconv"	"thiscall"
 				"return"	"int"
 				"this"		"entity"
-			}			
+			}	
 			"CBasePlayer::ForceRespawn"
 			{
 				"offset"	"CBasePlayer::ForceRespawn"
@@ -186,64 +171,74 @@
 				"return"	"void"
 				"this"		"entity"
 			}
+			"CEconItemView::IterateAttributes"
+			{
+				"offset"	"CEconItemView::IterateAttributes"
+				"hooktype"	"raw"
+				"return"	"void"
+				"this"		"address"
+				"arguments"
+				{
+					"IEconItemAttributeIterator"
+					{
+						"type"	"objectptr"
+					}
+				}
+			}
+			"CTFPlayer::SpeakConceptIfAllowed" 
+			{
+				"signature"		"CTFPlayer::SpeakConceptIfAllowed"
+				"callconv"		"thiscall"
+				"return"		"bool"
+				"this"			"entity"
+				"arguments"
+				{
+					"iConcept"
+					{
+						"type"	"int"
+					}
+					"modifiers"
+					{
+						"type"	"charptr"
+					}
+					"pszOutResponseChosen"
+					{
+						"type"	"charptr"
+					}
+					"bufsize"
+					{
+						"type"	"int"
+					}
+					"IRecipientFilter"
+					{
+						"type"	"int"
+					}
+				}
+			}
+			"CLagCompensationManager::StartLagCompensation"
+			{
+				"signature"	"CLagCompensationManager::StartLagCompensation"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"address"
+				"arguments"
+				{
+					"player"
+					{
+						"type"	"cbaseentity"
+					}
+					"cmd"
+					{
+						"type"	"objectptr"
+					}
+				}
+			}
 			"CTeamplayRoundBasedRules::RoundRespawn"
 			{
 				"offset"	"CTeamplayRoundBasedRules::RoundRespawn"
 				"hooktype"	"gamerules"
 				"return"	"void"
 				"this"		"ignore"
-			}
-			"CTeamplayRules::SetWinningTeam"
-			{
-				"offset"	"CTeamplayRules::SetWinningTeam"
-				"hooktype"	"gamerules"
-				"return"	"void"
-				"this"		"ignore"
-				"arguments"
-				{
-					"team"
-					{
-						"type"	"int"
-					}
-					"iWinReason"
-					{
-						"type"	"int"
-					}
-					"bForceMapReset"
-					{
-						"type"	"bool"
-					}
-					"bSwitchTeams"
-					{
-						"type"	"bool"
-					}
-					"bDontAddScore"
-					{
-						"type"	"bool"
-					}
-					"bFinal"
-					{
-						"type"	"bool"
-					}
-				}
-			}
-			"CTFGameMovement::ProcessMovement"
-			{
-				"signature"	"CTFGameMovement::ProcessMovement"
-				"callconv"	"thiscall"
-				"return"	"void"
-				"this"		"ignore"
-				"arguments"
-				{
-					"player"
-					{
-						"type"	"cbaseentity" // CBasePlayer *
-					}
-					"mv"
-					{
-						"type"	"objectptr" // CMoveData *
-					}
-				}
 			}
 			"CTFPlayer::CanPickupDroppedWeapon"
 			{
@@ -341,129 +336,6 @@
 						"type"	"int"
 					}
 				}
-			}
-			"CTFPlayer::TeamFortress_CalculateMaxSpeed"
-			{
-				"signature"	"CTFPlayer::TeamFortress_CalculateMaxSpeed"
-				"callconv"	"thiscall"
-				"return"	"float"
-				"this"		"address"
-				"arguments"
-				{
-					"bIgnoreSpecialAbility"
-					{
-						"type"	"bool"
-					}
-				}
-			}
-			"CBaseEntity::ModifyOrAppendCriteria"
-			{
-				"offset"	"CBaseEntity::ModifyOrAppendCriteria"
-				"hooktype"	"entity"
-				"return"	"void"
-				"this"		"entity"
-				"arguments"
-				{
-					"criteriaSet"
-					{
-						"type"	"int"
-					}
-				}
-			}
-			"PassServerEntityFilter"
-			{
-				// bool PassServerEntityFilter( const IHandleEntity *pTouch, const IHandleEntity *pPass )
-				"signature" "PassServerEntityFilter"
-				"callconv" "cdecl"
-				"return" "bool"
-				"arguments"
-				{
-					"touch"
-					{
-						"type" "cbaseentity"
-					}
-					"pass"
-					{
-						"type" "cbaseentity"
-					}
-				}
-			}
-		}
-		"Offsets"
-		{
-			"CBaseEntity::GetBaseEntity"
-			{
-				"linux" 	"6"
-				"windows" 	"5"
-			}
-			"CBaseEntity::ShouldCollide"
-			{
-				"linux"		"18"
-				"windows"	"17"
-			}
-			"CBaseAnimating::m_pStudioHdr"
-			{
-				"linux"		"300"
-				"windows"	"294"
-			}
-			"CBasePlayer::EquipWearable"
-			{
-				"linux"		"439"
-				"windows"	"438"
-			}
-			"CBasePlayer::ForceRespawn"
-			{
-				"linux"		"337"
-				"windows"	"336"
-			}
-			"CTeamplayRoundBasedRules::RoundRespawn"
-			{
-				"linux"		"231"
-				"windows"	"229"
-			}
-			"CTeamplayRules::SetWinningTeam"
-			{
-				"linux"		"165"
-				"windows"	"164"
-			}
-			"CTeam::AddPlayer"
-			{
-				"linux"		"209"
-				"windows"	"208"
-			}
-			"CTeam::RemovePlayer"
-			{
-				"linux"		"210"
-				"windows"	"209"
-			}
-			"CBaseEntity::ModifyOrAppendCriteria"
-			{
-				"linux"		"124"
-				"windows"	"123"
-			}
-		}
-		"Addresses"
-		{
-			"Patch_ProcessMovement"
-			{
-				"linux"
-				{
-					"signature"	"CTFGameMovement::ProcessMovement"
-					"offset"	"84"
-				}
-				"windows"
-				{
-					"signature"	"CTFGameMovement::ProcessMovement"
-					"offset"	"70"
-				}
-			}
-		}
-		"Keys"
-		{
-			"Patch_ProcessMovement"
-			{
-				"windows"	"\x90\x90\x90\x90\x90\x90\x90"
-				"linux"		"\x90\x90\x90\x90\x90\x90\x90"
 			}
 		}
 	}

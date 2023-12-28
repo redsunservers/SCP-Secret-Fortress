@@ -2,20 +2,16 @@
 #include <clientprefs>
 #include <tf2_stocks>
 #include <sdkhooks>
-#include <sdktools>
-#include <tf2items>
 #include <morecolors>
 #include <tf2attributes>
 #include <dhooks>
 #include <tf_econ_data>
 #include <tf2utils>
+#include <vscript>
 #undef REQUIRE_PLUGIN
 #tryinclude <sourcecomms>
 #tryinclude <basecomm>
 #define REQUIRE_PLUGIN
-#undef REQUIRE_EXTENSIONS
-#tryinclude <sendproxy>
-#define REQUIRE_EXTENSIONS
 
 #pragma semicolon 1
 #pragma newdecls required
@@ -40,7 +36,7 @@ native bool OnPlayerAdjustVolume(int caller, int client, int volume);
 #define GITHUB_URL		"github.com/redsunservers/SCP-Secret-Fortress"
 
 #define FAR_FUTURE		100000000.0
-#define MAXENTITIES		2048
+//#define MAXENTITIES		2048
 
 #define TFTeam_Unassigned	0
 #define TFTeam_Spectator	1
@@ -84,13 +80,17 @@ bool SourceComms;
 #include "scp_sf/configs.sp"
 #include "scp_sf/convars.sp"
 #include "scp_sf/dhooks.sp"
+#include "scp_sf/events.sp"
 #include "scp_sf/forwards.sp"
 #include "scp_sf/gamemode.sp"
 #include "scp_sf/items.sp"
+#include "scp_sf/maplogic.sp"
 #include "scp_sf/music.sp"
 #include "scp_sf/natives.sp"
 #include "scp_sf/proxy.sp"
 #include "scp_sf/sdkcalls.sp"
+#include "scp_sf/sdkhooks.sp"
+#include "scp_sf/vieweffects.sp"
 
 #include "scp_sf/classes/human.sp"
 
@@ -139,13 +139,30 @@ public void OnPluginStart()
 	Commands_PluginStart();
 	ConVar_PluginStart();
 	DHooks_PluginStart();
+	Events_PluginStart();
 	Items_PluginStart();
+	MapLogic_PluginStart();
 	SDKCalls_PluginStart();
+	SDKHooks_PluginStart();
+	
+	char classname[64];
+
+	int entity = -1;
+	while((entity=FindEntityByClassname(entity, "*")) != -1)
+	{
+		GetEntityClassname(entity, classname, sizeof(classname));
+		OnEntityCreated(entity, classname);
+	}
 }
 
 public void OnPluginEnd()
 {
 	DHooks_PluginEnd();
+}
+
+public void OnAllPluginsLoaded()
+{
+	MapLogic_AllPluginsLoaded();
 }
 
 public void OnLibraryAdded(const char[] name)
@@ -177,6 +194,8 @@ public void OnLibraryRemoved(const char[] name)
 public void OnMapStart()
 {
 	DHooks_MapStart();
+	MapLogic_MapStart();
+	ViewEffects_MapStart();
 }
 
 public void OnMapEnd()
@@ -199,7 +218,7 @@ public void OnConfigsExecuted()
 public void OnClientPutInServer(int client)
 {
 	DHooks_ClientPutInServer(client);
-	Proxy_ClientPutInServer(client);
+	SDKHooks_PutInServer(client);
 }
 
 public void OnClientDisconnect(int client)
@@ -239,6 +258,7 @@ public void OnClientSpeakingEnd(int client)
 public void OnEntityCreated(int entity, const char[] classname)
 {
 	Proxy_EntityCreated(entity, classname);
+	SDKHooks_EntityCreated(entity, classname);
 }
 
 public void OnEntityDestroyed(int entity)

@@ -32,16 +32,9 @@ public bool Human_OnClientCommand(int client, const char[] command)
 	if(StrEqual(command, "dropitem"))	// Drop their active item
 	{
 		int entity = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-		if(entity != -1 && Items_DropItem(client, entity, false))
+		if(entity != -1 && Items_AttemptDropItem(client, entity))
 		{
-			if(!Items_SwapInSlot(client))
-			{
-				entity = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
-				if(entity != -1)
-					Items_SwapToItem(client, entity);
-			}
-
-			MaxSprintCached[client] = false;
+			Items_SwapToBest(client);
 			return true;
 		}
 	}
@@ -118,21 +111,29 @@ public bool Human_OnClientCommand(int client, const char[] command)
 
 				if(index != -1)
 				{
-					Items_AttemptPickup(client, index);
-					MaxSprintCached[client] = false;
+					if(Items_AttemptPickup(client, index))
+						RemoveEntity(entity);
+
 					return true;
 				}
 			}
 			else if(StrEqual(buffer, "tf_dropped_weapon"))
 			{
-				Items_AttemptPickup(client, GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), entity);
-				MaxSprintCached[client] = false;
+				if(Items_AttemptPickup(client, GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), entity))
+					RemoveEntity(entity);
+
 				return true;
 			}
 		}
 	}
 
 	return false;
+}
+
+public void Human_OnWeaponSwitch(int client)
+{
+	// TODO: Add this forward
+	MaxSprintCached[client] = false;
 }
 
 public void Human_OnUpdateSpeed(int client, float &speed)
@@ -196,10 +197,13 @@ public Action Human_OnPlayerRunCmd(int client, int &buttons)
 	}
 	else if(WasSprintting[client])
 	{
+		if(!ground)	// Penalty for sprint jumping
+			SprintEnergy[client] -= 11.0;
+
 		WasSprintting[client] = false;
 		Classes_UpdateSpeed(client);
 	}
-	else if(!ground)
+	else if(ground)
 	{
 		float maxEnergy = float(1 + MaxSprintLevel[client] * 11);
 		if(SprintEnergy[client] < maxEnergy)
@@ -277,10 +281,6 @@ public Action Human_OnPlayerRunCmd(int client, int &buttons)
 						{
 							strcopy(interact, sizeof(interact), "Pick Up Item");
 						}
-						else if(Items_CanAttractAmmo(client, index))
-						{
-							strcopy(interact, sizeof(interact), "Take Ammunition");
-						}
 					}
 				}
 			}
@@ -292,10 +292,6 @@ public Action Human_OnPlayerRunCmd(int client, int &buttons)
 				{
 					strcopy(interact, sizeof(interact), "Pick Up Item");
 				}
-				else if(Items_CanAttractAmmo(client, index))
-				{
-					strcopy(interact, sizeof(interact), "Take Ammunition");
-				}
 			}
 		}
 
@@ -303,31 +299,29 @@ public Action Human_OnPlayerRunCmd(int client, int &buttons)
 		if(entity != -1)
 			Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon);
 		
+		char buffer[512];
 		if(MaxSprintLevel[client] > 0)
-		{
-			Format(weapon.Viewmodel, sizeof(weapon.Viewmodel), "%%+attack3%% %t", "Sprint");
-		}
-		else
-		{
-			weapon.Viewmodel[0] = 0;
-		}
+			Format(buffer, sizeof(buffer), "%%%%+attack3%%%% %t", "Sprint");
 
 		if(weapon.DisplayAttack[0])
-			Format(weapon.Viewmodel, sizeof(weapon.Viewmodel), "%s %%+attack%% %t", weapon.Viewmodel, weapon.DisplayAttack);
+			Format(buffer, sizeof(buffer), "%s %%%%+attack%%%% %t", buffer, weapon.DisplayAttack);
 
 		if(weapon.DisplayAltfire[0])
-			Format(weapon.Viewmodel, sizeof(weapon.Viewmodel), "%s %%+attack2%% %t", weapon.Viewmodel, weapon.DisplayAltfire);
+			Format(buffer, sizeof(buffer), "%s %%%%+attack2%%%% %t", buffer, weapon.DisplayAltfire);
 
 		if(weapon.DisplayReload[0])
-			Format(weapon.Viewmodel, sizeof(weapon.Viewmodel), "%s %%+reload%% %t", weapon.Viewmodel, weapon.DisplayReload);
+			Format(buffer, sizeof(buffer), "%s %%%%+reload%%%% %t", buffer, weapon.DisplayReload);
+		
+		if(entity != -1 && Items_CanDropItem(client, entity))
+			Format(buffer, sizeof(buffer), "%s %%%%dropitem%%%% %t", buffer, "Drop Item");
 
 		if(entity != -1 && Items_HasMultiInSlot(client, TF2Util_GetWeaponSlot(entity)))
-			Format(weapon.Viewmodel, sizeof(weapon.Viewmodel), "%s %%+inspect%% %t", weapon.Viewmodel, "Switch Items");
+			Format(buffer, sizeof(buffer), "%s %%%%+inspect%%%% %t", buffer, "Switch Items");
 
 		if(interact[0])
-			Format(weapon.Viewmodel, sizeof(weapon.Viewmodel), "%s %%+use_action_slot_item%% %t", weapon.Viewmodel, interact);
+			Format(buffer, sizeof(buffer), "%s %%%%+use_action_slot_item%%%% %t", buffer, interact);
 		
-		PrintKeyHintText(client, weapon.Viewmodel);
+		PrintKeyHintText(client, buffer);
 
 
 		if(SprintHud && MaxSprintLevel[client] > 0)
@@ -340,9 +334,9 @@ public Action Human_OnPlayerRunCmd(int client, int &buttons)
 					Format(interact, sizeof(interact), "%s \n", interact);
 				}
 				
-				if(i >= MaxSprintLevel[client])
+				if(i <= MaxSprintLevel[client])
 				{
-					float highest = float((i * 11) + 1);
+					float highest = float(i * 11);
 					if(SprintEnergy[client] > highest)
 					{
 						Format(interact, sizeof(interact), "%s" ... CHAR_FULL, interact);
@@ -362,7 +356,7 @@ public Action Human_OnPlayerRunCmd(int client, int &buttons)
 				}
 			}
 
-			SetHudTextParams(0.175, 0.925, 0.9, 255, 255, 255, 255);
+			SetHudTextParams(0.175, 0.85, 0.9, 255, 255, 255, 255);
 			ShowSyncHudText(client, SprintHud, interact);
 		}
 	}

@@ -19,7 +19,6 @@ static int EconItemOffset;
 static int StudioHdrOffset;
 
 static int ForceRespawnPreHook[MAXPLAYERS+1];
-static int ForceRespawnPostHook[MAXPLAYERS+1];
 
 void DHooks_PluginStart()
 {
@@ -27,10 +26,12 @@ void DHooks_PluginStart()
 	
 	CreateDetour(gamedata, "CBaseAnimating::GetBoneCache", GetBoneCachePre);
 	CreateDetour(gamedata, "CLagCompensationManager::StartLagCompensation", _, StartLagCompensationPost);
+	CreateDetour(gamedata, "CTFPlayer::CanPickupDroppedWeapon", CanPickupDroppedWeaponPre);
 	CreateDetour(gamedata, "CTFPlayer::DoAnimationEvent", DoAnimationEventPre);
 	CreateDetour(gamedata, "CTFPlayer::DropAmmoPack", DropAmmoPackPre);
 	CreateDetour(gamedata, "CTFPlayer::GetMaxAmmo", GetMaxAmmoPre);
 	CreateDetour(gamedata, "CTFPlayer::RegenThink", RegenThinkPre, RegenThinkPost);
+	CreateDetour(gamedata, "CTFPlayer::SpeakConceptIfAllowed", SpeakConceptIfAllowedPre, SpeakConceptIfAllowedPost);
 	CreateDetour(gamedata, "CTFPlayer::Taunt", TauntPre, TauntPost);
 	
 	ForceRespawn = CreateHook(gamedata, "CBasePlayer::ForceRespawn");
@@ -88,7 +89,6 @@ void DHooks_ClientPutInServer(int client)
 	if(ForceRespawn)
 	{
 		ForceRespawnPreHook[client] = ForceRespawn.HookEntity(Hook_Pre, client, ForceRespawnPre);
-		ForceRespawnPostHook[client] = ForceRespawn.HookEntity(Hook_Post, client, ForceRespawnPost);
 	}
 }
 
@@ -151,7 +151,6 @@ static void DHooks_UnhookClient(int client)
 	if(ForceRespawn)
 	{
 		DynamicHook.RemoveHook(ForceRespawnPreHook[client]);
-		DynamicHook.RemoveHook(ForceRespawnPostHook[client]);
 	}
 }
 
@@ -162,39 +161,16 @@ Address DHooks_GetLagCompensationManager()
 
 static MRESReturn CanPickupDroppedWeaponPre(int client, DHookReturn ret, DHookParam param)
 {
-/*
-	switch(Forward_OnPickupDroppedWeapon(client, param.Get(1)))
-	{
-		case Plugin_Continue:
-		{
-			if(Client(client).IsBoss || Client(client).Minion)
-			{
-				ret.Value = false;
-				return MRES_Supercede;
-			}
-		}
-		case Plugin_Handled:
-		{
-			ret.Value = true;
-			return MRES_Supercede;
-		}
-		case Plugin_Stop:
-		{
-			ret.Value = false;
-			return MRES_Supercede;
-		}
-	}
-	*/
-	return MRES_Ignored;
+	ret.Value = false;
+	return MRES_Supercede;
 }
 
 static MRESReturn DoAnimationEventPre(int client, DHookParam param)
 {
-	/*
-	PlayerAnimEvent_t anim = param.Get(1);
+	int anim = param.Get(1);
 	int data = param.Get(2);
 
-	Action action = Classes_OnAnimation(client, anim, data);
+	Action action = Classes_DoAnimationEvent(client, anim, data);
 	if(action >= Plugin_Handled)
 		return MRES_Supercede;
 
@@ -204,37 +180,22 @@ static MRESReturn DoAnimationEventPre(int client, DHookParam param)
 		param.Set(2, data);
 		return MRES_ChangedOverride;
 	}
-*/
+
 	return MRES_Ignored;
 }
 
 static MRESReturn DropAmmoPackPre(int client, DHookParam param)
 {
-	//return (Client(client).Minion || Client(client).IsBoss) ? MRES_Supercede : MRES_Ignored;
+	return MRES_Supercede;
 }
 
 static MRESReturn ForceRespawnPre(int client)
-{/*
-	PrefClass = 0;
-	if(Client(client).IsBoss)
-	{
-		int class;
-		Client(client).Cfg.GetInt("class", class);
-		if(class)
-		{
-			PrefClass = GetEntProp(client, Prop_Send, "m_iDesiredPlayerClass");
-			SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", class);
-		}
-	}
-*/
-	return MRES_Ignored;
-}
-
-static MRESReturn ForceRespawnPost(int client)
 {
-	//if(PrefClass)
-	//	SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", PrefClass);
-	
+	ClassEnum class;
+	if(Classes_GetByIndex(Client(client).Class, class) && class.Class)
+		SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", class.Class);
+
+	Client(client).ResetByDeath();
 	return MRES_Ignored;
 }
 
@@ -277,13 +238,16 @@ static MRESReturn IterateAttributesPost(Address address, DHookParam param)
 static MRESReturn RegenThinkPre(int client, DHookParam param)
 {
 	ClassEnum class;
-	if(Classes_GetByIndex(Client(client).Class, class) && class.Regen)
+	if(Classes_GetByIndex(Client(client).Class, class))
 	{
-		TF2_SetPlayerClass(client, TFClass_Medic, _, false);
-	}
-	else if(TF2_GetPlayerClass(client) == TFClass_Medic)
-	{
-		TF2_SetPlayerClass(client, TFClass_Unknown, _, false);
+		if(class.Regen)
+		{
+			TF2_SetPlayerClass(client, TFClass_Medic, _, false);
+		}
+		else if(TF2_GetPlayerClass(client) == TFClass_Medic)
+		{
+			TF2_SetPlayerClass(client, TFClass_Unknown, _, false);
+		}
 	}
 	return MRES_Ignored;
 }
@@ -291,13 +255,16 @@ static MRESReturn RegenThinkPre(int client, DHookParam param)
 static MRESReturn RegenThinkPost(int client, DHookParam param)
 {
 	ClassEnum class;
-	if(Classes_GetByIndex(Client(client).Class, class) && class.Regen)
+	if(Classes_GetByIndex(Client(client).Class, class))
 	{
-		TF2_SetPlayerClass(client, class.Class, _, false);
-	}
-	else if(TF2_GetPlayerClass(client) == TFClass_Unknown)
-	{
-		TF2_SetPlayerClass(client, TFClass_Medic, _, false);
+		if(class.Regen && class.Class)
+		{
+			TF2_SetPlayerClass(client, class.Class, _, false);
+		}
+		else if(TF2_GetPlayerClass(client) == TFClass_Unknown)
+		{
+			TF2_SetPlayerClass(client, TFClass_Medic, _, false);
+		}
 	}
 	return MRES_Ignored;
 }
@@ -306,6 +273,32 @@ static MRESReturn RoundRespawnPre()
 {
 	Music_RoundRespawn();
 	Gamemode_RoundRespawn();
+	return MRES_Ignored;
+}
+
+static MRESReturn SpeakConceptIfAllowedPre(int client, DHookParam param)
+{
+	ClassEnum class;
+	for(int target = 1; target <= MaxClients; target++)
+	{
+		if(IsClientInGame(target) && Classes_GetByIndex(Client(target).Class, class) && class.Class)
+		{
+			TF2_SetPlayerClass(target, class.Class, _, false);
+		}
+	}
+	return MRES_Ignored;
+}
+
+static MRESReturn SpeakConceptIfAllowedPost(int client, DHookParam param)
+{
+	ClassEnum class;
+	for(int target = 1; target <= MaxClients; target++)
+	{
+		if(IsClientInGame(target) && Classes_GetByIndex(Client(target).Class, class) && Client(target).WeaponClass)
+		{
+			TF2_SetPlayerClass(target, Client(target).WeaponClass, _, false);
+		}
+	}
 	return MRES_Ignored;
 }
 
@@ -318,16 +311,19 @@ static MRESReturn StartLagCompensationPost(Address address)
 static MRESReturn TauntPre(int client)
 {
 	// Dont allow taunting if disguised or cloaked
-	if(Client(client).Class < 0 || TF2_IsPlayerInCondition(client, TFCond_Disguising) || TF2_IsPlayerInCondition(client, TFCond_Disguised) || TF2_IsPlayerInCondition(client, TFCond_Cloaked))
+	if(TF2_IsPlayerInCondition(client, TFCond_Disguising) || TF2_IsPlayerInCondition(client, TFCond_Disguised) || TF2_IsPlayerInCondition(client, TFCond_Cloaked))
 		return MRES_Supercede;
 
 	// Player wants to taunt, set class to whoever can actually taunt with active weapon
-	int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-	if(weapon > MaxClients)
+	if(Classes_GetByIndex(Client(client).Class))
 	{
-		TFClassType class = TF2_GetWeaponClass(GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex"));
-		if(class != TFClass_Unknown)
-			TF2_SetPlayerClass(client, class, false, false);
+		int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+		if(weapon > MaxClients)
+		{
+			TFClassType class = TF2_GetWeaponClass(GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex"));
+			if(class != TFClass_Unknown)
+				TF2_SetPlayerClass(client, class, false, false);
+		}
 	}
 	return MRES_Ignored;
 }

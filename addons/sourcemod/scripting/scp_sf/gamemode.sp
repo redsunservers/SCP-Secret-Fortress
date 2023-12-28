@@ -11,7 +11,7 @@ ArrayList Gamemode_ConfigSetupPre(KeyValues map)
 	KeyValues kv = new KeyValues("Gamemode");
 	kv.ImportFromFile(buffer);
 
-	bool usingMap = map.JumpToKey("Gamemode");
+	bool usingMap = (map && map.JumpToKey("Gamemode"));
 	KeyValues choosen;
 
 
@@ -168,6 +168,18 @@ void Gamemode_RoundRespawn()
 	}
 
 	if(Call_StartGameruler("OnRoundRespawn"))
+		Call_Finish();
+}
+
+void Gamemode_RoundStart()
+{
+	if(Call_StartGameruler("RoundStart"))
+		Call_Finish();
+}
+
+void Gamemode_RoundEnd()
+{
+	if(Call_StartGameruler("RoundEnd"))
 		Call_Finish();
 }
 

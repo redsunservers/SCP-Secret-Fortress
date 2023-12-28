@@ -7,7 +7,6 @@ static float LastChatAt[MAXPLAYERS+1];
 static float LastVoiceAt[MAXPLAYERS+1];
 static int CanTalkTo[MAXPLAYERS+1][MAXPLAYERS+1];
 static float GlobalFor[MAXPLAYERS+1];
-static TFClassType DisplayClass[MAXPLAYERS+1];
 static TFClassType WeaponClass[MAXPLAYERS+1];
 static int CurrentFloor[MAXPLAYERS+1];
 
@@ -78,18 +77,6 @@ methodmap Client
 		}
 	}
 
-	property TFClassType DisplayClass
-	{
-		public get()
-		{
-			return DisplayClass[view_as<int>(this)];
-		}
-		public set(TFClassType class)
-		{
-			DisplayClass[view_as<int>(this)] = class;
-		}
-	}
-
 	property TFClassType WeaponClass
 	{
 		public get()
@@ -127,6 +114,7 @@ methodmap Client
 	public void ResetByDeath()
 	{
 		this.CurrentFloor = -1;
+		this.WeaponClass = TFClass_Unknown;
 	}
 	
 	public void ResetByRound()
