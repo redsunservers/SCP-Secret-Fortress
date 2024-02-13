@@ -1174,9 +1174,10 @@ bool Items_IsHoldingWeapon(int client)
 	{
 		WeaponEnum weapon;
 		
-		if(!Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon))
+		int index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
+		if(!Items_GetWeaponByIndex(index, weapon))
 			return true;
-			
+		
 		if ((weapon.Type == ITEM_TYPE_WEAPON) || (weapon.Type == ITEM_TYPE_GRENADE))
 			return true;	
 
