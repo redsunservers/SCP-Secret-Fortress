@@ -372,7 +372,9 @@ public void SCP173_OnButton(int client, int button)
 
 					ModelRef[client] = EntIndexToEntRef(entity);
 				}
-
+				
+				ang1[0] = 0.0;
+				ang1[2] = 0.0;
 				TeleportEntity(entity, pos2, ang1, NULL_VECTOR);
 				return;
 			}
@@ -427,110 +429,69 @@ public Action SCP173_PuddleTimer(Handle timer, DataPack pack)
 	return Plugin_Stop;
 }
 
-// From ff2_dynamic_defaults by sarysa
-public bool DPT_TracePlayersAndBuildings(int entity, int contentsMask, any data)
+bool DPT_TryTeleport(int clientIdx, float maxDistance, const float startPos[3], const float eyeAngles[3], float testPos[3])
 {
-	if(entity>0 && entity<=MaxClients)
-		return false;
-
-	return IsValidEntity(entity);
-}
-
-static bool DPT_TryTeleport(int clientIdx, float maxDistance, const float startPos[3], const float eyeAngles[3], float testPos[3])
-{
-	float sizeMultiplier = GetEntPropFloat(clientIdx, Prop_Send, "m_flModelScale");
-	static float endPos[3];
-	TR_TraceRayFilter(startPos, eyeAngles, MASK_PLAYERSOLID, RayType_Infinite, DPT_TracePlayersAndBuildings);
-	TR_GetEndPosition(endPos);
+	TR_TraceRayFilter(startPos, eyeAngles, MASK_PLAYERSOLID, RayType_Infinite, Trace_DontHitEntity, clientIdx);
+	TR_GetEndPosition(testPos);
 	
-	// don't even try if the distance is less than 82
-	float distance = GetVectorDistance(startPos, endPos);
-	if (distance < 82.0)
-		return false;
-		
+	float distance = GetVectorDistance(startPos, testPos);
 	if (distance > maxDistance)
-		constrainDistance(startPos, endPos, distance, maxDistance);
-	else // shave just a tiny bit off the end position so our point isn't directly on top of a wall
-		constrainDistance(startPos, endPos, distance, distance - 1.0);
-	
-	// now for the tests. I go 1 extra on the standard mins/maxs on purpose.
-	bool found = false;
-	for (int x = 0; x < 3; x++)
 	{
-		if (found)
-			break;
-	
-		float xOffset;
-		if (x == 0)
-			xOffset = 0.0;
-		else if (x == 1)
-			xOffset = 12.5 * sizeMultiplier;
-		else
-			xOffset = 25.0 * sizeMultiplier;
-		
-		if (endPos[0] < startPos[0])
-			testPos[0] = endPos[0] + xOffset;
-		else if (endPos[0] > startPos[0])
-			testPos[0] = endPos[0] - xOffset;
-		else if (xOffset != 0.0)
-			break; // super rare but not impossible, no sense wasting on unnecessary tests
-	
-		for (int y = 0; y < 3; y++)
+		constrainDistance(startPos, testPos, distance, maxDistance);
+	}
+	else
+	{
+		int entity = TR_GetEntityIndex();
+		if (0 < entity <= MaxClients && !IsFriendly(Client[clientIdx].Class, Client[entity].Class))
 		{
-			if (found)
-				break;
-
-			float yOffset;
-			if (y == 0)
-				yOffset = 0.0;
-			else if (y == 1)
-				yOffset = 12.5 * sizeMultiplier;
-			else
-				yOffset = 25.0 * sizeMultiplier;
-
-			if (endPos[1] < startPos[1])
-				testPos[1] = endPos[1] + yOffset;
-			else if (endPos[1] > startPos[1])
-				testPos[1] = endPos[1] - yOffset;
-			else if (yOffset != 0.0)
-				break; // super rare but not impossible, no sense wasting on unnecessary tests
-		
-			for (int z = 0; z < 3; z++)
-			{
-				if (found)
-					break;
-
-				float zOffset;
-				if (z == 0)
-					zOffset = 0.0;
-				else if (z == 1)
-					zOffset = 41.5 * sizeMultiplier;
-				else
-					zOffset = 83.0 * sizeMultiplier;
-
-				if (endPos[2] < startPos[2])
-					testPos[2] = endPos[2] + zOffset;
-				else if (endPos[2] > startPos[2])
-					testPos[2] = endPos[2] - zOffset;
-				else if (zOffset != 0.0)
-					break; // super rare but not impossible, no sense wasting on unnecessary tests
-
-				// before we test this position, ensure it has line of sight from the point our player looked from
-				// this ensures the player can't teleport through walls
-				static float tmpPos[3];
-				TR_TraceRayFilter(endPos, testPos, MASK_BLOCKLOS, RayType_EndPoint, Trace_WorldAndBrushes);
-				TR_GetEndPosition(tmpPos);
-				if (testPos[0] != tmpPos[0] || testPos[1] != tmpPos[1] || testPos[2] != tmpPos[2])
-					continue;
-				
-				// now we do our very expensive test. thankfully there's only 27 of these calls, worst case scenario.
-				found = IsSpotSafe(clientIdx, testPos, sizeMultiplier);
-			}
+			// Try lock into enemy
+			GetClientAbsOrigin(entity, testPos);
+			if (GetSafePosition(clientIdx, testPos, testPos))
+				return true;
 		}
 	}
 	
-	if (!found)
-		return false;
+	float eyeVel[3];
+	AnglesToVelocity(eyeAngles, eyeVel);
 	
-	return true;
+	// shave just a tiny bit off the end position so our point isn't directly on top of a wall
+	SubtractVectors(testPos, eyeVel, testPos);
+	
+	// don't even try if the distance is less than 82
+	while (GetVectorDistance(startPos, testPos) >= 82.0)
+	{
+		if (GetSafePosition(clientIdx, testPos, testPos))
+			return true;
+		
+		// Go back by 1hu and try again
+		SubtractVectors(testPos, eyeVel, testPos);
+	}
+	
+	return false;
+}
+
+bool GetSafePosition(int client, const float testPos[3], float result[3])
+{
+	float mins[3], maxs[3];
+	GetEntPropVector(client, Prop_Send, "m_vecMins", mins);
+	GetEntPropVector(client, Prop_Send, "m_vecMaxs", maxs);
+	
+	// Check if spot is safe
+	result = testPos;
+	TR_TraceHullFilter(testPos, testPos, mins, maxs, MASK_PLAYERSOLID, Trace_DontHitPlayers);
+	if (!TR_DidHit())
+		return true;
+	
+	// Might be hitting a celing, get the highest point
+	float height = maxs[2] - mins[2];
+	result[2] += height;
+	TR_TraceRayFilter(testPos, result, MASK_PLAYERSOLID, RayType_EndPoint, Trace_DontHitPlayers);
+	TR_GetEndPosition(result);
+	result[2] -= height;
+	
+	TR_TraceHullFilter(result, result, mins, maxs, MASK_PLAYERSOLID, Trace_DontHitPlayers);
+	if (!TR_DidHit())
+		return true;
+	
+	return false;
 }

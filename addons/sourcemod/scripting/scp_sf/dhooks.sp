@@ -27,6 +27,7 @@ void DHook_Setup(GameData gamedata)
 	DHook_CreateDetour(gamedata, "CTFPlayer::RegenThink", DHook_RegenThinkPre, DHook_RegenThinkPost);
 	DHook_CreateDetour(gamedata, "CTFPlayer::Taunt", DHook_TauntPre, DHook_TauntPost);
 	DHook_CreateDetour(gamedata, "CTFPlayer::TeamFortress_CalculateMaxSpeed", DHook_CalculateMaxSpeedPre, DHook_CalculateMaxSpeedPost);
+	DHook_CreateDetour(gamedata, "PassServerEntityFilter", _, Detour_PassServerEntityFilterPost);
 	
 	// TODO: DHook_CreateDetour version of this
 	AllowedToHealTarget = new DynamicDetour(Address_Null, CallConv_THISCALL, ReturnType_Bool, ThisPointer_CBaseEntity);
@@ -528,4 +529,43 @@ public MRESReturn DHook_ModifyOrAppendCriteriaPost(int player, DHookParam params
 	SDKCall_RemoveCriteria(criteriaSet, "crosshair_enemy");
 	
 	return MRES_Ignored;
+}
+
+public MRESReturn Detour_PassServerEntityFilterPost(DHookReturn ret, DHookParam param)
+{
+	if (!ret || param.IsNull(1) || param.IsNull(2))
+	{
+		return MRES_Ignored;
+	}
+	
+	int touch_ent = param.Get(1);
+	int pass_ent  = param.Get(2);
+	
+	if (!IsValidEntity(touch_ent) || !IsValidEntity(pass_ent))
+	{
+		return MRES_Ignored;
+	}
+	
+	bool touch_is_player = touch_ent > 0 && touch_ent <= MaxClients && IsPlayerAlive(touch_ent);
+	bool pass_is_player  = pass_ent > 0 && pass_ent <= MaxClients && IsPlayerAlive(pass_ent);
+	
+	if ((touch_is_player && pass_is_player) || (!touch_is_player && !pass_is_player))
+	{
+		return MRES_Ignored;
+	}
+	
+	int entity = touch_is_player ? pass_ent : touch_ent;
+	
+	char classname[64];
+	GetEntityClassname(entity, classname, sizeof(classname));
+	
+	if (strncmp(classname, "func_door", sizeof(classname)) != 0 && strncmp(classname, "func_movelinear", sizeof(classname)) != 0)
+	{
+		return MRES_Ignored;
+	}
+	
+	int client = touch_is_player ? touch_ent : pass_ent;
+	
+	ret.Value = !Classes_OnDoorWalk(client, entity);
+	return MRES_Supercede;
 }

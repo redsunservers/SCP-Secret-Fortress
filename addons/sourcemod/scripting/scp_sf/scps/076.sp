@@ -70,7 +70,7 @@ public void SCP076_OnDeath(int client, Event event)
 	CreateTimer(5.0, Timer_DissolveRagdoll, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 }
 
-public bool SCP076_DoorWalk(int client, int entity)
+public void SCP076_DoorTouch(int client, int entity)
 {
 	if(Client[client].Extra2 >= MaxHeads)
 	{
@@ -82,19 +82,4 @@ public bool SCP076_DoorWalk(int client, int entity)
 				AcceptEntityInput(entity, "FireUser1", client, client);
 		}
 	}
-	return true;
-}
-
-public int SCP076_OnKeycard(int client, AccessEnum access)
-{
-	if(access == Access_Checkpoint)
-		return 1;
-
-	if(Client[client].Extra2 < MaxHeads)
-		return 0;
-
-	if(access==Access_Main || access==Access_Armory)
-		return 3;
-
-	return 1;
 }

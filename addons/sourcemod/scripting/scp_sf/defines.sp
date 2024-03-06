@@ -27,12 +27,4 @@
 
 #define LOADOUT_POSITION_ACTION 9
 
-// intentionally big to avoid conflicts
-#define DOOR_ID_NORMAL 1147483644
-#define DOOR_ID_CHECKPOINT 1147483645
-#define DOOR_ID_TRIGGER 1147483646
-
-#define DOOR_ID_PROP "m_iHammerID"
-#define DOOR_ENTREF_PROP "m_lifeState"
-
 float TRIPLE_D[3] = { 0.0, 0.0, 0.0 };

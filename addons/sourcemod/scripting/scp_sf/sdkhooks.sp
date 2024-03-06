@@ -62,10 +62,18 @@ public void OnEntityCreated(int entity, const char[] classname)
 	{
 		SDKHook(entity, SDKHook_Spawn, OnPipeSpawned);
 	}
-	else if(StrEqual(classname, "func_door"))
+	else if(StrContains(classname, "func_door") == 0 || StrEqual(classname, "func_movelinear"))
 	{
-		SDKHook(entity, SDKHook_Spawn, OnDoorSpawned);
-	}	
+		SDKHook(entity, SDKHook_StartTouch, OnDoorTouch);
+	}
+	else if (StrEqual(classname, "func_button"))
+	{
+		RequestFrame(UpdateDoorsFromButton, EntIndexToEntRef(entity));
+	}
+	else if (StrEqual(classname, "logic_relay"))
+	{
+		RequestFrame(UpdateDoorsFromRelay, entity);
+	}
 }
 
 public void OnSmallHealthSpawned(int entity)
@@ -322,18 +330,12 @@ public Action OnPipeTouch(int entity, int client)
 	return IsValidClient(client) ? Plugin_Handled : Plugin_Continue;
 }
 
-public Action OnDoorSpawned(int entity)
-{
-	SDKHook(entity, SDKHook_StartTouch, OnDoorTouch);
-	return Plugin_Continue;
-}
-
 public Action OnDoorTouch(int entity, int client)
 {
 	if (IsValidClient(client))
 	{
 		// ignore the result, this is only called so scps like 096 can destroy doors when touching them
-		Classes_OnDoorWalk(client, entity);	
+		Classes_OnDoorTouch(client, entity);	
 	}
 	
 	return Plugin_Continue;

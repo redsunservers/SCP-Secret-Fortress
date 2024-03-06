@@ -1174,10 +1174,10 @@ bool Items_IsHoldingWeapon(int client)
 	{
 		WeaponEnum weapon;
 		
-		int index = Items_GetWeaponByIndex(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), weapon);
-		if(!index)
+		int index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
+		if(!Items_GetWeaponByIndex(index, weapon))
 			return true;
-			
+		
 		if ((weapon.Type == ITEM_TYPE_WEAPON) || (weapon.Type == ITEM_TYPE_GRENADE))
 			return true;	
 
@@ -1510,7 +1510,7 @@ public bool Items_ArmorDrop(int client, int weapon, bool &swap)
 
 public Action Items_DisarmerHit(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapo, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	if(!IsSCP(victim) && !IsFriendly(Client[victim].Class, Client[client].Class))
+	if(!IsSCP(client) && !IsSCP(victim) && !IsFriendly(Client[victim].Class, Client[client].Class))
 	{
 		bool cancel;
 		if(!Client[victim].Disarmer)
@@ -2500,7 +2500,7 @@ public bool Items_DisarmerButton(int client, int weapon, int &buttons, int &hold
 	static int previousTarget[MAXPLAYERS + 1];
 	static float DisarmerCharge[MAXPLAYERS + 1];
 
-	if(!(buttons & IN_ATTACK2))
+	if(!(buttons & IN_ATTACK2) || IsSCP(client))
 	{
 		previousTarget[client] = -1;
 		DisarmerCharge[client] = 0.0;
@@ -2559,15 +2559,18 @@ public bool Items_DisarmerButton(int client, int weapon, int &buttons, int &hold
 		delay[client] = engineTime + 0.1;
 		DisarmerCharge[client] += 10.0;
 		
+		ClassEnum class;
+		Classes_GetByIndex(Client[target].Class, class);
+		
 		SetHudTextParamsEx(-1.0, 0.6, 0.35, Client[client].Colors, Client[client].Colors, 0, 1.0, 0.01, 0.5);
 		if(canDisarm)
 		{
-			ShowSyncHudText(client, HudPlayer, "%t", "disarming_other", target, DisarmerCharge[client]);
+			ShowSyncHudText(client, HudPlayer, "%t", "disarming_other", class.Display, DisarmerCharge[client]);
 			ShowSyncHudText(target, HudPlayer, "%t", "disarming_me", client, DisarmerCharge[client]);
 		}
 		else if (canUndisarm)
 		{
-			ShowSyncHudText(client, HudPlayer, "%t", "arming_other", target, DisarmerCharge[client]);
+			ShowSyncHudText(client, HudPlayer, "%t", "arming_other", class.Display, DisarmerCharge[client]);
 			ShowSyncHudText(target, HudPlayer, "%t", "arming_me", client, DisarmerCharge[client]);
 		}
 	
@@ -2595,8 +2598,7 @@ public bool Items_DisarmerButton(int client, int weapon, int &buttons, int &hold
 				}
 				Items_SetEmptyWeapon(target);
 				
-				ClassEnum class;
-				if(Classes_GetByIndex(Client[target].Class, class) && class.Group==2 && !class.Vip)
+				if(class.Group==2 && !class.Vip)
 					GiveAchievement(Achievement_DisarmMTF, client);
 				
 				// all weapons are gone, so reset the time		
