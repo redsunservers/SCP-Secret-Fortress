@@ -2843,7 +2843,7 @@ void ShowClassInfo(int client, bool help=false)
 			FormatEx(buffer, sizeof(buffer), "train_%s", class.Name);
 			if(TranslationPhraseExists(buffer))
 			{
-				SetHudTextParamsEx(-1.0, 0.5, 16.0, Client[client].Colors, Client[client].Colors, 1, 5.0, 1.0, 4.0);
+				SetHudTextParamsEx(-1.0, 0.6, 16.0, Client[client].Colors, Client[client].Colors, 1, 5.0, 1.0, 4.0);
 				ShowSyncHudText(client, HudGame, "%t", buffer);
 				return;
 			}
@@ -2854,7 +2854,7 @@ void ShowClassInfo(int client, bool help=false)
 		FormatEx(buffer, sizeof(buffer), "desc_%s", class.Name);
 		if(TranslationPhraseExists(buffer))
 		{
-			SetHudTextParamsEx(-1.0, 0.5, 3.5, Client[client].Colors, Client[client].Colors, 1, 5.0, 1.0, 4.0);
+			SetHudTextParamsEx(-1.0, 0.6, 3.5, Client[client].Colors, Client[client].Colors, 1, 5.0, 1.0, 4.0);
 			ShowSyncHudText(client, HudGame, "%t", buffer);
 		}
 	}
