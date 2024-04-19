@@ -27,12 +27,11 @@ void ViewEffects_MapStart()
 	}
 }
 
-void ViewEffects_WeaponSwitch(int client)
+void ViewEffects_WeaponSwitch(int client, int active)
 {
 	DeleteWeapon(client);
 
 	int viewmodel = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
-	int active = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 	if(viewmodel != -1 && active != -1)
 	{
 		ClassEnum class;

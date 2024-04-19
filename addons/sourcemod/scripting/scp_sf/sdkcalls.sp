@@ -2,6 +2,8 @@
 #pragma newdecls required
 
 static Handle SDKGetMaxHealth;
+static Handle SDKFindCriterionIndex;
+static Handle SDKRemoveCriteria;
 static Handle SDKStartLagCompensation;
 static Handle SDKFinishLagCompensation;
 static Handle SDKTeamAddPlayer;
@@ -25,11 +27,26 @@ void SDKCalls_PluginStart()
 		LogError("[Gamedata] Could not find GetMaxHealth");
 	
 	delete gamedata;
-	
+
 	
 	gamedata = new GameData("scp_sf");
 	
 	CurrentCommandOffset = CreateOffset(gamedata, "CBasePlayer::m_pCurrentCommand");
+	
+	StartPrepSDKCall(SDKCall_Raw);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "AI_CriteriaSet::FindCriterionIndex");
+	PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+	SDKFindCriterionIndex = EndPrepSDKCall();
+	if(!SDKFindCriterionIndex)
+		LogMessage("Failed to create SDKCall: AI_CriteriaSet::FindCriterionIndex");
+	
+	StartPrepSDKCall(SDKCall_Raw);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "AI_CriteriaSet::RemoveCriteria");
+	PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
+	SDKRemoveCriteria = EndPrepSDKCall();
+	if(!SDKRemoveCriteria)
+		LogMessage("Failed to create SDKCall: AI_CriteriaSet::RemoveCriteria");
 	
 	StartPrepSDKCall(SDKCall_Raw);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CLagCompensationManager::StartLagCompensation");
@@ -99,35 +116,6 @@ void SDKCalls_PluginStart()
 	delete gamedata;
 }
 
-int SDKCalls_GetMaxHealth(int client)
-{
-	return SDKGetMaxHealth ? SDKCall(SDKGetMaxHealth, client) : GetEntProp(client, Prop_Data, "m_iMaxHealth");
-}
-
-void SDKCalls_StartLagCompensation(int client)
-{
-	if(SDKStartLagCompensation && SDKFinishLagCompensation && CurrentCommandOffset != -1)
-	{
-		Address value = DHooks_GetLagCompensationManager();
-		if(!value)
-			ThrowError("Trying to start lag compensation before any existed");
-		
-		SDKCall(SDKStartLagCompensation, value, client, GetEntityAddress(client) + view_as<Address>(CurrentCommandOffset));
-	}
-}
-
-void SDKCalls_FinishLagCompensation(int client)
-{
-	if(SDKStartLagCompensation && SDKFinishLagCompensation && CurrentCommandOffset != -1)
-	{
-		Address value = DHooks_GetLagCompensationManager();
-		if(!value)
-			ThrowError("Trying to finish lag compensation before any existed");
-		
-		SDKCall(SDKFinishLagCompensation, value, client);
-	}
-}
-
 void SDKCalls_ChangeClientTeam(int client, int newTeam)
 {
 	int clientTeam = GetEntProp(client, Prop_Send, "m_iTeamNum");
@@ -172,6 +160,31 @@ int SDKCalls_CreateDroppedWeapon(int client, const float origin[3], const float 
 	return INVALID_ENT_REFERENCE;
 }
 
+int SDKCalls_FindCriterionIndex(int criteriaSet, const char[] criteria)
+{
+	if(SDKFindCriterionIndex)
+		return SDKCall(SDKFindCriterionIndex, criteriaSet, criteria);
+	
+	return -1;
+}
+
+void SDKCalls_FinishLagCompensation(int client)
+{
+	if(SDKStartLagCompensation && SDKFinishLagCompensation && CurrentCommandOffset != -1)
+	{
+		Address value = DHooks_GetLagCompensationManager();
+		if(!value)
+			ThrowError("Trying to finish lag compensation before any existed");
+		
+		SDKCall(SDKFinishLagCompensation, value, client);
+	}
+}
+
+int SDKCalls_GetMaxHealth(int client)
+{
+	return SDKGetMaxHealth ? SDKCall(SDKGetMaxHealth, client) : GetEntProp(client, Prop_Data, "m_iMaxHealth");
+}
+
 void SDKCalls_InitDroppedWeapon(int droppedWeapon, int client, int fromWeapon, bool swap, bool suicide)
 {
 	if(SDKInitWeapon)
@@ -184,6 +197,12 @@ void SDKCalls_InitPickup(int entity, int client, int weapon)
 		SDKCall(SDKInitPickup, entity, client, weapon);
 }
 
+void SDKCalls_RemoveCriteria(int criteriaSet, const char[] criteria)
+{
+	if(SDKRemoveCriteria)
+		SDKCall(SDKRemoveCriteria, criteriaSet, criteria);
+}
+
 void SDKCalls_SetSpeed(int client)
 {
 	if(SDKSetSpeed)
@@ -193,5 +212,17 @@ void SDKCalls_SetSpeed(int client)
 	else
 	{
 		TF2_AddCondition(client, TFCond_SpeedBuffAlly, 0.001);
+	}
+}
+
+void SDKCalls_StartLagCompensation(int client)
+{
+	if(SDKStartLagCompensation && SDKFinishLagCompensation && CurrentCommandOffset != -1)
+	{
+		Address value = DHooks_GetLagCompensationManager();
+		if(!value)
+			ThrowError("Trying to start lag compensation before any existed");
+		
+		SDKCall(SDKStartLagCompensation, value, client, GetEntityAddress(client) + view_as<Address>(CurrentCommandOffset));
 	}
 }

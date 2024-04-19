@@ -95,9 +95,6 @@ public void VIPEscape_OnConfigSetup(KeyValues kv)
 
 public void VIPEscape_OnRoundRespawn()
 {
-	if(GameRules_GetProp("m_bInWaitingForPlayers"))
-		return;
-	
 	ArrayList players = new ArrayList();
 
 	for(int client = 1; client <= MaxClients; client++)
@@ -112,6 +109,15 @@ public void VIPEscape_OnRoundRespawn()
 	if(!length)
 		return;
 	
+	if(GameRules_GetProp("m_bInWaitingForPlayers"))
+	{
+		for(int i; i < length; i++)
+		{
+			Classes_SetClientClass(players.Get(i), -1, ClassSpawn_RoundStart);
+		}
+		return;
+	}
+
 	players.Sort(Sort_Random, Sort_Integer);
 
 	if(StartClasses[List_SCP])

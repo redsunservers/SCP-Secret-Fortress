@@ -19,6 +19,11 @@
 				"linux"		"337"
 				"windows"	"336"
 			}
+			"CBaseEntity::ModifyOrAppendCriteria"
+			{
+				"linux"		"124"
+				"windows"	"123"
+			}
 			"CBasePlayer::m_pCurrentCommand"
 			{
 				"linux"		"3512"
@@ -52,6 +57,16 @@
 		}
 		"Signatures"
 		{
+			"AI_CriteriaSet::FindCriterionIndex"
+			{
+				"linux"		"@_ZNK14AI_CriteriaSet18FindCriterionIndexEPKc"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x48\x56\xFF\x75\x08"
+			}
+			"AI_CriteriaSet::RemoveCriteria"
+			{
+				"linux"		"@_ZN14AI_CriteriaSet14RemoveCriteriaEPKc"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x48\x56\x57\xFF\x75\x08"
+			}
 			"CBaseAnimating::GetBoneCache"
 			{
 				"library"	"server"
@@ -136,9 +151,29 @@
 				"linux"		"@_ZN9CTFPlayer21TeamFortress_SetSpeedEv"
 				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x83\xEC\x1C\x53"
 			}
+			"PassServerEntityFilter"
+			{
+				"library"	"server"
+				"linux"		"@_Z22PassServerEntityFilterPK13IHandleEntityS1_"
+				"windows"   "\x55\x8B\xEC\x56\x8B\x75\x0C\x85\xF6\x75\x2A\xB0\x01"
+			}
 		}
 		"Functions"
 		{
+			"CBaseEntity::ModifyOrAppendCriteria"
+			{
+				"offset"	"CBaseEntity::ModifyOrAppendCriteria"
+				"hooktype"	"entity"
+				"return"	"void"
+				"this"		"entity"
+				"arguments"
+				{
+					"criteriaSet"
+					{
+						"type"	"int"
+					}
+				}
+			}
 			"CBaseEntity::ShouldCollide"
 			{
 				"offset"	"CBaseEntity::ShouldCollide"
@@ -334,6 +369,23 @@
 					"int"
 					{
 						"type"	"int"
+					}
+				}
+			}
+			"PassServerEntityFilter"
+			{
+				"signature"	"PassServerEntityFilter"
+				"callconv"	"cdecl"
+				"return"	"bool"
+				"arguments"
+				{
+					"touch"
+					{
+						"type"	"cbaseentity"
+					}
+					"pass"
+					{
+						"type"	"cbaseentity"
 					}
 				}
 			}

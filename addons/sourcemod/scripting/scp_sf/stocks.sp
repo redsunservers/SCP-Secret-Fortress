@@ -281,10 +281,10 @@ Function KvGetFunction(KeyValues kv, const char[] string, Function defaul = INVA
 	return defaul;
 }
 
-void KvGetTranslation(KeyValues kv, const char[] string, char[] buffer, int length, const char[] defaul)
+void KvGetTranslation(KeyValues kv, const char[] string, char[] buffer, int length, const char[] defaul = "")
 {
 	kv.GetString(string, buffer, length, defaul);
-	if(!TranslationPhraseExists(buffer))
+	if(buffer[0] && !TranslationPhraseExists(buffer))
 	{
 		LogError("[Config] Missing translation '%s'", buffer);
 		strcopy(buffer, length, defaul);

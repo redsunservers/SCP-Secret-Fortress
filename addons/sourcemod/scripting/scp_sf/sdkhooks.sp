@@ -181,6 +181,9 @@ static void WeaponSwitchPostFrame(int userid)
 	int client = GetClientOfUserId(userid);
 	if(client)
 	{
-		ViewEffects_WeaponSwitch(client);
+		int active = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+		
+		Classes_WeaponSwitch(client, active);
+		ViewEffects_WeaponSwitch(client, active);
 	}
 }

@@ -1,26 +1,56 @@
 name: Compile
 
-on:
-  pull_request:
-    branches: master
+on: [pull_request]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sm-version: ['1.12.X']
     
     steps:
-      - name: Checkout
+      - name: Install Checkout
         uses: actions/checkout@v1
       
-      - name: Environments
-        run: |
-          echo "SM_VERSION=1.11" >> $GITHUB_ENV
+      - name: Install Setup SP ${{ matrix.sm-version }}
+        uses: rumblefrog/setup-sp@master
+        with:
+          version: ${{ matrix.sm-version }}
       
-      - name: Install
+      - name: Get GitHub Env
         run: |
-          bash scripts/install.sh
+          echo "PLUGIN_VERSION_REVISION<<EOF" >> $GITHUB_ENV
+          git rev-list --count HEAD >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
       
-      - name: Compile
+      - name: Install Includes
         run: |
-          cd build/addons/sourcemod/scripting
-          ./spcomp -E scp_sf.sp -o ../plugins/scp_sf.smx
+          echo "SCRIPTS_PATH=addons/sourcemod/scripting" >> $GITHUB_ENV
+          cd addons/sourcemod/scripting
+          cd include
+          wget "https://raw.githubusercontent.com/DoctorMcKay/sourcemod-plugins/master/scripting/include/morecolors.inc"
+          wget "https://raw.githubusercontent.com/asherkin/TF2Items/master/pawn/tf2items.inc"
+          wget "https://raw.githubusercontent.com/FlaminSarge/tf2attributes/master/scripting/include/tf2attributes.inc"
+          wget "https://raw.githubusercontent.com/nosoop/SM-TFEconData/master/scripting/include/tf_econ_data.inc"
+          wget "https://raw.githubusercontent.com/nosoop/SM-TFUtils/master/scripting/include/tf2utils.inc"
+          wget "https://raw.githubusercontent.com/FortyTwoFortyTwo/VScript/main/scripting/include/vscript.inc"
+          wget "https://raw.githubusercontent.com/sbpp/sourcebans-pp/php81/game/addons/sourcemod/scripting/include/sourcecomms.inc"
+        working-directory: ./
+      
+      - name: Full Compile ${{ matrix.sm-version }}
+        run: |
+          spcomp -E -O2 -v2 -i "include" scp_sf.sp
+        working-directory: ${{ env.SCRIPTS_PATH }}
+      
+      - name: Remove Optional
+        run: |
+          cd addons/sourcemod/scripting/include
+          rm basecomm.inc
+          rm sourcecomms.inc
+        working-directory: ./
+      
+      - name: Full Compile ${{ matrix.sm-version }}
+        run: |
+          spcomp -E -O2 -v2 -i "include" scp_sf.sp
+        working-directory: ${{ env.SCRIPTS_PATH }}

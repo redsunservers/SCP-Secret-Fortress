@@ -9,8 +9,10 @@ enum struct RawHooks
 }
 
 static DynamicHook ForceRespawn;
+static DynamicHook ModifyOrAppendCriteria;
+static DynamicHook ShouldCollide;
+static DynamicHook ItemIterateAttribute;
 static DynamicHook RoundRespawn;
-static DynamicHook HookItemIterateAttribute;
 
 static ArrayList RawEntityHooks;
 static Address CLagCompensationManager;
@@ -19,6 +21,8 @@ static int EconItemOffset;
 static int StudioHdrOffset;
 
 static int ForceRespawnPreHook[MAXPLAYERS+1];
+static int ModifyOrAppendCriteriaPostHook[MAXPLAYERS+1];
+static int ShouldCollidePreHook[MAXPLAYERS+1];
 
 void DHooks_PluginStart()
 {
@@ -33,10 +37,13 @@ void DHooks_PluginStart()
 	CreateDetour(gamedata, "CTFPlayer::RegenThink", RegenThinkPre, RegenThinkPost);
 	CreateDetour(gamedata, "CTFPlayer::SpeakConceptIfAllowed", SpeakConceptIfAllowedPre, SpeakConceptIfAllowedPost);
 	CreateDetour(gamedata, "CTFPlayer::Taunt", TauntPre, TauntPost);
+	CreateDetour(gamedata, "PassServerEntityFilter", _, PassServerEntityFilterPost);
 	
 	ForceRespawn = CreateHook(gamedata, "CBasePlayer::ForceRespawn");
+	ModifyOrAppendCriteria = CreateHook(gamedata, "CBaseEntity::ModifyOrAppendCriteria");
+	ShouldCollide = CreateHook(gamedata, "CBaseEntity::ShouldCollide");
+	ItemIterateAttribute = CreateHook(gamedata, "CEconItemView::IterateAttributes");
 	RoundRespawn = CreateHook(gamedata, "CTeamplayRoundBasedRules::RoundRespawn");
-	HookItemIterateAttribute = CreateHook(gamedata, "CEconItemView::IterateAttributes");
 
 	StudioHdrOffset = CreateOffset(gamedata, "CBaseAnimating::m_pStudioHdr");
 
@@ -90,6 +97,16 @@ void DHooks_ClientPutInServer(int client)
 	{
 		ForceRespawnPreHook[client] = ForceRespawn.HookEntity(Hook_Pre, client, ForceRespawnPre);
 	}
+
+	if(ShouldCollide)
+	{
+		ShouldCollidePreHook[client] = ShouldCollide.HookEntity(Hook_Pre, client, ShouldCollidePre);
+	}
+	
+	if(ModifyOrAppendCriteria)
+	{
+		ModifyOrAppendCriteriaPostHook[client] = ModifyOrAppendCriteria.HookEntity(Hook_Post, client, ModifyOrAppendCriteriaPost);
+	}
 }
 
 void DHooks_EntityDestoryed()
@@ -130,8 +147,8 @@ void DHooks_HookStripWeapon(int entity)
 		RawHooks raw;
 		
 		raw.Ref = EntIndexToEntRef(entity);
-		raw.Pre = HookItemIterateAttribute.HookRaw(Hook_Pre, address, IterateAttributesPre);
-		raw.Post = HookItemIterateAttribute.HookRaw(Hook_Post, address, IterateAttributesPost);
+		raw.Pre = ItemIterateAttribute.HookRaw(Hook_Pre, address, IterateAttributesPre);
+		raw.Post = ItemIterateAttribute.HookRaw(Hook_Post, address, IterateAttributesPost);
 		
 		RawEntityHooks.PushArray(raw);
 	}
@@ -142,16 +159,20 @@ void DHooks_PluginEnd()
 	for(int client = 1; client <= MaxClients; client++)
 	{
 		if(IsClientInGame(client))
-			DHooks_UnhookClient(client);
+			UnhookClient(client);
 	}
 }
 
-static void DHooks_UnhookClient(int client)
+static void UnhookClient(int client)
 {
 	if(ForceRespawn)
-	{
 		DynamicHook.RemoveHook(ForceRespawnPreHook[client]);
-	}
+
+	if(ModifyOrAppendCriteria)
+		DynamicHook.RemoveHook(ModifyOrAppendCriteriaPostHook[client]);
+
+	if(ShouldCollide)
+		DynamicHook.RemoveHook(ShouldCollidePreHook[client]);
 }
 
 Address DHooks_GetLagCompensationManager()
@@ -191,6 +212,9 @@ static MRESReturn DropAmmoPackPre(int client, DHookParam param)
 
 static MRESReturn ForceRespawnPre(int client)
 {
+	if(Classes_ForceRespawn(client))
+		return MRES_Supercede;
+	
 	ClassEnum class;
 	if(Classes_GetByIndex(Client(client).Class, class) && class.Class)
 		SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", class.Class);
@@ -233,7 +257,63 @@ static MRESReturn IterateAttributesPost(Address address, DHookParam param)
 {
 	StoreToAddress(address + view_as<Address>(IterateAttributesOffset), false, NumberType_Int8);
 	return MRES_Ignored;
-} 
+}
+
+static MRESReturn ModifyOrAppendCriteriaPost(int client, DHookParam params)
+{
+	if(!IsClientInGame(client) || GetClientTeam(client) > TFTeam_Spectator || !TF2_IsPlayerInCondition(client, TFCond_Disguised))
+		return MRES_Ignored;
+	
+	int criteriaSet = params.Get(1);
+	
+	if(SDKCalls_FindCriterionIndex(criteriaSet, "crosshair_enemy") == -1)
+		return MRES_Ignored;
+	
+	// Prevent disguised SCP from calling people they may not be able to see out
+	SDKCalls_RemoveCriteria(criteriaSet, "crosshair_on");
+	SDKCalls_RemoveCriteria(criteriaSet, "crosshair_enemy");
+	
+	return MRES_Ignored;
+}
+
+static MRESReturn PassServerEntityFilterPost(DHookReturn ret, DHookParam param)
+{
+	if(param.IsNull(1) || param.IsNull(2))
+	{
+		return MRES_Ignored;
+	}
+	
+	int touch_ent = param.Get(1);
+	int pass_ent  = param.Get(2);
+	
+	if(!IsValidEntity(touch_ent) || !IsValidEntity(pass_ent))
+	{
+		return MRES_Ignored;
+	}
+	
+	bool touch_is_player = touch_ent > 0 && touch_ent <= MaxClients && IsPlayerAlive(touch_ent);
+	bool pass_is_player = pass_ent > 0 && pass_ent <= MaxClients && IsPlayerAlive(pass_ent);
+	
+	if((touch_is_player && pass_is_player) || (!touch_is_player && !pass_is_player))
+	{
+		return MRES_Ignored;
+	}
+	
+	int entity = touch_is_player ? pass_ent : touch_ent;
+	
+	char classname[64];
+	GetEntityClassname(entity, classname, sizeof(classname));
+	
+	if(strncmp(classname, "func_door", sizeof(classname)) != 0 && strncmp(classname, "func_movelinear", sizeof(classname)) != 0)
+	{
+		return MRES_Ignored;
+	}
+	
+	int client = touch_is_player ? touch_ent : pass_ent;
+	
+	ret.Value = !Classes_DoorWalk(client, entity);
+	return MRES_Supercede;
+}
 
 static MRESReturn RegenThinkPre(int client, DHookParam param)
 {
@@ -299,6 +379,17 @@ static MRESReturn SpeakConceptIfAllowedPost(int client, DHookParam param)
 			TF2_SetPlayerClass(target, Client(target).WeaponClass, _, false);
 		}
 	}
+	return MRES_Ignored;
+}
+
+public MRESReturn ShouldCollidePre(int client, DHookReturn ret, DHookParam param)
+{
+	if(param.Get(1) == COLLISION_GROUP_PLAYER_MOVEMENT)
+	{
+		ret.Value = false;
+		return MRES_Supercede;
+	}
+
 	return MRES_Ignored;
 }
 

@@ -7,35 +7,65 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sm-version: ['1.12.X']
     
     steps:
-      - name: Checkout
+      - name: Install Checkout
         uses: actions/checkout@v1
       
-      - name: Environments
-        run: |
-          echo "SM_VERSION=1.11" >> $GITHUB_ENV
+      - name: Install Setup SP ${{ matrix.sm-version }}
+        uses: rumblefrog/setup-sp@master
+        with:
+          version: ${{ matrix.sm-version }}
       
-      - name: Install
+      - name: Get GitHub Env
         run: |
-          bash scripts/install.sh
+          echo "PLUGIN_VERSION_REVISION<<EOF" >> $GITHUB_ENV
+          git rev-list --count HEAD >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
       
-      - name: Set Version
+      - name: Setup Env
         run: |
-          bash scripts/date.sh
+          echo "SCRIPTS_PATH=addons/sourcemod/scripting" >> $GITHUB_ENV
+          cd addons/sourcemod/scripting
+          export PLUGIN_VERSION=$(sed -En '/#define PLUGIN_VERSION\W/p' scp_sf.sp)
+          echo "PLUGIN_VERSION<<EOF" >> $GITHUB_ENV
+          echo $PLUGIN_VERSION | grep -o '[0-9]*\.[0-9]*' >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+          sed -i -e 's/#define PLUGIN_VERSION_REVISION.*".*"/#define PLUGIN_VERSION_REVISION "'$PLUGIN_VERSION_REVISION'"/g' scp_sf.sp
+          cd include
+          wget "https://raw.githubusercontent.com/DoctorMcKay/sourcemod-plugins/master/scripting/include/morecolors.inc"
+          wget "https://raw.githubusercontent.com/asherkin/TF2Items/master/pawn/tf2items.inc"
+          wget "https://raw.githubusercontent.com/FlaminSarge/tf2attributes/master/scripting/include/tf2attributes.inc"
+          wget "https://raw.githubusercontent.com/nosoop/SM-TFEconData/master/scripting/include/tf_econ_data.inc"
+          wget "https://raw.githubusercontent.com/nosoop/SM-TFUtils/master/scripting/include/tf2utils.inc"
+          wget "https://raw.githubusercontent.com/FortyTwoFortyTwo/VScript/main/scripting/include/vscript.inc"
+          wget "https://raw.githubusercontent.com/sbpp/sourcebans-pp/php81/game/addons/sourcemod/scripting/include/sourcecomms.inc"
+        working-directory: ./
       
-      - name: Compile
+      - name: Compile ${{ matrix.sm-version }}
         run: |
-          mkdir -p build/addons/sourcemod/plugins/freaks
-          cd build/addons/sourcemod/scripting
-          ./spcomp -E scp_sf.sp -o ../plugins/scp_sf.smx
+          spcomp -E -O2 -v2 -i "include" scp_sf.sp -o ../plugins/scp_sf.smx
+        working-directory: ${{ env.SCRIPTS_PATH }}
       
       - name: Package
         run: |
-          bash scripts/package.sh
+          mkdir -p package/addons/sourcemod/plugins
+          mkdir -p package/addons/sourcemod/gamedata
+          mkdir -p package/addons/sourcemod/configs
+          cp -r addons/sourcemod/plugins/scp_sf.smx package/addons/sourcemod/plugins
+          cp -r ../addons/sourcemod/gamedata/scp_sf.txt package/addons/sourcemod/gamedata
+          cp -r ../addons/sourcemod/configs/scp_sf package/addons/sourcemod/configs
+          cp -r ../addons/sourcemod/translations package/addons/sourcemod
+          cp -r ../materials package
+          cp -r ../models package
+          cp -r ../sound package
+        working-directory: ./
       
       - name: Upload Artifacts
         uses: actions/upload-artifact@master
         with:
-          name: SCPSecretFortress-${{env.DATE_VERSION}}
-          path: ./build/package
+          name: SCPSecretFortress-${{env.PLUGIN_VERSION}}.${{env.PLUGIN_VERSION_REVISION}}
+          path: ./package

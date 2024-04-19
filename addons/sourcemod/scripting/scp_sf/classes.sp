@@ -16,6 +16,7 @@ enum struct ClassEnum
 	int HandModel;
 	int PlayerModel;
 	int ForceTeam;
+	int PaintColor;
 
 	float Speed;
 	float SpeakAllyDist;
@@ -31,22 +32,26 @@ enum struct ClassEnum
 	Function FuncCanTalkTo;		// void(int client, int target, float &distance)
 	Function FuncCardAccess;	// void(int client, int type, int &level) 
 	Function FuncCommand;		// bool(int client, const char[] command)
+	Function FuncCondAdded;		// void(int client, TFCond cond)
 	Function FuncDeath;			// void(int client, int attacker, Event event)
 	Function FuncDealDamage;	// void(int client, int victim, ...)
 	Function FuncDoAnimation;	// Action(int client, int anim, int data)
 	Function FuncDoorTouch;		// void(int client, int entity)
 	Function FuncDoorWalk;		// bool(int client, int entity)
+	Function FuncForceRespawn;	// bool(int client)
+	Function FuncInventory;		// bool(int client)
 	Function FuncKill;			// void(int client, int victim, Event event)
 	Function FuncMusic;			// void(int client, char filepath[PLATFORM_MAX_PATH], int &duration)
 	Function FuncPlayerRunCmd;	// Action(int client, int &buttons)
 	Function FuncPrecache;		// void(int index, ClassEnum class)
 	Function FuncSetClass;		// void(int client)
 	Function FuncSound;			// Action(int client, int clients[MAXPLAYERS], ...)
-	Function FuncSpawn;			// void(int client)
+	Function FuncSpawn;			// bool(int client)
 	Function FuncTakeDamage;	// void(int client, int &attacker, ...)
 	Function FuncTransmitSee;	// bool(int client, int target)
 	Function FuncTransmitSelf;	// bool(int client, int target)
 	Function FuncUpdateSpeed;	// void(int client, float &speed)
+	Function FuncWeaponSwitch;	// void(int client, int entity)
 	Function FuncViewmodel;		// void(int client, int entity, WeaponEnum weapon)
 
 	int SetupEnum(KeyValues kv, ArrayList whitelist, const ClassEnum defaul)
@@ -76,6 +81,7 @@ enum struct ClassEnum
 		this.Health = kv.GetNum("health", defaul.Health);
 		this.MusicType = kv.GetNum("musicindex", defaul.MusicType);
 		this.ForceTeam = kv.GetNum("forceteam", defaul.ForceTeam);
+		this.PaintColor = kv.GetNum("paintcolor", defaul.PaintColor);
 		this.Speed = kv.GetFloat("speed", defaul.Speed);
 		this.SpeakAllyDist = kv.GetFloat("speakallydist", defaul.SpeakAllyDist);
 		this.SpeakOtherDist = kv.GetFloat("speakotherdist", defaul.SpeakOtherDist);
@@ -236,11 +242,14 @@ enum struct ClassEnum
 		this.FuncCanTalkTo = KvGetFunction(kv, "func_cantalkto", defaul.FuncCanTalkTo);
 		this.FuncCardAccess = KvGetFunction(kv, "func_cardaccess", defaul.FuncCardAccess);
 		this.FuncCommand = KvGetFunction(kv, "func_clientcommand", defaul.FuncCommand);
+		this.FuncCondAdded = KvGetFunction(kv, "func_condadded", defaul.FuncCondAdded);
 		this.FuncDealDamage = KvGetFunction(kv, "func_dealdamage", defaul.FuncDealDamage);
 		this.FuncDeath = KvGetFunction(kv, "func_playerdeath", defaul.FuncDeath);
 		this.FuncDoAnimation = KvGetFunction(kv, "func_doanimation", defaul.FuncDoAnimation);
 		this.FuncDoorTouch = KvGetFunction(kv, "func_doortouch", defaul.FuncDoorTouch);
 		this.FuncDoorWalk = KvGetFunction(kv, "func_doorwalk", defaul.FuncDoorWalk);
+		this.FuncForceRespawn = KvGetFunction(kv, "func_forcerespawn", defaul.FuncForceRespawn);
+		this.FuncInventory = KvGetFunction(kv, "func_inventory", defaul.FuncInventory);
 		this.FuncKill = KvGetFunction(kv, "func_playerkill", defaul.FuncKill);
 		this.FuncMusic = KvGetFunction(kv, "func_music", defaul.FuncMusic);
 		this.FuncPlayerRunCmd = KvGetFunction(kv, "func_playerruncmd", defaul.FuncPlayerRunCmd);
@@ -252,6 +261,7 @@ enum struct ClassEnum
 		this.FuncTransmitSee = KvGetFunction(kv, "func_transmitsee", defaul.FuncTransmitSee);
 		this.FuncTransmitSelf = KvGetFunction(kv, "func_transmitself", defaul.FuncTransmitSelf);
 		this.FuncUpdateSpeed = KvGetFunction(kv, "func_updatespeed", defaul.FuncUpdateSpeed);
+		this.FuncWeaponSwitch = KvGetFunction(kv, "func_weaponswitch", defaul.FuncWeaponSwitch);
 		this.FuncViewmodel = KvGetFunction(kv, "func_viewmodel", defaul.FuncViewmodel);
 
 		return pos;
@@ -262,11 +272,14 @@ enum struct ClassEnum
 		this.FuncCanTalkTo = INVALID_FUNCTION;
 		this.FuncCardAccess = INVALID_FUNCTION;
 		this.FuncCommand = INVALID_FUNCTION;
+		this.FuncCondAdded = INVALID_FUNCTION;
 		this.FuncDealDamage = INVALID_FUNCTION;
 		this.FuncDeath = INVALID_FUNCTION;
 		this.FuncDoAnimation = INVALID_FUNCTION;
 		this.FuncDoorTouch = INVALID_FUNCTION;
 		this.FuncDoorWalk = INVALID_FUNCTION;
+		this.FuncForceRespawn = INVALID_FUNCTION;
+		this.FuncInventory = INVALID_FUNCTION;
 		this.FuncKill = INVALID_FUNCTION;
 		this.FuncMusic = INVALID_FUNCTION;
 		this.FuncPlayerRunCmd = INVALID_FUNCTION;
@@ -278,6 +291,7 @@ enum struct ClassEnum
 		this.FuncTransmitSee = INVALID_FUNCTION;
 		this.FuncTransmitSelf = INVALID_FUNCTION;
 		this.FuncUpdateSpeed = INVALID_FUNCTION;
+		this.FuncWeaponSwitch = INVALID_FUNCTION;
 		this.FuncViewmodel = INVALID_FUNCTION;
 	}
 
@@ -689,7 +703,7 @@ bool Classes_IsDeadClass(int client)
 
 void Classes_PlayerSpawn(int client)
 {
-/*	bool result = false;
+	bool result = false;
 
 	if(Call_StartClassFunc(Client(client).Class, ClassEnum::FuncSpawn))
 	{
@@ -697,7 +711,7 @@ void Classes_PlayerSpawn(int client)
 		Call_Finish(result);
 	}
 
-	if(!result)*/
+	if(!result)
 	{
 		ClassEnum class;
 		if(Classes_GetByIndex(Client(client).Class, class))
@@ -717,7 +731,7 @@ void Classes_PostInventoryApplication(int client)
 {
 	bool result = false;
 
-	if(Call_StartClassFunc(Client(client).Class, ClassEnum::FuncSpawn))
+	if(Call_StartClassFunc(Client(client).Class, ClassEnum::FuncInventory))
 	{
 		Call_PushCell(client);
 		Call_Finish(result);
@@ -728,7 +742,7 @@ void Classes_PostInventoryApplication(int client)
 		ClassEnum class;
 		if(Classes_GetByIndex(Client(client).Class, class))
 		{
-			if(class.Cosmetics && class.ForceTeam != TFTeam_Unassigned && class.ForceTeam != TFTeam_Spectator)
+			if(class.Cosmetics && GetClientTeam(client) > TFTeam_Spectator)
 			{
 				for(int i = TF2Util_GetPlayerWearableCount(client) - 1; i >= 0; i--)
 				{
@@ -736,7 +750,20 @@ void Classes_PostInventoryApplication(int client)
 					if(entity != -1)
 					{
 						SetEntProp(entity, Prop_Send, "m_bOnlyIterateItemViewAttributes", true);	// Removes attributes
-						// TODO: Paint everything Orange or White :)
+						
+						if(class.PaintColor)
+							TF2Attrib_SetByName(entity, "set item tint RGB", view_as<float>(class.PaintColor));
+						
+						/*
+						if(team == 2)
+						{
+							TF2Attrib_SetByName(entity, "set item tint RGB", view_as<float>(13595446));	// Mann Co. Orange
+						}
+						else
+						{
+							TF2Attrib_SetByName(entity, "set item tint RGB", view_as<float>(15132390));	// An Extraordinary Abundance of Tinge
+						}
+						*/
 					}
 				}
 			}
@@ -1004,6 +1031,39 @@ void Classes_CardAccess(int client, int type, int &level)
 		Call_PushCell(client);
 		Call_PushCell(type);
 		Call_PushCellRef(level);
+		Call_Finish();
+	}
+}
+
+bool Classes_ForceRespawn(int client)
+{
+	bool result = false;
+
+	if(Call_StartClassFunc(Client(client).Class, ClassEnum::FuncForceRespawn))
+	{
+		Call_PushCell(client);
+		Call_Finish(result);
+	}
+
+	return result;
+}
+
+void Classes_WeaponSwitch(int client, int entity)
+{
+	if(Call_StartClassFunc(Client(client).Class, ClassEnum::FuncWeaponSwitch))
+	{
+		Call_PushCell(client);
+		Call_PushCell(entity);
+		Call_Finish();
+	}
+}
+
+void Classes_ConditionAdded(int client, TFCond cond)
+{
+	if(Call_StartClassFunc(Client(client).Class, ClassEnum::FuncCondAdded))
+	{
+		Call_PushCell(client);
+		Call_PushCell(cond);
 		Call_Finish();
 	}
 }

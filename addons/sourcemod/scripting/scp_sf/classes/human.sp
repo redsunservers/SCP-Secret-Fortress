@@ -1,6 +1,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+static bool HasDied[MAXPLAYERS+1];
 static float NextHudIn[MAXPLAYERS+1];
 static bool MaxSprintCached[MAXPLAYERS+1];
 static int MaxSprintLevel[MAXPLAYERS+1];
@@ -17,11 +18,25 @@ public void Human_OnPrecache()
 
 public void Human_OnSetClass(int client)
 {
+	HasDied[client] = false;
 	NextHudIn[client] = 0.0;
 	MaxSprintCached[client] = false;
 	SprintEnergy[client] = 0.0;
 	WasSprintting[client] = false;
 	LastRunCmdTime[client] = GetGameTime();
+}
+
+public bool Human_OnForceRespawn(int client)
+{
+	if(HasDied[client])
+		Classes_SetClientClass(client, Classes_GetByName("spec"), ClassSpawn_Death);
+	
+	return false;
+}
+
+public void Human_OnPlayerDeath(int client, int attacker, Event event)
+{
+	HasDied[client] = true;
 }
 
 public bool Human_OnClientCommand(int client, const char[] command)
@@ -132,7 +147,6 @@ public bool Human_OnClientCommand(int client, const char[] command)
 
 public void Human_OnWeaponSwitch(int client)
 {
-	// TODO: Add this forward
 	MaxSprintCached[client] = false;
 }
 

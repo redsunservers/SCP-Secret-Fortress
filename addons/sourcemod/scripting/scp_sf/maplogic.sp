@@ -6,39 +6,20 @@ static float PrinterCooldown[MAXPLAYERS+1];
 static float MenuUntil[MAXPLAYERS+1];
 static int MenuType[MAXPLAYERS+1];
 static Handle MenuTimer[MAXPLAYERS+1];
-static ArrayList ScriptList;
 
 void MapLogic_PluginStart()
 {
 	HookEntityOutput("logic_relay", "OnTrigger", LogicRelayTrigger);
 }
 
-void MapLogic_AllPluginsLoaded()
-{
-	SetupVScript();
-}
-
 void MapLogic_MapStart()
 {
-	int length = ScriptList.Length;
-	for(int i; i < length; i++)
-	{
-		VScriptFunction func = ScriptList.Get(i);
-		func.Register();
-	}
-
 	for(int i; i < sizeof(UpgradeCooldown); i++)
 	{
 		UpgradeCooldown[i] = 0.0;
 		PrinterCooldown[i] = 0.0;
 		MenuUntil[i] = 0.0;
 	}
-}
-
-void MapLogic_RunScript(int entity, const char[] funcname, int activator = -1, int caller = -1)
-{
-	SetVariantString(funcname);
-	AcceptEntityInput(entity, "RunScriptCode", activator, caller);
 }
 
 int MapLogic_GetPlayerAccess(int client, int type)
@@ -242,73 +223,6 @@ static Action LogicRelayTrigger(const char[] output, int entity, int client, flo
 	}
 	
 	return Plugin_Continue;
-}
-
-static VScriptFunction AddGlobalFunction(const char[] name)
-{
-	VScriptFunction func = VScript_CreateGlobalFunction(name);
-	ScriptList.Push(func);
-	return func;
-}
-
-static void BindGlobalFunction(VScriptFunction vscript, DHookCallback dhook)
-{
-	vscript.SetFunctionEmpty();
-
-	DynamicDetour detour = vscript.CreateDetour();
-	detour.Enable(Hook_Post, dhook);
-	delete detour;
-}
-
-static void SetupVScript()
-{
-	ScriptList = new ArrayList();
-
-	VScriptFunction func = AddGlobalFunction("SCP_GetPlayerAccess");
-	func.SetParam(1, FIELD_HSCRIPT);
-	func.SetParam(2, FIELD_INTEGER);
-	func.Return = FIELD_INTEGER;
-	BindGlobalFunction(func, GetPlayerAccess);
-
-	func = AddGlobalFunction("SCP_GetPlayerClass");
-	func.SetParam(1, FIELD_HSCRIPT);
-	func.Return = FIELD_CSTRING;
-	BindGlobalFunction(func, GetPlayerClass);
-}
-
-static MRESReturn GetPlayerAccess(int entity, DHookReturn ret, DHookParam param)
-{
-	int client = VScript_HScriptToEntity(param.Get(1));
-	if(client > 0 && client <= MaxClients)
-	{
-		ret.Value = MapLogic_GetPlayerAccess(client, param.Get(2));
-		return MRES_Override;
-	}
-
-	LogVScriptError("Invalid client %d", client);
-	return MRES_Ignored;
-}
-
-static MRESReturn GetPlayerClass(int entity, DHookReturn ret, DHookParam param)
-{
-	int client = VScript_HScriptToEntity(param.Get(1));
-	if(client > 0 && client <= MaxClients)
-	{
-		ClassEnum class;
-		Classes_GetByIndex(Client(client).Class, class);
-		ret.SetString(class.Name);
-		return MRES_Override;
-	}
-	
-	LogVScriptError("Invalid client %d", client);
-	return MRES_Ignored;
-}
-
-static void LogVScriptError(const char[] format, any ...)
-{
-	char buffer[512];
-	VFormat(buffer, sizeof(buffer), format, 2);
-	LogError("[Map] %s", buffer);
 }
 
 static void Start914Menu(int client)

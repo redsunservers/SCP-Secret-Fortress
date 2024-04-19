@@ -75,9 +75,9 @@ enum struct WeaponEnum
 
 		kv.GetString("classname", this.Classname, sizeof(this.Classname));
 		
-		KvGetTranslation(kv, "displayattack", this.DisplayAttack, sizeof(this.DisplayAttack), "weapon_0");
-		KvGetTranslation(kv, "displayaltfire", this.DisplayAltfire, sizeof(this.DisplayAltfire), "weapon_0");
-		KvGetTranslation(kv, "displayreload", this.DisplayReload, sizeof(this.DisplayReload), "weapon_0");
+		KvGetTranslation(kv, "displayattack", this.DisplayAttack, sizeof(this.DisplayAttack));
+		KvGetTranslation(kv, "displayaltfire", this.DisplayAltfire, sizeof(this.DisplayAltfire));
+		KvGetTranslation(kv, "displayreload", this.DisplayReload, sizeof(this.DisplayReload));
 
 		kv.GetString("914++", this.VeryFine, sizeof(this.VeryFine));
 		kv.GetString("914+", this.Fine, sizeof(this.Fine));
@@ -104,21 +104,21 @@ enum struct WeaponEnum
 					kv.GetSectionName(buffer, sizeof(buffer));
 					if(IsCharNumeric(buffer[0]))
 					{
-						this.Attrib[this.Attribs++] = StringToInt(buffer);
+						this.Attrib[this.Attribs] = StringToInt(buffer);
 					}
 					else
 					{
-						this.Attrib[this.Attribs++] = TF2Econ_TranslateAttributeNameToDefinitionIndex(buffer);
+						this.Attrib[this.Attribs] = TF2Econ_TranslateAttributeNameToDefinitionIndex(buffer);
 					}
 
 					if(this.Attrib[this.Attribs] > 0)
 					{
 						this.Value[this.Attribs] = kv.GetFloat(NULL_STRING);
+						this.Attribs++;
 					}
 					else
 					{
 						LogError("[Config] '%s' has invalid attribute '%s'", this.Display, buffer);
-						this.Attribs--;
 					}
 				}
 				while(kv.GotoNextKey(false));
@@ -141,7 +141,7 @@ enum struct WeaponEnum
 					kv.GetSectionName(buffer, sizeof(buffer));
 					if(!FileExists(buffer, true))
 					{
-						LogError("[Config] '%s' has missing file '%s'", this.Display, buffer);
+						LogError("[Config] '%s' has missing file '%s' in 'downloads'", this.Display, buffer);
 						continue;
 					}
 
@@ -200,48 +200,59 @@ static Action GiveItemCommand(int client, int args)
 
 	char pattern[PLATFORM_MAX_PATH];
 	GetCmdArg(2, pattern, sizeof(pattern));
+	StripQuotes(pattern);
 
 	char targetName[MAX_TARGET_LENGTH];
 
 	SetGlobalTransTarget(client);
 
-	int index;
 	bool found;
 	WeaponEnum weapon;
 	int length = WeaponList.Length;
-	for(int i; i < length; i++)
+	if(pattern[0] == '#' || IsCharNumeric(pattern[0]))
 	{
-		WeaponList.GetArray(i, weapon);
-		FormatEx(targetName, sizeof(targetName), "%t", weapon.Display);
-		if(StrContains(targetName, pattern, false) != -1)
-		{
-			found = true;
-			break;
-		}
-
-		index++;
-	}
-
-	if(!found)
-	{
-		index = 0;
-		length = WeaponList.Length;
+		int match = pattern[0] == '#' ? StringToInt(pattern[1]) : StringToInt(pattern);
 		for(int i; i < length; i++)
 		{
 			WeaponList.GetArray(i, weapon);
-			if(StrContains(weapon.Display, pattern, false) != -1)
+			if(weapon.Index == match)
 			{
 				found = true;
 				break;
 			}
+		}
+	}
 
-			index++;
+	if(!found)
+	{
+		for(int i; i < length; i++)
+		{
+			WeaponList.GetArray(i, weapon);
+			FormatEx(targetName, sizeof(targetName), "%t", weapon.Display);
+			if(StrContains(targetName, pattern, false) != -1)
+			{
+				found = true;
+				break;
+			}
 		}
 
 		if(!found)
 		{
-			ReplyToCommand(client, "[SM] Invalid item string");
-			return Plugin_Handled;
+			for(int i; i < length; i++)
+			{
+				WeaponList.GetArray(i, weapon);
+				if(StrContains(weapon.Display, pattern, false) != -1)
+				{
+					found = true;
+					break;
+				}
+			}
+
+			if(!found)
+			{
+				ReplyToCommand(client, "[SM] Invalid item string");
+				return Plugin_Handled;
+			}
 		}
 	}
 
@@ -257,7 +268,7 @@ static Action GiveItemCommand(int client, int args)
 
 	for(int i; i < matches; i++)
 	{
-		Items_GiveItem(targets[i], index);
+		Items_GiveItem(targets[i], weapon.Index);
 	}
 
 	if(targetNounIsMultiLanguage)
@@ -664,18 +675,21 @@ int Items_GiveItem(int client, int index, int ground = -1)
 
 	entity = -1;
 	
+	PrintToChatAll("Items_GiveItem::%d", index);
 	WeaponEnum weapon;
 	if(Items_GetWeaponByIndex(index, weapon))
 	{
+		PrintToChatAll("Items_GiveItem::2");
 		entity = CreateEntityByName(weapon.Classname);
 		if(entity != -1)
 		{
+			PrintToChatAll("Items_GiveItem::3");
 			SetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex", index);
 			SetEntProp(entity, Prop_Send, "m_bInitialized", 1);
 			SetEntProp(entity, Prop_Send, "m_iEntityQuality", 6);
 			SetEntProp(entity, Prop_Send, "m_iEntityLevel", 1);
 			SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", true);
-			SetItemID(entity, 0);
+			//SetItemID(entity, 0);
 
 			DispatchSpawn(entity);
 

@@ -2,12 +2,11 @@
 #include <clientprefs>
 #include <tf2_stocks>
 #include <sdkhooks>
+#include <dhooks>
 #include <morecolors>
 #include <tf2attributes>
-#include <dhooks>
 #include <tf_econ_data>
 #include <tf2utils>
-#include <vscript>
 #undef REQUIRE_PLUGIN
 #tryinclude <sourcecomms>
 #tryinclude <basecomm>
@@ -93,6 +92,7 @@ bool SourceComms;
 #include "scp_sf/vieweffects.sp"
 
 #include "scp_sf/classes/human.sp"
+#include "scp_sf/classes/vip.sp"
 
 #include "scp_sf/gamemode/vip_escape.sp"
 
@@ -158,11 +158,6 @@ public void OnPluginStart()
 public void OnPluginEnd()
 {
 	DHooks_PluginEnd();
-}
-
-public void OnAllPluginsLoaded()
-{
-	MapLogic_AllPluginsLoaded();
 }
 
 public void OnLibraryAdded(const char[] name)
@@ -264,4 +259,9 @@ public void OnEntityCreated(int entity, const char[] classname)
 public void OnEntityDestroyed(int entity)
 {
 	DHooks_EntityDestoryed();
+}
+
+public void TF2_OnConditionAdded(int client, TFCond condition)
+{
+	Classes_ConditionAdded(client, condition);
 }
