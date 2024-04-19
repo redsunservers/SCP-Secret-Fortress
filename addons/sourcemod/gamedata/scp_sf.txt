@@ -50,7 +50,7 @@
 			{
 				"library"	"server"
 				"linux"		"@_ZN9CTFPlayer22CanPickupDroppedWeaponEPK16CTFDroppedWeapon"
-				"windows"	""
+				"windows"	"\x55\x8B\xEC\x51\x8B\x45\x08\x53\x56\x57\x80\xB8\x04\x05\x00\x00\x00"
 			}
 			"CTFPlayer::DoAnimationEvent"
 			{
@@ -98,7 +98,7 @@
 			{
 				"library"	"server"
 				"linux"		"@_ZN9CTFPlayer24TryToPickupDroppedWeaponEv"
-				"windows"	""
+				"windows"	"\x55\x8B\xEC\x83\xEC\x24\x53\x56\x57\x8B\x7D\x08\x8B\xF1\x81\xC7\xB0\x04\x00\x00"
 			}
 			"CWeaponMedigun::AllowedToHealTarget"
 			{
