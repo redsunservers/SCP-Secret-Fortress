@@ -44,7 +44,7 @@
 			{
 				"library"	"server"
 				"linux"		"@_ZN15CTFGameMovement15ProcessMovementEP11CBasePlayerP9CMoveData"
-				"windows"	""
+				"windows"	"\x55\x8B\xEC\x56\x57\x8B\x7D\x08\x8B\xF1\x85\xFF\x74\x2A\x53"
 			}
 			"CTFPlayer::CanPickupDroppedWeapon"
 			{
@@ -56,7 +56,7 @@
 			{
 				"library"	"server"
 				"linux"		"@_ZN9CTFPlayer16DoAnimationEventE17PlayerAnimEvent_ti"
-				"windows"	""
+				"windows"	"\x55\x8B\xEC\x51\x53\x56\x8B\x35\x2A\x2A\x2A\x2A\x8B\xD9\x8B\xCE"
 			}
 			"CTFPlayer::DropAmmoPack"
 			{
@@ -114,7 +114,7 @@
 			"AI_CriteriaSet::RemoveCriteria"
 			{
 				"linux"		"@_ZN14AI_CriteriaSet14RemoveCriteriaEPKc"
-				"windows"	""
+				"windows"	"\x55\x8B\xEC\x83\xEC\x48\x56\x57\xFF\x75\x08"
 			}
 			"PassServerEntityFilter"
 			{
