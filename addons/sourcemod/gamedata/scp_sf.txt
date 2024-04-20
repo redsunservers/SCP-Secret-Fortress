@@ -38,13 +38,13 @@
 			{
 				"library"	"server"
 				"linux"		"@_ZN16CTFDroppedWeapon18InitPickedUpWeaponEP9CTFPlayerP13CTFWeaponBase"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x08\xD9\xEE\x53\x56\x57"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x14\xD9\xEE\x53"
 			}
 			"CTFGameMovement::ProcessMovement"
 			{
 				"library"	"server"
 				"linux"		"@_ZN15CTFGameMovement15ProcessMovementEP11CBasePlayerP9CMoveData"
-				"windows"	"\x55\x8B\xEC\x56\x57\x8B\x7D\x08\x8B\xF1\x85\xFF\x74\x2A\x53"
+				"windows"	"\x55\x8B\xEC\x56\x57\x8B\x7D\x08\x8B\xF1\x85\xFF\x0F\x84\x2A\x2A\x2A\x2A\x83\x7D\x0C\x00"
 			}
 			"CTFPlayer::CanPickupDroppedWeapon"
 			{
@@ -449,12 +449,12 @@
 				"linux"
 				{
 					"signature"	"CTFGameMovement::ProcessMovement"
-					"offset"	"84"
+					"offset"	"97"
 				}
 				"windows"
 				{
 					"signature"	"CTFGameMovement::ProcessMovement"
-					"offset"	"70"
+					"offset"	"77"
 				}
 			}
 		}
