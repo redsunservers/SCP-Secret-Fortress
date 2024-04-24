@@ -119,7 +119,7 @@
 			"PassServerEntityFilter"
 			{
 				"library"	"server"
-				"linux"		"@_Z22PassServerEntityFilterPK13IHandleEntityS1_"
+				"linux"		"@_Z22PassServerEntityFilterPK13IHandleEntityS1_.part.0"
 				"windows"	"\x55\x8B\xEC\x56\x8B\x75\x0C\x57\x85\xF6\x74\x2A\x8B\x7D\x08"
 			}
 		}
@@ -381,10 +381,18 @@
 					"touch"
 					{
 						"type" "cbaseentity"
+						"linux"
+						{
+							"register"	"eax"
+						}
 					}
 					"pass"
 					{
 						"type" "cbaseentity"
+						"linux"
+						{
+							"register"	"edx"
+						}
 					}
 				}
 			}
