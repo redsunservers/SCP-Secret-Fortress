@@ -152,7 +152,7 @@ public void SCP096_OnButton(int client, int button)
 				TF2_AddCondition(client, TFCond_CritCola, 99.9);
 
 				TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
-				int weapon = SpawnWeapon(client, "tf_weapon_sword", 310, 100, 13, "2 ; 11 ; 6 ; 0.95 ; 28 ; 3 ; 252 ; 0 ; 326 ; 2 ; 412 ; 0.6 ; 4328 ; 1", false);
+				int weapon = SpawnWeapon(client, "tf_weapon_sword", 310, 100, 13, "2 ; 11 ; 6 ; 0.95 ; 28 ; 3 ; 252 ; 0 ; 326 ; 2 ; 412 ; 0.6", false);
 				if(weapon > MaxClients)
 				{
 					ApplyStrangeRank(weapon, 16);
