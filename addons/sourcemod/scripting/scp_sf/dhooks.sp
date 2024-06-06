@@ -551,7 +551,8 @@ public MRESReturn Detour_PassServerEntityFilterPost(DHookReturn ret, DHookParam 
 	
 	if ((touch_is_player && pass_is_player) || (!touch_is_player && !pass_is_player))
 	{
-		return MRES_Ignored;
+		ret.Value = true;
+		return MRES_Supercede;
 	}
 	
 	int entity = touch_is_player ? pass_ent : touch_ent;
@@ -561,7 +562,8 @@ public MRESReturn Detour_PassServerEntityFilterPost(DHookReturn ret, DHookParam 
 	
 	if (strncmp(classname, "func_door", sizeof(classname)) != 0 && strncmp(classname, "func_movelinear", sizeof(classname)) != 0)
 	{
-		return MRES_Ignored;
+		ret.Value = true;
+		return MRES_Supercede;
 	}
 	
 	int client = touch_is_player ? touch_ent : pass_ent;
