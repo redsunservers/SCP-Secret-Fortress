@@ -316,13 +316,13 @@ public void SCP096_OnButton(int client, int button)
 			{
 				if(Client[client].Pos[0])
 				{
-					StopSound(client, SNDCHAN_VOICE, SoundPassive);
+					StopSound(client, SNDCHAN_AUTO, SoundPassive);
 					Client[client].Pos[0] = 0.0;
 				}
 			}
 			else if(!Client[client].Pos[0])
 			{
-				EmitSoundToAll2(SoundPassive, client, SNDCHAN_VOICE, SNDLEVEL_MINIBIKE, _, _, _, client);
+				EmitSoundToAll2(SoundPassive, client, SNDCHAN_AUTO, SNDLEVEL_MINIBIKE, _, _, _, client);
 				Client[client].Pos[0] = 1.0;
 			}
 		}
@@ -357,7 +357,7 @@ static void TriggerShyGuy(int client, int target, bool full)
 		default:
 		{
 			if(Client[client].Pos[0])
-				StopSound(client, SNDCHAN_VOICE, SoundPassive);
+				StopSound(client, SNDCHAN_AUTO, SoundPassive);
 
 			Client[client].Pos[0] = 0.0;
 			Client[client].Extra3 = GetGameTime()+RageWarmup;
