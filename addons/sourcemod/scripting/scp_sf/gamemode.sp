@@ -877,7 +877,10 @@ static ArrayList GrabClassList(KeyValues kv)
 	{
 		IntToString(i, buffer, sizeof(buffer));
 		kv.GetString(buffer, buffer, sizeof(buffer));
-		if(!buffer[0])
+
+		if(buffer[0])	// Convert the string to lowercase because keyvalues might uppercase them
+			StrToLower(buffer);
+		else
 			break;
 
 		list.PushString(buffer);
