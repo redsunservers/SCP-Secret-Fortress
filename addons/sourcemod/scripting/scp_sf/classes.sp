@@ -127,6 +127,7 @@ void Classes_Setup(KeyValues main, KeyValues map, ArrayList whitelist)
 			if(!kv.GetSectionName(class.Name, sizeof(class.Name)) || StrEqual(class.Name, "default"))
 				continue;
 
+			StrToLower(class.Name);
 			if(whitelist && whitelist.FindString(class.Name)==-1)
 				continue;
 
