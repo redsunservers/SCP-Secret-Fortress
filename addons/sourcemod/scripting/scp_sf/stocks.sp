@@ -1616,9 +1616,9 @@ stock int CreateExplosion(int attacker = -1, int damage = 0, int radius = -1, fl
 	return explosion;
 }
 
-stock void StrToLower(char[] sBuffer)
+stock void StrToLower(char[] buffer)
 {
-	int iLength = strlen(sBuffer);
-	for (int i = 0; i < iLength; i++)
-		sBuffer[i] = CharToLower(sBuffer[i]);
+	int length = strlen(buffer);
+	for (int i = 0; i < length; i++)
+		buffer[i] = CharToLower(buffer[i]);
 }
