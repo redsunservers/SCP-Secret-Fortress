@@ -124,7 +124,7 @@ void Classes_Setup(KeyValues main, KeyValues map, ArrayList whitelist)
 		int count;
 		do
 		{
-			if(!kv.GetSectionName(class.Name, sizeof(class.Name)) || StrEqual(class.Name, "default"))
+			if(!kv.GetSectionName(class.Name, sizeof(class.Name)) || StrEqual(class.Name, "default", false))
 				continue;
 
 			StrToLower(class.Name);
