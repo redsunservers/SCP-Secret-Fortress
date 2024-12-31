@@ -1454,6 +1454,22 @@ bool IsPointTouchingBox(float pos[3], float mins[3], float maxs[3])
 	return true;
 }
 
+int GetEntityFromHandle(any handle)
+{
+	int ent = handle & 0xFFF;
+	if (ent == 0xFFF)
+		ent = -1;
+	return ent;
+}
+
+int GetEntityFromAddress(Address entity)
+{
+	if (entity == Address_Null)
+		return -1;
+
+	return GetEntityFromHandle(LoadFromAddress(entity + view_as<Address>(FindDataMapInfo(0, "m_angRotation") + 12), NumberType_Int32));
+}
+
 int StringtToCharArray(Address stringt, char[] buffer, int maxlen)
 {
 	if (stringt == Address_Null)
