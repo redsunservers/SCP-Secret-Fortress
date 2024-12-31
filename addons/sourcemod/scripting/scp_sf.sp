@@ -2201,7 +2201,7 @@ public Action OnBroadcast(Event event, const char[] name, bool dontBroadcast)
 	return Plugin_Continue;
 }
 
-public Action OnPlayerRunCmd(int client, int &buttons)
+public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
 	if(!Enabled || !IsPlayerAlive(client))
 		return Plugin_Continue;
@@ -2310,7 +2310,7 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 	}
 
 	// Check if the player moved at all or is speaking
-	if((buttons & IN_ATTACK) || (!(buttons & IN_DUCK) && ((buttons & IN_FORWARD) || (buttons & IN_BACK) || (buttons & IN_MOVELEFT) || (buttons & IN_MOVERIGHT))))
+	if (buttons & IN_ATTACK || !(GetEntityFlags(client) & FL_DUCKING || (vel[0] == 0.0 && vel[1] == 0.0 && vel[2] == 0.0)))
 		Client[client].IdleAt = engineTime+2.5;
 
 	// SCP-specific buttons
