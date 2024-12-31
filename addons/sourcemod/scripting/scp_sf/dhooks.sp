@@ -1,7 +1,6 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static DynamicDetour AllowedToHealTarget;
 static DynamicHook RoundRespawn;
 static DynamicHook ShouldCollide;
 static DynamicHook ForceRespawn;
@@ -27,28 +26,9 @@ void DHook_Setup(GameData gamedata)
 	DHook_CreateDetour(gamedata, "CTFPlayer::RegenThink", DHook_RegenThinkPre, DHook_RegenThinkPost);
 	DHook_CreateDetour(gamedata, "CTFPlayer::Taunt", DHook_TauntPre, DHook_TauntPost);
 	DHook_CreateDetour(gamedata, "CTFPlayer::TeamFortress_CalculateMaxSpeed", DHook_CalculateMaxSpeedPre, DHook_CalculateMaxSpeedPost);
-	DHook_CreateDetour(gamedata, "PassServerEntityFilter", _, Detour_PassServerEntityFilterPost);
+	DHook_CreateDetour(gamedata, "CWeaponMedigun::AllowedToHealTarget", DHook_AllowedToHealTargetPre);
+	DHook_CreateDetour(gamedata, "CTraceFilterSimple::ShouldHitEntity", DHook_ShouldHitEntityPre);
 	
-	// TODO: DHook_CreateDetour version of this
-	AllowedToHealTarget = new DynamicDetour(Address_Null, CallConv_THISCALL, ReturnType_Bool, ThisPointer_CBaseEntity);
-	if(AllowedToHealTarget)
-	{
-		if(AllowedToHealTarget.SetFromConf(gamedata, SDKConf_Signature, "CWeaponMedigun::AllowedToHealTarget"))
-		{
-			AllowedToHealTarget.AddParam(HookParamType_CBaseEntity);
-			if(!AllowedToHealTarget.Enable(Hook_Pre, DHook_AllowedToHealTarget))
-				LogError("[Gamedata] Failed to detour CWeaponMedigun::AllowedToHealTarget");
-		}
-		else
-		{
-			LogError("[Gamedata] Could not find CWeaponMedigun::AllowedToHealTarget");
-		}
-	}
-	else
-	{
-		LogError("[Gamedata] Could not find CWeaponMedigun::AllowedToHealTarget");
-	}
-
 	RoundRespawn = DynamicHook.FromConf(gamedata, "CTeamplayRoundBasedRules::RoundRespawn");
 	if(!RoundRespawn)
 		LogError("[Gamedata] Could not find CTeamplayRoundBasedRules::RoundRespawn");
@@ -131,7 +111,7 @@ public MRESReturn DHook_RoundRespawn()
 	return MRES_Ignored;
 }
 
-public MRESReturn DHook_AllowedToHealTarget(int weapon, DHookReturn ret, DHookParam param)
+public MRESReturn DHook_AllowedToHealTargetPre(int weapon, DHookReturn ret, DHookParam param)
 {
 	if(weapon==-1 || param.IsNull(1))
 		return MRES_Ignored;
@@ -531,43 +511,42 @@ public MRESReturn DHook_ModifyOrAppendCriteriaPost(int player, DHookParam params
 	return MRES_Ignored;
 }
 
-public MRESReturn Detour_PassServerEntityFilterPost(DHookReturn ret, DHookParam param)
+public MRESReturn DHook_ShouldHitEntityPre(Address address, DHookReturn ret, DHookParam param)
 {
-	if (!ret || param.IsNull(1) || param.IsNull(2))
-	{
-		return MRES_Ignored;
-	}
-	
 	int touch_ent = param.Get(1);
-	int pass_ent  = param.Get(2);
+	int pass_ent = GetEntityFromAddress(LoadFromAddress(address + view_as<Address>(4), NumberType_Int32));	// +4 from CTraceFilterSimple::m_pPassEnt
+	if (pass_ent == -1)
+		return MRES_Ignored;
 	
-	if (!IsValidEntity(touch_ent) || !IsValidEntity(pass_ent))
+	int client = -1;
+	int entity = -1;
+	
+	if (0 < touch_ent <= MaxClients)
+	{
+		client = touch_ent;
+		entity = pass_ent;
+	}
+	else if (0 < pass_ent <= MaxClients)
+	{
+		client = pass_ent;
+		entity = touch_ent;
+	}
+	else
 	{
 		return MRES_Ignored;
 	}
-	
-	bool touch_is_player = touch_ent > 0 && touch_ent <= MaxClients && IsPlayerAlive(touch_ent);
-	bool pass_is_player  = pass_ent > 0 && pass_ent <= MaxClients && IsPlayerAlive(pass_ent);
-	
-	if ((touch_is_player && pass_is_player) || (!touch_is_player && !pass_is_player))
-	{
-		ret.Value = true;
-		return MRES_Supercede;
-	}
-	
-	int entity = touch_is_player ? pass_ent : touch_ent;
 	
 	char classname[64];
 	GetEntityClassname(entity, classname, sizeof(classname));
 	
-	if (strncmp(classname, "func_door", sizeof(classname)) != 0 && strncmp(classname, "func_movelinear", sizeof(classname)) != 0)
+	if (StrContains(classname, "func_door") == 0 || StrContains(classname, "func_movelinear") == 0)
 	{
-		ret.Value = true;
-		return MRES_Supercede;
+		if (Classes_OnDoorWalk(client, entity))
+		{
+			ret.Value = false;
+			return MRES_Supercede;
+		}
 	}
 	
-	int client = touch_is_player ? touch_ent : pass_ent;
-	
-	ret.Value = !Classes_OnDoorWalk(client, entity);
-	return MRES_Supercede;
+	return MRES_Ignored;
 }
