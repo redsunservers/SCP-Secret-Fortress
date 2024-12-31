@@ -2310,7 +2310,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 	}
 
 	// Check if the player moved at all or is speaking
-	if (buttons & IN_ATTACK || !(GetEntityFlags(client) & FL_DUCKING || (vel[0] == 0.0 && vel[1] == 0.0))	// Ignoring vertical vel[2]
+	if (buttons & IN_ATTACK || !(GetEntityFlags(client) & FL_DUCKING || (vel[0] == 0.0 && vel[1] == 0.0)))	// Ignoring vertical vel[2]
 		Client[client].IdleAt = engineTime+2.5;
 
 	// SCP-specific buttons
