@@ -2610,7 +2610,7 @@ public void UpdateListenOverrides(float engineTime)
 					continue;
 				}
 
-				if (Forward_OnUpdateListenOverrides(client, target) != Plugin_Continue)
+				if(Forward_OnUpdateListenOverrides(client, target) != Plugin_Continue)
 				{
 					Client[target].CanTalkTo[client] = false;
 					SetListenOverride(client, target, Listen_No);
