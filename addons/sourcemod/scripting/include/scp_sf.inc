@@ -211,6 +211,21 @@ forward void SCPSF_OnWeapon(int client, int entity);
  */
 forward Action SCPSF_OnReactionPre(int client, const char[] event, char sound[PLATFORM_MAX_PATH]);
 
+/**
+ * Calls when listen overrides are being checked between two clients
+ *
+ * @note			Does not go through if the listener has the talker muted client-side
+ *
+ * @param listener 	Client index of the listener
+ * @param talker 	Client index of the talker
+ *
+ * @return		Plugin_Continue - No changes
+ *			Plugin_Changed - Stops the listener from hearing the talker
+ *			Plugin_Handled - Stops the listener from hearing the talker
+ *			Plugin_Stop - Stops the listener from hearing the talker
+ */
+forward Action SCPSF_OnUpdateListenOverrides(int listener, int talker);
+
 public SharedPlugin __pl_SCPSF =
 {
 	name = "scp_sf",

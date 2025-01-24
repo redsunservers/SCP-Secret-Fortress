@@ -6,6 +6,7 @@ static GlobalForward OnClass;
 static GlobalForward OnClassPre;
 static GlobalForward OnEscape;
 static GlobalForward OnReactionPre;
+static GlobalForward OnUpdateListenOverrides;
 static GlobalForward OnWeapon;
 static GlobalForward OnWeaponPre;
 
@@ -16,6 +17,7 @@ void Forward_Setup()
 	OnClassPre = new GlobalForward("SCPSF_OnClassPre", ET_Event, Param_Cell, Param_String, Param_Cell);
 	OnEscape = new GlobalForward("SCPSF_OnEscape", ET_Ignore, Param_Cell, Param_Cell);
 	OnReactionPre = new GlobalForward("SCPSF_OnReactionPre", ET_Event, Param_Cell, Param_String, Param_String);
+	OnUpdateListenOverrides = new GlobalForward("SCPSF_OnUpdateListenOverrides", ET_Ignore, Param_Cell, Param_Cell);
 	OnWeapon = new GlobalForward("SCPSF_OnWeapon", ET_Ignore, Param_Cell, Param_Cell);
 	OnWeaponPre = new GlobalForward("SCPSF_OnWeaponPre", ET_Event, Param_Cell, Param_Cell, Param_CellByRef);
 }
@@ -103,4 +105,14 @@ void Forward_OnMessage(int client, char[] name, int nameL, char[] msg, int msgL)
 		Call_Finish();
 	}
 	delete iter;
+}
+
+Action Forward_OnUpdateListenOverrides(int listener, int talker)
+{
+	Action action;
+	Call_StartForward(OnUpdateListenOverrides);
+	Call_PushCell(listener);
+	Call_PushCell(talker);
+	Call_Finish(action);
+	return action;
 }

@@ -2610,11 +2610,17 @@ public void UpdateListenOverrides(float engineTime)
 					continue;
 				}
 
-				Client[target].CanTalkTo[client] = true;
+				if (Forward_OnUpdateListenOverrides(client, target) != Plugin_Continue)
+				{
+					Client[target].CanTalkTo[client] = false;
+					SetListenOverride(client, target, Listen_No);
+					continue;
+				}
 
 				#if defined _sourcecomms_included
 				if(SourceComms && SourceComms_GetClientMuteType(target)>bNot)
 				{
+					Client[target].CanTalkTo[client] = false;
 					SetListenOverride(client, target, Listen_No);
 					continue;
 				}
@@ -2623,11 +2629,13 @@ public void UpdateListenOverrides(float engineTime)
 				#if defined _basecomm_included
 				if(BaseComm && BaseComm_IsClientMuted(target))
 				{
+					Client[target].CanTalkTo[client] = false;
 					SetListenOverride(client, target, Listen_No);
 					continue;
 				}
 				#endif
 
+				Client[target].CanTalkTo[client] = true;
 				SetListenOverride(client, target, Listen_Default);
 			}
 		}
@@ -2670,6 +2678,9 @@ public void UpdateListenOverrides(float engineTime)
 
 			bool muted = (manage && IsClientMuted(client[i], client[a]));
 			bool blocked = muted;
+
+			if(!blocked && Forward_OnUpdateListenOverrides(client[i], client[a]) != Plugin_Continue)
+				blocked = true;
 
 			#if defined _basecomm_included
 			if(!blocked && BaseComm && BaseComm_IsClientMuted(client[a]))
