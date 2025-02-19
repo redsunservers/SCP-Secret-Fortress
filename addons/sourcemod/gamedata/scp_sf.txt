@@ -432,13 +432,13 @@
 			}
 			"CTeamplayRoundBasedRules::RoundRespawn"
 			{
-				"linux"		"231"
-				"windows"	"229"
+				"linux"		"232"
+				"windows"	"230"
 			}
 			"CTeamplayRules::SetWinningTeam"
 			{
-				"linux"		"165"
-				"windows"	"164"
+				"linux"		"166"
+				"windows"	"165"
 			}
 			"CTeam::AddPlayer"
 			{
