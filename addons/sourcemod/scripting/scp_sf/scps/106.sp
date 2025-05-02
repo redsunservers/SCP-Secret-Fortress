@@ -23,8 +23,7 @@ public bool SCP106_Create(int client)
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 	}
 
-	ViewModel_Create(client, ModelMelee);
-	ViewModel_SetDefaultAnimation(client, "a_fists_idle_02");
+	ViewModel_Create(client, ModelMelee, .sDefaultAnim = "a_fists_idle_02");
 	ViewModel_SetAnimation(client, "fists_draw");
 	return false;
 }

@@ -509,8 +509,7 @@ public void SZF_106Button(int client, int button)
 			if(weapon > MaxClients)
 				TF2Attrib_SetByDefIndex(weapon, 821, 0.0);
 
-			ViewModel_Create(client, ModelMelee);
-			ViewModel_SetDefaultAnimation(client, "a_fists_idle_02");
+			ViewModel_Create(client, ModelMelee, .sDefaultAnim = "a_fists_idle_02");
 			TF2_RemoveCondition(client, TFCond_SpeedBuffAlly);
 			TF2_RemoveCondition(client, TFCond_StealthedUserBuffFade);
 			TF2_RemoveCondition(client, TFCond_DodgeChance);

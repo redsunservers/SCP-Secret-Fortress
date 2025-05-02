@@ -118,8 +118,7 @@ public void SCP049_OnWeaponSwitch(int client, int entity)
 			Revive[client].GoneAt = GetGameTime()+3.0;
 		}
 
-		ViewModel_Create(client, ModelMedi);
-		ViewModel_SetDefaultAnimation(client, "b_idle");
+		ViewModel_Create(client, ModelMedi, .sDefaultAnim = "b_idle");
 		ViewModel_SetAnimation(client, "b_draw");
 	}
 }
@@ -333,8 +332,7 @@ public void SCP049_OnButton(int client, int button)
 
 			FakeClientCommandEx(client, "voicemenu 1 6");	// Activate charge
 
-			ViewModel_Create(client, ModelMelee);
-			ViewModel_SetDefaultAnimation(client, "b_idle");
+			ViewModel_Create(client, ModelMelee, .sDefaultAnim = "b_idle");
 			ViewModel_SetAnimation(client, "b_draw");
 		}
 
