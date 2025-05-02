@@ -5,7 +5,7 @@
 
 static int ViewmodelRef[MAXPLAYERS + 1] = {INVALID_ENT_REFERENCE, ...};
 
-int ViewModel_Create(int iClient, const char[] sModel, const float vecAnglesOffset[3] = NULL_VECTOR, float flHeight = 0.0, int Skin = 0, bool ViewChange = true, bool NeedsHands = false)
+int ViewModel_Create(int iClient, const char[] sModel, const float vecAnglesOffset[3] = NULL_VECTOR, float flHeight = 0.0, int Skin = 0, bool ViewChange = true, bool NeedsHands = false, const char[] sDefaultAnim = "")
 {
 	int iViewModel = CreateEntityByName("prop_dynamic");
 	if (iViewModel <= MaxClients)
@@ -17,6 +17,9 @@ int ViewModel_Create(int iClient, const char[] sModel, const float vecAnglesOffs
 	DispatchKeyValue(iViewModel, "model", sModel);
 	DispatchKeyValue(iViewModel, "disablereceiveshadows", "0");
 	DispatchKeyValue(iViewModel, "disableshadows", "1");
+	
+	if (sDefaultAnim[0])
+		DispatchKeyValue(iViewModel, "defaultanim", sDefaultAnim);
 	
 	float vecOrigin[3], vecAngles[3];
 	GetClientAbsOrigin(iClient, vecOrigin);
@@ -86,15 +89,6 @@ void ViewModel_SetAnimation(int iClient, const char[] sAnimation)
 	{
 		SetVariantString(sAnimation);
 		AcceptEntityInput(ViewmodelRef[iClient], "SetAnimation");
-	}
-}
-
-void ViewModel_SetDefaultAnimation(int iClient, const char[] sAnimation)
-{
-	if (ViewModel_Valid(iClient))
-	{
-		SetVariantString(sAnimation);
-		AcceptEntityInput(ViewmodelRef[iClient], "SetDefaultAnimation");
 	}
 }
 
