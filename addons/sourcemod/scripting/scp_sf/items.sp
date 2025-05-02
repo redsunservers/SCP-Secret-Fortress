@@ -611,8 +611,8 @@ void Items_SetupViewmodel(int client, int weapon)
 			{
 				// all custom viewmodels follow this anim name convention
 				ViewModel_Create(client, Weapon.ViewmodelName, _, _, Weapon.Skin, false, true);
-				ViewModel_SetDefaultAnimation(client, "idle");
 				ViewModel_SetAnimation(client, "draw");
+				ViewModel_SetDefaultAnimation(client, "idle");
 			}
 		}
 	}
