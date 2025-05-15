@@ -1,0 +1,241 @@
+#pragma semicolon 1
+#pragma newdecls required
+
+static int BossIndex[MAXPLAYERS+1] = {-1, ...};
+static bool Minion[MAXPLAYERS+1];
+static bool Sprinting[MAXPLAYERS+1];
+static bool Escaped[MAXPLAYERS+1];
+static float SprintPower[MAXPLAYERS+1];
+static float Stress[MAXPLAYERS+1];
+static float LastGameTime[MAXPLAYERS+1];
+static bool EyesClosed[MAXPLAYERS+1];
+static int ControlProgress[MAXPLAYERS+1];
+static float LightPower[MAXPLAYERS+1];
+static int KeycardContain[MAXPLAYERS+1];
+static int KeycardArmory[MAXPLAYERS+1];
+static int KeycardExit[MAXPLAYERS+1];
+static int ActionItem[MAXPLAYERS+1] = {-1, ...};
+
+methodmap Client
+{
+	public Client(int client)
+	{
+		return view_as<Client>(client);
+	}
+	
+	property int Index
+	{
+		public get()
+		{
+			return view_as<int>(this);
+		}
+	}
+
+	property bool IsBoss
+	{
+		public get()
+		{
+			return BossIndex[this.Index] != -1;
+		}
+	}
+
+	property int Boss
+	{
+		public get()
+		{
+			return BossIndex[this.Index];
+		}
+		public set(int value)
+		{
+			BossIndex[this.Index] = value;
+		}
+	}
+
+	property bool Minion
+	{
+		public get()
+		{
+			return Minion[this.Index];
+		}
+		public set(bool value)
+		{
+			Minion[this.Index] = value;
+		}
+	}
+
+	property bool Sprinting
+	{
+		public get()
+		{
+			return Sprinting[this.Index];
+		}
+		public set(bool value)
+		{
+			Sprinting[this.Index] = value;
+		}
+	}
+
+	property bool Escaped
+	{
+		public get()
+		{
+			return Escaped[this.Index];
+		}
+		public set(bool value)
+		{
+			Escaped[this.Index] = value;
+		}
+	}
+
+	// Out of 100.0
+	property float SprintPower
+	{
+		public get()
+		{
+			return SprintPower[this.Index];
+		}
+		public set(float value)
+		{
+			SprintPower[this.Index] = value;
+		}
+	}
+
+	// Based on 1s per time passed
+	property float Stress
+	{
+		public get()
+		{
+			return Stress[this.Index];
+		}
+		public set(float value)
+		{
+			Stress[this.Index] = value;
+		}
+	}
+
+	property float LastGameTime
+	{
+		public get()
+		{
+			return LastGameTime[this.Index];
+		}
+		public set(float value)
+		{
+			LastGameTime[this.Index] = value;
+		}
+	}
+
+	property bool EyesClosed
+	{
+		public get()
+		{
+			return EyesClosed[this.Index];
+		}
+		public set(bool value)
+		{
+			EyesClosed[this.Index] = value;
+		}
+	}
+
+	property int ControlProgress
+	{
+		public get()
+		{
+			return ControlProgress[this.Index];
+		}
+		public set(int value)
+		{
+			ControlProgress[this.Index] = value;
+		}
+	}
+
+	// Out of 100.0
+	property float LightPower
+	{
+		public get()
+		{
+			return LightPower[this.Index];
+		}
+		public set(float value)
+		{
+			LightPower[this.Index] = value;
+		}
+	}
+
+	property int KeycardContain
+	{
+		public get()
+		{
+			return KeycardContain[this.Index];
+		}
+		public set(int value)
+		{
+			KeycardContain[this.Index] = value;
+		}
+	}
+
+	property int KeycardArmory
+	{
+		public get()
+		{
+			return KeycardArmory[this.Index];
+		}
+		public set(int value)
+		{
+			KeycardArmory[this.Index] = value;
+		}
+	}
+
+	property int KeycardExit
+	{
+		public get()
+		{
+			return KeycardExit[this.Index];
+		}
+		public set(int value)
+		{
+			KeycardExit[this.Index] = value;
+		}
+	}
+	
+	// Item index, -1 for none
+	property int ActionItem
+	{
+		public get()
+		{
+			return ActionItem[this.Index];
+		}
+		public set(int value)
+		{
+			ActionItem[this.Index] = value;
+		}
+	}
+	
+	public void ResetByDeath()
+	{
+		this.Minion = false;
+		this.Sprinting = false;
+		this.Escaped = false;
+		this.SprintPower = 0.0;
+		this.Stress = 0.0;
+		this.EyesClosed = false;
+		this.LightPower = 0.0;
+		this.KeycardContain = 0;
+		this.KeycardArmory = 0;
+		this.KeycardExit = 0;
+		this.ActionItem = -1;
+	}
+	
+	public void ResetByRound()
+	{
+		this.ControlProgress = 0;
+		this.ResetByDeath();
+	}
+	
+	public void ResetByDisconnect()
+	{
+		this.Boss = -1;
+		this.LastGameTime = 0.0;
+		this.ResetByRound();
+	}
+}

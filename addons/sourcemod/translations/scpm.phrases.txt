@@ -1,0 +1,41 @@
+"Phrases"
+{
+	"You Will Die"
+	{
+		"en"	"YOU WILL DIE"
+	}
+	"There Is No Hope"
+	{
+		"en"	"THERE IS NO HOPE"
+	}
+	"Mental Breakdown"
+	{
+		"en"	"MENTAL BREAKDOWN"
+	}
+	"Control Progress 1"
+	{
+		"en"	"%+reload% INTERACT\n%+attack3% SPRINT\n%+inpsect% FLASHLIGHT"
+	}
+	"Control Progress 2"
+	{
+		"en"	"%+use_action_slot_item% USE CONSUMABLE\n%dropitem% DROP ITEM"
+	}
+	"Weapon Stripped"
+	{
+		"en"	"Weapon Stripped"
+	}
+	"Action Item"
+	{
+		"#format"	"{1:t}"
+		"en"		"Action Item: {1}"
+	}
+	"NaN"
+	{
+		"en"	"N/A"
+	}
+	"Action Status"
+	{
+		"#format"	"{1:d},{2:d},{2:d}"
+		"en"		"Containment Level: {1}\nArmory Level: {2}\nCheckpoint Level: {3}"
+	}
+}

@@ -1,0 +1,561 @@
+#pragma semicolon 1
+#pragma newdecls required
+
+enum struct ActionInfo
+{
+	int Index;
+	char Name[64];
+
+	char Model[PLATFORM_MAX_PATH];
+	int Skin;
+
+	void SetupKv(KeyValues kv)
+	{
+		kv.GetSectionName(this.Name, sizeof(this.Name));
+
+		if(kv.JumpToKey("Downloads"))
+		{
+			if(kv.GotoFirstSubKey(false))
+			{
+				do
+				{
+					kv.GetSectionName(this.Model, sizeof(this.Model));
+
+					if(FileExists(this.Model, true))
+					{
+						AddFileToDownloadsTable(this.Model);
+					}
+					else
+					{
+						LogError("[Config] Missing file '%s' for '%s'", this.Model, this.Name);
+					}
+				}
+				while(kv.GotoNextKey(false));
+
+				kv.GoBack();
+			}
+
+			kv.GoBack();
+		}
+
+		if(!TranslationPhraseExists(this.Name))
+		{
+			LogError("[Config] Missing translation for '%s'", this.Name);
+			strcopy(this.Name, sizeof(this.Name), "Weapon Stripped");
+		}
+
+		this.Skin = kv.GetNum("skin", 255);
+		kv.GetString("model", this.Model, sizeof(this.Model));
+		if(this.Model[0])
+			PrecacheModel(this.Model);
+	}
+}
+
+enum struct ItemInfo
+{
+	int Index;
+	int Type;
+
+	int Common;
+	char Model[PLATFORM_MAX_PATH];
+
+	void SetupKv(KeyValues kv)
+	{
+		this.Common = kv.GetNum("common", 1);
+		kv.GetString("model", this.Model, sizeof(this.Model));
+		if(this.Model[0])
+			PrecacheModel(this.Model);
+	}
+}
+
+static ArrayList ActionList;
+static ArrayList ItemList;
+static StringMap CompatList;
+static ArrayList TypeList;
+
+void Items_SetupConfig(KeyValues map)
+{
+	delete ActionList;
+	ActionList = new ArrayList(sizeof(ActionInfo));
+
+	delete ItemList;
+	ItemList = new ArrayList(sizeof(ItemInfo));
+
+	delete CompatList;
+	CompatList = new StringMap();
+
+	delete TypeList;
+	TypeList = new ArrayList(ByteCountToCells(32));
+	
+	KeyValues kv;
+
+	if(map)
+	{
+		map.Rewind();
+		if(map.JumpToKey("Items"))
+			kv.Import(map);
+	}
+
+	char buffer1[PLATFORM_MAX_PATH], buffer2[32];
+	
+	if(!kv)
+	{
+		BuildPath(Path_SM, buffer1, sizeof(buffer1), CONFIG_CFG, "items");
+		kv = new KeyValues("Items");
+		kv.ImportFromFile(buffer1);
+	}
+
+	ItemInfo item;
+
+	if(kv.JumpToKey("Groups"))
+	{
+		if(kv.GotoFirstSubKey())
+		{
+			do
+			{
+				kv.GetSectionName(buffer2, sizeof(buffer2));
+				item.Type = TypeList.PushString(buffer2);
+
+				if(kv.GotoFirstSubKey())
+				{
+					do
+					{
+						kv.GetSectionName(buffer2, sizeof(buffer2));
+						item.Index = StringToInt(buffer2);
+
+						item.SetupKv(kv);
+						ItemList.PushArray(item);
+					}
+					while(kv.GotoNextKey());
+					
+					kv.GoBack();
+				}
+			}
+			while(kv.GotoNextKey());
+
+			kv.GoBack();
+		}
+
+		kv.GoBack();
+	}
+
+	ActionInfo action;
+
+	if(kv.JumpToKey("Consumables"))
+	{
+		if(kv.GotoFirstSubKey())
+		{
+			do
+			{
+				action.SetupKv(kv);
+				ActionList.PushArray(action);
+			}
+			while(kv.GotoNextKey());
+
+			kv.GoBack();
+		}
+
+		kv.GoBack();
+	}
+
+	if(kv.JumpToKey("Compact"))
+	{
+		if(kv.GotoFirstSubKey(false))
+		{
+			do
+			{
+				kv.GetSectionName(buffer1, sizeof(buffer1));
+				kv.GetString(NULL_STRING, buffer2, sizeof(buffer2));
+				CompatList.SetString(buffer1, buffer2);
+			}
+			while(kv.GotoNextKey(false));
+
+			kv.GoBack();
+		}
+
+		kv.GoBack();
+	}
+
+	if(kv != map)
+		delete kv;
+}
+
+void Items_RoundStart()
+{
+	// 100% at 32 players
+	float chance = 0.4 + (MaxPlayersAlive[TFTeam_Humans] * 0.01875);
+
+	int index;
+	char buffer[PLATFORM_MAX_PATH], type[32];
+	ItemInfo item;
+
+	int entity = -1;
+	while((entity=FindEntityByClassname(entity, "prop_dynamic*")) != -1)
+	{
+		int extra;
+		GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
+		if(StrContains(buffer, "_rand_", false) == 3)
+		{
+			if(GetRandomFloat() > chance)
+			{
+				RemoveEntity(entity);
+				continue;
+			}
+
+			index = 9;
+		}
+		else if(StrContains(buffer, "_item_", false) == 3)
+		{
+			index = 9;
+		}
+		else if(StrContains(buffer, "_weapon", false) == 3)
+		{
+			index = 11;
+		}
+		else if(StrContains(buffer, "_keycard_", false) == 3)
+		{
+			index = 12;
+			extra = 1;
+		}
+		else if(StrContains(buffer, "_healthkit", false) == 3)
+		{
+			index = 14;
+		}
+		else
+		{
+			continue;
+		}
+
+		if(strlen(buffer) > index)
+		{
+			strcopy(type, sizeof(type), buffer[index]);
+			int end = FindCharInString(type, '_');
+			if(end != -1)
+				type[end] = '\0';
+			
+			switch(extra)
+			{
+				case 1:
+					IntToString(StringToInt(type) + 30000, type, sizeof(type));
+			}
+		}
+		else
+		{
+			strcopy(type, sizeof(type), "common");
+		}
+		
+		if(CompatList.ContainsKey(type))
+			CompatList.GetString(type, type, sizeof(type));
+		
+		int typeIndex = TypeList.FindString(type);
+		
+		if(typeIndex == -1)
+		{
+			index = StringToInt(type);
+
+			index = GetItemDataOfIndex(index, _, item);
+			if(index == -1)
+			{
+				LogError("[Map] Unknown item index '%s' for '%s'", type, buffer);
+				RemoveEntity(entity);
+				continue;
+			}
+		}
+		else
+		{
+			index = GetItemDataOfType(typeIndex, item);
+			if(index == -1)
+			{
+				LogError("[Config] Item group '%s' has no valid entries", type);
+				RemoveEntity(entity);
+				continue;
+			}
+		}
+		
+		if(item.Model[0])
+			SetEntityModel(entity, item.Model);
+		
+		FormatEx(buffer, sizeof(buffer), "scp_item_%d", item.Index);
+		SetEntPropString(entity, Prop_Data, "m_iGlobalname", buffer);
+	}
+}
+
+// Gets a random item based on it's type
+static int GetItemDataOfType(int type, ItemInfo item)
+{
+	ArrayList list = new ArrayList();
+
+	int length = ItemList.Length;
+	for(int i; i < length; i++)
+	{
+		ItemList.GetArray(i, item);
+		if(item.Type == type)
+		{
+			for(int b; b < item.Common; b++)
+			{
+				list.Push(i);
+			}
+		}
+	}
+
+	length = list.Length;
+	if(length)
+	{
+		length = list.Get(GetURandomInt() % length);
+		ItemList.GetArray(length, item);
+	}
+	else
+	{
+		length = -1;
+	}
+
+	delete list;
+	return length;
+}
+
+// Gets the item based on it's index and type
+static int GetItemDataOfIndex(int index, int type = -1, ItemInfo item)
+{
+	int length = ItemList.Length;
+	for(int i; i < length; i++)
+	{
+		ItemList.GetArray(i, item);
+		if(item.Index == index)
+		{
+			if(type == -1 || item.Type == type)
+				return i;
+		}
+	}
+
+	return -1;
+}
+
+// Gets the action based on it's index
+static int GetActionDataOfIndex(int index, ActionInfo action)
+{
+	int length = ActionList.Length;
+	for(int i; i < length; i++)
+	{
+		ActionList.GetArray(i, action);
+		if(action.Index == index)
+			return i;
+	}
+
+	return -1;
+}
+
+// Gives a new weapon to the player given a index
+int Items_GiveByIndex(int client, int index, bool forceAsWeapon = false)
+{
+	char classname[64];
+	ActionInfo action;
+	bool isAction = GetActionDataOfIndex(index, action) != -1;
+
+	// Check if this index is an action
+	if(isAction)
+	{
+		if(!forceAsWeapon)
+		{
+			// TODO: Give action item
+			return -1;
+		}
+
+		strcopy(classname, sizeof(classname), "tf_weapon_shovel");
+	}
+	else
+	{
+		TF2Econ_GetItemClassName(index, classname, sizeof(classname));
+	}
+	
+	// Don't bother with wearables or builders
+	if(StrContains(classname, "tf_weapon", false) == -1 || StrContains(classname, "tf_weapon_builder", false) != -1 || StrContains(classname, "tf_weapon_sapper", false) != -1)
+		return -1;
+
+	// Force to soldier shotgun
+	if(StrContains(classname, "tf_weapon_shotgun", false) != -1)
+		strcopy(classname, sizeof(classname), "tf_weapon_shotgun_soldier");
+
+	// Force to soldier shovel
+	if(StrContains(classname, "saxxy", false) != -1)
+		strcopy(classname, sizeof(classname), "tf_weapon_shovel");
+
+	int entity = CreateEntityByName(classname);
+	if(entity != -1)
+	{
+		SetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex", index);
+		SetEntProp(entity, Prop_Send, "m_bInitialized", true);
+		SetEntProp(entity, Prop_Send, "m_iEntityQuality", 6);
+		SetEntProp(entity, Prop_Send, "m_iEntityLevel", 1);
+
+		DispatchSpawn(entity);
+
+		if(isAction && action.Model[0])
+			SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", PrecacheModel(action.Model));
+		
+		if(isAction && action.Skin)
+			SetEntityRenderColor(entity, _, _, _, action.Skin);
+		
+		// Drop anything in our current slot
+		if(!isAction)
+		{
+			int slot = TF2_GetClassnameSlot(classname);
+			if(slot != -1)
+			{
+				slot = GetPlayerWeaponSlot(client, slot);
+				if(slot != -1)
+				{
+					float pos[3], ang[3];
+					GetClientEyePosition(client, pos);
+					GetClientEyeAngles(client, ang);
+					Items_DropByEntity(client, slot, pos, ang, false);
+				}
+			}
+		}
+
+		SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", true);
+		EquipPlayerWeapon(client, entity);
+
+		if(!isAction)
+			TF2U_SetPlayerActiveWeapon(client, entity);
+	}
+
+	return entity;
+}
+
+// Drops a new weapon from the player given a index
+bool Items_DropByIndex(int client, int index, const float origin[3], const float angles[3], bool death)
+{
+	int entity = Items_GiveByIndex(client, index, true);
+	if(entity == -1)
+		return false;
+	
+	bool result = Items_DropByEntity(client, entity, origin, angles, death);
+
+	if(!result)
+		TF2_RemoveItem(client, entity);
+	
+	return result;
+}
+
+// Drops and removes a weapon from the player
+bool Items_DropByEntity(int client, int helditem, const float origin[3], const float angles[3], bool death)
+{
+	char buffer[PLATFORM_MAX_PATH];
+	GetEntityNetClass(helditem, buffer, sizeof(buffer));
+	int offset = FindSendPropInfo(buffer, "m_Item");
+	if(offset < 0)
+	{
+		LogError("Failed to find m_Item on: %s", buffer);
+		return false;
+	}
+
+	int index = GetEntProp(helditem, Prop_Send, HasEntProp(helditem, Prop_Send, "m_iWorldModelIndex") ? "m_iWorldModelIndex" : "m_nModelIndex");
+	if(index < 1)
+		return false;
+
+	ModelIndexToString(index, buffer, sizeof(buffer));
+
+	//Dropped weapon doesn't like being spawn high in air, create on ground then teleport back after DispatchSpawn
+	TR_TraceRayFilter(origin, view_as<float>({90.0, 0.0, 0.0}), MASK_SOLID, RayType_Infinite, Trace_OnlyHitWorld);
+	if(!TR_DidHit())	//Outside of map
+		return false;
+
+	float spawn[3];
+	TR_GetEndPosition(spawn);
+
+	// CTFDroppedWeapon::Create deletes tf_dropped_weapon if there too many in map, pretend entity is marking for deletion so it doesnt actually get deleted
+	ArrayList list = new ArrayList();
+	int entity = MaxClients+1;
+	while((entity=FindEntityByClassname(entity, "tf_dropped_weapon")) > MaxClients)
+	{
+		int flags = GetEntProp(entity, Prop_Data, "m_iEFlags");
+		if(flags & EFL_KILLME)
+			continue;
+
+		SetEntProp(entity, Prop_Data, "m_iEFlags", flags|EFL_KILLME);
+		list.Push(entity);
+	}
+
+	//Pass client as NULL, only used for deleting existing dropped weapon which we do not want to happen
+	entity = SDKCall_CreateDroppedWeapon(-1, spawn, angles, buffer, GetEntityAddress(helditem)+view_as<Address>(offset));
+
+	offset = list.Length;
+	for(int i; i<offset; i++)
+	{
+		int ent = list.Get(i);
+		int flags = GetEntProp(ent, Prop_Data, "m_iEFlags");
+		flags = flags &= ~EFL_KILLME;
+		SetEntProp(ent, Prop_Data, "m_iEFlags", flags);
+	}
+
+	delete list;
+
+	bool result;
+	if(entity != INVALID_ENT_REFERENCE)
+	{
+		DispatchSpawn(entity);
+
+		//Check if weapon is not marked for deletion after spawn, otherwise we may get bad physics model leading to a crash
+		if(GetEntProp(entity, Prop_Data, "m_iEFlags") & EFL_KILLME)
+		{
+			LogError("Unable to create dropped weapon with model '%s'", buffer);
+		}
+		else
+		{
+			SDKCall_InitDroppedWeapon(entity, client, helditem, !death, death);
+
+			bool wasActive = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon") == helditem;
+
+			int r, g, b, a;
+			GetEntityRenderColor(helditem, r, g, b, a);
+			SetEntityRenderColor(entity, r, g, b, a);
+
+			TF2_RemoveItem(client, helditem);
+
+			if(wasActive && !death)
+			{
+				int melee = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+				if(melee != -1)
+					TF2U_SetPlayerActiveWeapon(client, melee);
+			}
+
+			// throw the item, if specified
+			float vel[3];
+			
+			if(death)
+			{
+				vel[0] = float(GetRandomInt(-100, 100));
+				vel[1] = float(GetRandomInt(-100, 100));
+				vel[2] = float(GetRandomInt(25, 100));
+			}
+
+			TeleportEntity(entity, origin, NULL_VECTOR, vel);
+			result = true;
+			
+			// Add dropped weapon to list, ordered by time created
+			static ArrayList droppedweapons;
+			if(!droppedweapons)
+				droppedweapons = new ArrayList();
+			
+			droppedweapons.Push(EntIndexToEntRef(entity));
+			int length = droppedweapons.Length;
+			for(int i = length - 1; i >= 0; i--)
+			{
+				// Clean up any ents that were already removed
+				if(!IsValidEntity(droppedweapons.Get(i)))
+					droppedweapons.Erase(i);
+			}
+			
+			// If there are too many dropped weapon, remove some ordered by time created
+			length = droppedweapons.Length;
+			while(length > 99)
+			{
+				RemoveEntity(droppedweapons.Get(0));
+				droppedweapons.Erase(0);
+				length--;
+			}
+		}
+	}
+
+	return result;
+}
