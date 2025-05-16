@@ -41,6 +41,13 @@ static Action Events_BroadcastAudio(Event event, const char[] name, bool dontBro
 
 static void Events_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
+	int userid = event.GetInt("userid");
+	int client = GetClientOfUserId(userid);
+	if(client)
+	{
+		Human_PlayerSpawn(client);
+	}
+
 	Gamemode_CheckAlivePlayers();
 }
 

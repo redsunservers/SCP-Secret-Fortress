@@ -14,11 +14,11 @@
 	}
 	"Control Progress 1"
 	{
-		"en"	"%+reload% INTERACT\n%+attack3% SPRINT\n%+inpsect% FLASHLIGHT"
+		"en"	"%+reload% INTERACT %+attack3% SPRINT %+inpsect% FLASHLIGHT"
 	}
 	"Control Progress 2"
 	{
-		"en"	"%+use_action_slot_item% USE CONSUMABLE\n%dropitem% DROP ITEM"
+		"en"	"%+use_action_slot_item% USE ACTION ITEM %dropitem% DROP ITEM"
 	}
 	"Weapon Stripped"
 	{
@@ -33,9 +33,9 @@
 	{
 		"en"	"N/A"
 	}
-	"Action Status"
+	"Keycard Status"
 	{
-		"#format"	"{1:d},{2:d},{2:d}"
+		"#format"	"{1:d},{2:d},{3:d}"
 		"en"		"Containment Level: {1}\nArmory Level: {2}\nCheckpoint Level: {3}"
 	}
 }

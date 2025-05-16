@@ -17,9 +17,6 @@ void DHook_PluginStart()
 	
 	CreateDetour(gamedata, "CTFPlayer::DropAmmoPack", DHook_DropAmmoPackPre);
 
-	if(CreateDetour(gamedata, "CTFPlayer::CanPickupDroppedWeapon", DHook_CanPickupDroppedWeaponPre, .error = false) == null)
-		CreateDetour(gamedata, "CTFPlayer::CanPickupDroppedWeapon.part.0", DHook_CanPickupDroppedWeaponPreAlt);
-	
 	ForceRespawn = CreateHook(gamedata, "CBasePlayer::ForceRespawn");
 	
 	delete gamedata;
@@ -46,7 +43,7 @@ static DynamicDetour CreateDetour(GameData gamedata, const char[] name, DHookCal
 			LogError("[Gamedata] Failed to enable post detour: %s", name);
 		
 		if(!reference)
-			delete detour;
+			CloseHandle(detour);
 	}
 	else if(error)
 	{
@@ -87,7 +84,7 @@ Address DHook_GetLagCompensationManager()
 {
 	return CLagCompensationManager;
 }
-
+/*
 static MRESReturn DHook_CanPickupDroppedWeaponPre(int client, DHookReturn ret, DHookParam param)
 {
 	//int weapon = param.Get(1);
@@ -106,7 +103,7 @@ static MRESReturn CanPickupDroppedWeapon(int client, DHookReturn ret)
 	ret.Value = !(Client(client).Minion || Client(client).IsBoss);
 	return MRES_Supercede;
 }
-
+*/
 static MRESReturn DHook_DropAmmoPackPre(int client, DHookParam param)
 {
 	return MRES_Supercede;

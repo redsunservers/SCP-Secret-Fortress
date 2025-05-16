@@ -218,6 +218,8 @@ int MaxPlayersAlive[TFTeam_MAX];
 #include "scpm/bosses/default.sp"
 #include "scpm/bosses/scp173.sp"
 
+#include "scpm/items/keycards.sp"
+
 public Plugin myinfo =
 {
 	name		=	"SCP: Mercenaries",
@@ -250,13 +252,17 @@ public void OnPluginStart()
 	TF2U_PluginStart();
 	SDKCall_PluginStart();
 	SDKHook_PluginStart();
-	VScript_PluginStart();
 
 	for(int i = 1; i <= MaxClients; i++)
 	{
 		if(IsClientInGame(i))
 			OnClientPutInServer(i);
 	}
+}
+
+public void OnAllPluginsLoaded()
+{
+	VScript_AllPluginsLoaded();
 }
 
 public void OnPluginEnd()

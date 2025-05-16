@@ -10,6 +10,7 @@ static Handle SDKInitWeapon;
 static Handle SDKInitPickup;
 //static Handle SDKGetMaxAmmo;
 static Handle SDKSetSpeed;
+static Handle SDKGiveNamedItem;
 
 void SDKCall_PluginStart()
 {
@@ -75,7 +76,7 @@ void SDKCall_PluginStart()
 	SDKInitWeapon = EndPrepSDKCall();
 	if(!SDKInitWeapon)
 		LogError("[Gamedata] Could not find CTFDroppedWeapon::InitDroppedWeapon");
-
+	
 	StartPrepSDKCall(SDKCall_Entity);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFDroppedWeapon::InitPickedUpWeapon");
 	PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer);
@@ -83,6 +84,17 @@ void SDKCall_PluginStart()
 	SDKInitPickup = EndPrepSDKCall();
 	if(!SDKInitPickup)
 		LogError("[Gamedata] Could not find CTFDroppedWeapon::InitPickedUpWeapon");
+
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::TeamFortress_SetSpeed");
+	SDKSetSpeed = EndPrepSDKCall();
+	if(!SDKSetSpeed)
+		LogError("[Gamedata] Could not find CTFPlayer::TeamFortress_SetSpeed");
+	
+	delete gamedata;
+
+
+	gamedata = new GameData("randomizer");
 	
 	//StartPrepSDKCall(SDKCall_Entity);
 	//PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::GetMaxAmmo");
@@ -92,12 +104,17 @@ void SDKCall_PluginStart()
 	//SDKGetMaxAmmo = EndPrepSDKCall();
 	//if(!SDKGetMaxAmmo)
 	//	LogError("[Gamedata] Could not find CTFPlayer::GetMaxAmmo");
-
-	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::TeamFortress_SetSpeed");
-	SDKSetSpeed = EndPrepSDKCall();
-	if(!SDKSetSpeed)
-		LogError("[Gamedata] Could not find CTFPlayer::TeamFortress_SetSpeed");
+	
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTFPlayer::GiveNamedItem");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	SDKGiveNamedItem = EndPrepSDKCall();
+	if(!SDKGiveNamedItem)
+		LogError("[Gamedata] Could not find CTFPlayer::GiveNamedItem");
 	
 	delete gamedata;
 }
@@ -140,6 +157,11 @@ int SDKCall_GetMaxAmmo(int client, int type, int class = -1)
 int SDKCall_GetMaxHealth(int client)
 {
 	return SDKGetMaxHealth ? SDKCall(SDKGetMaxHealth, client) : GetEntProp(client, Prop_Data, "m_iMaxHealth");
+}
+
+int SDKCall_GiveNamedItem(int client, const char[] classname, int subType, Address item, bool force)
+{
+	return SDKCall(SDKGiveNamedItem, client, classname, subType, item, force);
 }
 
 void SDKCall_InitDroppedWeapon(int droppedWeapon, int client, int fromWeapon, bool swap, bool sewerslide)

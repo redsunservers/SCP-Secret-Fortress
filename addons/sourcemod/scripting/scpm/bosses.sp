@@ -6,14 +6,14 @@ enum struct BossData
 	char Prefix[32];
 	Handle Subplugin;
 
-	bool SetupKv(KeyValues kv)
+	bool SetupKv(KeyValues kv, int index)
 	{
 		kv.GetSectionName(this.Prefix, sizeof(this.Prefix));
 		this.Subplugin = INVALID_HANDLE;
 
 		if(!TranslationPhraseExists(this.Prefix))
 		{
-			LogError("[Config] Boss '%s' has no translations");
+			LogError("[Config] Boss '%s' has no translations", this.Prefix);
 			return false;
 		}
 
@@ -23,6 +23,7 @@ enum struct BossData
 			return false;
 		}
 
+		Call_PushCell(index);
 		Call_PushArrayEx(this, sizeof(BossData), SM_PARAM_COPYBACK);
 		Call_Finish();
 		return true;
@@ -158,6 +159,8 @@ void Bosses_SetupConfig(KeyValues map)
 
 		if(kv.GotoFirstSubKey(false))
 		{
+			int index;
+
 			do
 			{
 				count--;
@@ -168,10 +171,10 @@ void Bosses_SetupConfig(KeyValues map)
 						continue;
 				}
 				
-				if(data.SetupKv(kv))
+				if(data.SetupKv(kv, index))
 				{
 					slots--;
-					BossList.PushArray(data);
+					index = BossList.PushArray(data) + 1;
 				}
 			}
 			while(kv.GotoNextKey(false));
@@ -286,7 +289,10 @@ void Bosses_Create(int client, int index)
 	}
 
 	if(IsPlayerAlive(client))
+	{
 		TF2_RegeneratePlayer(client);
+		Bosses_PlayerSpawn(client);
+	}
 }
 
 // Removes a player as a boss
@@ -330,6 +336,15 @@ void Bosses_ClientDisconnect(int client)
 			Call_PushCell(client);
 			Call_Finish();
 		}
+	}
+}
+
+void Bosses_PlayerSpawn(int client)
+{
+	if(Bosses_StartFunctionClient(client, "Spawn"))
+	{
+		Call_PushCell(client);
+		Call_Finish();
 	}
 }
 

@@ -102,6 +102,42 @@ void Human_ClientDisconnect(int client)
 	}
 }
 
+void Human_PlayerSpawn(int client)
+{
+	if(!Client(client).IsBoss && !Client(client).Minion && IsPlayerAlive(client))
+	{
+		int team = GetClientTeam(client);
+		if(team > TFTeam_Spectator)
+		{
+			ArrayList list = new ArrayList();
+
+			int entity = -1;
+			char name[32];
+			while((entity=FindEntityByClassname(entity, "info_target")) != -1)
+			{
+				GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
+				if(!StrContains(name, team == TFTeam_Humans ? "scp_spawn_d" : "scp_spawn_s", false))
+					list.Push(entity);
+			}
+
+			int length = list.Length;
+			if(length)
+			{
+				entity = list.Get(GetRandomInt(0, length-1));
+
+				float pos[3], ang[3];
+				GetEntPropVector(entity, Prop_Data, "m_vecAbsOrigin", pos);
+				GetEntPropVector(entity, Prop_Data, "m_vecAbsOrigin", ang);
+				ang[0] = 0.0;
+				ang[2] = 0.0;
+				TeleportEntity(client, pos, ang, NULL_VECTOR);
+			}
+
+			delete list;
+		}
+	}
+}
+
 void Human_InventoryApplication(int client)
 {
 	Client(client).LightPower = 100.0;
@@ -112,9 +148,9 @@ void Human_InventoryApplication(int client)
 	int hud;
 	if(!Client(client).IsBoss && !Client(client).Minion)
 	{
-		hud = HIDEHUD_HEALTH|HIDEHUD_TARGET_ID;
-		if(!Client(client).Escaped)
-			hud += HIDEHUD_BUILDING_STATUS|HIDEHUD_CLOAK_AND_FEIGN|HIDEHUD_PIPES_AND_CHARGE|HIDEHUD_METAL;
+		//hud = HIDEHUD_HEALTH|HIDEHUD_TARGET_ID;
+		//if(!Client(client).Escaped)
+		//	hud += HIDEHUD_BUILDING_STATUS|HIDEHUD_CLOAK_AND_FEIGN|HIDEHUD_PIPES_AND_CHARGE|HIDEHUD_METAL;
 	}
 	
 	SetEntProp(client, Prop_Send, "m_iHideHUD", hud);
@@ -138,10 +174,10 @@ void Human_ToggleFlashlight(int client)
 		return;
 	
 	int effects = GetEntProp(client, Prop_Send, "m_fEffects");
-	if(effects & EF_BRIGHTLIGHT)
+	if(effects & EF_DIMLIGHT)
 	{
-		ClientCommand(client, "items/flashlight1.wav");
-		SetEntProp(client, Prop_Send, "m_fEffects", effects & ~EF_BRIGHTLIGHT);
+		ClientCommand(client, "playgamesound items/flashlight1.wav");
+		SetEntProp(client, Prop_Send, "m_fEffects", effects & ~EF_DIMLIGHT);
 		
 		if(IsValidEntity(FlashlightRef[client]))
 		{
@@ -152,8 +188,8 @@ void Human_ToggleFlashlight(int client)
 	}
 	else
 	{
-		ClientCommand(client, "items/flashlight1.wav");
-		SetEntProp(client, Prop_Send, "m_fEffects", effects | EF_BRIGHTLIGHT);
+		ClientCommand(client, "playgamesound items/flashlight1.wav");
+		SetEntProp(client, Prop_Send, "m_fEffects", effects | EF_DIMLIGHT);
 		
 		if(!ImpulseFlashlight[client] && !IsValidEntity(FlashlightRef[client]))
 		{
@@ -237,13 +273,13 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 		}
 
 		// Flashlight Logic
-		if(effects & EF_BRIGHTLIGHT)
+		if(effects & EF_DIMLIGHT)
 		{
 			Client(client).LightPower -= delta;
 			if(Client(client).LightPower < 0.5)
 			{
 				ClientCommand(client, "playgamesound ambient/energy/spark6.wav");
-				SetEntProp(client, Prop_Send, "m_fEffects", effects & ~EF_BRIGHTLIGHT);
+				SetEntProp(client, Prop_Send, "m_fEffects", effects & ~EF_DIMLIGHT);
 				
 				if(IsValidEntity(FlashlightRef[client]))
 				{
@@ -264,7 +300,8 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 				Client(client).LightPower = 100.0;
 		}
 
-		static float updateTime[MAXPLAYERS+1][2];
+		static char buffer[256];
+		static float updateTime[MAXPLAYERS+1][3];
 		if(FAbs(updateTime[client][0] - gameTime) > 0.2)
 		{
 			updateTime[client][0] = gameTime;
@@ -272,7 +309,6 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 			if(GameRules_GetRoundState() != RoundState_RoundRunning)
 				return;
 			
-			static char buffer[256];
 			int stress = 999;
 			int health = GetClientHealth(client);
 			int maxhealth = SDKCall_GetMaxHealth(client);
@@ -374,7 +410,6 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 				return;
 			
 			SetGlobalTransTarget(client);
-			static char buffer[256];
 
 			// Action Item
 			Format(buffer, sizeof(buffer), "%t", "Action Item", "NaN");
@@ -384,6 +419,27 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 
 			SetHudTextParams(0.8, 0.79, 0.3, 255, 255, 255, 255);
 			ShowSyncHudText(client, ActionHud, buffer);
+		}
+		else if(Client(client).ControlProgress < 2 && FAbs(updateTime[client][2] - gameTime) > 0.5)
+		{
+			updateTime[client][2] = gameTime;
+
+			if(GameRules_GetRoundState() != RoundState_RoundRunning)
+				return;
+			
+			if(Client(client).ControlProgress)
+			{
+				if(Client(client).ActionItem != -1)
+				{
+					Format(buffer, sizeof(buffer), "%T", "Control Progress 2", client);
+					PrintKeyHintText(client, buffer);
+				}
+			}
+			else
+			{
+				Format(buffer, sizeof(buffer), "%T", "Control Progress 1", client);
+				PrintKeyHintText(client, buffer);
+			}
 		}
 	}
 }
@@ -403,7 +459,8 @@ void Human_PlayerDeath(int client)
 		Items_DropByEntity(client, entity, pos, ang, true);
 	}
 
-	// TODO: Action & Keycard Drops
+	Items_DropActionItem(client, true);
+	Keycard_DropBestMatch(client, true);
 }
 
 void Human_ConditionAdded(int client, TFCond cond)
@@ -441,10 +498,11 @@ void Human_Interact(int client, int entity)
 	GetEntityClassname(entity, buffer, sizeof(buffer));
 	if(StrEqual(buffer, "tf_dropped_weapon"))
 	{
-		/*if(Items_Pickup(client, GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"), entity))
-		{
-			AcceptEntityInput(entity, "Kill");
-		}*/
+		Items_GiveByEntity(client, entity);
+		AcceptEntityInput(entity, "Kill");
+
+		if(!Client(client).ControlProgress)
+			Client(client).ControlProgress = 1;
 	}
 	else if(!StrContains(buffer, "prop_dynamic") || !StrContains(buffer, "prop_physics"))
 	{
@@ -457,6 +515,9 @@ void Human_Interact(int client, int entity)
 
 			AcceptEntityInput(entity, "FireUser2", client, client);
 			AcceptEntityInput(entity, "KillHierarchy");
+			
+			if(!Client(client).ControlProgress)
+				Client(client).ControlProgress = 1;
 		}
 	}
 }

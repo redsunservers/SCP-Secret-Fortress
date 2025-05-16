@@ -15,8 +15,8 @@
 	- (SCP 1) Exit 0 -> 1
 	- (SCP 1) SCP 1 -> 2
 	- (Armory 1) Armory 1 -> 2
-	- (SCP 3 or Armory 3) Exit 1 -> 2
 	- (SCP 2) SCP 2 -> 3
+	- (SCP 3 or Armory 3) Exit 1 -> 2
 	- (Armory 2) Armory 2 -> 3
 	- (SCP 3) Armory 0 -> 1
 
@@ -130,7 +130,6 @@ static Action GlobalBlinkTimer(Handle timer)
 	bf.WriteByte(0);
 	bf.WriteByte(255);
 	EndMessage();
-	delete bf;
 
 	return Plugin_Continue;
 }

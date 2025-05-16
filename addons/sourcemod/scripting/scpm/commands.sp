@@ -51,8 +51,8 @@ public Action OnClientCommandKeyValues(int client, KeyValues kv)
 		}
 		else if(StrEqual(buffer, "+use_action_slot_item_server", false))
 		{
-			//Human_UseConsumable(client);
-			return Plugin_Handled;
+			Items_UseActionItem(client);
+			return Plugin_Handled;	// Block normal weapon pickups
 		}
 	}
 	return Plugin_Continue;

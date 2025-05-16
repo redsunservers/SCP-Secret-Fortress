@@ -174,6 +174,14 @@ void PrintSayText2(int client, int author, bool chat = true, const char[] messag
 	EndMessage();
 }
 
+void PrintKeyHintText(int client, const char[] message)
+{
+	BfWrite bf = view_as<BfWrite>(StartMessageOne("KeyHintText", client));
+	bf.WriteByte(1);
+	bf.WriteString(message);
+	EndMessage();
+}
+
 int GetClientPointVisible(int client, float distance = 100.0)
 {
 	float pos[3], vec[3];

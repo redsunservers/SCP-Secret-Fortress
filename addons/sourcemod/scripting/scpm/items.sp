@@ -4,14 +4,32 @@
 enum struct ActionInfo
 {
 	int Index;
-	char Name[64];
+	char Prefix[32];
+	Handle Subplugin;
 
 	char Model[PLATFORM_MAX_PATH];
 	int Skin;
 
-	void SetupKv(KeyValues kv)
+	bool SetupKv(KeyValues kv, int index)
 	{
-		kv.GetSectionName(this.Name, sizeof(this.Name));
+		kv.GetSectionName(this.Prefix, sizeof(this.Prefix));
+		this.Index = StringToInt(this.Prefix);
+		this.Subplugin = INVALID_HANDLE;
+
+		kv.GetString("name", this.Prefix, sizeof(this.Prefix), this.Prefix);
+
+		if(!TranslationPhraseExists(this.Prefix))
+		{
+			LogError("[Config] Item '%s' has no translations", this.Prefix);
+			return false;
+		}
+
+		if(StartItemFunction(this.Subplugin, this.Prefix, "Precache"))
+		{
+			Call_PushCell(index);
+			Call_PushArrayEx(this, sizeof(this), SM_PARAM_COPYBACK);
+			Call_Finish();
+		}
 
 		if(kv.JumpToKey("Downloads"))
 		{
@@ -27,7 +45,7 @@ enum struct ActionInfo
 					}
 					else
 					{
-						LogError("[Config] Missing file '%s' for '%s'", this.Model, this.Name);
+						LogError("[Config] Missing file '%s' for '%s'", this.Model, this.Prefix);
 					}
 				}
 				while(kv.GotoNextKey(false));
@@ -38,16 +56,12 @@ enum struct ActionInfo
 			kv.GoBack();
 		}
 
-		if(!TranslationPhraseExists(this.Name))
-		{
-			LogError("[Config] Missing translation for '%s'", this.Name);
-			strcopy(this.Name, sizeof(this.Name), "Weapon Stripped");
-		}
-
 		this.Skin = kv.GetNum("skin", 255);
 		kv.GetString("model", this.Model, sizeof(this.Model));
 		if(this.Model[0])
 			PrecacheModel(this.Model);
+		
+		return true;
 	}
 }
 
@@ -140,6 +154,7 @@ void Items_SetupConfig(KeyValues map)
 	}
 
 	ActionInfo action;
+	int index;
 
 	if(kv.JumpToKey("Consumables"))
 	{
@@ -147,8 +162,10 @@ void Items_SetupConfig(KeyValues map)
 		{
 			do
 			{
-				action.SetupKv(kv);
-				ActionList.PushArray(action);
+				if(action.SetupKv(kv, index))
+				{
+					index = ActionList.PushArray(action) + 1;
+				}
 			}
 			while(kv.GotoNextKey());
 
@@ -314,13 +331,13 @@ static int GetItemDataOfType(int type, ItemInfo item)
 }
 
 // Gets the item based on it's index and type
-static int GetItemDataOfIndex(int index, int type = -1, ItemInfo item)
+static int GetItemDataOfIndex(int itemIndex, int type = -1, ItemInfo item)
 {
 	int length = ItemList.Length;
 	for(int i; i < length; i++)
 	{
 		ItemList.GetArray(i, item);
-		if(item.Index == index)
+		if(item.Index == itemIndex)
 		{
 			if(type == -1 || item.Type == type)
 				return i;
@@ -331,13 +348,13 @@ static int GetItemDataOfIndex(int index, int type = -1, ItemInfo item)
 }
 
 // Gets the action based on it's index
-static int GetActionDataOfIndex(int index, ActionInfo action)
+static int GetActionDataOfIndex(int itemIndex, ActionInfo action)
 {
 	int length = ActionList.Length;
 	for(int i; i < length; i++)
 	{
 		ActionList.GetArray(i, action);
-		if(action.Index == index)
+		if(action.Index == itemIndex)
 			return i;
 	}
 
@@ -345,18 +362,18 @@ static int GetActionDataOfIndex(int index, ActionInfo action)
 }
 
 // Gives a new weapon to the player given a index
-int Items_GiveByIndex(int client, int index, bool forceAsWeapon = false)
+int Items_GiveByIndex(int client, int itemIndex, bool forceAsWeapon = false)
 {
 	char classname[64];
 	ActionInfo action;
-	bool isAction = GetActionDataOfIndex(index, action) != -1;
+	bool isAction = GetActionDataOfIndex(itemIndex, action) != -1;
 
 	// Check if this index is an action
 	if(isAction)
 	{
 		if(!forceAsWeapon)
 		{
-			// TODO: Give action item
+			Items_GiveActionItem(client, itemIndex);
 			return -1;
 		}
 
@@ -364,7 +381,7 @@ int Items_GiveByIndex(int client, int index, bool forceAsWeapon = false)
 	}
 	else
 	{
-		TF2Econ_GetItemClassName(index, classname, sizeof(classname));
+		TF2Econ_GetItemClassName(itemIndex, classname, sizeof(classname));
 	}
 	
 	// Don't bother with wearables or builders
@@ -382,7 +399,7 @@ int Items_GiveByIndex(int client, int index, bool forceAsWeapon = false)
 	int entity = CreateEntityByName(classname);
 	if(entity != -1)
 	{
-		SetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex", index);
+		SetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex", itemIndex);
 		SetEntProp(entity, Prop_Send, "m_bInitialized", true);
 		SetEntProp(entity, Prop_Send, "m_iEntityQuality", 6);
 		SetEntProp(entity, Prop_Send, "m_iEntityLevel", 1);
@@ -422,10 +439,51 @@ int Items_GiveByIndex(int client, int index, bool forceAsWeapon = false)
 	return entity;
 }
 
-// Drops a new weapon from the player given a index
-bool Items_DropByIndex(int client, int index, const float origin[3], const float angles[3], bool death)
+// Gives the dropped weapon to the player
+int Items_GiveByEntity(int client, int entity)
 {
-	int entity = Items_GiveByIndex(client, index, true);
+	static Address offsetIndex;
+	if(!offsetIndex)
+		offsetIndex = view_as<Address>(FindSendPropInfo("CTFDroppedWeapon", "m_iItemDefinitionIndex"));
+	
+	int itemIndex = LoadFromAddress(GetEntityAddress(entity) + offsetIndex, NumberType_Int16);
+
+	ActionInfo action;
+	bool isAction = GetActionDataOfIndex(itemIndex, action) != -1;
+
+	// Check if this index is an action
+	if(isAction)
+	{
+		Items_GiveActionItem(client, itemIndex);
+		return -1;
+	}
+	
+	char classname[64];
+	TF2Econ_GetItemClassName(itemIndex, classname, sizeof(classname));
+	
+	// Don't bother with wearables or builders
+	if(StrContains(classname, "tf_weapon", false) == -1 || StrContains(classname, "tf_weapon_builder", false) != -1 || StrContains(classname, "tf_weapon_sapper", false) != -1)
+		return -1;
+
+	// Force to soldier shotgun
+	if(StrContains(classname, "tf_weapon_shotgun", false) != -1)
+		strcopy(classname, sizeof(classname), "tf_weapon_shotgun_soldier");
+
+	// Force to soldier shovel
+	if(StrContains(classname, "saxxy", false) != -1)
+		strcopy(classname, sizeof(classname), "tf_weapon_shovel");
+
+	static Address offsetItem;
+	if(!offsetItem)
+		offsetItem = view_as<Address>(FindSendPropInfo("CTFDroppedWeapon", "m_Item"));
+	
+	return SDKCall_GiveNamedItem(client, classname, 0, GetEntityAddress(entity) + offsetItem, true);
+}
+
+// Drops a new weapon from the player given a index
+bool Items_DropByIndex(int client, int itemIndex, const float origin[3], const float angles[3], bool death)
+{
+	int entity = Items_GiveByIndex(client, itemIndex, true);
 	if(entity == -1)
 		return false;
 	
@@ -440,19 +498,11 @@ bool Items_DropByIndex(int client, int index, const float origin[3], const float
 // Drops and removes a weapon from the player
 bool Items_DropByEntity(int client, int helditem, const float origin[3], const float angles[3], bool death)
 {
-	char buffer[PLATFORM_MAX_PATH];
-	GetEntityNetClass(helditem, buffer, sizeof(buffer));
-	int offset = FindSendPropInfo(buffer, "m_Item");
-	if(offset < 0)
-	{
-		LogError("Failed to find m_Item on: %s", buffer);
-		return false;
-	}
-
 	int index = GetEntProp(helditem, Prop_Send, HasEntProp(helditem, Prop_Send, "m_iWorldModelIndex") ? "m_iWorldModelIndex" : "m_nModelIndex");
 	if(index < 1)
 		return false;
 
+	char buffer[PLATFORM_MAX_PATH];
 	ModelIndexToString(index, buffer, sizeof(buffer));
 
 	//Dropped weapon doesn't like being spawn high in air, create on ground then teleport back after DispatchSpawn
@@ -476,11 +526,15 @@ bool Items_DropByEntity(int client, int helditem, const float origin[3], const f
 		list.Push(entity);
 	}
 
+	static Address offset;
+	if(!offset)
+		offset = view_as<Address>(FindSendPropInfo("CTFWearable", "m_Item"));
+	
 	//Pass client as NULL, only used for deleting existing dropped weapon which we do not want to happen
-	entity = SDKCall_CreateDroppedWeapon(-1, spawn, angles, buffer, GetEntityAddress(helditem)+view_as<Address>(offset));
+	entity = SDKCall_CreateDroppedWeapon(-1, spawn, angles, buffer, GetEntityAddress(helditem) + offset);
 
-	offset = list.Length;
-	for(int i; i<offset; i++)
+	int length = list.Length;
+	for(int i; i<length; i++)
 	{
 		int ent = list.Get(i);
 		int flags = GetEntProp(ent, Prop_Data, "m_iEFlags");
@@ -538,7 +592,7 @@ bool Items_DropByEntity(int client, int helditem, const float origin[3], const f
 				droppedweapons = new ArrayList();
 			
 			droppedweapons.Push(EntIndexToEntRef(entity));
-			int length = droppedweapons.Length;
+			length = droppedweapons.Length;
 			for(int i = length - 1; i >= 0; i--)
 			{
 				// Clean up any ents that were already removed
@@ -558,4 +612,99 @@ bool Items_DropByEntity(int client, int helditem, const float origin[3], const f
 	}
 
 	return result;
+}
+
+void Items_GiveActionItem(int client, int itemIndex)
+{
+	bool result;
+	if(StartItemFunctionByIndex(itemIndex, "Type"))
+	{
+		Call_Finish(result);
+	}
+
+	if(!result)
+	{
+		// Already have an item
+		if(Client(client).ActionItem != -1 && !Items_DropActionItem(client, false))
+		{
+			float pos[3], ang[3];
+			GetClientEyePosition(client, pos);
+			GetClientEyeAngles(client, ang);
+			Items_DropByIndex(client, itemIndex, pos, ang, false);
+			return;
+		}
+		
+		Client(client).ActionItem = itemIndex;
+	}
+
+	if(StartItemFunctionByIndex(itemIndex, "Pickup"))
+	{
+		Call_PushCell(client);
+		Call_Finish();
+	}
+}
+
+bool Items_UseActionItem(int client)
+{
+	if(Client(client).ActionItem == -1)
+		return false;
+	
+	bool result = true;
+	if(StartItemFunctionByIndex(Client(client).ActionItem, "Use"))
+	{
+		Call_PushCell(client);
+		Call_Finish(result);
+	}
+
+	if(result)
+		Client(client).ActionItem = -1;
+	
+	Client(client).ControlProgress = 2;
+	return true;
+}
+
+bool Items_DropActionItem(int client, bool death)
+{
+	if(Client(client).ActionItem == -1)
+		return false;
+	
+	bool result = true;
+	if(StartItemFunctionByIndex(Client(client).ActionItem, "Drop"))
+	{
+		Call_PushCell(client);
+		Call_PushCell(death);
+		Call_Finish(result);
+	}
+
+	if(result)
+	{
+		float pos[3], ang[3];
+		GetClientEyePosition(client, pos);
+		GetClientEyeAngles(client, ang);
+		Items_DropByIndex(client, Client(client).ActionItem, pos, ang, death);
+	}
+	
+	Client(client).ControlProgress = 2;
+	return result;
+}
+
+static bool StartItemFunctionByIndex(int itemIndex, const char[] name)
+{
+	ActionInfo action;
+	if(GetActionDataOfIndex(itemIndex, action) == -1)
+		return false;
+	
+	return StartItemFunction(action.Subplugin, action.Prefix, name);
+}
+
+static bool StartItemFunction(Handle plugin, const char[] prefix, const char[] name)
+{
+	static char buffer[64];
+	Format(buffer, sizeof(buffer), "%s_%s", prefix, name);
+	Function func = GetFunctionByName(plugin, buffer);
+	if(func == INVALID_FUNCTION)
+		return false;
+	
+	Call_StartFunction(plugin, func);
+	return true;
 }

@@ -1,10 +1,11 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+static bool Initialized;
 static Handle SDKGetAttribute;
 static Handle SDKGetCustomAttribute;
 
-void VScript_PluginStart()
+void VScript_AllPluginsLoaded()
 {
 	if(VScript_IsScriptVMInitialized())
 		VScript_OnScriptVMInitialized();
@@ -12,6 +13,11 @@ void VScript_PluginStart()
 
 public void VScript_OnScriptVMInitialized()
 {
+	if(Initialized)
+		return;
+	
+	Initialized = true;
+
 	VScriptFunction func = VScript_GetClassFunction("CEconEntity", "GetAttribute");
 	if(func)
 	{
