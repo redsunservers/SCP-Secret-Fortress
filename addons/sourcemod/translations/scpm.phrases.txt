@@ -14,11 +14,11 @@
 	}
 	"Control Progress 1"
 	{
-		"en"	"%+reload% INTERACT %+attack3% SPRINT %+inpsect% FLASHLIGHT"
+		"en"	"%%+reload%% INTERACT %%+attack3%% SPRINT %%+inpsect%% FLASHLIGHT"
 	}
 	"Control Progress 2"
 	{
-		"en"	"%+use_action_slot_item% USE ACTION ITEM %dropitem% DROP ITEM"
+		"en"	"%%+use_action_slot_item%% USE ACTION ITEM %%dropitem%% DROP ITEM"
 	}
 	"Weapon Stripped"
 	{

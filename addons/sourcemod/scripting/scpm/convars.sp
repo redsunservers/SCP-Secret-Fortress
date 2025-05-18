@@ -151,7 +151,13 @@ void ConVar_Enable()
 			{
 				info.Cvar = FindConVar(info.Name);
 				if(!info.Cvar)
-					SetFailState("Could not find convar '%s'", info.Name);
+				{
+					CvarList.Erase(i);
+					i--;
+					length--;
+					continue;
+					//SetFailState("Could not find convar '%s'", info.Name);
+				}
 			}
 
 			info.Cvar.GetString(info.Defaul, sizeof(info.Defaul));

@@ -396,6 +396,23 @@ int Items_GiveByIndex(int client, int itemIndex, bool forceAsWeapon = false)
 	if(StrContains(classname, "saxxy", false) != -1)
 		strcopy(classname, sizeof(classname), "tf_weapon_shovel");
 
+	// Drop anything in our current slot
+	if(!isAction)
+	{
+		int slot = TF2_GetClassnameSlot(classname);
+		if(slot != -1)
+		{
+			slot = GetPlayerWeaponSlot(client, slot);
+			if(slot != -1)
+			{
+				float pos[3], ang[3];
+				GetClientEyePosition(client, pos);
+				GetClientEyeAngles(client, ang);
+				Items_DropByEntity(client, slot, pos, ang, false);
+			}
+		}
+	}
+
 	int entity = CreateEntityByName(classname);
 	if(entity != -1)
 	{
@@ -411,23 +428,6 @@ int Items_GiveByIndex(int client, int itemIndex, bool forceAsWeapon = false)
 		
 		if(isAction && action.Skin)
 			SetEntityRenderColor(entity, _, _, _, action.Skin);
-		
-		// Drop anything in our current slot
-		if(!isAction)
-		{
-			int slot = TF2_GetClassnameSlot(classname);
-			if(slot != -1)
-			{
-				slot = GetPlayerWeaponSlot(client, slot);
-				if(slot != -1)
-				{
-					float pos[3], ang[3];
-					GetClientEyePosition(client, pos);
-					GetClientEyeAngles(client, ang);
-					Items_DropByEntity(client, slot, pos, ang, false);
-				}
-			}
-		}
 
 		SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", true);
 		EquipPlayerWeapon(client, entity);
@@ -472,12 +472,30 @@ int Items_GiveByEntity(int client, int entity)
 	// Force to soldier shovel
 	if(StrContains(classname, "saxxy", false) != -1)
 		strcopy(classname, sizeof(classname), "tf_weapon_shovel");
+	
+	// Drop anything in our current slot
+	int slot = TF2_GetClassnameSlot(classname);
+	if(slot != -1)
+	{
+		slot = GetPlayerWeaponSlot(client, slot);
+		if(slot != -1)
+		{
+			float pos[3], ang[3];
+			GetClientEyePosition(client, pos);
+			GetClientEyeAngles(client, ang);
+			Items_DropByEntity(client, slot, pos, ang, false);
+		}
+	}
 
 	static Address offsetItem;
 	if(!offsetItem)
 		offsetItem = view_as<Address>(FindSendPropInfo("CTFDroppedWeapon", "m_Item"));
+
+	int weapon = SDKCall_GiveNamedItem(client, classname, 0, GetEntityAddress(entity) + offsetItem, true);
+	if(weapon != -1)
+		EquipPlayerWeapon(client, weapon);
 	
-	return SDKCall_GiveNamedItem(client, classname, 0, GetEntityAddress(entity) + offsetItem, true);
+	return weapon;
 }
 
 // Drops a new weapon from the player given a index

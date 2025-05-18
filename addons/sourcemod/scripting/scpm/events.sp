@@ -16,6 +16,7 @@ void Events_PluginStart()
 
 static void Events_RoundRespawn(Event event, const char[] name, bool dontBroadcast)
 {
+	Music_ToggleRoundMusic(true);
 	Gamemode_RoundRespawn();
 }
 
@@ -46,6 +47,8 @@ static void Events_PlayerSpawn(Event event, const char[] name, bool dontBroadcas
 	if(client)
 	{
 		Human_PlayerSpawn(client);
+		if(GetClientTeam(client) > TFTeam_Spectator)
+			Music_ToggleMusic(client);
 	}
 
 	Gamemode_CheckAlivePlayers();
@@ -102,6 +105,7 @@ static void Events_PlayerDeath(Event event, const char[] name, bool dontBroadcas
 		{
 			Human_PlayerDeath(victim);
 			Bosses_Remove(victim, false);
+			Music_ToggleMusic(victim, false, true);
 			Gamemode_CheckAlivePlayers(victim);
 			Client(victim).ResetByDeath();
 		}

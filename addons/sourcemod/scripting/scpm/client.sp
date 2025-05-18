@@ -15,6 +15,11 @@ static int KeycardContain[MAXPLAYERS+1];
 static int KeycardArmory[MAXPLAYERS+1];
 static int KeycardExit[MAXPLAYERS+1];
 static int ActionItem[MAXPLAYERS+1] = {-1, ...};
+static float AllTalkTimeFor[MAXPLAYERS+1];
+static float LastDangerAt[MAXPLAYERS+1];
+static int LookingAtPos[MAXPLAYERS+1][(MAXPLAYERS+1) / 32];
+static int CanTalkToPos[MAXPLAYERS+1][(MAXPLAYERS+1) / 32];
+static bool SilentTalk[MAXPLAYERS+1];
 
 methodmap Client
 {
@@ -210,6 +215,78 @@ methodmap Client
 			ActionItem[this.Index] = value;
 		}
 	}
+
+	// Game time
+	property float AllTalkTimeFor
+	{
+		public get()
+		{
+			return AllTalkTimeFor[this.Index];
+		}
+		public set(float value)
+		{
+			AllTalkTimeFor[this.Index] = value;
+		}
+	}
+
+	// Game time, set in music.sp
+	property float LastDangerAt
+	{
+		public get()
+		{
+			return LastDangerAt[this.Index];
+		}
+		public set(float value)
+		{
+			LastDangerAt[this.Index] = value;
+		}
+	}
+
+	public bool LookingAt(int target, any value = -1)
+	{
+		int pos = target / 32;
+		int at = target % 32;
+
+		if(value == true)
+		{
+			LookingAtPos[this.Index][pos] |= (1 << at);
+		}
+		else if(value == false)
+		{
+			LookingAtPos[this.Index][pos] &= ~(1 << at);
+		}
+
+		return view_as<bool>(LookingAtPos[this.Index][pos] & (1 << at));
+	}
+
+	public bool CanTalkTo(int target, any value = -1)
+	{
+		int pos = target / 32;
+		int at = target % 32;
+
+		if(value == true)
+		{
+			CanTalkToPos[this.Index][pos] |= (1 << at);
+		}
+		else if(value == false)
+		{
+			CanTalkToPos[this.Index][pos] &= ~(1 << at);
+		}
+
+		return view_as<bool>(CanTalkToPos[this.Index][pos] & (1 << at));
+	}
+
+	property bool SilentTalk
+	{
+		public get()
+		{
+			return SilentTalk[this.Index];
+		}
+		public set(bool value)
+		{
+			SilentTalk[this.Index] = value;
+		}
+	}
 	
 	public void ResetByDeath()
 	{
@@ -224,6 +301,9 @@ methodmap Client
 		this.KeycardArmory = 0;
 		this.KeycardExit = 0;
 		this.ActionItem = -1;
+		this.AllTalkTimeFor = 0.0;
+		this.LastDangerAt = 0.0;
+		this.SilentTalk = false;
 	}
 	
 	public void ResetByRound()

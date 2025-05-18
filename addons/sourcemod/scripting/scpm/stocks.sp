@@ -209,6 +209,27 @@ void ModelIndexToString(int index, char[] model, int size)
 	ReadStringTable(table, index, model, size);
 }
 
+void GetVectorAnglesTwoPoints(const float start[3], const float end[3], float angles[3])
+{
+	angles[0] = end[0] - start[0];
+	angles[1] = end[1] - start[1];
+	angles[2] = end[2] - start[2];
+	GetVectorAngles(angles, angles);
+}
+
+float FixAngle(float angle)
+{
+	while(angle < -180.0)
+	{
+		angle += 360.0;
+	}
+	while(angle > 180.0)
+	{
+		angle -= 360.0;
+	}	
+	return angle;
+}
+
 public bool Trace_OnlyHitWorld(int entity, int mask)
 {
 	return entity == 0;
@@ -217,4 +238,13 @@ public bool Trace_OnlyHitWorld(int entity, int mask)
 public bool Trace_DontHitEntity(int entity, int mask, any data)
 {
 	return entity != data;
+}
+
+public bool Trace_WorldAndBrushes(int entity, int mask)
+{
+	if(Trace_OnlyHitWorld(entity, mask))
+		return true;
+	
+	static char buffer[8];
+	return (GetEntityClassname(entity, buffer, sizeof(buffer)) && (!strncmp(buffer, "func_", 5, false)));
 }

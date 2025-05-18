@@ -149,3 +149,54 @@ public void Default_Interact(int client, int entity)
 {
 
 }
+
+// When a scp map relay is triggered
+public void Default_RelayTrigger(int client, const char[] name, int relay, int target)
+{
+/*
+
+		else if(!StrContains(name, "scp_femur", false))
+		{
+			ClassEnum class;
+			int index = Classes_GetByName("scp106", class);
+			int found;
+			for(int target=1; target<=MaxClients; target++)
+			{
+				if(IsValidClient(target) && index==Client[target].Class)
+				{
+					SDKHooks_TakeDamage(target, target, target, 9001.0, DMG_NERVEGAS);
+					found = target;
+				}
+			}
+
+			index = Classes_GetByName("pootisred", class);
+			for(int target=1; target<=MaxClients; target++)
+			{
+				if(IsValidClient(target) && index==Client[target].Class)
+				{
+					SDKHooks_TakeDamage(target, target, target, 9001.0, DMG_NERVEGAS);
+					found = target;
+				}
+			}
+
+			index = class.Group;
+			if(Enabled && found)
+			{
+				for(int target=1; target<=MaxClients; target++)
+				{
+					if(IsValidClient(target) && 
+					Classes_GetByIndex(Client[target].Class, class) &&
+					class.Group >= 0 &&
+					class.Group != index)
+						GiveAchievement(Achievement_Kill106, target);
+				}
+			}
+		}
+		*/
+}
+
+// The chase theme that will play to the victim
+public float Default_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int victim, bool &infinite)
+{
+	return 0.0;
+}

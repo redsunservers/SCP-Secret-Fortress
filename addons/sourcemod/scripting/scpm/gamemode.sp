@@ -27,6 +27,10 @@
 	- (Armory 2) Armory 2 -> 3
 */
 
+#define TALK_DISTANCE	650000.0	// 800 HU
+#define LOOK_PITCH	45.0	// Pitch to be considered looking at a target
+#define LOOK_YAW	60.0	// Yaw to be considered looking at a target
+
 enum
 {
 	Access_Unknown = -1,
@@ -40,10 +44,13 @@ enum
 
 static Handle SyncHud;
 static Handle BlinkTimer;
+static Handle GlobalTimer;
+static bool ListenerDefault;
 
 void Gamemode_PluginStart()
 {
 	SyncHud = CreateHudSynchronizer();
+	GlobalTimer = CreateTimer(0.2, GlobalThinkTimer);
 
 	HookEntityOutput("logic_relay", "OnTrigger", OnRelayTrigger);
 
@@ -134,6 +141,187 @@ static Action GlobalBlinkTimer(Handle timer)
 	return Plugin_Continue;
 }
 
+static Action GlobalThinkTimer(Handle timer)
+{
+	GlobalTimer = null;
+	Gamemode_UpdateListeners();
+	return Plugin_Continue;
+}
+
+void Gamemode_UpdateListeners()
+{
+	delete GlobalTimer;
+	GlobalTimer = CreateTimer(0.2, GlobalThinkTimer);
+
+	if(GameRules_GetRoundState() > RoundState_RoundRunning || GameRules_GetProp("m_bInWaitingForPlayers", 1))
+	{
+		if(!ListenerDefault)
+		{
+			ListenerDefault = true;
+			for(int a = 0; a <= MaxClients; a++)
+			{
+				Client(a).LookingAt(a, false);
+				Client(a).CanTalkTo(a, true);
+
+				for(int b = a + 1; b <= MaxClients; b++)
+				{
+					Client(a).LookingAt(b, false);
+					Client(a).CanTalkTo(b, true);
+					Client(b).LookingAt(a, false);
+					Client(b).CanTalkTo(a, true);
+
+					if(a && IsClientInGame(a) && IsClientInGame(b))
+					{
+						SetListenOverride(a, b, Listen_Default);
+						SetListenOverride(b, a, Listen_Default);
+					}
+				}
+			}
+		}
+		return;
+	}
+
+	ListenerDefault = false;
+	static int valid[MAXPLAYERS+1], team[MAXPLAYERS+1];
+	static float pos[MAXPLAYERS+1][3], ang[MAXPLAYERS+1][3], range[MAXPLAYERS+1];
+	static bool admin[MAXPLAYERS+1];
+	for(int client = 1; client <= MaxClients; client++)
+	{
+		if(!IsClientInGame(client))
+		{
+			valid[client] = 0;
+			continue;
+		}
+
+		GetClientEyePosition(client, pos[client]);
+
+		if(!IsPlayerAlive(client))
+		{
+			valid[client] = 1;
+			admin[client] = (GetClientTeam(client) == TFTeam_Spectator && CheckCommandAccess(client, "sm_mute", ADMFLAG_CHAT));
+			continue;
+		}
+
+		team[client] = GetClientTeam(client);
+		GetClientEyeAngles(client, ang[client]);
+
+		ang[client][0] = FixAngle(ang[client][0]);
+		ang[client][1] = FixAngle(ang[client][1]);
+
+		int entity = GetEntPropEnt(client, Prop_Send, "m_PlayerFog.m_hCtrl");
+		if(entity == -1 || !GetEntProp(entity, Prop_Send, "m_fog.enable") || GetEntPropFloat(entity, Prop_Send, "m_fog.maxdensity") < 0.99)
+		{
+			range[client] = 0.0;
+		}
+		else
+		{
+			range[client] = GetEntPropFloat(entity, Prop_Send, "m_fog.end");
+			range[client] *= range[client];
+		}
+
+		valid[client] = 2;
+		admin[client] = false;
+	}
+
+	for(int a = 1; a <= MaxClients; a++)
+	{
+		if(!valid[a])
+			continue;
+		
+		for(int b = a + 1; b <= MaxClients; b++)
+		{
+			if(!valid[b])
+				continue;
+			
+			float distance = GetVectorDistance(pos[a], pos[b], true);
+
+			for(int c; c < 2; c++)
+			{
+				int speaker = c ? b : a;
+				int target = c ? a : b;
+
+				bool failed;
+
+				// Check for dead talk
+				if(valid[speaker] < 2)
+				{
+					if(!admin[speaker] && valid[target] > 1)
+						failed = true;
+				}
+
+				// Bosses can always hear other bosses
+				else if(!Client(target).IsBoss)
+				{
+					if(Client(speaker).SilentTalk || distance > TALK_DISTANCE)
+						failed = true;
+				}
+				
+				Client(speaker).CanTalkTo(target, !failed);
+				SetListenOverride(target, speaker, failed ? Listen_No : Listen_Yes);
+
+				// Either are dead, don't do LOS checks
+				if(valid[speaker] < 2 || valid[target] < 2)
+					continue;
+				
+				// Fog distance
+				failed = (range[speaker] && range[speaker] < distance);
+
+				if(!failed)
+				{
+					// "Looking" at our target
+					static float vec[3];
+					GetVectorAnglesTwoPoints(pos[speaker], pos[target], vec);
+					vec[0] = FixAngle(vec[0]);
+					vec[1] = FixAngle(vec[1]);
+
+					float diff = FAbs(ang[speaker][0] - vec[0]);
+					if(diff > LOOK_PITCH && diff < (360.0 - LOOK_PITCH))
+						failed = true;
+					
+					if(!failed)
+					{
+						diff = FAbs(ang[speaker][1] - vec[1]);
+						if(diff > LOOK_YAW && diff < (360.0 - LOOK_YAW))
+							failed = true;
+						
+						//PrintCenterText(speaker, "%f %f [0] %f [1] %f [%d]", vec[0], vec[1], FAbs(ang[speaker][0] - vec[0]), FAbs(ang[speaker][1] - vec[1]), failed ? 0 : 1);
+						
+						if(!failed)
+						{
+							TR_TraceRayFilter(pos[speaker], pos[target], CONTENTS_SOLID|CONTENTS_MOVEABLE|CONTENTS_MIST, RayType_EndPoint, Trace_WorldAndBrushes);
+							TR_GetEndPosition(vec);
+							if(pos[target][0] != vec[0] || pos[target][1] != vec[1] || pos[target][2] != vec[2])
+								failed = true;
+						}
+					}
+					/*else
+					{
+						PrintCenterText(speaker, "%f %f [0] %f [1] %f [0]", vec[0], vec[1], FAbs(ang[speaker][0] - vec[0]), FAbs(ang[speaker][1] - vec[1]));
+					}*/
+				}
+				
+				Client(speaker).LookingAt(target, !failed);
+				if(!failed)
+				{
+					//PrintToConsole(speaker, "DEBUG: Looking at %N", target);
+
+					if(team[speaker] != team[target])
+					{
+						if(Client(target).IsBoss)
+						{
+							Music_StartChase(speaker, target);
+						}
+						else if(Client(speaker).IsBoss)
+						{
+							Music_StartChase(speaker, speaker);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 // Call whenever to update PlayerAlive variables
 void Gamemode_CheckAlivePlayers(int exclude = 0, bool alive = true, bool resetMax = false)
 {
@@ -176,13 +364,15 @@ void Gamemode_CheckAlivePlayers(int exclude = 0, bool alive = true, bool resetMa
 			if(PlayersAlive[TFTeam_Humans])
 			{
 				winner = TFTeam_Humans;
-				reason =  PlayersAlive[TFTeam_Bosses] ? WINREASON_FLAG_CAPTURE_LIMIT : WINREASON_OPPONENTS_DEAD;
+				reason = PlayersAlive[TFTeam_Bosses] ? WINREASON_FLAG_CAPTURE_LIMIT : WINREASON_OPPONENTS_DEAD;
 			}
 			else if(PlayersAlive[TFTeam_Bosses])
 			{
 				winner = TFTeam_Bosses;
 				reason = WINREASON_OPPONENTS_DEAD;
 			}
+
+			PrintToChatAll("%d vs %d (%d)", PlayersAlive[TFTeam_Humans], PlayersAlive[TFTeam_Bosses], winner);
 
 			int entity = CreateEntityByName("game_round_win"); 
 			DispatchKeyValue(entity, "force_map_reset", "1");
@@ -242,14 +432,6 @@ bool Gamemode_PlayerRunCmd(int client, int &buttons, int &impulse)
 			impulse = 0;
 			changed = true;
 		}
-		/*case 201, 202:	// Spray
-		{
-			if()
-			{
-				impulse = 0;
-				changed = true;
-			}
-		}*/
 	}
 
 	return changed;
@@ -285,335 +467,351 @@ public Action OnRelayTrigger(const char[] output, int entity, int client, float 
 	char name[32];
 	GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
 
-	if(!StrContains(name, "scp_access", false))
+	if(!StrContains(name, "scp_", false))
 	{
-		int type = StringToInt(name[11]);
-		switch(type)
+		for(int other = 1; other <= MaxClients; other++)
 		{
-			case Access_Main:
+			if(IsClientInGame(other) && IsPlayerAlive(other) && Bosses_StartFunctionClient(other, "RelayTrigger"))
 			{
-				switch(Client(client).KeycardContain)
+				Call_PushCell(other);
+				Call_PushString(name);
+				Call_PushCell(entity);
+				Call_PushCell(client);
+				Call_Finish();
+			}
+		}
+	
+		if(!StrContains(name, "scp_access", false))
+		{
+			int type = StringToInt(name[11]);
+			switch(type)
+			{
+				case Access_Main:
 				{
-					case 0:
-						AcceptEntityInput(entity, "FireUser4", client, client);
-					
-					case 1:
-						AcceptEntityInput(entity, "FireUser1", client, client);
+					switch(Client(client).KeycardContain)
+					{
+						case 0:
+							AcceptEntityInput(entity, "FireUser4", client, client);
+						
+						case 1:
+							AcceptEntityInput(entity, "FireUser1", client, client);
 
-					case 2:
-						AcceptEntityInput(entity, "FireUser2", client, client);
+						case 2:
+							AcceptEntityInput(entity, "FireUser2", client, client);
 
-					default:
-						AcceptEntityInput(entity, "FireUser3", client, client);
+						default:
+							AcceptEntityInput(entity, "FireUser3", client, client);
+					}
+				}
+				case Access_Armory:
+				{
+					switch(Client(client).KeycardArmory)
+					{
+						case 0:
+							AcceptEntityInput(entity, "FireUser4", client, client);
+						
+						case 1:
+							AcceptEntityInput(entity, "FireUser1", client, client);
+
+						case 2:
+							AcceptEntityInput(entity, "FireUser2", client, client);
+
+						default:
+							AcceptEntityInput(entity, "FireUser3", client, client);
+					}
+				}
+				case Access_Exit:
+				{
+					AcceptEntityInput(entity, Client(client).KeycardExit > 1 ? "FireUser1" : "FireUser4", client, client);
+				}
+				case Access_Warhead:
+				{
+					AcceptEntityInput(entity, Client(client).KeycardContain > 2 ? "FireUser1" : "FireUser4", client, client);
+				}
+				case Access_Checkpoint:
+				{
+					AcceptEntityInput(entity, Client(client).KeycardExit > 0 ? "FireUser1" : "FireUser4", client, client);
+				}
+				case Access_Intercom:
+				{
+					AcceptEntityInput(entity, (Client(client).KeycardContain > 2 || Client(client).KeycardArmory > 2) ? "FireUser1" : "FireUser4", client, client);
 				}
 			}
-			case Access_Armory:
+		}
+		else if(!StrContains(name, "scp_removecard", false))
+		{
+			if(client > 0 && client <= MaxClients)
 			{
-				switch(Client(client).KeycardArmory)
+				Client(client).KeycardContain = 0;
+				Client(client).KeycardArmory = 0;
+				Client(client).KeycardExit = 0;
+			}
+		}
+		else if(!StrContains(name, "scp_startmusic", false))
+		{
+			Music_ToggleRoundMusic(true);
+
+			for(int target = 1; target <= MaxClients; target++)
+			{
+				if(IsClientInGame(target))
+					Music_ToggleMusic(target, true, false);
+			}
+		}
+		else if(!StrContains(name, "scp_endmusic", false))
+		{
+			Music_ToggleRoundMusic(false);
+
+			for(int target = 1; target <= MaxClients; target++)
+			{
+				if(IsClientInGame(target))
+					Music_ToggleMusic(target, false, true);
+			}
+		}
+		else if(!StrContains(name, "scp_respawn", false))
+		{
+			if(client > 0 && client <= MaxClients)
+			{
+				//if(Enabled && TF2_IsPlayerInCondition(client, TFCond_MarkedForDeath))
+				//	GiveAchievement(Achievement_SurvivePocket, client);
+
+				ArrayList list = new ArrayList();
+
+				int other = -1;
+				while((other=FindEntityByClassname(other, "info_target")) != -1)
 				{
-					case 0:
-						AcceptEntityInput(entity, "FireUser4", client, client);
-					
-					case 1:
-						AcceptEntityInput(entity, "FireUser1", client, client);
-
-					case 2:
-						AcceptEntityInput(entity, "FireUser2", client, client);
-
-					default:
-						AcceptEntityInput(entity, "FireUser3", client, client);
+					GetEntPropString(other, Prop_Data, "m_iName", name, sizeof(name));
+					if(!StrContains(name, "scp_spawn_106", false))
+						list.Push(other);
 				}
-			}
-			case Access_Exit:
-			{
-				AcceptEntityInput(entity, Client(client).KeycardExit > 1 ? "FireUser1" : "FireUser4", client, client);
-			}
-			case Access_Warhead:
-			{
-				AcceptEntityInput(entity, Client(client).KeycardContain > 2 ? "FireUser1" : "FireUser4", client, client);
-			}
-			case Access_Checkpoint:
-			{
-				AcceptEntityInput(entity, Client(client).KeycardExit > 0 ? "FireUser1" : "FireUser4", client, client);
-			}
-			case Access_Intercom:
-			{
-				AcceptEntityInput(entity, (Client(client).KeycardContain > 2 || Client(client).KeycardArmory > 2) ? "FireUser1" : "FireUser4", client, client);
-			}
-		}
-	}
-	/*
-	else if(!StrContains(name, "scp_removecard", false))
-	{
-		if(IsValidClient(client))
-		{
-			int ent = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-			if(ent > MaxClients)
-			{
-				if(Items_IsHoldingKeycard(ent))
+
+				int length = list.Length;
+				if(!length)
 				{
-					Items_SwitchItem(client, ent);
-					TF2_RemoveItem(client, ent);
-					return Plugin_Continue;
+					while((other=FindEntityByClassname(other, "info_target")) != -1)
+					{
+						GetEntPropString(other, Prop_Data, "m_iName", name, sizeof(name));
+						if(!StrContains(name, "scp_spawn_p", false))
+							list.Push(other);
+					}
+
+					length = list.Length;
 				}
-			}
 
-			int i;
-			while((ent=Items_Iterator(client, i, true)) != -1)
-			{
-				if(Items_IsKeycard(ent))
-					TF2_RemoveItem(client, ent);
-			}
-		}
-	}
-	else if(!StrContains(name, "scp_startmusic", false))
-	{
-		NoMusicRound = false;
-		for(int target=1; target<=MaxClients; target++)
-		{
-			Client[target].NextSongAt = 0.0;
-		}
-	}
-	else if(!StrContains(name, "scp_endmusic", false))
-	{
-		NoMusicRound = true;
-		ChangeGlobalSong(FAR_FUTURE, "");
-	}
-	else if(!StrContains(name, "scp_respawn", false))	// Temp backwards compability
-	{
-		if(IsValidClient(client))
-		{
-			if(Enabled && TF2_IsPlayerInCondition(client, TFCond_MarkedForDeath))
-				GiveAchievement(Achievement_SurvivePocket, client);
-
-			Classes_SpawnPoint(client, Classes_GetByName("scp106"));
-		}
-	}
-	else if(!StrContains(name, "scp_escapepocket", false))
-	{
-		if(Enabled && IsValidClient(client))
-			GiveAchievement(Achievement_SurvivePocket, client);
-	}
-	else if(!StrContains(name, "scp_floor", false))
-	{
-		if(IsValidClient(client))
-		{
-			int floor = StringToInt(name[10]);
-			if(floor != Client[client].Floor)
-			{
-				Client[client].NextSongAt = 0.0;
-				Client[client].Floor = floor;
-			}
-		}
-	}
-	else if(!StrContains(name, "scp_femur", false))
-	{
-		ClassEnum class;
-		int index = Classes_GetByName("scp106", class);
-		int found;
-		for(int target=1; target<=MaxClients; target++)
-		{
-			if(IsValidClient(target) && index==Client[target].Class)
-			{
-				SDKHooks_TakeDamage(target, target, target, 9001.0, DMG_NERVEGAS);
-				found = target;
-			}
-		}
-
-		index = Classes_GetByName("pootisred", class);
-		for(int target=1; target<=MaxClients; target++)
-		{
-			if(IsValidClient(target) && index==Client[target].Class)
-			{
-				SDKHooks_TakeDamage(target, target, target, 9001.0, DMG_NERVEGAS);
-				found = target;
-			}
-		}
-
-		index = class.Group;
-		if(Enabled && found)
-		{
-			for(int target=1; target<=MaxClients; target++)
-			{
-				if(IsValidClient(target) && 
-				   Classes_GetByIndex(Client[target].Class, class) &&
-				   class.Group >= 0 &&
-				   class.Group != index)
-					GiveAchievement(Achievement_Kill106, target);
-			}
-		}
-	}
-	else if(!StrContains(name, "scp_upgrade", false))
-	{
-		if(Enabled && IsValidClient(client))
-		{
-			int index = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-			if(index>MaxClients && IsValidEntity(index))
-				index = GetEntProp(index, Prop_Send, "m_iItemDefinitionIndex");
-
-			char buffer[64];
-			Items_GetTranName(index, buffer, sizeof(buffer));
-
-			SetGlobalTransTarget(client);
-			if(Client[client].Cooldown > GetGameTime())
-			{
-				Menu menu = new Menu(Handler_None);
-				menu.SetTitle("%t\n ", buffer);
-
-				FormatEx(buffer, sizeof(buffer), "%t", "in_cooldown");
-				menu.AddItem("", buffer);
-
-				menu.Display(client, 3);
-			}
-			else
-			{
-				Menu menu = new Menu(Handler_Upgrade);
-				menu.SetTitle("%t\n ", buffer);
-
-				WeaponEnum weapon;
-				Items_GetWeaponByIndex(index, weapon);
-
-				FormatEx(buffer, sizeof(buffer), "%t", "914_very");
-				menu.AddItem("", buffer, weapon.VeryFine[0] ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
-
-				FormatEx(buffer, sizeof(buffer), "%t", "914_fine");
-				menu.AddItem("", buffer, weapon.Fine[0] ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
-
-				FormatEx(buffer, sizeof(buffer), "%t", "914_onetoone");
-				menu.AddItem("", buffer, weapon.OneToOne[0] ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
-
-				FormatEx(buffer, sizeof(buffer), "%t", "914_coarse");
-				menu.AddItem("", buffer, weapon.Coarse[0] ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
-
-				FormatEx(buffer, sizeof(buffer), "%t", "914_rough");
-				menu.AddItem("", buffer, weapon.Rough[0] ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
-
-				menu.Display(client, 10);
-			}
-		}
-	}
-	else if(!StrContains(name, "scp_printer", false))
-	{
-		if(Enabled && IsValidClient(client))
-		{
-			int index = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-			if(index>MaxClients && IsValidEntity(index))
-				index = GetEntProp(index, Prop_Send, "m_iItemDefinitionIndex");
-
-			char buffer[64];
-			Items_GetTranName(index, buffer, sizeof(buffer));
-
-			SetGlobalTransTarget(client);
-			if(Client[client].Cooldown > GetGameTime())
-			{
-				Menu menu = new Menu(Handler_None);
-				menu.SetTitle("%t\n ", buffer);
-
-				FormatEx(buffer, sizeof(buffer), "%t", "in_cooldown");
-				menu.AddItem("", buffer);
-
-				menu.Display(client, 3);
-			}
-			else
-			{
-
-				WeaponEnum weapon;
-				if(Items_GetWeaponByIndex(index, weapon) && weapon.Type==ITEM_TYPE_KEYCARD)
+				if(length)
 				{
-					Menu menu = new Menu(Handler_Printer);
-					menu.SetTitle("%t\n ", buffer);
+					other = list.Get(GetRandomInt(0, length-1));
 
-					FormatEx(buffer, sizeof(buffer), "%t", "914_copy");
-					menu.AddItem("", buffer);
-
-					menu.Display(client, 6);
+					float pos[3], ang[3];
+					GetEntPropVector(other, Prop_Data, "m_vecAbsOrigin", pos);
+					GetEntPropVector(other, Prop_Data, "m_vecAbsOrigin", ang);
+					ang[0] = 0.0;
+					ang[2] = 0.0;
+					TeleportEntity(client, pos, ang, NULL_VECTOR);
 				}
 				else
+				{
+					TF2_RespawnPlayer(client);
+				}
+
+				delete list;
+			}
+		}
+		else if(!StrContains(name, "scp_escapepocket", false))
+		{
+			//if(Enabled && IsValidClient(client))
+			//	GiveAchievement(Achievement_SurvivePocket, client);
+		}
+		/*
+		else if(!StrContains(name, "scp_floor", false))
+		{
+			if(IsValidClient(client))
+			{
+				int floor = StringToInt(name[10]);
+				if(floor != Client[client].Floor)
+				{
+					Client[client].NextSongAt = 0.0;
+					Client[client].Floor = floor;
+				}
+			}
+		}
+		else if(!StrContains(name, "scp_upgrade", false))
+		{
+			if(Enabled && IsValidClient(client))
+			{
+				int index = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+				if(index>MaxClients && IsValidEntity(index))
+					index = GetEntProp(index, Prop_Send, "m_iItemDefinitionIndex");
+
+				char buffer[64];
+				Items_GetTranName(index, buffer, sizeof(buffer));
+
+				SetGlobalTransTarget(client);
+				if(Client[client].Cooldown > GetGameTime())
 				{
 					Menu menu = new Menu(Handler_None);
 					menu.SetTitle("%t\n ", buffer);
 
-					FormatEx(buffer, sizeof(buffer), "%t", "914_nowork");
+					FormatEx(buffer, sizeof(buffer), "%t", "in_cooldown");
 					menu.AddItem("", buffer);
 
 					menu.Display(client, 3);
 				}
+				else
+				{
+					Menu menu = new Menu(Handler_Upgrade);
+					menu.SetTitle("%t\n ", buffer);
+
+					WeaponEnum weapon;
+					Items_GetWeaponByIndex(index, weapon);
+
+					FormatEx(buffer, sizeof(buffer), "%t", "914_very");
+					menu.AddItem("", buffer, weapon.VeryFine[0] ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+
+					FormatEx(buffer, sizeof(buffer), "%t", "914_fine");
+					menu.AddItem("", buffer, weapon.Fine[0] ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+
+					FormatEx(buffer, sizeof(buffer), "%t", "914_onetoone");
+					menu.AddItem("", buffer, weapon.OneToOne[0] ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+
+					FormatEx(buffer, sizeof(buffer), "%t", "914_coarse");
+					menu.AddItem("", buffer, weapon.Coarse[0] ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+
+					FormatEx(buffer, sizeof(buffer), "%t", "914_rough");
+					menu.AddItem("", buffer, weapon.Rough[0] ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+
+					menu.Display(client, 10);
+				}
 			}
 		}
-	}
-	else if(!StrContains(name, "scp_intercom", false))
-	{
-		if(Enabled && IsValidClient(client))
+		else if(!StrContains(name, "scp_printer", false))
 		{
-			Client[client].ComFor = GetGameTime()+15.0;
-			GiveAchievement(Achievement_Intercom, client);
-		}
-	}
-	else if(!StrContains(name, "scp_nukecancel", false))
-	{
-		if(Enabled && IsValidClient(client))
-			GiveAchievement(Achievement_SurviveCancel, client);
-	}
-	else if(!StrContains(name, "scp_nuke", false))
-	{
-		if(Enabled)
-			GiveAchievement(Achievement_SurviveWarhead, 0);
-	}
-	else if(!StrContains(name, "scp_giveitem_", false))
-	{
-		if(IsValidClient(client))
-		{
-			char buffers[4][6];
-			ExplodeString(name, "_", buffers, sizeof(buffers), sizeof(buffers[]));
-			Items_CreateWeapon(client, StringToInt(buffers[2]), _, true, true);
-		}
-	}
-	else if(!StrContains(name, "scp_removeitem_", false))
-	{
-		if(IsValidClient(client))
-		{
-			char buffers[4][6];
-			ExplodeString(name, "_", buffers, sizeof(buffers), sizeof(buffers[]));
-
-			int index = StringToInt(buffers[2]);
-			int active = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-
-			int i, ent;
-			while((ent=Items_Iterator(client, i, true)) != -1)
+			if(Enabled && IsValidClient(client))
 			{
-				if(GetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex") == index)
+				int index = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+				if(index>MaxClients && IsValidEntity(index))
+					index = GetEntProp(index, Prop_Send, "m_iItemDefinitionIndex");
+
+				char buffer[64];
+				Items_GetTranName(index, buffer, sizeof(buffer));
+
+				SetGlobalTransTarget(client);
+				if(Client[client].Cooldown > GetGameTime())
 				{
-					TF2_RemoveItem(client, ent);
+					Menu menu = new Menu(Handler_None);
+					menu.SetTitle("%t\n ", buffer);
+
+					FormatEx(buffer, sizeof(buffer), "%t", "in_cooldown");
+					menu.AddItem("", buffer);
+
+					menu.Display(client, 3);
+				}
+				else
+				{
+
+					WeaponEnum weapon;
+					if(Items_GetWeaponByIndex(index, weapon) && weapon.Type==ITEM_TYPE_KEYCARD)
+					{
+						Menu menu = new Menu(Handler_Printer);
+						menu.SetTitle("%t\n ", buffer);
+
+						FormatEx(buffer, sizeof(buffer), "%t", "914_copy");
+						menu.AddItem("", buffer);
+
+						menu.Display(client, 6);
+					}
+					else
+					{
+						Menu menu = new Menu(Handler_None);
+						menu.SetTitle("%t\n ", buffer);
+
+						FormatEx(buffer, sizeof(buffer), "%t", "914_nowork");
+						menu.AddItem("", buffer);
+
+						menu.Display(client, 3);
+					}
+				}
+			}
+		}
+		*/
+		else if(!StrContains(name, "scp_intercom", false))
+		{
+			if(client > 0 && client <= MaxClients)
+			{
+				float duration = StringToFloat(name[13]);
+				if(duration < 1.0)
+					duration = 15.0;
+				
+				Client(client).AllTalkTimeFor = GetGameTime() + duration;
+				//GiveAchievement(Achievement_Intercom, client);
+			}
+		}
+		/*
+		else if(!StrContains(name, "scp_nukecancel", false))
+		{
+			if(Enabled && IsValidClient(client))
+				GiveAchievement(Achievement_SurviveCancel, client);
+		}
+		else if(!StrContains(name, "scp_nuke", false))
+		{
+			if(Enabled)
+				GiveAchievement(Achievement_SurviveWarhead, 0);
+		}
+		*/
+		else if(!StrContains(name, "scp_giveitem_", false))
+		{
+			if(client > 0 && client <= MaxClients)
+			{
+				Items_GiveByIndex(client, StringToInt(name[13]));
+			}
+		}
+		else if(!StrContains(name, "scp_removeitem_", false))
+		{
+			if(client > 0 && client <= MaxClients)
+			{
+				int index = StringToInt(name[15]);
+				int active = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+
+				int i, ent;
+				while(TF2_GetItem(client, ent, i))
+				{
+					if(GetEntProp(ent, Prop_Send, "m_iItemDefinitionIndex") == index)
+					{
+						TF2_RemoveItem(client, ent);
+						AcceptEntityInput(entity, "FireUser1", client, client);
+
+						if(ent == active)
+						{
+							int melee = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+							if(melee != -1)
+								TF2U_SetPlayerActiveWeapon(client, melee);
+						}
+					}
+				}
+			}
+		}
+		else if(!StrContains(name, "scp_insertitem_", false))
+		{
+			if(client > 0 && client <= MaxClients)
+			{
+				int index = StringToInt(name[15]);
+				int active = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+				
+				if(GetEntProp(active, Prop_Send, "m_iItemDefinitionIndex") == index)
+				{
+					TF2_RemoveItem(client, active);
 					AcceptEntityInput(entity, "FireUser1", client, client);
-					if(ent == active)
-						Items_SwitchItem(client, ent);
+					
+					int melee = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+					if(melee != -1)
+						TF2U_SetPlayerActiveWeapon(client, melee);
+				}
+				else
+				{
+					AcceptEntityInput(entity, "FireUser2", client, client);
 				}
 			}
 		}
 	}
-	else if(!StrContains(name, "scp_insertitem_", false))
-	{
-		if(IsValidClient(client))
-		{
-			char buffers[4][6];
-			ExplodeString(name, "_", buffers, sizeof(buffers), sizeof(buffers[]));
-
-			int index = StringToInt(buffers[2]);
-			int active = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-			
-			if(GetEntProp(active, Prop_Send, "m_iItemDefinitionIndex") == index)
-			{
-				TF2_RemoveItem(client, active);
-				AcceptEntityInput(entity, "FireUser1", client, client);
-				Items_SwitchItem(client, active);
-			}
-			else
-			{
-				AcceptEntityInput(entity, "FireUser2", client, client);
-			}
-		}
-	}
-	*/
 
 	return Plugin_Continue;
 }

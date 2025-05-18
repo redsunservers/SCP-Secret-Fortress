@@ -222,6 +222,13 @@ void Human_ToggleFlashlight(int client)
 	}
 }
 
+// 100.0 being gone insane
+float Human_GetStress(int client)
+{
+	int class = view_as<int>(TF2_GetPlayerClass(client));
+	return ((GetGameTime() - RoundStartTime) + Client(client).Stress) * 100.0 / ClassStats[class].StressLimit;
+}
+
 void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 {
 	if(!Client(client).IsBoss && !Client(client).Minion && IsPlayerAlive(client))
@@ -476,7 +483,7 @@ void Human_ConditionAdded(int client, TFCond cond)
 			{
 				Client(client).Escaped = true;
 				TF2_RegeneratePlayer(client);
-				Gamemode_CheckAlivePlayers(client);
+				Gamemode_CheckAlivePlayers();
 			}
 		}
 	}

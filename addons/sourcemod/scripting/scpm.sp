@@ -6,6 +6,7 @@
 #include <tf_econ_data> 
 #include <dhooks>
 #include <vscript>
+#include <tf2items>
 #undef REQUIRE_EXTENSIONS
 #undef REQUIRE_PLUGIN
 
@@ -209,6 +210,7 @@ int MaxPlayersAlive[TFTeam_MAX];
 #include "scpm/gamemode.sp"
 #include "scpm/humans.sp"
 #include "scpm/items.sp"
+#include "scpm/music.sp"
 #include "scpm/sdkcalls.sp"
 #include "scpm/sdkhooks.sp"
 #include "scpm/tf2utils.sp"
@@ -310,6 +312,7 @@ public void OnClientDisconnect(int client)
 {
 	Bosses_ClientDisconnect(client);
 	Human_ClientDisconnect(client);
+	Music_ClientDisconnect(client);
 	Client(client).ResetByDisconnect();
 }
 
