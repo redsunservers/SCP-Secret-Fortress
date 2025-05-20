@@ -55,6 +55,8 @@ void SDKHook_HookClient(int client)
 {
 	if(!OTDLoaded)
 		SDKHook(client, SDKHook_OnTakeDamage, SDKHook_TakeDamage);
+	
+	SDKHook(client, SDKHook_SetTransmit, SDKHook_Transmit);
 }
 
 public void OnEntityCreated(int entity, const char[] classname)
@@ -148,6 +150,17 @@ public Action TF2_OnTakeDamage(int victim, int &attacker, int &inflictor, float 
 
 		return action;
 	}
+	return Plugin_Continue;
+}
+
+static Action SDKHook_Transmit(int client, int target)
+{
+	if(client != target && target > 0 && target <= MaxClients)
+	{
+		if(Client(client).NoTransmitTo(target))
+			return Plugin_Stop;
+	}
+
 	return Plugin_Continue;
 }
 

@@ -48,6 +48,23 @@
 #define HIDEHUD_METAL			(1 << 15)
 #define HIDEHUD_TARGET_ID		(1 << 16)
 
+// env_explosion flags
+#define SF_ENVEXPLOSION_NODAMAGE	0x00000001 // when set, ENV_EXPLOSION will not actually inflict damage
+#define SF_ENVEXPLOSION_REPEATABLE	0x00000002 // can this entity be refired?
+#define SF_ENVEXPLOSION_NOFIREBALL	0x00000004 // don't draw the fireball
+#define SF_ENVEXPLOSION_NOSMOKE		0x00000008 // don't draw the smoke
+#define SF_ENVEXPLOSION_NODECAL		0x00000010 // don't make a scorch mark
+#define SF_ENVEXPLOSION_NOSPARKS	0x00000020 // don't make sparks
+#define SF_ENVEXPLOSION_NOSOUND		0x00000040 // don't play explosion sound.
+#define SF_ENVEXPLOSION_RND_ORIENT	0x00000080	// randomly oriented sprites
+#define SF_ENVEXPLOSION_NOFIREBALLSMOKE	0x00000100
+#define SF_ENVEXPLOSION_NOPARTICLES	0x00000200
+#define SF_ENVEXPLOSION_NODLIGHTS	0x00000400
+#define SF_ENVEXPLOSION_NOCLAMPMIN	0x00000800 // don't clamp the minimum size of the fireball sprite
+#define SF_ENVEXPLOSION_NOCLAMPMAX	0x00001000 // don't clamp the maximum size of the fireball sprite
+#define SF_ENVEXPLOSION_SURFACEONLY	0x00002000 // don't damage the player if he's underwater.
+#define SF_ENVEXPLOSION_GENERIC_DAMAGE	0x00004000 // don't do BLAST damage
+
 enum
 {
 	WINREASON_NONE = 0,
@@ -184,9 +201,10 @@ enum
 {
 	Version,
 	
-	//PrefToggle,
+	SCPCount,
 	
 	AllowSpectators,
+	Gravity,
 	
 	Cvar_MAX
 }
@@ -194,7 +212,6 @@ enum
 ConVar Cvar[Cvar_MAX];
 
 float RoundStartTime;
-float NextBlinkAt;
 int PlayersAlive[TFTeam_MAX];
 int MaxPlayersAlive[TFTeam_MAX];
 
@@ -221,14 +238,9 @@ int MaxPlayersAlive[TFTeam_MAX];
 #include "scpm/bosses/scp173.sp"
 
 #include "scpm/items/keycards.sp"
-
-public Plugin myinfo =
-{
-	name		=	"SCP: Mercenaries",
-	author		=	"Many Many",
-	description	=	"Now with 80% less karma",
-	version		=	"manual"
-}
+#include "scpm/items/generic.sp"
+#include "scpm/items/scp018.sp"
+#include "scpm/items/grenades.sp"
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
@@ -241,7 +253,7 @@ public void OnPluginStart()
 	LoadTranslations("scpm.phrases");
 	LoadTranslations("common.phrases");
 	LoadTranslations("core.phrases");
-	if(!TranslationPhraseExists("Weapon Stripped"))
+	if(!TranslationPhraseExists("SCP-914"))
 		SetFailState("Translation file \"scpm.phrases\" is outdated");
 	
 	Bosses_PluginStart();
@@ -311,9 +323,15 @@ public void OnClientPutInServer(int client)
 public void OnClientDisconnect(int client)
 {
 	Bosses_ClientDisconnect(client);
+	Gamemode_ClientDisconnect(client);
 	Human_ClientDisconnect(client);
 	Music_ClientDisconnect(client);
 	Client(client).ResetByDisconnect();
+}
+
+public void OnGameFrame()
+{
+	SCP018_GameFrame();
 }
 
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
@@ -334,8 +352,9 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 {
 	Human_ConditionAdded(client, condition);
 }
-
+/*
 public void TF2_OnConditionRemoved(int client, TFCond condition)
 {
 	Human_ConditionRemoved(client, condition);
 }
+*/

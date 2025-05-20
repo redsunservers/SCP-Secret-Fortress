@@ -22,6 +22,7 @@ enum struct ClassStat
 	float SprintRegen;
 	float SprintDegen;
 	float StressLimit;
+	float Awareness;
 
 	void SetupKv(KeyValues kv)
 	{
@@ -30,6 +31,7 @@ enum struct ClassStat
 		this.SprintRegen = kv.GetFloat("sprintregen", 5.0);
 		this.SprintDegen = kv.GetFloat("sprintdrain", 10.0);
 		this.StressLimit = kv.GetFloat("maxstress", 1000.0);
+		this.Awareness = kv.GetFloat("awareness", 1.0);
 	}
 }
 
@@ -109,31 +111,7 @@ void Human_PlayerSpawn(int client)
 		int team = GetClientTeam(client);
 		if(team > TFTeam_Spectator)
 		{
-			ArrayList list = new ArrayList();
-
-			int entity = -1;
-			char name[32];
-			while((entity=FindEntityByClassname(entity, "info_target")) != -1)
-			{
-				GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
-				if(!StrContains(name, team == TFTeam_Humans ? "scp_spawn_d" : "scp_spawn_s", false))
-					list.Push(entity);
-			}
-
-			int length = list.Length;
-			if(length)
-			{
-				entity = list.Get(GetRandomInt(0, length-1));
-
-				float pos[3], ang[3];
-				GetEntPropVector(entity, Prop_Data, "m_vecAbsOrigin", pos);
-				GetEntPropVector(entity, Prop_Data, "m_vecAbsOrigin", ang);
-				ang[0] = 0.0;
-				ang[2] = 0.0;
-				TeleportEntity(client, pos, ang, NULL_VECTOR);
-			}
-
-			delete list;
+			GoToNamedSpawn(client, team == TFTeam_Humans ? "scp_spawn_d" : "scp_spawn_s");
 		}
 	}
 }
@@ -223,7 +201,7 @@ void Human_ToggleFlashlight(int client)
 }
 
 // 100.0 being gone insane
-float Human_GetStress(int client)
+float Human_GetStressPercent(int client)
 {
 	int class = view_as<int>(TF2_GetPlayerClass(client));
 	return ((GetGameTime() - RoundStartTime) + Client(client).Stress) * 100.0 / ClassStats[class].StressLimit;
@@ -488,14 +466,14 @@ void Human_ConditionAdded(int client, TFCond cond)
 		}
 	}
 }
-
+/*
 void Human_ConditionRemoved(int client, TFCond cond)
 {
 	if(Client(client).IsBoss || Client(client).Minion)
 		return;
 
 }
-
+*/
 void Human_Interact(int client, int entity)
 {
 	if(entity == -1)
@@ -527,6 +505,14 @@ void Human_Interact(int client, int entity)
 				Client(client).ControlProgress = 1;
 		}
 	}
+}
+
+float Humans_GetAwareness(int client)
+{
+	if(Client(client).IsBoss || Client(client).Minion)
+		return 1.0;
+	
+	return ClassStats[TF2_GetPlayerClass(client)].Awareness;
 }
 
 static void EquipHuman(int client, bool post)

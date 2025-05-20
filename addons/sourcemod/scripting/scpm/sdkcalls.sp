@@ -139,7 +139,7 @@ void SDKCall_EquipWearable(int client, int entity)
 	}
 }
 
-void SDKCall_FinishLagCompensation(int client)
+stock void SDKCall_FinishLagCompensation(int client)
 {
 	if(SDKStartLagCompensation && SDKFinishLagCompensation)
 	{
@@ -170,7 +170,7 @@ void SDKCall_InitDroppedWeapon(int droppedWeapon, int client, int fromWeapon, bo
 		SDKCall(SDKInitWeapon, droppedWeapon, client, fromWeapon, swap, sewerslide);
 }
 
-void SDKCall_InitPickup(int entity, int client, int weapon)
+stock void SDKCall_InitPickup(int entity, int client, int weapon)
 {
 	if(SDKInitPickup)
 		SDKCall(SDKInitPickup, entity, client, weapon);
@@ -188,7 +188,7 @@ void SDKCall_SetSpeed(int client)
 	}
 }
 
-void SDKCall_StartLagCompensation(int client)
+stock void SDKCall_StartLagCompensation(int client)
 {
 	if(SDKStartLagCompensation && SDKFinishLagCompensation)
 	{

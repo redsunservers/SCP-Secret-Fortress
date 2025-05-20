@@ -136,12 +136,28 @@ static Action Command_DropItem(int client, const char[] command, int args)
 	if(!Client(client).IsBoss && !Client(client).Minion)
 	{
 		int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-		if(weapon != -1 && weapon != GetPlayerWeaponSlot(client, TFWeaponSlot_Melee))
+		if(weapon != -1)
 		{
-			float pos[3], ang[3];
-			GetClientEyePosition(client, pos);
-			GetClientEyeAngles(client, ang);
-			Items_DropByEntity(client, weapon, pos, ang, false);
+			bool found;
+			int entity, i;
+			while(TF2_GetItem(client, entity, i))
+			{
+				if(weapon != entity)
+				{
+					found = true;
+					TF2U_SetPlayerActiveWeapon(client, entity);
+					break;
+				}
+			}
+
+			if(found)
+			{
+				float pos[3], ang[3];
+				GetClientEyePosition(client, pos);
+				GetClientEyeAngles(client, ang);
+				Items_DropByEntity(client, weapon, pos, ang, false);
+				return Plugin_Handled;
+			}
 		}
 	}
 	return Plugin_Continue;

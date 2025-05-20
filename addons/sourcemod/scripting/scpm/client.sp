@@ -19,6 +19,8 @@ static float AllTalkTimeFor[MAXPLAYERS+1];
 static float LastDangerAt[MAXPLAYERS+1];
 static int LookingAtPos[MAXPLAYERS+1][(MAXPLAYERS+1) / 32];
 static int CanTalkToPos[MAXPLAYERS+1][(MAXPLAYERS+1) / 32];
+static int GlowingToPos[MAXPLAYERS+1][(MAXPLAYERS+1) / 32];
+static int NoTransmitToPos[MAXPLAYERS+1][(MAXPLAYERS+1) / 32];
 static bool SilentTalk[MAXPLAYERS+1];
 
 methodmap Client
@@ -274,6 +276,40 @@ methodmap Client
 		}
 
 		return view_as<bool>(CanTalkToPos[this.Index][pos] & (1 << at));
+	}
+
+	public bool GlowingTo(int target, any value = -1)
+	{
+		int pos = target / 32;
+		int at = target % 32;
+
+		if(value == true)
+		{
+			GlowingToPos[this.Index][pos] |= (1 << at);
+		}
+		else if(value == false)
+		{
+			GlowingToPos[this.Index][pos] &= ~(1 << at);
+		}
+
+		return view_as<bool>(GlowingToPos[this.Index][pos] & (1 << at));
+	}
+
+	public bool NoTransmitTo(int target, any value = -1)
+	{
+		int pos = target / 32;
+		int at = target % 32;
+
+		if(value == true)
+		{
+			NoTransmitToPos[this.Index][pos] |= (1 << at);
+		}
+		else if(value == false)
+		{
+			NoTransmitToPos[this.Index][pos] &= ~(1 << at);
+		}
+
+		return view_as<bool>(NoTransmitToPos[this.Index][pos] & (1 << at));
 	}
 
 	property bool SilentTalk

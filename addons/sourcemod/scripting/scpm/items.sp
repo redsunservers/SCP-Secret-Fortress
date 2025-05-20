@@ -31,7 +31,7 @@ enum struct ActionInfo
 			Call_Finish();
 		}
 
-		if(kv.JumpToKey("Downloads"))
+		if(kv.JumpToKey("downloads"))
 		{
 			if(kv.GotoFirstSubKey(false))
 			{
@@ -205,6 +205,7 @@ void Items_RoundStart()
 	int index;
 	char buffer[PLATFORM_MAX_PATH], type[32];
 	ItemInfo item;
+	ActionInfo action;
 
 	int entity = -1;
 	while((entity=FindEntityByClassname(entity, "prop_dynamic*")) != -1)
@@ -237,6 +238,7 @@ void Items_RoundStart()
 		else if(StrContains(buffer, "_healthkit", false) == 3)
 		{
 			index = 14;
+			extra = 2;
 		}
 		else
 		{
@@ -254,6 +256,9 @@ void Items_RoundStart()
 			{
 				case 1:
 					IntToString(StringToInt(type) + 30000, type, sizeof(type));
+				
+				case 2:
+					IntToString(StringToInt(type) + 30012, type, sizeof(type));
 			}
 		}
 		else
@@ -289,8 +294,19 @@ void Items_RoundStart()
 			}
 		}
 		
-		if(item.Model[0])
-			SetEntityModel(entity, item.Model);
+		index = GetActionDataOfIndex(item.Index, action);
+		if(index == -1)
+		{
+			TF2Econ_GetItemDefinitionString(item.Index, "model_player", buffer, sizeof(buffer));
+			PrintToServer(buffer);
+			if(buffer[0])
+				SetEntityModel(entity, buffer);
+		}
+		else
+		{
+			if(action.Model[0])
+				SetEntityModel(entity, action.Model);
+		}
 		
 		FormatEx(buffer, sizeof(buffer), "scp_item_%d", item.Index);
 		SetEntPropString(entity, Prop_Data, "m_iGlobalname", buffer);
@@ -643,13 +659,23 @@ void Items_GiveActionItem(int client, int itemIndex)
 	if(!result)
 	{
 		// Already have an item
-		if(Client(client).ActionItem != -1 && !Items_DropActionItem(client, false))
+		if(Client(client).ActionItem != -1)
 		{
 			float pos[3], ang[3];
 			GetClientEyePosition(client, pos);
 			GetClientEyeAngles(client, ang);
-			Items_DropByIndex(client, itemIndex, pos, ang, false);
-			return;
+
+			if(Items_DropActionItem(client, false))
+			{
+				// Drop exisitng item
+				Items_DropByIndex(client, Client(client).ActionItem, pos, ang, false);
+			}
+			else
+			{
+				// Blocked from picking up
+				Items_DropByIndex(client, itemIndex, pos, ang, false);
+				return;
+			}
 		}
 		
 		Client(client).ActionItem = itemIndex;
@@ -706,9 +732,98 @@ bool Items_DropActionItem(int client, bool death)
 	return result;
 }
 
-static bool StartItemFunctionByIndex(int itemIndex, const char[] name)
+stock bool Items_GetItemName(int itemIndex, char[] name, int length)
+{
+	static ActionInfo action;
+	if(GetActionDataOfIndex(itemIndex, action) == -1)
+		return TF2Econ_GetLocalizedItemName(itemIndex, name, length);
+	
+	strcopy(name, length, action.Prefix);
+	return true;
+}
+
+// 4: Rough, 3: Coarse, 2: 1:1, 1: Fine, 0: Very Fine
+int Items_GetUpgradePath(int itemIndex, int type)
 {
 	ActionInfo action;
+
+	if(GetActionDataOfIndex(itemIndex, action) == -1)
+	{
+		TFClassType class = TFClass_Engineer;
+		int slot = TFWeaponSlot_Secondary;
+		
+		static TFClassType ClassIndexes[] = {TFClass_Scout, TFClass_Soldier, TFClass_Pyro, TFClass_DemoMan, TFClass_Heavy, TFClass_Engineer, TFClass_Medic, TFClass_Sniper, TFClass_Spy};
+
+		SortIntegers(view_as<int>(ClassIndexes), sizeof(ClassIndexes), Sort_Random);
+
+		for(int i; i < sizeof(ClassIndexes); i++)
+		{
+			int found = TF2Econ_GetItemLoadoutSlot(itemIndex, ClassIndexes[i]);
+			if(found != -1)
+			{
+				class = ClassIndexes[i];
+				slot = found;
+				break;
+			}
+		}
+
+		switch(type)
+		{
+			case 4:	// Rough
+			{
+				class = ClassIndexes[0];
+				slot = TFWeaponSlot_Melee;
+			}
+			case 3:	// Coarse
+			{
+				slot++;
+				if(slot > TFWeaponSlot_Melee)
+					slot = TFWeaponSlot_Melee;
+			}
+			case 1:	// Fine
+			{
+				slot--;
+				if(slot < TFWeaponSlot_Primary)
+					slot = TFWeaponSlot_Primary;
+			}
+			case 0:	// Very Fine
+			{
+				class = ClassIndexes[0];
+				slot = TFWeaponSlot_Primary;
+			}
+		}
+		
+		ItemInfo item;
+		int length = ItemList.Length;
+		int start = GetURandomInt() % length;
+		for(int a = start + 1; a != start; a++)
+		{
+			if(a >= length)
+			{
+				a = -1;
+				continue;
+			}
+
+			ItemList.GetArray(a, item);
+			if(item.Index == itemIndex)
+				continue;
+			
+			if(GetActionDataOfIndex(item.Index, action) != -1)
+				continue;
+
+			if(TF2Econ_GetItemLoadoutSlot(item.Index, class) != slot)
+				return item.Index;
+		}
+
+		return -1;
+	}
+
+	return -1;
+}
+
+static bool StartItemFunctionByIndex(int itemIndex, const char[] name)
+{
+	static ActionInfo action;
 	if(GetActionDataOfIndex(itemIndex, action) == -1)
 		return false;
 	

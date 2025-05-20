@@ -38,4 +38,104 @@
 		"#format"	"{1:d},{2:d},{3:d}"
 		"en"		"Containment Level: {1}\nArmory Level: {2}\nCheckpoint Level: {3}"
 	}
+	"SCP-914"
+	{
+		"en"	"SCP-914"
+	}
+	"Keycard"
+	{
+		"en"	"Keycard"
+	}
+	"My Body"
+	{
+		"en"	"My Body"
+	}
+	"Keycard100"
+	{
+		"en"	"Janitor Keycard"
+	}
+	"Keycard200"
+	{
+		"en"	"Scientist Keycard"
+	}
+	"Keycard101"
+	{
+		"en"	"Zone Manager Keycard"
+	}
+	"Keycard201"
+	{
+		"en"	"Major Scientist Keycard"
+	}
+	"Keycard111"
+	{
+		"en"	"Guard Keycard"
+	}
+	"Keycard121"
+	{
+		"en"	"Senior Guard Keycard"
+	}
+	"Keycard122"
+	{
+		"en"	"Lieutenant Keycard"
+	}
+	"Keycard132"
+	{
+		"en"	"Commander Keycard"
+	}
+	"Keycard301"
+	{
+		"en"	"Containment Engineer Keycard"
+	}
+	"Keycard302"
+	{
+		"en"	"Facility Manager Keycard"
+	}
+	"Keycard232"
+	{
+		"en"	"Artificial Keycard"
+	}
+	"Keycard332"
+	{
+		"en"	"O5 Keycard"
+	}
+	"SmallHealth"
+	{
+		"en"	"Pain Killers"
+	}
+	"MediumHealth"
+	{
+		"en"	"Health Kit"
+	}
+	"Adrenaline"
+	{
+		"en"	"Adrenaline"
+	}
+	"Radio"
+	{
+		"en"	"Radio"
+	}
+	"SCP500"
+	{
+		"en"	"SCP-500"
+	}
+	"SCP018"
+	{
+		"en"	"SCP-018"
+	}
+	"FlashGrenade"
+	{
+		"en"	"Flash Grenade"
+	}
+	"FragGrenade"
+	{
+		"en"	"High-Explosive Grenade"
+	}
+	"SCP207"
+	{
+		"en"	"SCP-207"
+	}
+	"SCP268"
+	{
+		"en"	"SCP-268"
+	}
 }

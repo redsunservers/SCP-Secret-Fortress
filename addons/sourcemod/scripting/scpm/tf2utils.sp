@@ -14,11 +14,8 @@ void TF2U_PluginLoad()
 	#if defined __nosoop_tf2_utils_included
 	MarkNativeAsOptional("TF2Util_GetPlayerWearableCount");
 	MarkNativeAsOptional("TF2Util_GetPlayerWearable");
-	MarkNativeAsOptional("TF2Util_GetPlayerMaxHealthBoost");
 	MarkNativeAsOptional("TF2Util_EquipPlayerWearable");
 	MarkNativeAsOptional("TF2Util_SetPlayerActiveWeapon");
-	MarkNativeAsOptional("TF2Util_IsPointInRespawnRoom");
-	MarkNativeAsOptional("TF2Util_GetPlayerLoadoutEntity");
 	#endif
 }
 
@@ -128,62 +125,4 @@ stock void TF2U_SetPlayerActiveWeapon(int client, int entity)
 		GetEntityClassname(entity, buffer, sizeof(buffer));
 		ClientCommand(client, "use %s", buffer);
 	}
-}
-
-stock bool TF2U_IsInRespawnRoom(int entity)
-{
-	#if defined __nosoop_tf2_utils_included
-	if(Loaded)
-	{
-		float pos[3];
-		GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
-		return TF2Util_IsPointInRespawnRoom(pos, entity);
-	}
-	#endif
-
-	return !entity;
-}
-
-stock int TF2U_GetPlayerLoadoutEntity(int client, int loadoutSlot, bool includeWearableWeapons = true)
-{
-	#if defined __nosoop_tf2_utils_included
-	if(Loaded)
-		return TF2Util_GetPlayerLoadoutEntity(client, loadoutSlot, includeWearableWeapons);
-	#endif
-
-	int entity = GetPlayerWeaponSlot(client, loadoutSlot);
-	if(entity == -1 && includeWearableWeapons)
-	{
-		switch(loadoutSlot)
-		{
-			case TFWeaponSlot_Primary:
-			{
-				int index;
-				while((TF2U_GetWearable(client, entity, index)))
-				{
-					int defindex = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
-					switch(defindex)
-					{
-						case 405, 608:
-							break;
-					}
-				}
-			}
-			case TFWeaponSlot_Secondary:
-			{
-				int index;
-				while((TF2U_GetWearable(client, entity, index)))
-				{
-					int defindex = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
-					switch(defindex)
-					{
-						case 133, 444, 131, 406, 1099, 1144, 57, 231, 642:
-							break;
-					}
-				}
-			}
-		}
-	}
-
-	return entity;
 }

@@ -203,7 +203,7 @@ stock bool Bosses_StartFunctionClient(int client, const char[] name)
 // @error Invalid index
 stock bool Bosses_StartFunction(int index, const char[] name)
 {
-	BossData data;
+	static BossData data;
 	BossList.GetArray(index, data);
 	return StartBossFunction(data.Subplugin, data.Prefix, name);
 }

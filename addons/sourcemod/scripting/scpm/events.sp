@@ -48,7 +48,10 @@ static void Events_PlayerSpawn(Event event, const char[] name, bool dontBroadcas
 	{
 		Human_PlayerSpawn(client);
 		if(GetClientTeam(client) > TFTeam_Spectator)
+		{
+			Gamemode_PlayerSpawn(client);
 			Music_ToggleMusic(client);
+		}
 	}
 
 	Gamemode_CheckAlivePlayers();

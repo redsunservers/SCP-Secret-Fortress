@@ -230,6 +230,225 @@ float FixAngle(float angle)
 	return angle;
 }
 
+void ApplyHealEvent(int entindex, int amount)
+{
+	Event event = CreateEvent("player_healonhit", true);
+
+	event.SetInt("entindex", entindex);
+	event.SetInt("amount", amount);
+
+	event.FireToClient(entindex);
+	event.Cancel();
+}
+
+void CopyVector(const float from[3], float out[3])
+{
+	out[0] = from[0];
+	out[1] = from[1];
+	out[2] = from[2];
+}
+
+public Action Timer_RemoveEntity(Handle timer, any entid)
+{
+	int entity = EntRefToEntIndex(entid);
+	if(IsValidEdict(entity) && entity>MaxClients)
+	{
+		TeleportEntity(entity, { 16383.0, 16383.0, -16383.0 }, NULL_VECTOR, NULL_VECTOR); // send it away first in case it feels like dying dramatically
+		RemoveEntity(entity);
+	}
+	return Plugin_Continue;
+}
+
+// interpolate between 2 values as a percentage
+float LerpValue(float p, float a, float b)
+{
+	return a + (b - a) * p;
+}
+
+int CreateExplosion(int attacker = -1, int damage = 0, int radius = -1, float pos[3], int flags = 0, const char[] killIcon = "", bool immediate = true)
+{
+	int explosion = CreateEntityByName("env_explosion");
+	
+	if (!IsValidEntity(explosion))
+		return -1;
+	
+	char buffer[32];
+	
+	DispatchKeyValueVector(explosion, "origin", pos);
+	
+	Format(buffer, sizeof(buffer), "%d", damage);
+	DispatchKeyValue(explosion, "iMagnitude", buffer);
+	
+	// set radius override if specified
+	if (radius != -1)
+	{
+		Format(buffer, sizeof(buffer), "%d", radius);
+		DispatchKeyValue(explosion, "iRadiusOverride", buffer);
+	}
+	
+	Format(buffer, sizeof(buffer), "%d", flags);
+	DispatchKeyValue(explosion, "spawnflags", buffer);
+	
+	// set attacker if specified
+	if (attacker != -1)
+		SetEntPropEnt(explosion, Prop_Data, "m_hOwnerEntity", attacker);
+	
+	DispatchSpawn(explosion);
+	
+	// change the kill icon if specified
+	if (killIcon[0])
+	{
+		Format(buffer, sizeof(buffer), "classname %s", killIcon);
+		SetVariantString(buffer);
+		AcceptEntityInput(explosion, "AddOutput");
+	}
+	
+	// do the explosion and clean up right here if it's set to do immediately, or let the explosion be manipulated further if not
+	if (immediate)
+	{
+		AcceptEntityInput(explosion, "Explode");
+		CreateTimer(0.1, Timer_RemoveEntity, EntIndexToEntRef(explosion), TIMER_FLAG_NO_MAPCHANGE);
+	}
+	
+	return explosion;
+}
+
+int AttachParticle(int entity, char[] particleType, bool attach=true, float lifetime)
+{
+	int particle = CreateEntityByName("info_particle_system");
+	if (!IsValidEntity(particle))
+		return 0;
+		
+	char targetName[128];
+	float position[3];
+	GetEntPropVector(entity, Prop_Send, "m_vecOrigin", position);
+	TeleportEntity(particle, position, NULL_VECTOR, NULL_VECTOR);
+
+	if (attach)
+	{
+		Format(targetName, sizeof(targetName), "target%d", entity);
+		DispatchKeyValue(entity, "targetname", targetName);
+	
+		DispatchKeyValue(particle, "targetname", "tf2particle");
+		DispatchKeyValue(particle, "parentname", targetName);
+	}
+	
+	DispatchKeyValue(particle, "effect_name", particleType);
+	DispatchSpawn(particle);
+	
+	if (attach)
+	{
+		SetVariantString(targetName);
+		AcceptEntityInput(particle, "SetParent", particle, particle, 0);
+		SetEntPropEnt(particle, Prop_Send, "m_hOwnerEntity", entity);
+	}
+	
+	ActivateEntity(particle);
+	AcceptEntityInput(particle, "start");
+	
+	CreateTimer(lifetime, Timer_RemoveEntity, EntIndexToEntRef(particle), TIMER_FLAG_NO_MAPCHANGE);	
+	
+	return particle;
+}
+
+int TF2_CreateLightEntity(float radius, int color[4], int brightness, float lifetime)
+{
+	int entity = CreateEntityByName("light_dynamic");
+	if (entity != -1)
+	{			
+		char lightColor[32];
+		Format(lightColor, sizeof(lightColor), "%d %d %d", color[0], color[1], color[2]);
+		DispatchKeyValue(entity, "rendercolor", lightColor);
+		
+		SetVariantFloat(radius);
+		AcceptEntityInput(entity, "spotlight_radius");
+		
+		SetVariantFloat(radius);
+		AcceptEntityInput(entity, "distance");
+		
+		SetVariantInt(brightness);
+		AcceptEntityInput(entity, "brightness");
+		
+		SetVariantInt(1);
+		AcceptEntityInput(entity, "cone");
+		
+		DispatchSpawn(entity);
+		
+		ActivateEntity(entity);
+		AcceptEntityInput(entity, "TurnOn");
+		SetEntityRenderFx(entity, RENDERFX_SOLID_SLOW);
+		SetEntityRenderColor(entity, color[0], color[1], color[2], color[3]);
+		
+		int flags = GetEdictFlags(entity);
+		if (!(flags & FL_EDICT_ALWAYS))
+		{
+			flags |= FL_EDICT_ALWAYS;
+			SetEdictFlags(entity, flags);
+		}
+		
+		CreateTimer(lifetime, Timer_RemoveEntity, EntIndexToEntRef(entity), TIMER_FLAG_NO_MAPCHANGE);
+	}
+	
+	return entity;
+}
+
+int TF2_CreateGlow(int client, const char[] model)
+{
+	if(!model[0])
+		return -1;
+
+	int prop = CreateEntityByName("tf_taunt_prop");
+	if(IsValidEntity(prop))
+	{
+		int team = GetClientTeam(client);
+		SetEntProp(prop, Prop_Data, "m_iInitialTeamNum", team);
+		SetEntProp(prop, Prop_Send, "m_iTeamNum", team);
+
+		DispatchSpawn(prop);
+
+		SetEntityModel(prop, model);
+		SetEntPropEnt(prop, Prop_Data, "m_hEffectEntity", client);
+		SetEntProp(prop, Prop_Send, "m_bGlowEnabled", true);
+		SetEntProp(prop, Prop_Send, "m_fEffects", GetEntProp(prop, Prop_Send, "m_fEffects")|EF_BONEMERGE|EF_NOSHADOW|EF_NOINTERP);
+
+		SetVariantString("!activator");
+		AcceptEntityInput(prop, "SetParent", client);
+
+		SetEntityRenderMode(prop, RENDER_TRANSCOLOR);
+		SetEntityRenderColor(prop, 255, 255, 255, 255);
+	}
+	return prop;
+}
+
+bool GoToNamedSpawn(int client, const char[] match)
+{
+	ArrayList list = new ArrayList();
+
+	int entity = -1;
+	char name[32];
+	while((entity=FindEntityByClassname(entity, "info_target")) != -1)
+	{
+		GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
+		if(!StrContains(name, match, false))
+			list.Push(entity);
+	}
+
+	int length = list.Length;
+	if(length)
+	{
+		entity = list.Get(GetRandomInt(0, length-1));
+
+		float pos[3], ang[3];
+		GetEntPropVector(entity, Prop_Data, "m_vecAbsOrigin", pos);
+		GetEntPropVector(entity, Prop_Data, "m_vecAbsOrigin", ang);
+		ang[0] = 0.0;
+		ang[2] = 0.0;
+		TeleportEntity(client, pos, ang, NULL_VECTOR);
+	}
+
+	delete list;
+}
+
 public bool Trace_OnlyHitWorld(int entity, int mask)
 {
 	return entity == 0;

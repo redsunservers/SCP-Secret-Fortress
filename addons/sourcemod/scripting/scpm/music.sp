@@ -234,7 +234,7 @@ void Music_ToggleMusic(int client, bool startNew = true, bool stopExisting = fal
 			MusicInfinite[client] = false;
 		}
 
-		float stress = Human_GetStress(client);
+		float stress = Human_GetStressPercent(client);
 		bool marked = TF2_IsPlayerInCondition(client, TFCond_MarkedForDeath);
 
 		int type;

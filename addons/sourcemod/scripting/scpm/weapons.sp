@@ -187,7 +187,7 @@ static void Weapons_SpawnFrame(int ref)
 		if(HasEntProp(entity, Prop_Send, "m_iPrimaryAmmoType"))
 		{
 			int type = GetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType");
-			if(type >= 0)
+			if(type > 0)
 				SetEntProp(client, Prop_Data, "m_iAmmo", amount, _, type);
 		}
 	}

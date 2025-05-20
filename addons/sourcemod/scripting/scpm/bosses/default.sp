@@ -22,31 +22,7 @@ public void Default_Remove(int client)
 // When the player spawns in
 public void Default_Spawn(int client)
 {
-	ArrayList list = new ArrayList();
-
-	int entity = -1;
-	char name[32];
-	while((entity=FindEntityByClassname(entity, "info_target")) != -1)
-	{
-		GetEntPropString(entity, Prop_Data, "m_iName", name, sizeof(name));
-		if(!StrContains(name, "scp_spawn_p", false))
-			list.Push(entity);
-	}
-
-	int length = list.Length;
-	if(length)
-	{
-		entity = list.Get(GetRandomInt(0, length-1));
-
-		float pos[3], ang[3];
-		GetEntPropVector(entity, Prop_Data, "m_vecAbsOrigin", pos);
-		GetEntPropVector(entity, Prop_Data, "m_vecAbsOrigin", ang);
-		ang[0] = 0.0;
-		ang[2] = 0.0;
-		TeleportEntity(client, pos, ang, NULL_VECTOR);
-	}
-
-	delete list;
+	GoToNamedSpawn(client, "scp_spawn_p");
 }
 
 // Called twice, once with weapons false, then weapons true
