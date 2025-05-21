@@ -111,7 +111,14 @@ void Human_PlayerSpawn(int client)
 		int team = GetClientTeam(client);
 		if(team > TFTeam_Spectator)
 		{
-			GoToNamedSpawn(client, team == TFTeam_Humans ? "scp_spawn_d" : "scp_spawn_s");
+			if(GameRules_GetProp("m_bInWaitingForPlayers", 1))
+			{
+				TF2_AddCondition(client, TFCond_HalloweenGhostMode);
+			}
+			else if(!Client(client).NoEscape)
+			{
+				GoToNamedSpawn(client, team == TFTeam_Humans ? "scp_spawn_d" : "scp_spawn_s");
+			}
 		}
 	}
 }
@@ -457,7 +464,7 @@ void Human_ConditionAdded(int client, TFCond cond)
 	{
 		case TFCond_TeleportedGlow:
 		{
-			if(!Client(client).Escaped)
+			if(!Client(client).Escaped && !Client(client).NoEscape)
 			{
 				Client(client).Escaped = true;
 				TF2_RegeneratePlayer(client);

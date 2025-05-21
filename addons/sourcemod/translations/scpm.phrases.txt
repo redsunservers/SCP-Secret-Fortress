@@ -38,6 +38,11 @@
 		"#format"	"{1:d},{2:d},{3:d}"
 		"en"		"Containment Level: {1}\nArmory Level: {2}\nCheckpoint Level: {3}"
 	}
+	"Stat Win Screen"
+	{
+		"#format"	"{1:d},{2:d}"
+		"en"		"SCPs Alive: {1} --- Survivors: {2}\n \nThe Escapees:"
+	}
 	"SCP-914"
 	{
 		"en"	"SCP-914"
@@ -137,5 +142,9 @@
 	"SCP268"
 	{
 		"en"	"SCP-268"
+	}
+	"MTFSpawn"
+	{
+		"en"	"{mediumblue}Mobile Task Force Unit, Epsilon-11{default} has entered the facility."
 	}
 }

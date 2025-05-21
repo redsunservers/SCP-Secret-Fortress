@@ -4,11 +4,11 @@
 void Events_PluginStart()
 {
 	HookEvent("player_spawn", Events_PlayerSpawn, EventHookMode_Post);
-	HookEvent("player_death", Events_PlayerDeath, EventHookMode_Post);
+	HookEvent("player_death", Events_PlayerDeath, EventHookMode_Pre);
 	HookEvent("player_team", Events_PlayerSpawn, EventHookMode_Post);
 	HookEvent("post_inventory_application", Events_InventoryApplication, EventHookMode_Pre);
 	HookEvent("scorestats_accumulated_update", Events_RoundRespawn, EventHookMode_PostNoCopy);
-	HookEvent("teamplay_broadcast_audio", Events_BroadcastAudio, EventHookMode_Pre);
+	//HookEvent("teamplay_broadcast_audio", Events_BroadcastAudio, EventHookMode_Pre);
 	HookEvent("teamplay_round_start", Events_RoundStart, EventHookMode_PostNoCopy);
 	HookEvent("teamplay_round_win", Events_RoundEnd, EventHookMode_Post);
 	HookEvent("teamplay_win_panel", Events_WinPanel, EventHookMode_Pre);
@@ -27,19 +27,20 @@ static void Events_RoundStart(Event event, const char[] name, bool dontBroadcast
 
 static void Events_RoundEnd(Event event, const char[] name, bool dontBroadcast)
 {
-	Gamemode_RoundEnd(event.GetInt("team"));
+	Gamemode_RoundEnd(/*event.GetInt("team")*/);
+	Specials_RoundEnd();
 }
-
+/*
 static Action Events_BroadcastAudio(Event event, const char[] name, bool dontBroadcast)
 {
 	char sound[64];
 	event.GetString("sound", sound, sizeof(sound));
-	if(!StrContains(sound, "Game.Your", false) || StrEqual(sound, "Game.Stalemate", false) || !StrContains(sound, "Announcer.AM_RoundStartRandom", false))
+	if(!StrContains(sound, "Game.Your", false) || StrEqual(sound, "Game.Stalemate", false))
 		return Plugin_Handled;
 	
 	return Plugin_Continue;
 }
-
+*/
 static void Events_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
 	int userid = event.GetInt("userid");
@@ -71,13 +72,12 @@ static Action Events_InventoryApplication(Event event, const char[] name, bool d
 	return Plugin_Continue;
 }
 
-static void Events_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
+static Action Events_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
 {
-	int victim = GetClientOfUserId(event.GetInt("userid"));
+	int userid = event.GetInt("userid");
+	int victim = GetClientOfUserId(userid);
 	if(victim)
 	{
-		PrintToChatAll("Events_PlayerDeath");
-		
 		bool deadRinger = view_as<bool>(event.GetInt("death_flags") & TF_DEATHFLAG_DEADRINGER);
 		
 		if(Bosses_StartFunctionClient(victim, "PlayerDeath"))
@@ -101,8 +101,28 @@ static void Events_PlayerDeath(Event event, const char[] name, bool dontBroadcas
 				}
 			}
 		}
-		
-		//ScreenFade(victim, 50, 50, FFADE_IN|FFADE_PURGE, 50, 0, 0, 255);
+
+		int assister = GetClientOfUserId(event.GetInt("assist"));
+
+		for(int target = 1; target <= MaxClients; target++)
+		{
+			if(IsClientInGame(target))
+			{
+				// If all these conditions fail, don't show the kill feed to the player
+				if(victim != target && attacker != target && !Client(victim).IsBoss && !Client(target).LookingAt(victim))
+				{
+					if(attacker < 1 || attacker > MaxClients || GetClientTeam(attacker) != GetClientTeam(target) || !Client(attacker).CanTalkTo(victim))
+					{
+						if(assister < 1 || assister > MaxClients || GetClientTeam(assister) != GetClientTeam(target) || !Client(assister).CanTalkTo(victim))
+						{
+							continue;
+						}
+					}
+				}
+
+				event.FireToClient(target);
+			}
+		}
 		
 		if(!deadRinger)
 		{
@@ -111,8 +131,24 @@ static void Events_PlayerDeath(Event event, const char[] name, bool dontBroadcas
 			Music_ToggleMusic(victim, false, true);
 			Gamemode_CheckAlivePlayers(victim);
 			Client(victim).ResetByDeath();
+			
+			CreateTimer(0.1, RemoveKillCam, userid, TIMER_FLAG_NO_MAPCHANGE);
 		}
+		
+		event.BroadcastDisabled = true;
+		return Plugin_Changed;
 	}
+
+	return Plugin_Continue;
+}
+
+static Action RemoveKillCam(Handle timer, int userid)
+{
+	int client = GetClientOfUserId(userid);
+	if(client)
+		SetEntProp(client, Prop_Send, "m_hObserverTarget", -1);
+	
+	return Plugin_Continue;
 }
 
 static Action Events_WinPanel(Event event, const char[] name, bool dontBroadcast)

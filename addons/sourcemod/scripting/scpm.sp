@@ -230,6 +230,7 @@ int MaxPlayersAlive[TFTeam_MAX];
 #include "scpm/music.sp"
 #include "scpm/sdkcalls.sp"
 #include "scpm/sdkhooks.sp"
+#include "scpm/specials.sp"
 #include "scpm/tf2utils.sp"
 #include "scpm/vscript.sp"
 #include "scpm/weapons.sp"
@@ -241,6 +242,8 @@ int MaxPlayersAlive[TFTeam_MAX];
 #include "scpm/items/generic.sp"
 #include "scpm/items/scp018.sp"
 #include "scpm/items/grenades.sp"
+
+#include "scpm/specials/secondmercs.sp"
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
@@ -287,12 +290,13 @@ public void OnPluginEnd()
 
 public void OnMapStart()
 {
-	
+	SDKHook_MapStart();
 }
 
 public void OnMapEnd()
 {
 	ConVar_Disable();
+	Specials_MapEnd();
 }
 
 public void OnLibraryAdded(const char[] name)

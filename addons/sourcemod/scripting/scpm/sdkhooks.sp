@@ -23,6 +23,13 @@ void SDKHook_PluginStart()
 	OTDLoaded = LibraryExists(OTD_LIBRARY);
 }
 
+void SDKHook_MapStart()
+{
+	int entity = FindEntityByClassname(-1, "tf_player_manager");
+	if(entity != -1)
+		SDKHook(entity, SDKHook_ThinkPost, PlayerManagerThink);
+}
+
 void SDKHook_LibraryAdded(const char[] name)
 {
 	if(!OTDLoaded && StrEqual(name, OTD_LIBRARY))
@@ -32,7 +39,7 @@ void SDKHook_LibraryAdded(const char[] name)
 		for(int client = 1; client <= MaxClients; client++)
 		{
 			if(IsClientInGame(client))
-				SDKUnhook(client, SDKHook_OnTakeDamage, SDKHook_TakeDamage);
+				SDKUnhook(client, SDKHook_OnTakeDamage, ClientTakeDamage);
 		}
 	}
 }
@@ -46,7 +53,7 @@ void SDKHook_LibraryRemoved(const char[] name)
 		for(int client = 1; client <= MaxClients; client++)
 		{
 			if(IsClientInGame(client))
-				SDKHook(client, SDKHook_OnTakeDamage, SDKHook_TakeDamage);
+				SDKHook(client, SDKHook_OnTakeDamage, ClientTakeDamage);
 		}
 	}
 }
@@ -54,17 +61,17 @@ void SDKHook_LibraryRemoved(const char[] name)
 void SDKHook_HookClient(int client)
 {
 	if(!OTDLoaded)
-		SDKHook(client, SDKHook_OnTakeDamage, SDKHook_TakeDamage);
+		SDKHook(client, SDKHook_OnTakeDamage, ClientTakeDamage);
 	
-	SDKHook(client, SDKHook_SetTransmit, SDKHook_Transmit);
+	SDKHook(client, SDKHook_SetTransmit, ClientTransmit);
 }
 
 public void OnEntityCreated(int entity, const char[] classname)
 {
 	if(StrContains(classname, "item_healthkit") != -1 || StrContains(classname, "item_ammopack") != -1 || StrEqual(classname, "tf_ammo_pack"))
 	{
-		SDKHook(entity, SDKHook_StartTouch, SDKHook_PickupTouch);
-		SDKHook(entity, SDKHook_Touch, SDKHook_PickupTouch);
+		SDKHook(entity, SDKHook_StartTouch, PickupTouch);
+		SDKHook(entity, SDKHook_Touch, PickupTouch);
 	}
 	else
 	{
@@ -72,7 +79,7 @@ public void OnEntityCreated(int entity, const char[] classname)
 	}
 }
 
-static Action SDKHook_TakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+static Action ClientTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
 	CritType crit = (damagetype & DMG_CRIT) ? CritType_Crit : CritType_None;
 	return TF2_OnTakeDamage(victim, attacker, inflictor, damage, damagetype, weapon, damageForce, damagePosition, damagecustom, crit);
@@ -153,7 +160,7 @@ public Action TF2_OnTakeDamage(int victim, int &attacker, int &inflictor, float 
 	return Plugin_Continue;
 }
 
-static Action SDKHook_Transmit(int client, int target)
+static Action ClientTransmit(int client, int target)
 {
 	if(client != target && target > 0 && target <= MaxClients)
 	{
@@ -216,10 +223,63 @@ static Action SDKHook_NormalSHook(int clients[MAXPLAYERS], int &numClients, char
 	return Plugin_Continue;
 }
 
-static Action SDKHook_PickupTouch(int entity, int client)
+static Action PickupTouch(int entity, int client)
 {
 	if(client > 0 && client <= MaxClients && (Client(client).IsBoss || Client(client).Minion))
 		return Plugin_Handled;
 	
 	return Plugin_Continue;
+}
+
+static void PlayerManagerThink(int entity)
+{
+	if(!RoundActive())
+		return;
+	
+	static int offsetAlive = -1;
+	if(offsetAlive == -1) 
+		offsetAlive = FindSendPropInfo("CTFPlayerResource", "m_bAlive");
+
+	static int offsetTeam = -1;
+	if(offsetTeam == -1) 
+		offsetTeam = FindSendPropInfo("CTFPlayerResource", "m_iTeam");
+
+	static int offsetScore = -1;
+	if(offsetScore == -1) 
+		offsetScore = FindSendPropInfo("CTFPlayerResource", "m_iTotalScore");
+
+	static int offsetClass = -1;
+	if(offsetClass == -1) 
+		offsetClass = FindSendPropInfo("CTFPlayerResource", "m_iPlayerClass");
+
+	static int offsetClassKilled = -1;
+	if(offsetClassKilled == -1) 
+		offsetClassKilled = FindSendPropInfo("CTFPlayerResource", "m_iPlayerClassWhenKilled");
+
+	bool[] alive = new bool[MaxClients+1];
+	int[] team = new int[MaxClients+1];
+
+	for(int client = 1; client <= MaxClients; client++)
+	{
+		if(IsClientInGame(client))
+		{
+			if(GetClientTeam(client) > TFTeam_Spectator)
+			{
+				team[client] = (client % 2) ? TFTeam_Bosses : TFTeam_Humans;
+				alive[client] = true;
+			}
+			else
+			{
+				team[client] = TFTeam_Spectator;
+				alive[client] = false;
+			}
+		}
+	}
+
+	static const int zero[MAXPLAYERS+1];
+	SetEntDataArray(entity, offsetAlive, alive, MaxClients + 1, 1);
+	SetEntDataArray(entity, offsetTeam, team, MaxClients + 1);
+	SetEntDataArray(entity, offsetScore, zero, MaxClients + 1);
+	SetEntDataArray(entity, offsetClass, zero, MaxClients + 1);
+	SetEntDataArray(entity, offsetClassKilled, zero, MaxClients + 1);
 }

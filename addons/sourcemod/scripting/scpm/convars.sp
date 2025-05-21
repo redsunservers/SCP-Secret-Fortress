@@ -41,10 +41,13 @@ void ConVar_PluginStart()
 	ConVar_Add("mp_flashlight", "1");
 	ConVar_Add("mp_forcecamera", "0", false);
 	ConVar_Add("mp_humans_must_join_team", "any");
-	ConVar_Add("mp_teams_unbalance_limit", "0");
-	ConVar_Add("mp_stalemate_enable", "0");
 	ConVar_Add("mp_scrambleteams_auto", "0");
+	ConVar_Add("mp_stalemate_enable", "0");
+	ConVar_Add("mp_teams_unbalance_limit", "0");
+	ConVar_Add("mp_tournament_blueteamname", "SCPS");
+	ConVar_Add("mp_tournament_redteamname", "MERCS");
 	ConVar_Add("mp_waitingforplayers_time", "90.0", false);
+	ConVar_Add("spec_freeze_time", "10.0");
 	ConVar_Add("tf_allow_player_use", "1");
 	ConVar_Add("tf_dropped_weapon_lifetime", "900.0");
 	ConVar_Add("tf_helpme_range", "-1.0");

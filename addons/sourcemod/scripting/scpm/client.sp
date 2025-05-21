@@ -22,6 +22,8 @@ static int CanTalkToPos[MAXPLAYERS+1][(MAXPLAYERS+1) / 32];
 static int GlowingToPos[MAXPLAYERS+1][(MAXPLAYERS+1) / 32];
 static int NoTransmitToPos[MAXPLAYERS+1][(MAXPLAYERS+1) / 32];
 static bool SilentTalk[MAXPLAYERS+1];
+static bool NoEscape[MAXPLAYERS+1];
+static float EscapeTimeAt[MAXPLAYERS+1];
 
 methodmap Client
 {
@@ -323,6 +325,31 @@ methodmap Client
 			SilentTalk[this.Index] = value;
 		}
 	}
+
+	property bool NoEscape
+	{
+		public get()
+		{
+			return NoEscape[this.Index];
+		}
+		public set(bool value)
+		{
+			NoEscape[this.Index] = value;
+		}
+	}
+
+	// Game time
+	property float EscapeTimeAt
+	{
+		public get()
+		{
+			return EscapeTimeAt[this.Index];
+		}
+		public set(float value)
+		{
+			EscapeTimeAt[this.Index] = value;
+		}
+	}
 	
 	public void ResetByDeath()
 	{
@@ -340,17 +367,19 @@ methodmap Client
 		this.AllTalkTimeFor = 0.0;
 		this.LastDangerAt = 0.0;
 		this.SilentTalk = false;
+		this.NoEscape = false;
 	}
 	
 	public void ResetByRound()
 	{
+		this.Boss = -1;
 		this.ControlProgress = 0;
+		this.EscapeTimeAt = 0.0;
 		this.ResetByDeath();
 	}
 	
 	public void ResetByDisconnect()
 	{
-		this.Boss = -1;
 		this.LastGameTime = 0.0;
 		this.ResetByRound();
 	}

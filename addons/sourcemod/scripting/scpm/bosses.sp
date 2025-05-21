@@ -17,14 +17,14 @@ enum struct BossData
 			return false;
 		}
 
-		if(!StartBossFunction(this.Subplugin, this.Prefix, "Precache"))
+		if(!StartCustomFunction(this.Subplugin, this.Prefix, "Precache"))
 		{
 			LogError("[Config] Boss '%s' does not have precache function", this.Prefix);
 			return false;
 		}
 
 		Call_PushCell(index);
-		Call_PushArrayEx(this, sizeof(BossData), SM_PARAM_COPYBACK);
+		Call_PushArrayEx(this, sizeof(this), SM_PARAM_COPYBACK);
 		Call_Finish();
 		return true;
 	}
@@ -205,19 +205,7 @@ stock bool Bosses_StartFunction(int index, const char[] name)
 {
 	static BossData data;
 	BossList.GetArray(index, data);
-	return StartBossFunction(data.Subplugin, data.Prefix, name);
-}
-
-static bool StartBossFunction(Handle plugin, const char[] prefix, const char[] name)
-{
-	static char buffer[64];
-	Format(buffer, sizeof(buffer), "%s_%s", prefix, name);
-	Function func = GetFunctionByName(plugin, buffer);
-	if(func == INVALID_FUNCTION)
-		return false;
-	
-	Call_StartFunction(plugin, func);
-	return true;
+	return StartCustomFunction(data.Subplugin, data.Prefix, name);
 }
 
 // Gets the boss index based on name, returns -1 if none found
@@ -393,4 +381,19 @@ Action Bosses_PlayerRunCmd(int client, int &buttons, int &impulse, float vel[3],
 	}
 	
 	return action;
+}
+
+// Delete the handle when done
+ArrayList Bosses_GetRandomList()
+{
+	ArrayList list = new ArrayList();
+
+	int length = BossList.Length;
+	for(int i; i < length; i++)
+	{
+		list.Push(i);
+	}
+
+	list.Sort(Sort_Random, Sort_Integer);
+	return list;
 }

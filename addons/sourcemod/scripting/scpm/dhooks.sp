@@ -7,6 +7,7 @@ static Address CLagCompensationManager;
 
 static int ForceRespawnPreHook[MAXPLAYERS+1];
 static int ForceRespawnPostHook[MAXPLAYERS+1];
+static bool AllowRespawns;
 static int PrefClass;
 
 void DHook_PluginStart()
@@ -80,6 +81,18 @@ void DHook_UnhookClient(int client)
 	}
 }
 
+void DHook_RepsawnPlayer(int client)
+{
+	DHook_ToggleRespawns(true);
+	TF2_RespawnPlayer(client);
+	DHook_ToggleRespawns(false);
+}
+
+void DHook_ToggleRespawns(bool value)
+{
+	AllowRespawns = value;
+}
+
 Address DHook_GetLagCompensationManager()
 {
 	return CLagCompensationManager;
@@ -113,6 +126,10 @@ static MRESReturn DHook_DropAmmoPackPre(int client, DHookParam param)
 static MRESReturn DHook_ForceRespawnPre(int client)
 {
 	PrefClass = 0;
+
+	if(!AllowRespawns && GameRules_GetRoundState() == RoundState_RoundRunning)
+		return MRES_Supercede;
+
 	if(Client(client).IsBoss)
 	{
 		int class;
@@ -126,6 +143,9 @@ static MRESReturn DHook_ForceRespawnPre(int client)
 		if(class)
 		{
 			PrefClass = GetEntProp(client, Prop_Send, "m_iDesiredPlayerClass");
+			if(!PrefClass)
+				PrefClass = class;
+			
 			SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", class);
 		}
 	}

@@ -12,6 +12,7 @@ void Configs_ConfigsExecuted()
 	Human_SetupConfig(map);
 	Items_SetupConfig(map);
 	Music_SetupConfig(map);
+	Specials_SetupConfig(map);
 	Weapons_SetupConfig(map);
 
 	delete map;

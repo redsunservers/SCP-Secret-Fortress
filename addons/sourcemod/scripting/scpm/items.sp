@@ -24,13 +24,6 @@ enum struct ActionInfo
 			return false;
 		}
 
-		if(StartItemFunction(this.Subplugin, this.Prefix, "Precache"))
-		{
-			Call_PushCell(index);
-			Call_PushArrayEx(this, sizeof(this), SM_PARAM_COPYBACK);
-			Call_Finish();
-		}
-
 		if(kv.JumpToKey("downloads"))
 		{
 			if(kv.GotoFirstSubKey(false))
@@ -61,6 +54,13 @@ enum struct ActionInfo
 		if(this.Model[0])
 			PrecacheModel(this.Model);
 		
+		if(StartCustomFunction(this.Subplugin, this.Prefix, "Precache"))
+		{
+			Call_PushCell(index);
+			Call_PushArrayEx(this, sizeof(this), SM_PARAM_COPYBACK);
+			Call_Finish();
+		}
+
 		return true;
 	}
 }
@@ -107,7 +107,7 @@ void Items_SetupConfig(KeyValues map)
 	{
 		map.Rewind();
 		if(map.JumpToKey("Items"))
-			kv.Import(map);
+			kv = map;
 	}
 
 	char buffer1[PLATFORM_MAX_PATH], buffer2[32];
@@ -827,17 +827,5 @@ static bool StartItemFunctionByIndex(int itemIndex, const char[] name)
 	if(GetActionDataOfIndex(itemIndex, action) == -1)
 		return false;
 	
-	return StartItemFunction(action.Subplugin, action.Prefix, name);
-}
-
-static bool StartItemFunction(Handle plugin, const char[] prefix, const char[] name)
-{
-	static char buffer[64];
-	Format(buffer, sizeof(buffer), "%s_%s", prefix, name);
-	Function func = GetFunctionByName(plugin, buffer);
-	if(func == INVALID_FUNCTION)
-		return false;
-	
-	Call_StartFunction(plugin, func);
-	return true;
+	return StartCustomFunction(action.Subplugin, action.Prefix, name);
 }

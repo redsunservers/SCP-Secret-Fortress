@@ -35,9 +35,7 @@ void Gamemode_PluginStart()
 
 	HookEntityOutput("logic_relay", "OnTrigger", OnRelayTrigger);
 
-	// Reload support
-	if(FindEntityByClassname(-1, "tf_gamerules") != -1)
-		RequestFrame(Gamemode_RoundRespawn);
+	RoundStartTime = GetGameTime();
 }
 
 void Gamemode_RoundRespawn()
@@ -84,21 +82,42 @@ void Gamemode_RoundRespawn()
 			bosses++;
 		}
 		
+		ArrayList list = Bosses_GetRandomList();
+		if(list.Length < bosses)
+			bosses = list.Length;
+
 		for(int i; i < count; i++)
 		{
 			int client = players[i][0];
 
 			SetEntProp(client, Prop_Send, "m_lifeState", 2);
-			ChangeClientTeam(client, TFTeam_Humans);
+			ChangeClientTeam(client, i < bosses ? TFTeam_Bosses : TFTeam_Humans);
 			SetEntProp(client, Prop_Send, "m_lifeState", 0);
+
+			if(i < bosses)
+			{
+				if(!IsFakeClient(client))
+					BossQueue.SetInt(client, 0);
+
+				int index = list.Get(i);
+				Bosses_Create(client, index);
+			}
+			else if(!IsFakeClient(client))
+			{
+				BossQueue.SetInt(client, players[i][1] + 10);
+			}
 		}
+
+		delete list;
+
+		Specials_PickNewRound();
+
+		delete BlinkTimer;
+		BlinkTimer = CreateTimer(0.1, GlobalBlinkTimer);
+		NextBlinkAt = GetGameTime() + 0.1;
 	}
 
 	Gamemode_CheckAlivePlayers(_, false, true);
-
-	delete BlinkTimer;
-	BlinkTimer = CreateTimer(0.1, GlobalBlinkTimer);
-	NextBlinkAt = GetGameTime() + 0.1;
 }
 
 static int SortByQueuePoints(int[] elem1, int[] elem2, const int[][] array, Handle hndl)
@@ -117,11 +136,39 @@ void Gamemode_PlayerSpawn(int client)
 	CreateTimer(2.0, ReapplyGlowEffect, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 }
 
-void Gamemode_RoundEnd(int winteam)
+void Gamemode_RoundEnd()
 {
 	delete BlinkTimer;
+	
+	char buffer[256];
+	for(int client = 1; client <= MaxClients; client++)
+	{
+		if(IsClientInGame(client))
+		{
+			if(Client(client).EscapeTimeAt)
+			{
+				int sec = RoundFloat(RoundStartTime - Client(client).EscapeTimeAt);
+				int min = sec / 60;
+				sec = sec % 60;
 
-	if(winteam) {}
+				Format(buffer, sizeof(buffer), "%s\n%N (%d:%02d)%s", buffer, client, min, sec, IsPlayerAlive(client) ? "" : " ☠");
+			}
+		}
+	}
+
+	if(!buffer[0])
+		strcopy(buffer, sizeof(buffer), "\n☠");
+
+	SetHudTextParams(-1.0, 0.3, 19.0, 255, 255, 255, 255, 2, 0.1, 0.1);
+	
+	for(int client = 1; client <= MaxClients; client++)
+	{
+		if(IsClientInGame(client))
+		{
+			SetGlobalTransTarget(client);
+			ShowSyncHudText(client, SyncHud, "%t%s", "Stat Win Screen", PlayersAlive[TFTeam_Bosses], PlayersAlive[TFTeam_Humans], buffer);
+		}
+	}
 }
 
 void Gamemode_ClientDisconnect(int client)
@@ -189,7 +236,7 @@ void Gamemode_UpdateListeners()
 	delete GlobalTimer;
 	GlobalTimer = CreateTimer(0.2, GlobalThinkTimer);
 
-	if(GameRules_GetRoundState() > RoundState_RoundRunning || GameRules_GetProp("m_bInWaitingForPlayers", 1))
+	if(!RoundActive())
 	{
 		if(!ListenerDefault)
 		{
@@ -412,7 +459,7 @@ void Gamemode_UpdateListeners()
 // Call whenever to update PlayerAlive variables
 void Gamemode_CheckAlivePlayers(int exclude = 0, bool alive = true, bool resetMax = false)
 {
-	bool stall;
+	bool stall, vip;
 
 	for(int i; i < TFTeam_MAX; i++)
 	{
@@ -426,10 +473,15 @@ void Gamemode_CheckAlivePlayers(int exclude = 0, bool alive = true, bool resetMa
 			int team = GetClientTeam(i);
 			if((!alive && team > TFTeam_Spectator) || IsPlayerAlive(i))
 			{
-				PlayersAlive[team]++;
+				if(!Client(i).NoEscape)
+					PlayersAlive[team]++;
 
-				if(team == TFTeam_Humans && !Client(i).Escaped)
-					stall = true;
+				if(!Client(i).NoEscape && team == TFTeam_Humans)
+				{
+					vip = true;
+					if(!Client(i).Escaped)
+						stall = true;
+				}
 			}
 		}
 	}
@@ -448,7 +500,7 @@ void Gamemode_CheckAlivePlayers(int exclude = 0, bool alive = true, bool resetMa
 			int winner = TFTeam_Unassigned;
 			int reason = WINREASON_STALEMATE;
 
-			if(PlayersAlive[TFTeam_Humans])
+			if(vip)
 			{
 				winner = TFTeam_Humans;
 				reason = PlayersAlive[TFTeam_Bosses] ? WINREASON_FLAG_CAPTURE_LIMIT : WINREASON_OPPONENTS_DEAD;

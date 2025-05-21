@@ -27,6 +27,18 @@ stock void AddDownloadList(const char[][] array, int length)
 	LockStringTables(save);
 }
 
+bool StartCustomFunction(Handle plugin, const char[] prefix, const char[] name)
+{
+	static char buffer[64];
+	Format(buffer, sizeof(buffer), "%s_%s", prefix, name);
+	Function func = GetFunctionByName(plugin, buffer);
+	if(func == INVALID_FUNCTION)
+		return false;
+	
+	Call_StartFunction(plugin, func);
+	return true;
+}
+
 float FAbs(float value)
 {
 	return value < 0.0 ? -value : value;
@@ -447,6 +459,213 @@ bool GoToNamedSpawn(int client, const char[] match)
 	}
 
 	delete list;
+
+	return view_as<bool>(length);
+}
+
+void TriggerRelay(const char[] name)
+{
+	int entity = -1;
+	while ((entity = FindEntityByClassname(entity, "logic_relay")) != -1)
+	{
+		char entityname[32];
+		GetEntPropString(entity, Prop_Data, "m_iName", entityname, sizeof(entityname));
+		if(StrEqual(entityname, name, false))
+			AcceptEntityInput(entity, "Trigger");
+	}
+}
+
+bool RoundActive()
+{
+	if(GameRules_GetProp("m_bInWaitingForPlayers", 1))
+		return false;
+	
+	RoundState state = GameRules_GetRoundState();
+	return state <= RoundState_RoundRunning;
+}
+
+void MultiToDownloadsTable(const char[][] filename, int length)
+{
+	for(int i; i < length; i++)
+	{
+		CheckAndAddFileToDownloadsTable(filename[i]);
+	}
+}
+
+void CheckAndAddFileToDownloadsTable(const char[] filename)
+{
+	if(!FileExists(filename, true))
+		LogError("[Boss] Missing file '%s'", filename);
+	
+	AddFileToDownloadsTable(filename);
+}
+
+void ConstrainDistance(const float[] startPoint, float[] endPoint, float distance, float maxDistance)
+{
+	float constrainFactor = maxDistance / distance;
+	endPoint[0] = ((endPoint[0] - startPoint[0]) * constrainFactor) + startPoint[0];
+	endPoint[1] = ((endPoint[1] - startPoint[1]) * constrainFactor) + startPoint[1];
+	endPoint[2] = ((endPoint[2] - startPoint[2]) * constrainFactor) + startPoint[2];
+}
+
+void AnglesToVelocity(const float ang[3], float vel[3], float speed=1.0)
+{
+	vel[0] = Cosine(DegToRad(ang[1]));
+	vel[1] = Sine(DegToRad(ang[1]));
+	vel[2] = Sine(DegToRad(ang[0])) * -1.0;
+	
+	NormalizeVector(vel, vel);
+	
+	ScaleVector(vel, speed);
+}
+
+// VScript Example Valve Wiki
+stock void ForceTaunt(int client, int index)
+{
+	int entity = CreateEntityByName("tf_weapon_bat");
+	if(entity != -1)
+	{
+		int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+
+		SetVariantString("self.StopTaunt(true)");
+		AcceptEntityInput(client, "RunScriptCode");
+		TF2_RemoveCondition(client, TFCond_Taunting);
+		
+		DispatchSpawn(entity);
+		SetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex", index);
+		SetEntProp(entity, Prop_Send, "m_bInitialized", true);
+		SetEntProp(entity, Prop_Send, "m_bForcePurgeFixedupStrings", true);
+		
+		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", entity);
+		SetEntProp(client, Prop_Send, "m_iFOV", 0); // fix sniper rifles
+		SetVariantString("self.HandleTauntCommand(0)");
+		AcceptEntityInput(client, "RunScriptCode");
+
+		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
+		RemoveEntity(entity);
+	}
+}
+
+void PlayDeathAnimation(int victim, int attacker, const char[][] deathAnims, const float[] cycleAnims, const float[] duration)
+{
+	if(GetEntityFlags(victim) & FL_ONGROUND)
+	{
+		int entity = CreateEntityByName("prop_dynamic_override");
+		if(entity == -1)
+			return;
+
+		RequestFrame(RemoveRagdoll, GetClientUserId(victim));
+
+		TFClassType class = TF2_GetPlayerClass(victim);
+
+		float pos[3], ang[3];
+		GetEntPropVector(victim, Prop_Send, "m_vecOrigin", pos);
+		GetClientEyeAngles(victim, ang);
+		ang[0] = 0.0;
+		ang[1] = FixAngle(ang[1] + 180.0);
+		ang[2] = 0.0;
+
+		TeleportEntity(entity, pos, ang, NULL_VECTOR);
+		
+		char buffer[PLATFORM_MAX_PATH];
+		GetEntPropString(victim, Prop_Data, "m_ModelName", buffer, sizeof(buffer));
+		DispatchKeyValue(entity, "model", buffer);
+		DispatchKeyValue(entity, "DefaultAnim", deathAnims[0]);
+		DispatchKeyValueInt(entity, "skin", GetClientTeam(victim) - 2);
+		
+		DispatchSpawn(entity);
+		
+		SetEntProp(entity, Prop_Send, "m_bClientSideAnimation", cycleAnims[class] <= 0.0);
+
+		SetVariantString(deathAnims[class]);
+		AcceptEntityInput(entity, "SetAnimation");
+		
+		SetEntPropFloat(entity, Prop_Send, "m_flCycle", cycleAnims[class]);
+
+		FormatEx(buffer, sizeof(buffer), "OnUser1 !self:BecomeRagdoll::%f:1", duration[class]);
+		SetVariantString("OnUser1 !self:BecomeRagdoll::2.0:1");
+		AcceptEntityInput(entity, "AddOutput");
+
+		AcceptEntityInput(entity, "FireUser1");
+
+		int wearable, i;
+		while(TF2U_GetWearable(victim, wearable, i))
+		{
+			int index = GetEntProp(entity, Prop_Data, "m_nModelIndex");
+			if(index < 1)
+				continue;
+			
+			ModelIndexToString(index, buffer, sizeof(buffer));
+
+			int ornament = CreateEntityByName("prop_dynamic_ornament");
+			if(ornament == -1)
+				continue;
+			
+			TeleportEntity(ornament, pos, ang, NULL_VECTOR);
+			DispatchKeyValue(ornament, "model", buffer);
+			DispatchKeyValueInt(ornament, "skin", GetEntProp(wearable, Prop_Send, "m_nSkin"));
+			DispatchKeyValueInt(ornament, "body", GetEntProp(wearable, Prop_Send, "m_nBody"));
+
+			DispatchSpawn(ornament);
+
+			SetVariantString("!activator");
+			AcceptEntityInput(ornament, "SetParent", entity, entity);
+		}
+		
+		int camera = CreateEntityByName("point_viewcontrol");
+		if(camera == -1)
+			return;
+		
+		GetClientEyePosition(victim, pos);
+		TeleportEntity(camera, pos, ang, NULL_VECTOR);
+		DispatchSpawn(camera);
+
+		SetVariantString("!activator");
+		AcceptEntityInput(camera, "SetParent", entity, entity);
+		
+		SetVariantString("eyes");
+		AcceptEntityInput(camera, "SetParentAttachment", entity, entity);
+		
+		SetVariantString("!activator");
+		AcceptEntityInput(camera, "Enable", victim, victim);
+
+		DataPack pack;
+		CreateDataTimer(duration[class], DisableCameraTimer, pack);
+		pack.WriteCell(EntIndexToEntRef(camera));
+		pack.WriteCell(GetClientUserId(victim));
+	}
+}
+
+static Action DisableCameraTimer(Handle timer, DataPack pack)
+{
+	pack.Reset();
+	int entity = EntRefToEntIndex(pack.ReadCell());
+	if(entity != -1)
+	{
+		int client = GetClientOfUserId(pack.ReadCell());
+		if(client)
+		{
+			int life = GetEntProp(client, Prop_Send, "m_lifeState");
+			SetEntProp(client, Prop_Send, "m_lifeState", 0);
+			AcceptEntityInput(entity, "Disable", client, client);
+			SetEntProp(client, Prop_Send, "m_lifeState", life);
+		}
+		
+		RemoveEntity(entity);
+	}
+	
+	return Plugin_Continue;
+}
+
+void RemoveRagdoll(int userid)
+{
+	int client = GetClientOfUserId(userid);
+	if(client)
+	{
+		int entity = GetEntPropEnt(client, Prop_Send, "m_hRagdoll");
+		if(entity != -1)
+			RemoveEntity(entity);
+	}
 }
 
 public bool Trace_OnlyHitWorld(int entity, int mask)
@@ -466,4 +685,9 @@ public bool Trace_WorldAndBrushes(int entity, int mask)
 	
 	static char buffer[8];
 	return (GetEntityClassname(entity, buffer, sizeof(buffer)) && (!strncmp(buffer, "func_", 5, false)));
+}
+
+public bool Trace_DontHitPlayers(int entity, int mask, any data)
+{
+	return entity <= 0 || entity > MaxClients;
 }
