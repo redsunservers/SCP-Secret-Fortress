@@ -1,3 +1,18 @@
+/*
+	TODO
+
+	- Item pickup/drop sounds
+	- Class cfg
+	- 106 deal damage
+	- SCP viewmodels
+	- Item giving correct ammo & clip
+	- Stress with teammates death/nearby/alone
+	- Stress when being looked at by scp
+	- SCP-049
+	- SCP-096
+	- SCP-939
+*/
+
 #include <sourcemod>
 #include <sdkhooks>
 #include <tf2_stocks>
