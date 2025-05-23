@@ -40,9 +40,10 @@ public void SCP018_Precache()
 	
 	SCP018List = new ArrayList(sizeof(SCP018Enum));
 	
-	PrecacheSound(SCP018HitSound, true);
-	PrecacheSound(SCP018ClientHitSound, true);
-	PrecacheSound(SCP018BreakSound, true);
+	PrecacheModel(SCP018Model);
+	PrecacheSound(SCP018HitSound);
+	PrecacheSound(SCP018ClientHitSound);
+	PrecacheSound(SCP018BreakSound);
 }
 
 // temporary storage for the trace... thanks sourcemod :(

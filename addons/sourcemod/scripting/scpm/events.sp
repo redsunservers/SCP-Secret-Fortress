@@ -48,6 +48,7 @@ static void Events_PlayerSpawn(Event event, const char[] name, bool dontBroadcas
 	if(client)
 	{
 		Human_PlayerSpawn(client);
+		Bosses_PlayerSpawn(client);
 		if(GetClientTeam(client) > TFTeam_Spectator)
 		{
 			Gamemode_PlayerSpawn(client);

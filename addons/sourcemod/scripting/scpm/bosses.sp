@@ -60,15 +60,6 @@ static Action Bosses_MakeBossCmd(int client, int args)
 			special = GetURandomInt() % BossList.Length;
 		}
 		
-		int team = -1;
-		if(args > 2)
-		{
-			GetCmdArg(3, buffer, sizeof(buffer));
-			team = StringToInt(buffer);
-			if(team < -1 || team > 3)
-				team = -1;
-		}
-		
 		GetCmdArg(1, buffer, sizeof(buffer));
 		
 		bool lang;
@@ -85,11 +76,14 @@ static Action Bosses_MakeBossCmd(int client, int args)
 						if(Client(target[i]).IsBoss)
 						{
 							Bosses_Remove(target[i]);
+							ChangeClientTeam(target[i], TFTeam_Humans);
+							TF2_RespawnPlayer(target[i]);
 							LogAction(client, target[i], "\"%L\" removed \"%L\" being a boss", client, target[i]);
 							continue;
 						}
 					}
 					
+					ChangeClientTeam(target[i], TFTeam_Bosses);
 					Bosses_Create(target[i], special);
 					LogAction(client, target[i], "\"%L\" made \"%L\" a boss", client, target[i]);
 				}
@@ -155,7 +149,7 @@ void Bosses_SetupConfig(KeyValues map)
 			kv.GoBack();
 		}
 
-		PrintToServer("[SCP] Picking %d bosses out of %d", slots, count);
+		PrintToServer("[SCP] Picking %d bosses out of %d", slots, count - 1);
 
 		if(kv.GotoFirstSubKey(false))
 		{
@@ -277,10 +271,7 @@ void Bosses_Create(int client, int index)
 	}
 
 	if(IsPlayerAlive(client))
-	{
-		TF2_RegeneratePlayer(client);
-		Bosses_PlayerSpawn(client);
-	}
+		DHook_RepsawnPlayer(client);
 }
 
 // Removes a player as a boss

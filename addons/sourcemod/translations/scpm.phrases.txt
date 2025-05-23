@@ -14,7 +14,7 @@
 	}
 	"Control Progress 1"
 	{
-		"en"	"%%+reload%% INTERACT %%+attack3%% SPRINT %%+inpsect%% FLASHLIGHT"
+		"en"	"%%+reload%% INTERACT %%+attack3%% SPRINT %%+inspect%% FLASHLIGHT"
 	}
 	"Control Progress 2"
 	{
@@ -42,6 +42,11 @@
 	{
 		"#format"	"{1:d},{2:d}"
 		"en"		"SCPs Alive: {1} --- Survivors: {2}\n \nThe Escapees:"
+	}
+	"In Menu Cooldown"
+	{
+		"#format"	"{1:.1f}"
+		"en"		"Cooling down {1}..."
 	}
 	"SCP-914"
 	{
@@ -146,5 +151,25 @@
 	"MTFSpawn"
 	{
 		"en"	"{mediumblue}Mobile Task Force Unit, Epsilon-11{default} has entered the facility."
+	}
+	"SCP173"
+	{
+		"en"	"SCP-173"
+	}
+	"Generic SCP Controls"
+	{
+		"en"	"%%+reload%% INTERACT"
+	}
+	"SCP106"
+	{
+		"en"	"SCP-106"
+	}
+	"SCP106 Controls"
+	{
+		"en"	"%%+reload%% INTERACT %%+use_action_slot_item%% TOGGLE NOCLIP"
+	}
+	"Unsafe Location"
+	{
+		"en"	"Unsafe Location"
 	}
 }

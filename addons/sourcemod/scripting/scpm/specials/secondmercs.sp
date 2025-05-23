@@ -19,7 +19,7 @@ public void SecondMercs_Event()
 
 public void MTFSquad_Precache()
 {
-	PrecacheSound("scp_sf/events/mtf_spawn.mp3");
+	PrecacheSound("scpm/misc/mtf_spawn.mp3");
 	PrecacheModel("models/scp_new/guards/counter_gign.mdl");
 	PrecacheModel("models/scp_new/guards/gibs/head.mdl");
 	PrecacheModel("models/scp_new/guards/gibs/leftarm.mdl");
@@ -28,6 +28,8 @@ public void MTFSquad_Precache()
 	PrecacheModel("models/scp_new/guards/gibs/rightfoot.mdl");
 	PrecacheModel("models/scp_new/guards/gibs/righthand.mdl");
 	PrecacheModel("models/scp_new/guards/gibs/torso.mdl");
+
+	CheckAndAddFileToDownloadsTable("scpm/misc/mtf_spawn.mp3");
 }
 
 public void MTFSquad_Event()

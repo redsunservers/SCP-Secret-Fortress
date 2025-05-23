@@ -247,7 +247,7 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 			else if(Client(client).SprintPower > (ClassStats[class].SprintDegen * 3.0))
 			{
 				Client(client).Sprinting = true;
-				Client(client).SprintPower -= ClassStats[class].SprintDegen;
+				Client(client).SprintPower -= ClassStats[class].SprintDegen / 2.0;
 				ClientCommand(client, "playgamesound player/suit_sprint.wav");
 				UpdateSpeed(client);
 			}
@@ -374,10 +374,6 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 			{
 				Format(buffer, sizeof(buffer), "%s\n»  %d％", buffer, RoundToCeil(Client(client).SprintPower));
 			}
-
-			int alpha = 55 + (health * 200 / maxhealth);
-			if(alpha > 255)
-				alpha = 255;
 			
 			// Close Eyes Logic
 			if(Client(client).EyesClosed)
@@ -386,7 +382,19 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 			}
 			else
 			{
-				SetHudTextParams(0.035, 0.83, 0.3, 255, alpha, alpha, alpha);
+				int alpha = 55 + (health * 200 / maxhealth);
+				if(alpha > 255)
+					alpha = 255;
+				
+				int green = 255;
+				if(health > 259)
+				{
+					green = 128;
+					if(health > 519)
+						green = 32;
+				}
+
+				SetHudTextParams(0.07, 0.83, 0.3, alpha > 254 ? green : alpha, alpha, alpha > 254 ? green : alpha, alpha);
 				ShowSyncHudText(client, StatusHud, buffer);
 			}
 		}
@@ -404,12 +412,20 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 			SetGlobalTransTarget(client);
 
 			// Action Item
-			Format(buffer, sizeof(buffer), "%t", "Action Item", "NaN");
+			if(Client(client).ActionItem == -1)
+			{
+				Format(buffer, sizeof(buffer), "%t", "Action Item", "NaN");
+			}
+			else
+			{
+				Items_GetItemName(Client(client).ActionItem, buffer, sizeof(buffer));
+				Format(buffer, sizeof(buffer), "%t", "Action Item", buffer);
+			}
 			
 			// Keycard Level
 			Format(buffer, sizeof(buffer), "%s\n%t", buffer, "Keycard Status", Client(client).KeycardContain, Client(client).KeycardArmory, Client(client).KeycardExit);
 
-			SetHudTextParams(0.8, 0.79, 0.3, 255, 255, 255, 255);
+			SetHudTextParams(0.7, 0.79, 0.3, 255, 255, 255, 255);
 			ShowSyncHudText(client, ActionHud, buffer);
 		}
 		else if(Client(client).ControlProgress < 2 && FAbs(updateTime[client][2] - gameTime) > 0.5)

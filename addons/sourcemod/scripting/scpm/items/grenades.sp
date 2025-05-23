@@ -72,7 +72,7 @@ static Action FlashGrenadeTimer(Handle timer, int ref)
 				// 512 units
 				if(GetVectorDistance(pos1, pos2, true) < 524288.0 && !TR_DidHit())
 				{
-					ScreenFade(i, 1000, 1000, FFADE_OUT, 200, 200, 200, 255);
+					ScreenFade(i, 1000, 1000, FFADE_IN, 200, 200, 200, 255);
 					ClientCommand(i, "dsp_player %d", GetRandomInt(35, 37));
 				}
 			}

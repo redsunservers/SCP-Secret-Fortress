@@ -132,36 +132,75 @@ static void GenerateConfig()
 	}
 }
 
-static void ConVar_Add(const char[] name, const char[] value, bool enforce = true)
+void ConVar_Add(const char[] name, const char[] value, bool enforce = true)
 {
 	CvarInfo info;
 	strcopy(info.Name, sizeof(info.Name), name);
 	strcopy(info.Value, sizeof(info.Value), value);
 	info.Enforce = enforce;
+
+	if(CvarHooked)
+	{
+		info.Cvar = FindConVar(info.Name);
+		info.Cvar.GetString(info.Defaul, sizeof(info.Defaul));
+	}
+
 	CvarList.PushArray(info);
+
+	if(CvarHooked)
+	{
+		bool setValue = true;
+		if(!info.Enforce)
+		{
+			char buffer[sizeof(info.Defaul)];
+			info.Cvar.GetDefault(buffer, sizeof(buffer));
+			if(!StrEqual(buffer, info.Defaul))
+				setValue = false;
+		}
+
+		if(setValue)
+			info.Cvar.SetString(info.Value);
+		
+		info.Cvar.AddChangeHook(ConVar_OnChanged);
+	}
+}
+
+stock void ConVar_Remove(const char[] name)
+{
+	int index = CvarList.FindString(name, CvarInfo::Name);
+	if(index != -1)
+	{
+		CvarInfo info;
+		CvarList.GetArray(index, info);
+		CvarList.Erase(index);
+
+		if(CvarHooked)
+		{
+			info.Cvar.RemoveChangeHook(ConVar_OnChanged);
+			info.Cvar.SetString(info.Defaul);
+		}
+	}
+	else
+	{
+		ThrowError("Unknown cvar name '%s'", name);
+	}
 }
 
 void ConVar_Enable()
 {
 	if(!CvarHooked)
 	{
+		CvarInfo info;
 		int length = CvarList.Length;
 		for(int i; i < length; i++)
 		{
-			CvarInfo info;
 			CvarList.GetArray(i, info);
 			
 			if(!info.Cvar)
 			{
 				info.Cvar = FindConVar(info.Name);
 				if(!info.Cvar)
-				{
-					CvarList.Erase(i);
-					i--;
-					length--;
-					continue;
-					//SetFailState("Could not find convar '%s'", info.Name);
-				}
+					SetFailState("Could not find convar '%s'", info.Name);
 			}
 
 			info.Cvar.GetString(info.Defaul, sizeof(info.Defaul));
@@ -190,10 +229,10 @@ void ConVar_Disable()
 {
 	if(CvarHooked)
 	{
+		CvarInfo info;
 		int length = CvarList.Length;
 		for(int i; i < length; i++)
 		{
-			CvarInfo info;
 			CvarList.GetArray(i, info);
 
 			info.Cvar.RemoveChangeHook(ConVar_OnChanged);

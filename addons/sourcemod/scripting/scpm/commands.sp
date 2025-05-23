@@ -135,6 +135,12 @@ static Action Command_DropItem(int client, const char[] command, int args)
 {
 	if(!Client(client).IsBoss && !Client(client).Minion)
 	{
+		if(Client(client).ActionItem != -1)
+		{
+			if(Items_DropActionItem(client, false))
+				return Plugin_Handled;
+		}
+
 		int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 		if(weapon != -1)
 		{

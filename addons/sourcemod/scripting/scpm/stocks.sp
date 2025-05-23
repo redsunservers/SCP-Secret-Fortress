@@ -546,94 +546,98 @@ stock void ForceTaunt(int client, int index)
 	}
 }
 
-void PlayDeathAnimation(int victim, int attacker, const char[][] deathAnims, const float[] cycleAnims, const float[] duration)
+void PlayClassDeathAnimation(int victim, int attacker, const char[][] deathAnims, const float[] cycleAnims, const float[] duration)
 {
-	if(GetEntityFlags(victim) & FL_ONGROUND)
+	TFClassType class = TF2_GetPlayerClass(victim);
+
+	PlayDeathAnimation(victim, attacker, deathAnims[class], cycleAnims[class], duration[class]);
+}
+
+void PlayDeathAnimation(int victim, int attacker, const char[] deathAnim, float cycleAnims, float duration, bool doCamera = true)
+{
+	int entity = CreateEntityByName("prop_dynamic_override");
+	if(entity == -1)
+		return;
+
+	RequestFrame(RemoveRagdoll, GetClientUserId(victim));
+
+	float pos[3], ang[3];
+	GetEntPropVector(victim, Prop_Send, "m_vecOrigin", pos);
+	GetClientEyeAngles(attacker, ang);
+	ang[0] = 0.0;
+	ang[1] = FixAngle(ang[1] + 180.0);
+	ang[2] = 0.0;
+
+	TeleportEntity(entity, pos, ang, NULL_VECTOR);
+	
+	char buffer[PLATFORM_MAX_PATH];
+	GetEntPropString(victim, Prop_Data, "m_ModelName", buffer, sizeof(buffer));
+	DispatchKeyValue(entity, "model", buffer);
+	DispatchKeyValueInt(entity, "skin", GetClientTeam(victim) - 2);
+	
+	DispatchSpawn(entity);
+	
+	SetEntProp(entity, Prop_Send, "m_bClientSideAnimation", cycleAnims <= 0.0);
+
+	SetVariantString(deathAnim);
+	AcceptEntityInput(entity, "SetAnimation");
+	
+	SetEntPropFloat(entity, Prop_Send, "m_flCycle", cycleAnims);
+
+	FormatEx(buffer, sizeof(buffer), "OnUser1 !self:BecomeRagdoll::%f:1", duration);
+	SetVariantString("OnUser1 !self:BecomeRagdoll::2.0:1");
+	AcceptEntityInput(entity, "AddOutput");
+
+	AcceptEntityInput(entity, "FireUser1");
+
+	int wearable, i;
+	while(TF2U_GetWearable(victim, wearable, i))
 	{
-		int entity = CreateEntityByName("prop_dynamic_override");
-		if(entity == -1)
-			return;
-
-		RequestFrame(RemoveRagdoll, GetClientUserId(victim));
-
-		TFClassType class = TF2_GetPlayerClass(victim);
-
-		float pos[3], ang[3];
-		GetEntPropVector(victim, Prop_Send, "m_vecOrigin", pos);
-		GetClientEyeAngles(victim, ang);
-		ang[0] = 0.0;
-		ang[1] = FixAngle(ang[1] + 180.0);
-		ang[2] = 0.0;
-
-		TeleportEntity(entity, pos, ang, NULL_VECTOR);
+		int index = GetEntProp(entity, Prop_Data, "m_nModelIndex");
+		if(index < 1)
+			continue;
 		
-		char buffer[PLATFORM_MAX_PATH];
-		GetEntPropString(victim, Prop_Data, "m_ModelName", buffer, sizeof(buffer));
-		DispatchKeyValue(entity, "model", buffer);
-		DispatchKeyValue(entity, "DefaultAnim", deathAnims[0]);
-		DispatchKeyValueInt(entity, "skin", GetClientTeam(victim) - 2);
+		ModelIndexToString(index, buffer, sizeof(buffer));
+
+		int ornament = CreateEntityByName("prop_dynamic_ornament");
+		if(ornament == -1)
+			continue;
 		
-		DispatchSpawn(entity);
-		
-		SetEntProp(entity, Prop_Send, "m_bClientSideAnimation", cycleAnims[class] <= 0.0);
+		TeleportEntity(ornament, pos, ang, NULL_VECTOR);
+		DispatchKeyValue(ornament, "model", buffer);
+		DispatchKeyValueInt(ornament, "skin", GetEntProp(wearable, Prop_Send, "m_nSkin"));
+		DispatchKeyValueInt(ornament, "body", GetEntProp(wearable, Prop_Send, "m_nBody"));
 
-		SetVariantString(deathAnims[class]);
-		AcceptEntityInput(entity, "SetAnimation");
-		
-		SetEntPropFloat(entity, Prop_Send, "m_flCycle", cycleAnims[class]);
-
-		FormatEx(buffer, sizeof(buffer), "OnUser1 !self:BecomeRagdoll::%f:1", duration[class]);
-		SetVariantString("OnUser1 !self:BecomeRagdoll::2.0:1");
-		AcceptEntityInput(entity, "AddOutput");
-
-		AcceptEntityInput(entity, "FireUser1");
-
-		int wearable, i;
-		while(TF2U_GetWearable(victim, wearable, i))
-		{
-			int index = GetEntProp(entity, Prop_Data, "m_nModelIndex");
-			if(index < 1)
-				continue;
-			
-			ModelIndexToString(index, buffer, sizeof(buffer));
-
-			int ornament = CreateEntityByName("prop_dynamic_ornament");
-			if(ornament == -1)
-				continue;
-			
-			TeleportEntity(ornament, pos, ang, NULL_VECTOR);
-			DispatchKeyValue(ornament, "model", buffer);
-			DispatchKeyValueInt(ornament, "skin", GetEntProp(wearable, Prop_Send, "m_nSkin"));
-			DispatchKeyValueInt(ornament, "body", GetEntProp(wearable, Prop_Send, "m_nBody"));
-
-			DispatchSpawn(ornament);
-
-			SetVariantString("!activator");
-			AcceptEntityInput(ornament, "SetParent", entity, entity);
-		}
-		
-		int camera = CreateEntityByName("point_viewcontrol");
-		if(camera == -1)
-			return;
-		
-		GetClientEyePosition(victim, pos);
-		TeleportEntity(camera, pos, ang, NULL_VECTOR);
-		DispatchSpawn(camera);
+		DispatchSpawn(ornament);
 
 		SetVariantString("!activator");
-		AcceptEntityInput(camera, "SetParent", entity, entity);
-		
-		SetVariantString("eyes");
-		AcceptEntityInput(camera, "SetParentAttachment", entity, entity);
-		
-		SetVariantString("!activator");
-		AcceptEntityInput(camera, "Enable", victim, victim);
-
-		DataPack pack;
-		CreateDataTimer(duration[class], DisableCameraTimer, pack);
-		pack.WriteCell(EntIndexToEntRef(camera));
-		pack.WriteCell(GetClientUserId(victim));
+		AcceptEntityInput(ornament, "SetParent", entity, entity);
 	}
+
+	if(!doCamera)
+		return;
+	
+	int camera = CreateEntityByName("point_viewcontrol");
+	if(camera == -1)
+		return;
+	
+	GetClientEyePosition(victim, pos);
+	TeleportEntity(camera, pos, ang, NULL_VECTOR);
+	DispatchSpawn(camera);
+
+	SetVariantString("!activator");
+	AcceptEntityInput(camera, "SetParent", entity, entity);
+	
+	SetVariantString("eyes");
+	AcceptEntityInput(camera, "SetParentAttachment", entity, entity);
+	
+	SetVariantString("!activator");
+	AcceptEntityInput(camera, "Enable", victim, victim);
+
+	DataPack pack;
+	CreateDataTimer(duration, DisableCameraTimer, pack);
+	pack.WriteCell(EntIndexToEntRef(camera));
+	pack.WriteCell(GetClientUserId(victim));
 }
 
 static Action DisableCameraTimer(Handle timer, DataPack pack)

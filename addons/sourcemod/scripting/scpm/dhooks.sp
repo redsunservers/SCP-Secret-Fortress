@@ -126,10 +126,10 @@ static MRESReturn DHook_DropAmmoPackPre(int client, DHookParam param)
 static MRESReturn DHook_ForceRespawnPre(int client)
 {
 	PrefClass = 0;
-
+	
 	if(!AllowRespawns && GameRules_GetRoundState() == RoundState_RoundRunning)
 		return MRES_Supercede;
-
+	
 	if(Client(client).IsBoss)
 	{
 		int class;

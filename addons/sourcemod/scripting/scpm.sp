@@ -236,6 +236,7 @@ int MaxPlayersAlive[TFTeam_MAX];
 #include "scpm/weapons.sp"
 
 #include "scpm/bosses/default.sp"
+#include "scpm/bosses/scp106.sp"
 #include "scpm/bosses/scp173.sp"
 
 #include "scpm/items/keycards.sp"
@@ -256,7 +257,7 @@ public void OnPluginStart()
 	LoadTranslations("scpm.phrases");
 	LoadTranslations("common.phrases");
 	LoadTranslations("core.phrases");
-	if(!TranslationPhraseExists("SCP-914"))
+	if(!TranslationPhraseExists("Created Boss On"))
 		SetFailState("Translation file \"scpm.phrases\" is outdated");
 	
 	Bosses_PluginStart();

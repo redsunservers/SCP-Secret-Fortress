@@ -65,7 +65,7 @@ public bool SCP207_Use(int client)
 		ApplyHealEvent(client, -5);
 		
 		Client(client).SprintPower += 50.0;
-		ClientCommand(client, "player/pl_scout_dodge_can_drink.wav");
+		ClientCommand(client, "playgamesound player/pl_scout_dodge_can_drink.wav");
 	}
 	else
 	{

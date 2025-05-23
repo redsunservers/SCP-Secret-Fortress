@@ -145,6 +145,8 @@ void Gamemode_RoundEnd()
 	{
 		if(IsClientInGame(client))
 		{
+			Music_ToggleMusic(client, false, true);
+			
 			if(Client(client).EscapeTimeAt)
 			{
 				int sec = RoundFloat(RoundStartTime - Client(client).EscapeTimeAt);
@@ -476,7 +478,7 @@ void Gamemode_CheckAlivePlayers(int exclude = 0, bool alive = true, bool resetMa
 				if(!Client(i).NoEscape)
 					PlayersAlive[team]++;
 
-				if(!Client(i).NoEscape && team == TFTeam_Humans)
+				if(!Client(i).IsBoss && !Client(i).Minion && !Client(i).NoEscape && team == TFTeam_Humans)
 				{
 					vip = true;
 					if(!Client(i).Escaped)
@@ -962,7 +964,7 @@ static void UpgradeMenu(int client, int slot = -1, bool force = false)
 				}
 
 				int index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
-				TF2Econ_GetLocalizedItemName(index, buffer, sizeof(buffer));
+				TF2Econ_GetItemName(index, buffer, sizeof(buffer));
 				menu.AddItem("-1", buffer);
 			}
 
@@ -997,19 +999,19 @@ static void UpgradeMenu(int client, int slot = -1, bool force = false)
 				menu.SetTitle("%t", "Keycard");
 
 				FormatEx(buffer, sizeof(buffer), "Very Fine");
-				menu.AddItem("4", buffer);
+				menu.AddItem("3", buffer);
 
 				FormatEx(buffer, sizeof(buffer), "Fine");
-				menu.AddItem("4", buffer);
+				menu.AddItem("3", buffer);
 
 				FormatEx(buffer, sizeof(buffer), "1:1");
-				menu.AddItem("4", buffer);
+				menu.AddItem("3", buffer);
 
 				FormatEx(buffer, sizeof(buffer), "Coarse");
-				menu.AddItem("4", buffer);
+				menu.AddItem("3", buffer);
 
 				FormatEx(buffer, sizeof(buffer), "Rough");
-				menu.AddItem("4", buffer);
+				menu.AddItem("3", buffer);
 
 				menu.ExitBackButton = true;
 			}
@@ -1022,19 +1024,19 @@ static void UpgradeMenu(int client, int slot = -1, bool force = false)
 			menu.SetTitle("%t", "My Body");
 
 			FormatEx(buffer, sizeof(buffer), "Very Fine");
-			menu.AddItem("6", buffer);
+			menu.AddItem("5", buffer);
 
 			FormatEx(buffer, sizeof(buffer), "Fine");
-			menu.AddItem("6", buffer);
+			menu.AddItem("5", buffer);
 
 			FormatEx(buffer, sizeof(buffer), "1:1");
-			menu.AddItem("6", buffer);
+			menu.AddItem("5", buffer);
 
 			FormatEx(buffer, sizeof(buffer), "Coarse");
-			menu.AddItem("6", buffer);
+			menu.AddItem("5", buffer);
 
 			FormatEx(buffer, sizeof(buffer), "Rough");
-			menu.AddItem("6", buffer);
+			menu.AddItem("5", buffer);
 
 			menu.ExitBackButton = true;
 		}

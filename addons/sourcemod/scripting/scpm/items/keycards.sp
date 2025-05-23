@@ -37,7 +37,7 @@ void Keycard_DropBestMatch(int client, bool death)
 	{
 		case 0:
 		{
-			index = Client(client).KeycardContain > 0 ? 30002 : 30001;
+			index = Client(client).KeycardContain > 1 ? 30002 : 30001;
 		}
 		case 1:
 		{
@@ -208,7 +208,7 @@ public bool Keycard201_Type()
 }
 public void Keycard201_Pickup(int client)
 {
-	KeycardPickup(client, 2, 0, 2);
+	KeycardPickup(client, 2, 0, 1);
 }
 
 public bool Keycard202_Type()
@@ -235,7 +235,7 @@ public bool Keycard211_Type()
 }
 public void Keycard211_Pickup(int client)
 {
-	KeycardPickup(client, 2, 1, 2);
+	KeycardPickup(client, 2, 1, 1);
 }
 
 public bool Keycard212_Type()
@@ -262,7 +262,7 @@ public bool Keycard221_Type()
 }
 public void Keycard221_Pickup(int client)
 {
-	KeycardPickup(client, 2, 2, 2);
+	KeycardPickup(client, 2, 2, 1);
 }
 
 public bool Keycard222_Type()
@@ -289,7 +289,7 @@ public bool Keycard231_Type()
 }
 public void Keycard231_Pickup(int client)
 {
-	KeycardPickup(client, 2, 3, 2);
+	KeycardPickup(client, 2, 3, 1);
 }
 
 public bool Keycard232_Type()
@@ -316,7 +316,7 @@ public bool Keycard301_Type()
 }
 public void Keycard301_Pickup(int client)
 {
-	KeycardPickup(client, 3, 0, 2);
+	KeycardPickup(client, 3, 0, 1);
 }
 
 public bool Keycard302_Type()
@@ -343,7 +343,7 @@ public bool Keycard311_Type()
 }
 public void Keycard311_Pickup(int client)
 {
-	KeycardPickup(client, 3, 1, 2);
+	KeycardPickup(client, 3, 1, 1);
 }
 
 public bool Keycard312_Type()
@@ -370,7 +370,7 @@ public bool Keycard321_Type()
 }
 public void Keycard321_Pickup(int client)
 {
-	KeycardPickup(client, 3, 2, 2);
+	KeycardPickup(client, 3, 2, 1);
 }
 
 public bool Keycard322_Type()
@@ -397,7 +397,7 @@ public bool Keycard331_Type()
 }
 public void Keycard331_Pickup(int client)
 {
-	KeycardPickup(client, 3, 3, 2);
+	KeycardPickup(client, 3, 3, 1);
 }
 
 public bool Keycard332_Type()

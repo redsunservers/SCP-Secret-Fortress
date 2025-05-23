@@ -298,7 +298,6 @@ void Items_RoundStart()
 		if(index == -1)
 		{
 			TF2Econ_GetItemDefinitionString(item.Index, "model_player", buffer, sizeof(buffer));
-			PrintToServer(buffer);
 			if(buffer[0])
 				SetEntityModel(entity, buffer);
 		}
@@ -306,6 +305,9 @@ void Items_RoundStart()
 		{
 			if(action.Model[0])
 				SetEntityModel(entity, action.Model);
+			
+			if(action.Skin)
+				SetEntityRenderColor(entity, _, _, _, action.Skin);
 		}
 		
 		FormatEx(buffer, sizeof(buffer), "scp_item_%d", item.Index);
@@ -378,7 +380,7 @@ static int GetActionDataOfIndex(int itemIndex, ActionInfo action)
 }
 
 // Gives a new weapon to the player given a index
-int Items_GiveByIndex(int client, int itemIndex, bool forceAsWeapon = false)
+int Items_GiveByIndex(int client, int itemIndex, bool tempWeapon = false)
 {
 	char classname[64];
 	ActionInfo action;
@@ -387,7 +389,7 @@ int Items_GiveByIndex(int client, int itemIndex, bool forceAsWeapon = false)
 	// Check if this index is an action
 	if(isAction)
 	{
-		if(!forceAsWeapon)
+		if(!tempWeapon)
 		{
 			Items_GiveActionItem(client, itemIndex);
 			return -1;
@@ -432,7 +434,7 @@ int Items_GiveByIndex(int client, int itemIndex, bool forceAsWeapon = false)
 	int entity = CreateEntityByName(classname);
 	if(entity != -1)
 	{
-		SetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex", itemIndex);
+		SetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex", isAction ? 196 : itemIndex);
 		SetEntProp(entity, Prop_Send, "m_bInitialized", true);
 		SetEntProp(entity, Prop_Send, "m_iEntityQuality", 6);
 		SetEntProp(entity, Prop_Send, "m_iEntityLevel", 1);
@@ -444,12 +446,18 @@ int Items_GiveByIndex(int client, int itemIndex, bool forceAsWeapon = false)
 		
 		if(isAction && action.Skin)
 			SetEntityRenderColor(entity, _, _, _, action.Skin);
+		
+		if(isAction)
+			SetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex", itemIndex);
+		
+		if(!tempWeapon)
+		{
+			SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", true);
+			EquipPlayerWeapon(client, entity);
 
-		SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", true);
-		EquipPlayerWeapon(client, entity);
-
-		if(!isAction)
-			TF2U_SetPlayerActiveWeapon(client, entity);
+			if(!isAction)
+				TF2U_SetPlayerActiveWeapon(client, entity);
+		}
 	}
 
 	return entity;
@@ -661,18 +669,12 @@ void Items_GiveActionItem(int client, int itemIndex)
 		// Already have an item
 		if(Client(client).ActionItem != -1)
 		{
-			float pos[3], ang[3];
-			GetClientEyePosition(client, pos);
-			GetClientEyeAngles(client, ang);
-
-			if(Items_DropActionItem(client, false))
-			{
-				// Drop exisitng item
-				Items_DropByIndex(client, Client(client).ActionItem, pos, ang, false);
-			}
-			else
+			if(!Items_DropActionItem(client, false))
 			{
 				// Blocked from picking up
+				float pos[3], ang[3];
+				GetClientEyePosition(client, pos);
+				GetClientEyeAngles(client, ang);
 				Items_DropByIndex(client, itemIndex, pos, ang, false);
 				return;
 			}
@@ -690,6 +692,13 @@ void Items_GiveActionItem(int client, int itemIndex)
 
 bool Items_UseActionItem(int client)
 {
+	if(Bosses_StartFunctionClient(client, "ActionButton"))
+	{
+		Call_PushCell(client);
+		Call_Finish();
+		return true;
+	}
+	
 	if(Client(client).ActionItem == -1)
 		return false;
 	
@@ -726,6 +735,7 @@ bool Items_DropActionItem(int client, bool death)
 		GetClientEyePosition(client, pos);
 		GetClientEyeAngles(client, ang);
 		Items_DropByIndex(client, Client(client).ActionItem, pos, ang, death);
+		Client(client).ActionItem = -1;
 	}
 	
 	Client(client).ControlProgress = 2;

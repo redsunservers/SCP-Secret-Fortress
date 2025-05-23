@@ -13,8 +13,9 @@ static const char Downloads[][] =
 	"models/scp_new/173/scp_173new_death.vvd",	
 	"materials/freak_fortress_2/scp_173/new173_texture.vmt",
 	"materials/freak_fortress_2/scp_173/new173_texture.vtf",
-	"sound/freak_fortress_2/scp173/scp173_kill2.mp3",
-	"sound/freak_fortress_2/scp173/173_death.wav"
+	"sound/scpm/scp173/kill.mp3",
+	"sound/scpm/scp173/scare.mp3",
+	"sound/scpm/scp173/death.wav"
 };
 
 static const char DeathAnims[][] =
@@ -70,8 +71,9 @@ static const float TimeAnims[] =
 
 static const char PlayerModel[] = "models/freak_fortress_2/scp_173/scp_173new.mdl";
 static const char DeathModel[] = "models/scp_new/173/scp_173new_death.mdl";
-static const char KillSound[] = "freak_fortress_2/scp173/scp173_kill2.mp3";
-static const char DeathSound[] = "freak_fortress_2/scp173/173_death.wav";
+static const char ScareSound[] = "scpm/scp173/scare.mp3";
+static const char KillSound[] = "scpm/scp173/kill.mp3";
+static const char DeathSound[] = "scpm/scp173/death.wav";
 static const char WalkSound[] = "physics/concrete/concrete_scrape_smooth_loop1.wav";
 
 static float LastBlinkTime[MAXPLAYERS+1];
@@ -84,6 +86,7 @@ public void SCP173_Precache()
 {
 	PrecacheModel(PlayerModel);
 	PrecacheModel(DeathModel);
+	PrecacheSound(ScareSound);
 	PrecacheSound(KillSound);
 	PrecacheSound(DeathSound);
 	PrecacheSound(WalkSound);
@@ -121,12 +124,20 @@ public void SCP173_Equip(int client, bool weapons)
 		if(entity != -1)
 		{
 			Attrib_Set(entity, "fire rate bonus", 0.3);
+			Attrib_Set(entity, "crit mod disabled", 1.0);
+			Attrib_Set(entity, "max health additive bonus", 2700.0);
 			Attrib_Set(entity, "damage vs players", 11.0);
 			Attrib_Set(entity, "damage force reduction", 0.0);
 			Attrib_Set(entity, "airblast vulnerability multiplier", 0.0);
 			Attrib_Set(entity, "no_duck", 1.0);
 
+			SetEntityRenderMode(entity, RENDER_TRANSCOLOR);
+			SetEntityRenderColor(entity, 255, 255, 255, 0);
+			SetEntProp(entity, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
+
 			TF2U_SetPlayerActiveWeapon(client, entity);
+
+			SetEntityHealth(client, 3000);
 		}
 	}
 }
@@ -143,6 +154,15 @@ public void SCP173_Remove(int client)
 	Attrib_Remove(client, "major move speed bonus");
 	Attrib_Remove(client, "no_jump");
 	Default_Remove(client);
+}
+
+public float SCP173_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int victim, bool &infinite)
+{
+	if(client == victim)
+		return 0.0;
+	
+	strcopy(theme, sizeof(theme), ScareSound);
+	return 30.0;
 }
 
 public Action SCP173_PlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
@@ -194,6 +214,7 @@ public Action SCP173_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 		SetEntProp(client, Prop_Send, "m_bUseClassAnimations", true);
 		SetEntProp(client, Prop_Send, "m_bCustomModelRotates", true);
 		SDKCall_SetSpeed(client);
+		PrintCenterText(client, "");
 	}
 
 	if(lookedAt && MotionTimeFor[client])
@@ -215,6 +236,8 @@ public Action SCP173_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 	{
 		if(lookedAt && blinked)
 		{
+			PrintCenterText(client, "[X]");
+
 			MotionTimeFor[client] = GetGameTime() + 0.15;
 			TeleportEntity(client, pos2, NULL_VECTOR, NULL_VECTOR);
 
@@ -236,13 +259,17 @@ public Action SCP173_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 
 			if(victim)
 			{
+				bool grounded = view_as<bool>(GetEntityFlags(victim) & FL_ONGROUND);
 				SDKHooks_TakeDamage(victim, client, client, 65.0, DMG_CRUSH, GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon"), ang, pos2, false);
-				if(GetClientHealth(victim) < 1)
+				if(grounded && GetClientHealth(victim) < 1)
 					TryDeathScene(victim, client);
 			}
 		}
 		else
 		{
+			if(lookedAt)
+				PrintCenterText(client, "[%.1f]", Gamemode_NextBlinkAt() - GetGameTime());
+
 			int entity = EntRefToEntIndex(ModelRef[client]);
 			if(entity == -1)
 			{
@@ -356,12 +383,9 @@ static bool GetSafePosition(int client, const float testPos[3], float result[3])
 
 static void TryDeathScene(int victim, int attacker)
 {
-	if(GetEntityFlags(victim) & FL_ONGROUND)
-	{
-		CutsceneFor[attacker] = GetGameTime() + 1.3;
-		CreateTimer(1.3, NecksnapTimer, GetClientUserId(victim), TIMER_FLAG_NO_MAPCHANGE);
-		PlayDeathAnimation(victim, attacker, DeathAnims, CycleAnims, TimeAnims);
-	}
+	CutsceneFor[attacker] = GetGameTime() + 1.3;
+	CreateTimer(1.3, NecksnapTimer, GetClientUserId(victim), TIMER_FLAG_NO_MAPCHANGE);
+	PlayClassDeathAnimation(victim, attacker, DeathAnims, CycleAnims, TimeAnims);
 }
 
 static Action NecksnapTimer(Handle timer, int userid)

@@ -19,6 +19,8 @@
 	Ghost Theme 13 - Unsafe
 	Ghost Theme 14 - Danger
 	Ghost Theme 15 - Safe
+
+	Grouchy Possessor Appears - Chase
 */
 
 enum
@@ -240,7 +242,7 @@ void Music_ToggleMusic(int client, bool startNew = true, bool stopExisting = fal
 		int type;
 		if(marked || stress > 80.0 || Client(client).LastDangerAt || Client(client).KeycardExit > 1)
 		{
-			if(marked || Client(client).LastDangerAt > (GetGameTime() - 90.0))
+			if(marked/* || Client(client).LastDangerAt > (GetGameTime() - 90.0)*/)
 			{
 				type = 2;
 			}
@@ -283,7 +285,7 @@ void Music_ToggleMusic(int client, bool startNew = true, bool stopExisting = fal
 		{
 			int index = list.Get(GetURandomInt() % length);
 
-			EmitSoundToClient(client, music.Filepath, _, SNDCHAN_STATIC, SNDLEVEL_NONE, _, intensity);
+			EmitSoundToClient(client, music.Filepath, _, SNDCHAN_STATIC, SNDLEVEL_NONE, _, music.Volume * intensity);
 			LastTheme[client] = index;
 			
 			delete CurrentTheme[client];
@@ -299,6 +301,10 @@ void Music_ToggleMusic(int client, bool startNew = true, bool stopExisting = fal
 			
 			MusicEndAt[client] = GetGameTime() + music.Time;
 
+		}
+		else
+		{
+			MusicTimer[client] = CreateTimer(10.0 / intensity, MusicNextTimer, client);
 		}
 
 		delete list;

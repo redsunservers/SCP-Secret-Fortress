@@ -176,3 +176,9 @@ public float Default_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int v
 {
 	return 0.0;
 }
+
+// When the player presses use action key
+public void Default_ActionButton(int client)
+{
+	
+}
