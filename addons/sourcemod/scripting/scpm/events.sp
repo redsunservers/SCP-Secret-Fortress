@@ -47,6 +47,7 @@ static void Events_PlayerSpawn(Event event, const char[] name, bool dontBroadcas
 	int client = GetClientOfUserId(userid);
 	if(client)
 	{
+		ViewModel_Destroy(client);
 		Human_PlayerSpawn(client);
 		Bosses_PlayerSpawn(client);
 		if(GetClientTeam(client) > TFTeam_Spectator)
@@ -112,9 +113,9 @@ static Action Events_PlayerDeath(Event event, const char[] name, bool dontBroadc
 				// If all these conditions fail, don't show the kill feed to the player
 				if(victim != target && attacker != target && !Client(victim).IsBoss && !Client(target).LookingAt(victim))
 				{
-					if(attacker < 1 || attacker > MaxClients || GetClientTeam(attacker) != GetClientTeam(target) || !Client(attacker).CanTalkTo(victim))
+					if(!attacker || GetClientTeam(attacker) != GetClientTeam(target) || !Client(attacker).CanTalkTo(victim))
 					{
-						if(assister < 1 || assister > MaxClients || GetClientTeam(assister) != GetClientTeam(target) || !Client(assister).CanTalkTo(victim))
+						if(!assister || GetClientTeam(assister) != GetClientTeam(target) || !Client(assister).CanTalkTo(victim))
 						{
 							continue;
 						}
@@ -124,6 +125,30 @@ static Action Events_PlayerDeath(Event event, const char[] name, bool dontBroadc
 				event.FireToClient(target);
 			}
 		}
+
+		if(!deadRinger && Client(victim).IsBoss)
+		{
+			char boss[64], killer[64];
+			Bosses_GetName(Client(victim).Boss, boss, sizeof(boss));
+
+			if(attacker)
+				GetClientName(attacker, killer, sizeof(killer));
+
+			if(assister)
+			{
+				char assistant[64];
+				GetClientName(assister, assistant, sizeof(assistant));
+				CPrintToChatAll("%t", "Boss Killed Message Duo", boss, killer, assistant);
+			}
+			else if(attacker && attacker != victim)
+			{
+				CPrintToChatAll("%t", "Boss Killed Message Solo", boss, killer);
+			}
+			else
+			{
+				CPrintToChatAll("%t", "Boss Killed Message None", boss);
+			}
+		}
 		
 		if(!deadRinger)
 		{
@@ -131,10 +156,13 @@ static Action Events_PlayerDeath(Event event, const char[] name, bool dontBroadc
 			Bosses_Remove(victim, false);
 			Music_ToggleMusic(victim, false, true);
 			Gamemode_CheckAlivePlayers(victim);
+			ViewModel_Destroy(victim);
 			Client(victim).ResetByDeath();
 			
 			CreateTimer(0.1, RemoveKillCam, userid, TIMER_FLAG_NO_MAPCHANGE);
 		}
+
+		Gamemode_UpdateListeners();
 		
 		event.BroadcastDisabled = true;
 		return Plugin_Changed;

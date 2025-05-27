@@ -64,6 +64,7 @@ void SDKHook_HookClient(int client)
 		SDKHook(client, SDKHook_OnTakeDamage, ClientTakeDamage);
 	
 	SDKHook(client, SDKHook_SetTransmit, ClientTransmit);
+	SDKHook(client, SDKHook_WeaponSwitchPost, ClientWeaponSwitch);
 }
 
 public void OnEntityCreated(int entity, const char[] classname)
@@ -105,7 +106,7 @@ public Action TF2_OnTakeDamage(int victim, int &attacker, int &inflictor, float 
 			{
 				case TF_CUSTOM_BACKSTAB:
 				{
-					damage = 100.0;
+					damage = 150.0;
 					damagetype |= DMG_PREVENT_PHYSICS_FORCE|DMG_CRIT;
 					critType = CritType_Crit;
 					changed = true;
@@ -169,6 +170,24 @@ static Action ClientTransmit(int client, int target)
 	}
 
 	return Plugin_Continue;
+}
+
+static void ClientWeaponSwitch(int client, int weapon)
+{
+	RequestFrame(ClientWeaponSwitchFrame, GetClientUserId(client));
+}
+
+static void ClientWeaponSwitchFrame(int userid)
+{
+	int client = GetClientOfUserId(userid);
+	if(client)
+	{
+		if(Bosses_StartFunctionClient(client, "WeaponSwitch"))
+		{
+			Call_PushCell(client);
+			Call_Finish();
+		}
+	}
 }
 
 static Action SDKHook_NormalSHook(int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH], int &entity, int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)

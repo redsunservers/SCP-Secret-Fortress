@@ -39,6 +39,7 @@ public void SCP106_Precache(int index)
 public void SCP106_Create(int client)
 {
 	Default_Create(client);
+	Client(client).KeycardExit = 0;
 
 	if(!NoclipHooked)
 	{
@@ -72,18 +73,27 @@ public void SCP106_Equip(int client, bool weapons)
 		{
 			Attrib_Set(entity, "damage penalty", 0.77);
 			Attrib_Set(entity, "crit mod disabled", 1.0);
-			Attrib_Set(entity, "max health additive bonus", 1400.0);
+			Attrib_Set(entity, "max health additive bonus", 1000.0);
 			Attrib_Set(entity, "move speed penalty", 0.85);
 			Attrib_Set(entity, "dmg taken from crit reduced", 0.0);
 			Attrib_Set(entity, "dmg taken from bullets reduced", 0.2);
 			Attrib_Set(entity, "damage force reduction", 0.4);
+			Attrib_Set(entity, "cancel falling damage", 1.0);
 			Attrib_Set(entity, "airblast vulnerability multiplier", 0.4);
 
 			TF2U_SetPlayerActiveWeapon(client, entity);
 
-			SetEntityHealth(client, 1600);
+			SetEntityHealth(client, 1200);
 		}
+
+		ViewModel_Create(client, ViewModel, "a_fists_idle_02");
+		ViewModel_SetAnimation(client, "fists_draw");
 	}
+}
+
+public void SCP106_WeaponSwitch(int client)
+{
+	Default_WeaponSwitch(client);
 }
 
 public void SCP106_Remove(int client)
@@ -110,8 +120,27 @@ public float SCP106_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int vi
 	return 30.8;
 }
 
+public Action SCP106_TakeDamage(int client, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom, CritType &critType)
+{
+	return Default_TakeDamage(client, attacker, inflictor, damage, damagetype, weapon, damageForce, damagePosition, damagecustom, critType);
+}
+
 public Action SCP106_DealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom, CritType &critType)
 {
+	if(!Client(victim).IsBoss)
+	{
+		SetEntPropFloat(client, Prop_Send, "m_flNextAttack", GetGameTime() + 2.0);
+
+		if(!GoToNamedSpawn(victim, "scp_pocket"))
+		{
+			if(GetURandomInt() % 3)
+			{
+				damage *= 2.0;
+				damagetype |= DMG_CRIT;
+				return Plugin_Changed;
+			}
+		}
+	}
 	return Plugin_Continue;
 }
 
@@ -122,7 +151,7 @@ public Action SCP106_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 	if(GetEntityMoveType(client) == MOVETYPE_NOCLIP)
 	{
 		float dist = FAbs(pos[2] - HoverPosition[client]);
-		if(dist > 100.0)
+		if(dist > 50.0)
 		{
 			// Assume teleported
 			HoverPosition[client] = pos[2];
@@ -188,6 +217,18 @@ public void SCP106_ActionButton(int client)
 		PrintCenterText(client, "%T", "Unsafe Location", client);
 		ClientCommand(client, "playgamesound items/suitchargeno1.wav");
 	}
+}
+
+public Action SCP106_CalcIsAttackCritical(int client, int weapon, const char[] weaponname, bool &result)
+{
+	ViewModel_SetAnimation(client, (GetURandomInt() % 2) ? "attack1" : "attack2");
+	return Plugin_Continue;
+}
+
+public void SCP106_RelayTrigger(int client, const char[] name, int relay, int target)
+{
+	if(!StrContains(name, "scp_femur", false))
+		SDKHooks_TakeDamage(client, client, client, 9001.0, DMG_NERVEGAS);
 }
 
 static bool GetSafePosition(int client, const float testPos[3], float result[3])

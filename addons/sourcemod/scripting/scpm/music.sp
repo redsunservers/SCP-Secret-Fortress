@@ -215,7 +215,7 @@ void Music_ToggleMusic(int client, bool startNew = true, bool stopExisting = fal
 		}
 	}
 
-	if(startNew && !RoundDisabled && !MusicTimer[client])
+	if(startNew && !RoundDisabled && !MusicTimer[client] && GameRules_GetRoundState() == RoundState_RoundRunning)
 	{
 		if(MusicInfinite[client])
 		{
@@ -242,7 +242,7 @@ void Music_ToggleMusic(int client, bool startNew = true, bool stopExisting = fal
 		int type;
 		if(marked || stress > 80.0 || Client(client).LastDangerAt || Client(client).KeycardExit > 1)
 		{
-			if(marked/* || Client(client).LastDangerAt > (GetGameTime() - 90.0)*/)
+			if(marked/* || Client(client).LastDangerAt > (GetGameTime() - 90.0)*/ && !Client(client).Escaped)
 			{
 				type = 2;
 			}
@@ -251,6 +251,8 @@ void Music_ToggleMusic(int client, bool startNew = true, bool stopExisting = fal
 				type = 1;
 			}
 		}
+
+		// Bug: Plays danger first then unsafe as SCP?
 
 		if(stress < 40.0)
 			stress = 40.0;
@@ -284,7 +286,8 @@ void Music_ToggleMusic(int client, bool startNew = true, bool stopExisting = fal
 		if(length)
 		{
 			int index = list.Get(GetURandomInt() % length);
-
+			MusicList.GetArray(index, music);
+			
 			EmitSoundToClient(client, music.Filepath, _, SNDCHAN_STATIC, SNDLEVEL_NONE, _, music.Volume * intensity);
 			LastTheme[client] = index;
 			

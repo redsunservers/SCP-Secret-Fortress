@@ -100,7 +100,7 @@ public bool Keycard101_Type()
 }
 public void Keycard101_Pickup(int client)
 {
-	KeycardPickup(client, 1, 0, 2);
+	KeycardPickup(client, 1, 0, 1);
 }
 
 public bool Keycard102_Type()
@@ -127,7 +127,7 @@ public bool Keycard111_Type()
 }
 public void Keycard111_Pickup(int client)
 {
-	KeycardPickup(client, 1, 1, 2);
+	KeycardPickup(client, 1, 1, 1);
 }
 
 public bool Keycard112_Type()
@@ -154,7 +154,7 @@ public bool Keycard121_Type()
 }
 public void Keycard121_Pickup(int client)
 {
-	KeycardPickup(client, 1, 2, 2);
+	KeycardPickup(client, 1, 2, 1);
 }
 
 public bool Keycard122_Type()
@@ -181,7 +181,7 @@ public bool Keycard131_Type()
 }
 public void Keycard131_Pickup(int client)
 {
-	KeycardPickup(client, 1, 3, 2);
+	KeycardPickup(client, 1, 3, 1);
 }
 
 public bool Keycard132_Type()

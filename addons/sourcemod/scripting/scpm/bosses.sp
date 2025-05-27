@@ -252,6 +252,13 @@ int Bosses_GetByName(const char[] name, bool exact = false, int client = 0)
 	return similarBoss;
 }
 
+int Bosses_GetName(int index, char[] buffer, int length)
+{
+	BossData boss;
+	BossList.GetArray(index, boss);
+	return strcopy(buffer, length, boss.Prefix);
+}
+
 // Sets a player as a boss given an index
 void Bosses_Create(int client, int index)
 {
@@ -270,8 +277,7 @@ void Bosses_Create(int client, int index)
 		Call_Finish();
 	}
 
-	if(IsPlayerAlive(client))
-		DHook_RepsawnPlayer(client);
+	DHook_RepsawnPlayer(client);
 }
 
 // Removes a player as a boss
@@ -297,6 +303,7 @@ void Bosses_Remove(int client, bool regen = true)
 		Attrib_Remove(client, "healing received penalty");
 		
 		TF2_RemoveAllItems(client);
+		ViewModel_Destroy(client);
 
 		if(regen && IsPlayerAlive(client))
 		{
@@ -372,6 +379,41 @@ Action Bosses_PlayerRunCmd(int client, int &buttons, int &impulse, float vel[3],
 	}
 	
 	return action;
+}
+
+Action Bosses_CalcIsAttackCritical(int client, int weapon, const char[] weaponname, bool &result)
+{
+	Action action;
+	if(Bosses_StartFunctionClient(client, "CalcIsAttackCritical"))
+	{
+		Call_PushCell(client);
+		Call_PushCell(weapon);
+		Call_PushString(weaponname);
+		Call_PushCellRef(result);
+		Call_Finish(action);
+	}
+	
+	return action;
+}
+
+void Bosses_ConditionAdded(int client, TFCond condition)
+{
+	if(Bosses_StartFunctionClient(client, "ConditionAdded"))
+	{
+		Call_PushCell(client);
+		Call_PushCell(condition);
+		Call_Finish();
+	}
+}
+
+void Bosses_ConditionRemoved(int client, TFCond condition)
+{
+	if(Bosses_StartFunctionClient(client, "ConditionRemoved"))
+	{
+		Call_PushCell(client);
+		Call_PushCell(condition);
+		Call_Finish();
+	}
 }
 
 // Delete the handle when done

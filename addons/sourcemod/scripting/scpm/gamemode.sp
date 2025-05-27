@@ -36,6 +36,10 @@ void Gamemode_PluginStart()
 	HookEntityOutput("logic_relay", "OnTrigger", OnRelayTrigger);
 
 	RoundStartTime = GetGameTime();
+	
+	delete BlinkTimer;
+	BlinkTimer = CreateTimer(0.1, GlobalBlinkTimer);
+	NextBlinkAt = GetGameTime() + 0.1;
 }
 
 void Gamemode_RoundRespawn()
@@ -149,7 +153,7 @@ void Gamemode_RoundEnd()
 			
 			if(Client(client).EscapeTimeAt)
 			{
-				int sec = RoundFloat(RoundStartTime - Client(client).EscapeTimeAt);
+				int sec = RoundFloat(Client(client).EscapeTimeAt - RoundStartTime);
 				int min = sec / 60;
 				sec = sec % 60;
 
@@ -161,7 +165,7 @@ void Gamemode_RoundEnd()
 	if(!buffer[0])
 		strcopy(buffer, sizeof(buffer), "\n☠");
 
-	SetHudTextParams(-1.0, 0.3, 19.0, 255, 255, 255, 255, 2, 0.1, 0.1);
+	SetHudTextParams(-1.0, 0.15, 19.0, 255, 255, 255, 255, 2, 0.1, 0.1);
 	
 	for(int client = 1; client <= MaxClients; client++)
 	{
@@ -181,6 +185,8 @@ void Gamemode_ClientDisconnect(int client)
 	delete MenuTimer[client];
 	MenuCooldownFor[client] = 0.0;
 	GlowEffectRef[client] = -1;
+
+	Gamemode_CheckAlivePlayers(client);
 }
 
 Action Gamemode_WinPanel(Event event)
@@ -272,7 +278,16 @@ void Gamemode_UpdateListeners()
 		return;
 	}
 
+	float gameTime = GetGameTime();
+	static float lastGameTime;
+	float delta = FAbs(gameTime - lastGameTime);
+	lastGameTime = gameTime;
+	
+	if(delta > 0.5)
+		delta = 0.5;
+
 	ListenerDefault = false;
+	static bool alone[MAXPLAYERS+1];
 	static int valid[MAXPLAYERS+1], team[MAXPLAYERS+1], spec[MAXPLAYERS+1];
 	static float pos[MAXPLAYERS+1][3], ang[MAXPLAYERS+1][3], range[MAXPLAYERS+1];
 	for(int client = 1; client <= MaxClients; client++)
@@ -295,6 +310,7 @@ void Gamemode_UpdateListeners()
 			continue;
 		}
 
+		alone[client] = true;
 		valid[client] = 2;
 		spec[client] = 0;
 		team[client] = GetClientTeam(client);
@@ -398,6 +414,8 @@ void Gamemode_UpdateListeners()
 					}
 
 					Client(speaker).GlowingTo(target, glow);
+					if(glow)
+						Client(speaker).NoTransmitTo(target, false);
 				}
 
 				if(!failed)
@@ -441,7 +459,12 @@ void Gamemode_UpdateListeners()
 				{
 					//PrintToConsole(speaker, "DEBUG: Looking at %N", target);
 
-					if(team[speaker] != team[target])
+					if(team[speaker] == team[target])
+					{
+						alone[speaker] = false;
+						alone[target] = false;
+					}
+					else
 					{
 						if(Client(target).IsBoss)
 						{
@@ -450,9 +473,23 @@ void Gamemode_UpdateListeners()
 						else if(Client(speaker).IsBoss)
 						{
 							Music_StartChase(speaker, speaker);
+
+							if(!Client(target).Minion)
+								Client(a).Stress += 3.0 * delta;
 						}
 					}
 				}
+			}
+		}
+
+		if(valid[a] > 1 && !Client(a).IsBoss && !Client(a).Minion)
+		{
+			float stress = Humans_GetStressGain(a, alone[a]);
+			if(stress != 0.0)
+			{
+				Client(a).Stress += stress * delta;
+				if(Client(a).Stress < 0.0)
+					Client(a).Stress = 0.0;
 			}
 		}
 	}
@@ -523,9 +560,12 @@ void Gamemode_CheckAlivePlayers(int exclude = 0, bool alive = true, bool resetMa
 	}
 }
 
-bool Gamemode_PlayerRunCmd(int client, int &buttons, int &impulse)
+bool Gamemode_PlayerRunCmd(int client, int &buttons, int &impulse, const float vel[3])
 {
 	bool changed;
+
+	if((!(buttons & IN_DUCK) && (vel[0] || vel[1] || vel[2])) || (GetEntProp(client, Prop_Send, "m_fEffects") & EF_DIMLIGHT))
+		Client(client).LastNoiseAt = GetGameTime();
 	
 	static bool holding[MAXPLAYERS+1];
 	if(buttons & (IN_USE|IN_RELOAD))
@@ -540,6 +580,7 @@ bool Gamemode_PlayerRunCmd(int client, int &buttons, int &impulse)
 		if(!holding[client])
 		{
 			holding[client] = true;
+			Client(client).LastNoiseAt = GetGameTime();
 			TF2_RemoveCondition(client, TFCond_Stealthed);
 
 			int entity = GetClientPointVisible(client);

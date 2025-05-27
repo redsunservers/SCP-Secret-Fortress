@@ -138,7 +138,10 @@ static Action Command_DropItem(int client, const char[] command, int args)
 		if(Client(client).ActionItem != -1)
 		{
 			if(Items_DropActionItem(client, false))
+			{
+				ClientCommand(client, "playgamesound ui/item_light_gun_drop.wav");
 				return Plugin_Handled;
+			}
 		}
 
 		int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
@@ -162,6 +165,7 @@ static Action Command_DropItem(int client, const char[] command, int args)
 				GetClientEyePosition(client, pos);
 				GetClientEyeAngles(client, ang);
 				Items_DropByEntity(client, weapon, pos, ang, false);
+				ClientCommand(client, "playgamesound ui/item_heavy_gun_drop.wav");
 				return Plugin_Handled;
 			}
 		}

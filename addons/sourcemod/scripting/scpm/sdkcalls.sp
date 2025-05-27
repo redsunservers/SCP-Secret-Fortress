@@ -170,7 +170,7 @@ void SDKCall_InitDroppedWeapon(int droppedWeapon, int client, int fromWeapon, bo
 		SDKCall(SDKInitWeapon, droppedWeapon, client, fromWeapon, swap, sewerslide);
 }
 
-stock void SDKCall_InitPickup(int entity, int client, int weapon)
+void SDKCall_InitPickup(int entity, int client, int weapon)
 {
 	if(SDKInitPickup)
 		SDKCall(SDKInitPickup, entity, client, weapon);

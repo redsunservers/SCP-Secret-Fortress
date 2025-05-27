@@ -1,18 +1,3 @@
-/*
-	TODO
-
-	- Item pickup/drop sounds
-	- Class cfg
-	- 106 deal damage
-	- SCP viewmodels
-	- Item giving correct ammo & clip
-	- Stress with teammates death/nearby/alone
-	- Stress when being looked at by scp
-	- SCP-049
-	- SCP-096
-	- SCP-939
-*/
-
 #include <sourcemod>
 #include <sdkhooks>
 #include <tf2_stocks>
@@ -214,6 +199,20 @@ enum
 
 enum
 {
+	OBS_MODE_NONE = 0,	// not in spectator mode
+	OBS_MODE_DEATHCAM,	// special mode for death cam animation
+	OBS_MODE_FREEZECAM,	// zooms to a target, and freeze-frames on them
+	OBS_MODE_FIXED,		// view from a fixed camera position
+	OBS_MODE_IN_EYE,	// follow a player in first person view
+	OBS_MODE_CHASE,		// follow a player in third person view
+	OBS_MODE_POI,		// PASSTIME point of interest - game objective, big fight, anything interesting; added in the middle of the enum due to tons of hard-coded "<ROAMING" enum compares
+	OBS_MODE_ROAMING,	// free roaming
+
+	NUM_OBSERVER_MODES,
+};
+
+enum
+{
 	Version,
 	
 	SCPCount,
@@ -226,6 +225,7 @@ enum
 
 ConVar Cvar[Cvar_MAX];
 
+int ModelEmpty;
 float RoundStartTime;
 int PlayersAlive[TFTeam_MAX];
 int MaxPlayersAlive[TFTeam_MAX];
@@ -247,12 +247,15 @@ int MaxPlayersAlive[TFTeam_MAX];
 #include "scpm/sdkhooks.sp"
 #include "scpm/specials.sp"
 #include "scpm/tf2utils.sp"
+#include "scpm/viewmodels.sp"
 #include "scpm/vscript.sp"
 #include "scpm/weapons.sp"
 
 #include "scpm/bosses/default.sp"
+#include "scpm/bosses/scp096.sp"
 #include "scpm/bosses/scp106.sp"
 #include "scpm/bosses/scp173.sp"
+#include "scpm/bosses/scp939.sp"
 
 #include "scpm/items/keycards.sp"
 #include "scpm/items/generic.sp"
@@ -302,11 +305,18 @@ public void OnPluginEnd()
 {
 	ConVar_Disable();
 	DHook_PluginEnd();
+
+	for(int i = 1; i <= MaxClients; i++)
+	{
+		if(IsClientInGame(i))
+			OnClientDisconnect(i);
+	}
 }
 
 public void OnMapStart()
 {
 	SDKHook_MapStart();
+	ModelEmpty = PrecacheModel("models/empty.mdl");
 }
 
 public void OnMapEnd()
@@ -346,6 +356,7 @@ public void OnClientDisconnect(int client)
 	Gamemode_ClientDisconnect(client);
 	Human_ClientDisconnect(client);
 	Music_ClientDisconnect(client);
+	ViewModel_Destroy(client);
 	Client(client).ResetByDisconnect();
 }
 
@@ -356,7 +367,7 @@ public void OnGameFrame()
 
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
-	bool changed = Gamemode_PlayerRunCmd(client, buttons, impulse);
+	bool changed = Gamemode_PlayerRunCmd(client, buttons, impulse, vel);
 	Human_PlayerRunCmd(client, buttons, vel);
 	Action action = Bosses_PlayerRunCmd(client, buttons, impulse, vel, angles, weapon, subtype, cmdnum, tickcount, seed, mouse);
 
@@ -370,11 +381,17 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 
 public void TF2_OnConditionAdded(int client, TFCond condition)
 {
+	Bosses_ConditionAdded(client, condition);
 	Human_ConditionAdded(client, condition);
 }
-/*
+
 public void TF2_OnConditionRemoved(int client, TFCond condition)
 {
-	Human_ConditionRemoved(client, condition);
+	Bosses_ConditionRemoved(client, condition);
+	//Human_ConditionRemoved(client, condition);
 }
-*/
+
+public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname, bool &result)
+{
+	return Bosses_CalcIsAttackCritical(client, weapon, weaponname, result);
+}

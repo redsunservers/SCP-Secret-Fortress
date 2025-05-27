@@ -401,6 +401,10 @@ int Items_GiveByIndex(int client, int itemIndex, bool tempWeapon = false)
 	{
 		TF2Econ_GetItemClassName(itemIndex, classname, sizeof(classname));
 	}
+
+	// Force to soldier shovel
+	if(StrContains(classname, "saxxy", false) != -1)
+		strcopy(classname, sizeof(classname), "tf_weapon_shovel");
 	
 	// Don't bother with wearables or builders
 	if(StrContains(classname, "tf_weapon", false) == -1 || StrContains(classname, "tf_weapon_builder", false) != -1 || StrContains(classname, "tf_weapon_sapper", false) != -1)
@@ -409,10 +413,6 @@ int Items_GiveByIndex(int client, int itemIndex, bool tempWeapon = false)
 	// Force to soldier shotgun
 	if(StrContains(classname, "tf_weapon_shotgun", false) != -1)
 		strcopy(classname, sizeof(classname), "tf_weapon_shotgun_soldier");
-
-	// Force to soldier shovel
-	if(StrContains(classname, "saxxy", false) != -1)
-		strcopy(classname, sizeof(classname), "tf_weapon_shovel");
 
 	// Drop anything in our current slot
 	if(!isAction)
@@ -455,10 +455,21 @@ int Items_GiveByIndex(int client, int itemIndex, bool tempWeapon = false)
 			SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", true);
 			EquipPlayerWeapon(client, entity);
 
+			// Refill ammo correctly
+			if(HasEntProp(entity, Prop_Send, "m_iPrimaryAmmoType"))
+			{
+				int type = GetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType");
+				if(type > 0)
+					GivePlayerAmmo(client, 100, type, true);
+			}
+
 			if(!isAction)
 				TF2U_SetPlayerActiveWeapon(client, entity);
 		}
 	}
+
+	if(!Client(client).Boss)
+		ClientCommand(client, "playgamesound ui/item_heavy_gun_pickup.wav");
 
 	return entity;
 }
@@ -517,7 +528,12 @@ int Items_GiveByEntity(int client, int entity)
 
 	int weapon = SDKCall_GiveNamedItem(client, classname, 0, GetEntityAddress(entity) + offsetItem, true);
 	if(weapon != -1)
+	{
+		SDKCall_InitPickup(entity, client, weapon);
 		EquipPlayerWeapon(client, weapon);
+	}
+
+	ClientCommand(client, "playgamesound ui/item_heavy_gun_pickup.wav");
 	
 	return weapon;
 }
@@ -682,6 +698,8 @@ void Items_GiveActionItem(int client, int itemIndex)
 		
 		Client(client).ActionItem = itemIndex;
 	}
+	
+	ClientCommand(client, "playgamesound ui/item_light_gun_pickup.wav");
 
 	if(StartItemFunctionByIndex(itemIndex, "Pickup"))
 	{
@@ -692,6 +710,8 @@ void Items_GiveActionItem(int client, int itemIndex)
 
 bool Items_UseActionItem(int client)
 {
+	Client(client).LastNoiseAt = GetGameTime();
+	
 	if(Bosses_StartFunctionClient(client, "ActionButton"))
 	{
 		Call_PushCell(client);

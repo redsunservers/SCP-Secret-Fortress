@@ -24,6 +24,7 @@ static int NoTransmitToPos[MAXPLAYERS+1][(MAXPLAYERS+1) / 32];
 static bool SilentTalk[MAXPLAYERS+1];
 static bool NoEscape[MAXPLAYERS+1];
 static float EscapeTimeAt[MAXPLAYERS+1];
+static float LastNoiseAt[MAXPLAYERS+1];
 
 methodmap Client
 {
@@ -350,6 +351,19 @@ methodmap Client
 			EscapeTimeAt[this.Index] = value;
 		}
 	}
+
+	// Game time
+	property float LastNoiseAt
+	{
+		public get()
+		{
+			return LastNoiseAt[this.Index];
+		}
+		public set(float value)
+		{
+			LastNoiseAt[this.Index] = value;
+		}
+	}
 	
 	public void ResetByDeath()
 	{
@@ -368,11 +382,11 @@ methodmap Client
 		this.LastDangerAt = 0.0;
 		this.SilentTalk = false;
 		this.NoEscape = false;
+		this.LastNoiseAt = 0.0;
 	}
 	
 	public void ResetByRound()
 	{
-		this.Boss = -1;
 		this.ControlProgress = 0;
 		this.EscapeTimeAt = 0.0;
 		this.ResetByDeath();

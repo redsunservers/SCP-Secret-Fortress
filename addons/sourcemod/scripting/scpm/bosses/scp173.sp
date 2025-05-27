@@ -125,21 +125,27 @@ public void SCP173_Equip(int client, bool weapons)
 		{
 			Attrib_Set(entity, "fire rate bonus", 0.3);
 			Attrib_Set(entity, "crit mod disabled", 1.0);
-			Attrib_Set(entity, "max health additive bonus", 2700.0);
-			Attrib_Set(entity, "damage vs players", 11.0);
+			Attrib_Set(entity, "max health additive bonus", 1700.0);
+			Attrib_Set(entity, "dmg penalty vs players", 11.0);
 			Attrib_Set(entity, "damage force reduction", 0.0);
+			Attrib_Set(entity, "cancel falling damage", 1.0);
+			Attrib_Set(entity, "cannot be backstabbed", 1.0);
 			Attrib_Set(entity, "airblast vulnerability multiplier", 0.0);
 			Attrib_Set(entity, "no_duck", 1.0);
 
 			SetEntityRenderMode(entity, RENDER_TRANSCOLOR);
 			SetEntityRenderColor(entity, 255, 255, 255, 0);
-			SetEntProp(entity, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
 
 			TF2U_SetPlayerActiveWeapon(client, entity);
 
-			SetEntityHealth(client, 3000);
+			SetEntityHealth(client, 2000);
 		}
 	}
+}
+
+public void SCP173_WeaponSwitch(int client)
+{
+	Default_WeaponSwitch(client);
 }
 
 public void SCP173_Remove(int client)
@@ -165,6 +171,11 @@ public float SCP173_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int vi
 	return 30.0;
 }
 
+public Action SCP173_TakeDamage(int client, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom, CritType &critType)
+{
+	return Default_TakeDamage(client, attacker, inflictor, damage, damagetype, weapon, damageForce, damagePosition, damagecustom, critType);
+}
+
 public Action SCP173_PlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
 	bool lookedAt = CutsceneFor[client] > GetGameTime();
@@ -172,13 +183,10 @@ public Action SCP173_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 	int team = GetClientTeam(client);
 	for(int target = 1; target <= MaxClients; target++)
 	{
-		if(IsClientInGame(target) && IsPlayerAlive(target) && GetClientTeam(target) != team)
+		if(Client(target).LookingAt(client) && IsClientInGame(target) && IsPlayerAlive(target) && GetClientTeam(target) != team)
 		{
-			if(Client(target).LookingAt(client))
-			{
-				lookedAt = true;
-				break;
-			}
+			lookedAt = true;
+			break;
 		}
 	}
 
@@ -189,8 +197,11 @@ public Action SCP173_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 	
 	if(!lookedAt && (vel[0] > 0.0 || vel[1] > 0.0 || vel[2] > 0.0))
 	{
-		PlayingWalk[client] = true;
-		EmitSoundToAll(WalkSound, client, SNDCHAN_STATIC, SNDLEVEL_GUNFIRE);
+		if(!PlayingWalk[client])
+		{
+			PlayingWalk[client] = true;
+			EmitSoundToAll(WalkSound, client, SNDCHAN_STATIC, SNDLEVEL_GUNFIRE);
+		}
 	}
 	else if(PlayingWalk[client])
 	{
@@ -198,13 +209,17 @@ public Action SCP173_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 		StopSound(client, SNDCHAN_STATIC, WalkSound);
 	}
 
-	if(lookedAt && GetEntProp(client, Prop_Send, "m_bUseClassAnimations"))
+	if(lookedAt)
 	{
-		Attrib_Set(client, "major move speed bonus", 0.01);
-		Attrib_Set(client, "no_jump", 1.0);
-		SetEntProp(client, Prop_Send, "m_bUseClassAnimations", false);
-		SetEntProp(client, Prop_Send, "m_bCustomModelRotates", false);
-		SDKCall_SetSpeed(client);
+		if(GetEntProp(client, Prop_Send, "m_bUseClassAnimations"))
+		{
+			Attrib_Set(client, "major move speed bonus", 0.002);
+			Attrib_Set(client, "no_jump", 1.0);
+			SetEntProp(client, Prop_Send, "m_bUseClassAnimations", false);
+			SetEntProp(client, Prop_Send, "m_bCustomModelRotates", false);
+			SetEntPropFloat(client, Prop_Send, "m_flNextAttack", GetGameTime() + 999.9);
+			SDKCall_SetSpeed(client);
+		}
 	}
 	else if(!GetEntProp(client, Prop_Send, "m_bUseClassAnimations"))
 	{
@@ -213,6 +228,7 @@ public Action SCP173_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 		Attrib_Remove(client, "no_jump");
 		SetEntProp(client, Prop_Send, "m_bUseClassAnimations", true);
 		SetEntProp(client, Prop_Send, "m_bCustomModelRotates", true);
+		SetEntPropFloat(client, Prop_Send, "m_flNextAttack", GetGameTime() + 1.0);
 		SDKCall_SetSpeed(client);
 		PrintCenterText(client, "");
 	}
@@ -236,7 +252,7 @@ public Action SCP173_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 	{
 		if(lookedAt && blinked)
 		{
-			PrintCenterText(client, "[X]");
+			PrintCenterText(client, "[ X ]");
 
 			MotionTimeFor[client] = GetGameTime() + 0.15;
 			TeleportEntity(client, pos2, NULL_VECTOR, NULL_VECTOR);
@@ -245,10 +261,10 @@ public Action SCP173_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 			float distance = 10000.0;
 			for(int target = 1; target <= MaxClients; target++)
 			{
-				if(target == client || !IsClientInGame(target) || !IsPlayerAlive(target) || GetClientTeam(target) != team)
+				if(target == client || !IsClientInGame(target) || !IsPlayerAlive(target) || GetClientTeam(target) == team)
 					continue;
 
-				GetClientEyePosition(target, pos1);
+				GetClientAbsOrigin(target, pos1);
 				float dist = GetVectorDistance(pos1, pos2, true);
 				if(dist < distance)
 				{
@@ -318,6 +334,9 @@ static bool DPT_TryTeleport(int clientIdx, float maxDistance, const float startP
 {
 	TR_TraceRayFilter(startPos, eyeAngles, MASK_PLAYERSOLID, RayType_Infinite, Trace_DontHitEntity, clientIdx);
 	TR_GetEndPosition(testPos);
+
+	if (TR_PointOutsideWorld(testPos))
+		return false;
 	
 	float distance = GetVectorDistance(startPos, testPos);
 	if (distance > maxDistance)
@@ -343,7 +362,7 @@ static bool DPT_TryTeleport(int clientIdx, float maxDistance, const float startP
 	SubtractVectors(testPos, eyeVel, testPos);
 	
 	// don't even try if the distance is less than 82
-	while (GetVectorDistance(startPos, testPos) >= 82.0)
+	for (int i; i < 100 && GetVectorDistance(startPos, testPos) >= 82.0; i++)
 	{
 		if (GetSafePosition(clientIdx, testPos, testPos))
 			return true;

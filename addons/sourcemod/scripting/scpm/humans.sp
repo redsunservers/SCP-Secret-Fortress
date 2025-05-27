@@ -23,6 +23,11 @@ enum struct ClassStat
 	float SprintDegen;
 	float StressLimit;
 	float Awareness;
+	float StressAlone;
+	float StressGroup;
+	float StressDark;
+	float StressDeath;
+	float PowerDrain;
 
 	void SetupKv(KeyValues kv)
 	{
@@ -32,6 +37,11 @@ enum struct ClassStat
 		this.SprintDegen = kv.GetFloat("sprintdrain", 10.0);
 		this.StressLimit = kv.GetFloat("maxstress", 1000.0);
 		this.Awareness = kv.GetFloat("awareness", 1.0);
+		this.StressAlone = kv.GetFloat("stressalone", 1.0);
+		this.StressGroup = kv.GetFloat("stressgroup", -1.0);
+		this.StressDark = kv.GetFloat("stressdark", 0.0);
+		this.StressDeath = kv.GetFloat("stressdeath", 30.0);
+		this.PowerDrain = kv.GetFloat("powerdrain", 1.0);
 	}
 }
 
@@ -133,9 +143,9 @@ void Human_InventoryApplication(int client)
 	int hud;
 	if(!Client(client).IsBoss && !Client(client).Minion)
 	{
-		//hud = HIDEHUD_HEALTH|HIDEHUD_TARGET_ID;
-		//if(!Client(client).Escaped)
-		//	hud += HIDEHUD_BUILDING_STATUS|HIDEHUD_CLOAK_AND_FEIGN|HIDEHUD_PIPES_AND_CHARGE|HIDEHUD_METAL;
+		hud = HIDEHUD_HEALTH|HIDEHUD_TARGET_ID;
+		if(!Client(client).Escaped)
+			hud += HIDEHUD_BUILDING_STATUS|HIDEHUD_CLOAK_AND_FEIGN|HIDEHUD_PIPES_AND_CHARGE|HIDEHUD_METAL;
 	}
 	
 	SetEntProp(client, Prop_Send, "m_iHideHUD", hud);
@@ -158,6 +168,8 @@ void Human_ToggleFlashlight(int client)
 	if(Client(client).IsBoss || Client(client).Minion)
 		return;
 	
+	Client(client).LastNoiseAt = GetGameTime();
+
 	int effects = GetEntProp(client, Prop_Send, "m_fEffects");
 	if(effects & EF_DIMLIGHT)
 	{
@@ -285,11 +297,17 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 				TeleportEntity(FlashlightRef[client], _, {0.0, 0.0, 0.0});
 			}
 		}
-		else if(Client(client).LightPower < 100.0)
+		else
 		{
-			Client(client).LightPower += delta;
-			if(Client(client).LightPower > 100.0)
-				Client(client).LightPower = 100.0;
+			if(ClassStats[class].StressDark)
+				Client(client).Stress += ClassStats[class].StressDark * delta;
+
+			if(Client(client).LightPower < 100.0)
+			{
+				Client(client).LightPower += delta;
+				if(Client(client).LightPower > 100.0)
+					Client(client).LightPower = 100.0;
+			}
 		}
 
 		static char buffer[256];
@@ -382,9 +400,9 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 			}
 			else
 			{
-				int alpha = 55 + (health * 200 / maxhealth);
-				if(alpha > 255)
-					alpha = 255;
+				int red = (health * 255 / maxhealth);
+				if(red > 255)
+					red = 255;
 				
 				int green = 255;
 				if(health > 259)
@@ -394,7 +412,7 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 						green = 32;
 				}
 
-				SetHudTextParams(0.07, 0.83, 0.3, alpha > 254 ? green : alpha, alpha, alpha > 254 ? green : alpha, alpha);
+				SetHudTextParams(0.07, 0.83, 0.3, red > 254 ? green : 255, 255, red > 254 ? green : red, 255);
 				ShowSyncHudText(client, StatusHud, buffer);
 			}
 		}
@@ -469,6 +487,14 @@ void Human_PlayerDeath(int client)
 
 	Items_DropActionItem(client, true);
 	Keycard_DropBestMatch(client, true);
+
+	for(int target = 1; target <= MaxClients; target++)
+	{
+		if(IsClientInGame(target) && IsPlayerAlive(target) && Client(target).LookingAt(client))
+		{
+			Client(target).Stress += ClassStats[TF2_GetPlayerClass(target)].StressDeath;
+		}
+	}
 }
 
 void Human_ConditionAdded(int client, TFCond cond)
@@ -482,6 +508,7 @@ void Human_ConditionAdded(int client, TFCond cond)
 		{
 			if(!Client(client).Escaped && !Client(client).NoEscape)
 			{
+				Client(client).EscapeTimeAt = GetGameTime();
 				Client(client).Escaped = true;
 				TF2_RegeneratePlayer(client);
 				Gamemode_CheckAlivePlayers();
@@ -538,6 +565,14 @@ float Humans_GetAwareness(int client)
 	return ClassStats[TF2_GetPlayerClass(client)].Awareness;
 }
 
+float Humans_GetStressGain(int client, bool alone)
+{
+	if(Client(client).IsBoss || Client(client).Minion)
+		return 0.0;
+	
+	return alone ? ClassStats[TF2_GetPlayerClass(client)].StressAlone : ClassStats[TF2_GetPlayerClass(client)].StressGroup;
+}
+
 static void EquipHuman(int client, bool post)
 {
 	if(Client(client).IsBoss || Client(client).Minion)
@@ -573,8 +608,13 @@ static void EquipHuman(int client, bool post)
 			}
 		}
 
-		if(post && melee != -1)
+		if(post && melee != -1)	// BUG: Ran twice on round start
+		{
+			char buffer[32];
+			FormatEx(buffer, sizeof(buffer), "%s Entry", ClassNames[TF2_GetPlayerClass(client)]);
+			CPrintToChat(client, "%t", buffer);
 			Weapons_ShowChanges(client, melee);
+		}
 	}
 
 	UpdateSpeed(client);
