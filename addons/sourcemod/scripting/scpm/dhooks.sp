@@ -21,6 +21,12 @@ void DHook_PluginStart()
 	ForceRespawn = CreateHook(gamedata, "CBasePlayer::ForceRespawn");
 	
 	delete gamedata;
+
+	gamedata = new GameData("randomizer");
+
+	CreateDetour(gamedata, "CTFPlayer::GetMaxAmmo", DHook_GetMaxAmmoPre);
+
+	delete gamedata;
 }
 
 static DynamicHook CreateHook(GameData gamedata, const char[] name)
@@ -158,6 +164,44 @@ static MRESReturn DHook_ForceRespawnPost(int client)
 	if(PrefClass)
 		SetEntProp(client, Prop_Send, "m_iDesiredPlayerClass", PrefClass);
 	
+	return MRES_Ignored;
+}
+
+static MRESReturn DHook_GetMaxAmmoPre(int client, DHookReturn ret, DHookParam param)
+{
+	int ammoType = param.Get(1);
+
+	switch(ammoType)
+	{
+		case 1, 2:	// Primary, Secondary
+		{
+			int weapon, i;
+			while(TF2_GetItem(client, weapon, i))
+			{
+				if(GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType") == ammoType)
+				{
+					TFClassType class = TF2_GetWeaponClass(GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex"), TF2_GetPlayerClass(client));
+					
+					// Nerf Engineer's pistol ammo to Scout's
+					if(class == TFClass_Engineer && ammoType == 2)
+						class = TFClass_Scout;
+					
+					// Revolvers are now using ammotype 1, get the default numbers
+					if(class == TFClass_Spy && ammoType == 1)
+						param.Set(1, 2);
+					
+					param.Set(2, class);
+					return MRES_ChangedHandled;
+				}
+			}
+		}
+		case 3:	// Metal
+		{
+			param.Set(2, TFClass_Engineer);
+			return MRES_ChangedHandled;
+		}
+	}
+
 	return MRES_Ignored;
 }
 

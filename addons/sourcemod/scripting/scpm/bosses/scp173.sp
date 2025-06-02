@@ -107,6 +107,7 @@ public TFClassType SCP173_TFClass()
 
 public void SCP173_Spawn(int client)
 {
+	ViewModel_DisableArms(client);
 	if(!GoToNamedSpawn(client, "scp_spawn_173"))
 		Default_Spawn(client);
 }
@@ -132,20 +133,13 @@ public void SCP173_Equip(int client, bool weapons)
 			Attrib_Set(entity, "cannot be backstabbed", 1.0);
 			Attrib_Set(entity, "airblast vulnerability multiplier", 0.0);
 			Attrib_Set(entity, "no_duck", 1.0);
-
-			SetEntityRenderMode(entity, RENDER_TRANSCOLOR);
-			SetEntityRenderColor(entity, 255, 255, 255, 0);
+			Attrib_Set(entity, "mod weapon blocks healing", 1.0);
 
 			TF2U_SetPlayerActiveWeapon(client, entity);
 
 			SetEntityHealth(client, 2000);
 		}
 	}
-}
-
-public void SCP173_WeaponSwitch(int client)
-{
-	Default_WeaponSwitch(client);
 }
 
 public void SCP173_Remove(int client)
@@ -169,6 +163,12 @@ public float SCP173_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int vi
 	
 	strcopy(theme, sizeof(theme), ScareSound);
 	return 30.0;
+}
+
+public void SCP173_Interact(int client, int entity)
+{
+	if(entity > MaxClients)
+		Client(client).ControlProgress = 1;
 }
 
 public Action SCP173_TakeDamage(int client, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom, CritType &critType)
@@ -320,6 +320,21 @@ public Action SCP173_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 			RemoveEntity(ModelRef[client]);
 		
 		ModelRef[client] = -1;
+	}
+	
+	if(!Client(client).ControlProgress)
+	{
+		if(Client(client).KeyHintUpdateAt < GetGameTime())
+		{
+			Client(client).KeyHintUpdateAt = GetGameTime() + 0.5;
+
+			if(!(buttons & IN_SCORE))
+			{
+				static char buffer[64];
+				Format(buffer, sizeof(buffer), "%T", "SCP Controls", client);
+				PrintKeyHintText(client, buffer);
+			}
+		}
 	}
 
 	return Plugin_Continue;

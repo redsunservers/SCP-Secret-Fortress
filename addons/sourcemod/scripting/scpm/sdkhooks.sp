@@ -64,6 +64,8 @@ void SDKHook_HookClient(int client)
 		SDKHook(client, SDKHook_OnTakeDamage, ClientTakeDamage);
 	
 	SDKHook(client, SDKHook_SetTransmit, ClientTransmit);
+	SDKHook(client, SDKHook_WeaponEquip, ClientWeaponEquipPre);
+	SDKHook(client, SDKHook_WeaponEquipPost, ClientWeaponEquipPost);
 	SDKHook(client, SDKHook_WeaponSwitchPost, ClientWeaponSwitch);
 }
 
@@ -172,6 +174,20 @@ static Action ClientTransmit(int client, int target)
 	return Plugin_Continue;
 }
 
+static Action ClientWeaponEquipPre(int client, int weapon)
+{
+	if(!Client(client).NoViewModel)
+		Randomizer_UpdateArms(client, weapon);
+	
+	return Plugin_Continue;
+}
+
+static void ClientWeaponEquipPost(int client, int weapon)
+{
+	if(!Client(client).NoViewModel)
+		Randomizer_UpdateArms(client);
+}
+
 static void ClientWeaponSwitch(int client, int weapon)
 {
 	RequestFrame(ClientWeaponSwitchFrame, GetClientUserId(client));
@@ -182,6 +198,9 @@ static void ClientWeaponSwitchFrame(int userid)
 	int client = GetClientOfUserId(userid);
 	if(client)
 	{
+		if(!Client(client).NoViewModel)
+			Randomizer_UpdateArms(client);
+
 		if(Bosses_StartFunctionClient(client, "WeaponSwitch"))
 		{
 			Call_PushCell(client);

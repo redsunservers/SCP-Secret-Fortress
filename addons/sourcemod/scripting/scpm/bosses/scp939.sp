@@ -83,13 +83,22 @@ public void SCP939_Equip(int client, bool weapons)
 			Attrib_Set(entity, "health regen", 4.0);
 			Attrib_Set(entity, "max health additive penalty", leader ? 375.0 : 125.0);
 			Attrib_Set(entity, "move speed penalty", 0.75);
+			Attrib_Set(entity, "mod weapon blocks healing", 1.0);
+
+			SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", ModelEmpty);
 
 			TF2U_SetPlayerActiveWeapon(client, entity);
 
 			SetEntityHealth(client, 500);
 		}
 
-		Items_GiveByIndex(client, 27);
+		entity = Items_GiveByIndex(client, 27);
+		if(entity != -1)
+		{
+			Attrib_Set(entity, "mod weapon blocks healing", 1.0);
+			
+			SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", ModelEmpty);
+		}
 
 		if(!leader)
 		{
@@ -150,18 +159,26 @@ public Action SCP939_DealDamage(int client, int victim, int &inflictor, float &d
 	return Plugin_Continue;
 }
 
+public void SCP939_ConditionAdded(int client, TFCond cond)
+{
+	if(cond == TFCond_Disguised)
+		Client(client).ControlProgress = 9;
+}
+
 public Action SCP939_PlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
-	static float updateTime[MAXPLAYERS+1];
-	if(FAbs(updateTime[client] - GetGameTime()) > 0.5)
+	if(Client(client).ControlProgress < 9)
 	{
-		updateTime[client] = GetGameTime();
-
-		if(!(buttons & IN_SCORE))
+		if(Client(client).KeyHintUpdateAt < GetGameTime())
 		{
-			static char buffer[64];
-			Format(buffer, sizeof(buffer), "%T", "SCP939 Controls", client);
-			PrintKeyHintText(client, buffer);
+			Client(client).KeyHintUpdateAt = GetGameTime() + 0.5;
+
+			if(!(buttons & IN_SCORE))
+			{
+				static char buffer[64];
+				Format(buffer, sizeof(buffer), "%T", "SCP939 Controls", client);
+				PrintKeyHintText(client, buffer);
+			}
 		}
 	}
 
@@ -233,5 +250,6 @@ static Action SpawnExtraDog(Handle timer)
 
 	ChangeClientTeam(choosen, TFTeam_Bosses);
 	Bosses_Create(choosen, BossIndex);
+	ClientCommand(choosen, "playgamesound ui/system_message_alert.wav");
 	return Plugin_Continue;
 }

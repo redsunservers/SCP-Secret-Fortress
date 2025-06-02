@@ -58,6 +58,7 @@ public TFClassType SCP096_TFClass()
 
 public void SCP096_Spawn(int client)
 {
+	ViewModel_DisableArms(client);
 	if(!GoToNamedSpawn(client, "scp_spawn_096"))
 		Default_Spawn(client);
 	
@@ -76,11 +77,6 @@ public void SCP096_Equip(int client, bool weapons)
 		GiveDefaultMelee(client);
 		SetEntityHealth(client, 2000);
 	}
-}
-
-public void SCP096_WeaponSwitch(int client)
-{
-	Default_WeaponSwitch(client);
 }
 
 public void SCP096_Remove(int client)
@@ -129,6 +125,12 @@ public float SCP096_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int vi
 	strcopy(theme, sizeof(theme), ChaseSound);
 	infinite = client != victim;
 	return 12.5;
+}
+
+public void SCP096_Interact(int client, int entity)
+{
+	if(entity > MaxClients)
+		Client(client).ControlProgress = 1;
 }
 
 public Action SCP096_TakeDamage(int client, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom, CritType &critType)
@@ -190,6 +192,7 @@ public Action SCP096_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 					Attrib_Set(entity, "increased jump height", 1.6);
 					Attrib_Set(entity, "damage force reduction", 0.0);
 					Attrib_Set(entity, "airblast vulnerability multiplier", 0.0);
+					Attrib_Set(entity, "mod weapon blocks healing", 1.0);
 					SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", ModelEmpty);
 
 					TF2_AddCondition(client, TFCond_MegaHeal, 16.0);
@@ -239,6 +242,21 @@ public Action SCP096_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 		}
 	}
 
+	if(!Client(client).ControlProgress)
+	{
+		if(Client(client).KeyHintUpdateAt < GetGameTime())
+		{
+			Client(client).KeyHintUpdateAt = GetGameTime() + 0.5;
+
+			if(!(buttons & IN_SCORE))
+			{
+				static char buffer[64];
+				Format(buffer, sizeof(buffer), "%T", "SCP Controls", client);
+				PrintKeyHintText(client, buffer);
+			}
+		}
+	}
+
 	return Plugin_Continue;
 }
 
@@ -271,10 +289,9 @@ static void GiveDefaultMelee(int client)
 		Attrib_Set(entity, "max health additive bonus", 1825.0);
 		Attrib_Set(entity, "move speed penalty", 0.85);
 		Attrib_Set(entity, "cancel falling damage", 1.0);
+		Attrib_Set(entity, "mod weapon blocks healing", 1.0);
 
 		SetEntPropFloat(entity, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + 999.9);
-		//SetEntityRenderMode(entity, RENDER_TRANSCOLOR);
-		//SetEntityRenderColor(entity, 255, 255, 255, 0);
 
 		SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", ModelEmpty);
 

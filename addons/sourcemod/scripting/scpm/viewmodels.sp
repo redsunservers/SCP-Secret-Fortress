@@ -3,8 +3,10 @@
 
 static int ViewmodelRef[MAXPLAYERS+1] = {-1, ...};
 
-void ViewModel_RemoveWearables(int client)
+void ViewModel_DisableArms(int client)
 {
+	Client(client).NoViewModel = true;
+	
 	int entity = -1;
 	while((entity=FindEntityByClassname(entity, "tf_wearable_vm")) != -1)
 	{
@@ -57,7 +59,7 @@ int ViewModel_Create(int client, const char[] model, const char[] anim = "", con
 	
 	ViewmodelRef[client] = EntIndexToEntRef(viewmodel);
 
-	ViewModel_RemoveWearables(client);
+	ViewModel_DisableArms(client);
 
 	return viewmodel;
 }

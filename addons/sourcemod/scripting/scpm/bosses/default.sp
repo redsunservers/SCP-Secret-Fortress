@@ -4,7 +4,11 @@
 // Required, precache, downloads
 public void Default_Precache(int index, BossData data)
 {
+}
 
+// When unloaded such as map/plugin end
+public void Default_Unload()
+{
 }
 
 // Created on the player
@@ -65,7 +69,6 @@ public void Default_PlayerDeath(int client, bool &fakeDeath)
 
 public void Default_PlayerKilled(int client, int victim, bool fakeDeath)
 {
-	
 }
 
 // Client is the boss (that a spy is disguised as)
@@ -125,7 +128,6 @@ public TFClassType Default_TFClass()
 // Entity is what the player is looking at, can be -1
 public void Default_Interact(int client, int entity)
 {
-
 }
 
 // When a scp map relay is triggered
@@ -142,7 +144,6 @@ public float Default_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int v
 // When the player presses use action key
 public void Default_ActionButton(int client)
 {
-	
 }
 
 public Action Default_CalcIsAttackCritical(int client, int weapon, const char[] weaponname, bool &result)
@@ -152,16 +153,13 @@ public Action Default_CalcIsAttackCritical(int client, int weapon, const char[] 
 
 public void Default_ConditionAdded(int client, TFCond condition)
 {
-
 }
 
 public void Default_ConditionRemoved(int client, TFCond condition)
 {
-
 }
 
 // Called the frame after switching weapons
 public void Default_WeaponSwitch(int client)
 {
-	ViewModel_RemoveWearables(client);
 }

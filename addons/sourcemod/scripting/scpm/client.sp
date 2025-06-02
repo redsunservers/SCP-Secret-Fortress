@@ -25,6 +25,8 @@ static bool SilentTalk[MAXPLAYERS+1];
 static bool NoEscape[MAXPLAYERS+1];
 static float EscapeTimeAt[MAXPLAYERS+1];
 static float LastNoiseAt[MAXPLAYERS+1];
+static bool NoViewModel[MAXPLAYERS+1];
+static float KeyHintUpdateAt[MAXPLAYERS+1];
 
 methodmap Client
 {
@@ -364,6 +366,31 @@ methodmap Client
 			LastNoiseAt[this.Index] = value;
 		}
 	}
+
+	property bool NoViewModel
+	{
+		public get()
+		{
+			return NoViewModel[this.Index];
+		}
+		public set(bool value)
+		{
+			NoViewModel[this.Index] = value;
+		}
+	}
+
+	// Game time
+	property float KeyHintUpdateAt
+	{
+		public get()
+		{
+			return KeyHintUpdateAt[this.Index];
+		}
+		public set(float value)
+		{
+			KeyHintUpdateAt[this.Index] = value;
+		}
+	}
 	
 	public void ResetByDeath()
 	{
@@ -383,6 +410,7 @@ methodmap Client
 		this.SilentTalk = false;
 		this.NoEscape = false;
 		this.LastNoiseAt = 0.0;
+		this.NoViewModel = false;
 	}
 	
 	public void ResetByRound()
@@ -395,6 +423,7 @@ methodmap Client
 	public void ResetByDisconnect()
 	{
 		this.LastGameTime = 0.0;
+		this.KeyHintUpdateAt = 0.0;
 		this.ResetByRound();
 	}
 }

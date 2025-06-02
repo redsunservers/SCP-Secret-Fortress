@@ -1,6 +1,8 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+#define SCP106_NOCLIPSPEED	"0.7"
+
 static const char Downloads[][] =
 {
 	"models/scp_sf/106/scp106_player_3.dx80.vtx",
@@ -43,9 +45,22 @@ public void SCP106_Create(int client)
 
 	if(!NoclipHooked)
 	{
-		ConVar_Add("sv_noclipspeed", "0.7");
+		char value[16];
+		Cvar[NoclipSpeed].GetString(value, sizeof(value));
+
+		ConVar_Add("sv_noclipspeed", SCP106_NOCLIPSPEED);
 		NoclipHooked = true;
+
+		// No spoilers about the upcoming SCP
+		for(int i = 1; i <= MaxClients; i++)
+		{
+			if(i != client && IsClientInGame(i) && !IsFakeClient(i))
+				Cvar[NoclipSpeed].ReplicateToClient(client, value);
+		}
 	}
+	
+	if(!IsFakeClient(client))
+		Cvar[NoclipSpeed].ReplicateToClient(client, SCP106_NOCLIPSPEED);
 }
 
 public TFClassType SCP106_TFClass()
@@ -55,6 +70,7 @@ public TFClassType SCP106_TFClass()
 
 public void SCP106_Spawn(int client)
 {
+	ViewModel_DisableArms(client);
 	if(!GoToNamedSpawn(client, "scp_spawn_106"))
 		Default_Spawn(client);
 }
@@ -80,6 +96,7 @@ public void SCP106_Equip(int client, bool weapons)
 			Attrib_Set(entity, "damage force reduction", 0.4);
 			Attrib_Set(entity, "cancel falling damage", 1.0);
 			Attrib_Set(entity, "airblast vulnerability multiplier", 0.4);
+			Attrib_Set(entity, "mod weapon blocks healing", 1.0);
 
 			TF2U_SetPlayerActiveWeapon(client, entity);
 
@@ -89,11 +106,6 @@ public void SCP106_Equip(int client, bool weapons)
 		ViewModel_Create(client, ViewModel, "a_fists_idle_02");
 		ViewModel_SetAnimation(client, "fists_draw");
 	}
-}
-
-public void SCP106_WeaponSwitch(int client)
-{
-	Default_WeaponSwitch(client);
 }
 
 public void SCP106_Remove(int client)
@@ -109,7 +121,16 @@ public void SCP106_Remove(int client)
 				return;
 		}
 
+		int flags = Cvar[NoclipSpeed].Flags;
+		bool replicate = !(flags & FCVAR_REPLICATED);
+		if(replicate)
+			Cvar[NoclipSpeed].Flags |= FCVAR_REPLICATED;
+		
 		ConVar_Remove("sv_noclipspeed");
+
+		if(replicate)
+			Cvar[NoclipSpeed].Flags &= ~FCVAR_REPLICATED;
+
 		NoclipHooked = false;
 	}
 }
@@ -167,16 +188,18 @@ public Action SCP106_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 		HoverPosition[client] = pos[2];
 	}
 
-	static float updateTime[MAXPLAYERS+1];
-	if(FAbs(updateTime[client] - GetGameTime()) > 0.5)
+	if(!Client(client).ControlProgress)
 	{
-		updateTime[client] = GetGameTime();
-
-		if(!(buttons & IN_SCORE))
+		if(Client(client).KeyHintUpdateAt < GetGameTime())
 		{
-			static char buffer[64];
-			Format(buffer, sizeof(buffer), "%T", "SCP106 Controls", client);
-			PrintKeyHintText(client, buffer);
+			Client(client).KeyHintUpdateAt = GetGameTime() + 0.5;
+
+			if(!(buttons & IN_SCORE))
+			{
+				static char buffer[64];
+				Format(buffer, sizeof(buffer), "%T", "SCP106 Controls", client);
+				PrintKeyHintText(client, buffer);
+			}
 		}
 	}
 
@@ -211,6 +234,7 @@ public void SCP106_ActionButton(int client)
 
 		PrintCenterText(client, "");
 		ClientCommand(client, "playgamesound common/wpn_moveselect.wav");
+		Client(client).ControlProgress = 1;
 	}
 	else
 	{

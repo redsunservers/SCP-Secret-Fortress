@@ -183,6 +183,21 @@ void Bosses_SetupConfig(KeyValues map)
 		delete kv;
 }
 
+void Bosses_MapEnd()
+{
+	if(BossList)
+	{
+		int length = BossList.Length;
+		for(int i; i < length; i++)
+		{
+			if(Bosses_StartFunction(i, "Unload"))
+			{
+				Call_Finish();
+			}
+		}
+	}	
+}
+
 // Calls a boss function is the client is a boss
 // @error Invalid client
 stock bool Bosses_StartFunctionClient(int client, const char[] name)

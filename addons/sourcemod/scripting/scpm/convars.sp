@@ -25,15 +25,16 @@ void ConVar_PluginStart()
 	
 	Cvar[AllowSpectators] = FindConVar("mp_allowspectators");
 	Cvar[Gravity] = FindConVar("sv_gravity");
+	Cvar[NoclipSpeed] = FindConVar("sv_noclipspeed");
 	
 	CvarList = new ArrayList(sizeof(CvarInfo));
-
+/*
 	ConVar_Add("randomizer_class", "");//"trigger=@!boss group=@me action=round");
 	ConVar_Add("randomizer_weapons", "");//"trigger=@!boss group=@me action=round count-primary=0 count-secondary=0 count-melee=1");
 	ConVar_Add("randomizer_cosmetics", "");
 	ConVar_Add("randomizer_droppedweapons", "1");
 	ConVar_Add("randomizer_enabled", "1");
-	
+*/
 	ConVar_Add("mat_supportflashlight", "1");
 	ConVar_Add("mp_autoteambalance", "0");
 	ConVar_Add("mp_bonusroundtime", "20.0", false);
@@ -159,7 +160,17 @@ void ConVar_Add(const char[] name, const char[] value, bool enforce = true)
 		}
 
 		if(setValue)
+		{
+			int flags = info.Cvar.Flags;
+			bool notify = view_as<bool>(flags & FCVAR_NOTIFY);
+			if(notify)
+				info.Cvar.Flags &= ~FCVAR_NOTIFY;
+			
 			info.Cvar.SetString(info.Value);
+
+			if(notify)
+				info.Cvar.Flags |= FCVAR_NOTIFY;
+		}
 		
 		info.Cvar.AddChangeHook(ConVar_OnChanged);
 	}
@@ -177,7 +188,16 @@ stock void ConVar_Remove(const char[] name)
 		if(CvarHooked)
 		{
 			info.Cvar.RemoveChangeHook(ConVar_OnChanged);
-			info.Cvar.SetString(info.Defaul);
+			
+			int flags = info.Cvar.Flags;
+			bool notify = view_as<bool>(flags & FCVAR_NOTIFY);
+			if(notify)
+				info.Cvar.Flags &= ~FCVAR_NOTIFY;
+			
+			info.Cvar.SetString(info.Value);
+
+			if(notify)
+				info.Cvar.Flags |= FCVAR_NOTIFY;
 		}
 	}
 	else

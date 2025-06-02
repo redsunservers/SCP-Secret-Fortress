@@ -116,6 +116,10 @@
 	{
 		"en"	"{orange}Spy{default}: {yellow}You're able to observe subjects less easily"
 	}
+	"Class No Use"
+	{
+		"en"	"I don't know how to use this..."
+	}
 	"Keycard100"
 	{
 		"en"	"Janitor Keycard"
@@ -208,6 +212,10 @@
 	{
 		"en"	"{mediumblue}Mobile Task Force Unit, Epsilon-11{default} has entered the facility."
 	}
+	"SCP Controls"
+	{
+		"en"	"%%+reload%% INTERACT"
+	}
 	"SCP173"
 	{
 		"en"	"SCP-173"
@@ -263,5 +271,9 @@
 	"SCP049 Entry"
 	{
 		"en"	"SCP-049\nObject Class: Euclid\nSCP-049 is a humanoid entity which bears the appearance of a medieval plague doctor.\nSCP-049 is capable of causing all biological functions of an organism to cease through direct skin contact.\nSCP-049-2 instances are reanimated corpses that have been operated on by SCP-049."
+	}
+	"SCP049 Controls"
+	{
+		"en"	"%%+reload%% INTERACT %%lastinv%% SWITCH WEAPONS"
 	}
 }

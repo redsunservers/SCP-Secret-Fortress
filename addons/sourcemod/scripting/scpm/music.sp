@@ -252,8 +252,6 @@ void Music_ToggleMusic(int client, bool startNew = true, bool stopExisting = fal
 			}
 		}
 
-		// Bug: Plays danger first then unsafe as SCP?
-
 		if(stress < 40.0)
 			stress = 40.0;
 

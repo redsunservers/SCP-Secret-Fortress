@@ -379,22 +379,31 @@ static int GetActionDataOfIndex(int itemIndex, ActionInfo action)
 	return -1;
 }
 
+bool Items_CanSpawn(int itemIndex)
+{
+	return ItemList.FindValue(itemIndex, ItemInfo::Index) != -1;
+}
+
 // Gives a new weapon to the player given a index
-int Items_GiveByIndex(int client, int itemIndex, bool tempWeapon = false)
+int Items_GiveByIndex(int client, int itemIndex, bool tempWeapon = false, const char[] forceClassname = "")
 {
 	char classname[64];
 	ActionInfo action;
 	bool isAction = GetActionDataOfIndex(itemIndex, action) != -1;
 
+	if(forceClassname[0])
+	{
+		strcopy(classname, sizeof(classname), forceClassname);
+	}
 	// Check if this index is an action
-	if(isAction)
+	else if(isAction)
 	{
 		if(!tempWeapon)
 		{
 			Items_GiveActionItem(client, itemIndex);
 			return -1;
 		}
-
+		
 		strcopy(classname, sizeof(classname), "tf_weapon_shovel");
 	}
 	else
@@ -452,16 +461,24 @@ int Items_GiveByIndex(int client, int itemIndex, bool tempWeapon = false)
 		
 		if(!tempWeapon)
 		{
+			int type;
+			if(!StrContains(classname, "tf_weapon_revolver"))
+			{
+				// Set revolver to primary slot ammo
+				type = 1;
+				SetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType", type);
+			}
+			else if(HasEntProp(entity, Prop_Send, "m_iPrimaryAmmoType"))
+			{
+				type = GetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType");
+			}
+
 			SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", true);
 			EquipPlayerWeapon(client, entity);
 
 			// Refill ammo correctly
-			if(HasEntProp(entity, Prop_Send, "m_iPrimaryAmmoType"))
-			{
-				int type = GetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType");
-				if(type > 0)
-					GivePlayerAmmo(client, 100, type, true);
-			}
+			if(type > 0)
+				GivePlayerAmmo(client, 100, type, true);
 
 			if(!isAction)
 				TF2U_SetPlayerActiveWeapon(client, entity);
@@ -475,7 +492,7 @@ int Items_GiveByIndex(int client, int itemIndex, bool tempWeapon = false)
 }
 
 // Gives the dropped weapon to the player
-int Items_GiveByEntity(int client, int entity)
+bool Items_GiveByEntity(int client, int entity, bool specialCheck = false)
 {
 	static Address offsetIndex;
 	if(!offsetIndex)
@@ -490,7 +507,7 @@ int Items_GiveByEntity(int client, int entity)
 	if(isAction)
 	{
 		Items_GiveActionItem(client, itemIndex);
-		return -1;
+		return true;
 	}
 	
 	char classname[64];
@@ -498,7 +515,15 @@ int Items_GiveByEntity(int client, int entity)
 	
 	// Don't bother with wearables or builders
 	if(StrContains(classname, "tf_weapon", false) == -1 || StrContains(classname, "tf_weapon_builder", false) != -1 || StrContains(classname, "tf_weapon_sapper", false) != -1)
-		return -1;
+		return false;
+
+	// Not all classes can use every weapon, get only their class or the spawn pool
+	if(specialCheck && !Items_CanSpawn(itemIndex))
+	{
+		TFClassType class = TF2_GetPlayerClass(client);
+		if(TF2_GetWeaponClass(itemIndex, class, TF2_GetClassnameSlot(classname, true)) != class)
+			return false;
+	}
 
 	// Force to soldier shotgun
 	if(StrContains(classname, "tf_weapon_shotgun", false) != -1)
@@ -535,7 +560,7 @@ int Items_GiveByEntity(int client, int entity)
 
 	ClientCommand(client, "playgamesound ui/item_heavy_gun_pickup.wav");
 	
-	return weapon;
+	return true;
 }
 
 // Drops a new weapon from the player given a index

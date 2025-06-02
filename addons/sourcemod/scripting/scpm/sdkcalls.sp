@@ -1,6 +1,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+static Handle SDKEconItemCopy;
 static Handle SDKEquipWearable;
 static Handle SDKGetMaxHealth;
 static Handle SDKStartLagCompensation;
@@ -104,6 +105,14 @@ void SDKCall_PluginStart()
 	//SDKGetMaxAmmo = EndPrepSDKCall();
 	//if(!SDKGetMaxAmmo)
 	//	LogError("[Gamedata] Could not find CTFPlayer::GetMaxAmmo");
+
+	StartPrepSDKCall(SDKCall_Raw);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CEconItemView::operator=");
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_ByValue);
+	SDKEconItemCopy = EndPrepSDKCall();
+	if(!SDKEconItemCopy)
+		LogError("[Gamedata] Could not find CEconItemView::operator=");
 	
 	StartPrepSDKCall(SDKCall_Player);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTFPlayer::GiveNamedItem");
@@ -125,6 +134,12 @@ int SDKCall_CreateDroppedWeapon(int client, const float origin[3], const float a
 		return SDKCall(SDKCreateWeapon, client, origin, angles, model, item);
 
 	return INVALID_ENT_REFERENCE;
+}
+
+void SDKCall_EconItemCopy(Address to, Address from)
+{
+	if(SDKEconItemCopy)
+		SDKCall(SDKEconItemCopy, to, from);
 }
 
 void SDKCall_EquipWearable(int client, int entity)

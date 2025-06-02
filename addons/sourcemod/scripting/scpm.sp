@@ -219,6 +219,7 @@ enum
 	
 	AllowSpectators,
 	Gravity,
+	NoclipSpeed,
 	
 	Cvar_MAX
 }
@@ -243,6 +244,7 @@ int MaxPlayersAlive[TFTeam_MAX];
 #include "scpm/humans.sp"
 #include "scpm/items.sp"
 #include "scpm/music.sp"
+#include "scpm/randomizer.sp"
 #include "scpm/sdkcalls.sp"
 #include "scpm/sdkhooks.sp"
 #include "scpm/specials.sp"
@@ -252,6 +254,7 @@ int MaxPlayersAlive[TFTeam_MAX];
 #include "scpm/weapons.sp"
 
 #include "scpm/bosses/default.sp"
+#include "scpm/bosses/scp049.sp"
 #include "scpm/bosses/scp096.sp"
 #include "scpm/bosses/scp106.sp"
 #include "scpm/bosses/scp173.sp"
@@ -315,12 +318,14 @@ public void OnPluginEnd()
 
 public void OnMapStart()
 {
+	Randomizer_MapStart();
 	SDKHook_MapStart();
 	ModelEmpty = PrecacheModel("models/empty.mdl");
 }
 
 public void OnMapEnd()
 {
+	Bosses_MapEnd();
 	ConVar_Disable();
 	Specials_MapEnd();
 }
@@ -383,12 +388,14 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 {
 	Bosses_ConditionAdded(client, condition);
 	Human_ConditionAdded(client, condition);
+	Randomizer_ConditionChanged(client, condition);
 }
 
 public void TF2_OnConditionRemoved(int client, TFCond condition)
 {
 	Bosses_ConditionRemoved(client, condition);
 	//Human_ConditionRemoved(client, condition);
+	Randomizer_ConditionChanged(client, condition);
 }
 
 public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname, bool &result)

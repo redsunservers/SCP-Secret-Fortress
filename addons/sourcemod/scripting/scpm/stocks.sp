@@ -160,6 +160,58 @@ int TF2_GetClassnameSlot(const char[] classname, bool econ = false)
 	return TFWeaponSlot_Melee;
 }
 
+TFClassType TF2_GetWeaponClass(int index, TFClassType defaul=TFClass_Unknown, int checkSlot=-1)
+{
+	switch(index)
+	{
+		case 25, 26:
+			return TFClass_Engineer;
+		
+		case 735, 736, 810, 831, 933, 1080, 1102:
+			return TFClass_Spy;
+	}
+	
+	if(defaul != TFClass_Unknown)
+	{
+		int slot = TF2Econ_GetItemLoadoutSlot(index, defaul);
+		if(checkSlot != -1)
+		{
+			if(slot == checkSlot)
+				return defaul;
+		}
+		else if(slot>=0 && slot<6)
+		{
+			return defaul;
+		}
+	}
+
+	TFClassType backup;
+	for(TFClassType class=TFClass_Engineer; class>TFClass_Unknown; class--)
+	{
+		if(defaul == class)
+			continue;
+
+		int slot = TF2Econ_GetItemLoadoutSlot(index, class);
+		if(checkSlot != -1)
+		{
+			if(slot == checkSlot)
+				return class;
+			
+			if(!backup && slot >= 0 && slot < 6)
+				backup = class;
+		}
+		else if(slot >= 0 && slot < 6)
+		{
+			return class;
+		}
+	}
+
+	if(checkSlot != -1 && backup)
+		return backup;
+	
+	return defaul;
+}
+
 void ScreenFade(int client, int duration, int time, int flags, int r, int g, int b, int a)
 {
 	BfWrite bf = view_as<BfWrite>(StartMessageOne("Fade", client));

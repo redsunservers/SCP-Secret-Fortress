@@ -244,9 +244,6 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 		// Sprint Button
 		if(((buttons & IN_ATTACK3) || (buttons & IN_SPEED)) && (vel[0] || vel[1] || vel[2]))
 		{
-			// MOVE TO ON SUCCESSFUL INTERACT
-			//Client(client).HideControls = true;
-
 			if(Client(client).Sprinting)
 			{
 				Client(client).SprintPower -= delta * ClassStats[class].SprintDegen;
@@ -311,7 +308,7 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 		}
 
 		static char buffer[256];
-		static float updateTime[MAXPLAYERS+1][3];
+		static float updateTime[MAXPLAYERS+1][2];
 		if(FAbs(updateTime[client][0] - gameTime) > 0.2)
 		{
 			updateTime[client][0] = gameTime;
@@ -446,9 +443,9 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 			SetHudTextParams(0.7, 0.79, 0.3, 255, 255, 255, 255);
 			ShowSyncHudText(client, ActionHud, buffer);
 		}
-		else if(Client(client).ControlProgress < 2 && FAbs(updateTime[client][2] - gameTime) > 0.5)
+		else if(Client(client).ControlProgress < 2 && Client(client).KeyHintUpdateAt < gameTime)
 		{
-			updateTime[client][2] = gameTime;
+			Client(client).KeyHintUpdateAt = GetGameTime() + 0.5;
 
 			if(GameRules_GetRoundState() != RoundState_RoundRunning)
 				return;
@@ -533,8 +530,14 @@ void Human_Interact(int client, int entity)
 	GetEntityClassname(entity, buffer, sizeof(buffer));
 	if(StrEqual(buffer, "tf_dropped_weapon"))
 	{
-		Items_GiveByEntity(client, entity);
-		AcceptEntityInput(entity, "Kill");
+		if(Items_GiveByEntity(client, entity))
+		{
+			AcceptEntityInput(entity, "Kill");
+		}
+		else
+		{
+			PrintCenterText(client, "%T", "Class No Use", client);
+		}
 
 		if(!Client(client).ControlProgress)
 			Client(client).ControlProgress = 1;
