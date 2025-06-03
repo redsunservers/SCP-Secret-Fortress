@@ -100,6 +100,9 @@ public void SCP096_Remove(int client)
 		}
 	}
 
+	SetVariantInt(0);
+	AcceptEntityInput(client, "SetForcedTauntCam");
+
 	SCPMode[client] = 0;
 
 	for(int i = 1; i <= MaxClients; i++)
@@ -125,6 +128,11 @@ public float SCP096_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int vi
 	strcopy(theme, sizeof(theme), ChaseSound);
 	infinite = client != victim;
 	return 12.5;
+}
+
+public Action SCP096_SoundHook(int client, int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH], int &entity, int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
+{
+	return Default_SoundHook(client, clients, numClients, sample, entity, channel, volume, level, pitch, flags, soundEntry, seed);
 }
 
 public void SCP096_Interact(int client, int entity)
@@ -181,10 +189,13 @@ public Action SCP096_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 			if(entity == client)
 			{
 				TF2_StunPlayer(client, 2.0, 0.99, TF_STUNFLAG_SLOWDOWN);
+				
+				SetVariantInt(0);
+				AcceptEntityInput(client, "SetForcedTauntCam");
 
 				TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 
-				entity = Items_GiveByIndex(client, 195);
+				entity = Items_GiveByIndex(client, 195, _, "tf_weapon_sword");
 				if(entity != -1)
 				{
 					Attrib_Set(entity, "damage bonus", 4.0);
@@ -193,9 +204,9 @@ public Action SCP096_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 					Attrib_Set(entity, "damage force reduction", 0.0);
 					Attrib_Set(entity, "airblast vulnerability multiplier", 0.0);
 					Attrib_Set(entity, "mod weapon blocks healing", 1.0);
-					SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", ModelEmpty);
 
-					TF2_AddCondition(client, TFCond_MegaHeal, 16.0);
+					SetEntPropFloat(entity, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + 2.0);
+					TF2_AddCondition(client, TFCond_MegaHeal, 17.0);
 
 					TF2U_SetPlayerActiveWeapon(client, entity);
 
@@ -293,8 +304,12 @@ static void GiveDefaultMelee(int client)
 
 		SetEntPropFloat(entity, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + 999.9);
 
-		SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", ModelEmpty);
+		SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", -1);
+		SetEntPropFloat(entity, Prop_Send, "m_flModelScale", 0.001);
 
 		TF2U_SetPlayerActiveWeapon(client, entity);
+
+		SetVariantInt(1);
+		AcceptEntityInput(client, "SetForcedTauntCam");
 	}
 }

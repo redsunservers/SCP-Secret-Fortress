@@ -44,7 +44,7 @@ public void SCP939_Create(int client)
 		PackLeader = client;
 	
 	if(!PackTimer)
-		PackTimer = CreateTimer(150.0, SpawnExtraDog);
+		PackTimer = CreateTimer(120.0, SpawnExtraDog);
 }
 
 public TFClassType SCP939_TFClass()
@@ -76,28 +76,30 @@ public void SCP939_Equip(int client, bool weapons)
 	{
 		bool leader = PackLeader == client;
 
-		int entity = Items_GiveByIndex(client, 461);
-		if(entity != -1)
-		{
-			Attrib_Set(entity, "damage bonus", 2.5);
-			Attrib_Set(entity, "health regen", 4.0);
-			Attrib_Set(entity, "max health additive penalty", leader ? 375.0 : 125.0);
-			Attrib_Set(entity, "move speed penalty", 0.75);
-			Attrib_Set(entity, "mod weapon blocks healing", 1.0);
-
-			SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", ModelEmpty);
-
-			TF2U_SetPlayerActiveWeapon(client, entity);
-
-			SetEntityHealth(client, 500);
-		}
-
-		entity = Items_GiveByIndex(client, 27);
+		int entity = Items_GiveByIndex(client, 27);
 		if(entity != -1)
 		{
 			Attrib_Set(entity, "mod weapon blocks healing", 1.0);
 			
-			SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", ModelEmpty);
+			SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", -1);
+			SetEntPropFloat(entity, Prop_Send, "m_flModelScale", 0.001);
+		}
+
+		entity = Items_GiveByIndex(client, 461);
+		if(entity != -1)
+		{
+			Attrib_Set(entity, "damage bonus", 2.5);
+			Attrib_Set(entity, "health regen", 4.0);
+			Attrib_Set(entity, "max health additive penalty", leader ? 125.0 : 25.0);
+			Attrib_Set(entity, "move speed penalty", 0.75);
+			Attrib_Set(entity, "mod weapon blocks healing", 1.0);
+
+			SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", -1);
+			SetEntPropFloat(entity, Prop_Send, "m_flModelScale", 0.001);
+
+			TF2U_SetPlayerActiveWeapon(client, entity);
+
+			SetEntityHealth(client, 250);
 		}
 
 		if(!leader)

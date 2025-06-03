@@ -153,13 +153,15 @@ static Action Events_PlayerDeath(Event event, const char[] name, bool dontBroadc
 		if(!deadRinger)
 		{
 			Human_PlayerDeath(victim);
-			Bosses_Remove(victim, false);
 			Music_ToggleMusic(victim, false, true);
 			Gamemode_CheckAlivePlayers(victim);
 			ViewModel_Destroy(victim);
 			Client(victim).ResetByDeath();
 			
 			CreateTimer(0.1, RemoveKillCam, userid, TIMER_FLAG_NO_MAPCHANGE);
+
+			if(Client(victim).IsBoss)
+				CreateTimer(0.1, RemoveBossTimer, userid, TIMER_FLAG_NO_MAPCHANGE);
 		}
 
 		Gamemode_UpdateListeners();
@@ -168,6 +170,15 @@ static Action Events_PlayerDeath(Event event, const char[] name, bool dontBroadc
 		return Plugin_Changed;
 	}
 
+	return Plugin_Continue;
+}
+
+static Action RemoveBossTimer(Handle timer, int userid)
+{
+	int client = GetClientOfUserId(userid);
+	if(client)
+		Bosses_Remove(client, false);
+	
 	return Plugin_Continue;
 }
 

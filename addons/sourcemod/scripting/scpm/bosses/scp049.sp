@@ -122,26 +122,7 @@ public void SCP049_Equip(int client, bool weapons)
 
 	if(weapons)
 	{
-		int entity = Items_GiveByIndex(client, 954, _, "tf_weapon_bonesaw");
-		if(entity != -1)
-		{
-			Attrib_Set(entity, "crit mod disabled", 1.0);
-			Attrib_Set(entity, "max health additive bonus", 650.0);
-			Attrib_Set(entity, "move speed penalty", 0.72);
-			Attrib_Set(entity, "dmg penalty vs players", 11.0);
-			Attrib_Set(entity, "damage force reduction", 0.8);
-			Attrib_Set(entity, "cancel falling damage", 1.0);
-			Attrib_Set(entity, "airblast vulnerability multiplier", 0.8);
-			Attrib_Set(entity, "mod weapon blocks healing", 1.0);
-
-			SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", ModelEmpty);
-
-			TF2U_SetPlayerActiveWeapon(client, entity);
-			
-			SetEntityHealth(client, 800);
-		}
-
-		entity = Items_GiveByIndex(client, 411);
+		int entity = Items_GiveByIndex(client, 411);
 		if(entity != -1)
 		{
 			Attrib_Set(entity, "heal rate bonus", 0.5);
@@ -150,7 +131,28 @@ public void SCP049_Equip(int client, bool weapons)
 			Attrib_Set(entity, "reduced_healing_from_medics", 0.1);
 			Attrib_Set(entity, "mod weapon blocks healing", 1.0);
 
-			SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", ModelEmpty);
+			SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", -1);
+			SetEntPropFloat(entity, Prop_Send, "m_flModelScale", 0.001);
+		}
+
+		entity = Items_GiveByIndex(client, 954, _, "tf_weapon_bonesaw");
+		if(entity != -1)
+		{
+			Attrib_Set(entity, "crit mod disabled", 0.0);
+			Attrib_Set(entity, "max health additive bonus", 350.0);
+			Attrib_Set(entity, "move speed penalty", 0.72);
+			Attrib_Set(entity, "dmg penalty vs players", 11.0);
+			Attrib_Set(entity, "damage force reduction", 0.8);
+			Attrib_Set(entity, "cancel falling damage", 1.0);
+			Attrib_Set(entity, "airblast vulnerability multiplier", 0.8);
+			Attrib_Set(entity, "mod weapon blocks healing", 1.0);
+
+			SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", -1);
+			SetEntPropFloat(entity, Prop_Send, "m_flModelScale", 0.001);
+
+			TF2U_SetPlayerActiveWeapon(client, entity);
+			
+			SetEntityHealth(client, 500);
 		}
 	}
 }
@@ -166,7 +168,6 @@ public void SCP049_WeaponSwitch(int client)
 	{
 		ViewModel_Create(client, ViewModelKnife, "b_idle");
 		ViewModel_SetAnimation(client, "b_draw");
-		Client(client).ControlProgress = 1;
 	}
 }
 
@@ -181,8 +182,108 @@ public float SCP049_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int vi
 	return 14.8;
 }
 
+public Action SCP049_SoundHook(int client, int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH], int &entity, int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
+{
+	if(!StrContains(sample, "vo", false))
+	{
+		if(StrContains(sample, "activatecharge", false) != -1)
+		{
+			Format(sample, sizeof(sample), "scpm/scp049/found%d.mp3", GetRandomInt(1, 2));
+		}
+		else if(StrContains(sample, "autochargeready", false)!=-1 || StrContains(sample, "taunts", false)!=-1)
+		{
+			Format(sample, sizeof(sample), "scpm/scp049/meleedare%d.mp3", GetRandomInt(1, 3));
+		}
+		else if(StrContains(sample, "autodejectedtie", false) != -1)
+		{
+			strcopy(sample, sizeof(sample), "scpm/scp049/battlecry2.mp3");
+		}
+		else if(StrContains(sample, "battlecry", false) != -1)
+		{
+			Format(sample, sizeof(sample), "scpm/scp049/battlecry%d.mp3", GetRandomInt(1, 2));
+		}
+		else if(StrContains(sample, "cheers", false) != -1)
+		{
+			Format(sample, sizeof(sample), "scpm/scp049/cheers%d.mp3", GetRandomInt(1, 3));
+		}
+		else if(StrContains(sample, "cloakedspy", false) != -1)
+		{
+			Format(sample, sizeof(sample), "scpm/scp049/doctor%d.mp3", GetRandomInt(1, 2));
+		}
+		else if(StrContains(sample, "medic_go", false)!=-1 || StrContains(sample, "head", false)!=-1 || StrContains(sample, "moveup", false)!=-1 || StrContains(sample, "medic_no", false)!=-1 || StrContains(sample, "thanks", false)!=-1 || StrContains(sample, "medic_yes", false)!=-1)
+		{
+			Format(sample, sizeof(sample), "scpm/scp049/hello%d.mp3", GetRandomInt(1, 3));
+		}
+		else if(StrContains(sample, "goodjob", false)!=-1 || StrContains(sample, "incoming", false)!=-1 || StrContains(sample, "need", false)!=-1 || StrContains(sample, "niceshot", false)!=-1 || StrContains(sample, "sentry", false)!=-1)
+		{
+			Format(sample, sizeof(sample), "scpm/scp049/greet%d.mp3", GetRandomInt(1, 3));
+		}
+		else if(StrContains(sample, "helpme", false) != -1)
+		{
+			Format(sample, sizeof(sample), "scpm/scp049/chase%d.mp3", GetRandomInt(1, 3));
+		}
+		else if(StrContains(sample, "jeers", false) != -1)
+		{
+			Format(sample, sizeof(sample), "scpm/scp049/jeers%d.mp3", GetRandomInt(1, 2));
+		}
+		else if(StrContains(sample, "negative", false) != -1)
+		{
+			Format(sample, sizeof(sample), "scpm/scp049/neg%d.mp3", GetRandomInt(1, 2));
+		}
+		else if(StrContains(sample, "positive", false) != -1)
+		{
+			Format(sample, sizeof(sample), "scpm/scp049/pos%d.mp3", GetRandomInt(1, 3));
+		}
+		else if(StrContains(sample, "specialcompleted", false) != -1)
+		{
+			Format(sample, sizeof(sample), "scpm/scp049/kill%d.mp3", GetRandomInt(1, 5));
+		}
+		else
+		{
+			return Plugin_Handled;
+		}
+
+		return Plugin_Changed;
+	}
+
+	return Plugin_Continue;
+}
+
 public Action SCP049_PlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
+	int melee = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+	if(melee != -1)
+	{
+		if(melee == GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon"))
+		{
+			if(GetEntProp(melee, Prop_Send, "m_iItemDefinitionIndex") != 195)
+			{
+				bool lookingAt;
+
+				int team = GetClientTeam(client);
+				for(int target = 1; target <= MaxClients; target++)
+				{
+					if(Client(client).LookingAt(target) && IsClientInGame(target) && IsPlayerAlive(target) && GetClientTeam(target) != team)
+					{
+						lookingAt = true;
+						break;
+					}
+				}
+
+				if(lookingAt)
+				{
+					SetEntProp(melee, Prop_Send, "m_iItemDefinitionIndex", 195);
+					FakeClientCommandEx(client, "voicemenu 1 6");
+				}
+			}
+		}
+		else if(GetEntProp(melee, Prop_Send, "m_iItemDefinitionIndex") != 954)
+		{
+			SetEntProp(melee, Prop_Send, "m_iItemDefinitionIndex", 954);
+			Client(client).ControlProgress = 1;
+		}
+	}
+	
 	if(!Client(client).ControlProgress)
 	{
 		if(Client(client).KeyHintUpdateAt < GetGameTime())
@@ -238,6 +339,10 @@ static void SpawnMarker(int victim, int client)
 
 	DispatchSpawn(entity);
 
+	float pos[3];
+	GetEntPropVector(client, Prop_Send, "m_vecOrigin", pos);
+	TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
+
 	CreateTimer(20.0, Timer_ExpireReviveMarker, EntIndexToEntRef(entity), TIMER_FLAG_NO_MAPCHANGE);
 }
 
@@ -260,7 +365,7 @@ static Action TransmitToDoctor(int entity, int client)
 {
 	if(client > 0 && client <= MaxClients)
 	{
-		if(!IsPlayerAlive(client) || Client(client).Boss != BossIndex)
+		if(IsPlayerAlive(client) && Client(client).Boss != BossIndex)
 			return Plugin_Stop;
 	}
 
@@ -274,7 +379,7 @@ static void RevivePlayerComplete(Event event, const char[] name, bool dontBroadc
 		return;
 	
 	int entity = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
-	if(entity != -1)
+	if(entity == -1)
 		return;
 
 	char classname[36];
@@ -285,11 +390,14 @@ static void RevivePlayerComplete(Event event, const char[] name, bool dontBroadc
 	int target = GetEntPropEnt(entity, Prop_Send, "m_hHealingTarget");
 	if(target <= MaxClients)
 		return;
+	
+	RemoveEntity(target);
 
 	target = GetEntPropEnt(target, Prop_Send, "m_hOwner");
 	if(target == -1)
 		return;
 	
+	DHook_RepsawnPlayer(target);
 	SetEntProp(target, Prop_Send, "m_bDucked", true);
 	SetEntityFlags(target, GetEntityFlags(target)|FL_DUCKING);
 
@@ -331,18 +439,24 @@ static Action TurnToZombie(Handle timer, int userid)
 		}
 
 		int melee = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+		int index;
 
 		int i;
 		while(TF2_GetItem(client, entity, i))
 		{
-			if(entity != melee)
-			{
-				TF2_RemoveItem(client, entity);
-				continue;
-			}
+			if(entity == melee)
+				index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
+			
+			TF2_RemoveItem(client, entity);
+		}
 
-			Attrib_Set(entity, "crit mod disabled hidden", 1.0);
+		entity = Items_GiveByIndex(client, index);
+		if(entity != -1)
+		{
+			Attrib_Set(entity, "crit mod disabled hidden", 0.0);
 			Attrib_Set(entity, "major move speed bonus", 1.15);
+			Attrib_Set(entity, "voice pitch scale", 0.5);
+			TF2U_SetPlayerActiveWeapon(client, entity);
 		}
 
 		SDKCall_SetSpeed(client);

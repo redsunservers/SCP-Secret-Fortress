@@ -176,7 +176,7 @@ void ConVar_Add(const char[] name, const char[] value, bool enforce = true)
 	}
 }
 
-stock void ConVar_Remove(const char[] name)
+void ConVar_Remove(const char[] name)
 {
 	int index = CvarList.FindString(name, CvarInfo::Name);
 	if(index != -1)
@@ -194,7 +194,7 @@ stock void ConVar_Remove(const char[] name)
 			if(notify)
 				info.Cvar.Flags &= ~FCVAR_NOTIFY;
 			
-			info.Cvar.SetString(info.Value);
+			info.Cvar.SetString(info.Defaul);
 
 			if(notify)
 				info.Cvar.Flags |= FCVAR_NOTIFY;

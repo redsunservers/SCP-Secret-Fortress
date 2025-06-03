@@ -440,6 +440,12 @@ int Items_GiveByIndex(int client, int itemIndex, bool tempWeapon = false, const 
 		}
 	}
 
+	TFClassType current = TF2_GetPlayerClass(client);
+	TFClassType class = TF2_GetWeaponClass(itemIndex, current);
+
+	if(!Client(client).NoViewModel)
+		TF2_SetPlayerClass(client, class, false, false);
+
 	int entity = CreateEntityByName(classname);
 	if(entity != -1)
 	{
@@ -473,10 +479,12 @@ int Items_GiveByIndex(int client, int itemIndex, bool tempWeapon = false, const 
 				type = GetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType");
 			}
 
+			if(type > 0)
+				SetEntProp(client, Prop_Data, "m_iAmmo", 0, _, type);
+
 			SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", true);
 			EquipPlayerWeapon(client, entity);
 
-			// Refill ammo correctly
 			if(type > 0)
 				GivePlayerAmmo(client, 100, type, true);
 
@@ -484,6 +492,9 @@ int Items_GiveByIndex(int client, int itemIndex, bool tempWeapon = false, const 
 				TF2U_SetPlayerActiveWeapon(client, entity);
 		}
 	}
+
+	if(!Client(client).NoViewModel)
+		TF2_SetPlayerClass(client, current, false, false);
 
 	if(!Client(client).Boss)
 		ClientCommand(client, "playgamesound ui/item_heavy_gun_pickup.wav");
@@ -547,6 +558,12 @@ bool Items_GiveByEntity(int client, int entity, bool specialCheck = false)
 		}
 	}
 
+	TFClassType current = TF2_GetPlayerClass(client);
+	TFClassType class = TF2_GetWeaponClass(itemIndex, current);
+
+	if(!Client(client).NoViewModel)
+		TF2_SetPlayerClass(client, class, false, false);
+
 	static Address offsetItem;
 	if(!offsetItem)
 		offsetItem = view_as<Address>(FindSendPropInfo("CTFDroppedWeapon", "m_Item"));
@@ -557,6 +574,9 @@ bool Items_GiveByEntity(int client, int entity, bool specialCheck = false)
 		SDKCall_InitPickup(entity, client, weapon);
 		EquipPlayerWeapon(client, weapon);
 	}
+
+	if(!Client(client).NoViewModel)
+		TF2_SetPlayerClass(client, current, false, false);
 
 	ClientCommand(client, "playgamesound ui/item_heavy_gun_pickup.wav");
 	

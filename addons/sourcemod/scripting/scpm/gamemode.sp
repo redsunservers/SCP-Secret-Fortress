@@ -44,6 +44,7 @@ void Gamemode_PluginStart()
 
 void Gamemode_RoundRespawn()
 {
+	PrintToChatAll("Gamemode_RoundRespawn");
 	RoundStartTime = GetGameTime();
 
 	int count;
@@ -165,7 +166,7 @@ void Gamemode_RoundEnd()
 	if(!buffer[0])
 		strcopy(buffer, sizeof(buffer), "\n☠");
 
-	SetHudTextParams(-1.0, 0.15, 19.0, 255, 255, 255, 255, 2, 0.1, 0.1);
+	SetHudTextParams(-1.0, 0.2, 19.0, 255, 255, 255, 255, 2, 0.1, 0.1);
 	
 	for(int client = 1; client <= MaxClients; client++)
 	{
@@ -402,7 +403,7 @@ void Gamemode_UpdateListeners()
 					bool glow;
 
 					// Insanity
-					if(TF2_IsPlayerInCondition(speaker, TFCond_MarkedForDeath))
+					if(TF2_IsPlayerInCondition(target, TFCond_MarkedForDeath))
 					{
 						glow = true;
 					}
@@ -413,9 +414,9 @@ void Gamemode_UpdateListeners()
 						Call_Finish(glow);
 					}
 
-					Client(speaker).GlowingTo(target, glow);
+					Client(target).GlowingTo(speaker, glow);
 					if(glow)
-						Client(speaker).NoTransmitTo(target, false);
+						Client(target).NoTransmitTo(speaker, false);
 				}
 
 				if(!failed)

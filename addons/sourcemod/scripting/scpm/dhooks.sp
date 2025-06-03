@@ -24,6 +24,7 @@ void DHook_PluginStart()
 
 	gamedata = new GameData("randomizer");
 
+	CreateDetour(gamedata, "CEconEntity::UpdateModelToClass", DHook_UpdateModelToClassPre);
 	CreateDetour(gamedata, "CTFPlayer::GetMaxAmmo", DHook_GetMaxAmmoPre);
 
 	delete gamedata;
@@ -219,4 +220,13 @@ static void DisableStartLagCompensation()
 		StartLagCompensation.Disable(Hook_Post, DHook_StartLagCompensation);
 		delete StartLagCompensation;
 	}
+}
+
+static MRESReturn DHook_UpdateModelToClassPre(int weapon)
+{
+	int client = GetEntPropEnt(weapon, Prop_Send, "m_hOwnerEntity");
+	if(client != -1)
+		return MRES_Supercede;
+	
+	return MRES_Ignored;
 }

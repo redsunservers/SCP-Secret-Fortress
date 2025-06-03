@@ -176,16 +176,13 @@ static Action ClientTransmit(int client, int target)
 
 static Action ClientWeaponEquipPre(int client, int weapon)
 {
-	if(!Client(client).NoViewModel)
-		Randomizer_UpdateArms(client, weapon);
-	
+	Randomizer_UpdateArms(client, weapon);
 	return Plugin_Continue;
 }
 
 static void ClientWeaponEquipPost(int client, int weapon)
 {
-	if(!Client(client).NoViewModel)
-		Randomizer_UpdateArms(client);
+	Randomizer_UpdateArms(client);
 }
 
 static void ClientWeaponSwitch(int client, int weapon)
@@ -198,8 +195,7 @@ static void ClientWeaponSwitchFrame(int userid)
 	int client = GetClientOfUserId(userid);
 	if(client)
 	{
-		if(!Client(client).NoViewModel)
-			Randomizer_UpdateArms(client);
+		Randomizer_UpdateArms(client);
 
 		if(Bosses_StartFunctionClient(client, "WeaponSwitch"))
 		{

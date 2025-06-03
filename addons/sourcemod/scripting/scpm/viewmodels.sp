@@ -6,28 +6,14 @@ static int ViewmodelRef[MAXPLAYERS+1] = {-1, ...};
 void ViewModel_DisableArms(int client)
 {
 	Client(client).NoViewModel = true;
-	
-	int entity = -1;
-	while((entity=FindEntityByClassname(entity, "tf_wearable_vm")) != -1)
-	{
-		if(GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity") == client)
-			TF2_RemoveWearable(client, entity);
-	}
-
-	int i;
-	while(TF2_GetItem(client, entity, i))
-	{
-		if(GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity") == client)
-			SetEntProp(entity, Prop_Send, "m_nCustomViewmodelModelIndex", ModelEmpty);
-	}
-
-	entity = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
-	if(entity != -1)
-		SetEntProp(entity, Prop_Send, "m_nModelIndex", ModelEmpty);
+	Randomizer_UpdateArms(client);
 }
 
 int ViewModel_Create(int client, const char[] model, const char[] anim = "", const float angOffset[3] = NULL_VECTOR, const float posOffset[3] = NULL_VECTOR)
 {
+	ViewModel_DisableArms(client);
+	ViewModel_Destroy(client);
+
 	int viewmodel = CreateEntityByName("prop_dynamic");
 	if(viewmodel == -1)
 		return -1;
@@ -58,8 +44,6 @@ int ViewModel_Create(int client, const char[] model, const char[] anim = "", con
 	SDKHook(viewmodel, SDKHook_SetTransmit, ViewModel_SetTransmit);
 	
 	ViewmodelRef[client] = EntIndexToEntRef(viewmodel);
-
-	ViewModel_DisableArms(client);
 
 	return viewmodel;
 }

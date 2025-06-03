@@ -150,7 +150,7 @@ void Music_ToggleRoundMusic(bool enable)
 void Music_StartChase(int victim, int attacker, bool force = false)
 {
 	float gameTime = GetGameTime();
-	bool newTheme = force || (Client(victim).LastDangerAt < (gameTime - 90.0)) || (MusicEndAt[victim] < gameTime);
+	bool newTheme = force || (MusicEndAt[victim] < gameTime);
 	Client(victim).LastDangerAt = gameTime;
 
 	if(newTheme && !RoundDisabled)
@@ -300,8 +300,7 @@ void Music_ToggleMusic(int client, bool startNew = true, bool stopExisting = fal
 			if(music.Time <= 0.0)
 				music.Time = 999.9;
 			
-			MusicEndAt[client] = GetGameTime() + music.Time;
-
+			//MusicEndAt[client] = GetGameTime() + music.Time;
 		}
 		else
 		{
@@ -315,7 +314,8 @@ void Music_ToggleMusic(int client, bool startNew = true, bool stopExisting = fal
 static Action MusicNextTimer(Handle timer, int client)
 {
 	MusicTimer[client] = null;
-	delete CurrentTheme[client];
+	if(!MusicInfinite[client])
+		delete CurrentTheme[client];
 
 	Music_ToggleMusic(client);
 	return Plugin_Continue;

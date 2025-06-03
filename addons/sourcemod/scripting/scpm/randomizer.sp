@@ -53,12 +53,23 @@ void Randomizer_DeleteFromClient(int client, int type)
 
 void Randomizer_ConditionChanged(int client, TFCond cond)
 {
-	if(cond == TFCond_Disguised && !Client(client).NoViewModel)
+	if(cond == TFCond_Disguised)
 		Randomizer_UpdateArms(client);
 }
 
 void Randomizer_UpdateArms(int client, int force = -1)
 {
+	if(Client(client).NoViewModel)
+	{
+		int viewmodel = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
+		if(viewmodel != -1)
+			SetEntProp(viewmodel, Prop_Send, "m_fEffects", EF_NODRAW);
+
+		Randomizer_DeleteFromClient(client, ViewType_Weapon);
+		Randomizer_DeleteFromClient(client, ViewType_Arm);
+		return;
+	}
+
 	TFClassType current = TF2_GetPlayerClass(client);
 
 	if(TF2_IsPlayerInCondition(client, TFCond_Disguised))

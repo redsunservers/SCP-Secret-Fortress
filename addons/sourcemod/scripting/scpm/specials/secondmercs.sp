@@ -17,9 +17,9 @@ public void SecondMercs_Event()
 	}
 }
 
-public void MTFSquad_Precache()
+public void MTFSpawn_Precache()
 {
-	PrecacheSound("scpm/misc/mtf_spawn.mp3");
+	PrecacheSound("scpm/misc/spawn_mtf.mp3");
 	PrecacheModel("models/scp_new/guards/counter_gign.mdl");
 	PrecacheModel("models/scp_new/guards/gibs/head.mdl");
 	PrecacheModel("models/scp_new/guards/gibs/leftarm.mdl");
@@ -29,21 +29,21 @@ public void MTFSquad_Precache()
 	PrecacheModel("models/scp_new/guards/gibs/righthand.mdl");
 	PrecacheModel("models/scp_new/guards/gibs/torso.mdl");
 
-	CheckAndAddFileToDownloadsTable("scpm/misc/mtf_spawn.mp3");
+	CheckAndAddFileToDownloadsTable("scpm/misc/spawn_mtf.mp3");
 }
 
-public void MTFSquad_Event()
+public void MTFSpawn_Event()
 {
-	EventTimer = CreateTimer(8.0, MTFSquadTimer);
+	EventTimer = CreateTimer(8.0, MTFSpawnTimer);
 	TriggerRelay("scp_mtf_spawn_pre");
 }
 
-public void MTFSquad_End()
+public void MTFSpawn_End()
 {
 	delete EventTimer;
 }
 
-static Action MTFSquadTimer(Handle timer)
+static Action MTFSpawnTimer(Handle timer)
 {
 	EventTimer = null;
 	TriggerRelay("scp_mtf_spawn");
@@ -78,6 +78,37 @@ static Action MTFSquadTimer(Handle timer)
 				}
 			}
 
+			int i;
+			while(TF2_GetItem(client, entity, i))
+			{
+				if(HasEntProp(entity, Prop_Send, "m_iPrimaryAmmoType"))
+				{
+					int type = GetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType");
+					if(type > 0)
+					{
+						//SetEntProp(client, Prop_Data, "m_iAmmo", 0, _, type);
+						//GivePlayerAmmo(client, 100, type, true);
+						SetEntProp(client, Prop_Data, "m_iAmmo", GetEntProp(client, Prop_Data, "m_iAmmo", _, type) / 5, _, type);
+					}
+				}
+			}
+			
+			i = 0;
+			while(TF2U_GetWearable(client, entity, i))
+			{
+				switch(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"))
+				{
+					case 57, 131, 133, 231, 405, 406, 444, 608, 642, 1099, 1144:
+					{
+						// Wearable weapons
+					}
+					default:
+					{
+						TF2_RemoveWearable(client, entity);
+					}
+				}
+			}
+
 			SetVariantString("models/scp_new/guards/counter_gign.mdl");
 			AcceptEntityInput(client, "SetCustomModelWithClassAnimations");
 
@@ -85,7 +116,7 @@ static Action MTFSquadTimer(Handle timer)
 		}
 	}
 	
-	EmitSoundToAll("scp_sf/events/mtf_spawn.mp3");
+	EmitSoundToAll("scpm/misc/spawn_mtf.mp3");
 	CPrintToChatAll("%t", "MTFSpawn");
 	return Plugin_Continue;
 }

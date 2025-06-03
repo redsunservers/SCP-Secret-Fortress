@@ -118,6 +118,10 @@ void Human_PlayerSpawn(int client)
 {
 	if(!Client(client).IsBoss && !Client(client).Minion && IsPlayerAlive(client))
 	{
+		SetEntProp(client, Prop_Send, "m_bForcedSkin", false);
+		SetEntProp(client, Prop_Send, "m_nForcedSkin", 0);
+		SetEntProp(client, Prop_Send, "m_iPlayerSkinOverride", 0);
+		
 		int team = GetClientTeam(client);
 		if(team > TFTeam_Spectator)
 		{

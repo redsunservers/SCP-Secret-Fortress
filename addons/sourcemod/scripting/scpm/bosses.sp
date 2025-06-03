@@ -283,7 +283,7 @@ void Bosses_Create(int client, int index)
 	SetEntProp(client, Prop_Send, "m_bForcedSkin", false);
 	SetEntProp(client, Prop_Send, "m_nForcedSkin", 0);
 	SetEntProp(client, Prop_Send, "m_iPlayerSkinOverride", 0);
-
+	
 	Client(client).Boss = index;
 
 	if(Bosses_StartFunctionClient(client, "Create"))

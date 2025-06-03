@@ -642,6 +642,11 @@ void PlayDeathAnimation(int victim, int attacker, const char[] deathAnim, float 
 
 	AcceptEntityInput(entity, "FireUser1");
 
+	DataPack pack;
+	CreateDataTimer(duration - 0.2, SetNewRagdoll, pack);
+	pack.WriteCell(EntIndexToEntRef(entity));
+	pack.WriteCell(GetClientUserId(victim));
+
 	int wearable, i;
 	while(TF2U_GetWearable(victim, wearable, i))
 	{
@@ -686,10 +691,24 @@ void PlayDeathAnimation(int victim, int attacker, const char[] deathAnim, float 
 	SetVariantString("!activator");
 	AcceptEntityInput(camera, "Enable", victim, victim);
 
-	DataPack pack;
+	//DataPack pack;
 	CreateDataTimer(duration, DisableCameraTimer, pack);
 	pack.WriteCell(EntIndexToEntRef(camera));
 	pack.WriteCell(GetClientUserId(victim));
+}
+
+static Action SetNewRagdoll(Handle timer, DataPack pack)
+{
+	pack.Reset();
+	int entity = EntRefToEntIndex(pack.ReadCell());
+	if(entity != -1)
+	{
+		int client = GetClientOfUserId(pack.ReadCell());
+		if(client)
+			SetEntPropEnt(client, Prop_Send, "m_hRagdoll", entity);
+	}
+	
+	return Plugin_Continue;
 }
 
 static Action DisableCameraTimer(Handle timer, DataPack pack)

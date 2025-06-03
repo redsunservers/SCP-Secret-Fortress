@@ -106,11 +106,16 @@ void Specials_PickNewRound()
 {
 	Specials_RoundEnd();
 	
-	int choosen = GetURandomInt() % (SpecialList.Length - 1);
+	int choosen = SpecialList.Length;
+	if(choosen < 2)
+		return;
+	
+	choosen = GetURandomInt() % (choosen - 1);
 	if(choosen >= LastActive)
 		choosen++;
 	
 	SpecialActive = choosen;
+	LastActive = choosen;
 
 	SpecialInfo special;
 	SpecialList.GetArray(SpecialActive, special);

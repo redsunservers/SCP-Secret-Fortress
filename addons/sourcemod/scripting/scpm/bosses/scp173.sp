@@ -118,6 +118,9 @@ public void SCP173_Equip(int client, bool weapons)
 
 	SetVariantString(PlayerModel);
 	AcceptEntityInput(client, "SetCustomModel");
+	
+	SetVariantInt(1);
+	AcceptEntityInput(client, "SetForcedTauntCam");
 
 	if(weapons)
 	{
@@ -125,8 +128,8 @@ public void SCP173_Equip(int client, bool weapons)
 		if(entity != -1)
 		{
 			Attrib_Set(entity, "fire rate bonus", 0.3);
-			Attrib_Set(entity, "crit mod disabled", 1.0);
-			Attrib_Set(entity, "max health additive bonus", 1700.0);
+			Attrib_Set(entity, "crit mod disabled", 0.0);
+			Attrib_Set(entity, "max health additive bonus", 1300.0);
 			Attrib_Set(entity, "dmg penalty vs players", 11.0);
 			Attrib_Set(entity, "damage force reduction", 0.0);
 			Attrib_Set(entity, "cancel falling damage", 1.0);
@@ -137,7 +140,7 @@ public void SCP173_Equip(int client, bool weapons)
 
 			TF2U_SetPlayerActiveWeapon(client, entity);
 
-			SetEntityHealth(client, 2000);
+			SetEntityHealth(client, 1600);
 		}
 	}
 }
@@ -148,6 +151,9 @@ public void SCP173_Remove(int client)
 		RemoveEntity(ModelRef[client]);
 	
 	StopSound(client, SNDCHAN_STATIC, WalkSound);
+
+	SetVariantInt(0);
+	AcceptEntityInput(client, "SetForcedTauntCam");
 
 	PlayingWalk[client] = false;
 	ModelRef[client] = -1;
@@ -163,6 +169,11 @@ public float SCP173_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int vi
 	
 	strcopy(theme, sizeof(theme), ScareSound);
 	return 30.0;
+}
+
+public Action SCP173_SoundHook(int client, int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH], int &entity, int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
+{
+	return Default_SoundHook(client, clients, numClients, sample, entity, channel, volume, level, pitch, flags, soundEntry, seed);
 }
 
 public void SCP173_Interact(int client, int entity)
@@ -248,7 +259,7 @@ public Action SCP173_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 	float pos1[3], ang[3], pos2[3];
 	GetClientEyePosition(client, pos1);
 	GetClientEyeAngles(client, ang);
-	if(DPT_TryTeleport(client, 1000.0, pos1, ang, pos2))
+	if(DPT_TryTeleport(client, 700.0, pos1, ang, pos2))
 	{
 		if(lookedAt && blinked)
 		{
@@ -398,7 +409,7 @@ static bool GetSafePosition(int client, const float testPos[3], float result[3])
 	// Check if spot is safe
 	result = testPos;
 	TR_TraceHullFilter(testPos, testPos, mins, maxs, MASK_PLAYERSOLID, Trace_DontHitPlayers);
-	if (!TR_DidHit())
+	if(!TR_DidHit())
 		return true;
 	
 	// Might be hitting a celing, get the highest point
@@ -409,7 +420,7 @@ static bool GetSafePosition(int client, const float testPos[3], float result[3])
 	result[2] -= height;
 	
 	TR_TraceHullFilter(result, result, mins, maxs, MASK_PLAYERSOLID, Trace_DontHitPlayers);
-	if (!TR_DidHit())
+	if(!TR_DidHit())
 		return true;
 	
 	return false;

@@ -226,7 +226,6 @@ enum
 
 ConVar Cvar[Cvar_MAX];
 
-int ModelEmpty;
 float RoundStartTime;
 int PlayersAlive[TFTeam_MAX];
 int MaxPlayersAlive[TFTeam_MAX];
@@ -312,7 +311,11 @@ public void OnPluginEnd()
 	for(int i = 1; i <= MaxClients; i++)
 	{
 		if(IsClientInGame(i))
+		{
+			Randomizer_DeleteFromClient(i, 0);
+			Randomizer_DeleteFromClient(i, 1);
 			OnClientDisconnect(i);
+		}
 	}
 }
 
@@ -320,7 +323,6 @@ public void OnMapStart()
 {
 	Randomizer_MapStart();
 	SDKHook_MapStart();
-	ModelEmpty = PrecacheModel("models/empty.mdl");
 }
 
 public void OnMapEnd()

@@ -55,7 +55,7 @@ public void SCP106_Create(int client)
 		for(int i = 1; i <= MaxClients; i++)
 		{
 			if(i != client && IsClientInGame(i) && !IsFakeClient(i))
-				Cvar[NoclipSpeed].ReplicateToClient(client, value);
+				Cvar[NoclipSpeed].ReplicateToClient(i, value);
 		}
 	}
 	
@@ -88,8 +88,8 @@ public void SCP106_Equip(int client, bool weapons)
 		if(entity != -1)
 		{
 			Attrib_Set(entity, "damage penalty", 0.77);
-			Attrib_Set(entity, "crit mod disabled", 1.0);
-			Attrib_Set(entity, "max health additive bonus", 1000.0);
+			Attrib_Set(entity, "crit mod disabled", 0.0);
+			Attrib_Set(entity, "max health additive bonus", 800.0);
 			Attrib_Set(entity, "move speed penalty", 0.85);
 			Attrib_Set(entity, "dmg taken from crit reduced", 0.0);
 			Attrib_Set(entity, "dmg taken from bullets reduced", 0.2);
@@ -100,7 +100,7 @@ public void SCP106_Equip(int client, bool weapons)
 
 			TF2U_SetPlayerActiveWeapon(client, entity);
 
-			SetEntityHealth(client, 1200);
+			SetEntityHealth(client, 1000);
 		}
 
 		ViewModel_Create(client, ViewModel, "a_fists_idle_02");
@@ -139,6 +139,11 @@ public float SCP106_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int vi
 {
 	strcopy(theme, sizeof(theme), ChaseSound);
 	return 30.8;
+}
+
+public Action SCP106_SoundHook(int client, int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH], int &entity, int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
+{
+	return Default_SoundHook(client, clients, numClients, sample, entity, channel, volume, level, pitch, flags, soundEntry, seed);
 }
 
 public Action SCP106_TakeDamage(int client, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom, CritType &critType)
