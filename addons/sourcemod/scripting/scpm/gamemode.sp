@@ -19,6 +19,7 @@ enum
 static Handle SyncHud;
 static Handle BlinkTimer;
 static Handle GlobalTimer;
+static Handle WinnerTimer;
 static Cookie BossQueue;
 static bool ListenerDefault;
 static float NextBlinkAt;
@@ -141,9 +142,15 @@ void Gamemode_PlayerSpawn(int client)
 	CreateTimer(2.0, ReapplyGlowEffect, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 }
 
+void Gamemode_MapEnd()
+{
+	delete WinnerTimer;
+}
+
 void Gamemode_RoundEnd()
 {
 	delete BlinkTimer;
+	delete WinnerTimer;
 	
 	char buffer[256];
 	for(int client = 1; client <= MaxClients; client++)
@@ -164,7 +171,7 @@ void Gamemode_RoundEnd()
 	}
 
 	if(!buffer[0])
-		strcopy(buffer, sizeof(buffer), "\n☠");
+		strcopy(buffer, sizeof(buffer), "\n...");
 
 	SetHudTextParams(-1.0, 0.2, 19.0, 255, 255, 255, 255, 2, 0.1, 0.1);
 	
@@ -534,31 +541,39 @@ void Gamemode_CheckAlivePlayers(int exclude = 0, bool alive = true, bool resetMa
 
 	if(alive && GameRules_GetRoundState() == RoundState_RoundRunning)
 	{
-		// Stall is a boss is alive (or singleplayer)
+		delete WinnerTimer;
+
+		// Stall if a boss is alive (or singleplayer)
 		if(!stall && (!PlayersAlive[TFTeam_Bosses] || MaxPlayersAlive[TFTeam_Bosses]))
 		{
-			int winner = TFTeam_Unassigned;
-			int reason = WINREASON_STALEMATE;
-
-			if(vip)
-			{
-				winner = TFTeam_Humans;
-				reason = PlayersAlive[TFTeam_Bosses] ? WINREASON_FLAG_CAPTURE_LIMIT : WINREASON_OPPONENTS_DEAD;
-			}
-			else if(PlayersAlive[TFTeam_Bosses])
-			{
-				winner = TFTeam_Bosses;
-				reason = WINREASON_OPPONENTS_DEAD;
-			}
-
-			int entity = CreateEntityByName("game_round_win"); 
-			DispatchKeyValue(entity, "force_map_reset", "1");
-			DispatchKeyValueInt(entity, "win_reason", reason);
-			SetEntProp(entity, Prop_Data, "m_iTeamNum", winner);
-			DispatchSpawn(entity);
-			AcceptEntityInput(entity, "RoundWin");
+			WinnerTimer = CreateTimer(1.0, CheckWinConditionTimer, vip);
 		}
 	}
+}
+
+static Action CheckWinConditionTimer(Handle timer, bool vip)
+{
+	int winner = TFTeam_Unassigned;
+	int reason = WINREASON_STALEMATE;
+
+	if(vip)
+	{
+		winner = TFTeam_Humans;
+		reason = PlayersAlive[TFTeam_Bosses] ? WINREASON_FLAG_CAPTURE_LIMIT : WINREASON_OPPONENTS_DEAD;
+	}
+	else if(PlayersAlive[TFTeam_Bosses])
+	{
+		winner = TFTeam_Bosses;
+		reason = WINREASON_OPPONENTS_DEAD;
+	}
+
+	int entity = CreateEntityByName("game_round_win"); 
+	DispatchKeyValue(entity, "force_map_reset", "1");
+	DispatchKeyValueInt(entity, "win_reason", reason);
+	SetEntProp(entity, Prop_Data, "m_iTeamNum", winner);
+	DispatchSpawn(entity);
+	AcceptEntityInput(entity, "RoundWin");
+	return Plugin_Continue;
 }
 
 bool Gamemode_PlayerRunCmd(int client, int &buttons, int &impulse, const float vel[3])

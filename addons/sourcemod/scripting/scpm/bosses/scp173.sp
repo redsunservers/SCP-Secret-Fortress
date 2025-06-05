@@ -142,7 +142,23 @@ public void SCP173_Equip(int client, bool weapons)
 
 			SetEntityHealth(client, 1600);
 		}
+		
+		Human_ToggleFlashlight(client);
 	}
+}
+
+public void SCP173_PlayerDeath(int client, bool &fakeDeath)
+{
+	if(IsValidEntity(ModelRef[client]))
+		RemoveEntity(ModelRef[client]);
+	
+	StopSound(client, SNDCHAN_STATIC, WalkSound);
+
+	PlayDeathAnimation(client, client, "death", _, _, false, DeathModel);
+	EmitSoundToAll(DeathSound, client, SNDCHAN_STATIC, SNDLEVEL_GUNFIRE);
+
+	PlayingWalk[client] = false;
+	ModelRef[client] = -1;
 }
 
 public void SCP173_Remove(int client)
@@ -189,6 +205,9 @@ public Action SCP173_TakeDamage(int client, int &attacker, int &inflictor, float
 
 public Action SCP173_PlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
+	if(!IsPlayerAlive(client))
+		return Plugin_Continue;
+	
 	bool lookedAt = CutsceneFor[client] > GetGameTime();
 
 	int team = GetClientTeam(client);

@@ -105,7 +105,14 @@ public void SCP106_Equip(int client, bool weapons)
 
 		ViewModel_Create(client, ViewModel, "a_fists_idle_02");
 		ViewModel_SetAnimation(client, "fists_draw");
+		
+		Human_ToggleFlashlight(client);
 	}
+}
+
+public void SCP106_PlayerDeath(int client, bool &fakeDeath)
+{
+	PlayDeathAnimation(client, client, "death_scp_106", _, 3.0, false, PlayerModel);
 }
 
 public void SCP106_Remove(int client)
@@ -172,6 +179,9 @@ public Action SCP106_DealDamage(int client, int victim, int &inflictor, float &d
 
 public Action SCP106_PlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
+	if(!IsPlayerAlive(client))
+		return Plugin_Continue;
+	
 	static float pos[3];
 	GetEntPropVector(client, Prop_Send, "m_vecOrigin", pos);
 	if(GetEntityMoveType(client) == MOVETYPE_NOCLIP)

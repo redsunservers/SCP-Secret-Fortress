@@ -31,6 +31,8 @@ public bool FlashGrenade_Use(int client)
 
 		CreateTimer(3.0, FlashGrenadeTimer, EntIndexToEntRef(entity), TIMER_FLAG_NO_MAPCHANGE);
 	}
+
+	Humans_PlayReaction(client, "ReactThrow");
 	return true;
 }
 
@@ -113,6 +115,8 @@ public bool FragGrenade_Use(int client)
 
 		CreateTimer(5.0, FragGrenadeTimer, EntIndexToEntRef(entity), TIMER_FLAG_NO_MAPCHANGE);
 	}
+	
+	Humans_PlayReaction(client, "ReactThrow");
 	return true;
 }
 

@@ -126,27 +126,33 @@ static Action Events_PlayerDeath(Event event, const char[] name, bool dontBroadc
 			}
 		}
 
-		if(!deadRinger && Client(victim).IsBoss)
+		if(Client(victim).IsBoss)
 		{
-			char boss[64], killer[64];
-			Bosses_GetName(Client(victim).Boss, boss, sizeof(boss));
-
 			if(attacker)
-				GetClientName(attacker, killer, sizeof(killer));
+				Humans_PlayReaction(attacker, "ReactKill");
 
-			if(assister)
+			if(!deadRinger)
 			{
-				char assistant[64];
-				GetClientName(assister, assistant, sizeof(assistant));
-				CPrintToChatAll("%t", "Boss Killed Message Duo", boss, killer, assistant);
-			}
-			else if(attacker && attacker != victim)
-			{
-				CPrintToChatAll("%t", "Boss Killed Message Solo", boss, killer);
-			}
-			else
-			{
-				CPrintToChatAll("%t", "Boss Killed Message None", boss);
+				char boss[64], killer[64];
+				Bosses_GetName(Client(victim).Boss, boss, sizeof(boss));
+
+				if(attacker)
+					GetClientName(attacker, killer, sizeof(killer));
+
+				if(assister)
+				{
+					char assistant[64];
+					GetClientName(assister, assistant, sizeof(assistant));
+					CPrintToChatAll("%t", "Boss Killed Message Duo", boss, killer, assistant);
+				}
+				else if(attacker && attacker != victim)
+				{
+					CPrintToChatAll("%t", "Boss Killed Message Solo", boss, killer);
+				}
+				else
+				{
+					CPrintToChatAll("%t", "Boss Killed Message None", boss);
+				}
 			}
 		}
 		

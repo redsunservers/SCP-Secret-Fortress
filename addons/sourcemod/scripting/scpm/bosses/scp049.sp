@@ -154,6 +154,8 @@ public void SCP049_Equip(int client, bool weapons)
 			
 			SetEntityHealth(client, 500);
 		}
+
+		Human_ToggleFlashlight(client);
 	}
 }
 
@@ -169,6 +171,11 @@ public void SCP049_WeaponSwitch(int client)
 		ViewModel_Create(client, ViewModelKnife, "b_idle");
 		ViewModel_SetAnimation(client, "b_draw");
 	}
+}
+
+public void SCP049_PlayerDeath(int client, bool &fakeDeath)
+{
+	PlayDeathAnimation(client, client, "death_scp_049", _, _, false, PlayerModel);
 }
 
 public void SCP049_Remove(int client)
@@ -251,6 +258,9 @@ public Action SCP049_SoundHook(int client, int clients[MAXPLAYERS], int &numClie
 
 public Action SCP049_PlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
+	if(!IsPlayerAlive(client))
+		return Plugin_Continue;
+	
 	int melee = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
 	if(melee != -1)
 	{
@@ -460,6 +470,7 @@ static Action TurnToZombie(Handle timer, int userid)
 		}
 
 		SDKCall_SetSpeed(client);
+		Human_ToggleFlashlight(client);
 	}
 	
 	return Plugin_Continue;

@@ -605,7 +605,7 @@ void PlayClassDeathAnimation(int victim, int attacker, const char[][] deathAnims
 	PlayDeathAnimation(victim, attacker, deathAnims[class], cycleAnims[class], duration[class]);
 }
 
-void PlayDeathAnimation(int victim, int attacker, const char[] deathAnim, float cycleAnims, float duration, bool doCamera = true)
+void PlayDeathAnimation(int victim, int attacker, const char[] deathAnim, float cycleAnims = 0.0, float duration = 0.0, bool doCamera = true, const char[] modelOverride = "")
 {
 	int entity = CreateEntityByName("prop_dynamic_override");
 	if(entity == -1)
@@ -617,14 +617,24 @@ void PlayDeathAnimation(int victim, int attacker, const char[] deathAnim, float 
 	GetEntPropVector(victim, Prop_Send, "m_vecOrigin", pos);
 	GetClientEyeAngles(attacker, ang);
 	ang[0] = 0.0;
-	ang[1] = FixAngle(ang[1] + 180.0);
 	ang[2] = 0.0;
+
+	if(victim != attacker)
+		ang[1] = FixAngle(ang[1] + 180.0);
 
 	TeleportEntity(entity, pos, ang, NULL_VECTOR);
 	
 	char buffer[PLATFORM_MAX_PATH];
-	GetEntPropString(victim, Prop_Data, "m_ModelName", buffer, sizeof(buffer));
-	DispatchKeyValue(entity, "model", buffer);
+	if(modelOverride[0])
+	{
+		DispatchKeyValue(entity, "model", modelOverride);
+	}
+	else
+	{
+		GetEntPropString(victim, Prop_Data, "m_ModelName", buffer, sizeof(buffer));
+		DispatchKeyValue(entity, "model", buffer);
+	}
+
 	DispatchKeyValueInt(entity, "skin", GetClientTeam(victim) - 2);
 	
 	DispatchSpawn(entity);
@@ -636,16 +646,19 @@ void PlayDeathAnimation(int victim, int attacker, const char[] deathAnim, float 
 	
 	SetEntPropFloat(entity, Prop_Send, "m_flCycle", cycleAnims);
 
-	FormatEx(buffer, sizeof(buffer), "OnUser1 !self:BecomeRagdoll::%f:1", duration);
-	SetVariantString("OnUser1 !self:BecomeRagdoll::2.0:1");
-	AcceptEntityInput(entity, "AddOutput");
+	if(duration > 0.2)
+	{
+		FormatEx(buffer, sizeof(buffer), "OnUser1 !self:BecomeRagdoll::%f:1", duration);
+		SetVariantString("OnUser1 !self:BecomeRagdoll::2.0:1");
+		AcceptEntityInput(entity, "AddOutput");
 
-	AcceptEntityInput(entity, "FireUser1");
-
-	DataPack pack;
-	CreateDataTimer(duration - 0.2, SetNewRagdoll, pack);
-	pack.WriteCell(EntIndexToEntRef(entity));
-	pack.WriteCell(GetClientUserId(victim));
+		AcceptEntityInput(entity, "FireUser1");
+	
+		DataPack pack;
+		CreateDataTimer(duration - 0.2, SetNewRagdoll, pack);
+		pack.WriteCell(EntIndexToEntRef(entity));
+		pack.WriteCell(GetClientUserId(victim));
+	}
 
 	int wearable, i;
 	while(TF2U_GetWearable(victim, wearable, i))
@@ -671,7 +684,7 @@ void PlayDeathAnimation(int victim, int attacker, const char[] deathAnim, float 
 		AcceptEntityInput(ornament, "SetParent", entity, entity);
 	}
 
-	if(!doCamera)
+	if(!doCamera || duration <= 0.2)
 		return;
 	
 	int camera = CreateEntityByName("point_viewcontrol");
@@ -691,7 +704,7 @@ void PlayDeathAnimation(int victim, int attacker, const char[] deathAnim, float 
 	SetVariantString("!activator");
 	AcceptEntityInput(camera, "Enable", victim, victim);
 
-	//DataPack pack;
+	DataPack pack;
 	CreateDataTimer(duration, DisableCameraTimer, pack);
 	pack.WriteCell(EntIndexToEntRef(camera));
 	pack.WriteCell(GetClientUserId(victim));

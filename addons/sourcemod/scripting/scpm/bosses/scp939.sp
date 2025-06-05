@@ -107,6 +107,8 @@ public void SCP939_Equip(int client, bool weapons)
 			SetEntityRenderMode(client, RENDER_TRANSCOLOR);
 			SetEntityRenderColor(client, GetRandomInt(200, 255), GetRandomInt(200, 255), GetRandomInt(200, 255));
 		}
+		
+		Human_ToggleFlashlight(client);
 	}
 }
 
@@ -169,6 +171,9 @@ public void SCP939_ConditionAdded(int client, TFCond cond)
 
 public Action SCP939_PlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
+	if(!IsPlayerAlive(client))
+		return Plugin_Continue;
+	
 	if(Client(client).ControlProgress < 9)
 	{
 		if(Client(client).KeyHintUpdateAt < GetGameTime())

@@ -76,7 +76,31 @@ public void SCP096_Equip(int client, bool weapons)
 	{
 		GiveDefaultMelee(client);
 		SetEntityHealth(client, 2000);
+		Human_ToggleFlashlight(client);
 	}
+}
+
+public void SCP096_PlayerDeath(int client, bool &fakeDeath)
+{
+	PlayDeathAnimation(client, client, "death_scp_096", _, _, false, PlayerModel);
+
+	switch(SCPMode[client])
+	{
+		case -1:
+		{
+			StopSound(client, SNDCHAN_AUTO, AmbientSound);
+		}
+		case 0:
+		{
+
+		}
+		default:
+		{
+			StopSound(client, SNDCHAN_AUTO, RageSound);
+		}
+	}
+
+	SCPMode[client] = 0;
 }
 
 public void SCP096_Remove(int client)
@@ -160,6 +184,9 @@ public Action SCP096_DealDamage(int client, int victim, int &inflictor, float &d
 
 public Action SCP096_PlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
+	if(!IsPlayerAlive(client))
+		return Plugin_Continue;
+	
 	if(!TF2_IsPlayerInCondition(client, TFCond_Dazed))
 	{
 		bool lookedAt;
@@ -174,11 +201,11 @@ public Action SCP096_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 					if(!IsMarked[target])
 					{
 						IsMarked[target] = true;
+						Humans_PlayReaction(target, "ReactRun");
 						Music_StartChase(target, client, true);
 					}
 					
 					lookedAt = true;
-					break;
 				}
 			}
 		}

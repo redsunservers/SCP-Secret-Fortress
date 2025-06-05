@@ -28,7 +28,28 @@ enum struct ClassStat
 	float StressDark;
 	float StressDeath;
 	float PowerDrain;
+	StringMap Reactions;
 
+	void Clean()
+	{
+		if(this.Reactions)
+		{
+			Handle handle;
+			StringMapSnapshot snap = this.Reactions.Snapshot();
+			int length = snap.Length;
+			for(int i; i < length; i++)
+			{
+				int size = snap.KeyBufferSize(i) + 1;
+				char[] key = new char[size];
+				snap.GetKey(i, key, size);
+
+				this.Reactions.GetValue(key, handle);
+				delete handle;
+			}
+
+			delete this.Reactions;
+		}
+	}
 	void SetupKv(KeyValues kv)
 	{
 		this.WalkSpeed = kv.GetFloat("walkspeed", 200.0);
@@ -42,6 +63,46 @@ enum struct ClassStat
 		this.StressDark = kv.GetFloat("stressdark", 0.0);
 		this.StressDeath = kv.GetFloat("stressdeath", 30.0);
 		this.PowerDrain = kv.GetFloat("powerdrain", 1.0);
+
+		if(kv.GotoFirstSubKey())
+		{
+			this.Reactions = new StringMap();
+			char buffer[PLATFORM_MAX_PATH];
+			ArrayList list;
+
+			do
+			{
+				kv.GetSectionName(buffer, sizeof(buffer));
+				if(this.Reactions.ContainsKey(buffer))
+					continue;
+
+				if(kv.GotoFirstSubKey(false))
+				{
+					list = new ArrayList(sizeof(buffer));
+					this.Reactions.SetValue(buffer, list);
+
+					do
+					{
+						kv.GetSectionName(buffer, sizeof(buffer));
+						if(buffer[0])
+						{
+							PrecacheSound(buffer);
+							list.PushString(buffer);
+						}
+					}
+					while(kv.GotoNextKey(false));
+
+					kv.GoBack();
+				}
+			}
+			while(kv.GotoNextKey());
+
+			kv.GoBack();
+		}
+		else
+		{
+			this.Reactions = null;
+		}
 	}
 }
 
@@ -80,6 +141,7 @@ void Human_SetupConfig(KeyValues map)
 	{
 		bool found = kv.JumpToKey(ClassNames[i]);
 		
+		ClassStats[i].Clean();
 		ClassStats[i].SetupKv(kv);
 
 		if(found)
@@ -169,45 +231,23 @@ static Action HumanEquipTimer(Handle timer, int userid)
 
 void Human_ToggleFlashlight(int client)
 {
-	if(Client(client).IsBoss || Client(client).Minion)
-		return;
-	
 	Client(client).LastNoiseAt = GetGameTime();
 
-	int effects = GetEntProp(client, Prop_Send, "m_fEffects");
-	if(effects & EF_DIMLIGHT)
+	if(Client(client).IsBoss || Client(client).Minion)
 	{
-		ClientCommand(client, "playgamesound items/flashlight1.wav");
-		SetEntProp(client, Prop_Send, "m_fEffects", effects & ~EF_DIMLIGHT);
-		
-		if(IsValidEntity(FlashlightRef[client]))
-		{
-			AcceptEntityInput(FlashlightRef[client], "TurnOff");
-			RemoveEntity(FlashlightRef[client]);
-			FlashlightRef[client] = -1;
-		}
-	}
-	else
-	{
-		ClientCommand(client, "playgamesound items/flashlight1.wav");
-		SetEntProp(client, Prop_Send, "m_fEffects", effects | EF_DIMLIGHT);
-		
-		if(!ImpulseFlashlight[client] && !IsValidEntity(FlashlightRef[client]))
+		if(!IsValidEntity(FlashlightRef[client]))
 		{
 			int entity = CreateEntityByName("light_dynamic");
 			if(entity != -1)
 			{
-				float pos[3], ang[3];
-				GetClientEyePosition(client, pos);
-				GetClientEyeAngles(client, ang);
-				TeleportEntity(entity, pos, ang, NULL_VECTOR);
+				float pos[3];
+				GetClientAbsOrigin(client, pos);
+				pos[2] += 10.0;
+				TeleportEntity(entity, pos);
 
-				DispatchKeyValue(entity, "_light", "255 255 255");
-				DispatchKeyValue(entity, "spotlight_radius", "512");
-				DispatchKeyValue(entity, "distance", "1024");
-				DispatchKeyValue(entity, "brightness", "0");
-				DispatchKeyValue(entity, "_inner_cone", "41");
-				DispatchKeyValue(entity, "_cone", "41");
+				DispatchKeyValue(entity, "_light", "255 255 255 100");
+				//DispatchKeyValue(entity, "distance", "256");
+				//DispatchKeyValue(entity, "brightness", "10");
 
 				DispatchSpawn(entity);
 				ActivateEntity(entity);
@@ -218,6 +258,56 @@ void Human_ToggleFlashlight(int client)
 				SDKHook(entity, SDKHook_SetTransmit, FlashlightTransmit);
 
 				FlashlightRef[client] = EntIndexToEntRef(entity);
+			}
+		}
+	}
+	else
+	{
+		int effects = GetEntProp(client, Prop_Send, "m_fEffects");
+		if(effects & EF_DIMLIGHT)
+		{
+			ClientCommand(client, "playgamesound items/flashlight1.wav");
+			SetEntProp(client, Prop_Send, "m_fEffects", effects & ~EF_DIMLIGHT);
+			
+			if(IsValidEntity(FlashlightRef[client]))
+			{
+				AcceptEntityInput(FlashlightRef[client], "TurnOff");
+				RemoveEntity(FlashlightRef[client]);
+				FlashlightRef[client] = -1;
+			}
+		}
+		else
+		{
+			ClientCommand(client, "playgamesound items/flashlight1.wav");
+			SetEntProp(client, Prop_Send, "m_fEffects", effects | EF_DIMLIGHT);
+			
+			if(!ImpulseFlashlight[client] && !IsValidEntity(FlashlightRef[client]))
+			{
+				int entity = CreateEntityByName("light_dynamic");
+				if(entity != -1)
+				{
+					float pos[3], ang[3];
+					GetClientEyePosition(client, pos);
+					GetClientEyeAngles(client, ang);
+					TeleportEntity(entity, pos, ang, NULL_VECTOR);
+
+					DispatchKeyValue(entity, "_light", "255 255 255");
+					DispatchKeyValue(entity, "spotlight_radius", "512");
+					DispatchKeyValue(entity, "distance", "1024");
+					DispatchKeyValue(entity, "brightness", "0");
+					DispatchKeyValue(entity, "_inner_cone", "41");
+					DispatchKeyValue(entity, "_cone", "41");
+
+					DispatchSpawn(entity);
+					ActivateEntity(entity);
+					SetVariantString("!activator");
+					AcceptEntityInput(entity, "SetParent", client);
+					AcceptEntityInput(entity, "TurnOn");
+
+					SDKHook(entity, SDKHook_SetTransmit, FlashlightTransmit);
+
+					FlashlightRef[client] = EntIndexToEntRef(entity);
+				}
 			}
 		}
 	}
@@ -348,7 +438,12 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 				}
 
 				if(stress < 1)
+				{
+					if(!TF2_IsPlayerInCondition(client, TFCond_MarkedForDeath))
+						Humans_PlayReaction(client, "ReactMeltdown");
+					
 					TF2_AddCondition(client, TFCond_MarkedForDeath);
+				}
 
 				// Stress kills at -25
 				if(stress < -20)
@@ -473,6 +568,15 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 
 void Human_PlayerDeath(int client)
 {
+	SetEntProp(client, Prop_Send, "m_fEffects", GetEntProp(client, Prop_Send, "m_fEffects") & ~EF_DIMLIGHT);
+
+	if(IsValidEntity(FlashlightRef[client]))
+	{
+		AcceptEntityInput(FlashlightRef[client], "TurnOff");
+		RemoveEntity(FlashlightRef[client]);
+		FlashlightRef[client] = -1;
+	}
+	
 	if(Client(client).IsBoss || Client(client).Minion)
 		return;
 
@@ -489,10 +593,12 @@ void Human_PlayerDeath(int client)
 	Items_DropActionItem(client, true);
 	Keycard_DropBestMatch(client, true);
 
+	int team = GetClientTeam(client);
 	for(int target = 1; target <= MaxClients; target++)
 	{
-		if(IsClientInGame(target) && IsPlayerAlive(target) && Client(target).LookingAt(client))
+		if(IsClientInGame(target) && IsPlayerAlive(target) && GetClientTeam(target) != team && !Client(target).IsBoss && !Client(target).Minion && Client(target).LookingAt(client))
 		{
+			Humans_PlayReaction(client, "ReactDeath");
 			Client(target).Stress += ClassStats[TF2_GetPlayerClass(target)].StressDeath;
 		}
 	}
@@ -557,6 +663,8 @@ void Human_Interact(int client, int entity)
 
 			AcceptEntityInput(entity, "FireUser2", client, client);
 			AcceptEntityInput(entity, "KillHierarchy");
+
+			Humans_PlayReaction(client, "ReactItem");
 			
 			if(!Client(client).ControlProgress)
 				Client(client).ControlProgress = 1;
@@ -578,6 +686,33 @@ float Humans_GetStressGain(int client, bool alone)
 		return 0.0;
 	
 	return alone ? ClassStats[TF2_GetPlayerClass(client)].StressAlone : ClassStats[TF2_GetPlayerClass(client)].StressGroup;
+}
+
+void Humans_PlayReaction(int client, const char[] name)
+{
+	if(Client(client).IsBoss || Client(client).Minion || !ClassStats[TF2_GetPlayerClass(client)].Reactions)
+		return;
+	
+	ArrayList list;
+	ClassStats[TF2_GetPlayerClass(client)].Reactions.GetValue(name, list);
+	if(!list)
+		return;
+	
+	int length = list.Length;
+	if(!length)
+		return;
+	
+	char sound[PLATFORM_MAX_PATH];
+	list.GetString(GetURandomInt() % length, sound, sizeof(sound));
+
+	if(TF2_IsPlayerInCondition(client, TFCond_Disguised))
+	{
+		EmitSoundToClient(client, sound, client, SNDCHAN_VOICE, SNDLEVEL_SCREAMING);
+	}
+	else
+	{
+		EmitSoundToAll(sound, client, SNDCHAN_VOICE, SNDLEVEL_SCREAMING);
+	}
 }
 
 static void EquipHuman(int client, bool post)

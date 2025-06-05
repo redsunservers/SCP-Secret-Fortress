@@ -329,6 +329,7 @@ public void OnMapEnd()
 {
 	Bosses_MapEnd();
 	ConVar_Disable();
+	Gamemode_MapEnd();
 	Specials_MapEnd();
 }
 
