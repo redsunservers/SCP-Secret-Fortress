@@ -310,7 +310,7 @@ static void PlayerManagerThink(int entity)
 		}
 	}
 
-	static const int zero[MAXPLAYERS+1];
+	static const int zero[MAXPLAYERS+1] = {0, ...};
 	SetEntDataArray(entity, offsetAlive, alive, MaxClients + 1, 1);
 	SetEntDataArray(entity, offsetTeam, team, MaxClients + 1);
 	SetEntDataArray(entity, offsetScore, zero, MaxClients + 1);
