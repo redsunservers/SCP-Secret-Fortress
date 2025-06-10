@@ -13,6 +13,7 @@ void Command_PluginStart()
 	AddCommandListener(Command_AutoTeam, "autoteam");
 	AddCommandListener(Command_JoinClass, "joinclass");
 	AddCommandListener(Command_DropItem, "dropitem");
+	AddCommandListener(Command_SayTeam, "say_team");
 }
 
 static bool BossTargetFilter(const char[] pattern, ArrayList clients)
@@ -171,4 +172,12 @@ static Action Command_DropItem(int client, const char[] command, int args)
 		}
 	}
 	return Plugin_Continue;
+}
+
+static Action Command_SayTeam(int client, const char[] command, int args)
+{
+	char buffer[512];
+	GetCmdArgString(buffer, sizeof(buffer));
+	FakeClientCommandEx(client, "say %s", buffer);
+	return Plugin_Handled;
 }

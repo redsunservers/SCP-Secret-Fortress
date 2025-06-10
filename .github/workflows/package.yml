@@ -1,41 +1,107 @@
 name: Package
 
+permissions:
+  contents: write
+
 on:
   push:
     branches: master
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '*')"
     
     steps:
-      - name: Checkout
+      - name: Install Checkout
         uses: actions/checkout@v1
       
-      - name: Environments
-        run: |
-          echo "SM_VERSION=1.11" >> $GITHUB_ENV
+      - name: Install Setup SP
+        uses: rumblefrog/setup-sp@master
+        with:
+          version: '1.13.x'
       
-      - name: Install
+      - name: Get GitHub Env
         run: |
-          bash scripts/install.sh
-      
-      - name: Set Version
+          echo "PLUGIN_VERSION_REVISION<<EOF" >> $GITHUB_ENV
+          git rev-list --count HEAD >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+
+      - name: Install Misc
         run: |
-          bash scripts/date.sh
+          bash scripts/setup.sh
+          bash scripts/optional.sh
+        working-directory: ./
       
-      - name: Compile
+      - name: Full Compile
         run: |
-          mkdir -p build/addons/sourcemod/plugins/freaks
-          cd build/addons/sourcemod/scripting
-          ./spcomp -E scp_sf.sp -o ../plugins/scp_sf.smx
+          mkdir -p plugins
+          spcomp -E -O2 -v2 -i "include" -o "plugins/scpm.smx" scpm.sp
+        working-directory: ${{ env.SCRIPTS_PATH }}
       
-      - name: Package
+      - name: Setup Package
+        run: bash scripts/package.sh
+      
+      - name: Package Full
+        uses: montudor/action-zip@v1.0.0
+        with:
+          args: zip -qq -r New-Install-Package-${{env.PLUGIN_VERSION}}.${{env.PLUGIN_VERSION_REVISION}}.zip New-Install-Package
+      
+      - name: Package Update
+        uses: montudor/action-zip@v1.0.0
+        with:
+          args: zip -qq -r Update-Package-${{env.PLUGIN_VERSION}}.${{env.PLUGIN_VERSION_REVISION}}.zip Update-Package
+      
+      - name: Release
+        uses: softprops/action-gh-release@master
+        with:
+          tag_name: ${{env.PLUGIN_VERSION}}.${{env.PLUGIN_VERSION_REVISION}}
+          files: |
+            New-Install-Package-${{env.PLUGIN_VERSION}}.${{env.PLUGIN_VERSION_REVISION}}.zip
+            Update-Package-${{env.PLUGIN_VERSION}}.${{env.PLUGIN_VERSION_REVISION}}.zip
+  
+  nonrelease:
+    runs-on: ubuntu-latest
+    if: "contains(github.event.head_commit.message, '*')"
+    
+    steps:
+      - name: Install Checkout
+        uses: actions/checkout@v1
+      
+      - name: Install Setup SP
+        uses: rumblefrog/setup-sp@master
+        with:
+          version: '1.13.x'
+      
+      - name: Get GitHub Env
         run: |
-          bash scripts/package.sh
+          echo "PLUGIN_VERSION_REVISION<<EOF" >> $GITHUB_ENV
+          git rev-list --count HEAD >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
       
-      - name: Upload Artifacts
+      - name: Install Misc
+        run: |
+          bash scripts/setup.sh
+          bash scripts/optional.sh
+        working-directory: ./
+      
+      - name: Full Compile
+        run: |
+          mkdir -p plugins
+          spcomp -E -O2 -v2 -i "include" -o "plugins/scpm.smx" scpm.sp
+        working-directory: ${{ env.SCRIPTS_PATH }}
+      
+      - name: Setup Package
+        run: bash scripts/package.sh
+      
+      - name: Upload Full
         uses: actions/upload-artifact@master
         with:
-          name: SCPSecretFortress-${{env.DATE_VERSION}}
-          path: ./build/package
+          name: New-Install-Package-${{env.PLUGIN_VERSION}}.${{env.PLUGIN_VERSION_REVISION}}
+          path: ./New-Install-Package
+      
+      - name: Upload Update
+        uses: actions/upload-artifact@master
+        with:
+          name: Update-Package-${{env.PLUGIN_VERSION}}.${{env.PLUGIN_VERSION_REVISION}}
+          path: ./Update-Package

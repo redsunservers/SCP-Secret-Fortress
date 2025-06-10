@@ -1,8 +1,6 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define CVAR_VERSION	"0.1"
-
 enum struct CvarInfo
 {
 	ConVar Cvar;
@@ -17,24 +15,18 @@ static bool CvarHooked;
 
 void ConVar_PluginStart()
 {
-	Cvar[Version] = CreateConVar("scp_version", CVAR_VERSION, "SCP Version", FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	Cvar[Version] = CreateConVar("scp_version", PLUGIN_VERSION_FULL, "SCP Version", FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	
 	Cvar[SCPCount] = CreateConVar("scp_game_bosses", "8", "How many players for every boss spawn", _, true, 1.0);
 	
-	AutoExecConfig(false, "SCPM");
+	AutoExecConfig(false, "scpm");
 	
 	Cvar[AllowSpectators] = FindConVar("mp_allowspectators");
 	Cvar[Gravity] = FindConVar("sv_gravity");
 	Cvar[NoclipSpeed] = FindConVar("sv_noclipspeed");
 	
 	CvarList = new ArrayList(sizeof(CvarInfo));
-/*
-	ConVar_Add("randomizer_class", "");//"trigger=@!boss group=@me action=round");
-	ConVar_Add("randomizer_weapons", "");//"trigger=@!boss group=@me action=round count-primary=0 count-secondary=0 count-melee=1");
-	ConVar_Add("randomizer_cosmetics", "");
-	ConVar_Add("randomizer_droppedweapons", "1");
-	ConVar_Add("randomizer_enabled", "1");
-*/
+
 	ConVar_Add("mat_supportflashlight", "1");
 	ConVar_Add("mp_autoteambalance", "0");
 	ConVar_Add("mp_bonusroundtime", "20.0", false);
@@ -49,6 +41,7 @@ void ConVar_PluginStart()
 	ConVar_Add("mp_tournament_redteamname", "MERCS");
 	ConVar_Add("mp_waitingforplayers_time", "90.0", false);
 	ConVar_Add("spec_freeze_time", "10.0");
+	ConVar_Add("sv_alltalk", "1");
 	ConVar_Add("tf_allow_player_use", "1");
 	ConVar_Add("tf_dropped_weapon_lifetime", "900.0");
 	ConVar_Add("tf_helpme_range", "-1.0");
@@ -57,18 +50,18 @@ void ConVar_PluginStart()
 
 void ConVar_ConfigsExecuted()
 {
-	bool generate = !FileExists("cfg/sourcemod/SCPM.cfg");
+	bool generate = !FileExists("cfg/sourcemod/scpm.cfg");
 	
 	if(!generate)
 	{
 		char buffer[512];
 		Cvar[Version].GetString(buffer, sizeof(buffer));
-		if(!StrEqual(buffer, CVAR_VERSION))
+		if(!StrEqual(buffer, PLUGIN_VERSION_FULL))
 		{
 			if(buffer[0])
 				generate = true;
 			
-			Cvar[Version].SetString(CVAR_VERSION);
+			Cvar[Version].SetString(PLUGIN_VERSION_FULL);
 		}
 	}
 	
@@ -80,12 +73,12 @@ void ConVar_ConfigsExecuted()
 
 static void GenerateConfig()
 {
-	File file = OpenFile("cfg/sourcemod/SCPM.cfg", "wt");
+	File file = OpenFile("cfg/sourcemod/scpm.cfg", "wt");
 	if(file)
 	{
-		file.WriteLine("// Settings present are for SCP: Mercenaries (" ... CVAR_VERSION ... ")");
+		file.WriteLine("// Settings present are for SCP: Mercenaries (" ... PLUGIN_VERSION_FULL ... ")");
 		file.WriteLine("// Updating the plugin version will generate new cvars and any non-SCP commands will be lost");
-		file.WriteLine("scp_version \"" ... CVAR_VERSION ... "\"");
+		file.WriteLine("scp_version \"" ... PLUGIN_VERSION_FULL ... "\"");
 		file.WriteLine(NULL_STRING);
 		
 		char buffer1[512], buffer2[256];

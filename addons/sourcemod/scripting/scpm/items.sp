@@ -387,6 +387,16 @@ bool Items_CanSpawn(int itemIndex)
 // Gives a new weapon to the player given a index
 int Items_GiveByIndex(int client, int itemIndex, bool tempWeapon = false, const char[] forceClassname = "")
 {
+	int newIndex = itemIndex;
+	switch(ForwardOld_OnWeaponPre(client, -1, newIndex))
+	{
+		case Plugin_Changed:
+			itemIndex = newIndex;
+		
+		case Plugin_Handled, Plugin_Stop:
+			return -1;
+	}
+
 	char classname[64];
 	ActionInfo action;
 	bool isAction = GetActionDataOfIndex(itemIndex, action) != -1;
@@ -499,6 +509,7 @@ int Items_GiveByIndex(int client, int itemIndex, bool tempWeapon = false, const 
 	if(!Client(client).Boss)
 		ClientCommand(client, "playgamesound ui/item_heavy_gun_pickup.wav");
 
+	ForwardOld_OnWeapon(client, entity);
 	return entity;
 }
 
@@ -510,6 +521,16 @@ bool Items_GiveByEntity(int client, int entity, bool specialCheck = false)
 		offsetIndex = view_as<Address>(FindSendPropInfo("CTFDroppedWeapon", "m_iItemDefinitionIndex"));
 	
 	int itemIndex = LoadFromAddress(GetEntityAddress(entity) + offsetIndex, NumberType_Int16);
+
+	int newIndex = itemIndex;
+	switch(ForwardOld_OnWeaponPre(client, entity, newIndex))
+	{
+		case Plugin_Changed:
+			itemIndex = newIndex;
+		
+		case Plugin_Handled, Plugin_Stop:
+			return false;
+	}
 
 	ActionInfo action;
 	bool isAction = GetActionDataOfIndex(itemIndex, action) != -1;
@@ -579,7 +600,8 @@ bool Items_GiveByEntity(int client, int entity, bool specialCheck = false)
 		TF2_SetPlayerClass(client, current, false, false);
 
 	ClientCommand(client, "playgamesound ui/item_heavy_gun_pickup.wav");
-	
+	ForwardOld_OnWeapon(client, weapon);
+
 	return true;
 }
 

@@ -91,21 +91,44 @@ void Gamemode_RoundRespawn()
 		ArrayList list = Bosses_GetRandomList();
 		if(list.Length < bosses)
 			bosses = list.Length;
-
+		
+		char class[32];
 		for(int i; i < count; i++)
 		{
 			int client = players[i][0];
+			
+			int index = -1;
+			if(i < bosses)
+			{
+				index = list.Get(i);
+				Bosses_GetName(index, class, sizeof(class));
+
+				Action action = ForwardOld_OnClassPre(client, class, sizeof(class));
+				if(action >= Plugin_Handled)
+				{
+					list.Push(index);
+					bosses++;
+				}
+
+				if(action == Plugin_Stop)
+				{
+					index = -1;
+				}
+				else if(action > Plugin_Continue && action < Plugin_Stop)
+				{
+					index = Bosses_GetByName(class);
+				}
+			}
 
 			SetEntProp(client, Prop_Send, "m_lifeState", 2);
-			ChangeClientTeam(client, i < bosses ? TFTeam_Bosses : TFTeam_Humans);
+			ChangeClientTeam(client, index == -1 ? TFTeam_Humans : TFTeam_Bosses);
 			SetEntProp(client, Prop_Send, "m_lifeState", 0);
 
-			if(i < bosses)
+			if(index != -1)
 			{
 				if(!IsFakeClient(client))
 					BossQueue.SetInt(client, 0);
-
-				int index = list.Get(i);
+				
 				Bosses_Create(client, index);
 			}
 			else if(!IsFakeClient(client))
@@ -358,8 +381,20 @@ void Gamemode_UpdateListeners()
 
 				bool failed;
 
+				// Client muted
+				if(IsClientMuted(target, speaker))
+				{
+					failed = true;
+				}
+
+				// Forward
+				else if(ForwardOld_OnUpdateListenOverrides(target, speaker) != Plugin_Continue)
+				{
+					failed = true;
+				}
+
 				// Check for dead talk
-				if(valid[speaker] < 2)
+				else if(valid[speaker] < 2)
 				{
 					if(spec[speaker] != 2 && valid[target] > 1)
 						failed = true;

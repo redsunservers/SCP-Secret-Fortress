@@ -619,6 +619,7 @@ void Human_ConditionAdded(int client, TFCond cond)
 				Client(client).Escaped = true;
 				TF2_RegeneratePlayer(client);
 				Gamemode_CheckAlivePlayers();
+				ForwardOld_OnEscape(client, 0);
 			}
 		}
 	}
@@ -704,6 +705,8 @@ void Humans_PlayReaction(int client, const char[] name)
 	
 	char sound[PLATFORM_MAX_PATH];
 	list.GetString(GetURandomInt() % length, sound, sizeof(sound));
+
+	ForwardOld_OnReactionPre(client, name, sound);
 
 	if(TF2_IsPlayerInCondition(client, TFCond_Disguised))
 	{

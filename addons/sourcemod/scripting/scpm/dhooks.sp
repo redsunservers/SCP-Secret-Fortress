@@ -12,21 +12,16 @@ static int PrefClass;
 
 void DHook_PluginStart()
 {
-	GameData gamedata = new GameData("ff2");
+	GameData gamedata = new GameData("scpm");
 	
 	StartLagCompensation = CreateDetour(gamedata, "CLagCompensationManager::StartLagCompensation", _, DHook_StartLagCompensation, true);
 	
+	CreateDetour(gamedata, "CEconEntity::UpdateModelToClass", DHook_UpdateModelToClassPre);
 	CreateDetour(gamedata, "CTFPlayer::DropAmmoPack", DHook_DropAmmoPackPre);
+	CreateDetour(gamedata, "CTFPlayer::GetMaxAmmo", DHook_GetMaxAmmoPre);
 
 	ForceRespawn = CreateHook(gamedata, "CBasePlayer::ForceRespawn");
 	
-	delete gamedata;
-
-	gamedata = new GameData("randomizer");
-
-	CreateDetour(gamedata, "CEconEntity::UpdateModelToClass", DHook_UpdateModelToClassPre);
-	CreateDetour(gamedata, "CTFPlayer::GetMaxAmmo", DHook_GetMaxAmmoPre);
-
 	delete gamedata;
 }
 

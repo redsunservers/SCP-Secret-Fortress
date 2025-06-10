@@ -6,7 +6,6 @@
 #include <tf_econ_data> 
 #include <dhooks>
 #include <vscript>
-#include <tf2items>
 #undef REQUIRE_EXTENSIONS
 #undef REQUIRE_PLUGIN
 
@@ -15,6 +14,10 @@
 
 #define CONFIG		"configs/scpm"
 #define CONFIG_CFG	CONFIG ... "/%s.cfg"
+
+#define PLUGIN_VERSION		"4"
+#define PLUGIN_VERSION_REVISION	"manual"
+#define PLUGIN_VERSION_FULL	PLUGIN_VERSION ... PLUGIN_VERSION_REVISION
 
 #define TFTeam_Unassigned	0
 #define TFTeam_Spectator	1
@@ -234,15 +237,19 @@ int MaxPlayersAlive[TFTeam_MAX];
 #include "scpm/stocks.sp"
 #include "scpm/attributes.sp"
 #include "scpm/bosses.sp"
+#include "scpm/chatprocesser.sp"
 #include "scpm/commands.sp"
 #include "scpm/configs.sp"
 #include "scpm/convars.sp"
 #include "scpm/dhooks.sp"
 #include "scpm/events.sp"
+#include "scpm/forwards_old.sp"
 #include "scpm/gamemode.sp"
 #include "scpm/humans.sp"
 #include "scpm/items.sp"
 #include "scpm/music.sp"
+#include "scpm/natives.sp"
+#include "scpm/natives_old.sp"
 #include "scpm/randomizer.sp"
 #include "scpm/sdkcalls.sp"
 #include "scpm/sdkhooks.sp"
@@ -268,6 +275,9 @@ int MaxPlayersAlive[TFTeam_MAX];
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
+	ForwardOld_PluginLoad();
+	Native_PluginLoad();
+	NativeOld_PluginLoad();
 	TF2U_PluginLoad();
 	return APLRes_Success;
 }
@@ -277,7 +287,7 @@ public void OnPluginStart()
 	LoadTranslations("scpm.phrases");
 	LoadTranslations("common.phrases");
 	LoadTranslations("core.phrases");
-	if(!TranslationPhraseExists("Created Boss On"))
+	if(!TranslationPhraseExists("Class No Use"))
 		SetFailState("Translation file \"scpm.phrases\" is outdated");
 	
 	Bosses_PluginStart();

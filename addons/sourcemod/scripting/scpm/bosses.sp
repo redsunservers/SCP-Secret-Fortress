@@ -286,6 +286,10 @@ void Bosses_Create(int client, int index)
 	
 	Client(client).Boss = index;
 
+	char name[32];
+	Bosses_GetName(index, name, sizeof(name));
+	ForwardOld_OnClass(client, name);
+
 	if(Bosses_StartFunctionClient(client, "Create"))
 	{
 		Call_PushCell(client);

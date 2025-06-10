@@ -9,7 +9,6 @@ static Handle SDKFinishLagCompensation;
 static Handle SDKCreateWeapon;
 static Handle SDKInitWeapon;
 static Handle SDKInitPickup;
-//static Handle SDKGetMaxAmmo;
 static Handle SDKSetSpeed;
 static Handle SDKGiveNamedItem;
 
@@ -39,7 +38,7 @@ void SDKCall_PluginStart()
 	delete gamedata;
 	
 	
-	gamedata = new GameData("ff2");
+	gamedata = new GameData("scpm");
 	
 	StartPrepSDKCall(SDKCall_Raw);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CLagCompensationManager::StartLagCompensation");
@@ -92,20 +91,6 @@ void SDKCall_PluginStart()
 	if(!SDKSetSpeed)
 		LogError("[Gamedata] Could not find CTFPlayer::TeamFortress_SetSpeed");
 	
-	delete gamedata;
-
-
-	gamedata = new GameData("randomizer");
-	
-	//StartPrepSDKCall(SDKCall_Entity);
-	//PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::GetMaxAmmo");
-	//PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	//PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	//PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_ByValue);
-	//SDKGetMaxAmmo = EndPrepSDKCall();
-	//if(!SDKGetMaxAmmo)
-	//	LogError("[Gamedata] Could not find CTFPlayer::GetMaxAmmo");
-
 	StartPrepSDKCall(SDKCall_Raw);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CEconItemView::operator=");
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
@@ -163,12 +148,7 @@ stock void SDKCall_FinishLagCompensation(int client)
 			SDKCall(SDKFinishLagCompensation, value, client);
 	}
 }
-/*
-int SDKCall_GetMaxAmmo(int client, int type, int class = -1)
-{
-	return SDKGetMaxAmmo ? SDKCall(SDKGetMaxAmmo, client, type, class) : -1;
-}
-*/
+
 int SDKCall_GetMaxHealth(int client)
 {
 	return SDKGetMaxHealth ? SDKCall(SDKGetMaxHealth, client) : GetEntProp(client, Prop_Data, "m_iMaxHealth");
