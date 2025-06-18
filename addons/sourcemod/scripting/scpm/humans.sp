@@ -322,7 +322,7 @@ float Human_GetStressPercent(int client)
 
 void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 {
-	if(!Client(client).IsBoss && !Client(client).Minion && IsPlayerAlive(client))
+	if(!Client(client).IsBoss && !Client(client).Minion && IsPlayerAlive(client) && !TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode))
 	{
 		float gameTime = GetGameTime();
 		float delta = gameTime - Client(client).LastGameTime;
@@ -720,7 +720,7 @@ void Humans_PlayReaction(int client, const char[] name)
 
 static void EquipHuman(int client, bool post)
 {
-	if(Client(client).IsBoss || Client(client).Minion)
+	if(Client(client).IsBoss || Client(client).Minion || TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode))
 		return;
 
 	if(!Client(client).Escaped)

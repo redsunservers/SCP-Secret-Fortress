@@ -45,7 +45,6 @@ void Gamemode_PluginStart()
 
 void Gamemode_RoundRespawn()
 {
-	PrintToChatAll("Gamemode_RoundRespawn");
 	RoundStartTime = GetGameTime();
 
 	int count;
