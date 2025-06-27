@@ -1,0 +1,163 @@
+"Games"
+{
+	"tf"
+	{
+		"Signatures"
+		{
+			"CEconItemView::operator="
+			{
+				"library"	"server"
+				"linux"		"@_ZN13CEconItemViewaSERKS_"
+				"windows"	"\x55\x8B\xEC\x53\x8B\x5D\x08\x56\x8B\xF1\x57\x66\x8B\x43\x04"
+			}
+			"CEconEntity::UpdateModelToClass"
+			{
+				"library"	"server"
+				"linux"		"@_ZN11CEconEntity18UpdateModelToClassEv"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x0C\x53\x56\x8B\x35\x2A\x2A\x2A\x2A\x8B\xD9"
+			}
+			"CLagCompensationManager::StartLagCompensation"
+			{
+				// "Trying to start a new lag compensation "
+				"library"	"server"
+				"linux"		"@_ZN23CLagCompensationManager20StartLagCompensationEP11CBasePlayerP8CUserCmd"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x28\x57\x8B\xF9\x89\x7D\xE4"
+			}
+			"CLagCompensationManager::FinishLagCompensation"
+			{
+				// "FinishLagCompensation"
+				"library"	"server"
+				"linux"		"@_ZN23CLagCompensationManager21FinishLagCompensationEP11CBasePlayer"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x44\x8B\x15\x2A\x2A\x2A\x2A"
+			}
+			"CTFDroppedWeapon::Create"
+			{
+				// "tf_dropped_weapon" Single Large Function
+				"library"	"server"
+				"linux"		"@_ZN16CTFDroppedWeapon6CreateEP9CTFPlayerRK6VectorRK6QAnglePKcPK13CEconItemView"
+				"windows"	"\x55\x8B\xEC\x51\xA1\x2A\x2A\x2A\x2A\x80\xB8\x72\x0C\x00\x00\x00"
+			}
+			"CTFDroppedWeapon::InitDroppedWeapon"
+			{
+				// "ChargeLevelDegradeThink" Called by 3 Funcs
+				"library"	"server"
+				"linux"		"@_ZN16CTFDroppedWeapon17InitDroppedWeaponEP9CTFPlayerP13CTFWeaponBasebb"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x24\x56\x57\x8B\xF9\x8B\x4D\x08"
+			}
+			"CTFDroppedWeapon::InitPickedUpWeapon"
+			{
+				// "ChargeLevelDegradeThink" Called only by CTFPlayer::PickupWeaponFromOther
+				"library"	"server"
+				"linux"		"@_ZN16CTFDroppedWeapon18InitPickedUpWeaponEP9CTFPlayerP13CTFWeaponBase"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x08\xD9\xEE\x53"
+			}
+			"CTFPlayer::DropAmmoPack"
+			{
+				// "models/items/ammopack_medium.mdl"
+				"library"	"server"
+				"linux"		"@_ZN9CTFPlayer12DropAmmoPackERK15CTakeDamageInfobb"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x2C\x53\x56\x8B\xF1\xC7\x45\xFC\x00\x00\x00\x00"
+			}
+			"CTFPlayer::GetMaxAmmo"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CTFPlayer10GetMaxAmmoEii"
+				"windows"	"\x55\x8B\xEC\x8B\x45\x0C\x53\x8B\xD9"
+			}
+			"CTFPlayer::TeamFortress_SetSpeed"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CTFPlayer21TeamFortress_SetSpeedEv"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x24\xA1\x2A\x2A\x2A\x2A\x56\x8B\xF1\x89\x75\xF0"
+			}
+		}
+		"Offsets"
+		{
+			"CBasePlayer::ForceRespawn"
+			{
+				"linux"		"338"
+				"windows"	"337"
+			}
+			"CTFPlayer::GiveNamedItem"
+			{
+				"linux"		"494"
+				"windows"	"487"
+			}
+		}
+		"Functions"
+		{
+			"CBasePlayer::ForceRespawn"
+			{
+				"offset"	"CBasePlayer::ForceRespawn"
+				"hooktype"	"entity"
+				"return"	"void"
+				"this"		"entity"
+			}
+			"CEconEntity::UpdateModelToClass"
+			{
+				"signature"	"CEconEntity::UpdateModelToClass"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"entity"
+			}
+			"CLagCompensationManager::StartLagCompensation"
+			{
+				"signature"	"CLagCompensationManager::StartLagCompensation"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"address"
+				"arguments"
+				{
+					"player"
+					{
+						"type"	"cbaseentity"
+					}
+					"cmd"
+					{
+						"type"	"objectptr"
+					}
+				}
+			}
+			"CTFPlayer::DropAmmoPack"
+			{
+				"signature"	"CTFPlayer::DropAmmoPack"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"entity"
+				"arguments"
+				{
+					"info"
+					{
+						"type"	"objectptr"
+					}
+					"bEmpty"
+					{
+						"type"	"bool"
+					}
+					"bDisguisedWeapon"
+					{
+						"type"	"bool"
+					}
+				}
+			}
+			"CTFPlayer::GetMaxAmmo"
+			{
+				"signature"	"CTFPlayer::GetMaxAmmo"
+				"callconv"	"thiscall"
+				"return"	"int"
+				"this"		"entity"
+				"arguments"
+				{
+					"iAmmoIndex"
+					{
+						"type"	"int"
+					}
+					"iClassNumber"
+					{
+						"type"	"int"
+					}
+				}
+			}
+		}
+	}
+}

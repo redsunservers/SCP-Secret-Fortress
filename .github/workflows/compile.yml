@@ -7,20 +7,39 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sm-version: ['1.13.x']
     
     steps:
-      - name: Checkout
+      - name: Install Checkout
         uses: actions/checkout@v1
       
-      - name: Environments
-        run: |
-          echo "SM_VERSION=1.11" >> $GITHUB_ENV
+      - name: Install Setup SP ${{ matrix.sm-version }}
+        uses: rumblefrog/setup-sp@master
+        with:
+          version: ${{ matrix.sm-version }}
       
-      - name: Install
+      - name: Get GitHub Env
         run: |
-          bash scripts/install.sh
+          echo "PLUGIN_VERSION_REVISION<<EOF" >> $GITHUB_ENV
+          git rev-list --count HEAD >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
       
-      - name: Compile
+      - name: Install Misc
+        run: bash scripts/setup.sh
+        working-directory: ./
+      
+      - name: Minimum Compile ${{ matrix.sm-version }}
         run: |
-          cd build/addons/sourcemod/scripting
-          ./spcomp -E scp_sf.sp -o ../plugins/scp_sf.smx
+          spcomp -E -O2 -v2 -i "include" scpm.sp
+        working-directory: ${{ env.SCRIPTS_PATH }}
+      
+      - name: Install Optional Includes
+        run: bash scripts/optional.sh
+        working-directory: ./
+      
+      - name: Full Compile ${{ matrix.sm-version }}
+        run: |
+          spcomp -E -O2 -v2 -i "include" scpm.sp
+        working-directory: ${{ env.SCRIPTS_PATH }}
