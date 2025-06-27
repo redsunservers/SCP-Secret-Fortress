@@ -29,7 +29,7 @@ void ConVar_PluginStart()
 
 	ConVar_Add("mat_supportflashlight", "1");
 	ConVar_Add("mp_autoteambalance", "0");
-	ConVar_Add("mp_bonusroundtime", "20.0", false);
+	ConVar_Add("mp_bonusroundtime", "20.0");
 	ConVar_Add("mp_disable_respawn_times", "1");
 	ConVar_Add("mp_flashlight", "1");
 	ConVar_Add("mp_forcecamera", "0", false);

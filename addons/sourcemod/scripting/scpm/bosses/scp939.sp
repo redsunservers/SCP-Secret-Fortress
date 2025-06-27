@@ -127,7 +127,7 @@ public void SCP939_Remove(int client)
 
 	for(int i; i < 4; i++)
 	{
-		SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", -1, _, i);
+		SetEntProp(client, Prop_Send, "m_nModelIndexOverrides", 0, _, i);
 	}
 
 	if(PackLeader == client)
