@@ -4,6 +4,8 @@
 void Native_PluginLoad()
 {
 	CreateNative("SCPM_CanTalkTo", CanTalkTo);
+
+	RegPluginLibrary("scpm");
 }
 
 static any CanTalkTo(Handle plugin, int numParams)

@@ -9,6 +9,8 @@ void NativeOld_PluginLoad()
 	CreateNative("SCPSF_StopMusic", StopMusic);
 	CreateNative("SCPSF_CanTalkTo", CanTalkTo);
 	CreateNative("SCPSF_GetChatTag", GetChatTag);
+
+	RegPluginLibrary("scp_sf");
 }
 
 static any GetClientClass(Handle plugin, int numParams)

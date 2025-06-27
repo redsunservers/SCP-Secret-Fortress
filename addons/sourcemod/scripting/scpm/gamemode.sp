@@ -406,7 +406,7 @@ void Gamemode_UpdateListeners()
 				}
 
 				// Bosses can always hear other bosses
-				else if(!Client(target).IsBoss && !spec[speaker])
+				else if(!Client(target).IsBoss && !spec[target])
 				{
 					if(Client(speaker).SilentTalk)
 						failed = true;
