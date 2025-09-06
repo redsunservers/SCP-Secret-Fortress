@@ -326,6 +326,14 @@ int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, 
 	WeaponEnum weapon;
 	if(Items_GetWeaponByIndex(index, weapon))
 	{
+		TFClassType previous = TF2_GetPlayerClass(client);
+		TFClassType class = weapon.Class;
+		if(class == TFClass_Unknown)
+			class = Client[client].CurrentClass;
+
+		if(class != TFClass_Unknown)
+			TF2_SetPlayerClass(client, class, false, false);
+
 		static char buffers[40][16];
 		int count = ExplodeString(weapon.Attributes, " ; ", buffers, sizeof(buffers), sizeof(buffers));
 
@@ -351,7 +359,12 @@ int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, 
 
 				int wearableRegionMask = TF2Econ_GetItemEquipRegionMask(wearableDefindex);
 				if (wearableRegionMask & newItemRegionMask)
+				{
+					if(previous != TFClass_Unknown)
+						TF2_SetPlayerClass(client, previous, false, false);
+					
 					return -1;
+				}
 			}
 
 			entity = CreateEntityByName(weapon.Classname);
@@ -385,13 +398,6 @@ int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, 
 
 			if(item)
 			{
-				TFClassType class = weapon.Class;
-				if(class == TFClass_Unknown)
-					class = Client[client].CurrentClass;
-
-				if(class != TFClass_Unknown)
-					TF2_SetPlayerClass(client, class, false, false);
-
 				TF2Items_SetClassname(item, weapon.Classname);
 
 				TF2Items_SetItemIndex(item, weapon.Index);
@@ -573,6 +579,9 @@ int Items_CreateWeapon(int client, int index, bool equip=true, bool clip=false, 
 			Items_ShowItemMenu(client);
 			Forward_OnWeapon(client, entity);
 		}
+
+		if(previous != TFClass_Unknown)
+			TF2_SetPlayerClass(client, previous, false, false);
 	}
 	return entity;
 }

@@ -731,10 +731,12 @@ stock bool TF2_IsWearable(int weapon)
 
 void SetActiveWeapon(int client, int entity)
 {
-	static char buffer[36];
+	TF2Util_SetPlayerActiveWeapon(client, entity);
+	
+	/*static char buffer[36];
 	GetEntityClassname(entity, buffer, sizeof(buffer));
 	FakeClientCommand(client, "use %s", buffer);
-	SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", entity);
+	SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", entity);*/
 }
 
 stock void SetSpeed(int client, float speed)

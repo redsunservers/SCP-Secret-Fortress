@@ -21,7 +21,6 @@ void ConVar_Setup()
 	CvarAchievement = CreateConVar("scp_achievements", "1", "If to call SCPSF_OnAchievement forward", _, true, 0.0, true, 1.0);
 	CvarChatHook = CreateConVar("scp_chathook", "1", "If to use it's own chat processor to manage chat messages", _, true, 0.0, true, 1.0);
 	CvarVoiceHook = CreateConVar("scp_voicehook", "1", "If to use it's own voice processor to manage voice chat", _, true, 0.0, true, 1.0);
-	CvarSendProxy = CreateConVar("scp_sendproxy", "1", "If to use SendProxy, if available", _, true, 0.0, true, 1.0);
 	CvarKarma = CreateConVar("scp_karma", "1", "If to use karma level for player damage", _, true, 0.0, true, 1.0);
 	CvarKarmaRatio = CreateConVar("scp_karmaratio", "20.0", "Maximum karma penalty, as a ratio of max health of client", _, true, 0.0, true, 100.0);
 	CvarKarmaMin = CreateConVar("scp_karmamin", "0.0", "Minimum karma level", _, true, 0.0, true, 100.0);
