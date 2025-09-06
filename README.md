@@ -22,10 +22,6 @@ This plugin uses different features which may cause some other plugins to misbeh
 [MemoryPatch](https://github.com/Kenzzer/MemoryPatch "Kenzzer/MemoryPatch: A simple .inc file to patch memory efficiently.") (Compiling)  
 [More Colors](https://forums.alliedmods.net/showthread.php?t=185016 "[INC] More Colors (1.9.1) - AlliedModders") (Compiling)
 
-## Recommend Dependencies:
-[Basic SendProxy](https://github.com/SlidyBat/sendproxy "SlidyBat/sendproxy: Fork of Afronanny's SendProxy Manager extension.") **or**
-[Per-Client SendProxy](https://github.com/TheByKotik/sendproxy "TheByKotik/sendproxy: Fork of Afronanny's SendProxy Manager extension.")
-
 ## Supported Plugins:
 [Source Vehicles](https://github.com/Mikusch/source-vehicles "Mikusch/source-vehicles: Driveable vehicles for TF2, CS:S and Black Mesa") (Whitelist/Blacklist classes that can drive)  
 [SourceBans++](https://github.com/sbpp/sourcebans-pp "sbpp/sourcebans-pp: Admin, ban, and comms management system for the Source engine") (For integrated chat processor)  
