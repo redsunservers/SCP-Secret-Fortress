@@ -14,8 +14,6 @@ void SDKHook_HookClient(int client)
 	SDKHook(client, SDKHook_OnTakeDamageAlivePost, OnTakeDamageAlivePost);	
 	SDKHook(client, SDKHook_SetTransmit, OnTransmit);
 	SDKHook(client, SDKHook_WeaponSwitchPost, OnWeaponSwitch);
-	SDKHook(client, SDKHook_PostThink, OnPostThink);
-	SDKHook(client, SDKHook_PostThinkPost, OnPostThinkPost);
 }
 
 void SDKHook_DealDamage(int client, int inflictor, int attacker, float damage, int damagetype=DMG_GENERIC, int weapon=-1, const float damageForce[3]=NULL_VECTOR, const float damagePosition[3]=NULL_VECTOR)
@@ -343,34 +341,65 @@ public Action OnDoorTouch(int entity, int client)
 
 public void OnPlayerManagerThink(int entity) 
 {
-	static int scoreOffset = -1;
-	if (scoreOffset == -1) 
-		scoreOffset = FindSendPropInfo("CTFPlayerResource", "m_iTotalScore");
+	static int offsetAlive = -1;
+	if(offsetAlive == -1) 
+		offsetAlive = FindSendPropInfo("CTFPlayerResource", "m_bAlive");
 
-	if (CvarKarma.BoolValue && !SZF_Enabled())
+	static int offsetTeam = -1;
+	if(offsetTeam == -1) 
+		offsetTeam = FindSendPropInfo("CTFPlayerResource", "m_iTeam");
+
+	static int offsetScore = -1;
+	if(offsetScore == -1) 
+		offsetScore = FindSendPropInfo("CTFPlayerResource", "m_iTotalScore");
+
+	static int offsetClass = -1;
+	if(offsetClass == -1) 
+		offsetClass = FindSendPropInfo("CTFPlayerResource", "m_iPlayerClass");
+
+	static int offsetClassKilled = -1;
+	if(offsetClassKilled == -1) 
+		offsetClassKilled = FindSendPropInfo("CTFPlayerResource", "m_iPlayerClassWhenKilled");
+
+	bool[] alive = new bool[MaxClients+1];
+	int[] team = new int[MaxClients+1];
+	int[] score = new int[MaxClients+1];
+	bool karmaEnabled = CvarKarma.BoolValue && !SZF_Enabled();
+	int MinKarma = CvarKarmaMin.IntValue;
+
+	for(int client = 1; client <= MaxClients; client++)
 	{
-		static int scoreLevels[MAXPLAYERS+1];
-		int MinKarma = CvarKarmaMin.IntValue;
-		
-		for (int i = 1; i <= MaxClients; i++) 
+		if(IsClientInGame(client))
 		{
-			if (IsClientInGame(i))
+			if(GetClientTeam(client) > 1)
 			{
-				float karma = Classes_GetKarma(i);
-
-				scoreLevels[i] = RoundToFloor(karma);
-				
-				if (scoreLevels[i] < MinKarma)
-					scoreLevels[i] = MinKarma;
+				team[client] = (client % 2) ? 3 : 2;
+				alive[client] = true;
 			}
-			else 
+			else
 			{
-				scoreLevels[i] = 0;
+				team[client] = 1;
+				alive[client] = false;
+			}
+
+			if(karmaEnabled)
+			{
+				float karma = Classes_GetKarma(client);
+
+				score[client] = RoundToFloor(karma);
+				
+				if(score[client] < MinKarma)
+					score[client] = MinKarma;
 			}
 		}
-		
-		SetEntDataArray(entity, scoreOffset, scoreLevels, MaxClients+1);
 	}
+
+	static const int zero[MAXPLAYERS+1] = {0, ...};
+	SetEntDataArray(entity, offsetAlive, alive, MaxClients + 1);
+	SetEntDataArray(entity, offsetTeam, team, MaxClients + 1);
+	SetEntDataArray(entity, offsetScore, score, MaxClients + 1);
+	SetEntDataArray(entity, offsetClass, zero, MaxClients + 1);
+	SetEntDataArray(entity, offsetClassKilled, zero, MaxClients + 1);
 }
 
 // prevent exploits if attacker dies and kills someone afterwards (e.g. grenade)
@@ -703,34 +732,4 @@ static void OnWeaponSwitchFrame(int userid)
 		
 		//ViewChange_Switch(client);
 	}
-}
-
-static const float ViewHeights[] =
-{
-	75.0,
-	65.0,
-	75.0,
-	68.0,
-	68.0,
-	75.0,
-	75.0,
-	68.0,
-	75.0,
-	68.0
-};
-
-public void OnPostThink(int client)
-{
-	if(IsPlayerAlive(client) && Client[client].WeaponClass!=TFClass_Unknown)
-	{
-		TF2_SetPlayerClass(client, Client[client].WeaponClass, false, false);
-		if(GetEntPropFloat(client, Prop_Send, "m_vecViewOffset[2]") > 64.0)	// Otherwise, shaking
-			SetEntPropFloat(client, Prop_Send, "m_vecViewOffset[2]", ViewHeights[Client[client].WeaponClass]);
-	}
-}
-
-public void OnPostThinkPost(int client)
-{
-	if(IsPlayerAlive(client) && Client[client].CurrentClass!=TFClass_Unknown)
-		TF2_SetPlayerClass(client, Client[client].CurrentClass, false, false);
 }
