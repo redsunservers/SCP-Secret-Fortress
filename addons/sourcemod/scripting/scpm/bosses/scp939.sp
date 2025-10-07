@@ -76,16 +76,13 @@ public void SCP939_Equip(int client, bool weapons)
 	{
 		bool leader = PackLeader == client;
 
-		int entity = Items_GiveByIndex(client, 27);
+		int entity = Items_GiveCustom(client, 27, _, false);
 		if(entity != -1)
 		{
 			Attrib_Set(entity, "mod weapon blocks healing", 1.0);
-			
-			SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", -1);
-			SetEntPropFloat(entity, Prop_Send, "m_flModelScale", 0.001);
 		}
 
-		entity = Items_GiveByIndex(client, 461);
+		entity = Items_GiveCustom(client, 461, _, false);
 		if(entity != -1)
 		{
 			Attrib_Set(entity, "damage bonus", 2.5);
@@ -93,9 +90,6 @@ public void SCP939_Equip(int client, bool weapons)
 			Attrib_Set(entity, "max health additive penalty", leader ? 125.0 : 25.0);
 			Attrib_Set(entity, "move speed penalty", 0.75);
 			Attrib_Set(entity, "mod weapon blocks healing", 1.0);
-
-			SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", -1);
-			SetEntPropFloat(entity, Prop_Send, "m_flModelScale", 0.001);
 
 			TF2U_SetPlayerActiveWeapon(client, entity);
 
@@ -137,7 +131,7 @@ public void SCP939_Remove(int client)
 	}
 }
 
-public float SCP939_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int victim, bool &infinite)
+public float SCP939_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int victim, bool &infinite, float &volume)
 {
 	strcopy(theme, sizeof(theme), ChaseSound);
 	return 15.9;

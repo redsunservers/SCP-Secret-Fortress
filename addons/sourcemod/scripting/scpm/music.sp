@@ -158,12 +158,14 @@ void Music_StartChase(int victim, int attacker, bool force = false)
 		bool infinite;
 		float time;
 		char buffer[PLATFORM_MAX_PATH];
+		float volume = 1.0;
 		if(Bosses_StartFunctionClient(attacker, "ChaseTheme"))
 		{
 			Call_PushCell(attacker);
 			Call_PushStringEx(buffer, sizeof(buffer), SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
 			Call_PushCell(victim);
 			Call_PushCellRef(infinite);
+			Call_PushFloatRef(volume);
 			Call_Finish(time);
 		}
 
@@ -171,13 +173,14 @@ void Music_StartChase(int victim, int attacker, bool force = false)
 		{
 			Music_ToggleMusic(victim, false, true);
 
-			EmitSoundToClient(victim, buffer, _, SNDCHAN_STATIC, SNDLEVEL_NONE);
+			EmitSoundToClient(victim, buffer, _, SNDCHAN_STATIC, SNDLEVEL_NONE, _, volume);
 			LastTheme[victim] = -1;
 
 			delete CurrentTheme[victim];
 			CurrentTheme[victim] = new DataPack();
 			CurrentTheme[victim].WriteString(buffer);
 			CurrentTheme[victim].WriteFloat(time);
+			CurrentTheme[victim].WriteFloat(volume);
 
 			if(infinite && time > 0.0)
 				MusicInfinite[victim] = true;
@@ -225,7 +228,8 @@ void Music_ToggleMusic(int client, bool startNew = true, bool stopExisting = fal
 				CurrentTheme[client].Reset();
 				CurrentTheme[client].ReadString(buffer, sizeof(buffer));
 				float time = CurrentTheme[client].ReadFloat();
-				EmitSoundToClient(client, buffer, _, SNDCHAN_STATIC, SNDLEVEL_NONE);
+				float volume = CurrentTheme[client].ReadFloat();
+				EmitSoundToClient(client, buffer, _, SNDCHAN_STATIC, SNDLEVEL_NONE, _, volume);
 
 				if(time > 0.0)
 					MusicTimer[client] = CreateTimer(time, MusicNextTimer, client);
@@ -293,6 +297,7 @@ void Music_ToggleMusic(int client, bool startNew = true, bool stopExisting = fal
 			CurrentTheme[client] = new DataPack();
 			CurrentTheme[client].WriteString(music.Filepath);
 			CurrentTheme[client].WriteFloat(music.Time);
+			CurrentTheme[client].WriteFloat(music.Volume * intensity);
 
 			if(intensity > 0.0 && music.Time > 0.0)
 				MusicTimer[client] = CreateTimer(music.Time / GetRandomFloat(intensity, 1.0), MusicNextTimer, client);

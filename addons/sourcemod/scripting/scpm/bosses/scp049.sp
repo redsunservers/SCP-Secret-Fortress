@@ -122,7 +122,7 @@ public void SCP049_Equip(int client, bool weapons)
 
 	if(weapons)
 	{
-		int entity = Items_GiveByIndex(client, 411);
+		int entity = Items_GiveCustom(client, 411, _, false);
 		if(entity != -1)
 		{
 			Attrib_Set(entity, "heal rate bonus", 0.5);
@@ -130,12 +130,9 @@ public void SCP049_Equip(int client, bool weapons)
 			Attrib_Set(entity, "overheal penalty", 0.0);
 			Attrib_Set(entity, "reduced_healing_from_medics", 0.1);
 			Attrib_Set(entity, "mod weapon blocks healing", 1.0);
-
-			SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", -1);
-			SetEntPropFloat(entity, Prop_Send, "m_flModelScale", 0.001);
 		}
 
-		entity = Items_GiveByIndex(client, 954, _, "tf_weapon_bonesaw");
+		entity = Items_GiveCustom(client, 954, "tf_weapon_bonesaw", false);
 		if(entity != -1)
 		{
 			Attrib_Set(entity, "crit mod disabled", 0.0);
@@ -146,9 +143,6 @@ public void SCP049_Equip(int client, bool weapons)
 			Attrib_Set(entity, "cancel falling damage", 1.0);
 			Attrib_Set(entity, "airblast vulnerability multiplier", 0.8);
 			Attrib_Set(entity, "mod weapon blocks healing", 1.0);
-
-			SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", -1);
-			SetEntPropFloat(entity, Prop_Send, "m_flModelScale", 0.001);
 
 			TF2U_SetPlayerActiveWeapon(client, entity);
 			
@@ -183,10 +177,22 @@ public void SCP049_Remove(int client)
 	Default_Remove(client);
 }
 
-public float SCP049_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int victim, bool &infinite)
+public float SCP049_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int victim, bool &infinite, float &volume)
 {
 	strcopy(theme, sizeof(theme), ChaseSound);
 	return 14.8;
+}
+
+public Action SCP049_DealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom, CritType &critType)
+{
+	if(Client(victim).ActionItem != -1 && Client(victim).ActionItem == SCP714_Index())
+	{
+		// Wearing SCP-714, resists plague
+		damage *= 0.01;
+		return Plugin_Changed;
+	}
+
+	return Plugin_Continue;
 }
 
 public Action SCP049_SoundHook(int client, int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH], int &entity, int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)

@@ -378,49 +378,7 @@ void Gamemode_UpdateListeners()
 				int speaker = c ? b : a;
 				int target = c ? a : b;
 
-				bool failed;
-
-				// Client muted
-				if(IsClientMuted(target, speaker))
-				{
-					failed = true;
-				}
-
-				// Forward
-				else if(ForwardOld_OnUpdateListenOverrides(target, speaker) != Plugin_Continue)
-				{
-					failed = true;
-				}
-
-				// Check for dead talk
-				else if(valid[speaker] < 2)
-				{
-					if(spec[speaker] != 2 && valid[target] > 1)
-						failed = true;
-				}
-
-				// Global talk
-				else if(Client(speaker).AllTalkTimeFor > GetGameTime())
-				{
-
-				}
-
-				// Bosses can always hear other bosses
-				else if(!Client(target).IsBoss && !spec[target])
-				{
-					if(Client(speaker).SilentTalk)
-						failed = true;
-					
-					if(distance > TALK_DISTANCE)
-					{
-						// If both players have a radio, can hear at any range
-						if(Client(speaker).ActionItem != Radio_Index() || Client(target).ActionItem != Radio_Index())
-							failed = true;
-					}
-				}
-				
-				Client(speaker).CanTalkTo(target, !failed);
-				SetListenOverride(target, speaker, failed ? Listen_No : Listen_Yes);
+				ProcessListening(target, speaker, distance, valid, spec);
 
 				// Either are dead, don't do LOS checks
 				if(valid[speaker] < 2 || valid[target] < 2)
@@ -428,99 +386,8 @@ void Gamemode_UpdateListeners()
 					Client(speaker).GlowingTo(target, false);
 					continue;
 				}
-				
-				// Fog distance
-				failed = (range[speaker] && range[speaker] < distance);
 
-				// Invis
-				if(TF2_IsPlayerInCondition(target, TFCond_Stealthed) ||
-				   TF2_IsPlayerInCondition(target, TFCond_StealthedUserBuffFade) ||
-				   TF2_IsPlayerInCondition(target, TFCond_Cloaked))
-					failed = true;
-				
-				// Glow Logic
-				if(!failed)
-				{
-					bool glow;
-
-					// Insanity
-					if(TF2_IsPlayerInCondition(target, TFCond_MarkedForDeath))
-					{
-						glow = true;
-					}
-					else if(Bosses_StartFunctionClient(speaker, "GlowTarget"))
-					{
-						Call_PushCell(speaker);
-						Call_PushCell(target);
-						Call_Finish(glow);
-					}
-
-					Client(target).GlowingTo(speaker, glow);
-					if(glow)
-						Client(target).NoTransmitTo(speaker, false);
-				}
-
-				if(!failed)
-				{
-					// "Looking" at our target
-					static float vec[3];
-					GetVectorAnglesTwoPoints(pos[speaker], pos[target], vec);
-					vec[0] = FixAngle(vec[0]);
-					vec[1] = FixAngle(vec[1]);
-
-					float diff = FAbs(ang[speaker][0] - vec[0]);
-					float min = LOOK_PITCH * Humans_GetAwareness(speaker);
-					if(diff > min && diff < (360.0 - min))
-						failed = true;
-					
-					if(!failed)
-					{
-						diff = FAbs(ang[speaker][1] - vec[1]);
-						min = LOOK_YAW * Humans_GetAwareness(speaker);
-						if(diff > min && diff < (360.0 - min))
-							failed = true;
-						
-						//PrintCenterText(speaker, "%f %f [0] %f [1] %f [%d]", vec[0], vec[1], FAbs(ang[speaker][0] - vec[0]), FAbs(ang[speaker][1] - vec[1]), failed ? 0 : 1);
-						
-						if(!failed)
-						{
-							TR_TraceRayFilter(pos[speaker], pos[target], CONTENTS_SOLID|CONTENTS_MOVEABLE|CONTENTS_MIST, RayType_EndPoint, Trace_WorldAndBrushes);
-							TR_GetEndPosition(vec);
-							if(pos[target][0] != vec[0] || pos[target][1] != vec[1] || pos[target][2] != vec[2])
-								failed = true;
-						}
-					}
-					/*else
-					{
-						PrintCenterText(speaker, "%f %f [0] %f [1] %f [0]", vec[0], vec[1], FAbs(ang[speaker][0] - vec[0]), FAbs(ang[speaker][1] - vec[1]));
-					}*/
-				}
-				
-				Client(speaker).LookingAt(target, !failed);
-				if(!failed)
-				{
-					//PrintToConsole(speaker, "DEBUG: Looking at %N", target);
-
-					if(team[speaker] == team[target])
-					{
-						alone[speaker] = false;
-						alone[target] = false;
-					}
-					else
-					{
-						if(Client(target).IsBoss)
-						{
-							Music_StartChase(speaker, target);
-						}
-						else if(Client(speaker).IsBoss)
-						{
-							Music_StartChase(speaker, speaker);
-
-							if(!Client(target).Minion)
-								Client(a).Stress += 3.0 * delta;
-						}
-					}
-				}
+				ProcessVisualize(target, speaker, distance, delta, alone, range, team, pos, ang);
 			}
 		}
 
@@ -532,6 +399,149 @@ void Gamemode_UpdateListeners()
 				Client(a).Stress += stress * delta;
 				if(Client(a).Stress < 0.0)
 					Client(a).Stress = 0.0;
+			}
+		}
+	}
+}
+
+static void ProcessListening(int target, int speaker, float distance, const int valid[MAXPLAYERS+1], const int spec[MAXPLAYERS+1])
+{
+	bool failed;
+
+	// Client muted
+	if(IsClientMuted(target, speaker))
+	{
+		failed = true;
+	}
+
+	// Forward
+	else if(ForwardOld_OnUpdateListenOverrides(target, speaker) != Plugin_Continue)
+	{
+		failed = true;
+	}
+
+	// Check for dead talk
+	else if(valid[speaker] < 2)
+	{
+		if(spec[speaker] != 2 && valid[target] > 1)
+			failed = true;
+	}
+
+	// Global talk
+	else if(Client(speaker).AllTalkTimeFor > GetGameTime())
+	{
+
+	}
+
+	// Bosses can always hear other bosses
+	else if(!Client(target).IsBoss && !spec[target])
+	{
+		if(Client(speaker).SilentTalk)
+			failed = true;
+		
+		if(distance > TALK_DISTANCE)
+		{
+			// If both players have a radio, can hear at any range
+			if(Client(speaker).ActionItem != Radio_Index() || Client(target).ActionItem != Radio_Index())
+				failed = true;
+		}
+	}
+	
+	Client(speaker).CanTalkTo(target, !failed);
+	SetListenOverride(target, speaker, failed ? Listen_No : Listen_Yes);
+}
+
+static void ProcessVisualize(int target, int speaker, float distance, float delta, bool[] alone, const float range[MAXPLAYERS+1], const int team[MAXPLAYERS+1], const float pos[MAXPLAYERS+1][3], const float ang[MAXPLAYERS+1][3])
+{
+	// Fog distance
+	bool failed = (range[speaker] && range[speaker] < distance);
+
+	// Invis
+	if(TF2_IsPlayerInCondition(target, TFCond_Stealthed) ||
+		TF2_IsPlayerInCondition(target, TFCond_StealthedUserBuffFade) ||
+		TF2_IsPlayerInCondition(target, TFCond_Cloaked))
+		failed = true;
+	
+	// Glow Logic
+	if(!failed)
+	{
+		bool glow;
+
+		// Insanity
+		if(TF2_IsPlayerInCondition(target, TFCond_MarkedForDeath))
+		{
+			glow = true;
+		}
+		else if(Bosses_StartFunctionClient(speaker, "GlowTarget"))
+		{
+			Call_PushCell(speaker);
+			Call_PushCell(target);
+			Call_Finish(glow);
+		}
+
+		Client(target).GlowingTo(speaker, glow);
+		if(glow)
+			Client(target).NoTransmitTo(speaker, false);
+	}
+
+	if(!failed)
+	{
+		// "Looking" at our target
+		static float vec[3];
+		GetVectorAnglesTwoPoints(pos[speaker], pos[target], vec);
+		vec[0] = FixAngle(vec[0]);
+		vec[1] = FixAngle(vec[1]);
+
+		float diff = FAbs(ang[speaker][0] - vec[0]);
+		float min = LOOK_PITCH * Humans_GetAwareness(speaker);
+		if(diff > min && diff < (360.0 - min))
+			failed = true;
+		
+		if(!failed)
+		{
+			diff = FAbs(ang[speaker][1] - vec[1]);
+			min = LOOK_YAW * Humans_GetAwareness(speaker);
+			if(diff > min && diff < (360.0 - min))
+				failed = true;
+			
+			//PrintCenterText(speaker, "%f %f [0] %f [1] %f [%d]", vec[0], vec[1], FAbs(ang[speaker][0] - vec[0]), FAbs(ang[speaker][1] - vec[1]), failed ? 0 : 1);
+			
+			if(!failed)
+			{
+				TR_TraceRayFilter(pos[speaker], pos[target], CONTENTS_SOLID|CONTENTS_MOVEABLE|CONTENTS_MIST, RayType_EndPoint, Trace_WorldAndBrushes);
+				TR_GetEndPosition(vec);
+				if(pos[target][0] != vec[0] || pos[target][1] != vec[1] || pos[target][2] != vec[2])
+					failed = true;
+			}
+		}
+		/*else
+		{
+			PrintCenterText(speaker, "%f %f [0] %f [1] %f [0]", vec[0], vec[1], FAbs(ang[speaker][0] - vec[0]), FAbs(ang[speaker][1] - vec[1]));
+		}*/
+	}
+	
+	Client(speaker).LookingAt(target, !failed);
+	if(!failed)
+	{
+		//PrintToConsole(speaker, "DEBUG: Looking at %N", target);
+
+		if(team[speaker] == team[target])
+		{
+			alone[speaker] = false;
+			alone[target] = false;
+		}
+		else
+		{
+			if(Client(target).IsBoss)
+			{
+				Music_StartChase(speaker, target);
+			}
+			else if(Client(speaker).IsBoss)
+			{
+				Music_StartChase(speaker, speaker);
+
+				if(!Client(target).Minion)
+					Client(target).Stress += 3.0 * delta;
 			}
 		}
 	}
@@ -1107,8 +1117,30 @@ static void UpgradeMenu(int client, int slot = -1, bool force = false)
 				menu.ExitBackButton = true;
 			}
 		}
-		case 4:
+		case 4:	// Action Item
 		{
+			if(Client(client).ActionItem != -1)
+			{
+				Items_GetItemName(Client(client).ActionItem, buffer, sizeof(buffer));
+				menu.SetTitle("%t", buffer);
+
+				FormatEx(buffer, sizeof(buffer), "Very Fine");
+				menu.AddItem("4", buffer);
+
+				FormatEx(buffer, sizeof(buffer), "Fine");
+				menu.AddItem("4", buffer);
+
+				FormatEx(buffer, sizeof(buffer), "1:1");
+				menu.AddItem("4", buffer);
+
+				FormatEx(buffer, sizeof(buffer), "Coarse");
+				menu.AddItem("4", buffer);
+
+				FormatEx(buffer, sizeof(buffer), "Rough");
+				menu.AddItem("4", buffer);
+
+				menu.ExitBackButton = true;
+			}
 		}
 		case 5:	// My Body
 		{
@@ -1344,9 +1376,24 @@ static int UpgradeMenuH(Menu menu, MenuAction action, int client, int choice)
 						}
 					}
 				}
-				case 4:
+				case 4:	// Action Item
 				{
+					if(Client(client).ActionItem != -1)
+					{
+						int item = Client(client).ActionItem;
 
+						if(Items_DropActionItem(client, false, true))
+						{
+							int index = Items_GetUpgradePath(item, choice);
+
+							if(index != -1)
+								Items_GiveActionItem(client, index);
+						}
+						else
+						{
+							PrintCenterText(client, "%T", "Can't Drop Item", client);
+						}
+					}
 				}
 				case 5:	// My Body
 				{
@@ -1373,7 +1420,7 @@ static int UpgradeMenuH(Menu menu, MenuAction action, int client, int choice)
 						}
 						case 2:	// 1:1 - Class Swap
 						{
-							TFClassType class = view_as<TFClassType>(GetURandomInt() % (TFClass_MAX - 1));
+							TFClassType class = view_as<TFClassType>((GetURandomInt() % (TFClass_MAX - 1) + 1));
 							if(TF2_GetPlayerClass(client) <= class)
 								class++;
 							

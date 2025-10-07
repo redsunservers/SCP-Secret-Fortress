@@ -124,7 +124,7 @@ public void SCP173_Equip(int client, bool weapons)
 
 	if(weapons)
 	{
-		int entity = Items_GiveByIndex(client, 195);
+		int entity = Items_GiveCustom(client, 593, "tf_weapon_shovel", false, false);
 		if(entity != -1)
 		{
 			Attrib_Set(entity, "fire rate bonus", 0.3);
@@ -178,12 +178,13 @@ public void SCP173_Remove(int client)
 	Default_Remove(client);
 }
 
-public float SCP173_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int victim, bool &infinite)
+public float SCP173_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int victim, bool &infinite, float &volume)
 {
 	if(client == victim)
 		return 0.0;
 	
 	strcopy(theme, sizeof(theme), ScareSound);
+	volume = 0.7;
 	return 30.0;
 }
 

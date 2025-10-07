@@ -65,6 +65,10 @@
 	{
 		"en"	"My Body"
 	}
+	"Can't Drop Item"
+	{
+		"en"	"I can't seem to drop this..."
+	}
 	"Boss Killed Message None"
 	{
 		"#format"	"{1:t}"
@@ -275,5 +279,25 @@
 	"SCP049 Controls"
 	{
 		"en"	"%%+reload%% INTERACT %%lastinv%% SWITCH WEAPONS"
+	}
+	"SCP427"
+	{
+		"en"	"SCP-427"
+	}
+	"SCP427 Message"
+	{
+		"en"	"It seems to be healing you, a bit too well..."
+	}
+	"SCP109"
+	{
+		"en"	"SCP-109"
+	}
+	"SCP714"
+	{
+		"en"	"SCP-714"
+	}
+	"SCP714 Message"
+	{
+		"en"	"It fits your finger perfectly..."
 	}
 }

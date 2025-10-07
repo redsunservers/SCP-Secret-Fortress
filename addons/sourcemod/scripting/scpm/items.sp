@@ -10,6 +10,9 @@ enum struct ActionInfo
 	char Model[PLATFORM_MAX_PATH];
 	int Skin;
 
+	int UpgradeGroup;
+	int UpgradeRank;
+
 	bool SetupKv(KeyValues kv, int index)
 	{
 		kv.GetSectionName(this.Prefix, sizeof(this.Prefix));
@@ -53,6 +56,9 @@ enum struct ActionInfo
 		kv.GetString("model", this.Model, sizeof(this.Model));
 		if(this.Model[0])
 			PrecacheModel(this.Model);
+		
+		this.UpgradeGroup = kv.GetNum("group");
+		this.UpgradeRank = kv.GetNum("rank");
 		
 		if(StartCustomFunction(this.Subplugin, this.Prefix, "Precache"))
 		{
@@ -491,7 +497,16 @@ int Items_GiveByIndex(int client, int itemIndex, bool tempWeapon = false, const 
 
 			if(type > 0)
 				SetEntProp(client, Prop_Data, "m_iAmmo", 0, _, type);
-
+			
+			char buffer[64];
+			GetEntityNetClass(entity, buffer, sizeof(buffer));
+			int offset = FindSendPropInfo(buffer, "m_iItemIDHigh");
+			
+			SetEntData(entity, offset - 8, 0);	// m_iItemID
+			SetEntData(entity, offset - 4, 0);	// m_iItemID
+			SetEntData(entity, offset, 0);		// m_iItemIDHigh
+			SetEntData(entity, offset + 4, 0);	// m_iItemIDLow
+			
 			SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", true);
 			EquipPlayerWeapon(client, entity);
 
@@ -505,11 +520,97 @@ int Items_GiveByIndex(int client, int itemIndex, bool tempWeapon = false, const 
 
 	if(!Client(client).NoViewModel)
 		TF2_SetPlayerClass(client, current, false, false);
+	
+	Event event = CreateEvent("localplayer_pickup_weapon", true);
+	event.FireToClient(client);
+	event.Cancel();
 
 	if(!Client(client).Boss)
 		ClientCommand(client, "playgamesound ui/item_heavy_gun_pickup.wav");
 
 	ForwardOld_OnWeapon(client, entity);
+	return entity;
+}
+
+// Gives a custom weapon, mainly for SCPs, deletes the weapon in the existing slot
+int Items_GiveCustom(int client, int itemIndex, const char[] forceClassname = "", bool visible = true, bool attribs = true)
+{
+	char classname[64];
+	
+	if(forceClassname[0])
+	{
+		strcopy(classname, sizeof(classname), forceClassname);
+	}
+	else
+	{
+		TF2Econ_GetItemClassName(itemIndex, classname, sizeof(classname));
+	}
+
+	// Force to soldier shovel
+	if(StrContains(classname, "saxxy", false) != -1)
+		strcopy(classname, sizeof(classname), "tf_weapon_shovel");
+	
+	// Force to soldier shotgun
+	if(StrContains(classname, "tf_weapon_shotgun", false) != -1)
+		strcopy(classname, sizeof(classname), "tf_weapon_shotgun_soldier");
+
+	// Remove anything in our current slot
+	int slot = TF2_GetClassnameSlot(classname);
+	if(slot != -1)
+	{
+		slot = GetPlayerWeaponSlot(client, slot);
+		if(slot != -1)
+			TF2_RemoveItem(client, slot);
+	}
+
+	TFClassType current = TF2_GetPlayerClass(client);
+	TFClassType class = TF2_GetWeaponClass(itemIndex, current);
+
+	if(!Client(client).NoViewModel)
+		TF2_SetPlayerClass(client, class, false, false);
+
+	int entity = CreateEntityByName(classname);
+	if(entity != -1)
+	{
+		SetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex", itemIndex);
+		SetEntProp(entity, Prop_Send, "m_bOnlyIterateItemViewAttributes", !attribs);
+		SetEntProp(entity, Prop_Send, "m_bInitialized", true);
+		SetEntProp(entity, Prop_Send, "m_iEntityQuality", 6);
+		SetEntProp(entity, Prop_Send, "m_iEntityLevel", 1);
+
+		DispatchSpawn(entity);
+
+		if(visible)
+		{
+			char buffer[64];
+			GetEntityNetClass(entity, buffer, sizeof(buffer));
+			int offset = FindSendPropInfo(buffer, "m_iItemIDHigh");
+			
+			SetEntData(entity, offset - 8, 0);	// m_iItemID
+			SetEntData(entity, offset - 4, 0);	// m_iItemID
+			SetEntData(entity, offset, 0);		// m_iItemIDHigh
+			SetEntData(entity, offset + 4, 0);	// m_iItemIDLow
+			
+			SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", true);
+		}
+		else
+		{
+			SetEntityRenderMode(entity, RENDER_ENVIRONMENTAL);
+		}
+
+		EquipPlayerWeapon(client, entity);
+		TF2U_SetPlayerActiveWeapon(client, entity);
+
+		SetEntProp(entity, Prop_Send, "m_iAccountID", GetSteamAccountID(client, false));
+	}
+
+	if(!Client(client).NoViewModel)
+		TF2_SetPlayerClass(client, current, false, false);
+	
+	Event event = CreateEvent("localplayer_pickup_weapon", true);
+	event.FireToClient(client);
+	event.Cancel();
+
 	return entity;
 }
 
@@ -777,7 +878,8 @@ void Items_GiveActionItem(int client, int itemIndex)
 
 bool Items_UseActionItem(int client)
 {
-	Client(client).LastNoiseAt = GetGameTime();
+	float gameTime = GetGameTime();
+	Client(client).LastNoiseAt = gameTime;
 	
 	if(Bosses_StartFunctionClient(client, "ActionButton"))
 	{
@@ -788,6 +890,12 @@ bool Items_UseActionItem(int client)
 	
 	if(Client(client).ActionItem == -1)
 		return false;
+
+	if(Client(client).ActionCooldownFor > gameTime)
+	{
+		ClientCommand(client, "playgamesound player/suit_denydevice.wav");
+		return false;
+	}
 	
 	bool result = true;
 	if(StartItemFunctionByIndex(Client(client).ActionItem, "Use"))
@@ -803,7 +911,7 @@ bool Items_UseActionItem(int client)
 	return true;
 }
 
-bool Items_DropActionItem(int client, bool death)
+bool Items_DropActionItem(int client, bool death, bool voided = false)
 {
 	if(Client(client).ActionItem == -1)
 		return false;
@@ -818,10 +926,14 @@ bool Items_DropActionItem(int client, bool death)
 
 	if(result)
 	{
-		float pos[3], ang[3];
-		GetClientEyePosition(client, pos);
-		GetClientEyeAngles(client, ang);
-		Items_DropByIndex(client, Client(client).ActionItem, pos, ang, death);
+		if(!voided)
+		{
+			float pos[3], ang[3];
+			GetClientEyePosition(client, pos);
+			GetClientEyeAngles(client, ang);
+			Items_DropByIndex(client, Client(client).ActionItem, pos, ang, death);
+		}
+
 		Client(client).ActionItem = -1;
 	}
 	
@@ -837,6 +949,32 @@ stock bool Items_GetItemName(int itemIndex, char[] name, int length)
 	
 	strcopy(name, length, action.Prefix);
 	return true;
+}
+
+Action Items_PlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
+{
+	Action action;
+	
+	if(Client(client).ActionItem != -1)
+	{
+		if(StartItemFunctionByIndex(client, "PlayerRunCmd"))
+		{
+			Call_PushCell(client);
+			Call_PushCellRef(buttons);
+			Call_PushCellRef(impulse);
+			Call_PushArrayEx(vel, sizeof(vel), SM_PARAM_COPYBACK);
+			Call_PushArrayEx(angles, sizeof(angles), SM_PARAM_COPYBACK);
+			Call_PushCellRef(weapon);
+			Call_PushCellRef(subtype);
+			Call_PushCellRef(cmdnum);
+			Call_PushCellRef(tickcount);
+			Call_PushCellRef(seed);
+			Call_PushArrayEx(mouse, sizeof(mouse), SM_PARAM_COPYBACK);
+			Call_Finish(action);
+		}
+	}
+	
+	return action;
 }
 
 // 4: Rough, 3: Coarse, 2: 1:1, 1: Fine, 0: Very Fine
@@ -913,6 +1051,59 @@ int Items_GetUpgradePath(int itemIndex, int type)
 		}
 
 		return -1;
+	}
+	else if(action.UpgradeGroup)
+	{
+		ActionInfo subAction;
+		int length = ActionList.Length;
+		for(int i; i < length; i++)
+		{
+			ActionList.GetArray(i, subAction);
+
+			switch(type)
+			{
+				case 4:	// Rough
+				{
+					if(action.UpgradeRank > subAction.UpgradeRank)
+					{
+						if(!(GetURandomInt() % 3))
+							return subAction.Index;
+					}
+				}
+				case 3:	// Coarse
+				{
+					if(action.UpgradeGroup == subAction.UpgradeGroup && action.UpgradeRank > subAction.UpgradeRank)
+					{
+						if(GetURandomInt() % 3)
+							return subAction.Index;
+					}
+				}
+				case 2:	// 1:1
+				{
+					if(action.UpgradeGroup == subAction.UpgradeGroup && action.UpgradeRank == subAction.UpgradeRank)
+					{
+						if(GetURandomInt() % 3)
+							return subAction.Index;
+					}
+				}
+				case 1:	// Fine
+				{
+					if(action.UpgradeGroup == subAction.UpgradeGroup && action.UpgradeRank < subAction.UpgradeRank)
+					{
+						if(GetURandomInt() % 3)
+							return subAction.Index;
+					}
+				}
+				case 0:	// Very Fine
+				{
+					if(action.UpgradeRank < subAction.UpgradeRank)
+					{
+						if(!(GetURandomInt() % 3))
+							return subAction.Index;
+					}
+				}
+			}
+		}
 	}
 
 	return -1;

@@ -141,7 +141,7 @@ public void SCP096_Remove(int client)
 	}
 }
 
-public float SCP096_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int victim, bool &infinite)
+public float SCP096_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int victim, bool &infinite, float &volume)
 {
 	if(client != victim && !IsMarked[victim])
 	{
@@ -178,8 +178,9 @@ public Action SCP096_DealDamage(int client, int victim, int &inflictor, float &d
 		return Plugin_Handled;
 	}
 	
-	Attrib_Set(victim, "bombinomicon effect on death", 1.0, 4.0);
-	return Plugin_Continue;
+	damagetype &= ~DMG_NEVERGIB;
+	damagetype |= DMG_BLAST;
+	return Plugin_Changed;
 }
 
 public Action SCP096_PlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
@@ -222,7 +223,7 @@ public Action SCP096_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 
 				TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 
-				entity = Items_GiveByIndex(client, 195, _, "tf_weapon_sword");
+				entity = Items_GiveCustom(client, 310, "tf_weapon_shovel", false, false);
 				if(entity != -1)
 				{
 					Attrib_Set(entity, "damage bonus", 4.0);
@@ -320,7 +321,7 @@ public bool SCP096_GlowTarget(int client, int target)
 
 static void GiveDefaultMelee(int client)
 {
-	int entity = Items_GiveByIndex(client, 1123);
+	int entity = Items_GiveCustom(client, 1123, _, false);
 	if(entity != -1)
 	{
 		Attrib_Set(entity, "damage penalty", 0.0);
@@ -330,9 +331,6 @@ static void GiveDefaultMelee(int client)
 		Attrib_Set(entity, "mod weapon blocks healing", 1.0);
 
 		SetEntPropFloat(entity, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + 999.9);
-
-		SetEntProp(entity, Prop_Send, "m_iWorldModelIndex", -1);
-		SetEntPropFloat(entity, Prop_Send, "m_flModelScale", 0.001);
 
 		TF2U_SetPlayerActiveWeapon(client, entity);
 

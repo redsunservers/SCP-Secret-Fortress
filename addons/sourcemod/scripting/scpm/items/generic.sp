@@ -54,7 +54,7 @@ public bool SCP500_Use(int client)
 	Client(client).SprintPower = 100.0;
 	SetEntityHealth(client, 300);
 	ClientCommand(client, "playgamesound items/medshot4.wav");
-	return false;
+	return true;
 }
 
 public bool SCP207_Use(int client)
@@ -64,6 +64,7 @@ public bool SCP207_Use(int client)
 		Client(client).Stress += 50.0;
 		ApplyHealEvent(client, -5);
 		
+		Client(client).ActionCooldownFor = GetGameTime() + 5.0;
 		Client(client).SprintPower += 50.0;
 		ClientCommand(client, "playgamesound player/pl_scout_dodge_can_drink.wav");
 	}
@@ -81,6 +82,7 @@ public bool SCP268_Use(int client)
 		Client(client).Stress += 100.0;
 		ApplyHealEvent(client, -10);
 		
+		Client(client).ActionCooldownFor = GetGameTime() + 20.0;
 		TF2_AddCondition(client, TFCond_Stealthed, 20.0);
 		ClientCommand(client, "playgamesound misc/halloween/spell_stealth.wav");
 	}
@@ -88,5 +90,16 @@ public bool SCP268_Use(int client)
 	{
 		ClientCommand(client, "playgamesound player/suit_denydevice.wav");
 	}
+	return false;
+}
+
+public bool SCP109_Use(int client)
+{
+	Client(client).ActionCooldownFor = GetGameTime() + 5.0;
+
+	if(Client(client).SprintPower < 90.0)
+		Client(client).SprintPower += 10.0;
+	
+	ClientCommand(client, "playgamesound player/pl_scout_dodge_can_drink.wav");
 	return false;
 }

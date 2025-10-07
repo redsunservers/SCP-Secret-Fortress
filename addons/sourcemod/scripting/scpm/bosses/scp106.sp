@@ -84,24 +84,8 @@ public void SCP106_Equip(int client, bool weapons)
 
 	if(weapons)
 	{
-		int entity = Items_GiveByIndex(client, 195);
-		if(entity != -1)
-		{
-			Attrib_Set(entity, "damage penalty", 0.77);
-			Attrib_Set(entity, "crit mod disabled", 0.0);
-			Attrib_Set(entity, "max health additive bonus", 800.0);
-			Attrib_Set(entity, "move speed penalty", 0.85);
-			Attrib_Set(entity, "dmg taken from crit reduced", 0.0);
-			Attrib_Set(entity, "dmg taken from bullets reduced", 0.2);
-			Attrib_Set(entity, "damage force reduction", 0.4);
-			Attrib_Set(entity, "cancel falling damage", 1.0);
-			Attrib_Set(entity, "airblast vulnerability multiplier", 0.4);
-			Attrib_Set(entity, "mod weapon blocks healing", 1.0);
-
-			TF2U_SetPlayerActiveWeapon(client, entity);
-
-			SetEntityHealth(client, 1000);
-		}
+		GiveDefaultMelee(client);
+		SetEntityHealth(client, 1000);
 
 		ViewModel_Create(client, ViewModel, "a_fists_idle_02");
 		ViewModel_SetAnimation(client, "fists_draw");
@@ -119,6 +103,9 @@ public void SCP106_Remove(int client)
 {
 	SetEntityMoveType(client, MOVETYPE_WALK);
 	Default_Remove(client);
+
+	SetVariantInt(0);
+	AcceptEntityInput(client, "SetForcedTauntCam");
 
 	if(NoclipHooked)
 	{
@@ -142,7 +129,7 @@ public void SCP106_Remove(int client)
 	}
 }
 
-public float SCP106_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int victim, bool &infinite)
+public float SCP106_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int victim, bool &infinite, float &volume)
 {
 	strcopy(theme, sizeof(theme), ChaseSound);
 	return 30.8;
@@ -197,6 +184,9 @@ public Action SCP106_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 			pos[2] = HoverPosition[client];
 			TeleportEntity(client, pos);
 		}
+
+		if(buttons & IN_ATTACK)
+			Client(client).ControlProgress = 0;
 	}
 	else
 	{
@@ -234,6 +224,14 @@ public void SCP106_ActionButton(int client)
 			TeleportEntity(client, pos);
 			SetEntityMoveType(client, MOVETYPE_WALK);
 
+			SetVariantInt(0);
+			AcceptEntityInput(client, "SetForcedTauntCam");
+			
+			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
+			GiveDefaultMelee(client);
+			ViewModel_Create(client, ViewModel, "a_fists_idle_02");
+			ViewModel_SetAnimation(client, "fists_draw");
+
 			PrintCenterText(client, "");
 			ClientCommand(client, "playgamesound common/wpn_hudoff.wav");
 		}
@@ -246,6 +244,28 @@ public void SCP106_ActionButton(int client)
 	else if(GetEntityFlags(client) & FL_ONGROUND)
 	{
 		SetEntityMoveType(client, MOVETYPE_NOCLIP);
+		ViewModel_Destroy(client);
+		
+		int entity = Items_GiveCustom(client, 1123, _, false);
+		if(entity != -1)
+		{
+			Attrib_Set(entity, "damage penalty", 0.0);
+			Attrib_Set(entity, "max health additive bonus", 800.0);
+			Attrib_Set(entity, "move speed penalty", 0.85);
+			Attrib_Set(entity, "dmg taken from crit reduced", 0.0);
+			Attrib_Set(entity, "dmg taken from bullets reduced", 0.2);
+			Attrib_Set(entity, "damage force reduction", 0.0);
+			Attrib_Set(entity, "cancel falling damage", 1.0);
+			Attrib_Set(entity, "airblast vulnerability multiplier", 0.0);
+			Attrib_Set(entity, "mod weapon blocks healing", 1.0);
+
+			SetEntPropFloat(entity, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + 999.9);
+
+			TF2U_SetPlayerActiveWeapon(client, entity);
+
+			SetVariantInt(1);
+			AcceptEntityInput(client, "SetForcedTauntCam");
+		}
 
 		PrintCenterText(client, "");
 		ClientCommand(client, "playgamesound common/wpn_moveselect.wav");
@@ -294,4 +314,24 @@ static bool GetSafePosition(int client, const float testPos[3], float result[3])
 		return true;
 	
 	return false;
+}
+
+static void GiveDefaultMelee(int client)
+{
+	int entity = Items_GiveCustom(client, 649, "tf_weapon_shovel", false, false);
+	if(entity != -1)
+	{
+		Attrib_Set(entity, "damage penalty", 0.77);
+		Attrib_Set(entity, "crit mod disabled", 0.0);
+		Attrib_Set(entity, "max health additive bonus", 800.0);
+		Attrib_Set(entity, "move speed penalty", 0.85);
+		Attrib_Set(entity, "dmg taken from crit reduced", 0.0);
+		Attrib_Set(entity, "dmg taken from bullets reduced", 0.2);
+		Attrib_Set(entity, "damage force reduction", 0.4);
+		Attrib_Set(entity, "cancel falling damage", 1.0);
+		Attrib_Set(entity, "airblast vulnerability multiplier", 0.4);
+		Attrib_Set(entity, "mod weapon blocks healing", 1.0);
+
+		TF2U_SetPlayerActiveWeapon(client, entity);
+	}
 }

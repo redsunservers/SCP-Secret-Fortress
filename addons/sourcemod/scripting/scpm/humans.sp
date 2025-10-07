@@ -535,6 +535,9 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 				Items_GetItemName(Client(client).ActionItem, buffer, sizeof(buffer));
 				Format(buffer, sizeof(buffer), "%t", "Action Item", buffer);
 			}
+
+			if(Client(client).ActionCooldownFor > gameTime)
+				Format(buffer, sizeof(buffer), "%s (%.1f)", buffer, Client(client).ActionCooldownFor - gameTime);
 			
 			// Keycard Level
 			Format(buffer, sizeof(buffer), "%s\n%t", buffer, "Keycard Status", Client(client).KeycardContain, Client(client).KeycardArmory, Client(client).KeycardExit);
@@ -686,7 +689,24 @@ float Humans_GetStressGain(int client, bool alone)
 	if(Client(client).IsBoss || Client(client).Minion)
 		return 0.0;
 	
-	return alone ? ClassStats[TF2_GetPlayerClass(client)].StressAlone : ClassStats[TF2_GetPlayerClass(client)].StressGroup;
+	float stress = alone ? ClassStats[TF2_GetPlayerClass(client)].StressAlone : ClassStats[TF2_GetPlayerClass(client)].StressGroup;
+
+	if(stress >= 0.0)
+	{
+		int team = GetClientTeam(client);
+		float lonely = float(PlayersAlive[team]) / float(MaxPlayersAlive[team]);
+
+		if(lonely < 0.2)
+		{
+			if(stress < 0.5)
+				stress = 0.5;
+			
+			// Extra stress loss when a majority of the server is 
+			stress *= 10.0 * (0.4 - lonely);
+		}
+	}
+
+	return stress;
 }
 
 void Humans_PlayReaction(int client, const char[] name)

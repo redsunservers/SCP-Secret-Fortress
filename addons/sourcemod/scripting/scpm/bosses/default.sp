@@ -139,7 +139,7 @@ public void Default_RelayTrigger(int client, const char[] name, int relay, int t
 }
 
 // The chase theme that will play to the victim
-public float Default_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int victim, bool &infinite)
+public float Default_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int victim, bool &infinite, float &volume)
 {
 	return 0.0;
 }

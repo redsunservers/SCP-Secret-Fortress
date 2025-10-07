@@ -66,6 +66,9 @@ static Action Events_InventoryApplication(Event event, const char[] name, bool d
 	int client = GetClientOfUserId(userid);
 	if(client)
 	{
+		SetVariantString(NULL_STRING);
+		AcceptEntityInput(client, "SetCustomModelWithClassAnimations");
+		
 		Human_InventoryApplication(client);
 
 		if(Client(client).IsBoss)
@@ -104,7 +107,7 @@ static Action Events_PlayerDeath(Event event, const char[] name, bool dontBroadc
 			}
 		}
 
-		int assister = GetClientOfUserId(event.GetInt("assist"));
+		int assister = GetClientOfUserId(event.GetInt("assister"));
 
 		for(int target = 1; target <= MaxClients; target++)
 		{

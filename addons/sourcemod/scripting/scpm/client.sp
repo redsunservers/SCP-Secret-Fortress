@@ -27,6 +27,7 @@ static float EscapeTimeAt[MAXPLAYERS+1];
 static float LastNoiseAt[MAXPLAYERS+1];
 static bool NoViewModel[MAXPLAYERS+1];
 static float KeyHintUpdateAt[MAXPLAYERS+1];
+static float ActionCooldownFor[MAXPLAYERS+1] = {-1, ...};
 
 methodmap Client
 {
@@ -391,6 +392,19 @@ methodmap Client
 			KeyHintUpdateAt[this.Index] = value;
 		}
 	}
+
+	// Game time
+	property float ActionCooldownFor
+	{
+		public get()
+		{
+			return ActionCooldownFor[this.Index];
+		}
+		public set(float value)
+		{
+			ActionCooldownFor[this.Index] = value;
+		}
+	}
 	
 	public void ResetByDeath()
 	{
@@ -411,6 +425,7 @@ methodmap Client
 		this.NoEscape = false;
 		this.LastNoiseAt = 0.0;
 		this.NoViewModel = false;
+		this.ActionCooldownFor = 0.0;
 	}
 	
 	public void ResetByRound()

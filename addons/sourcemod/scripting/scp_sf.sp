@@ -1,3 +1,12 @@
+/*
+    - SCP173 can't attack up close
+    - SCP173 eye logic broken af
+    - Custom/invis models leak over rounds
+    - 049 has visible passive melee
+    - 106 should no attack when noclip
+    - SCP049 animators despawn early
+    - "Looking At" code seems broken af
+*/
 #include <sourcemod>
 #include <sdkhooks>
 #include <tf2_stocks>
@@ -270,6 +279,8 @@ int MaxPlayersAlive[TFTeam_MAX];
 #include "scpm/items/generic.sp"
 #include "scpm/items/scp018.sp"
 #include "scpm/items/grenades.sp"
+#include "scpm/items/scp427.sp"
+#include "scpm/items/scp714.sp"
 
 #include "scpm/specials/secondmercs.sp"
 
@@ -387,7 +398,16 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 {
 	bool changed = Gamemode_PlayerRunCmd(client, buttons, impulse, vel);
 	Human_PlayerRunCmd(client, buttons, vel);
-	Action action = Bosses_PlayerRunCmd(client, buttons, impulse, vel, angles, weapon, subtype, cmdnum, tickcount, seed, mouse);
+	Action action;
+
+	if(Client(client).Boss == -1)
+	{
+		action = Items_PlayerRunCmd(client, buttons, impulse, vel, angles, weapon, subtype, cmdnum, tickcount, seed, mouse);
+	}
+	else
+	{
+		action = Bosses_PlayerRunCmd(client, buttons, impulse, vel, angles, weapon, subtype, cmdnum, tickcount, seed, mouse);
+	}
 
 	Client(client).LastGameTime = GetGameTime();
 
