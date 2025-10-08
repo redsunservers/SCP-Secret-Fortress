@@ -733,10 +733,9 @@ void SetActiveWeapon(int client, int entity)
 {
 	TF2Util_SetPlayerActiveWeapon(client, entity);
 	
-	/*static char buffer[36];
-	GetEntityClassname(entity, buffer, sizeof(buffer));
-	FakeClientCommand(client, "use %s", buffer);
-	SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", entity);*/
+	// We want to be able to switch to weapons out of ammo anyway
+	if (GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon") != entity)
+		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", entity);
 }
 
 stock void SetSpeed(int client, float speed)
