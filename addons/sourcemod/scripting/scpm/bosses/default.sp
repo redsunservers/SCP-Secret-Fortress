@@ -1,9 +1,10 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-// Required, precache, downloads
-public void Default_Precache(int index, BossData data)
+// Required, precache, downloads. Return if to allow this boss. Hidden if to not spawn on round start
+public bool Default_Precache(int index, BossData data, bool &hidden)
 {
+	return false;
 }
 
 // When unloaded such as map/plugin end

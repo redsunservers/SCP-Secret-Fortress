@@ -7,6 +7,7 @@ enum struct SpecialInfo
 	Handle Subplugin;
 
 	float Delay;
+	int BossScale;
 
 	void SetupKv(KeyValues kv, int index)
 	{
@@ -14,6 +15,7 @@ enum struct SpecialInfo
 		this.Subplugin = INVALID_HANDLE;
 
 		this.Delay = kv.GetFloat("delay", 300.0);
+		this.BossScale = kv.GetNum("scpscale", 10);
 
 		if(kv.JumpToKey("downloads"))
 		{
@@ -102,7 +104,7 @@ void Specials_MapEnd()
 	Specials_RoundEnd();
 }
 
-void Specials_PickNewRound()
+void Specials_PickNewRound(int &bossScale)
 {
 	Specials_RoundEnd();
 	
@@ -119,6 +121,10 @@ void Specials_PickNewRound()
 
 	SpecialInfo special;
 	SpecialList.GetArray(SpecialActive, special);
+	
+	if(special.BossScale)
+		bossScale = special.BossScale;
+
 	if(special.Delay > 0.0)
 		special.Delay *= GetRandomFloat(0.9, 1.1);
 

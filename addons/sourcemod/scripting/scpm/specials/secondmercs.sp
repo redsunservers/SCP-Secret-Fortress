@@ -29,7 +29,7 @@ public void MTFSpawn_Precache()
 	PrecacheModel("models/scp_new/guards/gibs/righthand.mdl");
 	PrecacheModel("models/scp_new/guards/gibs/torso.mdl");
 
-	CheckAndAddFileToDownloadsTable("scpm/misc/spawn_mtf.mp3");
+	CheckAndAddFileToDownloadsTable("sound/scpm/misc/spawn_mtf.mp3");
 }
 
 public void MTFSpawn_Event()

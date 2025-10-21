@@ -73,7 +73,10 @@ void Gamemode_RoundRespawn()
 	{
 		SortCustom2D(players, count, SortByQueuePoints);
 
-		int base = Cvar[SCPCount].IntValue;
+		int base = 8;
+
+		Specials_PickNewRound(base);
+
 		int bosses = count / base;
 
 		if(bosses == 0 && count > 2)
@@ -137,8 +140,6 @@ void Gamemode_RoundRespawn()
 		}
 
 		delete list;
-
-		Specials_PickNewRound();
 
 		delete BlinkTimer;
 		BlinkTimer = CreateTimer(0.1, GlobalBlinkTimer);
@@ -243,6 +244,8 @@ static Action GlobalBlinkTimer(Handle timer)
 		if(IsClientInGame(client) && !IsFakeClient(client) && GetClientTeam(client) == TFTeam_Humans && IsPlayerAlive(client))
 			humans[numHumans++] = client;
 	}
+
+	// TODO: Thirdperson Check
 	
 	BfWrite bf = view_as<BfWrite>(StartMessage("Fade", humans, numHumans));
 	bf.WriteShort(100);	// Duration (0.1s)
@@ -597,6 +600,8 @@ void Gamemode_CheckAlivePlayers(int exclude = 0, bool alive = true, bool resetMa
 
 static Action CheckWinConditionTimer(Handle timer, bool vip)
 {
+	WinnerTimer = null;
+
 	int winner = TFTeam_Unassigned;
 	int reason = WINREASON_STALEMATE;
 
@@ -1073,6 +1078,20 @@ static void UpgradeMenu(int client, int slot = -1, bool force = false)
 			if(Client(client).KeycardContain)
 			{
 				FormatEx(buffer, sizeof(buffer), "%t", "Keycard");
+				menu.AddItem("-1", buffer, ITEMDRAW_DEFAULT);
+			}
+			else
+			{
+				menu.AddItem("-1", NULL_STRING, ITEMDRAW_DISABLED);
+			}
+
+			menu.AddItem("-1", NULL_STRING, ITEMDRAW_DISABLED);
+
+			// 5 Action Item
+			if(Client(client).ActionItem != -1)
+			{
+				Items_GetItemName(Client(client).ActionItem, buffer, sizeof(buffer));
+				Format(buffer, sizeof(buffer), "%t", buffer);
 				menu.AddItem("-1", buffer, ITEMDRAW_DEFAULT);
 			}
 			else

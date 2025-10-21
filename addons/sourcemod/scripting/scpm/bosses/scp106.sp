@@ -28,7 +28,7 @@ static int BossIndex;
 static bool NoclipHooked;
 static float HoverPosition[MAXPLAYERS+1];
 
-public void SCP106_Precache(int index)
+public bool SCP106_Precache(int index)
 {
 	BossIndex = index;
 
@@ -36,6 +36,7 @@ public void SCP106_Precache(int index)
 	PrecacheModel(ViewModel);
 	PrecacheSound(ChaseSound);
 	MultiToDownloadsTable(Downloads, sizeof(Downloads));
+	return true;
 }
 
 public void SCP106_Create(int client)
@@ -282,6 +283,12 @@ public Action SCP106_CalcIsAttackCritical(int client, int weapon, const char[] w
 {
 	ViewModel_SetAnimation(client, (GetURandomInt() % 2) ? "attack1" : "attack2");
 	return Plugin_Continue;
+}
+
+public void SCP106_PlayerKilled(int client, int victim, bool fakeDeath)
+{
+	if(!fakeDeath)
+		Bosses_DisplayEntry(victim, "SCP106 Entry");
 }
 
 public void SCP106_RelayTrigger(int client, const char[] name, int relay, int target)

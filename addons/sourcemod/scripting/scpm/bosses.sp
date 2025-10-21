@@ -5,11 +5,13 @@ enum struct BossData
 {
 	char Prefix[32];
 	Handle Subplugin;
+	bool Pickable;
 
 	bool SetupKv(KeyValues kv, int index)
 	{
 		kv.GetSectionName(this.Prefix, sizeof(this.Prefix));
 		this.Subplugin = INVALID_HANDLE;
+		this.Pickable = true;
 
 		if(!TranslationPhraseExists(this.Prefix))
 		{
@@ -23,10 +25,14 @@ enum struct BossData
 			return false;
 		}
 
+		bool result;
+
 		Call_PushCell(index);
 		Call_PushArrayEx(this, sizeof(this), SM_PARAM_COPYBACK);
-		Call_Finish();
-		return true;
+		Call_PushCellRef(this.Pickable);
+		Call_Finish(result);
+		
+		return result;
 	}
 }
 
@@ -131,47 +137,72 @@ void Bosses_SetupConfig(KeyValues map)
 		kv = new KeyValues("Bosses");
 		kv.ImportFromFile(buffer);
 	}
-
-	int slots = kv.GetNum("maxloaded", 99);
 	
+	int bossIndex;
 	BossData data;
-	if(kv.JumpToKey("Enabled"))
+
+	if(kv.JumpToKey("Always"))
 	{
+		if(kv.GotoFirstSubKey())
+		{
+			do
+			{
+				if(data.SetupKv(kv, bossIndex))
+					bossIndex = BossList.PushArray(data) + 1;
+			}
+			while(kv.GotoNextKey());
+
+			kv.GoBack();
+		}
+
+		kv.GoBack();
+	}
+
+	if(kv.JumpToKey("Random"))
+	{
+		int slots = kv.GetNum("maxloaded", 99);
+		
 		int count = 1;
-		if(kv.GotoFirstSubKey(false))
+		if(kv.GotoFirstSubKey())
 		{
 			do
 			{
 				count++;
 			}
-			while(kv.GotoNextKey(false));
+			while(kv.GotoNextKey());
 
 			kv.GoBack();
 		}
 
-		PrintToServer("[SCP] Picking %d bosses out of %d", slots, count - 1);
+		PrintToServer("[SCP] Picking %d packs out of %d", slots, count - 1);
 
-		if(kv.GotoFirstSubKey(false))
+		if(kv.GotoFirstSubKey())
 		{
-			int index;
-
 			do
 			{
 				count--;
 				if(count > slots)
 				{
-					// Loops through and picks bosses to disable depending on our limit
+					// Loops through and picks packs to disable depending on our limit
 					if((GetURandomInt() % count) >= slots)
 						continue;
 				}
 				
-				if(data.SetupKv(kv, index))
+				if(kv.GotoFirstSubKey())
 				{
 					slots--;
-					index = BossList.PushArray(data) + 1;
+					
+					do
+					{
+						if(data.SetupKv(kv, bossIndex))
+							bossIndex = BossList.PushArray(data) + 1;
+					}
+					while(kv.GotoNextKey());
+
+					kv.GoBack();
 				}
 			}
-			while(kv.GotoNextKey(false));
+			while(kv.GotoNextKey());
 
 			kv.GoBack();
 		}
@@ -332,6 +363,44 @@ void Bosses_Remove(int client, bool regen = true)
 	}
 }
 
+void Bosses_DisplayEntry(int client, const char[] entry, bool delayed = true)
+{
+	DataPack pack;
+	CreateDataTimer(delayed ? 10.0 : 0.1, ShowEntryTimer, pack, TIMER_FLAG_NO_MAPCHANGE);
+	pack.WriteCell(GetClientUserId(client));
+	pack.WriteString(entry);
+}
+
+static Action ShowEntryTimer(Handle timer, DataPack pack)
+{
+	pack.Reset();
+	int client = GetClientOfUserId(pack.ReadCell());
+	if(client && !IsPlayerAlive(client) && GetClientMenu(client) == MenuSource_None)
+	{
+		char buffer[512];
+		pack.ReadString(buffer, sizeof(buffer));
+		Format(buffer, sizeof(buffer), "%T", buffer, client);
+
+		Panel panel = new Panel();
+		
+		panel.DrawText(buffer);
+
+		FormatEx(buffer, sizeof(buffer), "%T", "Exit", client);
+		panel.CurrentKey = 10;
+		panel.DrawItem(buffer);
+
+		panel.Send(client, EntryMenuH, 60);
+		delete panel;
+	}
+
+	return Plugin_Continue;
+}
+
+static int EntryMenuH(Menu menu, MenuAction action, int param1, int param2)
+{
+	return 0;
+}
+
 void Bosses_ClientDisconnect(int client)
 {
 	if(Client(client).IsBoss)
@@ -438,12 +507,15 @@ void Bosses_ConditionRemoved(int client, TFCond condition)
 // Delete the handle when done
 ArrayList Bosses_GetRandomList()
 {
+	BossData boss;
 	ArrayList list = new ArrayList();
 
 	int length = BossList.Length;
 	for(int i; i < length; i++)
 	{
-		list.Push(i);
+		BossList.GetArray(i, boss);
+		if(boss.Pickable)
+			list.Push(i);
 	}
 
 	list.Sort(Sort_Random, Sort_Integer);

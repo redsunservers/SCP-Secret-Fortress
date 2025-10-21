@@ -82,7 +82,7 @@ static float CutsceneFor[MAXPLAYERS+1];
 static int ModelRef[MAXPLAYERS+1] = {-1, ...};
 static bool PlayingWalk[MAXPLAYERS+1];
 
-public void SCP173_Precache()
+public bool SCP173_Precache()
 {
 	PrecacheModel(PlayerModel);
 	PrecacheModel(DeathModel);
@@ -91,6 +91,7 @@ public void SCP173_Precache()
 	PrecacheSound(DeathSound);
 	PrecacheSound(WalkSound);
 	MultiToDownloadsTable(Downloads, sizeof(Downloads));
+	return true;
 }
 
 public void SCP173_Create(int client)
@@ -369,6 +370,12 @@ public Action SCP173_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 	}
 
 	return Plugin_Continue;
+}
+
+public void SCP173_PlayerKilled(int client, int victim, bool fakeDeath)
+{
+	if(!fakeDeath)
+		Bosses_DisplayEntry(victim, "SCP173 Entry");
 }
 
 static Action PropSetTransmit(int entity, int target)

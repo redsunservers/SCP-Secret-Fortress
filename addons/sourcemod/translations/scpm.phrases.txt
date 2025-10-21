@@ -196,6 +196,10 @@
 	{
 		"en"	"SCP-018"
 	}
+	"SCP018 Entry"
+	{
+		"en"	"SCP-018\nObject Class: Euclid\nDescription: SCP-018 has the appearance of a Super Ball made in 1969.\nSCP-018 is able to bounce with over two hundred percent efficiency.\nThe ball will soon become a dangerous projectile."
+	}
 	"FlashGrenade"
 	{
 		"en"	"Flash Grenade"
@@ -272,6 +276,10 @@
 	{
 		"en"	"SCP-049"
 	}
+	"SCP049A"
+	{
+		"en"	"SCP-049-1"
+	}
 	"SCP049 Entry"
 	{
 		"en"	"SCP-049\nObject Class: Euclid\nSCP-049 is a humanoid entity which bears the appearance of a medieval plague doctor.\nSCP-049 is capable of causing all biological functions of an organism to cease through direct skin contact.\nSCP-049-2 instances are reanimated corpses that have been operated on by SCP-049."
@@ -284,9 +292,21 @@
 	{
 		"en"	"SCP-427"
 	}
-	"SCP427 Message"
+	"SCP427A"
 	{
-		"en"	"It seems to be healing you, a bit too well..."
+		"en"	"SCP-427-1"
+	}
+	"SCP427 Entry"
+	{
+		"en"	"SCP-427\nObject Class: Safe*\nSCP-427 is a small, spherical, ornately carved locket.\nWhen SCP-427 is opened and exposed to biological tissue, it rapidly regenerates cellular damage.\nHowever, long-term exposure produces a significant health hazard."
+	}
+	"SCP427 Open"
+	{
+		"en"	"You opened the locket..."
+	}
+	"SCP427 Close"
+	{
+		"en"	"You closed the locket..."
 	}
 	"SCP109"
 	{
@@ -296,8 +316,20 @@
 	{
 		"en"	"SCP-714"
 	}
-	"SCP714 Message"
+	"SCP714 On"
 	{
 		"en"	"It fits your finger perfectly..."
+	}
+	"SCP714 Off"
+	{
+		"en"	"You took off the ring..."
+	}
+	"FREAK008"
+	{
+		"en"	"FREAK-008"
+	}
+	"FREAK008 Entry"
+	{
+		"en"	"FREAK-008\nClass: Soldier\nNickname: Painis Cupcake\nFREAK-008 takes the form of a RED Soldier and while moving he makes shotgun-cocking noises.\nDue to his cannibalistic lifestyle, FREAK-008 has brutal force as one of his primary combat abilities.\nThe loud shotgun-cocking noises he emits while moving are a warning to any potential victims in his vicinity."
 	}
 }

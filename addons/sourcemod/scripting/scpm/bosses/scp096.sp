@@ -33,7 +33,7 @@ static int BossIndex;
 static bool IsMarked[MAXPLAYERS+1];
 static int SCPMode[MAXPLAYERS+1];
 
-public void SCP096_Precache(int index)
+public bool SCP096_Precache(int index)
 {
 	BossIndex = index;
 	
@@ -44,6 +44,7 @@ public void SCP096_Precache(int index)
 	PrecacheSound(ScareSound);
 	PrecacheSound(RageSound);
 	MultiToDownloadsTable(Downloads, sizeof(Downloads));
+	return true;
 }
 
 public void SCP096_Create(int client)
@@ -303,6 +304,12 @@ public Action SCP096_CalcIsAttackCritical(int client, int weapon, const char[] w
 {
 	ViewModel_SetAnimation(client, (GetURandomInt() % 2) ? "attack1" : "attack2");
 	return Plugin_Continue;
+}
+
+public void SCP096_PlayerKilled(int client, int victim, bool fakeDeath)
+{
+	if(!fakeDeath)
+		Bosses_DisplayEntry(victim, "SCP096 Entry");
 }
 
 public bool SCP096_GlowTarget(int client, int target)

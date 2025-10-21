@@ -227,11 +227,12 @@ enum
 {
 	Version,
 	
-	SCPCount,
+	//SCPCount,
 	
 	AllowSpectators,
 	Gravity,
 	NoclipSpeed,
+	RollAngle,
 	
 	Cvar_MAX
 }

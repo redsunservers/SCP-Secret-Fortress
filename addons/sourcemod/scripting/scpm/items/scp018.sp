@@ -64,6 +64,8 @@ static Action Timer_SCP018Damage(Handle timer, DataPack pack)
 		int thrower = pack.ReadCell();
 		float damage = pack.ReadFloat();
 		SDKHooks_TakeDamage(client, entindex, thrower, damage, DMG_CLUB, .bypassHooks = false);
+		if(GetClientHealth(client) < 1)
+			Bosses_DisplayEntry(client, "SCP018 Entry");
 	}
 
 	return Plugin_Continue;

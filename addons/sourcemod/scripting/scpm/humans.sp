@@ -205,6 +205,7 @@ void Human_InventoryApplication(int client)
 	Attrib_Remove(client, "major move speed bonus");
 	Attrib_Remove(client, "maxammo primary reduced");
 	Attrib_Remove(client, "maxammo secondary reduced");
+	Cvar[RollAngle].ReplicateToClient(client, "1.5");
 
 	int hud;
 	if(!Client(client).IsBoss && !Client(client).Minion)
@@ -508,8 +509,18 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 						green = 32;
 				}
 
-				SetHudTextParams(0.07, 0.83, 0.3, red > 254 ? green : 255, 255, red > 254 ? green : red, 255);
+				SetHudTextParams(0.07, 0.83, 0.3, red > 254 ? green : 255, red > 254 ? 255 : red, red > 254 ? green : red, 255);
 				ShowSyncHudText(client, StatusHud, buffer);
+
+				float rolling = 1.5;
+				if(stress < 50)
+					rolling += (50 - stress) * 0.05;
+				
+				if(red < 255)
+					rolling += (255 - red) * 0.025;
+
+				FloatToString(rolling, buffer, sizeof(buffer));
+				Cvar[RollAngle].ReplicateToClient(client, buffer);
 			}
 		}
 		else if(FAbs(updateTime[client][1] - gameTime) > 0.2)
@@ -605,6 +616,8 @@ void Human_PlayerDeath(int client)
 			Client(target).Stress += ClassStats[TF2_GetPlayerClass(target)].StressDeath;
 		}
 	}
+
+	// TODO: SCP death menu
 }
 
 void Human_ConditionAdded(int client, TFCond cond)

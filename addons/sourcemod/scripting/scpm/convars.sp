@@ -17,13 +17,12 @@ void ConVar_PluginStart()
 {
 	Cvar[Version] = CreateConVar("scp_version", PLUGIN_VERSION_FULL, "SCP Version", FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	
-	Cvar[SCPCount] = CreateConVar("scp_game_bosses", "8", "How many players for every boss spawn", _, true, 1.0);
-	
 	AutoExecConfig(false, "scpm");
 	
 	Cvar[AllowSpectators] = FindConVar("mp_allowspectators");
 	Cvar[Gravity] = FindConVar("sv_gravity");
 	Cvar[NoclipSpeed] = FindConVar("sv_noclipspeed");
+	Cvar[RollAngle] = FindConVar("sv_rollangle");
 	
 	CvarList = new ArrayList(sizeof(CvarInfo));
 

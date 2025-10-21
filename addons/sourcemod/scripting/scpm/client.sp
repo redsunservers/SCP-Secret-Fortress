@@ -27,7 +27,7 @@ static float EscapeTimeAt[MAXPLAYERS+1];
 static float LastNoiseAt[MAXPLAYERS+1];
 static bool NoViewModel[MAXPLAYERS+1];
 static float KeyHintUpdateAt[MAXPLAYERS+1];
-static float ActionCooldownFor[MAXPLAYERS+1] = {-1, ...};
+static float ActionCooldownFor[MAXPLAYERS+1];
 
 methodmap Client
 {

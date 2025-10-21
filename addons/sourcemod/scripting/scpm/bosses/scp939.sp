@@ -26,13 +26,14 @@ static int PlayerModelIndex;
 static int PackLeader;
 static Handle PackTimer;
 
-public void SCP939_Precache(int index)
+public bool SCP939_Precache(int index)
 {
 	BossIndex = index;
 	
 	PlayerModelIndex = PrecacheModel(PlayerModel);
 	PrecacheSound(ChaseSound);
 	MultiToDownloadsTable(Downloads, sizeof(Downloads));
+	return true;
 }
 
 public void SCP939_Create(int client)
@@ -203,6 +204,12 @@ public bool SCP939_GlowTarget(int client, int target)
 		return true;
 	
 	return false;
+}
+
+public void SCP939_PlayerKilled(int client, int victim, bool fakeDeath)
+{
+	if(!fakeDeath)
+		Bosses_DisplayEntry(victim, "SCP939 Entry");
 }
 
 static Action SpawnExtraDog(Handle timer)

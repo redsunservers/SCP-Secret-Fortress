@@ -69,7 +69,7 @@ static const char ChaseSound[] = "#scpm/scp049/chase.mp3";
 
 static int BossIndex;
 
-public void SCP049_Precache(int index)
+public bool SCP049_Precache(int index)
 {
 	BossIndex = index;
 
@@ -89,6 +89,7 @@ public void SCP049_Precache(int index)
 
 	// Assume all Revive Markers belong to 049 while active
 	HookEvent("revive_player_complete", RevivePlayerComplete);
+	return true;
 }
 
 public void SCP049_Unload()
@@ -185,7 +186,7 @@ public float SCP049_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int vi
 
 public Action SCP049_DealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom, CritType &critType)
 {
-	if(Client(victim).ActionItem != -1 && Client(victim).ActionItem == SCP714_Index())
+	if(SCP714_IsWearing(victim))
 	{
 		// Wearing SCP-714, resists plague
 		damage *= 0.01;
@@ -327,7 +328,10 @@ public Action SCP049_CalcIsAttackCritical(int client, int weapon, const char[] w
 public void SCP049_PlayerKilled(int client, int victim, bool fakeDeath)
 {
 	if(!fakeDeath)
+	{
 		SpawnMarker(victim, client);
+		Bosses_DisplayEntry(victim, "SCP049 Entry");
+	}
 }
 
 static void SpawnMarker(int victim, int client)
