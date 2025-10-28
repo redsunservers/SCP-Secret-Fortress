@@ -193,10 +193,6 @@ void Music_StartChase(int victim, int attacker, bool force = false)
 			
 			MusicEndAt[victim] = gameTime + time;
 		}
-		else
-		{
-			Music_ToggleMusic(victim, true, true);
-		}
 	}
 }
 
@@ -313,6 +309,31 @@ void Music_ToggleMusic(int client, bool startNew = true, bool stopExisting = fal
 		}
 
 		delete list;
+	}
+}
+
+void Music_StopSpecificTheme(const char[] theme, float time = 0.0)
+{
+	char buffer[PLATFORM_MAX_PATH];
+
+	for(int client = 1; client <= MaxClients; client++)
+	{
+		if(CurrentTheme[client] && IsClientInGame(client))
+		{
+			CurrentTheme[client].Reset();
+			CurrentTheme[client].ReadString(buffer, sizeof(buffer));
+
+			if(StrEqual(theme, buffer))
+			{
+				Music_ToggleMusic(client, time <= 0.0, true);
+
+				if(time > 0.0)
+				{
+					delete MusicTimer[client];
+					MusicTimer[client] = CreateTimer(time, MusicNextTimer, client);
+				}
+			}
+		}
 	}
 }
 

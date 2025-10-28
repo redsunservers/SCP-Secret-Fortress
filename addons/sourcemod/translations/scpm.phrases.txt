@@ -324,12 +324,37 @@
 	{
 		"en"	"You took off the ring..."
 	}
-	"FREAK008"
+	"PainisCupcake"
 	{
 		"en"	"FREAK-008"
 	}
-	"FREAK008 Entry"
+	"PainisCupcake Entry"
 	{
 		"en"	"FREAK-008\nClass: Soldier\nNickname: Painis Cupcake\nFREAK-008 takes the form of a RED Soldier and while moving he makes shotgun-cocking noises.\nDue to his cannibalistic lifestyle, FREAK-008 has brutal force as one of his primary combat abilities.\nThe loud shotgun-cocking noises he emits while moving are a warning to any potential victims in his vicinity."
+	}
+	"Blightcaller"
+	{
+		"en"	"FREAK-108"
+	}
+	"Blightcaller Entry"
+	{
+		"en"	"FREAK-108\nClass: Medic\nNickname: The Blightcaller\nFREAK-108 is a Biohazard Medic, alike a medieval Plague Doctor, which is furthered by his habit of spreading diseases.\nFREAK-108 has been known to distort anything electronic, causing them to emit loud static.\nWhen pursuing a chosen victim, he relies on telepathic illusions to make said victim hallucinate, most effective on victims with extreme stress."
+	}
+	"Blightcaller Controls"
+	{
+		"en"	"%%+reload%% INTERACT %%+use_action_slot_item%% UNSTABLE TELEPORT"
+	}
+	"Blightcaller Tele Early"
+	{
+		"#format"	"{1:d},{2:d}"
+		"en"		"Too soon ({1}/{2})..."
+	}
+	"Blightcaller Tele Duck"
+	{
+		"en"	"Ready, crouch to use..."
+	}
+	"Avoid Making Noise"
+	{
+		"en"	"Avoid making noise by crouching or staying still"
 	}
 }

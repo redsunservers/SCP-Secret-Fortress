@@ -209,20 +209,23 @@ static Action SDKHook_NormalSHook(int clients[MAXPLAYERS], int &numClients, char
 {
 	static bool InSoundHook;
 
-	if(!InSoundHook && entity > 0 && entity <= MaxClients && (channel == SNDCHAN_VOICE || (channel == SNDCHAN_STATIC && !StrContains(sample, "vo", false))))
+	if(!InSoundHook && entity > 0 && entity <= MaxClients)
 	{
 		int client = entity;
-		if(TF2_IsPlayerInCondition(entity, TFCond_Disguised))
+		if((channel == SNDCHAN_VOICE || (channel == SNDCHAN_STATIC && !StrContains(sample, "vo", false))))
 		{
-			for(int i; i < numClients; i++)
+			if(TF2_IsPlayerInCondition(entity, TFCond_Disguised))
 			{
-				if(clients[i] == entity)	// Get the sound from the Spy/enemies to avoid teammates hearing it
+				for(int i; i < numClients; i++)
 				{
-					client = GetEntPropEnt(entity, Prop_Send, "m_hDisguiseTarget");
-					if(client == -1 || view_as<TFClassType>(GetEntProp(entity, Prop_Send, "m_nDisguiseClass")) != TF2_GetPlayerClass(client))
-						client = entity;
-					
-					break;
+					if(clients[i] == entity)	// Get the sound from the Spy/enemies to avoid teammates hearing it
+					{
+						client = GetEntPropEnt(entity, Prop_Send, "m_hDisguiseTarget");
+						if(client == -1 || view_as<TFClassType>(GetEntProp(entity, Prop_Send, "m_nDisguiseClass")) != TF2_GetPlayerClass(client))
+							client = entity;
+						
+						break;
+					}
 				}
 			}
 		}

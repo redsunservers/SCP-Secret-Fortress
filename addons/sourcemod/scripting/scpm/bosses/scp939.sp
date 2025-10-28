@@ -134,6 +134,9 @@ public void SCP939_Remove(int client)
 
 public float SCP939_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int victim, bool &infinite, float &volume)
 {
+	if(client != victim)
+		ShowQuietTooltop(victim);
+	
 	strcopy(theme, sizeof(theme), ChaseSound);
 	return 15.9;
 }
@@ -260,4 +263,17 @@ static Action SpawnExtraDog(Handle timer)
 	Bosses_Create(choosen, BossIndex);
 	ClientCommand(choosen, "playgamesound ui/system_message_alert.wav");
 	return Plugin_Continue;
+}
+
+void ShowQuietTooltop(int client)
+{
+	if(!Client(client).QuietTooltip)
+	{
+		char buffer[64];
+		Format(buffer, sizeof(buffer), "%T", "Avoid Making Noise", client);
+		PrintKeyHintText(client, buffer);
+
+		Client(client).KeyHintUpdateAt = GetGameTime() + 10.0;
+		Client(client).QuietTooltip = true;
+	}
 }

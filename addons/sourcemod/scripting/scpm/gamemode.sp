@@ -471,7 +471,7 @@ static void ProcessVisualize(int target, int speaker, float distance, float delt
 		bool glow;
 
 		// Insanity
-		if(TF2_IsPlayerInCondition(target, TFCond_MarkedForDeath))
+		if(team[speaker] != team[target] && TF2_IsPlayerInCondition(target, TFCond_MarkedForDeath))
 		{
 			glow = true;
 		}

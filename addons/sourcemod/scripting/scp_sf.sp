@@ -1,12 +1,3 @@
-/*
-    - SCP173 can't attack up close
-    - SCP173 eye logic broken af
-    - Custom/invis models leak over rounds
-    - 049 has visible passive melee
-    - 106 should no attack when noclip
-    - SCP049 animators despawn early
-    - "Looking At" code seems broken af
-*/
 #include <sourcemod>
 #include <sdkhooks>
 #include <tf2_stocks>
@@ -275,6 +266,8 @@ int MaxPlayersAlive[TFTeam_MAX];
 #include "scpm/bosses/scp106.sp"
 #include "scpm/bosses/scp173.sp"
 #include "scpm/bosses/scp939.sp"
+#include "scpm/bosses/painiscupcake.sp"
+#include "scpm/bosses/blightcaller.sp"
 
 #include "scpm/items/keycards.sp"
 #include "scpm/items/generic.sp"

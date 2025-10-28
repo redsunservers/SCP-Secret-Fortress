@@ -61,9 +61,12 @@ static Action Bosses_MakeBossCmd(int client, int args)
 				special = Bosses_GetByName(buffer, false, client);
 			}
 		}
-		else
+		
+		if(special == -1)
 		{
-			special = GetURandomInt() % BossList.Length;
+			ArrayList list = Bosses_GetRandomList();
+			special = list.Get(0);
+			delete list;
 		}
 		
 		GetCmdArg(1, buffer, sizeof(buffer));
@@ -188,7 +191,7 @@ void Bosses_SetupConfig(KeyValues map)
 						continue;
 				}
 				
-				if(kv.GotoFirstSubKey())
+				if(kv.GotoFirstSubKey(false))
 				{
 					slots--;
 					
@@ -197,7 +200,7 @@ void Bosses_SetupConfig(KeyValues map)
 						if(data.SetupKv(kv, bossIndex))
 							bossIndex = BossList.PushArray(data) + 1;
 					}
-					while(kv.GotoNextKey());
+					while(kv.GotoNextKey(false));
 
 					kv.GoBack();
 				}
@@ -384,6 +387,7 @@ static Action ShowEntryTimer(Handle timer, DataPack pack)
 		Panel panel = new Panel();
 		
 		panel.DrawText(buffer);
+		panel.DrawText(" ");
 
 		FormatEx(buffer, sizeof(buffer), "%T", "Exit", client);
 		panel.CurrentKey = 10;

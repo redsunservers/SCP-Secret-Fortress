@@ -24,10 +24,10 @@ static const char Downloads[][] =
 
 static const char PlayerModel[] = "models/scp_sf/096/scp096_2.mdl";
 static const char ViewModel[] = "models/scp_sf/096/scp096_hands_7.mdl";
-static const char AmbientSound[] = "#scpm/scp096/ambient.mp3";
+static const char AmbientSound[] = "scpm/scp096/ambient.mp3";
 static const char ChaseSound[] = "#scpm/scp096/chase.mp3";
 static const char ScareSound[] = "#scpm/scp096/scare.mp3";
-static const char RageSound[] = "#scpm/scp096/rage.mp3";
+static const char RageSound[] = "scpm/scp096/rage.mp3";
 static int BossIndex;
 
 static bool IsMarked[MAXPLAYERS+1];
@@ -157,6 +157,9 @@ public float SCP096_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int vi
 
 public Action SCP096_SoundHook(int client, int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH], int &entity, int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
 {
+	if(StrContains(sample, "pl_impact_stun", false) != -1)
+		return Plugin_Handled;
+	
 	return Default_SoundHook(client, clients, numClients, sample, entity, channel, volume, level, pitch, flags, soundEntry, seed);
 }
 
@@ -238,6 +241,7 @@ public Action SCP096_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 					TF2_AddCondition(client, TFCond_MegaHeal, 17.0);
 
 					TF2U_SetPlayerActiveWeapon(client, entity);
+					SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", entity);
 
 					ViewModel_Create(client, ViewModel, "a_fists_idle_02");
 
@@ -340,6 +344,7 @@ static void GiveDefaultMelee(int client)
 		SetEntPropFloat(entity, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + 999.9);
 
 		TF2U_SetPlayerActiveWeapon(client, entity);
+		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", entity);
 
 		SetVariantInt(1);
 		AcceptEntityInput(client, "SetForcedTauntCam");

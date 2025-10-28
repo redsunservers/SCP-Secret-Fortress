@@ -377,43 +377,57 @@ int CreateExplosion(int attacker = -1, int damage = 0, int radius = -1, float po
 	return explosion;
 }
 
-int AttachParticle(int entity, char[] particleType, bool attach=true, float lifetime)
+int CreateParticleEffect(const char[] effectName, const float position[3] = NULL_VECTOR, int attachment = -1, float duration = 0.0, bool voided = true)
 {
 	int particle = CreateEntityByName("info_particle_system");
-	if (!IsValidEntity(particle))
-		return 0;
+	if(particle != -1)
+	{
+		if(!IsNullVector(position))
+		{
+			TeleportEntity(particle, position, NULL_VECTOR, NULL_VECTOR);
+		}
+		else if(attachment != -1)
+		{
+			float pos[3];
+			GetEntPropVector(attachment, Prop_Send, "m_vecOrigin", pos);
+			TeleportEntity(particle, pos, NULL_VECTOR, NULL_VECTOR);
+		}
 		
-	char targetName[128];
-	float position[3];
-	GetEntPropVector(entity, Prop_Send, "m_vecOrigin", position);
-	TeleportEntity(particle, position, NULL_VECTOR, NULL_VECTOR);
+		SetEntPropFloat(particle, Prop_Data, "m_flSimulationTime", GetGameTime());
+		DispatchKeyValue(particle, "targetname", "rpg_fortress");
 
-	if (attach)
-	{
-		Format(targetName, sizeof(targetName), "target%d", entity);
-		DispatchKeyValue(entity, "targetname", targetName);
-	
-		DispatchKeyValue(particle, "targetname", "tf2particle");
-		DispatchKeyValue(particle, "parentname", targetName);
+		DispatchKeyValue(particle, "effect_name", effectName);
+		DispatchSpawn(particle);
+
+		if(attachment != -1)
+		{
+			SetVariantString("!activator");
+			AcceptEntityInput(particle, "SetParent", attachment, particle);
+		}
+
+		ActivateEntity(particle);
+		AcceptEntityInput(particle, "start");
+
+		SetEdictFlags(particle, (GetEdictFlags(particle) & ~FL_EDICT_ALWAYS));	
+		
+		if(duration > 0.0)
+		{
+			if(voided)
+			{
+				CreateTimer(duration, Timer_RemoveEntity, EntIndexToEntRef(particle), TIMER_FLAG_NO_MAPCHANGE);
+			}
+			else
+			{
+				char buffer[64];
+				FormatEx(buffer, sizeof(buffer), "OnUser1 !self:Kill::%f:1", duration);
+				SetVariantString(buffer);
+				AcceptEntityInput(particle, "AddOutput");
+			}
+		}	
 	}
-	
-	DispatchKeyValue(particle, "effect_name", particleType);
-	DispatchSpawn(particle);
-	
-	if (attach)
-	{
-		SetVariantString(targetName);
-		AcceptEntityInput(particle, "SetParent", particle, particle, 0);
-		SetEntPropEnt(particle, Prop_Send, "m_hOwnerEntity", entity);
-	}
-	
-	ActivateEntity(particle);
-	AcceptEntityInput(particle, "start");
-	
-	CreateTimer(lifetime, Timer_RemoveEntity, EntIndexToEntRef(particle), TIMER_FLAG_NO_MAPCHANGE);	
-	
 	return particle;
 }
+
 
 int TF2_CreateLightEntity(float radius, int color[4], int brightness, float lifetime)
 {
@@ -586,7 +600,7 @@ stock void ForceTaunt(int client, int index)
 		DispatchSpawn(entity);
 		SetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex", index);
 		SetEntProp(entity, Prop_Send, "m_bInitialized", true);
-		SetEntProp(entity, Prop_Send, "m_bForcePurgeFixedupStrings", true);
+		SetEntProp(entity, Prop_Data, "m_bForcePurgeFixedupStrings", true);
 		
 		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", entity);
 		SetEntProp(client, Prop_Send, "m_iFOV", 0); // fix sniper rifles
@@ -649,7 +663,7 @@ void PlayDeathAnimation(int victim, int attacker, const char[] deathAnim, float 
 	if(duration > 0.2)
 	{
 		FormatEx(buffer, sizeof(buffer), "OnUser1 !self:BecomeRagdoll::%f:1", duration);
-		SetVariantString("OnUser1 !self:BecomeRagdoll::2.0:1");
+		SetVariantString(buffer);
 		AcceptEntityInput(entity, "AddOutput");
 
 		AcceptEntityInput(entity, "FireUser1");
@@ -756,6 +770,39 @@ void RemoveRagdoll(int userid)
 	}
 }
 
+void CreateEarthquake(float position[3], float duration, float radius, float amplitude, float frequency)
+{
+	int earthquake = CreateEntityByName("env_shake");
+	if (IsValidEntity(earthquake))
+	{
+		DispatchKeyValueFloat(earthquake, "amplitude", amplitude);
+		DispatchKeyValueFloat(earthquake, "radius", radius * 2);
+		DispatchKeyValueFloat(earthquake, "duration", duration + 1.0);
+		DispatchKeyValueFloat(earthquake, "frequency", frequency);
+
+		SetVariantString("spawnflags 4"); // no physics (physics is 8), affects people in air (4)
+		AcceptEntityInput(earthquake, "AddOutput");
+
+		// create
+		DispatchSpawn(earthquake);
+		TeleportEntity(earthquake, position, NULL_VECTOR, NULL_VECTOR);
+
+		AcceptEntityInput(earthquake, "StartShake", 0);
+		CreateTimer(duration + 0.1, Timer_RemoveEntity, EntIndexToEntRef(earthquake), TIMER_FLAG_NO_MAPCHANGE);
+	}
+}
+
+Action Timer_RemoveOverlay(Handle timer, int userid)
+{
+	int client = GetClientOfUserId(userid);
+	if(client)
+	{
+		SetVariantString("");
+		AcceptEntityInput(client, "SetScriptOverlayMaterial", client, client);
+	}
+	return Plugin_Continue;
+}
+
 public bool Trace_OnlyHitWorld(int entity, int mask)
 {
 	return entity == 0;
@@ -778,4 +825,32 @@ public bool Trace_WorldAndBrushes(int entity, int mask)
 public bool Trace_DontHitPlayers(int entity, int mask, any data)
 {
 	return entity <= 0 || entity > MaxClients;
+}
+
+static bool TraceResult;
+
+bool IsPointTeleporter(const float pos[3], const float mins[3], const float maxs[3])
+{
+	TraceResult = false;
+	TR_EnumerateEntitiesHull(pos, pos, mins, maxs, PARTITION_TRIGGER_EDICTS, TraceEntityEnumerator_Teleporter);
+	return TraceResult;
+}
+
+static bool TraceEntityEnumerator_Teleporter(int entity, int client)
+{
+	static char classname[32];
+	if(GetEntityClassname(entity, classname, sizeof(classname)) && !StrContains(classname, "trigger_teleport"))
+	{
+		Handle trace = TR_ClipCurrentRayToEntityEx(MASK_ALL, entity);
+		bool didHit = TR_DidHit(trace);
+		delete trace;
+		
+		if(didHit)
+		{
+			TraceResult = true;
+			return false;
+		}
+	}
+	
+	return true;
 }

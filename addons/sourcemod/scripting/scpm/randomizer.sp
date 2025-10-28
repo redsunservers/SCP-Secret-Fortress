@@ -48,7 +48,7 @@ void Randomizer_DeleteFromClient(int client, int type)
 	if (ViewModels[client][type] && IsValidEntity(ViewModels[client][type]))
 		RemoveEntity(ViewModels[client][type]);
 	
-	ViewModels[client][type] = -1;
+	ViewModels[client][type] = 0;
 }
 
 void Randomizer_ConditionChanged(int client, TFCond cond)
@@ -127,7 +127,7 @@ void Randomizer_UpdateArms(int client, int force = -1)
 	}
 	
 	int arms = GetViewModel(client, ViewType_Arm, ArmModelIndex[current]);
-	if(arms == -1)
+	if(arms == 0 || arms == -1)
 		return;
 	
 	int effects = GetEntProp(arms, Prop_Send, "m_fEffects");
@@ -147,7 +147,7 @@ void Randomizer_UpdateArms(int client, int force = -1)
 	else if(weapon != -1)
 	{
 		int wearable = GetViewModel(client, ViewType_Weapon, GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex"), weapon);
-		if(wearable != -1)
+		if(wearable != 0 && wearable != -1)
 			SetEntPropEnt(wearable, Prop_Send, "m_hWeaponAssociatedWith", weapon);
 		
 		SetEntPropEnt(arms, Prop_Send, "m_hWeaponAssociatedWith", weapon);
@@ -196,15 +196,15 @@ static int CreateWearable(int client, int modelIndex, int weapon = -1)
 static int GetViewModel(int client, int type, int modelIndex, int weapon = -1)
 {
 	if(!ViewModels[client][type] || !IsValidEntity(ViewModels[client][type]))
-		ViewModels[client][type] = -1;
+		ViewModels[client][type] = 0;
 	
-	if(ViewModels[client][type] != -1 && GetEntProp(ViewModels[client][type], Prop_Send, "m_nModelIndex") != modelIndex)
+	if(ViewModels[client][type] != 0 && GetEntProp(ViewModels[client][type], Prop_Send, "m_nModelIndex") != modelIndex)
 	{
 		RemoveEntity(ViewModels[client][type]);
-		ViewModels[client][type] = -1;
+		ViewModels[client][type] = 0;
 	}
 	
-	if(ViewModels[client][type] == -1)
+	if(ViewModels[client][type] == 0)
 		ViewModels[client][type] = CreateWearable(client, modelIndex, weapon);
 	
 	return ViewModels[client][type];

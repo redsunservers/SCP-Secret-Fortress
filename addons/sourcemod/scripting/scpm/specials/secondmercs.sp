@@ -117,6 +117,7 @@ static Action MTFSpawnTimer(Handle timer)
 	}
 	
 	EmitSoundToAll("scpm/misc/spawn_mtf.mp3");
+	EmitSoundToAll("scpm/misc/spawn_mtf.mp3");
 	CPrintToChatAll("%t", "MTFSpawn");
 	return Plugin_Continue;
 }

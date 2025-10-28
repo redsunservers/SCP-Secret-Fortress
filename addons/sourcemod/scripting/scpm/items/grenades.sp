@@ -49,7 +49,7 @@ static Action FlashGrenadeTimer(Handle timer, int ref)
 		
 		if (IsValidEntity(explosion))
 		{
-			AttachParticle(explosion, "drg_cow_explosioncore_normal_blue", false, 1.0);
+			CreateParticleEffect("drg_cow_explosioncore_normal_blue", pos1, _, 1.0);
 			EmitGameSoundToAll("Weapon_Detonator.Detonate", explosion);
 			
 			// create a short light effect, clientside duration can increase slightly depending on ping
@@ -134,7 +134,7 @@ static Action FragGrenadeTimer(Handle timer, int ref)
 		
 		if (IsValidEntity(explosion))
 		{
-			AttachParticle(explosion, "asplode_hoodoo", false, 5.0);
+			CreateParticleEffect("asplode_hoodoo", pos, _, 5.0);
 			EmitGameSoundToAll("Weapon_Airstrike.Explosion", explosion);
 			
 			AcceptEntityInput(explosion, "Explode");

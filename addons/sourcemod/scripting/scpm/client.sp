@@ -28,6 +28,7 @@ static float LastNoiseAt[MAXPLAYERS+1];
 static bool NoViewModel[MAXPLAYERS+1];
 static float KeyHintUpdateAt[MAXPLAYERS+1];
 static float ActionCooldownFor[MAXPLAYERS+1];
+static bool QuietTooltip[MAXPLAYERS+1];
 
 methodmap Client
 {
@@ -405,6 +406,18 @@ methodmap Client
 			ActionCooldownFor[this.Index] = value;
 		}
 	}
+
+	property bool QuietTooltip
+	{
+		public get()
+		{
+			return QuietTooltip[this.Index];
+		}
+		public set(bool value)
+		{
+			QuietTooltip[this.Index] = value;
+		}
+	}
 	
 	public void ResetByDeath()
 	{
@@ -432,6 +445,7 @@ methodmap Client
 	{
 		this.ControlProgress = 0;
 		this.EscapeTimeAt = 0.0;
+		this.QuietTooltip = false;
 		this.ResetByDeath();
 	}
 	

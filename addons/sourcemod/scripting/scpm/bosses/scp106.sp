@@ -228,7 +228,6 @@ public void SCP106_ActionButton(int client)
 			SetVariantInt(0);
 			AcceptEntityInput(client, "SetForcedTauntCam");
 			
-			TF2_RemoveWeaponSlot(client, TFWeaponSlot_Melee);
 			GiveDefaultMelee(client);
 			ViewModel_Create(client, ViewModel, "a_fists_idle_02");
 			ViewModel_SetAnimation(client, "fists_draw");
@@ -263,6 +262,7 @@ public void SCP106_ActionButton(int client)
 			SetEntPropFloat(entity, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + 999.9);
 
 			TF2U_SetPlayerActiveWeapon(client, entity);
+			SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", entity);
 
 			SetVariantInt(1);
 			AcceptEntityInput(client, "SetForcedTauntCam");
@@ -340,5 +340,6 @@ static void GiveDefaultMelee(int client)
 		Attrib_Set(entity, "mod weapon blocks healing", 1.0);
 
 		TF2U_SetPlayerActiveWeapon(client, entity);
+		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", entity);
 	}
 }

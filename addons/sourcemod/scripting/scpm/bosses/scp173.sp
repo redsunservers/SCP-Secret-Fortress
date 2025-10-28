@@ -71,7 +71,7 @@ static const float TimeAnims[] =
 
 static const char PlayerModel[] = "models/freak_fortress_2/scp_173/scp_173new.mdl";
 static const char DeathModel[] = "models/scp_new/173/scp_173new_death.mdl";
-static const char ScareSound[] = "scpm/scp173/scare.mp3";
+static const char ScareSound[] = "#scpm/scp173/scare.mp3";
 static const char KillSound[] = "scpm/scp173/kill.mp3";
 static const char DeathSound[] = "scpm/scp173/death.wav";
 static const char WalkSound[] = "physics/concrete/concrete_scrape_smooth_loop1.wav";
@@ -284,7 +284,7 @@ public Action SCP173_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 	{
 		if(lookedAt && blinked)
 		{
-			PrintCenterText(client, "[ X ]");
+			PrintCenterText(client, "[  X  ]");
 
 			MotionTimeFor[client] = GetGameTime() + 0.15;
 			TeleportEntity(client, pos2, NULL_VECTOR, NULL_VECTOR);
@@ -333,6 +333,7 @@ public Action SCP173_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 				SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
 				SetEntityRenderMode(entity, RENDER_TRANSALPHA);
 				SetEntityRenderColor(entity, (blinked || lookedAt) ? 255 : 55, 55, 55, 155);
+				SetEntityRenderFx(entity, RENDERFX_PULSE_FAST);
 
 				SDKHook(entity, SDKHook_SetTransmit, PropSetTransmit);
 

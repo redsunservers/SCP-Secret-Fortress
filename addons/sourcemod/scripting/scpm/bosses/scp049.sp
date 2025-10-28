@@ -131,6 +131,7 @@ public void SCP049_Equip(int client, bool weapons)
 			Attrib_Set(entity, "overheal penalty", 0.0);
 			Attrib_Set(entity, "reduced_healing_from_medics", 0.1);
 			Attrib_Set(entity, "mod weapon blocks healing", 1.0);
+			Attrib_Set(entity, "deploy time increased", 2.5);
 		}
 
 		entity = Items_GiveCustom(client, 954, "tf_weapon_bonesaw", false);
@@ -182,6 +183,11 @@ public float SCP049_ChaseTheme(int client, char theme[PLATFORM_MAX_PATH], int vi
 {
 	strcopy(theme, sizeof(theme), ChaseSound);
 	return 14.8;
+}
+
+public Action SCP049_TakeDamage(int client, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom, CritType &critType)
+{
+	return Default_TakeDamage(client, attacker, inflictor, damage, damagetype, weapon, damageForce, damagePosition, damagecustom, critType);
 }
 
 public Action SCP049_DealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom, CritType &critType)

@@ -205,17 +205,21 @@ void Human_InventoryApplication(int client)
 	Attrib_Remove(client, "major move speed bonus");
 	Attrib_Remove(client, "maxammo primary reduced");
 	Attrib_Remove(client, "maxammo secondary reduced");
-	Cvar[RollAngle].ReplicateToClient(client, "1.5");
 
-	int hud;
-	if(!Client(client).IsBoss && !Client(client).Minion)
+	if(!IsFakeClient(client))
 	{
-		hud = HIDEHUD_HEALTH|HIDEHUD_TARGET_ID;
-		if(!Client(client).Escaped)
-			hud += HIDEHUD_BUILDING_STATUS|HIDEHUD_CLOAK_AND_FEIGN|HIDEHUD_PIPES_AND_CHARGE|HIDEHUD_METAL;
+		Cvar[RollAngle].ReplicateToClient(client, "1.5");
+
+		int hud;
+		if(!Client(client).IsBoss && !Client(client).Minion)
+		{
+			hud = HIDEHUD_HEALTH|HIDEHUD_TARGET_ID;
+			if(!Client(client).Escaped)
+				hud += HIDEHUD_BUILDING_STATUS|HIDEHUD_CLOAK_AND_FEIGN|HIDEHUD_PIPES_AND_CHARGE|HIDEHUD_METAL;
+		}
+		
+		SetEntProp(client, Prop_Send, "m_iHideHUD", hud);
 	}
-	
-	SetEntProp(client, Prop_Send, "m_iHideHUD", hud);
 
 	EquipHuman(client, true);
 	CreateTimer(0.1, HumanEquipTimer, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
@@ -247,8 +251,10 @@ void Human_ToggleFlashlight(int client)
 				TeleportEntity(entity, pos);
 
 				DispatchKeyValue(entity, "_light", "255 255 255 100");
-				//DispatchKeyValue(entity, "distance", "256");
-				//DispatchKeyValue(entity, "brightness", "10");
+				DispatchKeyValue(entity, "spotlight_radius", "500");
+				DispatchKeyValue(entity, "distance", "500");
+				DispatchKeyValue(entity, "brightness", "1");
+				DispatchKeyValue(entity, "cone", "1");
 
 				DispatchSpawn(entity);
 				ActivateEntity(entity);
@@ -490,37 +496,40 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 				Format(buffer, sizeof(buffer), "%s\n»  %d％", buffer, RoundToCeil(Client(client).SprintPower));
 			}
 			
-			// Close Eyes Logic
-			if(Client(client).EyesClosed)
+			if(!IsFakeClient(client))
 			{
-				ScreenFade(client, 300, 150, FFADE_IN, 0, 0, 0, 255);
-			}
-			else
-			{
-				int red = (health * 255 / maxhealth);
-				if(red > 255)
-					red = 255;
-				
-				int green = 255;
-				if(health > 259)
+				// Close Eyes Logic
+				if(Client(client).EyesClosed)
 				{
-					green = 128;
-					if(health > 519)
-						green = 32;
+					ScreenFade(client, 300, 150, FFADE_IN, 0, 0, 0, 255);
 				}
+				else
+				{
+					int red = (health * 255 / maxhealth);
+					if(red > 255)
+						red = 255;
+					
+					int green = 255;
+					if(health > 259)
+					{
+						green = 128;
+						if(health > 519)
+							green = 32;
+					}
 
-				SetHudTextParams(0.07, 0.83, 0.3, red > 254 ? green : 255, red > 254 ? 255 : red, red > 254 ? green : red, 255);
-				ShowSyncHudText(client, StatusHud, buffer);
+					SetHudTextParams(0.07, 0.83, 0.3, red > 254 ? green : 255, red > 254 ? 255 : red, red > 254 ? green : red, 255);
+					ShowSyncHudText(client, StatusHud, buffer);
 
-				float rolling = 1.5;
-				if(stress < 50)
-					rolling += (50 - stress) * 0.05;
-				
-				if(red < 255)
-					rolling += (255 - red) * 0.025;
+					float rolling = 1.5;
+					if(stress < 50)
+						rolling += (50 - stress) * 0.05;
+					
+					if(red < 255)
+						rolling += (255 - red) * 0.025;
 
-				FloatToString(rolling, buffer, sizeof(buffer));
-				Cvar[RollAngle].ReplicateToClient(client, buffer);
+					FloatToString(rolling, buffer, sizeof(buffer));
+					Cvar[RollAngle].ReplicateToClient(client, buffer);
+				}
 			}
 		}
 		else if(FAbs(updateTime[client][1] - gameTime) > 0.2)

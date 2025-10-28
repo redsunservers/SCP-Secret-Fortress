@@ -53,6 +53,7 @@ public bool SCP500_Use(int client)
 	
 	Client(client).SprintPower = 100.0;
 	SetEntityHealth(client, 300);
+	TF2_RemoveCondition(client, TFCond_Plague);
 	ClientCommand(client, "playgamesound items/medshot4.wav");
 	return true;
 }
