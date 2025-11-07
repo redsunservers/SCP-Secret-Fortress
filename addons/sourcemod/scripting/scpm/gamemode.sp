@@ -79,14 +79,15 @@ void Gamemode_RoundRespawn()
 
 		int bosses = count / base;
 
-		if(bosses == 0 && count > 2)
+		if(bosses == 0)
 		{
 			// Min of one boss at 3 player count
-			bosses = 1;
+			if(count > 2)
+				bosses = 1;
 		}
 		else if((count % base) > GetRandomInt(0, base - 1))
 		{
-			// Bonus boss chance
+			// Bonus boss chance based on the fraction
 			bosses++;
 		}
 		
@@ -445,7 +446,7 @@ static void ProcessListening(int target, int speaker, float distance, const int 
 		if(distance > TALK_DISTANCE)
 		{
 			// If both players have a radio, can hear at any range
-			if(Client(speaker).ActionItem != Radio_Index() || Client(target).ActionItem != Radio_Index())
+			if(Radio_IsActive(speaker) || Radio_IsActive(target))
 				failed = true;
 		}
 	}

@@ -182,7 +182,6 @@ void Human_PlayerSpawn(int client)
 	{
 		SetEntProp(client, Prop_Send, "m_bForcedSkin", false);
 		SetEntProp(client, Prop_Send, "m_nForcedSkin", 0);
-		SetEntProp(client, Prop_Send, "m_iPlayerSkinOverride", 0);
 		
 		int team = GetClientTeam(client);
 		if(team > TFTeam_Spectator)
@@ -374,10 +373,30 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 				Client(client).SprintPower = 100.0;
 		}
 
+		// Power Logic
+		float powerUse = (effects & EF_DIMLIGHT) ? 1.0 : -1.0;
+		if(Radio_IsActive(client))
+			powerUse += 0.5;
+
+		if(powerUse > 0.0)
+		{
+			Client(client).LightPower -= powerUse * delta;
+			if(Client(client).LightPower < 0.0)
+				Client(client).LightPower = 0.0;
+		}
+		else
+		{
+			if(Client(client).LightPower < 100.0)
+			{
+				Client(client).LightPower += powerUse * delta;
+				if(Client(client).LightPower > 100.0)
+					Client(client).LightPower = 100.0;
+			}
+		}
+
 		// Flashlight Logic
 		if(effects & EF_DIMLIGHT)
 		{
-			Client(client).LightPower -= delta;
 			if(Client(client).LightPower < 0.5)
 			{
 				ClientCommand(client, "playgamesound ambient/energy/spark6.wav");
@@ -402,7 +421,7 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 
 			if(Client(client).LightPower < 100.0)
 			{
-				Client(client).LightPower += delta;
+				Client(client).LightPower += delta - powerUse;
 				if(Client(client).LightPower > 100.0)
 					Client(client).LightPower = 100.0;
 			}
@@ -510,10 +529,10 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 						red = 255;
 					
 					int green = 255;
-					if(health > 259)
+					if(health > 260)
 					{
 						green = 128;
-						if(health > 519)
+						if(health > 520)
 							green = 32;
 					}
 

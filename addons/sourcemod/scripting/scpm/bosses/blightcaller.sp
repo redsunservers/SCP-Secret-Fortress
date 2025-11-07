@@ -36,7 +36,7 @@ static const char Downloads[][] =
 	"sound/scpm/blightcaller/scare.mp3"
 };
 
-static const char PlayerModel[] = "models/scp_sf/106/scp106_player_3.mdl";
+static const char PlayerModel[] = "models/freak_fortress_2/blightcaller_remade/blightcaller.mdl";
 static const char JumpscareOverlay[] = "freak_fortress_2/scp_173/scp173_rage_overlay1";
 static const char AmbientSound[] = "#scpm/blightcaller/ambient.mp3";
 static const char JumpscareSound[] = "scpm/blightcaller/scare.mp3";
@@ -80,6 +80,7 @@ public void Blightcaller_Spawn(int client)
 public void Blightcaller_Equip(int client, bool weapons)
 {
 	Default_Equip(client, weapons);
+	Attrib_Set(client, "healing received penalty", 0.33);
 
 	SetVariantString(PlayerModel);
 	AcceptEntityInput(client, "SetCustomModelWithClassAnimations");
@@ -153,14 +154,19 @@ public Action Blightcaller_TakeDamage(int client, int &attacker, int &inflictor,
 
 public Action Blightcaller_DealDamage(int client, int victim, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom, CritType &critType)
 {
-	if(TF2_IsPlayerInCondition(victim, TFCond_Plague) || SCP714_IsWearing(victim))
+	if(damagecustom != TF_CUSTOM_BLEEDING)
 	{
-		// Wearing SCP-714, resists plague
-		damage *= 0.1;
-		return Plugin_Changed;
-	}
+		if(TF2_IsPlayerInCondition(victim, TFCond_Plague) || SCP714_IsWearing(victim))
+		{
+			// Wearing SCP-714, resists plague
+			damage *= 0.1;
+			return Plugin_Changed;
+		}
 
-	TF2_AddCondition(victim, TFCond_Plague, _, client);
+		TF2_AddCondition(victim, TFCond_Plague, _, client);
+		ToggleZombie(victim, true);
+	}
+	
 	return Plugin_Continue;
 }
 
@@ -196,7 +202,7 @@ public Action Blightcaller_PlayerRunCmd(int client, int &buttons, int &impulse, 
 
 		if(CurrentTarget)
 		{
-			if(!DoneJumpscare && Client(CurrentTarget).LookingAt(client))
+			if(!DoneJumpscare && Client(CurrentTarget).LookingAt(client) && !SCP714_IsWearing(CurrentTarget))
 			{
 				DoneJumpscare = true;
 				
@@ -225,7 +231,7 @@ public Action Blightcaller_PlayerRunCmd(int client, int &buttons, int &impulse, 
 			if(length)
 				TeleLocations.GetArray(length - 1, lastPos);
 			
-			GetClientAbsOrigin(client, newPos);
+			GetClientAbsOrigin(CurrentTarget, newPos);
 			if(GetVectorDistance(newPos, lastPos, true) > 999999.0)
 			{
 				if(!IsPointTeleporter(newPos, {-24.0, -24.0, 0.0}, {24.0, 24.0, 82.0}))

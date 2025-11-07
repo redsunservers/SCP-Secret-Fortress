@@ -71,6 +71,8 @@ void SDKHook_HookClient(int client)
 
 public void OnEntityCreated(int entity, const char[] classname)
 {
+	//Bosses_EntityCreated(entity, classname);
+
 	if(StrContains(classname, "item_healthkit") != -1 || StrContains(classname, "item_ammopack") != -1 || StrEqual(classname, "tf_ammo_pack"))
 	{
 		SDKHook(entity, SDKHook_StartTouch, PickupTouch);
@@ -127,7 +129,7 @@ public Action TF2_OnTakeDamage(int victim, int &attacker, int &inflictor, float 
 			Call_PushCellRef(weapon);
 			Call_PushArrayEx(damageForce, sizeof(damageForce), SM_PARAM_COPYBACK);
 			Call_PushArrayEx(damagePosition, sizeof(damagePosition), SM_PARAM_COPYBACK);
-			Call_PushCellRef(damagecustom);
+			Call_PushCell(damagecustom);
 			Call_PushCellRef(critType);
 			Call_Finish(action);
 		}
@@ -153,7 +155,7 @@ public Action TF2_OnTakeDamage(int victim, int &attacker, int &inflictor, float 
 			Call_PushCellRef(weapon);
 			Call_PushArrayEx(damageForce, sizeof(damageForce), SM_PARAM_COPYBACK);
 			Call_PushArrayEx(damagePosition, sizeof(damagePosition), SM_PARAM_COPYBACK);
-			Call_PushCellRef(damagecustom);
+			Call_PushCell(damagecustom);
 			Call_PushCellRef(critType);
 			Call_Finish(action);
 		}
@@ -205,8 +207,148 @@ static void ClientWeaponSwitchFrame(int userid)
 	}
 }
 
+enum struct SoundData
+{
+	int clients[MAXPLAYERS];
+	int numClients;
+	char sample[PLATFORM_MAX_PATH];
+	int entity;
+	int channel;
+	float volume;
+	int level;
+	int pitch;
+	int flags;
+}
+
+static SoundData SoundOverride;
+
+void EmitSoundEx(const int[] clients, int numClients,
+		const char[] sample,
+		int entity = SOUND_FROM_PLAYER,
+		int channel = SNDCHAN_AUTO,
+		int level = SNDLEVEL_NORMAL,
+		int flags = SND_NOFLAGS,
+		float volume = SNDVOL_NORMAL,
+		int pitch = SNDPITCH_NORMAL,
+		int speakerentity = -1,
+		const float origin[3] = NULL_VECTOR,
+		float soundtime = 0.0,
+		int dsp = 0)
+{
+	// What's going on? We use VScript to use parameters such as DSP as SM doesn't have it
+	// But we can't 100% use VScript because SetVariantString is limited to 128 characters
+	// So we partially use VScript for special effects, sound hook it, and add the rest of our settings
+	// Insane...
+
+	for(int b; b < numClients && b < sizeof(SoundOverride); b++)
+	{
+		SoundOverride.clients[b] = clients[b];
+	}
+	SoundOverride.numClients = numClients;
+	strcopy(SoundOverride.sample, sizeof(SoundOverride.sample), sample);
+	SoundOverride.entity = entity;
+	SoundOverride.channel = channel;
+	SoundOverride.level = level;
+	SoundOverride.flags = flags;
+	SoundOverride.volume = volume;
+	SoundOverride.pitch = pitch;
+
+	char buffer[128];
+	int size = strcopy(buffer, sizeof(buffer), "EmitSoundEx({sound_name=\"SCPM\"");
+	
+	if(dsp != 0)
+		size += Format(buffer[size], sizeof(buffer) - size, ",special_dsp=%d", dsp);
+	
+	if(!IsNullVector(origin))
+		size += Format(buffer[size], sizeof(buffer) - size, ",origin=Vector(%f,%f,%f)", origin[0], origin[1], origin[2]);
+	
+	if(soundtime < 0.0)
+		size += Format(buffer[size], sizeof(buffer) - size, ",delay=%f", soundtime);
+	
+	if(soundtime > 0.0)
+		size += Format(buffer[size], sizeof(buffer) - size, ",sound_time=%f", soundtime);
+	
+	if(speakerentity != -1)
+		size += Format(buffer[size], sizeof(buffer) - size, ",speaker_entity=EntIndexToHScript(%d)", speakerentity);
+	
+	strcopy(buffer[size], sizeof(buffer) - size, "});");
+
+	SetVariantString(buffer);
+	AcceptEntityInput(0, "RunScriptCode");
+}
+
+stock void EmitSoundToClientEx(int client,
+		const char[] sample,
+		int entity = SOUND_FROM_PLAYER,
+		int channel = SNDCHAN_AUTO,
+		int level = SNDLEVEL_NORMAL,
+		int flags = SND_NOFLAGS,
+		float volume = SNDVOL_NORMAL,
+		int pitch = SNDPITCH_NORMAL,
+		int speakerentity = -1,
+		const float origin[3] = NULL_VECTOR,
+		float soundtime = 0.0,
+		int dsp = 0)
+{
+	int clients[1];
+	clients[0] = client;
+	/* Save some work for SDKTools and remove SOUND_FROM_PLAYER references */
+	entity = (entity == SOUND_FROM_PLAYER) ? client : entity;
+	EmitSoundEx(clients, 1, sample, entity, channel,
+		level, flags, volume, pitch, speakerentity,
+		origin, soundtime, dsp);
+}
+
+stock void EmitSoundToAllEx(const char[] sample,
+		int entity = SOUND_FROM_PLAYER,
+		int channel = SNDCHAN_AUTO,
+		int level = SNDLEVEL_NORMAL,
+		int flags = SND_NOFLAGS,
+		float volume = SNDVOL_NORMAL,
+		int pitch = SNDPITCH_NORMAL,
+		int speakerentity = -1,
+		const float origin[3] = NULL_VECTOR,
+		float soundtime = 0.0,
+		int dsp = 0)
+{
+	int[] clients = new int[MaxClients];
+	int total = 0;
+
+	for(int i = 1; i <= MaxClients; i++)
+	{
+		if(IsClientInGame(i))
+			clients[total++] = i;
+	}
+
+	if(total)
+	{
+		EmitSoundEx(clients, total, sample, entity, channel,
+			level, flags, volume, pitch, speakerentity,
+			origin, soundtime, dsp);
+	}
+}
+
 static Action SDKHook_NormalSHook(int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH], int &entity, int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
 {
+	if(SoundOverride.numClients)
+	{
+		for(int i; i < SoundOverride.numClients; i++)
+		{
+			clients[i] = SoundOverride.clients[i];
+		}
+		numClients = SoundOverride.numClients;
+		strcopy(sample, sizeof(sample), SoundOverride.sample);
+		entity = SoundOverride.entity;
+		channel = SoundOverride.channel;
+		volume = SoundOverride.volume;
+		level = SoundOverride.level;
+		pitch = SoundOverride.pitch;
+		flags = SoundOverride.flags;
+
+		SoundOverride.numClients = 0;
+		return Plugin_Changed;
+	}
+
 	static bool InSoundHook;
 
 	if(!InSoundHook && entity > 0 && entity <= MaxClients)
@@ -236,6 +378,31 @@ static Action SDKHook_NormalSHook(int clients[MAXPLAYERS], int &numClients, char
 
 			Action action;
 			if(Bosses_StartFunctionClient(client, "SoundHook"))
+			{
+				Call_PushCell(client);
+				Call_PushArrayEx(clients, sizeof(clients), SM_PARAM_COPYBACK);
+				Call_PushCellRef(numClients);
+				Call_PushStringEx(sample, sizeof(sample), SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
+				Call_PushCellRef(entity);
+				Call_PushCellRef(channel);
+				Call_PushCellRef(volume);
+				Call_PushCellRef(level);
+				Call_PushCellRef(pitch);
+				Call_PushCellRef(flags);
+				Call_PushStringEx(soundEntry, sizeof(soundEntry), SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
+				Call_PushCellRef(seed);
+				Call_Finish(action);
+			}
+			
+			InSoundHook = false;
+			return action;
+		}
+		else
+		{
+			InSoundHook = true;
+
+			Action action;
+			if(Items_StartFunctionClient(entity, "SoundHook"))
 			{
 				Call_PushCell(client);
 				Call_PushArrayEx(clients, sizeof(clients), SM_PARAM_COPYBACK);

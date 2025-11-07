@@ -93,6 +93,82 @@ static ArrayList ItemList;
 static StringMap CompatList;
 static ArrayList TypeList;
 
+void Items_PluginStart()
+{
+	RegAdminCmd("scp_giveitem", Items_GiveItemCmd, ADMFLAG_CHEATS, "Gives a specific item on a player");
+}
+
+static Action Items_GiveItemCmd(int client, int args)
+{
+	if(args && args < 3)
+	{
+		char buffer[64];
+		int special = -1;
+		if(args > 1)
+		{
+			GetCmdArg(2, buffer, sizeof(buffer));
+			if(buffer[0] == '#')
+			{
+				special = StringToInt(buffer[1]);
+			}
+			else
+			{
+				special = Item_GetByName(buffer, false, client);
+				if(special == -1)
+				{
+					ActionInfo data;
+					int length = ActionList.Length;
+					for(int i; i < length; i++)
+					{
+						ActionList.GetArray(i, data);
+						ReplyToCommand(client, "#%d - %t", data.Index, data.Prefix);
+					}
+
+					return Plugin_Handled;
+				}
+			}
+		}
+		
+		if(special < 0)
+			special = 0;
+		
+		GetCmdArg(1, buffer, sizeof(buffer));
+		
+		bool lang;
+		int matches;
+		int[] target = new int[MaxClients];
+		if((matches = ProcessTargetString(buffer, client, target, MaxClients, 0, buffer, sizeof(buffer), lang)) > 0)
+		{
+			for(int i; i < matches; i++)
+			{
+				if(!IsClientSourceTV(target[i]) && !IsClientReplay(target[i]))
+				{
+					Items_GiveByIndex(target[i], special);
+					LogAction(client, target[i], "\"%L\" gave \"%L\" a item", client, target[i]);
+				}
+			}
+			
+			if(lang)
+			{
+				ShowActivity(client, "%t", "Gave Item To", buffer);
+			}
+			else
+			{
+				ShowActivity(client, "%t", "Gave Item To", "_s", buffer);
+			}
+		}
+		else
+		{
+			ReplyToTargetError(client, matches);
+		}
+	}
+	else
+	{
+		ReplyToCommand(client, "[SM] Usage: scp_giveitem <client> <item name / #index>");
+	}
+	return Plugin_Handled;
+}
+
 void Items_SetupConfig(KeyValues map)
 {
 	delete ActionList;
@@ -383,6 +459,57 @@ static int GetActionDataOfIndex(int itemIndex, ActionInfo action)
 	}
 
 	return -1;
+}
+
+// Gets the item index based on name, returns -1 if none found
+int Item_GetByName(const char[] name, bool exact = false, int client = 0)
+{
+	int similarIndex = -1;
+	if(ActionList)
+	{
+		int length = ActionList.Length;
+		int size1 = exact ? 0 : strlen(name);
+		int similarChars;
+		ActionInfo data;
+		char buffer[64];
+
+		SetGlobalTransTarget(client);
+
+		for(int i; i < length; i++)
+		{
+			ActionList.GetArray(i, data);
+			FormatEx(buffer, sizeof(buffer), "%t", data.Prefix);
+			
+			if(StrEqual(name, buffer, false))
+				return data.Index;
+			
+			if(size1)
+			{
+				int bump = StrContains(buffer, name, false);
+				if(bump == -1)
+					bump = 0;
+				
+				int size2 = strlen(buffer) - bump;
+				if(size2 > size1)
+					size2 = size1;
+				
+				int amount;
+				for(int c; c < size2; c++)
+				{
+					if(CharToLower(name[c]) == CharToLower(buffer[c + bump]))
+						amount++;
+				}
+				
+				if(amount > similarChars)
+				{
+					similarChars = amount;
+					similarIndex = data.Index;
+				}
+			}
+		}
+	}
+
+	return similarIndex;
 }
 
 bool Items_CanSpawn(int itemIndex)
@@ -955,23 +1082,20 @@ Action Items_PlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], 
 {
 	Action action;
 	
-	if(Client(client).ActionItem != -1)
+	if(Items_StartFunctionClient(client, "PlayerRunCmd"))
 	{
-		if(StartItemFunctionByIndex(client, "PlayerRunCmd"))
-		{
-			Call_PushCell(client);
-			Call_PushCellRef(buttons);
-			Call_PushCellRef(impulse);
-			Call_PushArrayEx(vel, sizeof(vel), SM_PARAM_COPYBACK);
-			Call_PushArrayEx(angles, sizeof(angles), SM_PARAM_COPYBACK);
-			Call_PushCellRef(weapon);
-			Call_PushCellRef(subtype);
-			Call_PushCellRef(cmdnum);
-			Call_PushCellRef(tickcount);
-			Call_PushCellRef(seed);
-			Call_PushArrayEx(mouse, sizeof(mouse), SM_PARAM_COPYBACK);
-			Call_Finish(action);
-		}
+		Call_PushCell(client);
+		Call_PushCellRef(buttons);
+		Call_PushCellRef(impulse);
+		Call_PushArrayEx(vel, sizeof(vel), SM_PARAM_COPYBACK);
+		Call_PushArrayEx(angles, sizeof(angles), SM_PARAM_COPYBACK);
+		Call_PushCellRef(weapon);
+		Call_PushCellRef(subtype);
+		Call_PushCellRef(cmdnum);
+		Call_PushCellRef(tickcount);
+		Call_PushCellRef(seed);
+		Call_PushArrayEx(mouse, sizeof(mouse), SM_PARAM_COPYBACK);
+		Call_Finish(action);
 	}
 	
 	return action;
@@ -1107,6 +1231,14 @@ int Items_GetUpgradePath(int itemIndex, int type)
 	}
 
 	return -1;
+}
+
+bool Items_StartFunctionClient(int client, const char[] name)
+{
+	if(Client(client).ActionItem == -1)
+		return false;
+	
+	return StartItemFunctionByIndex(Client(client).ActionItem, name);
 }
 
 static bool StartItemFunctionByIndex(int itemIndex, const char[] name)

@@ -271,6 +271,7 @@ int MaxPlayersAlive[TFTeam_MAX];
 
 #include "scpm/items/keycards.sp"
 #include "scpm/items/generic.sp"
+#include "scpm/items/radio.sp"
 #include "scpm/items/scp018.sp"
 #include "scpm/items/grenades.sp"
 #include "scpm/items/scp427.sp"
@@ -302,6 +303,7 @@ public void OnPluginStart()
 	DHook_PluginStart();
 	Gamemode_PluginStart();
 	Human_PluginStart();
+	Items_PluginStart();
 	TF2U_PluginStart();
 	SDKCall_PluginStart();
 	SDKHook_PluginStart();

@@ -36,3 +36,9 @@ public Action Default_PlayerRunCmd(int client, int &buttons, int &impulse, float
 {
 	return Plugin_Continue;
 }
+
+// Client is the user (that a spy is disguised as)
+public Action Default_SoundHook(int client, int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH], int &entity, int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
+{
+	return Plugin_Continue;
+}

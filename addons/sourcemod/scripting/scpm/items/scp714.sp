@@ -38,11 +38,12 @@ public bool SCP714_Use(int client)
 	
 	if(Opened[client])
 	{
-		PrintCenterText(client, "%T", "SCP714 Open", client);
+		PrintCenterText(client, "%T", "SCP714 On", client);
+		TF2_RemoveCondition(client, TFCond_Plague);
 	}
 	else
 	{
-		PrintCenterText(client, "%T", "SCP714 Close", client);
+		PrintCenterText(client, "%T", "SCP714 Off", client);
 	}
 	
 	return false;

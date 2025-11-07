@@ -117,6 +117,7 @@ public void SCP049_Spawn(int client)
 public void SCP049_Equip(int client, bool weapons)
 {
 	Default_Equip(client, weapons);
+	Attrib_Set(client, "healing received penalty", 0.1);
 
 	SetVariantString(PlayerModel);
 	AcceptEntityInput(client, "SetCustomModelWithClassAnimations");
@@ -129,7 +130,6 @@ public void SCP049_Equip(int client, bool weapons)
 			Attrib_Set(entity, "heal rate bonus", 0.5);
 			Attrib_Set(entity, "ubercharge rate bonus", 0.5);
 			Attrib_Set(entity, "overheal penalty", 0.0);
-			Attrib_Set(entity, "reduced_healing_from_medics", 0.1);
 			Attrib_Set(entity, "mod weapon blocks healing", 1.0);
 			Attrib_Set(entity, "deploy time increased", 2.5);
 		}
@@ -446,28 +446,12 @@ static Action TurnToZombie(Handle timer, int userid)
 		SetVariantString(NULL_STRING);
 		AcceptEntityInput(client, "SetCustomModelWithClassAnimations");
 		
-		TFClassType class = TF2_GetPlayerClass(client);
-		SetEntProp(client, Prop_Send, "m_bForcedSkin", true);
-		SetEntProp(client, Prop_Send, "m_nForcedSkin", (class == TFClass_Spy) ? 23 : 5);
-		
-		int entity = CreateEntityByName("tf_wearable");
-		if(entity != -1)
-		{
-			static const int VoodooIndex[] =  {-1, 5617, 5625, 5618, 5620, 5622, 5619, 5624, 5623, 5621};
-
-			SetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex", VoodooIndex[class]);
-			SetEntProp(entity, Prop_Send, "m_bInitialized", true);
-			SetEntProp(entity, Prop_Send, "m_iEntityQuality", 0);
-			SetEntProp(entity, Prop_Send, "m_iEntityLevel", 1);
-
-			DispatchSpawn(entity);
-			SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", true);
-		}
+		ToggleZombie(client, true);
 
 		int melee = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
 		int index;
 
-		int i;
+		int entity, i;
 		while(TF2_GetItem(client, entity, i))
 		{
 			if(entity == melee)

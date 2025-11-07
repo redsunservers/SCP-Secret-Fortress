@@ -21,11 +21,13 @@ static char OriginalModel[PLATFORM_MAX_PATH];
 static int BossIndex = -1;
 static bool Opened[MAXPLAYERS+1];
 static float LastTime[MAXPLAYERS+1];
+static int MsgTime[MAXPLAYERS+1];
 
 public void SCP427_Pickup(int client)
 {
 	Opened[client] = false;
 	LastTime[client] = 0.0;
+	MsgTime[client] = 0;
 }
 
 public bool SCP427_Use(int client)
@@ -49,13 +51,19 @@ public Action SCP427_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 	if(Opened[client])
 	{
 		float gameTime = GetGameTime();
-		if(gameTime < LastTime[client])
+		if(gameTime > LastTime[client])
 		{
 			LastTime[client] = gameTime + 0.1;
 			
 			int health = GetClientHealth(client);
-			SetEntityHealth(client, health + 1);
-			Client(client).Stress += 0.2;
+			SetEntityHealth(client, health + 2);
+			Client(client).Stress += 0.5;
+
+			if((++MsgTime[client]) > 19)
+			{
+				MsgTime[client] = 0;
+				ApplyHealEvent(client, -1);
+			}
 
 			float stress = Human_GetStressPercent(client);
 			
@@ -160,6 +168,9 @@ public void SCP427A_Equip(int client, bool weapons)
 
 	SetVariantString(PlayerModel);
 	AcceptEntityInput(client, "SetCustomModelWithClassAnimations");
+
+	SetEntProp(client, Prop_Send, "m_bForcedSkin", true);
+	SetEntProp(client, Prop_Send, "m_nForcedSkin", 0);
 
 	if(weapons)
 	{

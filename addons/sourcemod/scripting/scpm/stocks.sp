@@ -394,8 +394,6 @@ int CreateParticleEffect(const char[] effectName, const float position[3] = NULL
 		}
 		
 		SetEntPropFloat(particle, Prop_Data, "m_flSimulationTime", GetGameTime());
-		DispatchKeyValue(particle, "targetname", "rpg_fortress");
-
 		DispatchKeyValue(particle, "effect_name", effectName);
 		DispatchSpawn(particle);
 
@@ -422,6 +420,7 @@ int CreateParticleEffect(const char[] effectName, const float position[3] = NULL
 				FormatEx(buffer, sizeof(buffer), "OnUser1 !self:Kill::%f:1", duration);
 				SetVariantString(buffer);
 				AcceptEntityInput(particle, "AddOutput");
+				AcceptEntityInput(particle, "FireUser1");
 			}
 		}	
 	}
@@ -802,6 +801,236 @@ Action Timer_RemoveOverlay(Handle timer, int userid)
 	}
 	return Plugin_Continue;
 }
+
+void ToggleZombie(int client, bool zombie)
+{
+	if(zombie && !GetEntProp(client, Prop_Send, "m_iPlayerSkinOverride"))
+	{
+		SetEntProp(client, Prop_Send, "m_iPlayerSkinOverride", 1);
+
+		int entity = CreateEntityByName("tf_wearable");
+		if(entity != -1)
+		{
+			static const int VoodooIndex[] =  {-1, 5617, 5625, 5618, 5620, 5622, 5619, 5624, 5623, 5621};
+			SetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex", VoodooIndex[TF2_GetPlayerClass(client)]);
+			SetEntProp(entity, Prop_Send, "m_bInitialized", true);
+			SetEntProp(entity, Prop_Send, "m_iEntityQuality", 0);
+			SetEntProp(entity, Prop_Send, "m_iEntityLevel", 1);
+
+			DispatchSpawn(entity);
+
+			char buffer[64];
+			GetEntityNetClass(entity, buffer, sizeof(buffer));
+			int offset = FindSendPropInfo(buffer, "m_iItemIDHigh");
+			
+			SetEntData(entity, offset - 8, 0);	// m_iItemID
+			SetEntData(entity, offset - 4, 0);	// m_iItemID
+			SetEntData(entity, offset, 0);		// m_iItemIDHigh
+			SetEntData(entity, offset + 4, 0);	// m_iItemIDLow
+			
+			SetEntProp(entity, Prop_Send, "m_bValidatedAttachedEntity", true);
+
+			TF2U_EquipPlayerWearable(client, entity);
+		}
+	}
+	else if(!zombie && GetEntProp(client, Prop_Send, "m_iPlayerSkinOverride"))
+	{
+		SetEntProp(client, Prop_Send, "m_iPlayerSkinOverride", 0);
+		
+		int entity, i;
+		while(TF2U_GetWearable(client, entity, i))
+		{
+			int index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
+			if(index > 5616 && index < 5626)
+				TF2_RemoveWearable(client, entity);
+		}
+	}
+}
+/*
+	SetVariantString has a limit of 128 characters
+	which is not enough for what we need to do,
+	hence the old VScript method (mainly for DSP)
+
+stock void EmitSoundEx(const int[] clients, int numClients,
+		const char[] sample,
+		int entity = SOUND_FROM_PLAYER,
+		int channel = SNDCHAN_AUTO,
+		int level = SNDLEVEL_NORMAL,
+		int flags = SND_NOFLAGS,
+		float volume = SNDVOL_NORMAL,
+		int pitch = SNDPITCH_NORMAL,
+		int speakerentity = -1,
+		const float origin[3] = NULL_VECTOR,
+		int dsp = 0,
+		float soundtime = 0.0)
+{
+	float vec[3];
+	any data[4];
+	ArrayList list = new ArrayList(sizeof(data));
+
+	// VScript Hack for per-client sound
+	for(int client = 1; client <= MaxClients; client++)
+	{
+		if(IsClientInGame(client))
+		{
+			bool found;
+
+			for(int i; i < numClients; i++)
+			{
+				if(clients[i] == client)
+				{
+					found = true;
+					break;
+				}
+			}
+
+			if(found)
+				continue;
+			
+			data[3] = client;
+			GetEntPropVector(client, Prop_Data, "m_vecViewOffset", vec);
+			for(int i; i < 3; i++)
+			{
+				data[i] = vec[i];
+			}
+
+			list.PushArray(data);
+			SetEntPropVector(client, Prop_Data, "m_vecViewOffset", { 16383.0, 16383.0, -16383.0 });
+		}
+	}
+
+	char buffer[512];
+	CompileSound(buffer, sizeof(buffer), sample, entity, channel, level, flags, volume, pitch, speakerentity, origin, dsp, soundtime, 1);
+	
+	SetVariantString(buffer);
+	AcceptEntityInput(0, "RunScriptCode");
+
+	int length = list.Length;
+	for(int a; a < length; a++)
+	{
+		list.GetArray(a, data);
+
+		for(int b; b < 3; b++)
+		{
+			vec[b] = data[b];
+		}
+
+		SetEntPropVector(data[3], Prop_Data, "m_vecViewOffset", vec);
+	}
+
+	delete list;
+}
+
+stock void EmitSoundToAllEx(const char[] sample,
+		int entity = SOUND_FROM_PLAYER,
+		int channel = SNDCHAN_AUTO,
+		int level = SNDLEVEL_NORMAL,
+		int flags = SND_NOFLAGS,
+		float volume = SNDVOL_NORMAL,
+		int pitch = SNDPITCH_NORMAL,
+		int speakerentity = -1,
+		const float origin[3] = NULL_VECTOR,
+		int dsp = 0,
+		float soundtime = 0.0,
+		int filter_type = 5,
+		int filter_param = -1)
+{
+	char buffer[512];
+	CompileSound(buffer, sizeof(buffer), sample, entity, channel, level, flags, volume, pitch, speakerentity, origin, dsp, soundtime, filter_type, filter_param);
+	
+	SetVariantString(buffer);
+	AcceptEntityInput(0, "RunScriptCode");
+}
+
+stock void EmitSoundToClientEx(int client,
+		const char[] sample,
+		int entity = SOUND_FROM_PLAYER,
+		int channel = SNDCHAN_AUTO,
+		int level = SNDLEVEL_NORMAL,
+		int flags = SND_NOFLAGS,
+		float volume = SNDVOL_NORMAL,
+		int pitch = SNDPITCH_NORMAL,
+		int speakerentity = -1,
+		const float origin[3] = NULL_VECTOR,
+		int dsp = 0,
+		float soundtime = 0.0)
+{
+	if(entity != SOUND_FROM_PLAYER && entity != client)
+	{
+		int clients[2];
+		clients[0] = client;
+		EmitSoundEx(clients, 1, sample, entity, channel, level, flags, volume, pitch, speakerentity, origin, dsp, soundtime);
+		return;
+	}
+
+	char buffer[512];
+	CompileSound(buffer, sizeof(buffer), sample, entity, channel, level, flags, volume, pitch, speakerentity, origin, dsp, soundtime, 4);
+
+	SetVariantString(buffer);
+	AcceptEntityInput(0, "RunScriptCode");
+}
+
+void CompileSound(char[] buffer, int length,
+		const char[] sample,
+		int entity = SOUND_FROM_PLAYER,
+		int channel = SNDCHAN_AUTO,
+		int level = SNDLEVEL_NORMAL,
+		int flags = SND_NOFLAGS,
+		float volume = SNDVOL_NORMAL,
+		int pitch = SNDPITCH_NORMAL,
+		int speakerentity = -1,
+		const float origin[3] = NULL_VECTOR,
+		int dsp = 0,
+		float soundtime = 0.0,
+		int filter_type = 5,
+		int filter_param = -1)
+{
+	int size = Format(buffer, length, "EmitSoundEx({sound_name=\"%s\"", sample);
+	
+	if(channel != SNDCHAN_AUTO)
+		size += Format(buffer[size], length - size, ",channel=%d", channel);
+	
+	if(volume != SNDVOL_NORMAL)
+		size += Format(buffer[size], length - size, ",volume=%f", volume);
+	
+	if(level != SNDLEVEL_NONE)
+		size += Format(buffer[size], length - size, ",sound_level=%d", level);
+	
+	if(flags != SND_NOFLAGS)
+		size += Format(buffer[size], length - size, ",flags=%d", flags);
+	
+	if(pitch != SNDPITCH_NORMAL)
+		size += Format(buffer[size], length - size, ",pitch=%d", pitch);
+	
+	if(dsp != 0)
+		size += Format(buffer[size], length - size, ",special_dsp=%d", dsp);
+	
+	if(!IsNullVector(origin))
+		size += Format(buffer[size], length - size, ",origin=Vector(%f,%f,%f)", origin[0], origin[1], origin[2]);
+	
+	if(soundtime < 0.0)
+		size += Format(buffer[size], length - size, ",delay=%f", soundtime);
+	
+	if(soundtime > 0.0)
+		size += Format(buffer[size], length - size, ",sound_time=%f", soundtime);
+	
+	if(entity >= 0)
+		size += Format(buffer[size], length - size, ",entity=EntIndexToHScript(%d)", entity);
+	
+	if(speakerentity != -1)
+		size += Format(buffer[size], length - size, ",speaker_entity=EntIndexToHScript(%d)", speakerentity);
+	
+	if(filter_type != 0)
+		size += Format(buffer[size], length - size, ",filter_type=%d", filter_type);
+	
+	if(filter_param != -1)
+		size += Format(buffer[size], length - size, ",filter_param=%d", filter_param);
+	
+	Format(buffer[size], length - size, "});");
+
+	// DEBUG
+	PrintToConsoleAll(buffer);
+}*/
 
 public bool Trace_OnlyHitWorld(int entity, int mask)
 {

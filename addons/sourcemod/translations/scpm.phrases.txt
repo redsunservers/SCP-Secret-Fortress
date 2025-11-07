@@ -53,6 +53,11 @@
 		"#format"	"{1:t}"
 		"en"		"Toggled being a boss on {1}."
 	}
+	"Gave Item To"
+	{
+		"#format"	"{1:t}"
+		"en"		"Gave an item to {1}."
+	}
 	"SCP-914"
 	{
 		"en"	"SCP-914"
@@ -187,6 +192,18 @@
 	"Radio"
 	{
 		"en"	"Radio"
+	}
+	"Radio On"
+	{
+		"en"	"Channel 1..."
+	}
+	"Radio Jammed"
+	{
+		"en"	"Something is jamming it..."
+	}
+	"Radio Off"
+	{
+		"en"	"Turned off..."
 	}
 	"SCP500"
 	{

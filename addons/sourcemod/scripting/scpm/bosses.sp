@@ -59,6 +59,18 @@ static Action Bosses_MakeBossCmd(int client, int args)
 			else
 			{
 				special = Bosses_GetByName(buffer, false, client);
+				if(special == -1)
+				{
+					BossData data;
+					int length = BossList.Length;
+					for(int i; i < length; i++)
+					{
+						BossList.GetArray(i, data);
+						ReplyToCommand(client, "#%d - %s", i, data.Prefix);
+					}
+
+					return Plugin_Handled;
+				}
 			}
 		}
 		
@@ -146,14 +158,14 @@ void Bosses_SetupConfig(KeyValues map)
 
 	if(kv.JumpToKey("Always"))
 	{
-		if(kv.GotoFirstSubKey())
+		if(kv.GotoFirstSubKey(false))
 		{
 			do
 			{
 				if(data.SetupKv(kv, bossIndex))
 					bossIndex = BossList.PushArray(data) + 1;
 			}
-			while(kv.GotoNextKey());
+			while(kv.GotoNextKey(false));
 
 			kv.GoBack();
 		}
@@ -268,7 +280,8 @@ int Bosses_GetByName(const char[] name, bool exact = false, int client = 0)
 		for(int i; i < length; i++)
 		{
 			BossList.GetArray(i, data);
-			FormatEx(buffer, sizeof(buffer), "%t", data.Prefix);
+			//FormatEx(buffer, sizeof(buffer), "%t", data.Prefix);
+			strcopy(buffer, sizeof(buffer), data.Prefix);
 			
 			if(StrEqual(name, buffer, false))
 				return i;
@@ -507,7 +520,20 @@ void Bosses_ConditionRemoved(int client, TFCond condition)
 		Call_Finish();
 	}
 }
-
+/*
+void Bosses_EntityCreated(int entity, const char[] classname)
+{
+	for(int client = 1; client <= MaxClients; client++)
+	{
+		if(Bosses_StartFunctionClient(client, "EntityCreated"))
+		{
+			Call_PushCell(entity);
+			Call_PushString(classname);
+			Call_Finish();
+		}
+	}
+}
+*/
 // Delete the handle when done
 ArrayList Bosses_GetRandomList()
 {

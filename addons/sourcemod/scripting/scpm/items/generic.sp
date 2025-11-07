@@ -1,13 +1,6 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static int RadioIndex;
-
-int Radio_Index()
-{
-	return RadioIndex;
-}
-
 public bool SmallHealth_Use(int client)
 {
 	Client(client).Stress -= 50.0;
@@ -35,17 +28,6 @@ public bool Adrenaline_Use(int client)
 	return true;
 }
 
-public void Radio_Precache(int index, ActionInfo data)
-{
-	RadioIndex = data.Index;
-}
-
-public bool Radio_Use(int client)
-{
-	ClientCommand(client, "playgamesound items/suitchargeno1.wav");
-	return false;
-}
-
 public bool SCP500_Use(int client)
 {
 	ApplyHealEvent(client, RoundToCeil(Client(client).Stress / 10.0));
@@ -54,6 +36,7 @@ public bool SCP500_Use(int client)
 	Client(client).SprintPower = 100.0;
 	SetEntityHealth(client, 300);
 	TF2_RemoveCondition(client, TFCond_Plague);
+	ToggleZombie(client, false);
 	ClientCommand(client, "playgamesound items/medshot4.wav");
 	return true;
 }
