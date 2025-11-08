@@ -84,11 +84,12 @@ static Action Events_PlayerDeath(Event event, const char[] name, bool dontBroadc
 	if(victim)
 	{
 		bool deadRinger = view_as<bool>(event.GetInt("death_flags") & TF_DEATHFLAG_DEADRINGER);
+		bool fakeDeath = deadRinger;
 		
 		if(Bosses_StartFunctionClient(victim, "PlayerDeath"))
 		{
 			Call_PushCell(victim);
-			Call_PushCellRef(deadRinger);
+			Call_PushCellRef(fakeDeath);
 			Call_Finish();
 		}
 		
@@ -101,7 +102,7 @@ static Action Events_PlayerDeath(Event event, const char[] name, bool dontBroadc
 				{
 					Call_PushCell(attacker);
 					Call_PushCell(victim);
-					Call_PushCell(deadRinger);
+					Call_PushCell(fakeDeath);
 					Call_Finish();
 				}
 			}
@@ -134,7 +135,7 @@ static Action Events_PlayerDeath(Event event, const char[] name, bool dontBroadc
 			if(attacker)
 				Humans_PlayReaction(attacker, "ReactKill");
 
-			if(!deadRinger)
+			if(!fakeDeath)
 			{
 				char boss[64], killer[64];
 				Bosses_GetName(Client(victim).Boss, boss, sizeof(boss));
@@ -166,9 +167,12 @@ static Action Events_PlayerDeath(Event event, const char[] name, bool dontBroadc
 			Gamemode_CheckAlivePlayers(victim);
 			ViewModel_Destroy(victim);
 			Client(victim).ResetByDeath();
-			
-			CreateTimer(0.1, RemoveKillCam, userid, TIMER_FLAG_NO_MAPCHANGE);
 
+			CreateTimer(0.1, RemoveKillCam, userid, TIMER_FLAG_NO_MAPCHANGE);
+		}
+
+		if(!fakeDeath)
+		{
 			if(Client(victim).IsBoss)
 				CreateTimer(0.1, RemoveBossTimer, userid, TIMER_FLAG_NO_MAPCHANGE);
 		}

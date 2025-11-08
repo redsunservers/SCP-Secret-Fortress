@@ -28,10 +28,9 @@ enum struct BossData
 		bool result;
 
 		Call_PushCell(index);
-		Call_PushArrayEx(this, sizeof(this), SM_PARAM_COPYBACK);
-		Call_PushCellRef(this.Pickable);
+		Call_PushArrayEx(this, sizeof(BossData), SM_PARAM_COPYBACK);
 		Call_Finish(result);
-		
+
 		return result;
 	}
 }

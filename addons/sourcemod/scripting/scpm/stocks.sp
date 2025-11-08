@@ -469,32 +469,27 @@ int TF2_CreateLightEntity(float radius, int color[4], int brightness, float life
 	return entity;
 }
 
-int TF2_CreateGlow(int client, const char[] model)
+int TF2_CreateGlow(int entity)
 {
-	if(!model[0])
-		return -1;
+	char buffer[64];
+	GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
+	DispatchKeyValue(entity, "targetname", "scpm_TF2_CreateGlow");
 
-	int prop = CreateEntityByName("tf_taunt_prop");
-	if(IsValidEntity(prop))
-	{
-		int team = GetClientTeam(client);
-		SetEntProp(prop, Prop_Data, "m_iInitialTeamNum", team);
-		SetEntProp(prop, Prop_Send, "m_iTeamNum", team);
+	int glow = CreateEntityByName("tf_glow");
+	DispatchKeyValue(glow, "target", "scpm_TF2_CreateGlow");
+	DispatchKeyValue(glow, "Mode", "0");
+	DispatchSpawn(glow);
 
-		DispatchSpawn(prop);
+	AcceptEntityInput(glow, "Enable");
+	SetEntPropString(entity, Prop_Data, "m_iName", buffer);
 
-		SetEntityModel(prop, model);
-		SetEntPropEnt(prop, Prop_Data, "m_hEffectEntity", client);
-		SetEntProp(prop, Prop_Send, "m_bGlowEnabled", true);
-		SetEntProp(prop, Prop_Send, "m_fEffects", GetEntProp(prop, Prop_Send, "m_fEffects")|EF_BONEMERGE|EF_NOSHADOW|EF_NOINTERP);
+	SetVariantColor({255, 255, 255, 255});
+	AcceptEntityInput(glow, "SetGlowColor");
 
-		SetVariantString("!activator");
-		AcceptEntityInput(prop, "SetParent", client);
-
-		SetEntityRenderMode(prop, RENDER_TRANSCOLOR);
-		SetEntityRenderColor(prop, 255, 255, 255, 255);
-	}
-	return prop;
+	SetVariantString("!activator");
+	AcceptEntityInput(glow, "SetParent", entity);
+	
+	return glow;
 }
 
 bool GoToNamedSpawn(int client, const char[] match)
@@ -846,191 +841,6 @@ void ToggleZombie(int client, bool zombie)
 		}
 	}
 }
-/*
-	SetVariantString has a limit of 128 characters
-	which is not enough for what we need to do,
-	hence the old VScript method (mainly for DSP)
-
-stock void EmitSoundEx(const int[] clients, int numClients,
-		const char[] sample,
-		int entity = SOUND_FROM_PLAYER,
-		int channel = SNDCHAN_AUTO,
-		int level = SNDLEVEL_NORMAL,
-		int flags = SND_NOFLAGS,
-		float volume = SNDVOL_NORMAL,
-		int pitch = SNDPITCH_NORMAL,
-		int speakerentity = -1,
-		const float origin[3] = NULL_VECTOR,
-		int dsp = 0,
-		float soundtime = 0.0)
-{
-	float vec[3];
-	any data[4];
-	ArrayList list = new ArrayList(sizeof(data));
-
-	// VScript Hack for per-client sound
-	for(int client = 1; client <= MaxClients; client++)
-	{
-		if(IsClientInGame(client))
-		{
-			bool found;
-
-			for(int i; i < numClients; i++)
-			{
-				if(clients[i] == client)
-				{
-					found = true;
-					break;
-				}
-			}
-
-			if(found)
-				continue;
-			
-			data[3] = client;
-			GetEntPropVector(client, Prop_Data, "m_vecViewOffset", vec);
-			for(int i; i < 3; i++)
-			{
-				data[i] = vec[i];
-			}
-
-			list.PushArray(data);
-			SetEntPropVector(client, Prop_Data, "m_vecViewOffset", { 16383.0, 16383.0, -16383.0 });
-		}
-	}
-
-	char buffer[512];
-	CompileSound(buffer, sizeof(buffer), sample, entity, channel, level, flags, volume, pitch, speakerentity, origin, dsp, soundtime, 1);
-	
-	SetVariantString(buffer);
-	AcceptEntityInput(0, "RunScriptCode");
-
-	int length = list.Length;
-	for(int a; a < length; a++)
-	{
-		list.GetArray(a, data);
-
-		for(int b; b < 3; b++)
-		{
-			vec[b] = data[b];
-		}
-
-		SetEntPropVector(data[3], Prop_Data, "m_vecViewOffset", vec);
-	}
-
-	delete list;
-}
-
-stock void EmitSoundToAllEx(const char[] sample,
-		int entity = SOUND_FROM_PLAYER,
-		int channel = SNDCHAN_AUTO,
-		int level = SNDLEVEL_NORMAL,
-		int flags = SND_NOFLAGS,
-		float volume = SNDVOL_NORMAL,
-		int pitch = SNDPITCH_NORMAL,
-		int speakerentity = -1,
-		const float origin[3] = NULL_VECTOR,
-		int dsp = 0,
-		float soundtime = 0.0,
-		int filter_type = 5,
-		int filter_param = -1)
-{
-	char buffer[512];
-	CompileSound(buffer, sizeof(buffer), sample, entity, channel, level, flags, volume, pitch, speakerentity, origin, dsp, soundtime, filter_type, filter_param);
-	
-	SetVariantString(buffer);
-	AcceptEntityInput(0, "RunScriptCode");
-}
-
-stock void EmitSoundToClientEx(int client,
-		const char[] sample,
-		int entity = SOUND_FROM_PLAYER,
-		int channel = SNDCHAN_AUTO,
-		int level = SNDLEVEL_NORMAL,
-		int flags = SND_NOFLAGS,
-		float volume = SNDVOL_NORMAL,
-		int pitch = SNDPITCH_NORMAL,
-		int speakerentity = -1,
-		const float origin[3] = NULL_VECTOR,
-		int dsp = 0,
-		float soundtime = 0.0)
-{
-	if(entity != SOUND_FROM_PLAYER && entity != client)
-	{
-		int clients[2];
-		clients[0] = client;
-		EmitSoundEx(clients, 1, sample, entity, channel, level, flags, volume, pitch, speakerentity, origin, dsp, soundtime);
-		return;
-	}
-
-	char buffer[512];
-	CompileSound(buffer, sizeof(buffer), sample, entity, channel, level, flags, volume, pitch, speakerentity, origin, dsp, soundtime, 4);
-
-	SetVariantString(buffer);
-	AcceptEntityInput(0, "RunScriptCode");
-}
-
-void CompileSound(char[] buffer, int length,
-		const char[] sample,
-		int entity = SOUND_FROM_PLAYER,
-		int channel = SNDCHAN_AUTO,
-		int level = SNDLEVEL_NORMAL,
-		int flags = SND_NOFLAGS,
-		float volume = SNDVOL_NORMAL,
-		int pitch = SNDPITCH_NORMAL,
-		int speakerentity = -1,
-		const float origin[3] = NULL_VECTOR,
-		int dsp = 0,
-		float soundtime = 0.0,
-		int filter_type = 5,
-		int filter_param = -1)
-{
-	int size = Format(buffer, length, "EmitSoundEx({sound_name=\"%s\"", sample);
-	
-	if(channel != SNDCHAN_AUTO)
-		size += Format(buffer[size], length - size, ",channel=%d", channel);
-	
-	if(volume != SNDVOL_NORMAL)
-		size += Format(buffer[size], length - size, ",volume=%f", volume);
-	
-	if(level != SNDLEVEL_NONE)
-		size += Format(buffer[size], length - size, ",sound_level=%d", level);
-	
-	if(flags != SND_NOFLAGS)
-		size += Format(buffer[size], length - size, ",flags=%d", flags);
-	
-	if(pitch != SNDPITCH_NORMAL)
-		size += Format(buffer[size], length - size, ",pitch=%d", pitch);
-	
-	if(dsp != 0)
-		size += Format(buffer[size], length - size, ",special_dsp=%d", dsp);
-	
-	if(!IsNullVector(origin))
-		size += Format(buffer[size], length - size, ",origin=Vector(%f,%f,%f)", origin[0], origin[1], origin[2]);
-	
-	if(soundtime < 0.0)
-		size += Format(buffer[size], length - size, ",delay=%f", soundtime);
-	
-	if(soundtime > 0.0)
-		size += Format(buffer[size], length - size, ",sound_time=%f", soundtime);
-	
-	if(entity >= 0)
-		size += Format(buffer[size], length - size, ",entity=EntIndexToHScript(%d)", entity);
-	
-	if(speakerentity != -1)
-		size += Format(buffer[size], length - size, ",speaker_entity=EntIndexToHScript(%d)", speakerentity);
-	
-	if(filter_type != 0)
-		size += Format(buffer[size], length - size, ",filter_type=%d", filter_type);
-	
-	if(filter_param != -1)
-		size += Format(buffer[size], length - size, ",filter_param=%d", filter_param);
-	
-	Format(buffer[size], length - size, "});");
-
-	// DEBUG
-	PrintToConsoleAll(buffer);
-}*/
 
 public bool Trace_OnlyHitWorld(int entity, int mask)
 {

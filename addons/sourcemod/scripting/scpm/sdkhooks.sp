@@ -236,9 +236,9 @@ void EmitSoundEx(const int[] clients, int numClients,
 		int dsp = 0)
 {
 	// What's going on? We use VScript to use parameters such as DSP as SM doesn't have it
-	// But we can't 100% use VScript because SetVariantString is limited to 128 characters
+	// But we can't VScript requires bad hacks for setting who can hear the sound
 	// So we partially use VScript for special effects, sound hook it, and add the rest of our settings
-	// Insane...
+	// Also SetVariantString is limited to 128 characters shh...
 
 	for(int b; b < numClients && b < sizeof(SoundOverride); b++)
 	{
@@ -254,7 +254,7 @@ void EmitSoundEx(const int[] clients, int numClients,
 	SoundOverride.pitch = pitch;
 
 	char buffer[128];
-	int size = strcopy(buffer, sizeof(buffer), "EmitSoundEx({sound_name=\"SCPM\"");
+	int size = strcopy(buffer, sizeof(buffer), "EmitSoundEx({sound_name=\"vo/null.mp3\"");
 	
 	if(dsp != 0)
 		size += Format(buffer[size], sizeof(buffer) - size, ",special_dsp=%d", dsp);

@@ -126,9 +126,9 @@ public Action SCP427_PlayerRunCmd(int client, int &buttons, int &impulse, float 
 	return Plugin_Continue;
 }
 
-public bool SCP427A_Precache(int index, BossData data, bool &hidden)
+public bool SCP427A_Precache(int index, BossData data)
 {
-	hidden = true;
+	data.Pickable = false;
 	BossIndex = index;
 
 	PrecacheModel(PlayerModel);

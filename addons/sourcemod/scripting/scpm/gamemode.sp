@@ -79,11 +79,14 @@ void Gamemode_RoundRespawn()
 
 		int bosses = count / base;
 
-		if(bosses == 0)
+		if(count < 3)
 		{
 			// Min of one boss at 3 player count
-			if(count > 2)
-				bosses = 1;
+			bosses = 0;
+		}
+		else if(bosses < 1)
+		{
+			bosses = 1;
 		}
 		else if((count % base) > GetRandomInt(0, base - 1))
 		{
@@ -1508,11 +1511,10 @@ static Action ReapplyGlowEffect(Handle timer, int userid)
 		if(IsValidEntity(GlowEffectRef[client]))
 			RemoveEntity(GlowEffectRef[client]);
 		
-		char model[PLATFORM_MAX_PATH];
-		GetEntPropString(client, Prop_Data, "m_ModelName", model, sizeof(model));
-		int entity = TF2_CreateGlow(client, model);
+		int entity = TF2_CreateGlow(client);
 		if(entity != -1)
 		{
+			SetEdictFlags(entity, (GetEdictFlags(entity) &~ FL_EDICT_ALWAYS) | FL_EDICT_FULLCHECK);
 			SDKHook(entity, SDKHook_SetTransmit, GlowTransmit);
 			GlowEffectRef[client] = EntIndexToEntRef(entity);
 		}
@@ -1526,12 +1528,21 @@ static Action ReapplyGlowEffect(Handle timer, int userid)
 
 static Action GlowTransmit(int entity, int target)
 {
+	SetEdictFlags(entity, (GetEdictFlags(entity) &~ FL_EDICT_ALWAYS) | FL_EDICT_FULLCHECK);
+
 	if(target > 0 && target <= MaxClients)
 	{
 		int client = GetEntPropEnt(entity, Prop_Data, "m_hParent");
 		if(client > 0 && client <= MaxClients)
 		{
-			return Client(client).GlowingTo(target) ? Plugin_Continue : Plugin_Stop;
+			if(Client(client).GlowingTo(target))
+			{
+				return Plugin_Continue;
+			}
+			else
+			{
+				return Plugin_Stop;
+			}
 		}
 
 		AcceptEntityInput(entity, "Kill");

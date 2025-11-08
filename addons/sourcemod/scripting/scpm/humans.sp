@@ -374,9 +374,9 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 		}
 
 		// Power Logic
-		float powerUse = (effects & EF_DIMLIGHT) ? 1.0 : -1.0;
+		float powerUse = (effects & EF_DIMLIGHT) ? ClassStats[class].PowerDrain : -1.0;
 		if(Radio_IsActive(client))
-			powerUse += 0.5;
+			powerUse += ClassStats[class].PowerDrain / 2.0;
 
 		if(powerUse > 0.0)
 		{
@@ -384,14 +384,11 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 			if(Client(client).LightPower < 0.0)
 				Client(client).LightPower = 0.0;
 		}
-		else
+		else if(Client(client).LightPower < 100.0)
 		{
-			if(Client(client).LightPower < 100.0)
-			{
-				Client(client).LightPower += powerUse * delta;
-				if(Client(client).LightPower > 100.0)
-					Client(client).LightPower = 100.0;
-			}
+			Client(client).LightPower -= powerUse * delta;
+			if(Client(client).LightPower > 100.0)
+				Client(client).LightPower = 100.0;
 		}
 
 		// Flashlight Logic
@@ -418,13 +415,6 @@ void Human_PlayerRunCmd(int client, int buttons, const float vel[3])
 		{
 			if(ClassStats[class].StressDark)
 				Client(client).Stress += ClassStats[class].StressDark * delta;
-
-			if(Client(client).LightPower < 100.0)
-			{
-				Client(client).LightPower += delta - powerUse;
-				if(Client(client).LightPower > 100.0)
-					Client(client).LightPower = 100.0;
-			}
 		}
 
 		static char buffer[256];

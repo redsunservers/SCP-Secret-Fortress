@@ -40,12 +40,17 @@ static const char PlayerModel[] = "models/freak_fortress_2/blightcaller_remade/b
 static const char JumpscareOverlay[] = "freak_fortress_2/scp_173/scp173_rage_overlay1";
 static const char AmbientSound[] = "#scpm/blightcaller/ambient.mp3";
 static const char JumpscareSound[] = "scpm/blightcaller/scare.mp3";
-static int BossIndex;
+static int BossIndex = -1;
 
 static int CurrentTarget;
 static ArrayList TeleLocations;
 static Handle TeleportTimer;
 static bool DoneJumpscare;
+
+stock int Blightcaller_Index()
+{
+	return BossIndex;
+}
 
 public bool Blightcaller_Precache(int index)
 {
@@ -56,6 +61,11 @@ public bool Blightcaller_Precache(int index)
 	PrecacheSound(JumpscareSound);
 	MultiToDownloadsTable(Downloads, sizeof(Downloads));
 	return true;
+}
+
+public void Blightcaller_Unload()
+{
+	BossIndex = -1;
 }
 
 public void Blightcaller_Create(int client)
@@ -199,6 +209,20 @@ public Action Blightcaller_PlayerRunCmd(int client, int &buttons, int &impulse, 
 				}
 			}
 		}
+		else
+		{
+			float pos1[3], pos2[3];
+			GetClientAbsOrigin(client, pos1);
+			for(int target = 1; target <= MaxClients; target++)
+			{
+				if(client != target && IsClientInGame(target) && IsPlayerAlive(target))
+				{
+					GetClientAbsOrigin(target, pos2);
+					if(GetVectorDistance(pos1, pos2, true) < 999999.0)
+						Radio_JamFor(target, 2.0);
+				}
+			}
+		}
 
 		if(CurrentTarget)
 		{
@@ -300,7 +324,7 @@ public void Blightcaller_ActionButton(int client)
 
 public bool Blightcaller_GlowTarget(int client, int target)
 {
-	if(CurrentTarget != target && GetClientTeam(client) != GetClientTeam(target) && !TF2_IsPlayerInCondition(target, TFCond_Plague) && (Client(target).LastNoiseAt + 1.0) < GetGameTime() && !TF2_IsPlayerInCondition(target, TFCond_MarkedForDeath))
+	if(CurrentTarget != target && IsPlayerAlive(client) && GetClientTeam(client) != GetClientTeam(target) && !TF2_IsPlayerInCondition(target, TFCond_Plague) && (Client(target).LastNoiseAt + 1.0) < GetGameTime() && !TF2_IsPlayerInCondition(target, TFCond_MarkedForDeath))
 	{
 		Client(target).NoTransmitTo(client, true);
 	}

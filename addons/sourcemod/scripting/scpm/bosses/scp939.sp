@@ -194,7 +194,7 @@ public bool SCP939_GlowTarget(int client, int target)
 {
 	float gameTime = GetGameTime();
 
-	if(GetClientTeam(client) != GetClientTeam(target) && (Client(target).LastNoiseAt + 3.0) < gameTime && !TF2_IsPlayerInCondition(target, TFCond_MarkedForDeath))
+	if(IsPlayerAlive(client) && GetClientTeam(client) != GetClientTeam(target) && (Client(target).LastNoiseAt + 3.0) < gameTime && !TF2_IsPlayerInCondition(target, TFCond_MarkedForDeath))
 	{
 		Client(target).NoTransmitTo(client, true);
 	}
