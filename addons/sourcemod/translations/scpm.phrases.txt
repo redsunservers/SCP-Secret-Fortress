@@ -1,0 +1,377 @@
+"Phrases"
+{
+	"You Will Die"
+	{
+		"en"	"YOU WILL DIE"
+	}
+	"There Is No Hope"
+	{
+		"en"	"THERE IS NO HOPE"
+	}
+	"Mental Breakdown"
+	{
+		"en"	"MENTAL BREAKDOWN"
+	}
+	"Control Progress 1"
+	{
+		"en"	"%%+reload%% INTERACT %%+attack3%% SPRINT %%+inspect%% FLASHLIGHT"
+	}
+	"Control Progress 2"
+	{
+		"en"	"%%+use_action_slot_item%% USE ACTION ITEM %%dropitem%% DROP ITEM"
+	}
+	"Weapon Stripped"
+	{
+		"en"	"Weapon Stripped"
+	}
+	"Action Item"
+	{
+		"#format"	"{1:t}"
+		"en"		"Action Item: {1}"
+	}
+	"NaN"
+	{
+		"en"	"N/A"
+	}
+	"Keycard Status"
+	{
+		"#format"	"{1:d},{2:d},{3:d}"
+		"en"		"Containment Level: {1}\nArmory Level: {2}\nCheckpoint Level: {3}"
+	}
+	"Stat Win Screen"
+	{
+		"#format"	"{1:d},{2:d}"
+		"en"		"SCPs Alive: {1} --- Survivors: {2}\n \nThe Escapees:"
+	}
+	"In Menu Cooldown"
+	{
+		"#format"	"{1:.1f}"
+		"en"		"Cooling down {1}..."
+	}
+	"Created Boss On"
+	{
+		"#format"	"{1:t}"
+		"en"		"Toggled being a boss on {1}."
+	}
+	"Gave Item To"
+	{
+		"#format"	"{1:t}"
+		"en"		"Gave an item to {1}."
+	}
+	"SCP-914"
+	{
+		"en"	"SCP-914"
+	}
+	"Keycard"
+	{
+		"en"	"Keycard"
+	}
+	"My Body"
+	{
+		"en"	"My Body"
+	}
+	"Can't Drop Item"
+	{
+		"en"	"I can't seem to drop this..."
+	}
+	"Boss Killed Message None"
+	{
+		"#format"	"{1:t}"
+		"en"		"{darkred}{1} {default}has been contained by {black}[REDACTED]"
+	}
+	"Boss Killed Message Solo"
+	{
+		"#format"	"{1:t},{2:s}"
+		"en"		"{darkred}{1} {default}has been contained by {orange}{2}"
+	}
+	"Boss Killed Message Duo"
+	{
+		"#format"	"{1:t},{2:s},{3:s}"
+		"en"		"{darkred}{1} {default}has been contained by {orange}{2} {default}and {orange}{3}"
+	}
+	"Scout Entry"
+	{
+		"en"	"{orange}Scout{default}: {green}Your walk speed is slightly increased {red}but sprint regenerates slower"
+	}
+	"Soldier Entry"
+	{
+		"en"	"{orange}Soldier{default}: {green}You don't gain stress when alone {red}but you go insane slightly faster"
+	}
+	"Pyro Entry"
+	{
+		"en"	"{orange}Pyro{default}: {green}You go insane slightly slower {red}but being with a group doesn't decrease stress"
+	}
+	"Demoman Entry"
+	{
+		"en"	"{orange}Demoman{default}: {green}Your sprint speed is heavily increased {red}but requires more sprint to use"
+	}
+	"Heavy Entry"
+	{
+		"en"	"{orange}Heavy{default}: {green}Increased max health {red}but your sprint speed is slightly decreased"
+	}
+	"Engineer Entry"
+	{
+		"en"	"{orange}Engineer{default}: {green}Power usage is heavily decreased {red}but you gain stress without your flashlight on"
+	}
+	"Medic Entry"
+	{
+		"en"	"{orange}Medic{default}: {green}Regenerates health over time {red}but increases stress when seeing death"
+	}
+	"Sniper Entry"
+	{
+		"en"	"{orange}Sniper{default}: {yellow}You're able to observe subjects more easily"
+	}
+	"Spy Entry"
+	{
+		"en"	"{orange}Spy{default}: {yellow}You're able to observe subjects less easily"
+	}
+	"Class No Use"
+	{
+		"en"	"I don't know how to use this..."
+	}
+	"Keycard100"
+	{
+		"en"	"Janitor Keycard"
+	}
+	"Keycard200"
+	{
+		"en"	"Scientist Keycard"
+	}
+	"Keycard101"
+	{
+		"en"	"Zone Manager Keycard"
+	}
+	"Keycard201"
+	{
+		"en"	"Major Scientist Keycard"
+	}
+	"Keycard111"
+	{
+		"en"	"Guard Keycard"
+	}
+	"Keycard121"
+	{
+		"en"	"Senior Guard Keycard"
+	}
+	"Keycard122"
+	{
+		"en"	"Lieutenant Keycard"
+	}
+	"Keycard132"
+	{
+		"en"	"Commander Keycard"
+	}
+	"Keycard301"
+	{
+		"en"	"Containment Engineer Keycard"
+	}
+	"Keycard302"
+	{
+		"en"	"Facility Manager Keycard"
+	}
+	"Keycard232"
+	{
+		"en"	"Artificial Keycard"
+	}
+	"Keycard332"
+	{
+		"en"	"O5 Keycard"
+	}
+	"SmallHealth"
+	{
+		"en"	"Pain Killers"
+	}
+	"MediumHealth"
+	{
+		"en"	"Health Kit"
+	}
+	"Adrenaline"
+	{
+		"en"	"Adrenaline"
+	}
+	"Radio"
+	{
+		"en"	"Radio"
+	}
+	"Radio On"
+	{
+		"en"	"Channel 1..."
+	}
+	"Radio Jammed"
+	{
+		"en"	"Something is jamming it..."
+	}
+	"Radio Off"
+	{
+		"en"	"Turned off..."
+	}
+	"SCP500"
+	{
+		"en"	"SCP-500"
+	}
+	"SCP018"
+	{
+		"en"	"SCP-018"
+	}
+	"SCP018 Entry"
+	{
+		"en"	"SCP-018\nObject Class: Euclid\nDescription: SCP-018 has the appearance of a Super Ball made in 1969.\nSCP-018 is able to bounce with over two hundred percent efficiency.\nThe ball will soon become a dangerous projectile."
+	}
+	"FlashGrenade"
+	{
+		"en"	"Flash Grenade"
+	}
+	"FragGrenade"
+	{
+		"en"	"High-Explosive Grenade"
+	}
+	"SCP207"
+	{
+		"en"	"SCP-207"
+	}
+	"SCP268"
+	{
+		"en"	"SCP-268"
+	}
+	"MTFSpawn"
+	{
+		"en"	"{mediumblue}Mobile Task Force Unit, Epsilon-11{default} has entered the facility."
+	}
+	"SCP Controls"
+	{
+		"en"	"%%+reload%% INTERACT"
+	}
+	"SCP173"
+	{
+		"en"	"SCP-173"
+	}
+	"SCP173 Entry"
+	{
+		"en"	"SCP-173\nObject Class: Euclid\nDescription: It is constructed from concrete and rebar with traces of Krylon brand spray paint.\nThe object cannot move while within a direct line of sight.\nLine of sight must not be broken at any time with SCP-173."
+	}
+	"Generic SCP Controls"
+	{
+		"en"	"%%+reload%% INTERACT"
+	}
+	"SCP106"
+	{
+		"en"	"SCP-106"
+	}
+	"SCP106 Entry"
+	{
+		"en"	"SCP-106\nObject Class: Keter\nDescription: SCP-106 appears to be an elderly humanoid, with a general appearance of advanced decomposition.\nWhen attacking, SCP-106 will attempt to incapacitate prey, then pull disabled prey into its pocket dimension.\nSCP-106 is capable of passing through solid matter.\nIn the event of a breach event by SCP-106, a human will be prepped for recall,\nthe lure subject will be injured, and the sound emitted by said subject will be transmitted."
+	}
+	"SCP106 Controls"
+	{
+		"en"	"%%+reload%% INTERACT %%+use_action_slot_item%% TOGGLE NOCLIP"
+	}
+	"Unsafe Location"
+	{
+		"en"	"Unsafe Location"
+	}
+	"SCP939"
+	{
+		"en"	"SCP-939"
+	}
+	"SCP939 Entry"
+	{
+		"en"	"SCP-939\nObject Class: Keter\nDescription: SCP-939 are endothermic, pack-based predators which display atrophy of various systems similar to troglobitic organisms.\nSCP-939's primary method of luring prey is the imitation of human speech in the voices of prior victims.\nHas eye spots, sensitive to light and dark, will only spot victims with under bright light or moving around quickly."
+	}
+	"SCP939 Controls"
+	{
+		"en"	"%%+reload%% INTERACT %%lastdisguise%% LAST VOICE"
+	}
+	"SCP096"
+	{
+		"en"	"SCP-096"
+	}
+	"SCP096 Entry"
+	{
+		"en"	"SCP-096\nObject Class: Euclid\nDescription: SCP-096 is normally extremely docile, however, when someone views SCP-096's face,\nwhether it be directly, via video recording, or even a photograph, it will enter a stage of considerable emotional distress.\nSCP-096 will cover its face with its hands and begin screaming, crying, and babbling incoherently, then will begin running to the person who viewed its face."
+	}
+	"SCP049"
+	{
+		"en"	"SCP-049"
+	}
+	"SCP049A"
+	{
+		"en"	"SCP-049-1"
+	}
+	"SCP049 Entry"
+	{
+		"en"	"SCP-049\nObject Class: Euclid\nSCP-049 is a humanoid entity which bears the appearance of a medieval plague doctor.\nSCP-049 is capable of causing all biological functions of an organism to cease through direct skin contact.\nSCP-049-2 instances are reanimated corpses that have been operated on by SCP-049."
+	}
+	"SCP049 Controls"
+	{
+		"en"	"%%+reload%% INTERACT %%lastinv%% SWITCH WEAPONS"
+	}
+	"SCP427"
+	{
+		"en"	"SCP-427"
+	}
+	"SCP427A"
+	{
+		"en"	"SCP-427-1"
+	}
+	"SCP427 Entry"
+	{
+		"en"	"SCP-427\nObject Class: Safe*\nSCP-427 is a small, spherical, ornately carved locket.\nWhen SCP-427 is opened and exposed to biological tissue, it rapidly regenerates cellular damage.\nHowever, long-term exposure produces a significant health hazard."
+	}
+	"SCP427 Open"
+	{
+		"en"	"You opened the locket..."
+	}
+	"SCP427 Close"
+	{
+		"en"	"You closed the locket..."
+	}
+	"SCP109"
+	{
+		"en"	"SCP-109"
+	}
+	"SCP714"
+	{
+		"en"	"SCP-714"
+	}
+	"SCP714 On"
+	{
+		"en"	"It fits your finger perfectly..."
+	}
+	"SCP714 Off"
+	{
+		"en"	"You took off the ring..."
+	}
+	"PainisCupcake"
+	{
+		"en"	"FREAK-008"
+	}
+	"PainisCupcake Entry"
+	{
+		"en"	"FREAK-008\nClass: Soldier\nNickname: Painis Cupcake\nFREAK-008 takes the form of a RED Soldier and while moving he makes shotgun-cocking noises.\nDue to his cannibalistic lifestyle, FREAK-008 has brutal force as one of his primary combat abilities.\nThe loud shotgun-cocking noises he emits while moving are a warning to any potential victims in his vicinity."
+	}
+	"Blightcaller"
+	{
+		"en"	"FREAK-108"
+	}
+	"Blightcaller Entry"
+	{
+		"en"	"FREAK-108\nClass: Medic\nNickname: The Blightcaller\nFREAK-108 is a Biohazard Medic, alike a medieval Plague Doctor, which is furthered by his habit of spreading diseases.\nFREAK-108 has been known to distort anything electronic, causing them to emit loud static.\nWhen pursuing a chosen victim, he relies on telepathic illusions to make said victim hallucinate, most effective on victims with extreme stress."
+	}
+	"Blightcaller Controls"
+	{
+		"en"	"%%+reload%% INTERACT %%+use_action_slot_item%% UNSTABLE TELEPORT"
+	}
+	"Blightcaller Tele Early"
+	{
+		"#format"	"{1:d},{2:d}"
+		"en"		"Too soon ({1}/{2})..."
+	}
+	"Blightcaller Tele Duck"
+	{
+		"en"	"Ready, crouch to use..."
+	}
+	"Avoid Making Noise"
+	{
+		"en"	"Avoid making noise by crouching or staying still"
+	}
+}

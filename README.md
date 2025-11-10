@@ -1,82 +1,33 @@
-# SCP: Secret Fortress
+# SCP: Mercenaries
 
-SCP: Secret Fortress is a gamemode for Team Fortress 2 inspired by the game [SCP: Secret Labortory](https://store.steampowered.com/app/700330/SCP_Secret_Laboratory/ "SCP: Secret: Laboratory on Steam"). It contains many elements that differ from normal TF2 such as the ability to pick up serveral different items and weapons, using no weapon slots and custom ammo types.
+**SCP: Mercenaries is a gamemode for Team Fortress 2 combined with the [SCP Foundation](https://scp-wiki.wikidot.com), to create a horror gamemode where survivors have to escape and survive against loose enemy SCPs. Uses custom maps with the "scp_" prefix.**
 
-Alterative gamemodes can be created using the same plugin, some ones already made includes SCP-3008-1 survival game using a custom map and [SCP: Pandemic](https://store.steampowered.com/app/872670/SCP_Pandemic_Early_Access/ "SCP: Pandemic (Early Access) on Steam") using [Super Zombie Fortress](https://github.com/redsunservers/SuperZombieFortress "redsunservers/SuperZombieFortress: Custom Team Fortress 2 Gamemode, inspired from Left 4 Dead") (szf) maps.
+## Installation:
 
-## Compatibility Notice
+**[View Releases](github.com/redsunservers/SCP-Secret-Fortress/releases)**  
+Use `New Install Package` for first time installs or content update
+Use `Update Package` for only patch updates without new content
 
-This plugin uses different features which may cause some other plugins to misbehave:
-- Uses it's own chat processor for proximity chat which causes other chat processors to not function (See scp_sf.inc about SCPSF_CanTalkTo)
-- Team 0 (Unassigned) is used as a playable team (Check if a player is alive along with team check)
-- Pop up menus during gameplay can be negative to weapon switching
-- Player's class swap often for plugins that may check one time
-- Without SendProxy can cause trippy viewmodels
-- Custom model plugins may not function at all
+Required:
 
-## Required Dependencies:
-[TF2Attributes](https://github.com/FlaminSarge/tf2attributes "FlaminSarge/tf2attributes: TF2Attributes SourceMod plugin")  
-[TF2Items](https://github.com/asherkin/TF2Items "asherkin/TF2Items: Items with custom attributes.")   
-[TF2 Econ Data](https://github.com/nosoop/SM-TFEconData "nosoop/SM-TFEconData: A library to get TF2 item data from game memory.")   
-[TF2 Utils](https://github.com/nosoop/SM-TFUtils "nosoop/SM-TFUtils: SourceMod utility natives for Team Fortress 2.")   
-[MemoryPatch](https://github.com/Kenzzer/MemoryPatch "Kenzzer/MemoryPatch: A simple .inc file to patch memory efficiently.") (Compiling)  
-[More Colors](https://forums.alliedmods.net/showthread.php?t=185016 "[INC] More Colors (1.9.1) - AlliedModders") (Compiling)
+- [VScript](https://github.com/FortyTwoFortyTwo/VScript)
+- [SM-TFEconData](https://github.com/nosoop/SM-TFEconData)
+- Supported Chat Processer or making use of "SCPM_CanTalkTo"
 
-## Supported Plugins:
-[Source Vehicles](https://github.com/Mikusch/source-vehicles "Mikusch/source-vehicles: Driveable vehicles for TF2, CS:S and Black Mesa") (Whitelist/Blacklist classes that can drive)  
-[SourceBans++](https://github.com/sbpp/sourcebans-pp "sbpp/sourcebans-pp: Admin, ban, and comms management system for the Source engine") (For integrated chat processor)  
-[Goomba Stomp](https://github.com/Flyflo/SM-Goomba-Stomp "Flyflo/SM-Goomba-Stomp") (Restricted to SCP classes)
+Supported:
+
+- [SM-TFUtils](https://github.com/nosoop/SM-TFUtils)
+- [TFOnTakeDamage](https://github.com/nosoop/SM-TFOnTakeDamage)
 
 ## Credits:
-Batfoxkid - Original gamemode creator  
-[GitHub Profile](https://github.com/Batfoxkid "Batfoxkid")
 
-ficool2 - Custom viewmodels / gibs, karma system, SCP-18, gameplay changes/bugfixes  
-[GitHub Profile](https://github.com/ficool2 "ficool2")
-
-Mikusch - Many many related DHooks and SDKCalls  
-[GitHub Profile](https://github.com/Mikusch "Mikusch") - [Fortress Royale](https://github.com/Mikusch/fortress-royale "Team Fortress 2 battle royale gamemode")
-
-42 - Some other related DHooks  
-[GitHub Profile](https://github.com/FortyTwoFortyTwo "FortyTwoFortyTwo (42)") - [Randomizer](https://github.com/FortyTwoFortyTwo/Randomizer "TF2 Gamemode where everyone plays as random class with random weapons")
-
-sarysa - Eye-based system for SCPs like SCP-173  
-[GitHub Profile](https://github.com/sarysa "sarysa") - [Forum Thread](https://forums.alliedmods.net/showthread.php?t=309245 "[FF2] Releasing all my private rages/bosses to the public. - AlliedModders")
-
-Benoist - Spectator team swap  
-[GitHub Profile](https://github.com/Kenzzer "Kenzzer (Benoist)") - [Forum Thread](https://forums.alliedmods.net/showthread.php?t=314271 "[ANY] How to properly switch team - AlliedModders")
-
-nosoop - Per-player outlines  
-[GitHub Profile](https://github.com/nosoop "nosoop") - [TF2 Custom Attribute Starter Pack](https://github.com/nosoop/SM-TFCustomAttributeStarterPack "nosoop/SM-TFCustomAttributeStarterPack: A collection of plugins to be used with the TF2 Custom Attribute framework.")
-
-Deathreus - Increased movement speed cap  
-[GitHub Profile](https://github.com/Deathreus "Deathreus") - [Forum Thread](https://forums.alliedmods.net/showthread.php?t=317520 "[TF2] Move Speed Unlocker - AlliedModders")
-
-naydef - Medi-Gun DHook  
-[GitHub Profile](https://github.com/naydef "naydef") - [Forum Thread](https://forums.alliedmods.net/showthread.php?t=311520 "[Solved] [TF2] Medigun healing enemy players help - AlliedModders")
-
-Koishi - Revive markers  
-[GitHub Profile](https://github.com/shadow93 "shadow93 (Koishi)") - [Forum Thread](https://forums.alliedmods.net/showthread.php?t=248320 "[FF2] [BOSS] 弾幕ドクター ～ Blitzkrieg (BETA 3.35)")
-
-Artvin - Map/Model development  
-[GitHub Profile](https://github.com/artvin01 "artvin01 (Artvin)")
-
-Crust - SCP custom animations  
-[Steam Profile](https://steamcommunity.com/profiles/76561198097667312 "Steam Community :: Crust")
-
-DoctorKrazy - Chaos & SCP-049-2 rigs  
-[AlliedModders Profile](https://forums.alliedmods.net/member.php?u=288676 "AlliedModders - View Profile: DoctorKrazy")
-
-JuegosPablo - MTF rig  
-[AlliedModders Profile](https://forums.alliedmods.net/member.php?u=268021 "AlliedModders - View Profile: JuegosPablo")
-
-RavensBro - SCP-173 rig  
-[AlliedModders Profile](https://forums.alliedmods.net/member.php?u=60510 "AlliedModders - View Profile: RavensBro")
-
-Marxvee - Special thanks  
-[GitHub Profile](https://github.com/spundarce "spundarce (Marxvee)")
-
-SCP: Secret Labortory - Game assets  
-[Steam Game](https://store.steampowered.com/app/700330/SCP_Secret_Laboratory/ "SCP: Secret: Laboratory on Steam")
-
-And [GitHub Contributors](https://github.com/redsunservers/SCP-Secret-Fortress/graphs/contributors "Contributors to redsunservers/SCP-Secret-Fortress")
+- [Batfoxkid](https://github.com/Batfoxkid) - Original gamemode creator
+- [ficool2](https://github.com/ficool2) - Custom viewmodels / gibs, karma system, SCP-18, gameplay changes/bugfixes
+- [Mikusch](https://github.com/Mikusch) - Many many related DHooks and SDKCalls
+- [42](https://github.com/FortyTwoFortyTwo) - [Randomizer](https://github.com/FortyTwoFortyTwo/Randomizer) weapon logic
+- [Artvin](https://github.com/artvin01) - Map and model development
+- [Crust](https://github.com/RealCrust) - SCP custom animations
+- RavensBro - SCP-173 model
+- [sarysa](https://github.com/sarysa), [Benoist](https://github.com/Kenzzer), [nosoop](https://github.com/nosoop), [Deathreus](https://github.com/Deathreus), [naydef](https://github.com/naydef), [Koishi](https://github.com/shadow93), [Marxvee](https://github.com/Marxvee) - Early gamemode contributions
+- DoctorKrazy, JuegosPablo - Early gamemode models
+- And [GitHub Contributors](https://github.com/redsunservers/SCP-Secret-Fortress/graphs/contributors)

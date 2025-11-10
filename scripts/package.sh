@@ -1,13 +1,15 @@
-cd build
+# Update Package
+mkdir -p Update-Package
+cp -r addons/sourcemod/scripting/plugins Update-Package
+cp -r addons/sourcemod/translations Update-Package
+cp -r addons/sourcemod/gamedata Update-Package
 
-mkdir -p package/addons/sourcemod/plugins
-mkdir -p package/addons/sourcemod/gamedata
-mkdir -p package/addons/sourcemod/configs
-
-cp -r addons/sourcemod/plugins/scp_sf.smx package/addons/sourcemod/plugins
-cp -r ../addons/sourcemod/gamedata/scp_sf.txt package/addons/sourcemod/gamedata
-cp -r ../addons/sourcemod/configs/scp_sf package/addons/sourcemod/configs
-cp -r ../addons/sourcemod/translations package/addons/sourcemod
-cp -r ../materials package
-cp -r ../models package
-cp -r ../sound package
+# Full Package
+mkdir -p New-Install-Package/addons/sourcemod
+cp -r models New-Install-Package
+cp -r materials New-Install-Package
+cp -r sound New-Install-Package
+cp -r addons/sourcemod/scripting/plugins New-Install-Package/addons/sourcemod
+cp -r addons/sourcemod/translations New-Install-Package/addons/sourcemod
+cp -r addons/sourcemod/gamedata New-Install-Package/addons/sourcemod
+cp -r addons/sourcemod/configs New-Install-Package/addons/sourcemod

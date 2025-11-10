@@ -1,0 +1,275 @@
+#pragma semicolon 1
+#pragma newdecls required
+
+enum struct CvarInfo
+{
+	ConVar Cvar;
+	char Name[32];
+	char Value[64];
+	char Defaul[64];
+	bool Enforce;
+}
+
+static ArrayList CvarList;
+static bool CvarHooked;
+
+void ConVar_PluginStart()
+{
+	Cvar[Version] = CreateConVar("scp_version", PLUGIN_VERSION_FULL, "SCP Version", FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	
+	AutoExecConfig(false, "scpm");
+	
+	Cvar[AllowSpectators] = FindConVar("mp_allowspectators");
+	Cvar[Gravity] = FindConVar("sv_gravity");
+	Cvar[NoclipSpeed] = FindConVar("sv_noclipspeed");
+	Cvar[RollAngle] = FindConVar("sv_rollangle");
+	
+	CvarList = new ArrayList(sizeof(CvarInfo));
+
+	ConVar_Add("mat_supportflashlight", "1");
+	ConVar_Add("mp_autoteambalance", "0");
+	ConVar_Add("mp_bonusroundtime", "20.0");
+	ConVar_Add("mp_disable_respawn_times", "1");
+	ConVar_Add("mp_flashlight", "1");
+	ConVar_Add("mp_forcecamera", "0", false);
+	ConVar_Add("mp_humans_must_join_team", "any");
+	ConVar_Add("mp_scrambleteams_auto", "0");
+	ConVar_Add("mp_stalemate_enable", "0");
+	ConVar_Add("mp_teams_unbalance_limit", "0");
+	ConVar_Add("mp_tournament_blueteamname", "SCPS");
+	ConVar_Add("mp_tournament_redteamname", "MERCS");
+	ConVar_Add("mp_waitingforplayers_time", "90.0", false);
+	ConVar_Add("spec_freeze_time", "10.0");
+	ConVar_Add("sv_alltalk", "1");
+	ConVar_Add("tf_allow_player_use", "1");
+	ConVar_Add("tf_dropped_weapon_lifetime", "900.0");
+	ConVar_Add("tf_helpme_range", "-1.0");
+	ConVar_Add("tf_spawn_glows_duration", "0.0");
+}
+
+void ConVar_ConfigsExecuted()
+{
+	bool generate = !FileExists("cfg/sourcemod/scpm.cfg");
+	
+	if(!generate)
+	{
+		char buffer[512];
+		Cvar[Version].GetString(buffer, sizeof(buffer));
+		if(!StrEqual(buffer, PLUGIN_VERSION_FULL))
+		{
+			if(buffer[0])
+				generate = true;
+			
+			Cvar[Version].SetString(PLUGIN_VERSION_FULL);
+		}
+	}
+	
+	if(generate)
+		GenerateConfig();
+	
+	ConVar_Enable();
+}
+
+static void GenerateConfig()
+{
+	File file = OpenFile("cfg/sourcemod/scpm.cfg", "wt");
+	if(file)
+	{
+		file.WriteLine("// Settings present are for SCP: Mercenaries (" ... PLUGIN_VERSION_FULL ... ")");
+		file.WriteLine("// Updating the plugin version will generate new cvars and any non-SCP commands will be lost");
+		file.WriteLine("scp_version \"" ... PLUGIN_VERSION_FULL ... "\"");
+		file.WriteLine(NULL_STRING);
+		
+		char buffer1[512], buffer2[256];
+		for(int i; i < AllowSpectators; i++)
+		{
+			if(Cvar[i].Flags & FCVAR_DONTRECORD)
+				continue;
+			
+			Cvar[i].GetDescription(buffer1, sizeof(buffer1));
+			
+			int current, split;
+			do
+			{
+				split = SplitString(buffer1[current], "\n", buffer2, sizeof(buffer2));
+				if(split == -1)
+				{
+					file.WriteLine("// %s", buffer1[current]);
+					break;
+				}
+				
+				file.WriteLine("// %s", buffer2);
+				current += split;
+			}
+			while(split != -1);
+			
+			file.WriteLine("// -");
+			
+			Cvar[i].GetDefault(buffer2, sizeof(buffer2));
+			file.WriteLine("// Default: \"%s\"", buffer2);
+			
+			float value;
+			if(Cvar[i].GetBounds(ConVarBound_Lower, value))
+				file.WriteLine("// Minimum: \"%.2f\"", value);
+			
+			if(Cvar[i].GetBounds(ConVarBound_Upper, value))
+				file.WriteLine("// Maximum: \"%.2f\"", value);
+			
+			Cvar[i].GetName(buffer2, sizeof(buffer2));
+			Cvar[i].GetString(buffer1, sizeof(buffer1));
+			file.WriteLine("%s \"%s\"", buffer2, buffer1);
+			file.WriteLine(NULL_STRING);
+		}
+		
+		delete file;
+	}
+}
+
+void ConVar_Add(const char[] name, const char[] value, bool enforce = true)
+{
+	CvarInfo info;
+	strcopy(info.Name, sizeof(info.Name), name);
+	strcopy(info.Value, sizeof(info.Value), value);
+	info.Enforce = enforce;
+
+	if(CvarHooked)
+	{
+		info.Cvar = FindConVar(info.Name);
+		info.Cvar.GetString(info.Defaul, sizeof(info.Defaul));
+	}
+
+	CvarList.PushArray(info);
+
+	if(CvarHooked)
+	{
+		bool setValue = true;
+		if(!info.Enforce)
+		{
+			char buffer[sizeof(info.Defaul)];
+			info.Cvar.GetDefault(buffer, sizeof(buffer));
+			if(!StrEqual(buffer, info.Defaul))
+				setValue = false;
+		}
+
+		if(setValue)
+		{
+			int flags = info.Cvar.Flags;
+			bool notify = view_as<bool>(flags & FCVAR_NOTIFY);
+			if(notify)
+				info.Cvar.Flags &= ~FCVAR_NOTIFY;
+			
+			info.Cvar.SetString(info.Value);
+
+			if(notify)
+				info.Cvar.Flags |= FCVAR_NOTIFY;
+		}
+		
+		info.Cvar.AddChangeHook(ConVar_OnChanged);
+	}
+}
+
+void ConVar_Remove(const char[] name)
+{
+	int index = CvarList.FindString(name, CvarInfo::Name);
+	if(index != -1)
+	{
+		CvarInfo info;
+		CvarList.GetArray(index, info);
+		CvarList.Erase(index);
+
+		if(CvarHooked)
+		{
+			info.Cvar.RemoveChangeHook(ConVar_OnChanged);
+			
+			int flags = info.Cvar.Flags;
+			bool notify = view_as<bool>(flags & FCVAR_NOTIFY);
+			if(notify)
+				info.Cvar.Flags &= ~FCVAR_NOTIFY;
+			
+			info.Cvar.SetString(info.Defaul);
+
+			if(notify)
+				info.Cvar.Flags |= FCVAR_NOTIFY;
+		}
+	}
+	else
+	{
+		ThrowError("Unknown cvar name '%s'", name);
+	}
+}
+
+void ConVar_Enable()
+{
+	if(!CvarHooked)
+	{
+		CvarInfo info;
+		int length = CvarList.Length;
+		for(int i; i < length; i++)
+		{
+			CvarList.GetArray(i, info);
+			
+			if(!info.Cvar)
+			{
+				info.Cvar = FindConVar(info.Name);
+				if(!info.Cvar)
+					SetFailState("Could not find convar '%s'", info.Name);
+			}
+
+			info.Cvar.GetString(info.Defaul, sizeof(info.Defaul));
+			CvarList.SetArray(i, info);
+
+			bool setValue = true;
+			if(!info.Enforce)
+			{
+				char buffer[sizeof(info.Defaul)];
+				info.Cvar.GetDefault(buffer, sizeof(buffer));
+				if(!StrEqual(buffer, info.Defaul))
+					setValue = false;
+			}
+
+			if(setValue)
+				info.Cvar.SetString(info.Value);
+			
+			info.Cvar.AddChangeHook(ConVar_OnChanged);
+		}
+
+		CvarHooked = true;
+	}
+}
+
+void ConVar_Disable()
+{
+	if(CvarHooked)
+	{
+		CvarInfo info;
+		int length = CvarList.Length;
+		for(int i; i < length; i++)
+		{
+			CvarList.GetArray(i, info);
+
+			info.Cvar.RemoveChangeHook(ConVar_OnChanged);
+			info.Cvar.SetString(info.Defaul);
+		}
+
+		CvarHooked = false;
+	}
+}
+
+static void ConVar_OnChanged(ConVar cvar, const char[] oldValue, const char[] newValue)
+{
+	int index = CvarList.FindValue(cvar, CvarInfo::Cvar);
+	if(index != -1)
+	{
+		CvarInfo info;
+		CvarList.GetArray(index, info);
+
+		if(!StrEqual(info.Value, newValue))
+		{
+			strcopy(info.Defaul, sizeof(info.Defaul), newValue);
+			CvarList.SetArray(index, info);
+
+			if(info.Enforce)
+				info.Cvar.SetString(info.Value);
+		}
+	}
+}
