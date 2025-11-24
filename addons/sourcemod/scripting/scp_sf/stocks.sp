@@ -1649,18 +1649,5 @@ void TeleportEntityInterpolated(int entity, const float pos[3] = NULL_VECTOR, co
 		DispatchKeyValueVector(entity, "angles", ang);
 	
 	if (!IsNullVector(vel))
-		RunScriptCode(entity, -1, -1, "self.SetAbsVelocity(Vector(%f, %f, %f))", vel[0], vel[1], vel[2]);
-}
-
-void RunScriptCode(int entity, int activator, int caller, const char[] format, any...)
-{
-	// taken from https://github.com/Mikusch/fortress-royale/ ty!!!!!!!!!!!!!!!!!!!!!!!!!!
-	if (!IsValidEntity(entity))
-		return;
-	
-	static char buffer[1024];
-	VFormat(buffer, sizeof(buffer), format, 5);
-	
-	SetVariantString(buffer);
-	AcceptEntityInput(entity, "RunScriptCode", activator, caller);
+		SetEntPropVector(entity, Prop_Data, "m_vecAbsVelocity", vel);
 }

@@ -195,7 +195,7 @@ public void SCP18_Tick()
 		{
 			EmitSoundToAll(SCP18BreakSound, scp18.EntIndex, SNDCHAN_AUTO, SNDLEVEL_NORMAL, _, SNDVOL_NORMAL);
 			
-			// don't instantly remove the entity so trail from it so it fades out smoothly
+			// don't instantly remove the entity so the trail from it fades out smoothly
 			SetEntityRenderMode(scp18.EntIndex, RENDER_NONE);
 			CreateTimer(0.5, Timer_RemoveEntity, scp18.EntRef, TIMER_FLAG_NO_MAPCHANGE);
 			
