@@ -1639,3 +1639,28 @@ stock void StrToLower(char[] buffer)
 	for (int i = 0; i < length; i++)
 		buffer[i] = CharToLower(buffer[i]);
 }
+
+void TeleportEntityInterpolated(int entity, const float pos[3] = NULL_VECTOR, const float ang[3] = NULL_VECTOR, const float vel[3] = NULL_VECTOR)
+{
+	if (!IsNullVector(pos))
+		DispatchKeyValueVector(entity, "origin", pos);
+	
+	if (!IsNullVector(ang))
+		DispatchKeyValueVector(entity, "angles", ang);
+	
+	if (!IsNullVector(vel))
+		RunScriptCode(entity, -1, -1, "self.SetAbsVelocity(Vector(%f, %f, %f))", vel[0], vel[1], vel[2]);
+}
+
+void RunScriptCode(int entity, int activator, int caller, const char[] format, any...)
+{
+	// taken from https://github.com/Mikusch/fortress-royale/ ty!!!!!!!!!!!!!!!!!!!!!!!!!!
+	if (!IsValidEntity(entity))
+		return;
+	
+	static char buffer[1024];
+	VFormat(buffer, sizeof(buffer), format, 5);
+	
+	SetVariantString(buffer);
+	AcceptEntityInput(entity, "RunScriptCode", activator, caller);
+}
