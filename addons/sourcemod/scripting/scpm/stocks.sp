@@ -548,16 +548,8 @@ void MultiToDownloadsTable(const char[][] filename, int length)
 {
 	for(int i; i < length; i++)
 	{
-		CheckAndAddFileToDownloadsTable(filename[i]);
+		AddFileToDownloadsTable(filename[i]);
 	}
-}
-
-void CheckAndAddFileToDownloadsTable(const char[] filename)
-{
-	if(!FileExists(filename, true))
-		LogError("[Boss] Missing file '%s'", filename);
-	
-	AddFileToDownloadsTable(filename);
 }
 
 void ConstrainDistance(const float[] startPoint, float[] endPoint, float distance, float maxDistance)

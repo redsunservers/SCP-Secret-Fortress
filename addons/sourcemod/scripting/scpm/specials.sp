@@ -26,15 +26,7 @@ enum struct SpecialInfo
 				do
 				{
 					kv.GetSectionName(buffer, sizeof(buffer));
-
-					if(FileExists(buffer, true))
-					{
-						AddFileToDownloadsTable(buffer);
-					}
-					else
-					{
-						LogError("[Config] Missing file '%s' for '%s'", buffer, this.Prefix);
-					}
+					AddFileToDownloadsTable(buffer);
 				}
 				while(kv.GotoNextKey(false));
 

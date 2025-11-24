@@ -34,15 +34,7 @@ enum struct ActionInfo
 				do
 				{
 					kv.GetSectionName(this.Model, sizeof(this.Model));
-
-					if(FileExists(this.Model, true))
-					{
-						AddFileToDownloadsTable(this.Model);
-					}
-					else
-					{
-						LogError("[Config] Missing file '%s' for '%s'", this.Model, this.Prefix);
-					}
+					AddFileToDownloadsTable(this.Model);
 				}
 				while(kv.GotoNextKey(false));
 

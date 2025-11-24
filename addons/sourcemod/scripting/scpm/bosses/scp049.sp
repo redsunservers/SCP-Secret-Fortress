@@ -84,7 +84,7 @@ public bool SCP049_Precache(int index)
 	{
 		PrecacheSound(SoundDownloads[i]);
 		FormatEx(buffer, sizeof(buffer), "sound/%s", SoundDownloads[i]);
-		CheckAndAddFileToDownloadsTable(buffer);
+		AddFileToDownloadsTable(buffer);
 	}
 
 	// Assume all Revive Markers belong to 049 while active

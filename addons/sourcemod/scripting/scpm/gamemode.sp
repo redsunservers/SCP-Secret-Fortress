@@ -1089,8 +1089,6 @@ static void UpgradeMenu(int client, int slot = -1, bool force = false)
 				menu.AddItem("-1", NULL_STRING, ITEMDRAW_DISABLED);
 			}
 
-			menu.AddItem("-1", NULL_STRING, ITEMDRAW_DISABLED);
-
 			// 5 Action Item
 			if(Client(client).ActionItem != -1)
 			{
@@ -1102,8 +1100,6 @@ static void UpgradeMenu(int client, int slot = -1, bool force = false)
 			{
 				menu.AddItem("-1", NULL_STRING, ITEMDRAW_DISABLED);
 			}
-
-			menu.AddItem("-1", NULL_STRING, ITEMDRAW_DISABLED);
 
 			// 6 Myself
 			if(Human_GetStressPercent(client) > 60.0)

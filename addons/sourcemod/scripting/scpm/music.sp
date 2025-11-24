@@ -63,12 +63,6 @@ enum struct MusicInfo
 			char buffer[PLATFORM_MAX_PATH];
 			FormatEx(buffer, sizeof(buffer), "sound/%s", this.Filepath);
 			ReplaceString(buffer, sizeof(buffer), "#", "");
-			if(!FileExists(buffer, true))
-			{
-				LogError("[Config] Missing file '%s' for music", buffer);
-				return false;
-			}
-
 			AddFileToDownloadsTable(buffer);
 		}
 
