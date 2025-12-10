@@ -14,6 +14,8 @@ static const float SCP18MaxVelocity = 10000.0;
 static const float SCP18MaxDamage = 1200.0;
 static const float SCP18Lifetime = 30.0;
 
+static const char SCP18TrailMaterial[] = "materials/sprites/laserbeam.vmt";
+
 enum struct SCP18Enum
 {
 	int EntRef;
@@ -45,6 +47,8 @@ public void Init_SCP18()
 	PrecacheSound(SCP18HitSound, true);
 	PrecacheSound(SCP18ClientHitSound, true);
 	PrecacheSound(SCP18BreakSound, true);
+	
+	PrecacheModel(SCP18TrailMaterial);
 }
 
 // temporary storage for the trace... thanks sourcemod :(
@@ -190,8 +194,13 @@ public void SCP18_Tick()
 		if (scp18.Magnitude == SCP18MaxVelocity && ((scp18.SpawnTime + SCP18Lifetime) < time))
 		{
 			EmitSoundToAll(SCP18BreakSound, scp18.EntIndex, SNDCHAN_AUTO, SNDLEVEL_NORMAL, _, SNDVOL_NORMAL);
-			CreateTimer(0.1, Timer_RemoveEntity, scp18.EntRef, TIMER_FLAG_NO_MAPCHANGE);
+			
+			// don't instantly remove the entity so the trail from it fades out smoothly
+			SetEntityRenderMode(scp18.EntIndex, RENDER_NONE);
+			CreateTimer(0.5, Timer_RemoveEntity, scp18.EntRef, TIMER_FLAG_NO_MAPCHANGE);
+			
 			SCP18List.Erase(i);
+			
 			continue;
 		}
 		
@@ -255,7 +264,7 @@ public void SCP18_Tick()
 			CopyVector(hitposition, scp18.Position);
 			CopyVector(reflection, scp18.Velocity);
 			
-			TeleportEntity(scp18.EntIndex, hitposition, NULL_VECTOR, reflection);		
+			TeleportEntityInterpolated(scp18.EntIndex, hitposition, NULL_VECTOR, reflection);
 			
 			EmitSoundToAll(SCP18HitSound, scp18.EntIndex, SNDCHAN_BODY, SNDLEVEL_NORMAL, _, SNDVOL_NORMAL);
 		}
@@ -265,7 +274,7 @@ public void SCP18_Tick()
 			CopyVector(nextposition, hitposition);
 			
 			// keep going in straight line
-			TeleportEntity(scp18.EntIndex, nextposition, NULL_VECTOR, scp18.Velocity);
+			TeleportEntityInterpolated(scp18.EntIndex, nextposition, NULL_VECTOR, scp18.Velocity);
 		}
 		
 		// only deal damage after 1st bounce
@@ -311,7 +320,7 @@ public bool SCP18_Button(int client, int weapon, int &buttons, int &holding)
 			{
 				DispatchKeyValue(entity, "solid", "0");
 
-				static float ang[3], pos[3], vel[3];
+				float ang[3], pos[3], vel[3];
 				GetEntPropVector(client, Prop_Send, "m_vecOrigin", pos);
 				GetClientEyeAngles(client, ang);
 				pos[2] += 63.0;
@@ -352,6 +361,25 @@ public bool SCP18_Button(int client, int weapon, int &buttons, int &holding)
 				for (int i = 1; i <= MaxClients; i++)
 					scp18.ClientHits[i] = 0;		
 				SCP18List.PushArray(scp18);
+				
+				// add a short trail
+				int trail = CreateEntityByName("env_spritetrail");
+				if(IsValidEntity(trail))
+				{
+					DispatchKeyValue(trail, "spritename", SCP18TrailMaterial);
+					DispatchKeyValueFloat(trail, "lifetime", 0.3);
+					DispatchKeyValueFloat(trail, "startwidth", 0.5);
+					DispatchKeyValueFloat(trail, "endwidth", 0.1);
+					DispatchKeyValue(trail, "rendercolor", "255 0 0");
+					DispatchKeyValueInt(trail, "renderamt", 255);
+					DispatchKeyValueInt(trail, "rendermode", view_as<int>(RENDER_TRANSCOLOR));
+					
+					DispatchSpawn(trail);
+					TeleportEntity(trail, pos);
+					
+					SetVariantString("!activator");
+					AcceptEntityInput(trail, "SetParent", entity);
+				}
 			}
 		}
 	}

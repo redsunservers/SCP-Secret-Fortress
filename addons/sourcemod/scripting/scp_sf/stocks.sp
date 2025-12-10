@@ -1639,3 +1639,15 @@ stock void StrToLower(char[] buffer)
 	for (int i = 0; i < length; i++)
 		buffer[i] = CharToLower(buffer[i]);
 }
+
+void TeleportEntityInterpolated(int entity, const float pos[3] = NULL_VECTOR, const float ang[3] = NULL_VECTOR, const float vel[3] = NULL_VECTOR)
+{
+	if (!IsNullVector(pos))
+		DispatchKeyValueVector(entity, "origin", pos);
+	
+	if (!IsNullVector(ang))
+		DispatchKeyValueVector(entity, "angles", ang);
+	
+	if (!IsNullVector(vel))
+		SetEntPropVector(entity, Prop_Data, "m_vecAbsVelocity", vel);
+}
