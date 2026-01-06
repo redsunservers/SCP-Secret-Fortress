@@ -1714,6 +1714,14 @@
 	{
 		"en"		"Worth 25 cents."
 	}
+	"weapon_30398"
+	{
+		"en"		"Fuel"
+	}
+	"info_30398"
+	{
+		"en"		"Fuel to power up mechanical engines."
+	}
 	"weapon_30666"
 	{
 		"en"		"Blaster Pistol"
