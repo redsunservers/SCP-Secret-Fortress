@@ -463,7 +463,7 @@
 				"linux"
 				{
 					"signature"	"CTFGameMovement::ProcessMovement"
-					"offset"	"97"
+					"offset"	"112"
 				}
 				"windows"
 				{
